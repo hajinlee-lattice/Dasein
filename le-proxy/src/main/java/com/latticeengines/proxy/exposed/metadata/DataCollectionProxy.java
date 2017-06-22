@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("dataCollectionProxy")
@@ -22,6 +23,28 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     protected DataCollectionProxy() {
         super("metadata");
     }
+
+    // default collection apis
+
+    public DataCollection getDefaultDataCollection(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection",
+                shortenCustomerSpace(customerSpace));
+        return get("get default dataCollection", url, DataCollection.class);
+    }
+
+    public StatisticsContainer getStatsInDefaultColellction(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
+                shortenCustomerSpace(customerSpace));
+        return get("get stats", url, StatisticsContainer.class);
+    }
+
+    public AttributeRepository getAttrRepoFromDefaultCollection(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo",
+                shortenCustomerSpace(customerSpace));
+        return get("get attr repo", url, AttributeRepository.class);
+    }
+
+    // full collection apis
 
     public List<DataCollection> getDataCollections(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollections",

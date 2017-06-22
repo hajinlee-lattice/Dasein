@@ -46,7 +46,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
-    protected AuthorizationHeaderHttpRequestInterceptor authHeaderInterceptor = new AuthorizationHeaderHttpRequestInterceptor(
+    protected final AuthorizationHeaderHttpRequestInterceptor authHeaderInterceptor = new AuthorizationHeaderHttpRequestInterceptor(
             "");
     private LedpResponseErrorHandler errorHandler = new LedpResponseErrorHandler();
 

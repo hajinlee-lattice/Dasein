@@ -1,12 +1,17 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
+import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.service.SegmentService;
 
 @Component("segmentService")
@@ -14,6 +19,12 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Autowired
     private SegmentEntityMgr segmentEntityMgr;
+
+    @Autowired
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
+
+    @Autowired
+    private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
@@ -37,6 +48,17 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
+    public List<MetadataSegment> getSegments(String customerSpace, String collectionName) {
+        List<MetadataSegment> segments = segmentEntityMgr.findAll();
+        if (segments == null || segments.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return segments.stream() //
+                .filter(segment -> collectionName.equals(segment.getDataCollection().getName())) //
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public MetadataSegment findByName(String customerSpace, String name) {
         return segmentEntityMgr.findByName(name);
     }
@@ -44,6 +66,11 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public MetadataSegment findMaster(String customerSpace, String collectionName) {
         return segmentEntityMgr.findMasterSegment(collectionName);
+    }
+
+    @Override
+    public StatisticsContainer getStats(String customerSpace, String segmentName, String modelId) {
+        return statisticsContainerEntityMgr.findInSegment(segmentName, modelId);
     }
 
     @Override

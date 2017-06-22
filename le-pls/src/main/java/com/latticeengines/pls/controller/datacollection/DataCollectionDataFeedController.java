@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.pls.controller.datacollection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,11 +15,11 @@ import com.latticeengines.pls.workflow.ConsolidateAndPublishWorkflowSubmitter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "datacollection", description = "REST resource for interacting with data collection")
+@Api(value = "datafeeds", description = "Controller of data feed operations.")
 @RestController
-@RequestMapping("/datacollections")
+@RequestMapping("/datacollection/datafeeds")
 @PreAuthorize("hasRole('View_PLS_Data')")
-public class DataCollectionResource {
+public class DataCollectionDataFeedController {
 
     @Autowired
     private ConsolidateAndPublishWorkflowSubmitter consolidateAndPublishWorkflowSubmitter;
@@ -27,22 +27,19 @@ public class DataCollectionResource {
     @Autowired
     private CalculateStatsWorkflowSubmitter calculateStatsWorkflowSubmitter;
 
-    @RequestMapping(value = "/{dataCollectionName}/datafeeds/{datafeedName}/consolidate", method = RequestMethod.POST)
+    @RequestMapping(value = "/{datafeedName}/consolidate", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Invoke data feed consolidate workflow. Returns the job id.")
-    public ResponseDocument<String> consolidate(@PathVariable String dataCollectionName,
-            @PathVariable String datafeedName) {
+    public ResponseDocument<String> consolidate(@PathVariable String datafeedName) {
         return ResponseDocument.successResponse( //
-                consolidateAndPublishWorkflowSubmitter.submit(dataCollectionName, datafeedName).toString());
-
+                consolidateAndPublishWorkflowSubmitter.submit(datafeedName).toString());
     }
 
-    @RequestMapping(value = "/{dataCollectionName}/datafeeds/{datafeedName}/calculatestats", method = RequestMethod.POST)
+    @RequestMapping(value = "/{datafeedName}/assemble", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Invoke calculate stats workflow. Returns the job id.")
-    public ResponseDocument<String> calculateStats(@PathVariable String dataCollectionName,
-            @PathVariable String datafeedName) {
+    public ResponseDocument<String> assemble(@PathVariable String datafeedName) {
         return ResponseDocument
-                .successResponse(calculateStatsWorkflowSubmitter.submit(dataCollectionName, datafeedName).toString());
+                .successResponse(calculateStatsWorkflowSubmitter.submit(datafeedName).toString());
     }
 }

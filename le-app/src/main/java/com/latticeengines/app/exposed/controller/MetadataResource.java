@@ -17,6 +17,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+//TODO: not sure if this one is still needed
 @Api(value = "metadata", description = "Common REST resource for retrieving attribute-level metadata")
 @RestController
 @RequestMapping("/metadata")
@@ -35,10 +36,10 @@ public class MetadataResource {
     @ResponseBody
     @ApiOperation(value = "Get list of attributes")
     private List<ColumnMetadata> getAttributes( //
-            @ApiParam(value = "Offset for pagination of matching attributes", required = false)//
+            @ApiParam(value = "Offset for pagination of matching attributes")//
             @RequestParam(value = "offset", required = false)//
             Integer offset, //
-            @ApiParam(value = "Maximum number of matching attributes in page", required = false)//
+            @ApiParam(value = "Maximum number of matching attributes in page")//
             @RequestParam(value = "max", required = false)//
             Integer max) {
         return metadataService.getAttributes(offset, max);

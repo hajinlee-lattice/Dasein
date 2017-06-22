@@ -98,27 +98,23 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         segment.setUpdated(new Date());
         segment.setCreated(new Date());
         segment.setMasterSegment(true);
+        segment.setTenant(MultiTenantContext.getTenant());
         return segment;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection getDataCollection(String name) {
-        DataCollection dataCollection = dataCollectionDao.findByField("name", name);
+        DataCollection dataCollection;
+        if (StringUtils.isBlank(name)) {
+            dataCollection = getDefaultCollection();
+        } else {
+            dataCollection = dataCollectionDao.findByField("name", name);
+        }
         if (dataCollection != null) {
             HibernateUtils.inflateDetails(dataCollection.getProperties());
         }
         return dataCollection;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    @Override
-    public DataCollection getDataCollection(DataCollectionType type) {
-        DataCollection collection = findByField("type", type);
-        if (collection != null) {
-            HibernateUtils.inflateDetails(collection.getProperties());
-        }
-        return collection;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -135,6 +131,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     @Override
     public List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole) {
+        collectionName = StringUtils.isBlank(collectionName) ? getDefaultCollectionName() : collectionName;
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole);
         if (tableNames == null) {
             return Collections.emptyList();
@@ -148,7 +145,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role) {
         Table table = tableEntityMgr.findByName(tableName);
         if (table != null) {
-            DataCollection collection = getDataCollection(collectionName);
+            DataCollection collection = StringUtils.isBlank(collectionName) ? getDefaultCollection()
+                    : getDataCollection(collectionName);
             DataCollectionTable dataCollectionTable = dataCollectionTableDao.findByNames(collectionName, tableName);
             if (dataCollectionTable == null) {
                 dataCollectionTable = new DataCollectionTable();
@@ -166,6 +164,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void removeTableFromCollection(String collectionName, String tableName) {
+        collectionName = StringUtils.isBlank(collectionName) ? getDefaultCollectionName() : collectionName;
         DataCollectionTable dataCollectionTable = dataCollectionTableDao.findByNames(collectionName, tableName);
         if (dataCollectionTable != null) {
             dataCollectionTableDao.create(dataCollectionTable);
@@ -176,7 +175,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Override
     public void upsertStatsForMasterSegment(String collectionName, StatisticsContainer statisticsContainer,
             String modelId) {
-        DataCollection dataCollection = getDataCollection(collectionName);
+        DataCollection dataCollection = StringUtils.isBlank(collectionName) ? getDefaultCollection()
+                : getDataCollection(collectionName);
         if (dataCollection == null) {
             throw new IllegalArgumentException("Cannot find data collection named " + collectionName);
         }
@@ -201,6 +201,30 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         statisticsContainer.setSegment(masterSeg);
         statisticsContainer.setTenant(MultiTenantContext.getTenant());
         statisticsContainerEntityMgr.create(statisticsContainer);
+    }
+
+    public String getDefaultCollectionName() {
+        return getDefaultCollection().getName();
+    }
+
+    private DataCollection getDefaultCollection() {
+        List<DataCollection> collections = dataCollectionDao.findAll();
+        if (collections == null || collections.isEmpty()) {
+            return createDefaultCollection();
+        }
+        if (collections.size() == 1) {
+            return collections.get(0);
+        }
+        throw new RuntimeException("There are " + collections.size() + " data collections in current tenant. "
+                + "Cannot determine which one is the default.");
+    }
+
+    private DataCollection createDefaultCollection() {
+        DataCollection dataCollection = new DataCollection();
+        dataCollection.setType(DataCollectionType.Segmentation);
+        dataCollection.setTenant(MultiTenantContext.getTenant());
+        createDataCollection(dataCollection);
+        return dataCollection;
     }
 
 }

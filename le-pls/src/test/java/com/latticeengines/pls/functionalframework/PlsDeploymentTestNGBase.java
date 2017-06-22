@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
@@ -72,9 +72,9 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
         restTemplate.delete(url);
     }
 
-    protected void forceDeleteTenantViaTenantConsole(CustomerSpace customerSpace) {
-        ((GlobalAuthDeploymentTestBed) testBed).forceDeleteTenantViaTenantConsole(customerSpace);
-        ((GlobalAuthDeploymentTestBed) testBed).forceDeleteViaPls(customerSpace);
+    protected void attachProtectedProxy(ProtectedRestApiProxy proxy) {
+        proxy.attachInterceptor(((GlobalAuthDeploymentTestBed) testBed).getPlsAuthInterceptor());
+        logger.info("Attached a " + proxy.getClass().getSimpleName() + " to pls auth interceptor.");
     }
 
     protected JobStatus waitForWorkflowStatus(WorkflowProxy workflowProxy, String applicationId, boolean running) {

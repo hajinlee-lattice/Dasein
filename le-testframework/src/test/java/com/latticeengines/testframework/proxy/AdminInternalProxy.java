@@ -1,4 +1,4 @@
-package com.latticeengines.proxy.exposed.admin;
+package com.latticeengines.testframework.proxy;
 
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 public class AdminInternalProxy extends BaseRestApiProxy {
 
     public AdminInternalProxy() {
-        super(PropertyUtils.getProperty("common.admin.url"), "admin/internal");
+        super(PropertyUtils.getProperty("common.test.admin.url"), "admin/internal");
     }
 
     // only works in QA

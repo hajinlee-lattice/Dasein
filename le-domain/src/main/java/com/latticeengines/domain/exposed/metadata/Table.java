@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
@@ -737,5 +738,15 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
     public void setHierarchies(List<LevelBasedHierarchy> hierarchies) {
         this.hierarchies = hierarchies;
+    }
+
+    @JsonIgnore
+    public List<ColumnMetadata> getColumnMetadata() {
+        List<Attribute> attributes = getAttributes();
+        if (attributes == null) {
+            return null;
+        } else {
+            return attributes.stream().map(Attribute::getColumnMetadata).collect(Collectors.toList());
+        }
     }
 }

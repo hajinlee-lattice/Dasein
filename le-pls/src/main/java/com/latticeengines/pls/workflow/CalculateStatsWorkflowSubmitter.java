@@ -40,26 +40,25 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
-    public ApplicationId submit(String dataCollectionName, String datafeedName) {
+    public ApplicationId submit(String datafeedName) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
+        DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(MultiTenantContext.getCustomerSpace().toString());
+        if (dataCollection == null) {
+            throw new LedpException(LedpCode.LEDP_37014);
+        }
+        log.info("Found default data collection " + dataCollection.getName());
+        String dataCollectionName = dataCollection.getName();
         log.info(String.format("Submitting calculate stats workflow for data collection %s for customer %s",
                 dataCollectionName, customerSpace));
-
         DataFeed datafeed = metadataProxy.findDataFeedByName(MultiTenantContext.getCustomerSpace().toString(),
                 datafeedName);
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("data feed %s status: %s", datafeedName, datafeedStatus.getName()));
-
         if (datafeedStatus == Status.Active || datafeedStatus == Status.InitialConsolidated) {
             metadataProxy.updateDataFeedStatus(customerSpace.toString(), datafeedName, Status.Finalizing.getName());
-            DataCollection dataCollection = dataCollectionProxy.getDataCollection(customerSpace.toString(),
-                    dataCollectionName);
-            if (dataCollection == null) {
-                throw new LedpException(LedpCode.LEDP_37013, new String[] { dataCollection.getType().name() });
-            }
             Table masterTableInDb = dataCollectionProxy.getTable(customerSpace.toString(), dataCollectionName,
                     TableRoleInCollection.ConsolidatedAccount);
             if (masterTableInDb == null) {

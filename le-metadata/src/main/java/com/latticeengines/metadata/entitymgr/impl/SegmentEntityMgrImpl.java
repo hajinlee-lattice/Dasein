@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<MetadataSegment> findAll() {
-        return super.findAll().stream().map(this::inflate).collect(Collectors.toList());
+        return super.findAll().stream().map(this::inflate)
+                .filter(segment -> !Boolean.TRUE.equals(segment.getMasterSegment())).collect(Collectors.toList());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

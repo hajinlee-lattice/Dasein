@@ -17,6 +17,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(value = "/tenant")
 public class CommonTenantConfigResource {
+
     @Autowired
     private CommonTenantConfigService configService;
 

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
-import com.latticeengines.app.exposed.service.MetadataService;
+import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -23,19 +23,22 @@ import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-@Component("metadataService")
-public class MetadataServiceImpl implements MetadataService {
-    
+@Component("dataLakeService")
+public class DataLakeServiceImpl implements DataLakeService {
+
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
     @Autowired
     private AttributeCustomizationService attributeCustomizationService;
 
+    // TODO: also need to add AM attrs
     @Override
     public List<ColumnMetadata> getAttributes(Integer offset, Integer max) {
         String customerSpace = MultiTenantContext.getTenant().getId();
         DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace);
+        // TODO:     this is not right, there many tables in data collection that
+        // TODO:     are not meant to be surfaced, e.g. ImportTable for data feed.
         List<Table> tables = dataCollectionProxy.getAllTables(customerSpace, dataCollection.getName());
         Stream<ColumnMetadata> stream = tables.stream() //
                 .flatMap(t -> t.getAttributes().stream()) //
@@ -70,4 +73,5 @@ public class MetadataServiceImpl implements MetadataService {
         }
         return null;
     }
+
 }

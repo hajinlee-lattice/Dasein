@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.pls.controller.datacollection;
 
 import java.util.List;
 
@@ -16,10 +16,10 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import io.swagger.annotations.Api;
 
-@Api(value = "metadatasegments", description = "REST resource for metadata segments")
+@Api(value = "Data Collection Segments", description = "REST resource for segments")
 @RestController
-@RequestMapping("/metadatasegments")
-public class MetadataSegmentResource {
+@RequestMapping("/datacollection/segments")
+public class DataCollectionSegmentResource {
 
     @Autowired
     private MetadataSegmentService metadataSegmentService;

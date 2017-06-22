@@ -3,6 +3,7 @@ package com.latticeengines.metadata.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 
 public interface SegmentService {
 
@@ -12,9 +13,13 @@ public interface SegmentService {
 
     List<MetadataSegment> getSegments(String customerSpace);
 
+    List<MetadataSegment> getSegments(String customerSpace, String collectionName);
+
     MetadataSegment findByName(String customerSpace, String name);
 
     MetadataSegment findMaster(String customerSpace, String collectionName);
+
+    StatisticsContainer getStats(String customerSpace, String segmentName, String modelId);
 
     void deleteAllSegments(String customerSpace);
 }

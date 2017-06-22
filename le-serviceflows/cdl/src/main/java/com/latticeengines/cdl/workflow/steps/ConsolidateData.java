@@ -11,7 +11,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -32,6 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -320,25 +320,18 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         matchInput.setExcludeUnmatchedWithPublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(true);
         matchInput.setDataCloudVersion(getDataCloudVersion());
-        matchInput.setSkipKeyResolution(true);
+        matchInput.setSkipKeyResolution(false);
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(true);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(false);
-
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
     }
 
     private Map<MatchKey, List<String>> getKeyMap() {
-        Map<MatchKey, List<String>> keyMap = new TreeMap<>();
-        keyMap.put(MatchKey.Domain, Arrays.asList("Domain"));
-        // keyMap.put(MatchKey.Name, Arrays.asList("Display Name"));
-        // keyMap.put(MatchKey.Country, Arrays.asList("Country"));
-        // keyMap.put(MatchKey.State, Arrays.asList("State"));
-        // keyMap.put(MatchKey.City, Arrays.asList("City"));
-        // keyMap.put(MatchKey.Zipcode, Arrays.asList("Zip"));
-        // keyMap.put(MatchKey.PhoneNumber, Arrays.asList("PhoneNumber"));
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
         return keyMap;
     }
 

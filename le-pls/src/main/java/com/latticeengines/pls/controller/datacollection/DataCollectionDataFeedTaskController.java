@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.pls.controller.datacollection;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,13 +20,39 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "datafile", description = "REST resource for retrieving data files")
 @RestController
-@RequestMapping(value = "/datafeedtask")
-public class DataFeedResource {
+@RequestMapping(value = "")
+public class DataCollectionDataFeedTaskController {
 
     @Autowired
     private DataFeedTaskManagerService dataFeedTaskManagerService;
 
-    @RequestMapping(value = "/createtask", method = RequestMethod.POST, headers =
+    @Deprecated
+    @RequestMapping(value = "/datafeedtask/createtask", method = RequestMethod.POST, headers =
+            "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a data feed task")
+    public String createDataFeedTaskDeprecated(@RequestParam (value = "source") String source,
+                                     @RequestParam (value = "feedtype") String feedtype,
+                                     @RequestParam (value = "entity") String entity,
+                                     @RequestParam (value = "datafeedname") String datafeedName,
+                                     @RequestBody String metadata,
+                                     HttpServletRequest request) {
+        return JsonUtils.serialize(ImmutableMap.of("task_id",
+                dataFeedTaskManagerService.createDataFeedTask(feedtype, entity, source, datafeedName, metadata)));
+    }
+
+    @Deprecated
+    @RequestMapping(value = "/datafeedtask/import/{taskIdentifier:\\w+\\.\\w+\\.\\w+\\.\\w+}", method = RequestMethod.POST, headers =
+            "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a data feed task")
+    public String startImportJobDeprecated(@PathVariable String taskIdentifier, @RequestBody String metadata,
+                                 HttpServletRequest request) {
+        return JsonUtils.serialize(ImmutableMap.of("application_id",
+                dataFeedTaskManagerService.submitImportJob(taskIdentifier, metadata)));
+    }
+
+    @RequestMapping(value = "/datacollection/datafeedtasks/createtask", method = RequestMethod.POST, headers =
             "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
@@ -40,7 +66,7 @@ public class DataFeedResource {
                 dataFeedTaskManagerService.createDataFeedTask(feedtype, entity, source, datafeedName, metadata)));
     }
 
-    @RequestMapping(value = "/import/{taskIdentifier:\\w+\\.\\w+\\.\\w+\\.\\w+}", method = RequestMethod.POST, headers =
+    @RequestMapping(value = "/datacollection/datafeedtasks/import/{taskIdentifier:\\w+\\.\\w+\\.\\w+\\.\\w+}", method = RequestMethod.POST, headers =
             "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")

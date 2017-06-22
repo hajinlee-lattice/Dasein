@@ -42,11 +42,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
-import com.latticeengines.proxy.exposed.admin.AdminInternalProxy;
-import com.latticeengines.proxy.exposed.admin.AdminTenantProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
+import com.latticeengines.testframework.proxy.AdminInternalProxy;
+import com.latticeengines.testframework.proxy.AdminTenantProxy;
 import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
 @SuppressWarnings("deprecation")
@@ -400,19 +401,9 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
     }
 
-    public void forceDeleteTenantViaTenantConsole(CustomerSpace customerSpace) {
-        loginAD();
-        try {
-            adminTenantProxy.deleteTenant(customerSpace.getTenantId());
-        } catch (Exception e) {
-            log.error("DELETE customer space " + customerSpace + " in tenant console failed.", e);
-        }
-        waitForTenantConsoleUninstall(customerSpace);
-    }
 
-    public void forceDeleteViaPls(CustomerSpace customerSpace) {
-        magicRestTemplate.delete(plsApiHostPort + "/pls/admin/tenants/" + customerSpace.toString());
+    public AuthorizationHeaderHttpRequestInterceptor getPlsAuthInterceptor() {
+        return authHeaderInterceptor;
     }
-
 
 }

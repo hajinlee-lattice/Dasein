@@ -20,11 +20,10 @@ public class StatisticsContainerDaoImpl extends BaseDaoImpl<StatisticsContainer>
 
     @SuppressWarnings("unchecked")
     @Override
-    public StatisticsContainer findInSegment(String collectionName, String segmentName, String modelId) {
+    public StatisticsContainer findInSegment(String segmentName, String modelId) {
         Session session = getSessionFactory().getCurrentSession();
         String queryPattern = "from %s as stat";
-        queryPattern += " where stat.segment.dataCollection.name = :collectionName";
-        queryPattern += " and stat.segment.name = :segmentName";
+        queryPattern += " where stat.segment.name = :segmentName";
         if (StringUtils.isBlank(modelId)) {
             queryPattern += " and stat.modelId is null";
         } else {
@@ -32,7 +31,6 @@ public class StatisticsContainerDaoImpl extends BaseDaoImpl<StatisticsContainer>
         }
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setString("collectionName", collectionName);
         query.setString("segmentName", segmentName);
         if (StringUtils.isNotBlank(modelId)) {
             query.setString("modelId", modelId);

@@ -590,6 +590,7 @@ public enum LedpCode {
     LEDP_37011("Unsupported lookup type {0}"), //
     LEDP_37012("Failed to retrieve data from {0}"), //
     LEDP_37013("Could not find data collection of type {0}"), //
+    LEDP_37014("Could not find the default data collection"), //
 
     // le-dante
     LEDP_38001("Could not find Talking point with External_ID {0}"), //

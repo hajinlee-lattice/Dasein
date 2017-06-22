@@ -59,8 +59,8 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public StatisticsContainer findInSegment(String collectionName, String segmentName, String modelId) {
-        return statisticsContainerDao.findInSegment(collectionName, segmentName, modelId);
+    public StatisticsContainer findInSegment(String segmentName, String modelId) {
+        return statisticsContainerDao.findInSegment(segmentName, modelId);
     }
 
     @Override

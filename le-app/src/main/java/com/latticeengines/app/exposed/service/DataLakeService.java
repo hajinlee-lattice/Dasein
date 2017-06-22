@@ -4,10 +4,11 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-@Deprecated
-public interface MetadataService {
-    List<ColumnMetadata> getAttributes(Integer offset, Integer max);
+public interface DataLakeService {
 
+    List<ColumnMetadata> getAttributes(Integer start, Integer limit);
     Statistics getStatistics();
+
 }

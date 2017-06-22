@@ -1,4 +1,4 @@
-package com.latticeengines.proxy.exposed.admin;
+package com.latticeengines.testframework.proxy;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ public class AdminTenantProxy extends ProtectedRestApiProxy {
     private AdminLoginProxy loginProxy;
 
     public AdminTenantProxy() {
-        super(PropertyUtils.getProperty("common.admin.url"), "admin/tenants");
+        super(PropertyUtils.getProperty("common.test.admin.url"), "admin/tenants");
     }
 
     @Override

@@ -16,14 +16,15 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Statistics {
 
-    @JsonProperty("Count")
-    private Long count;
+    @JsonProperty("Counts")
+    private Map<BusinessEntity, Long> counts;
 
     @JsonProperty("Categories")
     @JsonDeserialize(keyUsing = CategoryKeyDeserializer.class)
@@ -37,13 +38,13 @@ public class Statistics {
     public void setCategories(Map<Category, CategoryStatistics> categories) {
         this.categories = categories;
     }
-         
-    public Long getCount() {
-        return count;
+
+    public Map<BusinessEntity, Long> getCounts() {
+        return counts;
     }
 
-    public void setCount(Long count) {
-        this.count = count;
+    public void setCounts(Map<BusinessEntity, Long> counts) {
+        this.counts = counts;
     }
 
     public CategoryStatistics getCategory(Category category) {

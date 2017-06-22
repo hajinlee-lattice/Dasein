@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
@@ -24,8 +26,18 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
+import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
+import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class StatsCubeUtils {
+
+    private static final Log log = LogFactory.getLog(StatsCubeUtils.class);
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
         final AtomicLong maxCount = new AtomicLong(0L);
@@ -133,6 +145,62 @@ public class StatsCubeUtils {
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);
         bucket.setRange(Pair.of(min, max));
+    }
+
+    public static StatisticsContainer constructStatsContainer(StatsCube statsCube,
+            List<Pair<BusinessEntity, List<ColumnMetadata>>> metadataPairs) {
+        Map<String, Pair<BusinessEntity, ColumnMetadata>> cmMap = convertToMap(metadataPairs);
+
+        StatisticsContainer statsContainer = new StatisticsContainer();
+
+        Map<String, AttributeStats> attrStatsMap = statsCube.getStatistics();
+        Statistics statistics = new Statistics();
+        Map<BusinessEntity, Long> counts = new HashMap<>();
+        counts.put(BusinessEntity.Account, statsCube.getCount());
+        statistics.setCounts(counts);
+        for (String name : attrStatsMap.keySet()) {
+            Pair<BusinessEntity, ColumnMetadata> pair = cmMap.get(name);
+            if (pair == null) {
+                log.warn("Cannot find attribute " + name + " in any of the provided column metadata. Skip it.");
+                continue;
+            }
+
+            BusinessEntity entity = pair.getLeft();
+            ColumnMetadata cm = pair.getRight();
+            AttributeLookup attrLookup = new AttributeLookup(entity, name);
+            Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
+            String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
+
+            AttributeStats statsInCube = attrStatsMap.get(name);
+            // create map entries if not there
+            if (!statistics.hasCategory(category)) {
+                statistics.putCategory(category, new CategoryStatistics());
+            }
+            CategoryStatistics categoryStatistics = statistics.getCategory(category);
+            if (!categoryStatistics.hasSubcategory(subCategory)) {
+                categoryStatistics.putSubcategory(subCategory, new SubcategoryStatistics());
+            }
+            // update the corresponding map entry
+            SubcategoryStatistics subcategoryStatistics = statistics.getCategory(category).getSubcategory(subCategory);
+            subcategoryStatistics.putAttrStats(attrLookup, statsInCube);
+        }
+        statsContainer.setStatistics(statistics);
+
+        return statsContainer;
+    }
+
+    private static Map<String, Pair<BusinessEntity, ColumnMetadata>> convertToMap(
+            List<Pair<BusinessEntity, List<ColumnMetadata>>> pairs) {
+        Map<String, Pair<BusinessEntity, ColumnMetadata>> map = new HashMap<>();
+        for (Pair<BusinessEntity, List<ColumnMetadata>> pair : pairs) {
+            BusinessEntity entity = pair.getLeft();
+            for (ColumnMetadata cm : pair.getRight()) {
+                if (!map.containsKey(cm.getColumnId())) {
+                    map.put(cm.getColumnId(), Pair.of(entity, cm));
+                }
+            }
+        }
+        return map;
     }
 
 }

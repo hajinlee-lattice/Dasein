@@ -20,20 +20,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
@@ -52,6 +51,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.proxy.TestDataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -82,6 +82,9 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     private DataCollectionProxy dataCollectionProxy;
 
     @Autowired
+    private TestDataFeedProxy dataFeedProxy;
+
+    @Autowired
     protected Configuration yarnConfiguration;
 
     @Value("${common.test.env}")
@@ -96,10 +99,12 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Tenant tenant = testBed.addExtraTestTenant(CustomerSpace.parse(DL_TENANT_NAME).toString());
         testBed.deleteTenant(testBed.getMainTestTenant());
         testBed.setMainTestTenant(tenant);
-        testBed.switchToSuperAdmin(tenant);
+        testBed.switchToSuperAdmin();
         firstTenant = testBed.getMainTestTenant();
         Tenant retrieved = testBed.getMainTestTenant();
         Assert.assertEquals(retrieved.getId(), CustomerSpace.parse(DL_TENANT_NAME).toString());
+
+        attachProtectedProxy(dataFeedProxy);
 
         log.info("Test environment setup finished.");
         createDataFeed();
@@ -121,33 +126,26 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         metadataProxy.updateDataFeedStatus(firstTenant.getId(), DATA_FEED_NAME, Status.InitialLoaded.getName());
     }
 
-    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "importData")
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importData")
     public void initialConsolidate() {
         log.info("Start consolidating data ...");
-        ResponseDocument<?> response = restTemplate
-                .postForObject(String.format("%s/pls/datacollections/%s/datafeeds/%s/consolidate", getRestAPIHostPort(),
-                        DATA_COLLECTION_NAME, DATA_FEED_NAME), null, ResponseDocument.class);
-        String appId = new ObjectMapper().convertValue(response.getResult(), String.class);
-        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId, false);
+        ApplicationId appId = dataFeedProxy.consolidate(DATA_FEED_NAME);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment.cdl" }, enabled = true, dependsOnMethods = "initialConsolidate")
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "initialConsolidate")
     public void firstFinalize() {
         log.info("Start calculating statistics ...");
-        ResponseDocument<?> response = restTemplate.postForObject(
-                String.format("%s/pls/datacollections/%s/datafeeds/%s/calculatestats", getRestAPIHostPort(),
-                        DATA_COLLECTION_NAME, DATA_FEED_NAME),
-                null, ResponseDocument.class);
-        String appId = new ObjectMapper().convertValue(response.getResult(), String.class);
-        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId, false);
+        ApplicationId appId = dataFeedProxy.assemble(DATA_FEED_NAME);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "firstFinalize")
     public void verifyFirstImport() throws IOException {
         String customerSpace = CustomerSpace.parse(firstTenant.getId()).toString();
-        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(customerSpace, DATA_COLLECTION_NAME);
+        StatisticsContainer statisticsContainer = dataCollectionProxy.getStatsInDefaultColellction(customerSpace);
         Assert.assertNotNull(statisticsContainer);
         // save stats to a local json to help create verifications
         File statsJson = new File("stats.json");
@@ -317,6 +315,9 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         dataCollection.setName(DATA_COLLECTION_NAME);
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollectionProxy.createOrUpdateDataCollection(firstTenant.getId(), dataCollection);
+
+        DataCollection defaultCollectin = dataCollectionProxy.getDefaultDataCollection(firstTenant.getId());
+        Assert.assertEquals(defaultCollectin.getName(), DATA_COLLECTION_NAME);
 
         DataFeed datafeed = new DataFeed();
         datafeed.setName(DATA_FEED_NAME);
