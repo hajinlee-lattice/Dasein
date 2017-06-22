@@ -256,7 +256,13 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
             return null;
         }
         TransformationStepConfig step5 = new TransformationStepConfig();
-        step5.setBaseSources(Collections.singletonList(profileTableName));
+        String tableSourceName = "CustomerProfile";
+        SourceTable sourceTable = new SourceTable(profileTableName, customerSpace);
+        List<String> baseSources = Collections.singletonList(tableSourceName);
+        step5.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step5.setBaseTables(baseTables);
         // consolidate diff
         step5.setInputSteps(Collections.singletonList(consolidatedStep));
         step5.setTransformer(TRANSFORMER_BUCKETER);

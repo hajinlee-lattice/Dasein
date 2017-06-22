@@ -10,6 +10,8 @@ public final class DataCloudConstants {
 
     public static final String ACCOUNT_MASTER_COLUMN = "AccountMasterColumn";
     public static final String ACCOUNT_MASTER = "AccountMaster";
+    public static final String ACCOUNT_MASTER_BUCKETED = "AccountMasterBucketed";
+    public static final String ACCOUNT_MASTER_COLLECTION = "AMCollection";
 
     public static final String LATTIC_ID = "LatticeID";
     public static final String LATTICE_ACCOUNT_ID = InterfaceName.LatticeAccountId.name();

@@ -46,8 +46,7 @@ public class DataFeedTaskController {
             "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
-    public String startImportJobDeprecated(@PathVariable String taskIdentifier, @RequestBody String metadata,
-                                 HttpServletRequest request) {
+    public String startImportJobDeprecated(@PathVariable String taskIdentifier, @RequestBody String metadata) {
         return JsonUtils.serialize(ImmutableMap.of("application_id",
                 dataFeedTaskManagerService.submitImportJob(taskIdentifier, metadata)));
     }

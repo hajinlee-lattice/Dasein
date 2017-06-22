@@ -59,6 +59,10 @@ public class DataCloudVersion implements HasPid, Serializable {
     private String accountLookupHdfsVersion;
 
     @JsonIgnore
+    @Column(name = "AMBucketedRedShiftTable", nullable = false)
+    private String amBucketedRedShiftTable;
+
+    @JsonIgnore
     @Column(name = "DynamoTableSignature", length = 100)
     private String dynamoTableSignature;
 
@@ -147,6 +151,14 @@ public class DataCloudVersion implements HasPid, Serializable {
 
     public void setDynamoTableSignatureLookup(String dynamoTableSignatureLookup) {
         this.dynamoTableSignatureLookup = dynamoTableSignatureLookup;
+    }
+
+    public String getAmBucketedRedShiftTable() {
+        return amBucketedRedShiftTable;
+    }
+
+    public void setAmBucketedRedShiftTable(String amBucketedRedShiftTable) {
+        this.amBucketedRedShiftTable = amBucketedRedShiftTable;
     }
 
     public Date getMetadataRefreshDate() {
