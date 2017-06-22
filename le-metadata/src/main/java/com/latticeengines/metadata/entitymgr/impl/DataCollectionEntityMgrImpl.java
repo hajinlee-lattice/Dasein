@@ -222,7 +222,10 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         DataCollection dataCollection = new DataCollection();
         dataCollection.setType(DataCollectionType.Segmentation);
         dataCollection.setTenant(MultiTenantContext.getTenant());
-        createDataCollection(dataCollection);
+        dataCollection.setName(NamingUtils.timestamp("DataCollection"));
+        dataCollectionDao.create(dataCollection);
+        MetadataSegment segment = masterSegment(dataCollection);
+        segmentEntityMgr.createOrUpdate(segment);
         return dataCollection;
     }
 
