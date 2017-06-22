@@ -269,13 +269,13 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             String originalZipCode = null;
             if (keyPositionMap.containsKey(MatchKey.Zipcode)) {
                 for (Integer pos : keyPositionMap.get(MatchKey.Zipcode)) {
-                    originalZipCode = (String) inputRecord.get(pos);
+                    originalZipCode = inputRecord.get(pos).toString();
                 }
             }
             String originalPhoneNumber = null;
             if (keyPositionMap.containsKey(MatchKey.PhoneNumber)) {
                 for (Integer pos : keyPositionMap.get(MatchKey.PhoneNumber)) {
-                    originalPhoneNumber = (String) inputRecord.get(pos);
+                    originalPhoneNumber = inputRecord.get(pos).toString();
                 }
             }
 
