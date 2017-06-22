@@ -4,10 +4,13 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
+@Component("segmentProxy")
 public class SegmentProxy extends MicroserviceRestApiProxy {
 
     protected SegmentProxy() {
