@@ -45,6 +45,8 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
+    private String statsTableName;
+
     @Override
     public void execute() {
         log.info("Inside UpdateStatsObjects execute()");
@@ -61,7 +63,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             throw new NullPointerException("Profile table for Stats Object Calculation is not found.");
         }
 
-        String statsTableName = getStringValueFromContext(CALCULATE_STATS_TARGET_TABLE);
+        statsTableName = getStringValueFromContext(CALCULATE_STATS_TARGET_TABLE);
         log.info(String.format("statsTableName for customer %s is %s", customerSpaceStr, statsTableName));
         Table statsTable = metadataProxy.getTable(customerSpaceStr, statsTableName);
         if (statsTable == null) {
@@ -70,6 +72,12 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
 
         StatisticsContainer statsContainer = constructStatsContainer(masterTable, statsTable);
         dataCollectionProxy.upsertStats(customerSpaceStr, collectionName, statsContainer);
+    }
+
+    @Override
+    public void onExecutionCompleted() {
+        log.info("Drop stats table " + statsTableName);
+        metadataProxy.deleteTable(getConfiguration().getCustomerSpace().toString(), statsTableName);
     }
 
     private StatsCube getStatsCube(Table targetTable) {

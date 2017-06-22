@@ -167,7 +167,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         collectionName = StringUtils.isBlank(collectionName) ? getDefaultCollectionName() : collectionName;
         DataCollectionTable dataCollectionTable = dataCollectionTableDao.findByNames(collectionName, tableName);
         if (dataCollectionTable != null) {
-            dataCollectionTableDao.create(dataCollectionTable);
+            dataCollectionTableDao.delete(dataCollectionTable);
         }
     }
 

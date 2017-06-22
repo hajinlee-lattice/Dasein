@@ -13,6 +13,9 @@ public class ExportDataToRedshiftConfiguration extends MicroserviceStepConfigura
     @JsonProperty("source_table")
     private Table sourceTable;
 
+    @JsonProperty("drop_source_table")
+    private Boolean dropSourceTable;
+
     public HdfsToRedshiftConfiguration getHdfsToRedshiftConfiguration() {
         return hdfsToRedshiftConfiguration;
     }
@@ -27,5 +30,13 @@ public class ExportDataToRedshiftConfiguration extends MicroserviceStepConfigura
 
     public void setSourceTable(Table sourceTable) {
         this.sourceTable = sourceTable;
+    }
+
+    public Boolean getDropSourceTable() {
+        return dropSourceTable;
+    }
+
+    public void setDropSourceTable(Boolean dropSourceTable) {
+        this.dropSourceTable = dropSourceTable;
     }
 }

@@ -80,6 +80,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .put(MatchKey.Country, Collections.singletonList(InterfaceName.Country.name())) //
                         .put(MatchKey.Zipcode, Collections.singletonList("Zip")) //
                         .build()) //
+                .dropConsolidatedTable(true) //
                 .build();
     }
 

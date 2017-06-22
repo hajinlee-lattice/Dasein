@@ -2,7 +2,7 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 import io.swagger.annotations.Api;
@@ -86,6 +87,17 @@ public class ColumnMetadataResource {
         ColumnMetadataService columnMetadataService = beanDispatcher
                 .getColumnMetadataService(dataCloudVersion);
         columnMetadataService.updateColumnMetadatas(dataCloudVersion, columnMetadatas);
+    }
+
+    @RequestMapping(value = "/attrrepo", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Update the columns for a specific cloud version")
+    public AttributeRepository getAttrRepoAtVersion(
+            @RequestParam(value = "datacloudversion") String dataCloudVersion) {
+        if (StringUtils.isBlank(dataCloudVersion)){
+            dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+        }
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
+        return columnMetadataService.getAttrRepo(dataCloudVersion);
     }
 
 }

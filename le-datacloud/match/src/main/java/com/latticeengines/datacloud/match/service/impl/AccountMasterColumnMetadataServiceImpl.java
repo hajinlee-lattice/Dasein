@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.Resource;
 
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,4 +65,10 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
         log.info("Metadata Refresh Date : " + approvedVersionDate + " Refreshing cache");
         return true;
     }
+
+    @Override
+    public AttributeRepository getAttrRepo(String dataCloudVersion) {
+        return null;
+    }
+
 }

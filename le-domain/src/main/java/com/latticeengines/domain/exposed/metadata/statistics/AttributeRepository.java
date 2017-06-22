@@ -85,6 +85,13 @@ public class AttributeRepository {
         Map<TableRoleInCollection, String> tableNameMap = getTableNameMap(tableMap);
         Map<AttributeLookup, AttributeStats> statsMap = expandStats(statistics);
         Map<AttributeLookup, ColumnMetadata> cmMap = expandAttrs(statsMap.keySet(), tableMap);
+        return constructRepo(statistics, tableNameMap, cmMap, customerSpace, collectionName);
+    }
+
+    public static AttributeRepository constructRepo(Statistics statistics, Map<TableRoleInCollection, String> tableNameMap,
+                                                    Map<AttributeLookup, ColumnMetadata> cmMap,
+                                                    CustomerSpace customerSpace, String collectionName) {
+        Map<AttributeLookup, AttributeStats> statsMap = expandStats(statistics);
         cmMap.forEach((lookup, cm) -> {
             AttributeStats stats = statsMap.get(lookup);
             cm.setStats(stats);

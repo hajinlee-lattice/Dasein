@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 
 @Component("columnMetadataService")
 public class ColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<ExternalColumn> {
@@ -41,5 +42,10 @@ public class ColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<Ext
     @Override
     protected boolean refreshCacheNeeded() {
         return true;
+    }
+
+    @Override
+    public AttributeRepository getAttrRepo(String dataCloudVersion) {
+        throw new UnsupportedOperationException("Attribute repository is not supported in 1.0.0");
     }
 }

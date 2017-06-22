@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.exposed.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import org.apache.avro.Schema;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -24,5 +25,7 @@ public interface ColumnMetadataService extends HasDataCloudVersion {
     List<ColumnMetadata> findAll(String dataCloudVersion);
 
     void updateColumnMetadatas(String dataCloudVersion, List<ColumnMetadata> columnMetadatas);
+
+    AttributeRepository getAttrRepo(String dataCloudVersion);
 
 }

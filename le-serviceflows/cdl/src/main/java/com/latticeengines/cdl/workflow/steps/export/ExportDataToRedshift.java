@@ -46,6 +46,15 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
 
     }
 
+    @Override
+    public void onExecutionCompleted() {
+        boolean dropSourceTable = Boolean.TRUE.equals(configuration.getDropSourceTable());
+        if (dropSourceTable) {
+            log.info("Drop source table " + sourceTable.getName());
+            metadataProxy.deleteTable(getConfiguration().getCustomerSpace().toString(), sourceTable.getName());
+        }
+    }
+
     private void exportData() {
         EaiJobConfiguration exportConfig = setupExportConfig();
         AppSubmission submission = eaiProxy.submitEaiJob(exportConfig);

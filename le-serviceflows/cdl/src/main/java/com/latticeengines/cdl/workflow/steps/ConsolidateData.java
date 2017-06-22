@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -48,9 +47,11 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
 
     private static final Log log = LogFactory.getLog(ConsolidateData.class);
 
-    private String masterTableName;
+    private String inputMasterTableName;
     private String profileTableName;
-    private static final String consolidatedTableName = "ConsolidatedTable";
+
+    private static final String outputMasterTablePrefix = "Account";
+    private static final String consolidatedTablePrefix = "ConsolidatedTable";
     private static final String accountId = TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name();
     private static final List<String> masterTableSortKeys = TableRoleInCollection.ConsolidatedAccount
             .getForeignKeysAsStringList();
@@ -84,14 +85,13 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
 
     @Override
     protected void onPostTransformationCompleted() {
-
         Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(masterTableName, pipelineVersion));
+                TableUtils.getFullTableName(outputMasterTablePrefix, pipelineVersion));
         dataCollectionProxy.upsertTable(customerSpace.toString(), collectionName, newMasterTable.getName(),
                 TableRoleInCollection.ConsolidatedAccount);
         if (isBucketing()) {
             Table diffTable = metadataProxy.getTable(customerSpace.toString(),
-                    TableUtils.getFullTableName(consolidatedTableName, pipelineVersion));
+                    TableUtils.getFullTableName(consolidatedTablePrefix, pipelineVersion));
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, diffTable);
         }
         putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);
@@ -117,11 +117,10 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
                 TableRoleInCollection.ConsolidatedAccount);
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
             log.info("There has been no master table for this data collection. Creating a new one");
-            masterTableName = NamingUtils.timestamp("Account");
         } else {
-            masterTableName = masterTable.getName();
+            inputMasterTableName = masterTable.getName();
         }
-        log.info("Set masterTableName=" + masterTableName);
+        log.info("Set inputMasterTableName=" + inputMasterTableName);
 
         srcIdField = configuration.getIdField();
         keyMap = configuration.getMatchKeyMap();
@@ -216,12 +215,12 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         Map<String, SourceTable> baseTables;
         TargetTable targetTable;
         TransformationStepConfig step3 = new TransformationStepConfig();
-        Table masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
+        Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
         if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
-            baseSources = Collections.singletonList(masterTableName);
+            baseSources = Collections.singletonList(inputMasterTableName);
             baseTables = new HashMap<>();
-            SourceTable sourceMasterTable = new SourceTable(masterTableName, customerSpace);
-            baseTables.put(masterTableName, sourceMasterTable);
+            SourceTable sourceMasterTable = new SourceTable(inputMasterTableName, customerSpace);
+            baseTables.put(inputMasterTableName, sourceMasterTable);
             step3.setBaseSources(baseSources);
             step3.setBaseTables(baseTables);
         }
@@ -231,7 +230,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
 
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(masterTableName);
+        targetTable.setNamePrefix(outputMasterTablePrefix);
         targetTable.setPrimaryKey(accountId);
         step3.setTargetTable(targetTable);
         return step3;
@@ -245,7 +244,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         if (!isBucketing()) {
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
-            targetTable.setNamePrefix(consolidatedTableName);
+            targetTable.setNamePrefix(consolidatedTablePrefix);
             targetTable.setPrimaryKey(accountId);
             step4.setTargetTable(targetTable);
         }
@@ -276,7 +275,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(consolidatedTableName);
+        targetTable.setNamePrefix(consolidatedTablePrefix);
         targetTable.setPrimaryKey(srcIdField);
         step6.setTargetTable(targetTable);
         return step6;
@@ -286,7 +285,11 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         try {
             SorterConfig config = new SorterConfig();
             config.setPartitions(100);
-            config.setSortingField(masterTableSortKeys.get(0)); // TODO: only support single sorting key now
+            config.setSortingField(masterTableSortKeys.get(0)); // TODO: only
+                                                                // support
+                                                                // single
+                                                                // sorting key
+                                                                // now
             config.setCompressResult(false);
             return appendEngineConf(config, lightEngineConfig());
         } catch (Exception ex) {

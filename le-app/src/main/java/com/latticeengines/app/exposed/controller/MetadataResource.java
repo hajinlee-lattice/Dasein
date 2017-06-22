@@ -17,7 +17,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-//TODO: not sure if this one is still needed
+// This is used for saving/retrieving attributes in lattice insights with customizations for UI purposes
 @Api(value = "metadata", description = "Common REST resource for retrieving attribute-level metadata")
 @RestController
 @RequestMapping("/metadata")

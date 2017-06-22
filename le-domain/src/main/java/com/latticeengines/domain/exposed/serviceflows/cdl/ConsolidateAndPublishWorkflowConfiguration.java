@@ -8,7 +8,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -65,6 +64,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
 
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
+            return this;
+        }
+
+        public Builder dropConsolidatedTable(Boolean drop) {
+            redshiftPublishWorkflowConfigurationBuilder.dropSourceTable(drop);
             return this;
         }
 

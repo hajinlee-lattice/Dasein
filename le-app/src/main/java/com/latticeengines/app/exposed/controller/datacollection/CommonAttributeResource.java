@@ -36,12 +36,12 @@ public class CommonAttributeResource {
     @ApiOperation(value = "Get list of attributes")
     private List<ColumnMetadata> getAttributes( //
                                                 @ApiParam(value = "Offset for pagination of matching attributes", required = false)//
-                                                @RequestParam(value = "start", required = false)//
-                                                        Integer start, //
+                                                @RequestParam(value = "offset", required = false)//
+                                                        Integer offset, //
                                                 @ApiParam(value = "Maximum number of matching attributes in page", required = false)//
-                                                @RequestParam(value = "limit", required = false)//
-                                                        Integer limit) {
-        return dataLakeService.getAttributes(start, limit);
+                                                @RequestParam(value = "max", required = false)//
+                                                        Integer max) {
+        return dataLakeService.getAttributes(offset, max);
     }
 
 }
