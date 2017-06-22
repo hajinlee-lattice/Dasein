@@ -34,6 +34,7 @@ public final class DataCloudConstants {
     public static final String PROFILE_ATTR_SRC_CUSTOMER = "CUSTOMER";
 
     public static final String CEAttr = "CEAttr";
+    public static final String EAttr = "EAttr";
 
     public static final String STATS_ATTR_NAME = "AttrName";
     public static final String STATS_ATTR_COUNT = "AttrCount";

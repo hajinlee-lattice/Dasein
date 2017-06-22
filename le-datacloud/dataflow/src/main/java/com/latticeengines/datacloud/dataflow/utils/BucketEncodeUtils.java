@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.dataflow.utils;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.EAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ATTRNAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_BKTALGO;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_DECSTRAT;
@@ -147,8 +147,8 @@ public class BucketEncodeUtils {
         throw new IllegalArgumentException("This record cannot be parsed to a bucked attr: " + record);
     }
 
-    public static boolean isCEAttr(String fieldName) {
-        return fieldName.matches(CEAttr + "\\d+");
+    public static boolean isEAttr(String fieldName) {
+        return fieldName.matches(EAttr + "\\d+");
     }
 
 }

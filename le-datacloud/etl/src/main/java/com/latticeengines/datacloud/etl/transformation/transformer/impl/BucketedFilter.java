@@ -76,7 +76,7 @@ public class BucketedFilter extends AbstractDataflowTransformer<BucketedFilterCo
         Set<String> originalFieldSet = new HashSet<>(parameters.originalAttrs);
         List<String> toRemove = baseSchema.getFields().stream() //
                 .map(Schema.Field::toString) //
-                .filter(f -> !originalFieldSet.contains(f) && !BucketEncodeUtils.isCEAttr(f)) //
+                .filter(f -> !originalFieldSet.contains(f) || BucketEncodeUtils.isEAttr(f)) //
                 .collect(Collectors.toList());
         return AvroUtils.removeFields(baseSchema, toRemove.toArray(new String[toRemove.size()]));
     }
