@@ -30,7 +30,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
@@ -210,12 +209,7 @@ public class DataFeedTask implements HasPid, Serializable {
         this.tables = tables;
     }
 
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
-    public static enum Status {
+    public enum Status {
         Initiating("initiating"), //
         Active("active"), //
         Updated("updated"), //

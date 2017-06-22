@@ -11,6 +11,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.metadata.dao.StatisticsContainerDao;
+import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -20,6 +21,9 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
 
     @Autowired
     private StatisticsContainerDao statisticsContainerDao;
+
+    @Autowired
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
 
     @Override
     public BaseDao<StatisticsContainer> getDao() {
@@ -66,6 +70,7 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public StatisticsContainer findInMasterSegment(String collectionName, String modelId) {
+        collectionName = StringUtils.isBlank(collectionName) ? dataCollectionEntityMgr.getDefaultCollectionName() : collectionName;
         return statisticsContainerDao.findInMasterSegment(collectionName, modelId);
     }
 }
