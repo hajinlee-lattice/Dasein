@@ -66,7 +66,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
     private List<String> inputTableNames = new ArrayList<>();
     private String srcIdField;
     Map<MatchKey, List<String>> keyMap = null;
-    Boolean dataInitialLoaded = false;
+    Boolean isActive = false;
     private String collectionName;
 
     private int mergeStep;
@@ -126,7 +126,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         srcIdField = configuration.getIdField();
         keyMap = configuration.getMatchKeyMap();
 
-        dataInitialLoaded = getObjectFromContext(DATA_INITIAL_LOADED, Boolean.class);
+        isActive = getObjectFromContext(IS_ACTIVE, Boolean.class);
         if (isBucketing()) {
             Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(), collectionName,
                     TableRoleInCollection.Profile);
@@ -141,7 +141,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
     }
 
     private boolean isBucketing() {
-        return !Boolean.TRUE.equals(dataInitialLoaded);
+        return !Boolean.TRUE.equals(isActive);
     }
 
     private PipelineTransformationRequest getConcolidateReqest() {
