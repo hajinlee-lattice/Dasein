@@ -4,7 +4,7 @@
             <div class="dashboard-section-container">
                 <div class="dashboard-section-header">
                     <h2>{{ vm.play.display_name||'Play Name' }}</h2>
-                    Created by someone on <time>{{vm.play.timestamp|date:'M/d/yyyy \'at\' h:mm:ssa'}}</time>
+                    Created by someone on <time>{{vm.play.timestamp-1000|date:'M/d/yyyy'}}</time>
                 </div>
                 <div class="dashboard-section-content">
                     <a ui-sref="home.playbook.wizard.settings({play_name: vm.play.name})">temp edit link</a>
@@ -42,6 +42,9 @@
                 </div>
                 <div class="dashboard-section-content">
                     <pre>{{vm.launchHistory|json}}</pre>
+                </div>
+                <div class="dashboard-section-footer">
+                    <span ng-if="vm.play.timestamp">Launched {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
                 </div>
             </div>
         </div>

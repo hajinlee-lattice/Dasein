@@ -9,14 +9,14 @@
             padding-right: 10px;
             padding-bottom: 10px;
             .dashboard-section-container {
+                @include flex-container;
+                flex-direction: column;
                 height: 100%;
                 background-color: white;
                 border-radius: 4px;
                 border: solid 1px #d0d0d0;
-                .dashboard-section-content {
-                    padding: 30px;
-                }
                 .dashboard-section-header {
+                    @include flex-item(0 1 auto);
                     padding: 10px 30px;
                     border-bottom: 1px solid #d0d0d0;
                     h2 {
@@ -25,6 +25,16 @@
                         background-position: left center;
                         padding-left: 35px;
                     }
+                }
+                .dashboard-section-content {
+                    @include flex-item(1 1 auto);
+                    padding: 30px;
+                }
+                .dashboard-section-footer {
+                    @include flex-item(0 1 auto);
+                    padding: 10px 30px;
+                    border-top: 1px solid #d0d0d0;
+                    text-align: right;
                 }
             }
             time {
