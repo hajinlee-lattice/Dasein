@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -26,7 +27,7 @@ public class QueryTestUtils {
     static AttributeRepository getAttributeRepo() {
         CustomerSpace customerSpace = CustomerSpace.parse("Query");
         String collectionName = "querytest";
-        Map<AttributeLookup, Attribute> attrMap = getAttrMap();
+        Map<AttributeLookup, ColumnMetadata> attrMap = getAttrMap();
         Map<TableRoleInCollection, String> tableNameMap = getTableNameMap();
         return new AttributeRepository(customerSpace, collectionName, attrMap, tableNameMap);
     }
@@ -39,25 +40,24 @@ public class QueryTestUtils {
         return map;
     }
 
-    private static Map<AttributeLookup, Attribute> getAttrMap() {
-        Map<AttributeLookup, Attribute> attrMap = new HashMap<>();
+    private static Map<AttributeLookup, ColumnMetadata> getAttrMap() {
+        Map<AttributeLookup, ColumnMetadata> attrMap = new HashMap<>();
         for (BusinessEntity entity : Arrays.asList(BusinessEntity.Account, BusinessEntity.LatticeAccount,
                 BusinessEntity.Contact)) {
-            getAttrsInTable().forEach(attr -> {
-                AttributeLookup lookup = new AttributeLookup(entity, attr.getName());
-                attrMap.put(lookup, attr);
+            getAttrsInTable().forEach(cm -> {
+                AttributeLookup lookup = new AttributeLookup(entity, cm.getName());
+                attrMap.put(lookup, cm);
             });
         }
         return attrMap;
     }
 
-    private static List<Attribute> getAttrsInTable() {
+    private static List<ColumnMetadata> getAttrsInTable() {
         List<String> simpleFields = Arrays.asList( //
                 "companyname", "id", "city", "state", "lastname", "number_of_family_members", "alexaviewsperuser");
-        List<Attribute> attrInTable = new ArrayList<>();
-        simpleFields.forEach(s -> attrInTable.add(new Attribute(s)));
+        List<ColumnMetadata> attrInTable = new ArrayList<>();
+        simpleFields.forEach(s -> attrInTable.add(new Attribute(s).getColumnMetadata()));
         Attribute bucketedAttribute = new Attribute("bucketed_attribute");
-
         AttributeStats stats = new AttributeStats();
         Buckets bkts = new Buckets();
         bkts.setType(BucketType.Enum);
@@ -72,11 +72,12 @@ public class QueryTestUtils {
         bkt3.setId(2L);
         bkts.setBucketList(Arrays.asList(bkt1, bkt2, bkt3));
         stats.setBuckets(bkts);
-        bucketedAttribute.setStats(stats);
         bucketedAttribute.setPhysicalName("businesstechnologiespayment");
         bucketedAttribute.setBitOffset(1);
         bucketedAttribute.setNumOfBits(2);
-        attrInTable.add(bucketedAttribute);
+        ColumnMetadata bucketCm = bucketedAttribute.getColumnMetadata();
+        bucketCm.setStats(stats);
+        attrInTable.add(bucketCm);
         return attrInTable;
     }
 

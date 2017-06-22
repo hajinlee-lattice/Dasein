@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     public AttributeRepository getAttrRepo(String customerSpace, String collectionName) {
-        StatisticsContainer statisticsContainer = getStats(customerSpace, collectionName);
+        String notNullCollectioName = StringUtils.isBlank(collectionName)
+                ? dataCollectionEntityMgr.getDefaultCollectionName() : collectionName;
+        StatisticsContainer statisticsContainer = getStats(customerSpace, notNullCollectioName);
         if (statisticsContainer == null) {
             return null;
         }
@@ -105,11 +108,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<TableRoleInCollection> roles = AttributeRepository.extractServingRoles(statistics);
         Map<TableRoleInCollection, Table> tableMap = new HashMap<>();
         roles.forEach(role -> {
-            Table table = getTables(customerSpace, collectionName, role).get(0);
+            Table table = getTables(customerSpace, notNullCollectioName, role).get(0);
             tableMap.put(role, table);
         });
         return AttributeRepository.constructRepo(statistics, tableMap, CustomerSpace.parse(customerSpace),
-                collectionName);
+                notNullCollectioName);
     }
 
 }

@@ -7,18 +7,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class AttributeRepository {
 
     @JsonProperty("Customer")
@@ -30,7 +36,7 @@ public class AttributeRepository {
     @JsonProperty("AttrMap")
     @JsonSerialize(keyUsing = AttributeLookup.AttributeLookupSerializer.class)
     @JsonDeserialize(keyUsing = AttributeLookup.AttributeLookupKeyDeserializer.class)
-    private Map<AttributeLookup, Attribute> attributeMap;
+    private Map<AttributeLookup, ColumnMetadata> cmMap;
 
     @JsonProperty("TableNameMap")
     private Map<TableRoleInCollection, String> tableNameMap;
@@ -39,15 +45,15 @@ public class AttributeRepository {
     // in other cases, should always construct from data collection
     @VisibleForTesting
     public AttributeRepository(CustomerSpace customerSpace, String collectionName,
-            Map<AttributeLookup, Attribute> attributeMap, Map<TableRoleInCollection, String> tableNameMap) {
+            Map<AttributeLookup, ColumnMetadata> cmMap, Map<TableRoleInCollection, String> tableNameMap) {
         this.collectionName = collectionName;
         this.customerSpace = customerSpace;
-        this.attributeMap = attributeMap;
+        this.cmMap = cmMap;
         this.tableNameMap = tableNameMap;
     }
 
-    public Attribute getAttribute(AttributeLookup attributeLookup) {
-        return attributeMap.get(attributeLookup);
+    public ColumnMetadata getColumnMetadata(AttributeLookup attributeLookup) {
+        return cmMap.get(attributeLookup);
     }
 
     public String getTableName(TableRoleInCollection tableRole) {
@@ -78,12 +84,12 @@ public class AttributeRepository {
             CustomerSpace customerSpace, String collectionName) {
         Map<TableRoleInCollection, String> tableNameMap = getTableNameMap(tableMap);
         Map<AttributeLookup, AttributeStats> statsMap = expandStats(statistics);
-        Map<AttributeLookup, Attribute> attrMap = expandAttrs(statsMap.keySet(), tableMap);
-        attrMap.forEach((lookup, attr) -> {
+        Map<AttributeLookup, ColumnMetadata> cmMap = expandAttrs(statsMap.keySet(), tableMap);
+        cmMap.forEach((lookup, cm) -> {
             AttributeStats stats = statsMap.get(lookup);
-            attr.setStats(stats);
+            cm.setStats(stats);
         });
-        return new AttributeRepository(customerSpace, collectionName, attrMap, tableNameMap);
+        return new AttributeRepository(customerSpace, collectionName, cmMap, tableNameMap);
     }
 
     private static Map<TableRoleInCollection, String> getTableNameMap(Map<TableRoleInCollection, Table> tableMap) {
@@ -92,30 +98,28 @@ public class AttributeRepository {
         return map;
     }
 
-    private static Map<AttributeLookup, Attribute> expandAttrs(Collection<AttributeLookup> lookups,
+    private static Map<AttributeLookup, ColumnMetadata> expandAttrs(Collection<AttributeLookup> lookups,
             Map<TableRoleInCollection, Table> tableMap) {
-        Map<TableRoleInCollection, Map<String, Attribute>> attrMaps = new HashMap<>();
-        Map<AttributeLookup, Attribute> attributes = new HashMap<>();
+        Map<TableRoleInCollection, Map<String, ColumnMetadata>> attrMaps = new HashMap<>();
+        Map<AttributeLookup, ColumnMetadata> attributes = new HashMap<>();
         lookups.forEach(lookup -> {
             BusinessEntity entity = lookup.getEntity();
             TableRoleInCollection role = entity.getServingStore();
             Table table = tableMap.get(role);
             if (!attrMaps.containsKey(role)) {
-                Map<String, Attribute> attrMap = expandAttrsInTable(table);
+                Map<String, ColumnMetadata> attrMap = expandAttrsInTable(table);
                 attrMaps.put(role, attrMap);
             }
-            Map<String, Attribute> attrMap = attrMaps.get(role);
-            Attribute attribute = attrMap.get(lookup.getAttribute());
+            Map<String, ColumnMetadata> attrMap = attrMaps.get(role);
+            ColumnMetadata attribute = attrMap.get(lookup.getAttribute());
             attributes.put(lookup, attribute);
         });
         return attributes;
     }
 
-    private static Map<String, Attribute> expandAttrsInTable(Table table) {
-        Map<String, Attribute> attrMap = new HashMap<>();
-        table.getAttributes().forEach(attr -> {
-            attrMap.put(attr.getName(), attr);
-        });
+    private static Map<String, ColumnMetadata> expandAttrsInTable(Table table) {
+        Map<String, ColumnMetadata> attrMap = new HashMap<>();
+        table.getAttributes().forEach(attr -> attrMap.put(attr.getName(), attr.getColumnMetadata()));
         return attrMap;
     }
 

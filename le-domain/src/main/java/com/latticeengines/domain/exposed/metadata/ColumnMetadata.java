@@ -7,115 +7,126 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ColumnMetadata implements HasAttributeCustomizations {
     public static final String SUBCATEGORY_OTHER = "Other";
 
+    @JsonProperty("ColumnId")
     private String columnId;
+    @JsonProperty("ColumnName")
     private String columnName;
+    @JsonProperty("Description")
     private String description;
+    @JsonProperty("DataType")
     private String dataType;
+    @JsonProperty("JavaClass")
     private String javaClass;
+    @JsonProperty("DisplayName")
     private String displayName;
     private Category category;
+    @JsonProperty("Subcategory")
     private String subcategory;
+    @JsonProperty("DiscretizationStrategy")
+    private String discretizationStrategy;
+    @JsonProperty("MatchDestination")
+    private String matchDestination;
+
     private StatisticalType statisticalType;
     private FundamentalType fundamentalType;
     private String approvedUsage;
     private String tags;
-    private String discretizationStrategy;
-    private String matchDestination;
-    private boolean isPremium;
     private String decodeStrategy;
 
-    @JsonProperty("ObjectType")
-    private SchemaInterpretation objectType;
+    @JsonProperty("BitOffset")
+    private Integer bitOffset;
+    @JsonProperty("NumBits")
+    private Integer numBits;
+    @JsonProperty("PhysicalName")
+    private String physicalName;
+    @JsonProperty("stats")
+    private AttributeStats stats;
 
-    @JsonProperty("BucketForSegment")
-    private boolean bucketForSegment;
-
+    @JsonProperty("IsPremium")
+    private Boolean isPremium;
     @JsonProperty("CanModel")
-    private boolean canModel;
-
+    private Boolean canModel;
     @JsonProperty("CanEnrich")
-    private boolean canEnrich;
-
+    private Boolean canEnrich;
     @JsonProperty("CanInternalEnrich")
-    private boolean canInternalEnrich;
-
+    private Boolean canInternalEnrich;
     @JsonProperty("CanInsights")
-    private boolean canInsights;
-
+    private Boolean canInsights;
     @JsonProperty("CanBIS")
-    private boolean canBis;
+    private Boolean canBis;
 
     @JsonProperty("AttributeFlagsMap")
     private Map<AttributeUseCase, JsonNode> attributeFlagsMap;
 
-    @JsonProperty("ColumnId")
     public String getColumnId() {
         return columnId;
     }
 
-    @JsonProperty("ColumnId")
     public void setColumnId(String columnId) {
         this.columnId = columnId;
     }
 
-    @JsonProperty("ColumnName")
+    @JsonIgnore
+    public String getName() {
+        return getColumnId();
+    }
+
+    @Deprecated
     public String getColumnName() {
         return columnName;
     }
 
-    @JsonProperty("ColumnName")
+    @Deprecated
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
 
-    @JsonProperty("Description")
     public String getDescription() {
         return description;
     }
 
-    @JsonProperty("Description")
     public void setDescription(String description) {
         this.description = description;
     }
 
-    @JsonProperty("DataType")
+    @Deprecated
     public String getDataType() {
         return dataType;
     }
 
-    @JsonProperty("DataType")
+    @Deprecated
     public void setDataType(String dataType) {
         this.dataType = dataType;
     }
 
-    @JsonProperty("JavaClass")
     public String getJavaClass() {
         return javaClass;
     }
 
-    @JsonProperty("JavaClass")
     public void setJavaClass(String javaClass) {
         this.javaClass = javaClass;
     }
 
-    @JsonProperty("DisplayName")
     public String getDisplayName() {
         return displayName;
     }
 
-    @JsonProperty("DisplayName")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
@@ -150,82 +161,68 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         this.tags = tags;
     }
 
-    @JsonProperty("DiscretizationStrategy")
     public String getDiscretizationStrategy() {
         return discretizationStrategy;
     }
 
-    @JsonProperty("DiscretizationStrategy")
     public void setDiscretizationStrategy(String discretizationStrategy) {
         this.discretizationStrategy = discretizationStrategy;
     }
 
-    @JsonProperty("MatchDestination")
     public String getMatchDestination() {
         return matchDestination;
     }
 
-    @JsonProperty("MatchDestination")
     public void setMatchDestination(String matchDestination) {
         this.matchDestination = matchDestination;
     }
 
-    @JsonProperty("IsPremium")
-    public boolean isPremium() {
+    public Boolean isPremium() {
         return isPremium;
     }
 
-    @JsonProperty("IsPremium")
-    public void setIsPremium(boolean isPremium) {
+    public void setIsPremium(Boolean isPremium) {
         this.isPremium = isPremium;
     }
 
-    public boolean isCanModel() {
+    public Boolean isCanModel() {
         return canModel;
     }
 
-    public void setCanModel(boolean canModel) {
+    public void setCanModel(Boolean canModel) {
         this.canModel = canModel;
     }
 
-    public boolean isCanEnrich() {
+    public Boolean isCanEnrich() {
         return canEnrich;
     }
 
-    public void setCanEnrich(boolean canEnrich) {
+    public void setCanEnrich(Boolean canEnrich) {
         this.canEnrich = canEnrich;
     }
 
-    public boolean isCanInternalEnrich() {
+    public Boolean isCanInternalEnrich() {
         return canInternalEnrich;
     }
 
-    public void setCanInternalEnrich(boolean canInternalEnrich) {
+    public void setCanInternalEnrich(Boolean canInternalEnrich) {
         this.canInternalEnrich = canInternalEnrich;
     }
 
-    public boolean isCanInsights() {
+    public Boolean isCanInsights() {
         return canInsights;
     }
 
-    public void setCanInsights(boolean canInsights) {
+    public void setCanInsights(Boolean canInsights) {
         this.canInsights = canInsights;
     }
 
-    public boolean isCanBis() {
+    public Boolean isCanBis() {
         return canBis;
     }
 
-    public void setCanBis(boolean canBis) {
+    public void setCanBis(Boolean canBis) {
         this.canBis = canBis;
-    }
-
-    public boolean isBucketForSegment() {
-        return bucketForSegment;
-    }
-
-    public void setBucketForSegment(boolean bucketForSegment) {
-        this.bucketForSegment = bucketForSegment;
     }
 
     @JsonProperty("FundamentalType")
@@ -337,12 +334,10 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         this.category = category;
     }
 
-    @JsonProperty("Subcategory")
     public String getSubcategory() {
         return subcategory;
     }
 
-    @JsonProperty("Subcategory")
     public void setSubcategory(String subcategory) {
         this.subcategory = subcategory;
     }
@@ -381,14 +376,6 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         this.decodeStrategy = decodeStrategy;
     }
 
-    public SchemaInterpretation getObjectType() {
-        return objectType;
-    }
-
-    public void setObjectType(SchemaInterpretation objectType) {
-        this.objectType = objectType;
-    }
-
     @Override
     public Map<AttributeUseCase, JsonNode> getAttributeFlagsMap() {
         return attributeFlagsMap;
@@ -399,4 +386,35 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         this.attributeFlagsMap = attributeFlagsMap;
     }
 
+    public Integer getBitOffset() {
+        return bitOffset;
+    }
+
+    public void setBitOffset(Integer bitOffset) {
+        this.bitOffset = bitOffset;
+    }
+
+    public Integer getNumBits() {
+        return numBits;
+    }
+
+    public void setNumBits(Integer numBits) {
+        this.numBits = numBits;
+    }
+
+    public String getPhysicalName() {
+        return physicalName;
+    }
+
+    public void setPhysicalName(String physicalName) {
+        this.physicalName = physicalName;
+    }
+
+    public AttributeStats getStats() {
+        return stats;
+    }
+
+    public void setStats(AttributeStats stats) {
+        this.stats = stats;
+    }
 }

@@ -31,7 +31,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.latticeengines.common.exposed.graph.GraphNode;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
@@ -115,10 +114,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
     private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
-
-    @Transient
-    @JsonProperty("stats")
-    private AttributeStats stats;
 
     public Attribute() {
 
@@ -929,14 +924,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return true;
     }
 
-    public AttributeStats getStats() {
-        return stats;
-    }
-
-    public void setStats(AttributeStats stats) {
-        this.stats = stats;
-    }
-
     @Transient
     @JsonIgnore
     public ColumnMetadata getColumnMetadata() {
@@ -951,6 +938,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         metadata.setFundamentalType(FundamentalType.fromName(getFundamentalType()));
         metadata.setStatisticalType(StatisticalType.fromName(getStatisticalType()));
         metadata.setDiscretizationStrategy(getDisplayDiscretizationStrategy());
+        metadata.setBitOffset(getBitOffset());
+        metadata.setNumBits(getNumOfBits());
+        metadata.setPhysicalName(getPhysicalName());
         return metadata;
     }
 

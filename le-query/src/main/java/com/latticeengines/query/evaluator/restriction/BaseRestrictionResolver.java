@@ -2,7 +2,7 @@ package com.latticeengines.query.evaluator.restriction;
 
 
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -27,7 +27,7 @@ public abstract class BaseRestrictionResolver<T extends Restriction> {
         if (attrRepo == null) {
             attrRepo = getAttrRepo();
         }
-        Attribute attribute = attrRepo.getAttribute(attributeLookup);
+        ColumnMetadata attribute = attrRepo.getColumnMetadata(attributeLookup);
         return attribute.getStats();
     }
 

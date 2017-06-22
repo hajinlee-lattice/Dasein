@@ -124,7 +124,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             for (ColumnMetadata attr : enrichmentColumns) {
                 if (nonNullEnrichValueMap.containsKey(attr.getColumnName())) {
                     requiredEnrichmentMetadataList.add(attr);
-                    if (attr.isCanInternalEnrich()) {
+                    if (Boolean.TRUE.equals(attr.isCanInternalEnrich())) {
                         nonNullInternalEnrichValueMap.put(attr.getColumnName(),
                                 nonNullEnrichValueMap.get(attr.getColumnName()));
                     }

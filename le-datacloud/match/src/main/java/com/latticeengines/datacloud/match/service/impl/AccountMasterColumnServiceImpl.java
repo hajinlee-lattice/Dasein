@@ -92,11 +92,11 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
         savedAccountMasterColumn.setInternalEnrichment(columnMetadata.isCanInternalEnrich());
 
         ApprovedUsage approvedUsage = ApprovedUsage.NONE;
-        if (columnMetadata.isCanBis()) {
+        if (Boolean.TRUE.equals(columnMetadata.isCanBis())) {
             approvedUsage = ApprovedUsage.MODEL_ALLINSIGHTS;
-        } else if (columnMetadata.isCanInsights()) {
+        } else if (Boolean.TRUE.equals(columnMetadata.isCanInsights())) {
             approvedUsage = ApprovedUsage.MODEL_MODELINSIGHTS;
-        } else if (columnMetadata.isCanModel()) {
+        } else if (Boolean.TRUE.equals(columnMetadata.isCanModel())) {
             approvedUsage = ApprovedUsage.MODEL;
         }
         savedAccountMasterColumn.setApprovedUsage(approvedUsage);

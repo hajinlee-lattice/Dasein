@@ -177,11 +177,11 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     private void validateColumnMetadatas(String dataCloudVersion,
             List<ColumnMetadata> columnMetadatas) {
         for (ColumnMetadata columnMetadata : columnMetadatas) {
-            if (columnMetadata.isCanBis()
-                    && (!columnMetadata.isCanInsights() || !columnMetadata.isCanModel())) {
+            if (Boolean.TRUE.equals(columnMetadata.isCanBis())
+                    && (!Boolean.TRUE.equals(columnMetadata.isCanInsights()) || !Boolean.TRUE.equals(columnMetadata.isCanModel()))) {
                 throw new LedpException(LedpCode.LEDP_25026,
                         new String[] { columnMetadata.getDisplayName(), dataCloudVersion });
-            } else if (columnMetadata.isCanInsights() && !columnMetadata.isCanModel()) {
+            } else if (Boolean.TRUE.equals(columnMetadata.isCanInsights()) && !Boolean.TRUE.equals(columnMetadata.isCanModel())) {
                 throw new LedpException(LedpCode.LEDP_25026,
                         new String[] { columnMetadata.getDisplayName(), dataCloudVersion });
             }

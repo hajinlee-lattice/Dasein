@@ -1,6 +1,6 @@
 package com.latticeengines.query.evaluator.lookup;
 
-import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -21,8 +21,8 @@ public abstract class BaseLookupResolver<T extends Lookup> {
         this.repository = repository;
     }
 
-    Attribute getAttribute(AttributeLookup attributeLookup) {
-        return repository.getAttribute(attributeLookup);
+    ColumnMetadata getColumnMetadata(AttributeLookup attributeLookup) {
+        return repository.getColumnMetadata(attributeLookup);
     }
 
 }

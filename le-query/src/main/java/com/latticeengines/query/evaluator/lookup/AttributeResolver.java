@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -26,32 +26,32 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
     @SuppressWarnings("unchecked")
     @Override
     public List<ComparableExpression<String>> resolveForCompare(AttributeLookup lookup) {
-        Attribute attribute = getAttribute(lookup);
-        if (attribute == null) {
+        ColumnMetadata cm = getColumnMetadata(lookup);
+        if (cm == null) {
             throw new IllegalArgumentException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
         return Collections
-                .singletonList(Expressions.asComparable(resolveBucketRange(lookup.getEntity(), attribute, false)));
+                .singletonList(Expressions.asComparable(resolveBucketRange(lookup.getEntity(), cm, false)));
     }
 
     @Override
     public Expression<?> resolveForSelect(AttributeLookup lookup) {
-        Attribute attribute = getAttribute(lookup);
-        if (attribute == null) {
+        ColumnMetadata cm = getColumnMetadata(lookup);
+        if (cm == null) {
             throw new QueryEvaluationException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
-        return resolveBucketRange(lookup.getEntity(), attribute, true);
+        return resolveBucketRange(lookup.getEntity(), cm, true);
     }
 
-    private Expression<String> resolveBucketRange(BusinessEntity entity, Attribute attribute, boolean alias) {
-        AttributeStats stats = attribute.getStats();
+    private Expression<String> resolveBucketRange(BusinessEntity entity, ColumnMetadata cm, boolean alias) {
+        AttributeStats stats = cm.getStats();
         if (stats != null) {
-            Integer numBits = attribute.getNumOfBits();
+            Integer numBits = cm.getNumBits();
             if (numBits == null) {
-                return QueryUtils.getAttributePath(entity, attribute.getName());
+                return QueryUtils.getAttributePath(entity, cm.getName());
             } else {
-                String physicalColumnName = attribute.getPhysicalName();
-                Integer offset = attribute.getBitOffset();
+                String physicalColumnName = cm.getPhysicalName();
+                Integer offset = cm.getBitOffset();
                 if (offset == null) {
                     offset = 0;
                 }
@@ -61,7 +61,7 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
                             .stringTemplate("({0}&{1})>>{2}", QueryUtils.getAttributePath(entity, physicalColumnName), //
                                     bitMask, //
                                     offset)
-                            .as(Expressions.stringPath(attribute.getName()));
+                            .as(Expressions.stringPath(cm.getName()));
                 } else {
                     return Expressions.stringTemplate("({0}&{1})>>{2}",
                             QueryUtils.getAttributePath(entity, physicalColumnName), //
@@ -70,7 +70,7 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
                 }
             }
         } else {
-            return QueryUtils.getAttributePath(entity, attribute.getName());
+            return QueryUtils.getAttributePath(entity, cm.getName());
         }
     }
 

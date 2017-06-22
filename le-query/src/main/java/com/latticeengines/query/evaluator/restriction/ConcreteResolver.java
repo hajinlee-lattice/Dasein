@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -72,8 +73,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         Lookup rhs = restriction.getRhs();
         if ((lhs instanceof AttributeLookup) && !(rhs instanceof AttributeLookup)) {
             AttributeLookup attrLookup = (AttributeLookup) lhs;
-            Attribute attribute = getAttrRepo().getAttribute(attrLookup);
-            if (attribute.getBitOffset() != null) {
+            ColumnMetadata cm = getAttrRepo().getColumnMetadata(attrLookup);
+            if (cm.getBitOffset() != null) {
                 // lhs is bucketed attribute, but rhs is not
                 if (rhs instanceof ValueLookup) {
                     ValueLookup valueLookup = (ValueLookup) rhs;
