@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import static com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils.isCEAttr;
+import static com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils.isEAttr;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,7 +32,7 @@ public class FilterBucketed extends TypesafeDataFlowBuilder<FilterBucketedParame
 
         List<String> sourceFieldNames = source.getFieldNames();
         Set<String> originalFields = new HashSet<>(parameters.originalAttrs);
-        sourceFieldNames.removeIf(f -> !originalFields.contains(f) && !isCEAttr(f));
+        sourceFieldNames.removeIf(f -> !originalFields.contains(f) || isEAttr(f));
 
         return source.retain(new FieldList(sourceFieldNames));
     }
