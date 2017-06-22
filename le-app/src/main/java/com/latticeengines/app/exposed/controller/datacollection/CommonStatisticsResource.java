@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "statistics", description = "Statistics of entities in data collection")
 @RestController
 @RequestMapping("/datacollection/statistics")
-public class DataCollectionStatsResource {
+public class CommonStatisticsResource {
 
     @Autowired
     private DataLakeService dataLakeService;

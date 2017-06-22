@@ -19,19 +19,19 @@ import io.swagger.annotations.Api;
 @Api(value = "Data Collection Segments", description = "REST resource for segments")
 @RestController
 @RequestMapping("/datacollection/segments")
-public class DataCollectionSegmentResource {
+public class MetadataSegmentResource {
 
     @Autowired
     private MetadataSegmentService metadataSegmentService;
 
-    @RequestMapping(value = "/all", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments() {
         return metadataSegmentService.getSegments();
     }
 
-    @RequestMapping(value = "/name/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get segment with name")
     public MetadataSegment getSegmentByName(@PathVariable String segmentName) {

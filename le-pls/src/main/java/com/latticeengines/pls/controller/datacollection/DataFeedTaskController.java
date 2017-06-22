@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "datafile", description = "REST resource for retrieving data files")
 @RestController
 @RequestMapping(value = "")
-public class DataCollectionDataFeedTaskController {
+public class DataFeedTaskController {
 
     @Autowired
     private DataFeedTaskManagerService dataFeedTaskManagerService;

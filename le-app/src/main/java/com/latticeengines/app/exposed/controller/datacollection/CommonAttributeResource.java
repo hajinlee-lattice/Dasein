@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -20,13 +19,10 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "metadata", description = "Common REST resource for attributes")
 @RestController
 @RequestMapping("/datacollection/attributes")
-public class DataCollectionAttrResource {
+public class CommonAttributeResource {
 
     @Autowired
     private DataLakeService dataLakeService;
-
-    @Autowired
-    private AttributeCustomizationService attributeCustomizationService;
 
     @RequestMapping(value = "/count", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

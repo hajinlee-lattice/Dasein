@@ -19,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/datacollection/datafeeds")
 @PreAuthorize("hasRole('View_PLS_Data')")
-public class DataCollectionDataFeedController {
+public class DataFeedController {
 
     @Autowired
     private ConsolidateAndPublishWorkflowSubmitter consolidateAndPublishWorkflowSubmitter;
