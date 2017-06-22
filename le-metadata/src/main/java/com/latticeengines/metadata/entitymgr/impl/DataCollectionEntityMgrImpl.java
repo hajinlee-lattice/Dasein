@@ -102,7 +102,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return segment;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public DataCollection getDataCollection(String name) {
         DataCollection dataCollection;
