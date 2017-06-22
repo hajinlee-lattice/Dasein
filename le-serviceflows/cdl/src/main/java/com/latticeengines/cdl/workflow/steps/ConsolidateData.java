@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -215,14 +216,16 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         Map<String, SourceTable> baseTables;
         TargetTable targetTable;
         TransformationStepConfig step3 = new TransformationStepConfig();
-        Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
-        if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
-            baseSources = Collections.singletonList(inputMasterTableName);
-            baseTables = new HashMap<>();
-            SourceTable sourceMasterTable = new SourceTable(inputMasterTableName, customerSpace);
-            baseTables.put(inputMasterTableName, sourceMasterTable);
-            step3.setBaseSources(baseSources);
-            step3.setBaseTables(baseTables);
+        if (StringUtils.isNotBlank(inputMasterTableName)) {
+            Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
+            if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
+                baseSources = Collections.singletonList(inputMasterTableName);
+                baseTables = new HashMap<>();
+                SourceTable sourceMasterTable = new SourceTable(inputMasterTableName, customerSpace);
+                baseTables.put(inputMasterTableName, sourceMasterTable);
+                step3.setBaseSources(baseSources);
+                step3.setBaseTables(baseTables);
+            }
         }
         step3.setInputSteps(Collections.singletonList(matchStep));
         step3.setTransformer("consolidateDataTransformer");
