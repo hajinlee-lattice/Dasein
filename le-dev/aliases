@@ -42,7 +42,7 @@ alias secdpl='mvn -DskipTests -Djavax.net.ssl.trustStore=certificates/laca-ldap.
 alias scheddpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-scheduler-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
 alias perfdpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-perf-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
 
-alias msbld='dirs -c && pushd $WSHOME/le-microservice && mvn -T6 -DskipTests clean package && popd'
+alias msbld='dirs -c && pushd $WSHOME/le-microservice && mvn -T8 -DskipTests clean package && popd'
 
 alias swlibdpllibs='bin/deployToSwlib.sh -o install -n prospectdiscovery -g com.latticeengines -a le-serviceflows-prospectdiscovery -i com.latticeengines.prospectdiscovery.Initializer -f ../le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-*-shaded.jar && bin/deployToSwlib.sh -o install -n leadprioritization -g com.latticeengines -a le-serviceflows-leadprioritization -i com.latticeengines.leadprioritization.Initializer -f ../le-serviceflows/leadprioritization/target/le-serviceflows-leadprioritization-*-shaded.jar && bin/deployToSwlib.sh -o install -n cdl -g com.latticeengines -a le-serviceflows-cdl -i com.latticeengines.cdl.Initializer -f ../le-serviceflows/cdl/target/le-serviceflows-cdl-*-shaded.jar && bin/deployToSwlib.sh -o install -n datacloud -g com.latticeengines -a le-serviceflows-datacloud -i com.latticeengines.datacloud.Initializer -f ../le-serviceflows/datacloud/target/le-serviceflows-datacloud-*-shaded.jar'
 alias swlibdpl='dirs -c && pushd $WSHOME/le-swlib && hadoop fs -rm -r /app/swlib || true && swlibdpllibs && popd'

@@ -1,5 +1,6 @@
 import calendar
 from collections import OrderedDict
+from pandas import DataFrame
 import logging
 import time
 
@@ -26,13 +27,21 @@ class ModelDetailGenerator(State):
         result["LookupID"] = self.lookupID()
         result["ModelID"] = mediator.modelId
         # Leads
-        result["TotalLeads"] = mediator.allDataPreTransform.shape[0]
-        result["TestingLeads"] = mediator.data.shape[0]
-        result["TrainingLeads"] = result["TotalLeads"] - result["TestingLeads"]
+        allData = mediator.allDataPostTransform
+        testData = mediator.data
+        result["TestingLeads"] = testData.shape[0]
+        if '__TRAINING__' in allData.columns.values:
+            trainingData = allData[allData['__TRAINING__'] == 1]
+            allData = DataFrame.append(trainingData, testData)
+            result["TrainingLeads"] = trainingData.shape[0]
+            result["TotalLeads"] = result["TrainingLeads"] + result["TestingLeads"]
+        else:
+            result["TotalLeads"] = allData.shape[0]
+            result["TrainingLeads"] = result["TotalLeads"] - result["TestingLeads"]
 
         # Conversions
-        result["TotalConversions"] = int(mediator.allDataPreTransform[schema["target"]].sum())
-        result["TestingConversions"] = int(mediator.data[schema["target"]].sum())
+        result["TotalConversions"] = int(allData[schema["target"]].sum())
+        result["TestingConversions"] = int(testData[schema["target"]].sum())
         result["TrainingConversions"] = result["TotalConversions"] - result["TestingConversions"]
         result["ModelType"] = mediator.modelType.split(":")[0]
         try:

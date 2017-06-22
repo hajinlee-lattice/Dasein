@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
@@ -147,14 +146,12 @@ public class StatsCubeUtils {
         bucket.setRange(Pair.of(min, max));
     }
 
-    public static StatisticsContainer constructStatsContainer(StatsCube statsCube,
+    public static Statistics constructStatistics(StatsCube statsCube,
             List<Pair<BusinessEntity, List<ColumnMetadata>>> metadataPairs) {
+        Statistics statistics = new Statistics();
         Map<String, Pair<BusinessEntity, ColumnMetadata>> cmMap = convertToMap(metadataPairs);
 
-        StatisticsContainer statsContainer = new StatisticsContainer();
-
         Map<String, AttributeStats> attrStatsMap = statsCube.getStatistics();
-        Statistics statistics = new Statistics();
         Map<BusinessEntity, Long> counts = new HashMap<>();
         counts.put(BusinessEntity.Account, statsCube.getCount());
         statistics.setCounts(counts);
@@ -184,9 +181,8 @@ public class StatsCubeUtils {
             SubcategoryStatistics subcategoryStatistics = statistics.getCategory(category).getSubcategory(subCategory);
             subcategoryStatistics.putAttrStats(attrLookup, statsInCube);
         }
-        statsContainer.setStatistics(statistics);
 
-        return statsContainer;
+        return statistics;
     }
 
     private static Map<String, Pair<BusinessEntity, ColumnMetadata>> convertToMap(

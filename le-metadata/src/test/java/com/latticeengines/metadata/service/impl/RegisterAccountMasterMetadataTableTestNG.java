@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -95,6 +96,7 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
         FileUtils.deleteQuietly(file);
         StatisticsContainer container = new StatisticsContainer();
         container.setStatistics(statistics);
+        container.setName(NamingUtils.timestamp("AMStats"));
         dataCollectionService.upsertTable(customerSpace, collection.getName(), tableName, TableRoleInCollection.AccountMaster);
         dataCollectionService.addStats(customerSpace, collection.getName(), container);
     }

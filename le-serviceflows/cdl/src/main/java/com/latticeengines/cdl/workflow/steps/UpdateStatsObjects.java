@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
@@ -96,7 +97,9 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         );
         // get StatsCube from statsTable
         StatsCube statsCube = getStatsCube(statsTable);
-        StatisticsContainer statsContainer = StatsCubeUtils.constructStatsContainer(statsCube, mdPairs);
+        Statistics statistics = StatsCubeUtils.constructStatistics(statsCube, mdPairs);
+        StatisticsContainer statsContainer = new StatisticsContainer();
+        statsContainer.setStatistics(statistics);
         statsContainer.setName(statsTable.getName());
         return statsContainer;
     }

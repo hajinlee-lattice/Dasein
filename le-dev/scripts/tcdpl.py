@@ -192,13 +192,15 @@ if __name__ == '__main__':
             time.sleep(1)
 
     if args.command in ('deploy', 'run'):
-        if args.apps and args.modules:
-            apps = args.apps.split(',')
-            modules = args.modules.split(',')
+        if args.apps or args.modules:
+            apps = args.apps.split(',') if args.apps else []
+            modules = args.modules.split(',') if args.modules else []
         else:
             print 'using preset ' + args.preset
             apps = PRESETS[args.preset]['apps']
             modules = PRESETS[args.preset]['modules']
+        if len(modules) > 0 and 'microservice' not in apps:
+            apps.append('microservice')
 
         print 'apps = %s' % apps
         print 'modules = %s\n' % modules
