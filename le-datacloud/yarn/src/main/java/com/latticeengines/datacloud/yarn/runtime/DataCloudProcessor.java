@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +41,11 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
     @Autowired
     private ProcessorContext initialProcessorContext;
 
+    @Resource(name = "bulkMatchProcessorExecutor")
     private BulkMatchProcessorExecutor bulkMatchProcessorExecutor;
+
+    @Resource(name = "bulkMatchProcessorAsyncExecutor")
+    private BulkMatchProcessorExecutor bulkMatchProcessorAsyncExecutor;
 
     @Override
     public String process(DataCloudJobConfiguration jobConfiguration) throws Exception {
@@ -49,13 +55,13 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
             initialProcessorContext.initialize(this, jobConfiguration);
             if (initialProcessorContext.isUseRemoteDnB()) {
-                bulkMatchProcessorExecutor = appContext.getBean(SYNC_PROCESSOR, BulkMatchProcessorExecutor.class);
+                bulkMatchProcessorAsyncExecutor.execute(initialProcessorContext);
+                bulkMatchProcessorAsyncExecutor.finalize(initialProcessorContext);
+
             } else {
-                bulkMatchProcessorExecutor = appContext.getBean(ASYNC_PROCESSOR, BulkMatchProcessorExecutor.class);
+                bulkMatchProcessorExecutor.execute(initialProcessorContext);
+                bulkMatchProcessorExecutor.finalize(initialProcessorContext);
             }
-            log.info("Loaded " + bulkMatchProcessorExecutor.getClass().getSimpleName() + " as executor.");
-            bulkMatchProcessorExecutor.execute(initialProcessorContext);
-            bulkMatchProcessorExecutor.finalize(initialProcessorContext);
 
         } catch (Exception e) {
             String rootOperationUid = jobConfiguration.getRootOperationUid();

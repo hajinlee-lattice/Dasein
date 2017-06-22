@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import scala.concurrent.Future;
 
 @Component("bulkMatchProcessorAsyncExecutor")
-@Scope("prototype")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
 
     private static final int NUM_10K = 10_000;

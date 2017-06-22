@@ -22,7 +22,6 @@ import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
 @Component("bulkMatchProcessorExecutor")
-@Scope("prototype")
 public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
 
     private static final Log log = LogFactory.getLog(BulkMatchProcessorExecutorImpl.class);
