@@ -77,12 +77,21 @@ public class TableResourceHelper {
         return true;
     }
 
-    public Boolean deleteTable(String customerSpace, //
+    public Boolean deleteTableAndCleanup(String customerSpace, //
             String tableName, //
             HttpServletRequest request) {
-        log.info(String.format("deleteTable(%s)", tableName));
+        log.info(String.format("deleteTableAndCleanup(%s)", tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
-        mdService.deleteTable(space, tableName);
+        mdService.deleteTableAndCleanup(space, tableName);
+        return true;
+    }
+
+    public Boolean deleteImportTableAndCleanup(String customerSpace, //
+            String tableName, //
+            HttpServletRequest request) {
+        log.info(String.format("deleteImportTableAndCleanup(%s)", tableName));
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        mdService.deleteImportTableAndCleanup(space, tableName);
         return true;
     }
 
@@ -109,7 +118,8 @@ public class TableResourceHelper {
             for (Map.Entry<String, Set<AnnotationValidationError>> entry : validationErrors.entrySet()) {
 
                 for (AnnotationValidationError error : entry.getValue()) {
-                    errors.add(String.format("Error with field %s for column %s.", error.getFieldName(), entry.getKey()));
+                    errors.add(
+                            String.format("Error with field %s for column %s.", error.getFieldName(), entry.getKey()));
                 }
 
             }
@@ -122,7 +132,7 @@ public class TableResourceHelper {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         List<Table> tables = mdService.getTables(space);
         for (Table table : tables) {
-            mdService.deleteTable(space, table.getName());
+            mdService.deleteTableAndCleanup(space, table.getName());
         }
         List<Table> importTables = mdService.getImportTables(space);
         for (Table table : importTables) {
@@ -144,7 +154,7 @@ public class TableResourceHelper {
         }
         return true;
     }
-    
+
     public void setStorageMechanism(String customerSpace, String tableName, StorageMechanism storageMechanism) {
         mdService.setStorageMechanism(CustomerSpace.parse(customerSpace), tableName, storageMechanism);
     }

@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -125,6 +126,23 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             if (hiveEnabled) {
                 hiveTableDao.deleteIfExists(entity);
             }
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void deleteTableAndCleanupByName(String name) {
+        final Table entity = findByName(name);
+        if (entity != null) {
+            List<String> extractPaths = ExtractUtils.getExtractPaths(yarnConfiguration, entity);
+            deleteByName(name);
+            extractPaths.forEach(p -> {
+                try {
+                    HdfsUtils.rmdir(yarnConfiguration, p);
+                } catch (IOException e) {
+                    log.error(String.format("Failed to delete extract %s", p));
+                }
+            });
         }
     }
 

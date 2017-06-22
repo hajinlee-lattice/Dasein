@@ -40,7 +40,7 @@ public class MetadataProvisioningServiceImpl implements MetadataProvisioningServ
         try {
             ClassLoader classLoader = getClass().getClassLoader();
             InputStream tableRegistryStream = classLoader.getResourceAsStream("Tables/tables.json");
-            
+
             String fileContents = StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
             ObjectMapper mapper = new ObjectMapper();
             JsonNode json;
@@ -59,13 +59,13 @@ public class MetadataProvisioningServiceImpl implements MetadataProvisioningServ
 
             for (JsonNode sourceType : sourceTypes) {
                 String s = sourceType.get("name").textValue();
-                
+
                 JsonNode tables = sourceType.get("tables");
-                
+
                 if (!tables.isArray()) {
                     throw new RuntimeException("tables element must be an array.");
                 }
-                
+
                 for (JsonNode jsonTable : tables) {
                     String path = String.format("Tables/%s/%s.json", s, jsonTable.get("name").textValue());
                     InputStream is = classLoader.getResourceAsStream(path);
@@ -90,7 +90,7 @@ public class MetadataProvisioningServiceImpl implements MetadataProvisioningServ
         try {
             List<Table> tables = mdService.getTables(customerSpace);
             for (Table table : tables) {
-                mdService.deleteTable(customerSpace, table.getName());
+                mdService.deleteImportTableAndCleanup(customerSpace, table.getName());
             }
         } catch (Exception e) {
             log.error(e.getMessage());

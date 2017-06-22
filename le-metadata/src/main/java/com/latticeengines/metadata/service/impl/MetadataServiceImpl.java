@@ -79,20 +79,20 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void deleteTable(CustomerSpace customerSpace, final String tableName) {
+    public void deleteTableAndCleanup(CustomerSpace customerSpace, final String tableName) {
         DatabaseUtils.retry("deleteTable", new Closure() {
             @Override
             public void execute(Object input) {
-                tableEntityMgr.deleteByName(tableName);
+                tableEntityMgr.deleteTableAndCleanupByName(tableName);
             }
         });
     }
 
     @Override
-    public void deleteImportTable(CustomerSpace customerSpace, String tableName) {
+    public void deleteImportTableAndCleanup(CustomerSpace customerSpace, String tableName) {
         tableTypeHolder.setTableType(TableType.IMPORTTABLE);
         try {
-            deleteTable(customerSpace, tableName);
+            deleteTableAndCleanup(customerSpace, tableName);
         } finally {
             tableTypeHolder.setTableType(TableType.DATATABLE);
         }

@@ -74,11 +74,11 @@ public class TableResource {
 
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Delete table")
+    @ApiOperation(value = "Delete table and cleanup data dir")
     public Boolean deleteTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
             HttpServletRequest request) {
-        return tableResourceHelper.deleteTable(customerSpace, tableName, request);
+        return tableResourceHelper.deleteTableAndCleanup(customerSpace, tableName, request);
     }
 
     @RequestMapping(value = "/tables/{tableName}/clone", method = RequestMethod.POST, headers = "Accept=application/json")

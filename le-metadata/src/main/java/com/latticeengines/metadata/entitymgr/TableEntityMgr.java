@@ -34,4 +34,6 @@ public interface TableEntityMgr {
     }
 
     void addExtract(Table table, Extract extract);
+
+    void deleteTableAndCleanupByName(String name);
 }

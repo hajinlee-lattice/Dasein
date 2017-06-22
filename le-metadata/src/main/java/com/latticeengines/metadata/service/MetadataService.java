@@ -18,7 +18,7 @@ public interface MetadataService {
 
     void createTable(CustomerSpace customerSpace, Table table);
 
-    void deleteTable(CustomerSpace customerSpace, String name);
+    void deleteTableAndCleanup(CustomerSpace customerSpace, String name);
 
     void updateTable(CustomerSpace customerSpace, Table table);
 
@@ -27,13 +27,13 @@ public interface MetadataService {
 
     List<Table> getImportTables(CustomerSpace customerSpace);
 
-    void deleteImportTable(CustomerSpace customerSpace, String tableName);
+    void deleteImportTableAndCleanup(CustomerSpace customerSpace, String tableName);
 
     Table getImportTable(CustomerSpace customerSpace, String name);
 
     Table cloneTable(CustomerSpace customerSpace, String tableName);
 
     Table copyTable(CustomerSpace customerSpace, CustomerSpace targetCustomerSpace, String tableName);
-    
+
     void setStorageMechanism(CustomerSpace customerSpace, String tableName, StorageMechanism storageMechanism);
 }

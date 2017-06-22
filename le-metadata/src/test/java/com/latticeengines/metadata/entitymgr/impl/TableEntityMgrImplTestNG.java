@@ -1,10 +1,13 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +18,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
@@ -37,7 +42,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void tearDown() {
-        metadataService.deleteTable(CustomerSpace.parse(customerSpace2), TABLE2);
+        metadataService.deleteTableAndCleanup(CustomerSpace.parse(customerSpace2), TABLE2);
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace2));
         Table t = tableEntityMgr.findByName(TABLE2);
         assertNull(t);
@@ -118,14 +123,26 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrs.get(3).getDataSource().get(0), "DerivedColumns");
     }
 
-    @Test(groups = "functional")
-    public void createTags() {
+    @Test(groups = "functional", dataProvider = "tableProvider", dependsOnMethods = { "findAll", "findByName" })
+    public void deleteTableAndCleanup(String customerSpace, String tableName) throws IOException {
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
 
+        Table table = tableEntityMgr.findByName(tableName);
+        String extractPath = "/tmp/data.txt";
+        HdfsUtils.writeToFile(yarnConfiguration, extractPath, "test data\ntest data");
+        Extract e1 = new Extract();
+        e1.setName("extract");
+        e1.setPath("/tmp/data.txt");
+        e1.setExtractionTimestamp(new Date().getTime());
+        e1.setProcessedRecords(2L);
+        tableEntityMgr.addExtract(table, e1);
+        tableEntityMgr.deleteTableAndCleanupByName(table.getName());
+        assertFalse(HdfsUtils.fileExists(yarnConfiguration, extractPath));
     }
 
     @DataProvider(name = "tableProvider")
     public Object[][] tableProvider() {
-        return new Object[][] { {customerSpace1, TABLE1 }, {customerSpace2, TABLE1 }, };
+        return new Object[][] { { customerSpace1, TABLE1 }, { customerSpace2, TABLE1 }, };
     }
 
 }

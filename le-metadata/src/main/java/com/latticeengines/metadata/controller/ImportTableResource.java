@@ -30,7 +30,7 @@ public class ImportTableResource {
 
     @Autowired
     private TableResourceHelper tableResourceHelper;
-    
+
     @RequestMapping(value = "/importtables", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
@@ -41,14 +41,16 @@ public class ImportTableResource {
     @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
-    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName, HttpServletRequest request) {
+    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName,
+            HttpServletRequest request) {
         return tableResourceHelper.getTable(customerSpace, tableName, request);
     }
 
     @RequestMapping(value = "/importtables/{tableName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table metadata by name")
-    public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName, HttpServletRequest request) {
+    public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName,
+            HttpServletRequest request) {
         return tableResourceHelper.getTableMetadata(customerSpace, tableName, request);
     }
 
@@ -78,7 +80,7 @@ public class ImportTableResource {
     public Boolean deleteTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
             HttpServletRequest request) {
-        return tableResourceHelper.deleteTable(customerSpace, tableName, request);
+        return tableResourceHelper.deleteImportTableAndCleanup(customerSpace, tableName, request);
     }
 
 }
