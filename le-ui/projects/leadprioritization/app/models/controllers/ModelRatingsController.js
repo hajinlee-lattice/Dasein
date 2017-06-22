@@ -59,10 +59,6 @@ angular.module('lp.models.ratings', [
         vm.chartNotUpdated = true;
 
         renderChart();
-
-
-        console.log(vm.barColors.childNodes[0]);
-
     }
 
 

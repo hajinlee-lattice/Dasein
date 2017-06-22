@@ -29,15 +29,15 @@
         <div class="row" ng-if="vm.models.length > 0">
             <ul class="twelve columns model-list">
                 <li 
-                        data-model-list-tile-widget
-                        class="model"
-                        ng-repeat="
-                            model in vm.header.filter.filtered |
-                            filter: vm.query |
-                            orderBy: vm.header.sort.order + vm.header.sort.property |
-                            startFrom: (current - 1) * pagesize |
-                            limitTo: pagesize" 
-                        data="model">
+                    data-model-list-tile-widget
+                    class="model"
+                    ng-repeat="
+                        model in vm.header.filter.filtered |
+                        filter: vm.query |
+                        orderBy: vm.header.sort.order + vm.header.sort.property |
+                        startFrom: (current - 1) * pagesize |
+                        limitTo: pagesize" 
+                    data="model">
                 </li>
             </ul>
         </div>

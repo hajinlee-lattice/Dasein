@@ -36,7 +36,7 @@ angular.module('mainApp.models.remodel', [
     });
 
     vm.init = function($q) {
-        console.log(!vm.newModelName, vm.newModelName.length > 50, vm.remodeling, vm.disableRemodelOnError);
+        
     }
     vm.init();
 
