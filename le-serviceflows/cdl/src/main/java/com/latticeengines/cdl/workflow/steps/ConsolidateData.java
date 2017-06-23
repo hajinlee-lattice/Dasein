@@ -99,7 +99,6 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, diffTable);
         }
         putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);
-        putObjectInContext(CONSOLIDATE_DOING_PUBLISH, isBucketing());
     }
 
     private void initializeConfiguration() {

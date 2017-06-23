@@ -157,7 +157,10 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifyFirstImport")
     public void importSecondData() {
-
+        log.info("Start second consolidating data ...");
+        ApplicationId appId = dataFeedProxy.consolidate(DATA_FEED_NAME);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importSecondData")

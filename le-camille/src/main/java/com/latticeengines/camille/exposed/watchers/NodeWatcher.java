@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.watchers;
 
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -16,6 +17,16 @@ public class NodeWatcher {
 
     private static final ConcurrentMap<String, NodeCache> watchers = new ConcurrentHashMap<>();
     private static Log log = LogFactory.getLog(NodeWatcher.class);
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> watchers.values().forEach(cache -> {
+            try {
+                cache.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        })));
+    }
 
     public static void registerWatcher(String watcherName) {
         if (!watchers.containsKey(watcherName)) {
@@ -40,6 +51,14 @@ public class NodeWatcher {
             throw new RuntimeException("Failed to watcher named " + watcherName);
         }
         nodeCache.getListenable().addListener(listener);
+    }
+
+    public static Path getWatcherPath(String watcherName) {
+        if (watchers.containsKey(watcherName)) {
+            return PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), null, watcherName);
+        } else {
+            return null;
+        }
     }
 
 }

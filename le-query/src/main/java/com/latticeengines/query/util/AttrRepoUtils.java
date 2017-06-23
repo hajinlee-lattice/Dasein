@@ -1,15 +1,17 @@
 package com.latticeengines.query.util;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ZK_WATCHER_AM_UPDATE;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -28,7 +30,7 @@ public class AttrRepoUtils {
     private static final String AM_REPO = "AMCollection";
 
     private ColumnMetadataProxy columnMetadataProxy;
-    private LoadingCache<String, AttributeRepository> amAttrRepoCache;
+    private Cache<String, AttributeRepository> amAttrRepoCache;
 
     @Autowired
     public AttrRepoUtils(ColumnMetadataProxy columnMetadataProxy) {
@@ -44,11 +46,7 @@ public class AttrRepoUtils {
         if (amAttrRepoCache == null) {
             initLoadingCache();
         }
-        try {
-            return amAttrRepoCache.get(AM_REPO);
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Failed to load am attr repo from cache.", e);
-        }
+        return amAttrRepoCache.getIfPresent(AM_REPO);
     }
 
     public ColumnMetadata getAttribute(AttributeRepository attrRepo, AttributeLookup attributeLookup) {
@@ -101,22 +99,28 @@ public class AttrRepoUtils {
     }
 
     private void initLoadingCache() {
-        amAttrRepoCache = CacheBuilder.newBuilder().maximumSize(1).refreshAfterWrite(30, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, AttributeRepository>() {
-                    @Override
-                    public AttributeRepository load(String repoId) throws Exception {
-                        AttributeRepository attrRepo;
-                        try {
-                            attrRepo = columnMetadataProxy.getAttrRepo();
-                        } catch (Exception e) {
-                            throw new RuntimeException("Failed to load am attr repo via proxy.", e);
-                        }
-                        if (attrRepo == null) {
-                            throw new RuntimeException("Failed to load am attr repo via proxy.");
-                        }
-                        return attrRepo;
-                    }
-                });
+        amAttrRepoCache = CacheBuilder.newBuilder().maximumSize(1).build();
+        amAttrRepoCache.put(AM_REPO, columnMetadataProxy.getAttrRepo());
+        // watch on a zk node that will be updated by data cloud whe new am is released.
+        NodeWatcher.registerWatcher(ZK_WATCHER_AM_UPDATE);
+        NodeWatcher.registerListener(ZK_WATCHER_AM_UPDATE, new AMUpdateWatcher(amAttrRepoCache, columnMetadataProxy));
+    }
+
+    private static class AMUpdateWatcher implements NodeCacheListener {
+        private static final Log log = LogFactory.getLog(AMUpdateWatcher.class);
+        private final Cache<String, AttributeRepository> amAttrRepoCache;
+        private ColumnMetadataProxy columnMetadataProxy;
+
+        AMUpdateWatcher(Cache<String, AttributeRepository> amAttrRepoCache, ColumnMetadataProxy columnMetadataProxy) {
+            this.amAttrRepoCache = amAttrRepoCache;
+            this.columnMetadataProxy = columnMetadataProxy;
+        }
+
+        @Override
+        public void nodeChanged() throws Exception {
+            log.info("am update zk watch changed, updating am attr repo cache.");
+            amAttrRepoCache.put(AM_REPO, columnMetadataProxy.getAttrRepo());
+        }
     }
 
 }

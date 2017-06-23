@@ -54,4 +54,6 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_SORTER = "sourceSorter";
     public static final String TRANSFORMER_COPIER = "sourceCopier";
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
+
+    public static final String ZK_WATCHER_AM_UPDATE = "AMUpdateTime";
 }
