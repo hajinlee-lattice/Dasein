@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.api.SetDataBuilder;
+import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
@@ -177,5 +178,9 @@ public class Camille {
 
     public InterProcessReadWriteLock createLock(String lockPath) {
         return new InterProcessReadWriteLock(client, lockPath);
+    }
+
+    public NodeCache createNodeCache(String nodePath) {
+        return new NodeCache(client, nodePath);
     }
 }

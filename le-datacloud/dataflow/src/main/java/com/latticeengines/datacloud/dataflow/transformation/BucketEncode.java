@@ -144,11 +144,19 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                         if (StringUtils.isBlank(srcAttr)) {
                             bktAttr.setSourceAttr(srcAttr);
                         }
+                    } else if (!inputFieldSet.contains(decodeStrategy.getEncodedColumn())) {
+                        // not even have the encoded column, remove it from encAttrs
+                        log.info("Skip bkt attr " + bktAttr.getNominalAttr());
+                        continue;
                     }
                 }
                 encodedAttr2.addBktAttr(bktAttr);
             }
-            encodedAttrs2.add(encodedAttr2);
+            if (encodedAttr2.getBktAttrs() != null && !encodedAttr2.getBktAttrs().isEmpty()) {
+                // empty encoded attr
+                log.info("Skip enc attr " + encAttr.getEncAttr());
+                encodedAttrs2.add(encodedAttr2);
+            }
         }
         return encodedAttrs2;
     }

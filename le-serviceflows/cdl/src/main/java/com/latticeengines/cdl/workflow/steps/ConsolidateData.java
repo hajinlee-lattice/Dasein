@@ -93,6 +93,9 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         if (isBucketing()) {
             Table diffTable = metadataProxy.getTable(customerSpace.toString(),
                     TableUtils.getFullTableName(consolidatedTablePrefix, pipelineVersion));
+            if (diffTable == null) {
+                throw new RuntimeException("Diff table has not been created.");
+            }
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, diffTable);
         }
         putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);

@@ -1,0 +1,45 @@
+package com.latticeengines.camille.exposed.watchers;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.curator.framework.recipes.cache.NodeCache;
+import org.apache.curator.framework.recipes.cache.NodeCacheListener;
+
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.Path;
+
+public class NodeWatcher {
+
+    private static final ConcurrentMap<String, NodeCache> watchers = new ConcurrentHashMap<>();
+    private static Log log = LogFactory.getLog(NodeWatcher.class);
+
+    public static void registerWatcher(String watcherName) {
+        if (!watchers.containsKey(watcherName)) {
+            Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), null, watcherName);
+            NodeCache cache = CamilleEnvironment.getCamille().createNodeCache(lockPath.toString());
+            try {
+                cache.start();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to register watcher at " + lockPath, e);
+            }
+            watchers.putIfAbsent(watcherName, cache);
+            log.info("Registered a new node cache " + watcherName + " at " + lockPath);
+        }
+    }
+
+    public static void registerListener(String watcherName, NodeCacheListener listener) {
+        if (!watchers.containsKey(watcherName)) {
+            registerWatcher(watcherName);
+        }
+        NodeCache nodeCache = watchers.get(watcherName);
+        if (nodeCache == null) {
+            throw new RuntimeException("Failed to watcher named " + watcherName);
+        }
+        nodeCache.getListenable().addListener(listener);
+    }
+
+}
