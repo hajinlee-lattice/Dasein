@@ -104,11 +104,6 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
 
     private Tuple setupIntervalBucketTuple(BufferCall bufferCall, List<Number> boundaries) {
         IntervalBucket bucket = new IntervalBucket();
-        boundaries.sort((o1, o2) -> {
-            Double d1 = o1.doubleValue();
-            Double d2 = o2.doubleValue();
-            return d1.compareTo(d2);
-        });
         bucket.setBoundaries(boundaries);
 
         Tuple result = Tuple.size(getFieldDeclaration().size());
@@ -149,8 +144,10 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
                 distinctValues.add(dVal);
             }
         }
+        List<Double> sorted = new ArrayList<>(distinctValues);
+        Collections.sort(sorted);
         List<Number> boundaries = new ArrayList<>();
-        for (Double dVal : distinctValues) {
+        for (Double dVal : sorted) {
             boundaries.add(numberTransform(dVal, cls));
         }
         return boundaries;
