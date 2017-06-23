@@ -25,6 +25,11 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
 
     @Override
     public void execute() {
+
+        DataFeedExecution execution = metadataProxy.updateExecutionWorkflowId(
+                configuration.getCustomerSpace().toString(), configuration.getDataFeedName(), jobId);
+        log.info(String.format("current running execution %s", execution));
+
         DataFeed datafeed = metadataProxy.findDataFeedByName(configuration.getCustomerSpace().toString(),
                 configuration.getDataFeedName());
         boolean isActive = Status.Active.equals(datafeed.getStatus());
@@ -32,12 +37,17 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
 
         ExportDataToRedshiftConfiguration exportDataToRedshiftConfig = getConfigurationFromJobParameters(
                 ExportDataToRedshiftConfiguration.class);
-        exportDataToRedshiftConfig.setSkipStep(isActive);
+        exportDataToRedshiftConfig.setSkipStep(!isActive);
         putObjectInContext(ExportDataToRedshiftConfiguration.class.getName(), exportDataToRedshiftConfig);
 
-        DataFeedExecution execution = datafeed.getActiveExecution();
+        execution = datafeed.getActiveExecution();
+
         if (execution == null) {
             putObjectInContext(CONSOLIDATE_INPUT_TABLES, Collections.EMPTY_LIST);
+        } else if (execution.getWorkflowId() != jobId) {
+            throw new RuntimeException(
+                    String.format("current active execution has a workflow id %s, which is different from %s ",
+                            execution.getWorkflowId(), jobId));
         } else {
             List<Table> importTables = execution.getImports().stream().map(DataFeedImport::getDataTable)
                     .collect(Collectors.toList());
