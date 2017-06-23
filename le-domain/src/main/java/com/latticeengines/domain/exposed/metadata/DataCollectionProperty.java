@@ -23,18 +23,16 @@ public class DataCollectionProperty extends MetadataProperty<DataCollection> imp
     @JsonIgnore
     private DataCollection owner;
 
+    @Override
+    @JsonIgnore
     public DataCollection getOwner() {
         return owner;
     }
 
+    @Override
+    @JsonIgnore
     public void setOwner(DataCollection owner) {
         this.owner = owner;
-    }
-
-    @JsonIgnore
-    @Override
-    public Class<DataCollection> getOwnerEntity() {
-        return DataCollection.class;
     }
 
 }

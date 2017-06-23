@@ -23,6 +23,9 @@ public class SegmentServiceImpl implements SegmentService {
     @Autowired
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
+    @Autowired
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
+
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
         segmentEntityMgr.createOrUpdate(segment);
@@ -41,7 +44,8 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public List<MetadataSegment> getSegments(String customerSpace) {
-        return segmentEntityMgr.findAll();
+        String collectionName = dataCollectionEntityMgr.getDefaultCollectionName();
+        return segmentEntityMgr.findAllInCollection(collectionName);
     }
 
     @Override
@@ -68,6 +72,11 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public StatisticsContainer getStats(String customerSpace, String segmentName) {
         return statisticsContainerEntityMgr.findInSegment(segmentName);
+    }
+
+    @Override
+    public void upsertStats(String customerSpace, String segmentName, StatisticsContainer statisticsContainer) {
+        segmentEntityMgr.upsertStats(segmentName, statisticsContainer);
     }
 
     @Override

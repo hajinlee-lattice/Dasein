@@ -21,5 +21,7 @@ public interface SegmentService {
 
     StatisticsContainer getStats(String customerSpace, String segmentName);
 
+    void upsertStats(String customerSpace, String segmentName, StatisticsContainer statisticsContainer);
+
     void deleteAllSegments(String customerSpace);
 }

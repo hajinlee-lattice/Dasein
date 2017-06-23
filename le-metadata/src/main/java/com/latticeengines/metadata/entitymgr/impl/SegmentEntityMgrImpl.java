@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.graph.utils.GraphUtils;
 import com.latticeengines.common.exposed.util.HibernateUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -24,12 +26,17 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentProperty;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentPropertyName;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.metadata.dao.SegmentDao;
 import com.latticeengines.metadata.dao.SegmentPropertyDao;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
+import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -45,6 +52,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
 
     @Autowired
     private SegmentPropertyDao segmentPropertyDao;
+
+    @Autowired
+    private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Override
     public BaseDao<MetadataSegment> getDao() {
@@ -63,7 +73,8 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Override
     public List<MetadataSegment> findAll() {
         return super.findAll().stream().map(this::inflate)
-                .filter(segment -> !Boolean.TRUE.equals(segment.getMasterSegment())).collect(Collectors.toList());
+                .filter(segment -> !Boolean.TRUE.equals(segment.getMasterSegment()))
+                .collect(Collectors.toList());
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -106,16 +117,70 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     public List<MetadataSegment> findAllInCollection(String collectionName) {
         return super.findAll().stream() //
                 .filter(s -> s.getDataCollection().getName().equals(collectionName)) //
+                .filter(segment -> !Boolean.TRUE.equals(segment.getMasterSegment())) //
                 .map(this::inflate).collect(Collectors.toList());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findMasterSegment(String collectionName) {
-        return super.findAll().stream() //
+        return segmentDao.findAll().stream() //
                 .filter(s -> s.getDataCollection().getName().equals(collectionName)) //
                 .filter(s -> Boolean.TRUE.equals(s.getMasterSegment())) //
                 .map(this::inflate).findFirst().orElse(null);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void upsertStats(String segmentName, StatisticsContainer statisticsContainer) {
+        MetadataSegment segment = findByName(segmentName);
+        if (segment == null) {
+            throw new IllegalStateException("Cannot find segment named " + segmentName + " in database");
+        }
+        StatisticsContainer oldStats = statisticsContainerEntityMgr.findInSegment(segmentName);
+        if (oldStats != null) {
+            log.info("There is already a main stats for segment " + segmentName + ". Remove it first.");
+            statisticsContainerEntityMgr.delete(oldStats);
+        }
+        if (StringUtils.isBlank(statisticsContainer.getName())) {
+            statisticsContainer.setName(NamingUtils.timestamp("Stats"));
+        }
+        statisticsContainer.setSegment(segment);
+        statisticsContainer.setTenant(MultiTenantContext.getTenant());
+        statisticsContainerEntityMgr.create(statisticsContainer);
+        Statistics statistics = statisticsContainer.getStatistics();
+        if (statistics != null) {
+            updateCountsByStats(statistics, segment);
+        }
+    }
+
+    private void updateCountsByStats(Statistics statistics, MetadataSegment segment) {
+        Map<BusinessEntity, Long> counts = statistics.getCounts();
+        if (counts != null && !counts.isEmpty()) {
+            boolean propUpdated = false;
+            if (counts.containsKey(BusinessEntity.Account)) {
+                MetadataSegmentProperty prop = new MetadataSegmentProperty();
+                prop.setOption(MetadataSegmentPropertyName.NumAccounts.getName());
+                prop.setValue(String.valueOf(counts.get(BusinessEntity.Account)));
+                segment.addSegmentProperty(prop);
+                propUpdated = true;
+            }
+
+            if (counts.containsKey(BusinessEntity.Contact)) {
+                MetadataSegmentProperty prop = new MetadataSegmentProperty();
+                prop.setOption(MetadataSegmentPropertyName.NumContacts.getName());
+                prop.setValue(String.valueOf(counts.get(BusinessEntity.Contact)));
+                segment.addSegmentProperty(prop);
+                propUpdated = true;
+            }
+
+            if (propUpdated) {
+                for (MetadataSegmentProperty metadataSegmentProperty : segment.getProperties()) {
+                    metadataSegmentProperty.setOwner(segment);
+                    segmentPropertyDao.createOrUpdate(metadataSegmentProperty);
+                }
+            }
+        }
     }
 
     private void addAttributeDependencies(MetadataSegment segment) {
@@ -158,7 +223,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         existing.setMasterSegment(incoming.getMasterSegment());
         existing.setDisplayName(incoming.getDisplayName());
         existing.setDescription(incoming.getDescription());
-        existing.setProperties(incoming.getProperties());
+        existing.setSegmentPropertyBag(incoming.getSegmentPropertyBag());
         existing.setMasterSegment(incoming.getMasterSegment());
         existing.setUpdated(new Date());
         return existing;

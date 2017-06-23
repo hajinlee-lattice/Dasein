@@ -112,7 +112,7 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         assertNotNull(retrieved.getTasks().get(0).getImportTemplate().getPid());
         assertEquals(retrieved.getTasks().get(0).getImportData().getTableType(), TableType.DATATABLE);
         assertNotNull(retrieved.getTasks().get(0).getImportData().getPid());
-        JsonUtils.deserialize(retrieved.toString(), DataFeed.class);
+        JsonUtils.deserialize(JsonUtils.serialize(retrieved), DataFeed.class);
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")

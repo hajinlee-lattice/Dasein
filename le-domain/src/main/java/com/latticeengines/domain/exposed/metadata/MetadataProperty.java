@@ -79,6 +79,10 @@ public abstract class MetadataProperty<T> implements HasOptionAndValue, HasPid {
         this.property = property;
     }
 
-    public abstract Class<T> getOwnerEntity();
+    @JsonIgnore
+    public abstract T getOwner();
+
+    @JsonIgnore
+    public abstract void setOwner(T owner);
 
 }

@@ -11,12 +11,15 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentProperty;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentPropertyName;
+import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -38,7 +41,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
 
     private static final String SEGMENT_DISPLAY_NAME = "SEGMENT_DISPLAY_NAME";
     private static final String UPDATED_DISPLAY_SEGMENT_NAME = "UPDATED_DISPLAY_SEGMENT_NAME";
-    private static final String SEGMENT_DESCRITION = "SEGMENT_DESCRIPTION";
+    private static final String SEGMENT_DESCRIPTION = "SEGMENT_DESCRIPTION";
     private static final String UPDATED_SEGMENT_DESCRIPTION = "UPDATED_SEGMENT_DESCRIPTION";
     private static final MetadataSegment METADATA_SEGMENT = new MetadataSegment();
     private static final MetadataSegmentProperty METADATA_SEGMENT_PROPERTY_1 = new MetadataSegmentProperty();
@@ -80,14 +83,13 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
     public void createSegment() {
         METADATA_SEGMENT.setName(SEGMENT_NAME);
         METADATA_SEGMENT.setDisplayName(SEGMENT_DISPLAY_NAME);
-        METADATA_SEGMENT.setDescription(SEGMENT_DESCRITION);
+        METADATA_SEGMENT.setDescription(SEGMENT_DESCRIPTION);
         METADATA_SEGMENT.setUpdated(new Date());
         METADATA_SEGMENT.setCreated(new Date());
         METADATA_SEGMENT.addSegmentProperty(METADATA_SEGMENT_PROPERTY_1);
         METADATA_SEGMENT.addSegmentProperty(METADATA_SEGMENT_PROPERTY_2);
-        METADATA_SEGMENT.setRestriction(Restriction.builder()
-                .let(BusinessEntity.Account, arbitraryAttribute.getName()).eq(null)
-                .build());
+        METADATA_SEGMENT.setRestriction(
+                Restriction.builder().let(BusinessEntity.Account, arbitraryAttribute.getName()).eq(null).build());
         METADATA_SEGMENT.setDataCollection(dataCollection);
         segmentEntityMgr.createOrUpdate(METADATA_SEGMENT);
 
@@ -113,7 +115,8 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         UPDATED_SEGMENT.setCreated(new Date());
         UPDATED_SEGMENT.addSegmentProperty(copyFromExistingSegmentProperty(METADATA_SEGMENT_PROPERTY_1));
         UPDATED_SEGMENT.addSegmentProperty(copyFromExistingSegmentProperty(METADATA_SEGMENT_PROPERTY_2));
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Hello").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Hello")
+                .build();
         UPDATED_SEGMENT.setRestriction(restriction);
         UPDATED_SEGMENT.setDataCollection(dataCollection);
         segmentEntityMgr.createOrUpdate(UPDATED_SEGMENT);
@@ -123,6 +126,18 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         assertEquals(retrieved.getDisplayName(), UPDATED_DISPLAY_SEGMENT_NAME);
         assertEquals(retrieved.getDescription(), UPDATED_SEGMENT_DESCRIPTION);
         assertFalse(retrieved.getMasterSegment());
+
+        Statistics statistics = new Statistics();
+        statistics.setCounts(ImmutableMap.<BusinessEntity, Long> builder().put(BusinessEntity.Account, 123L)
+                .put(BusinessEntity.Contact, 234L).build());
+        StatisticsContainer container = new StatisticsContainer();
+        container.setStatistics(statistics);
+        segmentEntityMgr.upsertStats(SEGMENT_NAME, container);
+
+        retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
+        assertNotNull(retrieved);
+        assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumAccounts), 123);
+        assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumContacts), 234);
     }
 
     @Test(groups = "functional", dependsOnMethods = "updateSegment")

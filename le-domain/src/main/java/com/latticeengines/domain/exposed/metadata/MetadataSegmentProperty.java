@@ -24,18 +24,16 @@ public class MetadataSegmentProperty extends MetadataProperty<MetadataSegment> i
     @JsonIgnore
     private MetadataSegment owner;
 
+    @Override
+    @JsonIgnore
     public MetadataSegment getOwner() {
         return owner;
     }
 
+    @Override
+    @JsonIgnore
     public void setOwner(MetadataSegment owner) {
         this.owner = owner;
-    }
-
-    @JsonIgnore
-    @Override
-    public Class<MetadataSegment> getOwnerEntity() {
-        return MetadataSegment.class;
     }
 
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -64,6 +65,17 @@ public class SegmentResource {
     public StatisticsContainer getSegmentStats(@PathVariable String customerSpace, @PathVariable String segmentName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return segmentService.getStats(customerSpace, segmentName);
+    }
+
+    @RequestMapping(value = "/{segmentName}/stats", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Upsert stats to a segment")
+    public SimpleBooleanResponse upsertStatsToSegment(@PathVariable String customerSpace,
+                                                      @PathVariable String segmentName,
+                                                      @RequestBody StatisticsContainer statisticsContainer) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        segmentService.upsertStats(customerSpace, segmentName, statisticsContainer);
+        return SimpleBooleanResponse.successResponse();
     }
 
 }

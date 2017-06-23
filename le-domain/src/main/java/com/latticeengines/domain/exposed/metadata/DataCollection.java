@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -31,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -41,7 +39,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
         "TENANT_ID", "NAME" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, HasProperties<DataCollectionProperty> {
+public class DataCollection extends BaseMetadataPropertyOwner<DataCollectionProperty>
+        implements HasName, HasTenant, HasTenantId, HasPid, HasProperties<DataCollectionProperty> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -146,10 +145,12 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, 
     }
 
 
+    @Override
     public List<DataCollectionProperty> getProperties() {
         return properties;
     }
 
+    @Override
     public void setProperties(List<DataCollectionProperty> properties) {
         this.properties = properties;
     }
@@ -176,30 +177,16 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid, 
     }
     // =====
 
-    @Override
-    public void putProperty(String key, String value) {
-        List<DataCollectionProperty> properties = getProperties().stream() //
-                .filter(p -> !p.getProperty().equals(key))
-                .collect(Collectors.toList());
-        properties.add(new DataCollectionProperty(key, value));
-        setProperties(properties);
-    }
-
-    @JsonIgnore
-    @Override
-    public DataCollectionProperty getProperty(String key) {
-        for (DataCollectionProperty property: getProperties()) {
-            if (property.getProperty().equals(key)) {
-                return property;
-            }
-        }
-        return null;
-    }
-
     @JsonIgnore
     @Transient
     public DataCollectionPropertyBag getDataCollectionPropertyBag() {
         return new DataCollectionPropertyBag(properties);
+    }
+
+    @Override
+    @JsonIgnore
+    protected Class<DataCollectionProperty> getPropertyClz() {
+        return DataCollectionProperty.class;
     }
 
 }

@@ -31,7 +31,6 @@ import com.latticeengines.metadata.dao.DataCollectionPropertyDao;
 import com.latticeengines.metadata.dao.DataCollectionTableDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
-import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -54,9 +53,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Autowired
     private DataCollectionPropertyDao dataCollectionPropertyDao;
-
-    @Autowired
-    private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Override
     public DataCollectionDao getDao() {
@@ -192,17 +188,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         if (masterSeg == null) {
             throw new IllegalStateException("Cannot find master segment of the collection " + collectionName);
         }
-        StatisticsContainer oldStats = statisticsContainerEntityMgr.findInMasterSegment(collectionName);
-        if (oldStats != null) {
-            log.info("There is already a main stats for collection " + collectionName + ". Remove it first.");
-            statisticsContainerEntityMgr.delete(oldStats);
-        }
-        if (StringUtils.isBlank(statisticsContainer.getName())) {
-            statisticsContainer.setName(NamingUtils.timestamp("Stats"));
-        }
-        statisticsContainer.setSegment(masterSeg);
-        statisticsContainer.setTenant(MultiTenantContext.getTenant());
-        statisticsContainerEntityMgr.create(statisticsContainer);
+        segmentEntityMgr.upsertStats(masterSeg.getName(), statisticsContainer);
     }
 
     public String getDefaultCollectionName() {

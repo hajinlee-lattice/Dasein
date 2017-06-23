@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.metadata;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -45,7 +44,8 @@ import springfox.documentation.annotations.ApiIgnore;
         "TENANT_ID", "NAME" }))
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
-public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, HasProperties<MetadataSegmentProperty> {
+public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentProperty> //
+        implements HasName, HasPid, HasAuditingFields, HasTenantId, HasProperties<MetadataSegmentProperty> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -200,7 +200,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         return properties;
     }
 
-    public void setProperties(List<MetadataSegmentProperty> properties) {
+    protected void setProperties(List<MetadataSegmentProperty> properties) {
         this.properties = properties;
     }
 
@@ -217,7 +217,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     }
 
     public void addSegmentProperty(MetadataSegmentProperty metadataSegmentProperty) {
-        this.properties.add(metadataSegmentProperty);
+        this.putProperty(metadataSegmentProperty.getOption(), metadataSegmentProperty.getValue());
     }
 
     @Override
@@ -247,25 +247,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         this.attributeDependencies = attributeDependencies;
     }
 
-    @Override
-    public void putProperty(String key, String value) {
-        List<MetadataSegmentProperty> properties = getProperties().stream() //
-                .filter(p -> !p.getProperty().equals(key))
-                .collect(Collectors.toList());
-        properties.add(new MetadataSegmentProperty(key, value));
-        setProperties(properties);
-    }
-
-    @Override
-    public MetadataSegmentProperty getProperty(String key) {
-        for (MetadataSegmentProperty property: getProperties()) {
-            if (property.getProperty().equals(key)) {
-                return property;
-            }
-        }
-        return null;
-    }
-
     public Boolean getMasterSegment() {
         return isMasterSegment;
     }
@@ -273,4 +254,11 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     public void setMasterSegment(Boolean masterSegment) {
         isMasterSegment = masterSegment;
     }
+
+    @Override
+    @JsonIgnore
+    protected Class<MetadataSegmentProperty> getPropertyClz() {
+        return MetadataSegmentProperty.class;
+    }
+
 }
