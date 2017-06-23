@@ -1,8 +1,8 @@
 import argparse
 import base64
 import boto3
-import subprocess
 import re
+import subprocess
 
 from ..conf import AwsEnvironment
 
@@ -82,9 +82,9 @@ def purge_internal(environment, image):
             continue
 
         tag = imageId['imageTag']
-        if re.match(r'(\d+)', tag):
+        if re.match(r'(\d+)$', tag):
             print tag + ' is a revision tag'
-            # revisions.append(tag)
+            revisions.append(tag)
 
     if len(revisions) > 0:
         revisions.sort()
