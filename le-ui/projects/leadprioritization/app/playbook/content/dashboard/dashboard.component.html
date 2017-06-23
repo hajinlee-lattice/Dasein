@@ -1,4 +1,5 @@
-<section class="container playbook-dashboard">
+<div  ng-if="!vm.play" class="loader vertical-center"></div>
+<section class="container playbook-dashboard" ng-if="vm.play">
     <div class="container-body">
         <div class="dashboard-section play">
             <div class="dashboard-section-container">
