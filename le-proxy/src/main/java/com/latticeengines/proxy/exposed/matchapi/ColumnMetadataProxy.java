@@ -52,7 +52,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         NodeWatcher.registerWatcher(ZK_WATCHER_AM_API_UPDATE);
         NodeWatcher.registerWatcher(ZK_WATCHER_AM_RELEASE);
         NodeWatcher.registerListener(ZK_WATCHER_AM_API_UPDATE, () -> {
-            log.info("am update zk watch changed, updating caches.");
+            log.info("ZK watch changed, updating caches ...");
             try {
                 // wait 10 sec for match api itself to refresh.
                 Thread.sleep(10000L);

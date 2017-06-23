@@ -24,10 +24,9 @@ import com.latticeengines.datacloud.core.entitymgr.AccountMasterFactEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.CategoricalAttributeEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.service.DimensionalQueryService;
-import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
+import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
@@ -48,7 +47,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.matchapi.service.AccountMasterStatisticsService;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -74,15 +72,12 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     private DimensionalQueryService dimensionalQueryService;
 
     @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
-
-    @Autowired
     @Qualifier("accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
     @Autowired
-    @Qualifier("accountMasterColumnEntityMgr")
-    private MetadataColumnEntityMgr<AccountMasterColumn> columnEntityMgr;
+    @Qualifier("accountMasterColumnMetadataService")
+    private ColumnMetadataService columnMetadataService;
 
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
@@ -377,8 +372,8 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     }
 
     private Map<String, ColumnMetadata> getColumnMetadata() {
-        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
+        String currentDataCloudVersion = versionEntityMgr.currentApprovedVersionAsString();
+        List<ColumnMetadata> allColumns = columnMetadataService.fromPredefinedSelection(Predefined.Enrichment,
                 currentDataCloudVersion);
         Map<String, ColumnMetadata> columnsMetadata = new HashMap<String, ColumnMetadata>();
         for (ColumnMetadata columnMetadata : allColumns) {
@@ -415,7 +410,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     }
 
     private void expandEncodedAttributes(AccountMasterCube cube) {
-        String dataCloudVersion = versionEntityMgr.latestApprovedForMajorVersion("2.0").getVersion();
+        String dataCloudVersion = versionEntityMgr.currentApprovedVersionAsString();
 
         ColumnSelection columnSelection = columnSelectionService
                 .parsePredefinedColumnSelection(ColumnSelection.Predefined.Enrichment, dataCloudVersion);
