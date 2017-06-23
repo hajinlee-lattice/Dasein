@@ -8,9 +8,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.cache.NodeCacheListener;
+import org.apache.zookeeper.ZooDefs;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class NodeWatcher {
@@ -53,11 +55,22 @@ public class NodeWatcher {
         nodeCache.getListenable().addListener(listener);
     }
 
-    public static Path getWatcherPath(String watcherName) {
+    private static Path getWatcherPath(String watcherName) {
         if (watchers.containsKey(watcherName)) {
             return PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), null, watcherName);
         } else {
             return null;
+        }
+    }
+
+    public static void updateWatchedData(String watcherName, String serializedData) {
+        Path path = getWatcherPath(watcherName);
+        if (path != null) {
+            try {
+                CamilleEnvironment.getCamille().upsert(path, new Document(serializedData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed up update watcher " + watcherName);
+            }
         }
     }
 
