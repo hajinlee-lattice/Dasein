@@ -1,6 +1,6 @@
 package com.latticeengines.query.util;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ZK_WATCHER_AM_UPDATE;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ZK_WATCHER_AM_RELEASE;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -102,8 +102,8 @@ public class AttrRepoUtils {
         amAttrRepoCache = CacheBuilder.newBuilder().maximumSize(1).build();
         amAttrRepoCache.put(AM_REPO, columnMetadataProxy.getAttrRepo());
         // watch on a zk node that will be updated by data cloud whe new am is released.
-        NodeWatcher.registerWatcher(ZK_WATCHER_AM_UPDATE);
-        NodeWatcher.registerListener(ZK_WATCHER_AM_UPDATE, new AMUpdateWatcher(amAttrRepoCache, columnMetadataProxy));
+        NodeWatcher.registerWatcher(ZK_WATCHER_AM_RELEASE);
+        NodeWatcher.registerListener(ZK_WATCHER_AM_RELEASE, new AMUpdateWatcher(amAttrRepoCache, columnMetadataProxy));
     }
 
     private static class AMUpdateWatcher implements NodeCacheListener {

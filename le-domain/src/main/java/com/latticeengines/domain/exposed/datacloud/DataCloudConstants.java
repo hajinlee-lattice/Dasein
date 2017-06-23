@@ -55,5 +55,6 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_COPIER = "sourceCopier";
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
 
-    public static final String ZK_WATCHER_AM_UPDATE = "AMUpdateTime";
+    public static final String ZK_WATCHER_AM_RELEASE = "AMRelease";
+    public static final String ZK_WATCHER_AM_MD_UPDATE = "AMMetadataUpdate";
 }
