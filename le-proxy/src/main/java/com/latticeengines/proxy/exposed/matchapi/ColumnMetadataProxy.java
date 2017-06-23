@@ -40,16 +40,19 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     @PostConstruct
     private void postConstruct() {
         enrichmentColumnsCache = WatcherCache.builder(AMApiUpdate.name()) //
+                .name("EnrichmentColumnsCache") //
                 .maximum(20) //
                 .load(dataCloudVersion -> requestColumnSelection(Predefined.Enrichment, (String) dataCloudVersion)) //
                 .initKeys(new String[] { "" }) //
                 .build();
         latestDataCloudVersionCache = WatcherCache.builder(AMApiUpdate.name()) //
+                .name("LatestDataCloudVersionCache") //
                 .maximum(20) //
                 .load(compatibleVersion -> requestLatestVersion((String) compatibleVersion)) //
                 .initKeys(new String[] { "" }) //
                 .build();
         amAttrRepoCache = WatcherCache.builder(AMApiUpdate.name()) //
+                .name("AMAttrRepoCache") //
                 .maximum(1) //
                 .load(key -> getAttrRepoViaREST()) //
                 .initKeys(new String[] { AM_REPO }) //

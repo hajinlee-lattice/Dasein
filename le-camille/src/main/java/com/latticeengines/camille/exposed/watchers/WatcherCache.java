@@ -20,19 +20,21 @@ public class WatcherCache<K, V> {
     private static final Random random = new Random(System.currentTimeMillis());
 
     private final Function<K, V> load;
+    private final String cacheName;
     private final String watcherName;
     private final Object[] initKeys;
     private final int capacity;
     private Cache<K, V> cache;
 
-    WatcherCache(String watcherName, Function<K, V> load, int capacity, Object... initKeys) {
+    WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity, Object... initKeys) {
         this.load = load;
+        this.cacheName = cacheName;
         this.watcherName = watcherName;
         this.initKeys = initKeys;
         this.capacity = capacity;
         NodeWatcher.registerWatcher(watcherName);
         NodeWatcher.registerListener(watcherName, () -> {
-            log.info("ZK watcher " + watcherName + " changed, updating caches ...");
+            log.info("ZK watcher " + watcherName + " changed, updating " + cacheName + " ...");
             refresh();
         });
     }
@@ -52,7 +54,8 @@ public class WatcherCache<K, V> {
     }
 
     public void scheduleInit(long duration, TimeUnit timeUnit) {
-        log.info("Scheduled to initialize the WatcherCache " + watcherName + " after "+ duration + " " + timeUnit);
+        log.info("Scheduled to initialize the WatcherCache " + cacheName + " watching " + watcherName + " after "
+                + duration + " " + timeUnit);
         scheduler.schedule(this::initialize, duration, timeUnit);
     }
 
@@ -60,22 +63,23 @@ public class WatcherCache<K, V> {
     public void initialize() {
         if (cache == null) {
             long startTime = System.currentTimeMillis();
-            log.info("Start initializing the WatcherCache " + watcherName + " ...");
+            log.info("Start initializing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
             cache = CacheBuilder.newBuilder().maximumSize(capacity).build();
             if (initKeys != null) {
                 Arrays.stream(initKeys).map(k -> (K) k).forEach(this::loadKey);
             }
-            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 60.0;
-            log.info(String.format("Finished initializing the WatcherCache %s after %.2f secs.", watcherName, duration));
+            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
+            log.info(
+                    String.format("Finished initializing the WatcherCache %s after %.2f secs.", watcherName, duration));
         }
     }
 
     private void refresh() {
         if (cache != null) {
             long startTime = System.currentTimeMillis();
-            log.info("Start refreshing the WatcherCache " + watcherName + " ...");
+            log.info("Start refreshing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
             cache.asMap().keySet().forEach(this::loadKey);
-            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 60.0;
+            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
             log.info(String.format("Finished refreshing the WatcherCache %s after %.2f secs.", watcherName, duration));
         }
     }
@@ -90,23 +94,31 @@ public class WatcherCache<K, V> {
             }
             V val = load.apply(key);
             if (val == null) {
-                log.info("Got null value when loading the key " + key + ". Skip adding it to the cache.");
+                log.info("Got null value when loading the key " + key + ". Skip adding it to the WatcherCache "
+                        + cacheName + ".");
             } else {
                 cache.put(key, val);
             }
         } catch (Exception e) {
-            log.error("Failed to load cache using key " + key);
+            log.error("Failed to load WatcherCache " + cacheName + " using key " + key);
         }
     }
 
     public static class Builder<K, V> {
         private Function<K, V> load;
+        private String cacheName;
         private String watcherName;
         private K[] initKeys;
         private int capacity = 10;
 
         Builder(String watcherName) {
             this.watcherName = watcherName;
+            this.cacheName = watcherName;
+        }
+
+        public Builder name(String cacheName) {
+            this.cacheName = cacheName;
+            return this;
         }
 
         public Builder load(Function<K, V> load) {
@@ -125,7 +137,7 @@ public class WatcherCache<K, V> {
         }
 
         public WatcherCache<K, V> build() {
-            return new WatcherCache<>(watcherName, load, capacity, initKeys);
+            return new WatcherCache<>(cacheName, watcherName, load, capacity, initKeys);
         }
 
     }

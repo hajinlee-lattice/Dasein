@@ -51,6 +51,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     @PostConstruct
     public void postConstruct() {
         topAttrsCache = WatcherCache.builder(AMApiUpdate.name()) //
+                .name("TopAttrsCache") //
                 .maximum(1) //
                 .load(key -> {
                     if (DUMMY_KEY.equals(key)) {
