@@ -50,10 +50,6 @@ public class NodeWatcherUnitTestNG {
         public void nodeChanged() throws Exception {
             state++;
         }
-
-        public int getState() {
-            return state;
-        }
     }
 
 }

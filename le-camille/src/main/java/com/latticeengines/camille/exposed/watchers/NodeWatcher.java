@@ -57,7 +57,7 @@ public class NodeWatcher {
 
     private static Path getWatcherPath(String watcherName) {
         if (watchers.containsKey(watcherName)) {
-            return PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), null, watcherName);
+            return PathBuilder.buildWatcherPath(CamilleEnvironment.getPodId(), watcherName);
         } else {
             return null;
         }
