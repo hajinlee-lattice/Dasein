@@ -165,13 +165,13 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         columns.add(Pair.of("Customer6", Double.class)); // Interval (use distinct value as interval boundary)
 
         Object[][] data = new Object[][] { //
-                { 1L, 0, null, 10F, null, true, 1.01 }, //
-                { 2L, null, 10L, null, 100D, false, 1.01 }, //
-                { 3L, 10, null, 100F, 100D, null, 1.01 }, //
+                { 1L, 0, null, 10F, null, true, 2.01 }, //
+                { 2L, null, 10L, null, 100D, false, 2.01 }, //
+                { 3L, 10, null, 100F, 100D, null, 2.01 }, //
                 { 4L, null, 100L, 100F, 1000D, true, 1.01 }, //
-                { 5L, 100, 100L, 1000F, 1000D, false, 2.02 }, //
-                { 6L, 100, 1000L, 1000F, 10000D, null, 2.02 }, //
-                { 7L, 1000, 1000L, 10000F, 10000D, true, 2.02 }, //
+                { 5L, 100, 100L, 1000F, 1000D, false, 1.02 }, //
+                { 6L, 100, 1000L, 1000F, 10000D, null, 1.02 }, //
+                { 7L, 1000, 1000L, 10000F, 10000D, true, 1.02 }, //
                 { 8L, 1000, 10000L, 10000F, null, false, null }, //
                 { 9L, 10000, 10000L, null, 0D, null, null }, //
                 { 10L, 10000, null, 0F, 100D, true, null }, //
