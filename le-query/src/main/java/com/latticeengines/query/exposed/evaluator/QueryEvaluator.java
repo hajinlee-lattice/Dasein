@@ -26,6 +26,9 @@ public class QueryEvaluator {
     private QueryProcessor processor;
 
     public SQLQuery<?> evaluate(AttributeRepository repository, Query query) {
+        if (processor == null) {
+            throw new RuntimeException("processor is null.");
+        }
         return processor.process(repository, query);
     }
 

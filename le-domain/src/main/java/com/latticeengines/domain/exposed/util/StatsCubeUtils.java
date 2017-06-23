@@ -86,6 +86,12 @@ public class StatsCubeUtils {
         Buckets buckets = new Buckets();
         buckets.setType(algorithm.getBucketType());
         List<Bucket> bucketList = initializeBucketList(algorithm);
+        for (int i = 0; i < bucketList.size(); i++) {
+            int bktId = i + 1;
+            if (!bktCounts.containsKey(bktId)) {
+                bktCounts.put(bktId, 0L);
+            }
+        }
         bktCounts.forEach((bktId, bktCnt) -> updateBucket(bucketList.get(bktId - 1), algorithm, bktId, bktCnt));
         buckets.setBucketList(bucketList);
         return buckets;

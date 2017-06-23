@@ -24,7 +24,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     protected AttributeRepository attrRepo;
 
-    @BeforeClass
+    @BeforeClass(groups = "functional")
     public void setupBase() {
         attrRepo = QueryTestUtils.getCustomerAttributeRepo();
         ColumnMetadataProxy proxy = Mockito.mock(ColumnMetadataProxy.class);
