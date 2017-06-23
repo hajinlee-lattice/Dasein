@@ -33,6 +33,8 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.mysql.jdbc.StringUtils;
 
+import javax.annotation.PostConstruct;
+
 @Component("companyProfileService")
 public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final Log log = LogFactory.getLog(CompanyProfileServiceImpl.class);
@@ -45,6 +47,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     @Value("${ulysses.companyprofile.datacloud.version:}")
     private String dataCloudVersion;
+
+    @PostConstruct
+    private void postConstruct() {
+        columnMetadataProxy.scheduleDelayedInitOfEnrichmentColCache();
+    }
 
     @Override
     public CompanyProfile getProfile(CustomerSpace customerSpace, CompanyProfileRequest request,

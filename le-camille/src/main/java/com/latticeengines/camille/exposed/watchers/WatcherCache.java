@@ -2,6 +2,7 @@ package com.latticeengines.camille.exposed.watchers;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 
 public class WatcherCache<K, V> {
 
@@ -32,15 +34,10 @@ public class WatcherCache<K, V> {
         this.watcherName = watcherName;
         this.initKeys = initKeys;
         this.capacity = capacity;
-        NodeWatcher.registerWatcher(watcherName);
-        NodeWatcher.registerListener(watcherName, () -> {
-            log.info("ZK watcher " + watcherName + " changed, updating " + cacheName + " ...");
-            refresh();
-        });
     }
 
-    public static <K, V> Builder<K, V> builder(String watcherName) {
-        return new Builder<>(watcherName);
+    public static <K, V> Builder<K, V> builder() {
+        return new Builder<>();
     }
 
     public V get(K key) {
@@ -60,17 +57,35 @@ public class WatcherCache<K, V> {
     }
 
     @SuppressWarnings("unchecked")
-    public void initialize() {
+    public synchronized void initialize() {
         if (cache == null) {
             long startTime = System.currentTimeMillis();
             log.info("Start initializing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
+            waitForCamille();
+            NodeWatcher.registerWatcher(watcherName);
+            NodeWatcher.registerListener(watcherName, () -> {
+                log.info("ZK watcher " + watcherName + " changed, updating " + cacheName + " ...");
+                refresh();
+            });
             cache = CacheBuilder.newBuilder().maximumSize(capacity).build();
             if (initKeys != null) {
                 Arrays.stream(initKeys).map(k -> (K) k).forEach(this::loadKey);
             }
             double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
             log.info(
-                    String.format("Finished initializing the WatcherCache %s after %.2f secs.", watcherName, duration));
+                    String.format("Finished initializing the WatcherCache %s after %.3f secs.", watcherName, duration));
+        }
+    }
+
+    private void waitForCamille() {
+        int retries = 0;
+        while (!CamilleEnvironment.isStarted() && retries++ < 100) {
+            try {
+                log.info("Wait one sec for camille to start ...");
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
     }
 
@@ -80,11 +95,11 @@ public class WatcherCache<K, V> {
             log.info("Start refreshing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
             cache.asMap().keySet().forEach(this::loadKey);
             double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
-            log.info(String.format("Finished refreshing the WatcherCache %s after %.2f secs.", watcherName, duration));
+            log.info(String.format("Finished refreshing the WatcherCache %s after %.3f secs.", watcherName, duration));
         }
     }
 
-    private void loadKey(K key) {
+    private synchronized void loadKey(K key) {
         try {
             try {
                 // avoid request spike on cached resource
@@ -111,13 +126,18 @@ public class WatcherCache<K, V> {
         private K[] initKeys;
         private int capacity = 10;
 
-        Builder(String watcherName) {
-            this.watcherName = watcherName;
+        Builder() {
+            this.watcherName = "Watcher-" + UUID.randomUUID().toString();
             this.cacheName = watcherName;
         }
 
         public Builder name(String cacheName) {
             this.cacheName = cacheName;
+            return this;
+        }
+
+        public Builder watch(String watcherName) {
+            this.watcherName = watcherName;
             return this;
         }
 

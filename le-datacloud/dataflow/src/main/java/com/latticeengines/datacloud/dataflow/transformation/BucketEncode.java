@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -82,12 +81,13 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         Map<String, BitCodeBook> map = new HashMap<>();
         Map<String, Map<String, Integer>> posMap = new HashMap<>();
         for (DCEncodedAttr encAttr : encAttrs) {
-            for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
+            for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
                 BitDecodeStrategy decodeStrategy = bktAttr.getDecodedStrategy();
                 if (decodeStrategy != null) {
                     String key = decodeStrategy.codeBookKey();
                     if (!map.containsKey(key)) {
-                        BitCodeBook codeBook = new BitCodeBook(BitCodeBook.DecodeStrategy.valueOf(decodeStrategy.getBitInterpretation()));
+                        BitCodeBook codeBook = new BitCodeBook(
+                                BitCodeBook.DecodeStrategy.valueOf(decodeStrategy.getBitInterpretation()));
                         codeBook.bindEncodedColumn(decodeStrategy.getEncodedColumn());
                         map.put(key, codeBook);
                     }
@@ -98,7 +98,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                 }
             }
         }
-        for (Map.Entry<String, BitCodeBook> entry: map.entrySet()) {
+        for (Map.Entry<String, BitCodeBook> entry : map.entrySet()) {
             entry.getValue().setBitsPosMap(posMap.get(entry.getKey()));
         }
         return map;
@@ -113,8 +113,8 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
     private List<String> fieldsNeededForEncode(List<DCEncodedAttr> encAttrs, List<String> inputFields) {
         Set<String> neededFields = new HashSet<>();
         Set<String> inputFieldSet = new HashSet<>(inputFields);
-        for (DCEncodedAttr encAttr: encAttrs) {
-            for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
+        for (DCEncodedAttr encAttr : encAttrs) {
+            for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
                 String srcAttr;
                 if (bktAttr.getDecodedStrategy() != null) {
                     srcAttr = bktAttr.getDecodedStrategy().getEncodedColumn();
@@ -132,26 +132,18 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
     private List<DCEncodedAttr> cleanupDecodeStrategy(List<String> inputFields, List<DCEncodedAttr> encAttrs) {
         Set<String> inputFieldSet = new HashSet<>(inputFields);
         List<DCEncodedAttr> encodedAttrs2 = new ArrayList<>();
-        for (DCEncodedAttr encAttr: encAttrs) {
+        for (DCEncodedAttr encAttr : encAttrs) {
             DCEncodedAttr encodedAttr2 = new DCEncodedAttr(encAttr.getEncAttr());
-            for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
+            for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
+                String srcAttr = bktAttr.getSourceAttr();
                 BitDecodeStrategy decodeStrategy = bktAttr.getDecodedStrategy();
-                if (decodeStrategy != null) {
-                    // suppose to be an encoded attribute
-                    String srcAttr = bktAttr.getSourceAttr();
-                    String nominalAttr = bktAttr.getNominalAttr();
-                    if (inputFieldSet.contains(srcAttr) || inputFieldSet.contains(nominalAttr)) {
-                        // but it shows up in the input fields
-                        bktAttr.setDecodedStrategy(null);
-                        if (StringUtils.isBlank(srcAttr)) {
-                            // properly set src attr
-                            bktAttr.setSourceAttr(nominalAttr);
-                        }
-                    } else if (!inputFieldSet.contains(decodeStrategy.getEncodedColumn())) {
-                        // not even have the encoded column, remove it from encAttrs
-                        log.info("Skip bkt attr " + bktAttr.getNominalAttr());
-                        continue;
-                    }
+                if (inputFieldSet.contains(srcAttr)) {
+                    // it must be a simple field
+                    bktAttr.setDecodedStrategy(null);
+                } else if (decodeStrategy == null || !inputFieldSet.contains(decodeStrategy.getEncodedColumn())) {
+                    // no src attr, also no decode
+                    log.info("Skip bkt attr " + bktAttr.getNominalAttr());
+                    continue;
                 }
                 encodedAttr2.addBktAttr(bktAttr);
             }

@@ -287,7 +287,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(consolidatedTablePrefix);
-        targetTable.setPrimaryKey(srcIdField);
+//        targetTable.setPrimaryKey(accountId);
         step6.setTargetTable(targetTable);
         return step6;
     }
@@ -296,11 +296,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         try {
             SorterConfig config = new SorterConfig();
             config.setPartitions(100);
-            config.setSortingField(masterTableSortKeys.get(0)); // TODO: only
-                                                                // support
-                                                                // single
-                                                                // sorting key
-                                                                // now
+            config.setSortingField(masterTableSortKeys.get(0));
             config.setCompressResult(false);
             return appendEngineConf(config, lightEngineConfig());
         } catch (Exception ex) {

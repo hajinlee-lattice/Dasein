@@ -11,11 +11,9 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -35,9 +33,6 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private WatcherCache<String, AttributeRepository> amAttrRepoCache;
     private boolean scheduled = false;
 
-    @Autowired
-    private BatonServiceImpl batonService;
-
     @SuppressWarnings("unchecked")
     public ColumnMetadataProxy() {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
@@ -46,20 +41,23 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     @SuppressWarnings("unchecked")
     @PostConstruct
     private void postConstruct() {
-        enrichmentColumnsCache = WatcherCache.builder(AMApiUpdate.name()) //
+        enrichmentColumnsCache = WatcherCache.builder() //
                 .name("EnrichmentColumnsCache") //
+                .watch(AMApiUpdate.name()) //
                 .maximum(20) //
                 .load(dataCloudVersion -> requestColumnSelection(Predefined.Enrichment, (String) dataCloudVersion)) //
                 .initKeys(new String[] { "" }) //
                 .build();
-        latestDataCloudVersionCache = WatcherCache.builder(AMApiUpdate.name()) //
+        latestDataCloudVersionCache = WatcherCache.builder() //
                 .name("LatestDataCloudVersionCache") //
+                .watch(AMApiUpdate.name()) //
                 .maximum(20) //
                 .load(compatibleVersion -> requestLatestVersion((String) compatibleVersion)) //
                 .initKeys(new String[] { "" }) //
                 .build();
-        amAttrRepoCache = WatcherCache.builder(AMApiUpdate.name()) //
+        amAttrRepoCache = WatcherCache.builder() //
                 .name("AMAttrRepoCache") //
+                .watch(AMApiUpdate.name()) //
                 .maximum(1) //
                 .load(key -> getAttrRepoViaREST()) //
                 .initKeys(new String[] { AM_REPO }) //

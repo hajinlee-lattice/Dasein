@@ -74,7 +74,7 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
 
     private Map<String, List<String>> getColsToDecode(List<DCEncodedAttr> encAttrs) {
         Map<String, List<String>> colsToDecode = new HashMap<>();
-        for (DCEncodedAttr encAttr: encAttrs) {
+        for (DCEncodedAttr encAttr : encAttrs) {
             List<DCBucketedAttr> bktAttrs = encAttr.getBktAttrs();
             for (DCBucketedAttr bktAttr : bktAttrs) {
                 BitDecodeStrategy decodeStrategy = bktAttr.getDecodedStrategy();
@@ -128,7 +128,8 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
                 // simple field
                 Integer posInArg = argPosMap.get(bktAttr.resolveSourceAttr());
                 if (posInArg == null) {
-                    log.error("Cannot find resolved src attr " + bktAttr.resolveSourceAttr() + " for bkt attr " + bktAttr.getNominalAttr() + " in argument.");
+                    throw new RuntimeException("Cannot find the source attr " + bktAttr.resolveSourceAttr()
+                            + " for bkt attr " + bktAttr.getNominalAttr());
                 }
                 Object value = arguments.getObject(posInArg);
                 bktIdx = bucket(value, algo);
@@ -143,13 +144,13 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
     private Map<String, Object> decodeAttrs(TupleEntry arguments) {
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> originalEncoded = new HashMap<>();
-        for (String codeBookKey: codeBookMap.keySet()) {
+        for (String codeBookKey : codeBookMap.keySet()) {
             if (!originalEncoded.containsKey(codeBookKey)) {
                 String encodedCol = codeBookMap.get(codeBookKey).getEncodedColumn();
                 originalEncoded.put(codeBookKey, arguments.getObject(argPosMap.get(encodedCol)));
             }
         }
-        for (Map.Entry<String, List<String>> entry: colsToDecode.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : colsToDecode.entrySet()) {
             BitCodeBook codeBook = codeBookMap.get(entry.getKey());
             Object bitEncoded = originalEncoded.get(entry.getKey());
             if (bitEncoded != null && StringUtils.isNotBlank(bitEncoded.toString())) {

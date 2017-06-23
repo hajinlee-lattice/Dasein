@@ -80,10 +80,6 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @JsonProperty("ModelId")
-    @Column(name = "MODEL")
-    private String modelId;
-
     public byte[] getData() {
         return data;
     }
@@ -175,13 +171,5 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
 
     public void setSegment(MetadataSegment segment) {
         this.segment = segment;
-    }
-
-    public String getModelId() {
-        return modelId;
-    }
-
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
     }
 }

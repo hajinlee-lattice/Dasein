@@ -1,5 +1,6 @@
 package com.latticeengines.workflowapi.yarn.runtime;
 
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,10 +65,10 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         String swlib = workflowConfig.getSwpkgName();
         if (StringUtils.isBlank(swlib)) {
             log.info("Enriching application context with all sw packages available.");
-            appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", appContext, versionManager);
+            appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(), appContext, versionManager);
         } else {
             log.info("Enriching application context with sw package " + swlib);
-            appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", swlib, appContext, versionManager);
+            appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(), swlib, appContext, versionManager);
         }
         workflowService.registerJob(workflowConfig.getWorkflowName(), appContext);
 
