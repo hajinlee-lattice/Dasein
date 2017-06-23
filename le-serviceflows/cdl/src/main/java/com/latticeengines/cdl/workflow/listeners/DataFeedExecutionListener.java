@@ -28,13 +28,6 @@ public class DataFeedExecutionListener extends LEJobListener {
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
-        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-        String datafeedName = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_NAME);
-        String customerSpace = job.getTenant().getId();
-
-        DataFeedExecution execution = metadataProxy.updateExecutionWorkflowId(customerSpace, datafeedName,
-                jobExecution.getId());
-        log.info(String.format("current running execution %s", execution));
     }
 
     @Override
