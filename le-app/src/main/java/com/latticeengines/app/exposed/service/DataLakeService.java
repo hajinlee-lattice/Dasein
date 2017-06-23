@@ -11,4 +11,6 @@ public interface DataLakeService {
     List<ColumnMetadata> getAttributes(Integer start, Integer limit);
     Statistics getStatistics();
 
+    Statistics getDemoStatistics();
+
 }

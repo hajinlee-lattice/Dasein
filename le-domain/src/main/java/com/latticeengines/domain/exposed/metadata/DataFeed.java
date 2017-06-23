@@ -33,7 +33,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -236,11 +235,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     public void setActiveExecution(DataFeedExecution activeExecution) {
         activeExecution.setDataFeed(this);
         this.activeExecution = activeExecution;
-    }
-
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
     }
 
     public enum Status {

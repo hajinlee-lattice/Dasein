@@ -1,5 +1,6 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -31,6 +33,8 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Autowired
     private AttributeCustomizationService attributeCustomizationService;
+
+    private Statistics demoStats;
 
     // TODO: also need to add AM attrs
     @Override
@@ -72,6 +76,21 @@ public class DataLakeServiceImpl implements DataLakeService {
             return container.getStatistics();
         }
         return null;
+    }
+
+    @Override
+    public Statistics getDemoStatistics() {
+        if (demoStats == null) {
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("stats.json");
+            ObjectMapper om = new ObjectMapper();
+            try {
+                Statistics statistics = om.readValue(is, Statistics.class);
+                demoStats = statistics;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to parse json resource.", e);
+            }
+        }
+        return demoStats;
     }
 
 }
