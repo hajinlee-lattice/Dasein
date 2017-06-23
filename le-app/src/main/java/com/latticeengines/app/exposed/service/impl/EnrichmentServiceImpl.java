@@ -50,7 +50,8 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     @SuppressWarnings("unchecked")
     @PostConstruct
     public void postConstruct() {
-        topAttrsCache = WatcherCache.builder(AMApiUpdate.name()) //
+        topAttrsCache = WatcherCache.builder() //
+                .watch(AMApiUpdate.name()) //
                 .name("TopAttrsCache") //
                 .maximum(1) //
                 .load(key -> {
