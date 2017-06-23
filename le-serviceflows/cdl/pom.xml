@@ -280,53 +280,6 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataflow</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-security</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-workflow</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-remote</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.8</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
 </project>

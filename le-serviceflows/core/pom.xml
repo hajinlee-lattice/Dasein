@@ -268,66 +268,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- TEST dependencies -->
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataflow</artifactId>
-            <version>${project.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-security</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-workflow</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-remote</artifactId>
-            <version>${le.remote.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.8</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.tez</groupId>
-            <artifactId>tez-runtime-library</artifactId>
-            <version>${tez.version}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-auth</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
     </dependencies>
 
 </project>

@@ -43,21 +43,6 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-serviceflows-core</artifactId>
-            <version>${le.serviceflows.core.version}</version>
-            <classifier>tests</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataflow</artifactId>
-            <version>${le.dataflow.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${le.dataflow.version}</version>
             <scope>provided</scope>
@@ -83,21 +68,6 @@
             <version>${le.proxy.version}</version>
             <classifier>intf</classifier>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-remote</artifactId>
-            <version>${le.remote.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${le.testframework.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
         </dependency>
 
         <dependency>
@@ -304,39 +274,12 @@
         </dependency>
 
         <!-- TEST dependencies -->
-
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.8</version>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-core</artifactId>
+            <version>${le.serviceflows.core.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.tez</groupId>
-            <artifactId>tez-runtime-library</artifactId>
-            <version>${tez.version}</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-auth</artifactId>
-                </exclusion>
-            </exclusions>
+            <classifier>tests</classifier>
         </dependency>
     </dependencies>
 
