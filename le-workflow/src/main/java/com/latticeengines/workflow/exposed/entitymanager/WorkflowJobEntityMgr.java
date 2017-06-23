@@ -18,4 +18,6 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus);
 
     void updateWorkflowJob(WorkflowJob workflowJob);
+
+    void registerWorkflowId(WorkflowJob workflowJob);
 }

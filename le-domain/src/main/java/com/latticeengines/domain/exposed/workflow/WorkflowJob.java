@@ -19,6 +19,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -34,6 +36,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "WORKFLOW_JOB")
 public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
+
+    private static final Log log = LogFactory.getLog(WorkflowJob.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -147,6 +151,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Transient
     public Map<String, String> getInputContext() {
         if (inputContextString == null) {
+            log.info("input context is empty.");
             setInputContext(new HashMap<String, String>());
         }
         Map<?, ?> raw = JsonUtils.deserialize(inputContextString, Map.class);
@@ -182,6 +187,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Transient
     public Map<String, String> getReportContext() {
         if (reportContextString == null) {
+            log.info("report context is empty.");
             setReportContext(new HashMap<String, String>());
         }
         Map<?, ?> raw = JsonUtils.deserialize(reportContextString, Map.class);
@@ -217,6 +223,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Transient
     public Map<String, String> getOutputContext() {
         if (outputContextString == null) {
+            log.info("output context is empty.");
             setOutputContext(new HashMap<String, String>());
         }
         Map<?, ?> raw = JsonUtils.deserialize(outputContextString, Map.class);

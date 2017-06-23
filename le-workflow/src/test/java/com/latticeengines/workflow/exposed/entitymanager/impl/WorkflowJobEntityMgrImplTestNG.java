@@ -122,8 +122,13 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob5.setTenant(tenant1);
         workflowJob5.setUserId(WorkflowUser.DEFAULT_USER.name());
         workflowJob5.setInputContextValue("filename", "abc");
-        workflowJob5.setWorkflowId(5L);
         workflowJobEntityMgr.create(workflowJob5);
+
+        workflowJob5.setWorkflowId(5L);
+        workflowJobEntityMgr.registerWorkflowId(workflowJob5);
+        workflowJob5 = workflowJobEntityMgr.findByApplicationId(workflowJob5.getApplicationId());
+        assertEquals(workflowJob5.getWorkflowId(), new Long(5L));
+
         JobStatus yarnJobStatus = new JobStatus();
         yarnJobStatus.setStatus(FinalApplicationStatus.FAILED);
         yarnJobStatus.setStartTime(10000L);

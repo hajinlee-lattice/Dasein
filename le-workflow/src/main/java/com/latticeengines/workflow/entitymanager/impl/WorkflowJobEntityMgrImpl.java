@@ -70,4 +70,10 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
         workflowJobDao.updateStatusFromYarn(workflowJob, yarnJobStatus);
         return workflowJob;
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void registerWorkflowId(WorkflowJob workflowJob) {
+        workflowJobDao.registerWorkflowId(workflowJob);
+    }
 }

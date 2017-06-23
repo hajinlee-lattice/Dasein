@@ -138,7 +138,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             WorkflowConfiguration workflowConfiguration) {
         long jobExecutionId = workflowService.startWorkflowJob(workflowName, workflowConfiguration);
         workflowJob.setWorkflowId(jobExecutionId);
-        workflowJobEntityMgr.update(workflowJob);
+        workflowJobEntityMgr.registerWorkflowId(workflowJob);
         return new WorkflowExecutionId(jobExecutionId);
     }
 

@@ -55,10 +55,6 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             throw new LedpException(LedpCode.LEDP_28022);
         }
         log.info(String.format("Looking up workflow for application id %s", appId));
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(appId.toString());
-        if (workflowJob == null) {
-            throw new RuntimeException(String.format("No workflow job found with application id %s", appId));
-        }
 
         if (workflowConfig.getWorkflowName() == null) {
             throw new LedpException(LedpCode.LEDP_28011, new String[] { workflowConfig.toString() });
@@ -71,13 +67,18 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", appContext, versionManager);
         } else {
             log.info("Enriching application context with sw package " + swlib);
-            appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", swlib, appContext,
-                    versionManager);
+            appContext = softwareLibraryService.loadSoftwarePackages("workflowapi", swlib, appContext, versionManager);
         }
         workflowService.registerJob(workflowConfig.getWorkflowName(), appContext);
 
         WorkflowExecutionId workflowId;
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(appId.toString());
+        if (workflowJob == null) {
+            throw new RuntimeException(String.format("No workflow job found with application id %s", appId));
+        }
+
         try {
+
             if (workflowConfig.isRestart()) {
                 log.info("Restarting workflow " + workflowConfig.getWorkflowIdToRestart().getId());
                 workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart());

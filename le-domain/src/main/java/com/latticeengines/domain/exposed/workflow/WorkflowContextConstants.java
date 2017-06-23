@@ -25,5 +25,6 @@ public class WorkflowContextConstants {
         public static final String JOB_TYPE = "JOB_TYPE";
         public static final String DATAFEED_NAME = "DATAFEED_NAME";
         public static final String DATAFEED_STATUS = "DATAFEED_STATUS";
+        public static final String INITIAL_DATAFEED_STATUS = "INITIAL_DATAFEED_STATUS";
     }
 }

@@ -17,4 +17,6 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
     void updateStatusFromYarn(WorkflowJob workflowJob, JobStatus yarnJobStatus);
 
+    void registerWorkflowId(WorkflowJob workflowJob);
+
 }

@@ -55,4 +55,17 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         query.setString("applicationId", workflowJob.getApplicationId());
         query.executeUpdate();
     }
+
+    @Override
+    public void registerWorkflowId(WorkflowJob workflowJob) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s workflowjob set workflowjob.workflowId=:workflowId where workflowjob.applicationId=:applicationId",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setLong("workflowId", workflowJob.getWorkflowId());
+        query.setString("applicationId", workflowJob.getApplicationId());
+        query.executeUpdate();
+    }
 }
