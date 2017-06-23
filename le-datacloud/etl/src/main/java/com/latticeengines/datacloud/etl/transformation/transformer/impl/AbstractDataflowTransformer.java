@@ -57,7 +57,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     protected Configuration yarnConfiguration;
 
     @Autowired
-    private MetadataProxy metadataProxy;
+    protected MetadataProxy metadataProxy;
 
     protected abstract String getDataFlowBeanName();
 
@@ -221,8 +221,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             }
             log.info("Select source " + sourceName + "@versions " + StringUtils.join(versions, ","));
         } catch (Exception e) {
-            log.info("Source " + sourceName + " is not initiated in HDFS");
-            e.printStackTrace();
+            log.error("Source " + sourceName + " is not initiated in HDFS", e);
             return false;
         }
         sourceTables.put(sourceName, sourceTable);

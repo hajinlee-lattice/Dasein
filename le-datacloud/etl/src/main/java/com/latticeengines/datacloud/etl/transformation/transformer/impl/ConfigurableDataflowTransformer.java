@@ -6,10 +6,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.impl.SimpleTransformationDataFlowService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class ConfigurableDataflowTransformer extends AbstractDataflowTransformer<TransformerConfig, TransformationFlowParameters> {
 
@@ -45,6 +47,14 @@ public class ConfigurableDataflowTransformer extends AbstractDataflowTransformer
 
     public void setSourceColumnEntityMgr(SourceColumnEntityMgr sourceColumnEntityMgr) {
         this.sourceColumnEntityMgr = sourceColumnEntityMgr;
+    }
+
+    public void setHdfsSourceEntityMgr(HdfsSourceEntityMgr hdfsSourceEntityMgr) {
+        this.hdfsSourceEntityMgr = hdfsSourceEntityMgr;
+    }
+
+    public void setMetadataProxy(MetadataProxy metadataProxy) {
+        this.metadataProxy = metadataProxy;
     }
 
 

@@ -9,11 +9,13 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlow;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.TransformerService;
 import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.ConfigurableDataflowTransformer;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("transformerService")
 public class TransformerServiceImpl implements TransformerService {
@@ -29,6 +31,12 @@ public class TransformerServiceImpl implements TransformerService {
 
     @Autowired
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
+
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    protected MetadataProxy metadataProxy;
 
     private Map<String, Transformer> transformerMap;
 
@@ -49,6 +57,8 @@ public class TransformerServiceImpl implements TransformerService {
             transformer.setSourceColumnEntityMgr(sourceColumnEntityMgr);
             transformer.setDataFlowBeanName(flow.getDataFlowBeanName());
             transformer.setDataFlowService(dataFlowService);
+            transformer.setHdfsSourceEntityMgr(hdfsSourceEntityMgr);
+            transformer.setMetadataProxy(metadataProxy);
             transformerList.add(transformer);
             transformerMap.put(transformer.getName(), transformer);
         }
