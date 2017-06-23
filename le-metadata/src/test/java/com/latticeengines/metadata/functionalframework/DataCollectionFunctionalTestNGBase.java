@@ -3,6 +3,7 @@ package com.latticeengines.metadata.functionalframework;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.metadata.dao.DataCollectionDao;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -12,6 +13,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import test.abstractconfmethod.C;
 
 public class DataCollectionFunctionalTestNGBase extends MetadataFunctionalTestNGBase {
 
@@ -30,7 +32,7 @@ public class DataCollectionFunctionalTestNGBase extends MetadataFunctionalTestNG
     @Override
     protected void cleanup() {
         dataCollection = dataCollectionEntityMgr.getDataCollection(collectionName);
-        dataCollectionEntityMgr.delete(dataCollection);
+        dataCollectionEntityMgr.removeDataCollection(collectionName);
         super.cleanup();
     }
 
