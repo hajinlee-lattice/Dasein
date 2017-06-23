@@ -103,7 +103,6 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         assertEquals(job.getJobStatus(), JobStatus.FAILED);
 
         workflowJob = workflowJobEntityMgr.findByApplicationId("applicationid_0001");
-        assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED);
 
     }
 
