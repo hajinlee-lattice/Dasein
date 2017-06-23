@@ -206,7 +206,10 @@ public class AccountMasterColumnMetadataServiceImplTestNG
                 expectedColumn.getApprovedUsageString());
         assertEquals(actualColumn.getCategory(), expectedColumn.getCategory());
         assertEquals(actualColumn.getJavaClass(), expectedColumn.getJavaClass());
-        assertEquals(actualColumn.isCanEnrich(), expectedColumn.isCanEnrich());
+        assertEquals(new Boolean(Boolean.TRUE.equals(actualColumn.isCanEnrich())), expectedColumn.isCanEnrich());
+        assertEquals(new Boolean(Boolean.TRUE.equals(actualColumn.isCanBis())), expectedColumn.isCanBis());
+        assertEquals(new Boolean(Boolean.TRUE.equals(actualColumn.isCanInsights())), expectedColumn.isCanInsights());
+        assertEquals(new Boolean(Boolean.TRUE.equals(actualColumn.isCanModel())), expectedColumn.isCanModel());
         assertEquals(actualColumn.getStatisticalType(), expectedColumn.getStatisticalType());
         assertEquals(actualColumn.getSubcategory(), expectedColumn.getSubcategory());
     }

@@ -87,9 +87,9 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
         savedAccountMasterColumn.setSubcategory(columnMetadata.getSubcategory());
         savedAccountMasterColumn.setStatisticalType(columnMetadata.getStatisticalType());
         savedAccountMasterColumn.setFundamentalType(columnMetadata.getFundamentalType());
-        savedAccountMasterColumn.setPremium(columnMetadata.isPremium());
+        savedAccountMasterColumn.setPremium(Boolean.TRUE.equals(columnMetadata.isPremium()));
         savedAccountMasterColumn.setDiscretizationStrategy(columnMetadata.getDiscretizationStrategy());
-        savedAccountMasterColumn.setInternalEnrichment(columnMetadata.isCanInternalEnrich());
+        savedAccountMasterColumn.setInternalEnrichment(Boolean.TRUE.equals(columnMetadata.isCanInternalEnrich()));
 
         ApprovedUsage approvedUsage = ApprovedUsage.NONE;
         if (Boolean.TRUE.equals(columnMetadata.isCanBis())) {
