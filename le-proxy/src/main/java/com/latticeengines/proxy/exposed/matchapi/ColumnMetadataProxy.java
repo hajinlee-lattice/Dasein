@@ -11,9 +11,11 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
@@ -31,7 +33,12 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private WatcherCache<String, List<ColumnMetadata>> enrichmentColumnsCache;
     private WatcherCache<String, DataCloudVersion> latestDataCloudVersionCache;
     private WatcherCache<String, AttributeRepository> amAttrRepoCache;
+    private boolean scheduled = false;
 
+    @Autowired
+    private BatonServiceImpl batonService;
+
+    @SuppressWarnings("unchecked")
     public ColumnMetadataProxy() {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
     }
@@ -57,8 +64,15 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                 .load(key -> getAttrRepoViaREST()) //
                 .initKeys(new String[] { AM_REPO }) //
                 .build();
+    }
 
-        enrichmentColumnsCache.scheduleInit(10, TimeUnit.MINUTES);
+    public void scheduleDelayedInitOfEnrichmentColCache() {
+        synchronized (this) {
+            if (!scheduled) {
+                enrichmentColumnsCache.scheduleInit(10, TimeUnit.MINUTES);
+                scheduled = true;
+            }
+        }
     }
 
     @Override
