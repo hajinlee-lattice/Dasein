@@ -81,11 +81,9 @@ def purge_internal(environment, image):
             continue
 
         tag = imageId['imageTag']
-        if '.' in tag or 'latest' == tag:
-            # if is a release tag or latest, do not delete
-            continue
-
-        revisions.append(tag)
+        if re.match(r'(\d+)', tag):
+            print tag + ' is a revision tag'
+            revisions.append(tag)
 
     if len(revisions) > 0:
         revisions.sort()
