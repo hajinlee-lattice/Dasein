@@ -11,7 +11,6 @@
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:redshiftdb-context.xml"/>
-    <import resource="classpath:camille-runtime-context.xml" />
 
     <context:component-scan base-package="com.latticeengines.query"/>
 

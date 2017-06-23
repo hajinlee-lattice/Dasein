@@ -51,15 +51,15 @@ public class DataCloudVersion implements HasPid, Serializable {
     private Date createDate;
 
     @JsonIgnore
-    @Column(name = "AccountMasterHdfsVersion", nullable = false)
+    @Column(name = "AccountMasterHdfsVersion")
     private String accountMasterHdfsVersion;
 
     @JsonIgnore
-    @Column(name = "AccountLookupHdfsVersion", nullable = false)
+    @Column(name = "AccountLookupHdfsVersion")
     private String accountLookupHdfsVersion;
 
     @JsonIgnore
-    @Column(name = "AMBucketedRedShiftTable", nullable = false)
+    @Column(name = "AMBucketedRedShiftTable")
     private String amBucketedRedShiftTable;
 
     @JsonIgnore

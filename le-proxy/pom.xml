@@ -84,6 +84,18 @@
             <classifier>intf</classifier>
         </dependency>
         <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>4.1.6.RELEASE</version>
