@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,8 +31,6 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
-
-import javax.annotation.PostConstruct;
 
 @Component("columnMetadataProxyMatchapi")
 public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface {
@@ -160,7 +160,10 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         List<ColumnMetadata> columns = requestColumnSelection(Predefined.Enrichment, dataCloudVersion);
         if (columns != null && !columns.isEmpty()) {
             enrichmentColumnsCache.put(dataCloudVersion, columns);
-            log.info("Loaded " + columns.size() + " columns into LoadingCache.");
+            if ("".equals(dataCloudVersion)) {
+                enrichmentColumnsCache.put(DEFAULT, columns);
+            }
+            log.info("Loaded " + columns.size() + " columns into Cache.");
         } else {
             log.warn("Got empty list when attempting to refresh enrichmentColumnsCache for " + dataCloudVersion
                     + ". Keep the old value.");
@@ -174,7 +177,10 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         DataCloudVersion latestVersion = requestLatestVersion(compatibleVersion);
         if (latestVersion != null) {
             latestDataCloudVersionCache.put(compatibleVersion, latestVersion);
-            log.info("Loaded latest version for compatibleVersion '" + compatibleVersion + "' into LoadingCache: "
+            if ("".equals(compatibleVersion)) {
+                latestDataCloudVersionCache.put(DEFAULT, latestVersion);
+            }
+            log.info("Loaded latest version for compatibleVersion '" + compatibleVersion + "' into Cache: "
                     + latestVersion.getVersion());
         } else {
             log.warn("Got null when attempting to refresh latestDataCloudVersionCache for " + compatibleVersion
