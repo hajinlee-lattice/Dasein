@@ -42,6 +42,8 @@ public interface HdfsSourceEntityMgr {
 
     Table getCollectedTableSince(IngestedRawSource source, Date earliest);
 
+    Table getCollectedTableSince(IngestedRawSource source, String firstVersion);
+
     Long count(Source source, String version);
 
     void purgeSourceAtVersion(Source source, String version);

@@ -379,6 +379,29 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
+    public Table getCollectedTableSince(IngestedRawSource source, String firstVersion) {
+
+        String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
+        List<String> avroPaths = new ArrayList<>();
+        try {
+            for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
+                if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
+                    String version = dir.substring(dir.lastIndexOf(HDFS_PATH_SEPARATOR) + 1);
+                    String success = rawDir + HDFS_PATH_SEPARATOR + version + HDFS_PATH_SEPARATOR + SUCCESS_FILE_SUFFIX;
+                    if (version.compareTo(firstVersion) > 0 && HdfsUtils.fileExists(yarnConfiguration, success)) {
+                        avroPaths.add(rawDir + HDFS_PATH_SEPARATOR + version + HDFS_PATH_SEPARATOR + WILD_CARD
+                                + AVRO_FILE_EXTENSION);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
+        }
+        return TableUtils.createTable(yarnConfiguration, source.getSourceName(),
+                avroPaths.toArray(new String[avroPaths.size()]), source.getPrimaryKey());
+    }
+
+    @Override
     public Long count(Source source, String version) {
         try {
             String avroDir;
