@@ -54,8 +54,4 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_SORTER = "sourceSorter";
     public static final String TRANSFORMER_COPIER = "sourceCopier";
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
-
-    public static final String ZK_WATCHER_AM_RELEASE = "AMRelease";
-    public static final String ZK_WATCHER_AM_MD_UPDATE = "AMMetadataUpdate";
-    public static final String ZK_WATCHER_AM_API_UPDATE = "AMMetadataApiUpdate"; // for watching proxies
 }

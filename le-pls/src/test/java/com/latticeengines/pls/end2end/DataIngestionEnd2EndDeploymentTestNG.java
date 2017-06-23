@@ -137,14 +137,14 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "initialConsolidate")
-    public void firstFinalize() {
-        log.info("Start calculating statistics ...");
+    public void firstAssemble() {
+        log.info("Start assembling data collection ...");
         ApplicationId appId = dataFeedProxy.assemble(DATA_FEED_NAME);
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "firstFinalize")
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "firstAssemble")
     public void verifyFirstImport() throws IOException {
         String customerSpace = CustomerSpace.parse(firstTenant.getId()).toString();
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStatsInDefaultColellction(customerSpace);
@@ -157,23 +157,22 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifyFirstImport")
     public void importSecondData() {
-        log.info("Start second consolidating data ...");
+    }
+
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importSecondData")
+    public void secondConsolidate() {
+        log.info("Start second consolidating ...");
         ApplicationId appId = dataFeedProxy.consolidate(DATA_FEED_NAME);
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importSecondData")
-    public void secondConsolidate() {
-
-    }
-
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondConsolidate")
-    public void secondFinalize() {
-
+    public void secondAssemble() {
+        log.info("Start second assembling ...");
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondFinalize")
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondAssemble")
     public void verifySecondImport() {
 
     }

@@ -180,4 +180,8 @@ public final class PathBuilder {
     public static Path buildLockPath(String podId, String division, String lockName) {
         return buildLocksPath(podId, division).append(lockName);
     }
+
+    public static Path buildWatcherPath(String podId, String watcherName) {
+        return new Path(PathConstants.PODS, podId, PathConstants.WATCHERS).append(watcherName);
+    }
 }

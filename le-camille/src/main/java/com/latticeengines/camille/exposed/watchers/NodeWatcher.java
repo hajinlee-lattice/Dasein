@@ -32,15 +32,15 @@ public class NodeWatcher {
 
     public static void registerWatcher(String watcherName) {
         if (!watchers.containsKey(watcherName)) {
-            Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), null, watcherName);
-            NodeCache cache = CamilleEnvironment.getCamille().createNodeCache(lockPath.toString());
+            Path watcherPath = PathBuilder.buildWatcherPath(CamilleEnvironment.getPodId(), watcherName);
+            NodeCache cache = CamilleEnvironment.getCamille().createNodeCache(watcherPath.toString());
             try {
                 cache.start();
             } catch (Exception e) {
-                throw new RuntimeException("Failed to register watcher at " + lockPath, e);
+                throw new RuntimeException("Failed to register watcher at " + watcherPath, e);
             }
             watchers.putIfAbsent(watcherName, cache);
-            log.info("Registered a new node cache " + watcherName + " at " + lockPath);
+            log.info("Registered a new node cache " + watcherName + " at " + watcherPath);
         }
     }
 

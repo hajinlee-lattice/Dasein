@@ -126,7 +126,11 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
             int bktIdx;
             if (decodeStrategy == null) {
                 // simple field
-                Object value = arguments.getObject(argPosMap.get(bktAttr.resolveSourceAttr()));
+                Integer posInArg = argPosMap.get(bktAttr.resolveSourceAttr());
+                if (posInArg == null) {
+                    log.error("Cannot find resolved src attr " + bktAttr.resolveSourceAttr() + " for bkt attr " + bktAttr.getNominalAttr() + " in argument.");
+                }
+                Object value = arguments.getObject(posInArg);
                 bktIdx = bucket(value, algo);
             } else {
                 bktIdx = bucket(decodedValues.get(bktAttr.resolveSourceAttr()), algo);

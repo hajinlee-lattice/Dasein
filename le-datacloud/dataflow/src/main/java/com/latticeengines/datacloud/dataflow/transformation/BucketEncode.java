@@ -137,12 +137,15 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
             for (DCBucketedAttr bktAttr: encAttr.getBktAttrs()) {
                 BitDecodeStrategy decodeStrategy = bktAttr.getDecodedStrategy();
                 if (decodeStrategy != null) {
+                    // suppose to be an encoded attribute
                     String srcAttr = bktAttr.getSourceAttr();
                     String nominalAttr = bktAttr.getNominalAttr();
                     if (inputFieldSet.contains(srcAttr) || inputFieldSet.contains(nominalAttr)) {
+                        // but it shows up in the input fields
                         bktAttr.setDecodedStrategy(null);
                         if (StringUtils.isBlank(srcAttr)) {
-                            bktAttr.setSourceAttr(srcAttr);
+                            // properly set src attr
+                            bktAttr.setSourceAttr(nominalAttr);
                         }
                     } else if (!inputFieldSet.contains(decodeStrategy.getEncodedColumn())) {
                         // not even have the encoded column, remove it from encAttrs
@@ -153,9 +156,10 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                 encodedAttr2.addBktAttr(bktAttr);
             }
             if (encodedAttr2.getBktAttrs() != null && !encodedAttr2.getBktAttrs().isEmpty()) {
+                encodedAttrs2.add(encodedAttr2);
+            } else {
                 // empty encoded attr
                 log.info("Skip enc attr " + encAttr.getEncAttr());
-                encodedAttrs2.add(encodedAttr2);
             }
         }
         return encodedAttrs2;

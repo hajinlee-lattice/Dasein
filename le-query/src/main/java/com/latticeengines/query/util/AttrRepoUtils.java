@@ -31,6 +31,7 @@ public class AttrRepoUtils {
     }
 
     private AttributeRepository getAMAttrRepo() {
+        // AM Attr Repo is cached in the proxy
         return columnMetadataProxy.getAttrRepo();
     }
 

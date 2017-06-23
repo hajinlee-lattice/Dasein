@@ -1,5 +1,7 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMApiUpdate;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,15 +14,11 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
+import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
@@ -40,7 +38,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     private static final Log log = LogFactory.getLog(EnrichmentServiceImpl.class);
     private static final String DUMMY_KEY = "TopNAttrTree";
 
-    private LoadingCache<String, TopNAttributeTree> topAttrsCache;
+    private WatcherCache<String, TopNAttributeTree> topAttrsCache;
     private Map<String, Boolean> flagMapForInternalEnrichment;
 
     @Autowired
@@ -49,19 +47,15 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     @Autowired
     private AttributeService attributeService;
 
-    @Autowired
-    @Qualifier("commonTaskScheduler")
-    private ThreadPoolTaskScheduler scheduler;
-
+    @SuppressWarnings("unchecked")
     @PostConstruct
     public void postConstruct() {
-        topAttrsCache = CacheBuilder.newBuilder().maximumSize(5).refreshAfterWrite(1, TimeUnit.HOURS)
-                .build(new CacheLoader<String, TopNAttributeTree>() {
-                    @Override
-                    public TopNAttributeTree load(String dummyKey) throws Exception {
+        topAttrsCache = WatcherCache.builder(AMApiUpdate.name()) //
+                .maximum(1) //
+                .load(key -> {
+                    if (DUMMY_KEY.equals(key)) {
                         TopNAttributeTree attributeTree = amStatsProxy.getTopAttrTree();
                         log.info("Loaded attributeTree into LoadingCache.");
-
                         List<LeadEnrichmentAttribute> allAttrs = attributeService.getAllAttributes();
                         Map<String, Boolean> updatedFlagMapForInternalEnrichment = new HashMap<>();
                         for (LeadEnrichmentAttribute attr : allAttrs) {
@@ -69,9 +63,13 @@ public class EnrichmentServiceImpl implements EnrichmentService {
                         }
                         flagMapForInternalEnrichment = updatedFlagMapForInternalEnrichment;
                         return attributeTree;
+                    } else {
+                        return null;
                     }
-                });
-        scheduler.scheduleWithFixedDelay(this::loadCache, TimeUnit.MINUTES.toMillis(30));
+                }) //
+                .initKeys(new String[] { DUMMY_KEY }) //
+                .build();
+        topAttrsCache.scheduleInit(30, TimeUnit.MINUTES);
     }
 
     @Override
