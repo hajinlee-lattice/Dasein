@@ -9,9 +9,9 @@ public interface DataFeedInterface {
 
     DataFeed findDataFeedByName(String customerSpace, String datafeedName);
 
-    DataFeedExecution finishExecution(String customerSpace, String datafeedName);
+    DataFeedExecution finishExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);
 
-    DataFeedExecution failExecution(String customerSpace, String datafeedName);
+    DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);
 
     DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 

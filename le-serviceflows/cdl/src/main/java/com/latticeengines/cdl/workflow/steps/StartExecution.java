@@ -25,6 +25,12 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
 
     @Override
     public void execute() {
+        boolean isActive = Status.Active.equals(configuration.getInitialDataFeedStatus());
+        putObjectInContext(IS_ACTIVE, isActive);
+        ExportDataToRedshiftConfiguration exportDataToRedshiftConfig = getConfigurationFromJobParameters(
+                ExportDataToRedshiftConfiguration.class);
+        exportDataToRedshiftConfig.setSkipStep(!isActive);
+        putObjectInContext(ExportDataToRedshiftConfiguration.class.getName(), exportDataToRedshiftConfig);
 
         DataFeedExecution execution = metadataProxy.updateExecutionWorkflowId(
                 configuration.getCustomerSpace().toString(), configuration.getDataFeedName(), jobId);
@@ -32,14 +38,6 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
 
         DataFeed datafeed = metadataProxy.findDataFeedByName(configuration.getCustomerSpace().toString(),
                 configuration.getDataFeedName());
-        boolean isActive = Status.Active.equals(datafeed.getStatus());
-        putObjectInContext(IS_ACTIVE, isActive);
-
-        ExportDataToRedshiftConfiguration exportDataToRedshiftConfig = getConfigurationFromJobParameters(
-                ExportDataToRedshiftConfiguration.class);
-        exportDataToRedshiftConfig.setSkipStep(!isActive);
-        putObjectInContext(ExportDataToRedshiftConfiguration.class.getName(), exportDataToRedshiftConfig);
-
         execution = datafeed.getActiveExecution();
 
         if (execution == null) {

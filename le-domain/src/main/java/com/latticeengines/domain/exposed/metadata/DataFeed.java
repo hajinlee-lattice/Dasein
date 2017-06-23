@@ -31,6 +31,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -236,17 +237,20 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     }
 
     public enum Status {
-        Initing("initing"), // no template yet
-        Initialized("initialized"), // import is ready to run
-        InitialLoaded("initialLoaded"), // initial import data loaded
-        InitialConsolidated("initialConsolidated"), // initial data consolidated
-        Active("active"), // master table has formed and pushed to data store
+        Initing("initing", false), // no template yet
+        Initialized("initialized", false), // import is ready to run
+        InitialLoaded("initialLoaded", true), // initial import data loaded
+        InitialConsolidated("initialConsolidated", true), // initial data
+                                                          // consolidated
+        Active("active", true), // master table has formed and pushed to data
+                                // store
 
-        Consolidating("consolidating"), //
-        Finalizing("finalizing"), //
-        Deleting("deleting");
+        Consolidating("consolidating", false), //
+        Finalizing("finalizing", false), //
+        Deleting("deleting", false);
 
         private final String name;
+        private boolean allowConsolidation;
         private static Map<String, Status> nameMap;
 
         static {
@@ -256,16 +260,26 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
             }
         }
 
-        Status(String name) {
+        Status(String name, boolean allowConsolidation) {
             this.name = name;
+            this.allowConsolidation = allowConsolidation;
         }
 
+        @JsonValue
         public String getName() {
             return this.name;
         }
 
         public String toString() {
             return this.name;
+        }
+
+        public boolean isAllowConsolidation() {
+            return allowConsolidation;
+        }
+
+        public void setAllowConsolidation(boolean allowConsolidation) {
+            this.allowConsolidation = allowConsolidation;
         }
 
         public static Status fromName(String name) {

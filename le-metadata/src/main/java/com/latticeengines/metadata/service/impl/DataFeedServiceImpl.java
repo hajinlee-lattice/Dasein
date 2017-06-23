@@ -35,8 +35,10 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public DataFeedExecution finishExecution(String customerSpace, String datafeedName) {
-        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Consolidated);
+    public DataFeedExecution finishExecution(String customerSpace, String datafeedName, String initialDataFeedStatus) {
+
+        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Consolidated,
+                getSuccessfulDataFeedStatus(initialDataFeedStatus));
     }
 
     @Override
@@ -67,8 +69,9 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public DataFeedExecution failExecution(String customerSpace, String datafeedName) {
-        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Failed);
+    public DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus) {
+        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Failed,
+                getFailedDataFeedStatus(initialDataFeedStatus));
     }
 
     @Override
@@ -81,5 +84,30 @@ public class DataFeedServiceImpl implements DataFeedService {
         execution.setWorkflowId(workflowId);
         datafeedExecutionEntityMgr.update(execution);
         return execution;
+    }
+
+    public Status getSuccessfulDataFeedStatus(String initialDataFeedStatus) {
+        Status datafeedStatus = Status.fromName(initialDataFeedStatus);
+        if (datafeedStatus == Status.InitialLoaded || datafeedStatus == Status.InitialConsolidated) {
+            return Status.InitialConsolidated;
+        } else if (datafeedStatus == Status.Active) {
+            return Status.Active;
+        }
+        throw new RuntimeException(
+                String.format("Can't finish this execution due to datafeed status is %s", initialDataFeedStatus));
+    }
+
+    public Status getFailedDataFeedStatus(String initialDataFeedStatus) {
+        Status datafeedStatus = Status.fromName(initialDataFeedStatus);
+        if (datafeedStatus == Status.InitialLoaded) {
+            return Status.InitialLoaded;
+        }
+        if (datafeedStatus == Status.InitialConsolidated) {
+            return Status.InitialConsolidated;
+        } else if (datafeedStatus == Status.Active) {
+            return Status.Active;
+        }
+        throw new RuntimeException(
+                String.format("Can't finish this execution due to datafeed status is %s", initialDataFeedStatus));
     }
 }

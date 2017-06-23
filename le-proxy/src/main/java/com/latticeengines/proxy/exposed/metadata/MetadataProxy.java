@@ -251,16 +251,18 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     }
 
     @Override
-    public DataFeedExecution finishExecution(String customerSpace, String datafeedName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/finishexecution",
-                customerSpace, datafeedName);
+    public DataFeedExecution finishExecution(String customerSpace, String datafeedName, String initialDataFeedStatus) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeeds/{datafeedName}/status/{initialDataFeedStatus}/finishexecution",
+                customerSpace, datafeedName, initialDataFeedStatus);
         return post("finishExecution", url, null, DataFeedExecution.class);
     }
 
     @Override
-    public DataFeedExecution failExecution(String customerSpace, String datafeedName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/failexecution",
-                customerSpace, datafeedName);
+    public DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeeds/{datafeedName}/status/{initialDataFeedStatus}/failexecution",
+                customerSpace, datafeedName, initialDataFeedStatus);
         return post("failExecution", url, null, DataFeedExecution.class);
     }
 

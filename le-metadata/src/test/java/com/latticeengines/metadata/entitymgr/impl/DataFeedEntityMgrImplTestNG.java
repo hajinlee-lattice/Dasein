@@ -130,13 +130,13 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
     @Test(groups = "functional", dependsOnMethods = "startExecution")
     public void finishExecution() {
         DataFeedExecution exec1 = datafeedEntityMgr.updateExecutionWithTerminalStatus(DATA_FEED_NAME,
-                DataFeedExecution.Status.Consolidated);
+                DataFeedExecution.Status.Consolidated, Status.InitialConsolidated);
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Consolidated);
 
         DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
         assertEquals(df.getExecutions().size(), 2);
-        assertEquals(df.getStatus(), Status.Active);
+        assertEquals(df.getStatus(), Status.InitialConsolidated);
 
         assertEquals(exec1.getStatus(), df.getExecutions().get(0).getStatus());
         assertEquals(exec1.getImports().size(), df.getTasks().size());

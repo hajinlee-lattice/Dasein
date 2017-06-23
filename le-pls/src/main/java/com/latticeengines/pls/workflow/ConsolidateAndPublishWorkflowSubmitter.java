@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
@@ -40,6 +41,9 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Autowired
+    private WorkflowProxy workflowProxy;
+
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
@@ -48,27 +52,42 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 datafeedName);
         log.info(String.format("data feed %s status: %s", datafeedName, datafeed.getStatus()));
         DataFeedExecution execution = datafeed.getActiveExecution();
-        if (datafeed.getStatus() != Status.InitialLoaded && datafeed.getStatus() != Status.Active
-                && datafeed.getStatus() != Status.InitialConsolidated
-                || execution.getStatus() == DataFeedExecution.Status.Started) {
+
+        Status datafeedStatus = datafeed.getStatus();
+        if (!datafeedStatus.isAllowConsolidation()) {
             throw new RuntimeException("we can't launch any consolidate workflow now as it is not ready.");
+        } else if (execution.getStatus() == DataFeedExecution.Status.Started) {
+            if (execution.getWorkflowId() == null //
+                    || !workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId())).getJobStatus()
+                            .isTerminated()) {
+                throw new RuntimeException(
+                        "we can't launch any consolidate workflow now as there is one already running.");
+            } else {
+                log.info(String.format(
+                        "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
+                        execution, datafeed));
+                metadataProxy.failExecution(MultiTenantContext.getCustomerSpace().toString(), datafeedName,
+                        datafeedStatus.getName());
+            }
         }
         execution = metadataProxy.startExecution(MultiTenantContext.getCustomerSpace().toString(), datafeedName);
         log.info(String.format("started execution of %s with status: %s", datafeedName, execution.getStatus()));
-        WorkflowConfiguration configuration = generateConfiguration(datafeedName);
+        WorkflowConfiguration configuration = generateConfiguration(datafeedName, datafeedStatus);
         return workflowJobService.submit(configuration);
     }
 
-    private WorkflowConfiguration generateConfiguration(String datafeedName) {
+    private WorkflowConfiguration generateConfiguration(String datafeedName, Status initialDataFeedStatus) {
         DataCollection dataCollection = dataCollectionProxy
                 .getDefaultDataCollection(MultiTenantContext.getCustomerSpace().toString());
         return new ConsolidateAndPublishWorkflowConfiguration.Builder() //
+                .initialDataFeedStatus(initialDataFeedStatus) //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
                 .datafeedName(datafeedName) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
+                        .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, initialDataFeedStatus.getName()) //
                         .build()) //
                 .dataCollectionName(dataCollection.getName()) //
                 .idField(InterfaceName.LEAccountIDLong.name()) //

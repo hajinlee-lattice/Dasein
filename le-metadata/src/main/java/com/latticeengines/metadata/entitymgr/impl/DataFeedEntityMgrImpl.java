@@ -134,10 +134,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         log.info(String.format("starting execution %s", execution));
         datafeedExecutionEntityMgr.update(execution);
 
-        datafeed.setActiveExecution(execution);
-        if (datafeed.getStatus() == Status.Active) {
-            datafeed.setStatus(Status.Consolidating);
-        }
+        datafeed.setStatus(Status.Consolidating);
         tasks = datafeed.getTasks();
         tasks.forEach(task -> {
             datafeedTaskEntityMgr.update(task, null, new Date());
@@ -149,7 +146,8 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status) {
+    public DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
+            Status datafeedStatus) {
         DataFeed datafeed = findByNameInflated(datafeedName);
         if (datafeed == null) {
             log.error("Can't find data feed: " + datafeedName);
@@ -165,13 +163,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedExecutionEntityMgr.create(newExecution);
 
         datafeed.setActiveExecutionId(newExecution.getPid());
-        if (datafeed.getStatus() == Status.InitialLoaded) {
-            if (status == DataFeedExecution.Status.Consolidated) {
-                datafeed.setStatus(Status.InitialConsolidated);
-            }
-        } else if (datafeed.getStatus() == Status.Consolidating) {
-            datafeed.setStatus(Status.Active);
-        }
+        datafeed.setStatus(datafeedStatus);
         log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName, datafeed));
         datafeedDao.update(datafeed);
         return execution;

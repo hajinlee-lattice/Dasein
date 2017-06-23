@@ -45,19 +45,20 @@ public class DataFeedResource {
         datafeedService.updateDataFeed(customerSpace, datafeedName, status);
     }
 
-    @RequestMapping(value = "/{datafeedName}/finishexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/{datafeedName}/status/{initialDataFeedStatus}/finishexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "finish data feed execution")
     public DataFeedExecution finishExecution(@PathVariable String customerSpace, //
-            @PathVariable String datafeedName) {
-        return datafeedService.finishExecution(customerSpace, datafeedName);
+            @PathVariable String datafeedName, @PathVariable String initialDataFeedStatus) {
+        return datafeedService.finishExecution(customerSpace, datafeedName, initialDataFeedStatus);
     }
 
-    @RequestMapping(value = "/{datafeedName}/failexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/{datafeedName}/status/{initialDataFeedStatus}/failexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "fail data feed execution")
-    public DataFeedExecution failExecution(@PathVariable String customerSpace, @PathVariable String datafeedName) {
-        return datafeedService.failExecution(customerSpace, datafeedName);
+    public DataFeedExecution failExecution(@PathVariable String customerSpace, @PathVariable String datafeedName,
+            @PathVariable String initialDataFeedStatus) {
+        return datafeedService.failExecution(customerSpace, datafeedName, initialDataFeedStatus);
     }
 
     @RequestMapping(value = "/{datafeedName}/execution/workflow/{workflowId}", method = RequestMethod.POST, headers = "Accept=application/json")

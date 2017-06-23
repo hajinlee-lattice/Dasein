@@ -2,8 +2,8 @@ package com.latticeengines.metadata.entitymgr;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
+import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution.Status;
 
 public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
 
@@ -11,7 +11,8 @@ public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
 
     DataFeed findByName(String datafeedName);
 
-    DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, Status status);
+    DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
+            Status datafeedStatus);
 
     DataFeed findByNameInflatedWithAllExecutions(String datafeedName);
 

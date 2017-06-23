@@ -6,6 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
+import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
 
@@ -21,6 +22,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
         public ConsolidateDataConfiguration consolidateDataConfiguration = new ConsolidateDataConfiguration();
 
         public RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
+
+        public Builder initialDataFeedStatus(Status initialDataFeedStatus) {
+            startExecutionConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
+            return this;
+        }
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("consolidateAndPublishWorkflow", customerSpace,
@@ -78,6 +84,7 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             return configuration;
         }
+
     }
 
 }
