@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.avro.util.Utf8;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -63,8 +64,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Trace
     public ColumnSelection parseColumnSelection(MatchInput input) {
-        ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(input
-                .getDataCloudVersion());
+        ColumnSelectionService columnSelectionService = beanDispatcher
+                .getColumnSelectionService(input.getDataCloudVersion());
         if (input.getUnionSelection() != null) {
             return combineSelections(columnSelectionService, input.getUnionSelection(), input.getDataCloudVersion());
         } else if (input.getPredefinedSelection() != null) {
@@ -142,7 +143,8 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         return matchContext;
     }
 
-    MatchOutput initializeMatchOutput(MatchInput input, ColumnSelection columnSelection, List<ColumnMetadata> metadatas) {
+    MatchOutput initializeMatchOutput(MatchInput input, ColumnSelection columnSelection,
+            List<ColumnMetadata> metadatas) {
         MatchOutput output = new MatchOutput(input.getRootOperationUid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
@@ -269,13 +271,27 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             String originalZipCode = null;
             if (keyPositionMap.containsKey(MatchKey.Zipcode)) {
                 for (Integer pos : keyPositionMap.get(MatchKey.Zipcode)) {
-                    originalZipCode = inputRecord.get(pos).toString();
+                    if (inputRecord.get(pos) != null) {
+                        if (inputRecord.get(pos) instanceof String) {
+                            originalZipCode = (String) inputRecord.get(pos);
+                        } else if (inputRecord.get(pos) instanceof Utf8 || inputRecord.get(pos) instanceof Long
+                                || inputRecord.get(pos) instanceof Integer) {
+                            originalZipCode = inputRecord.get(pos).toString();
+                        }
+                    }
                 }
             }
             String originalPhoneNumber = null;
             if (keyPositionMap.containsKey(MatchKey.PhoneNumber)) {
                 for (Integer pos : keyPositionMap.get(MatchKey.PhoneNumber)) {
-                    originalPhoneNumber = inputRecord.get(pos).toString();
+                    if (inputRecord.get(pos) != null) {
+                        if (inputRecord.get(pos) instanceof String) {
+                            originalPhoneNumber = (String) inputRecord.get(pos);
+                        } else if (inputRecord.get(pos) instanceof Utf8 || inputRecord.get(pos) instanceof Long
+                                || inputRecord.get(pos) instanceof Integer) {
+                            originalPhoneNumber = inputRecord.get(pos).toString();
+                        }
+                    }
                 }
             }
 
