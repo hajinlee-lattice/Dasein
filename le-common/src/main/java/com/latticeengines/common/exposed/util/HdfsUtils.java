@@ -44,6 +44,8 @@ public class HdfsUtils {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(HdfsUtils.class);
+    private static final int EOF = -1;
+    private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
     public interface HdfsFileFormat {
         public static final String AVRO_FILE = ".*.avro";
@@ -610,5 +612,37 @@ public class HdfsUtils {
         }
 
         return provider;
+    }
+
+    public static final long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration, InputStream inputStream,
+            String hdfsPath, long totalRows) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
+                return copyLarge(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), outputStream, totalRows);
+            }
+        }
+    }
+
+    private static long copyLarge(InputStream input, OutputStream output, long totalRows)
+            throws IOException {
+        byte [] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        boolean stop = false;
+        int n = 0;
+        long rows = 0;
+        while (EOF != (n = input.read(buffer))) {
+            if (!stop) {
+                output.write(buffer, 0, n);
+            }
+            for (int i = 0; i < n; i++) {
+                if (buffer[i] == '\n') {
+                    rows++;
+                    if (!stop && rows > totalRows) {
+                        stop = true;
+                    }
+                }
+            }
+        }
+        return rows;
     }
 }
