@@ -1,10 +1,12 @@
 package com.latticeengines.datacloud.etl.transformation.transformer;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public class TransformStep {
 
@@ -20,6 +22,7 @@ public class TransformStep {
     private Schema targetSchema;
     private long elapsedTime;
     private Long count;
+    private Map<String, Table> baseTables;
 
     public TransformStep(String name, Transformer transformer, Source[] baseSources, List<String> baseVersions,
                          Source[] baseTemplates, Source target, String targetVersion, Source targetTemplate, String config) {
@@ -92,6 +95,14 @@ public class TransformStep {
 
     public void setCount(Long count) {
         this.count = count;
+    }
+
+    public Map<String, Table> getBaseTables() {
+        return baseTables;
+    }
+
+    public void setBaseTables(Map<String, Table> baseTables) {
+        this.baseTables = baseTables;
     }
 
 }

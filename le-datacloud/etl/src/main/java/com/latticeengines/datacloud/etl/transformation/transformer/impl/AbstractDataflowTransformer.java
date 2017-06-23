@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.transformation.service.impl.SimpleTransformationDataFlowService;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P extends TransformationFlowParameters>
         extends AbstractTransformer<T> {
@@ -53,6 +55,9 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     protected abstract String getDataFlowBeanName();
 
@@ -151,8 +156,10 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
                 versionList.add(baseSourceVersions.get(i));
             }
             preDataFlowProcessing(step, workflowDir, parameters, configuration);
-            Table result = dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(),
-                    parameters);
+            Map<String, Table> baseTables = setupSourceTables(baseSourceVersionMap);
+            step.setBaseTables(baseTables);
+            //Table result = dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(), parameters);
+            Table result = dataFlowService.executeDataFlow(step, getDataFlowBeanName(), parameters, workflowDir);
             step.setCount(result.getCount());
             List<Schema> baseSchemas = getBaseSourceSchemas(step);
             step.setTargetSchema(getTargetSchema(result, parameters, baseSchemas));
@@ -186,6 +193,40 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         } else {
             return null;
         }
+    }
+
+    protected Map<String, Table> setupSourceTables(Map<Source, List<String>> baseSourceVersions) {
+        Map<String, Table> sourceTables = new HashMap<>();
+        for (Map.Entry<Source, List<String>> entry : baseSourceVersions.entrySet()) {
+            Source baseSource = entry.getKey();
+            List<String> baseSourceVersion = entry.getValue();
+            log.info("Add base source " + baseSource.getSourceName());
+            addSource(sourceTables, baseSource, baseSourceVersion);
+        }
+        return sourceTables;
+    }
+
+    private boolean addSource(Map<String, Table> sourceTables, Source source, List<String> versions) {
+        String sourceName = source.getSourceName();
+        Table sourceTable;
+        try {
+            if (source instanceof TableSource) {
+                TableSource tableSource = (TableSource) source;
+                sourceTable = metadataProxy.getTable(tableSource.getCustomerSpace().toString(),
+                        tableSource.getTable().getName());
+            } else if (versions.size() == 1) {
+                sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, versions.get(0));
+            } else {
+                sourceTable = hdfsSourceEntityMgr.getTableAtVersions(source, versions);
+            }
+            log.info("Select source " + sourceName + "@versions " + StringUtils.join(versions, ","));
+        } catch (Exception e) {
+            log.info("Source " + sourceName + " is not initiated in HDFS");
+            e.printStackTrace();
+            return false;
+        }
+        sourceTables.put(sourceName, sourceTable);
+        return true;
     }
 
     @Override

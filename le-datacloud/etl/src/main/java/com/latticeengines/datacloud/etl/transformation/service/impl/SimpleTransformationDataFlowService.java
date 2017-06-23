@@ -14,6 +14,7 @@ import com.latticeengines.datacloud.core.source.RefreshedSource;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CollectionDataFlowKeys;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -36,6 +37,23 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
     @Autowired
     private MetadataProxy metadataProxy;
 
+    public <P extends TransformationFlowParameters> Table executeDataFlow(TransformStep step, String flowBean,
+            P parameters, String workflowDir) {
+        if (StringUtils.isEmpty(flowBean)) {
+            throw new LedpException(LedpCode.LEDP_25012,
+                    new String[] { step.getTargetTemplate().getSourceName(), "Name of dataFlowBean cannot be null" });
+        }
+        String flowName = CollectionDataFlowKeys.TRANSFORM_FLOW;
+        DataFlowContext ctx = dataFlowContext(step.getTargetTemplate(), step.getBaseTables(), parameters, workflowDir);
+        if (step.getTargetTemplate() instanceof PipelineSource) {
+            ctx.setProperty(DataFlowProperty.FLOWNAME, step.getTargetTemplate().getSourceName() + HIPHEN + flowName);
+        } else {
+            ctx.setProperty(DataFlowProperty.FLOWNAME, step.getTargetTemplate().getSourceName() + HIPHEN + flowBean);
+        }
+        return dataTransformationService.executeNamedTransformation(ctx, flowBean);
+    }
+
+    @Deprecated
     public <P extends TransformationFlowParameters> Table executeDataFlow(Source source, String workflowDir,
             Map<Source, List<String>> baseSourceVersions, String flowBean, P parameters) {
 
@@ -67,6 +85,7 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
         return dataTransformationService.executeNamedTransformation(ctx, flowBean);
     }
 
+    @Deprecated
     private Map<String, Table> setupSourceTables(Map<Source, List<String>> baseSourceVersions) {
         Map<String, Table> sourceTables = new HashMap<>();
         for (Map.Entry<Source, List<String>> entry : baseSourceVersions.entrySet()) {
@@ -78,6 +97,7 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
         return sourceTables;
     }
 
+    @Deprecated
     private boolean addSource(Map<String, Table> sourceTables, Source source, List<String> versions) {
         String sourceName = source.getSourceName();
         Table sourceTable;
