@@ -140,9 +140,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         }
         tasks = datafeed.getTasks();
         tasks.forEach(task -> {
-            task.setStartTime(new Date());
-            task.setImportData(null);
-            datafeedTaskEntityMgr.update(task);
+            datafeedTaskEntityMgr.update(task, null, new Date());
         });
         log.info(String.format("starting execution: updating data feed to %s", datafeed));
         datafeedDao.update(datafeed);

@@ -54,8 +54,7 @@ public class DataCollectionFunctionalTestNGBase extends MetadataFunctionalTestNG
         if (tableEntityMgr.findByName(table.getName()) == null) {
             tableEntityMgr.create(table);
         }
-        dataCollectionEntityMgr.upsertTableToCollection(collectionName, table.getName(),
-                role);
+        dataCollectionEntityMgr.upsertTableToCollection(collectionName, table.getName(), role);
     }
 
     protected List<Table> getTablesInCollection() {

@@ -61,16 +61,16 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void create(DataFeedTask dataFeedTask) {
-        Table dataTable = dataFeedTask.getImportData();
-        Table templateTable = dataFeedTask.getImportTemplate();
+    public void create(DataFeedTask datafeedTask) {
+        Table dataTable = datafeedTask.getImportData();
+        Table templateTable = datafeedTask.getImportTemplate();
         if (dataTable != null) {
             Table existing = tableEntityMgr.findByName(dataTable.getName());
             if (existing == null) {
                 dataTable.setTableType(TableType.DATATABLE);
                 tableEntityMgr.create(dataTable);
             } else {
-                dataFeedTask.setImportData(existing);
+                datafeedTask.setImportData(existing);
             }
         }
         tableTypeHolder.setTableType(TableType.IMPORTTABLE);
@@ -80,50 +80,50 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
                 templateTable.setTableType(TableType.IMPORTTABLE);
                 tableEntityMgr.create(templateTable);
             } else {
-                dataFeedTask.setImportTemplate(existing);
+                datafeedTask.setImportTemplate(existing);
             }
         }
         tableTypeHolder.setTableType(TableType.DATATABLE);
-        datafeedTaskDao.create(dataFeedTask);
-        addImportDataTableToQueue(dataFeedTask);
+        datafeedTaskDao.create(datafeedTask);
+        addImportDataTableToQueue(datafeedTask);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Table peekFirstDataTable(DataFeedTask dataFeedTask) {
-        Table table = datafeedTaskTableDao.peekFirstDataTable(dataFeedTask);
+    public Table peekFirstDataTable(DataFeedTask datafeedTask) {
+        Table table = datafeedTaskTableDao.peekFirstDataTable(datafeedTask);
         TableEntityMgr.inflateTable(table);
         return table;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public Table pollFirstDataTable(DataFeedTask dataFeedTask) {
-        Table table = datafeedTaskTableDao.pollFirstDataTable(dataFeedTask);
+    public Table pollFirstDataTable(DataFeedTask datafeedTask) {
+        Table table = datafeedTaskTableDao.pollFirstDataTable(datafeedTask);
         TableEntityMgr.inflateTable(table);
         return table;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public int getDataTableSize(DataFeedTask dataFeedTask) {
-        if (dataFeedTask == null) {
+    public int getDataTableSize(DataFeedTask datafeedTask) {
+        if (datafeedTask == null) {
             return 0;
         }
-        return datafeedTaskTableDao.getDataTableSize(dataFeedTask);
+        return datafeedTaskTableDao.getDataTableSize(datafeedTask);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void addImportDataTableToQueue(DataFeedTask dataFeedTask) {
+    public void addImportDataTableToQueue(DataFeedTask datafeedTask) {
         try {
-            if (dataFeedTask.getImportData() != null) {
-                if (dataFeedTask.getImportData().getPid() == null) {
-                    dataFeedTask.getImportData().setTableType(TableType.DATATABLE);
-                    tableEntityMgr.create(dataFeedTask.getImportData());
-                    createOrUpdate(dataFeedTask);
+            if (datafeedTask.getImportData() != null) {
+                if (datafeedTask.getImportData().getPid() == null) {
+                    datafeedTask.getImportData().setTableType(TableType.DATATABLE);
+                    tableEntityMgr.create(datafeedTask.getImportData());
+                    update(datafeedTask, datafeedTask.getImportData());
                 }
-                addTableToQueue(dataFeedTask, dataFeedTask.getImportData());
+                addTableToQueue(datafeedTask, datafeedTask.getImportData());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -132,13 +132,13 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void addTableToQueue(DataFeedTask dataFeedTask, Table table) {
+    public void addTableToQueue(DataFeedTask datafeedTask, Table table) {
         if (!TableType.DATATABLE.equals(table.getTableType())) {
             throw new IllegalArgumentException(
                     "Can only put data table in the queue. But " + table.getName() + " is a " + table.getTableType());
         }
         DataFeedTaskTable datafeedTaskTable = new DataFeedTaskTable();
-        datafeedTaskTable.setFeedTask(dataFeedTask);
+        datafeedTaskTable.setFeedTask(datafeedTask);
         datafeedTaskTable.setTable(table);
         datafeedTaskTableDao.create(datafeedTaskTable);
     }
@@ -184,7 +184,8 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             datafeedTask.setStatus(Status.Active);
             datafeedTask.setLastImported(new Date());
             log.info(String.format("creating new import table for data feed task %s", datafeedTask));
-            createOrUpdate(datafeedTask);
+            update(datafeedTask, datafeedTask.getImportData(), datafeedTask.getStatus(),
+                    datafeedTask.getLastImported());
             addTableToQueue(datafeedTask, datafeedTask.getImportData());
         }
     }
@@ -200,12 +201,12 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void createDataFeedTask(DataFeedTask dataFeedTask) {
-        create(dataFeedTask);
-        Table importTemplate = dataFeedTask.getImportTemplate();
+    public void createDataFeedTask(DataFeedTask datafeedTask) {
+        create(datafeedTask);
+        Table importTemplate = datafeedTask.getImportTemplate();
         updateReferences(importTemplate);
         createReferences(importTemplate);
-        Table importData = dataFeedTask.getImportData();
+        Table importData = datafeedTask.getImportData();
         if (importData != null) {
             updateReferences(importData);
             createReferences(importData);
@@ -305,5 +306,23 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
                 attributeDao.create(attr);
             }
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void update(DataFeedTask datafeedTask, Table importData, Date startTime) {
+        datafeedTaskDao.update(datafeedTask, importData, startTime);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void update(DataFeedTask datafeedTask, Table importData) {
+        datafeedTaskDao.update(datafeedTask, importData);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void update(DataFeedTask datafeedTask, Table importData, Status status, Date lastImported) {
+        datafeedTaskDao.update(datafeedTask, importData, status, lastImported);
     }
 }
