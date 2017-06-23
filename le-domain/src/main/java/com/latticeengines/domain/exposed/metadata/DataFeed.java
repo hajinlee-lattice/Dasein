@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.Index;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -236,6 +238,11 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         this.activeExecution = activeExecution;
     }
 
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
     public enum Status {
         Initing("initing", false), // no template yet
         Initialized("initialized", false), // import is ready to run
@@ -267,7 +274,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
         @JsonValue
         public String getName() {
-            return this.name;
+            return StringUtils.capitalize(super.name());
         }
 
         public String toString() {

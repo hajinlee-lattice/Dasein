@@ -11,6 +11,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
@@ -111,6 +112,7 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         assertNotNull(retrieved.getTasks().get(0).getImportTemplate().getPid());
         assertEquals(retrieved.getTasks().get(0).getImportData().getTableType(), TableType.DATATABLE);
         assertNotNull(retrieved.getTasks().get(0).getImportData().getPid());
+        JsonUtils.deserialize(retrieved.toString(), DataFeed.class);
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
