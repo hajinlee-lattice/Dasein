@@ -84,7 +84,7 @@ def purge_internal(environment, image):
         tag = imageId['imageTag']
         if re.match(r'(\d+)', tag):
             print tag + ' is a revision tag'
-            revisions.append(tag)
+            # revisions.append(tag)
 
     if len(revisions) > 0:
         revisions.sort()
