@@ -129,7 +129,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
     public void deleteSegment() {
         MetadataSegment retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
         segmentEntityMgr.delete(retrieved);
-        assertEquals(segmentEntityMgr.findAll().size(), 1);
+        assertEquals(segmentEntityMgr.findAll().size(), 0);
     }
 
     private MetadataSegmentProperty copyFromExistingSegmentProperty(MetadataSegmentProperty existingProperty) {
