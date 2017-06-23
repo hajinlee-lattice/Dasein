@@ -168,7 +168,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     private SoftwarePackage getInstalledPackageByNameVersion(String module, String name, String version) {
         List<SoftwarePackage> packages = getInstalledPackages(module);
         for (SoftwarePackage pkg : packages) {
-            if (!pkg.getName().equals(name)) {
+            if (StringUtils.isBlank(pkg.getName()) || !pkg.getName().equals(name)) {
                 continue;
             }
             if (StringUtils.isBlank(version) || version.equals(pkg.getVersion())) {
