@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
@@ -61,19 +60,5 @@ public class QueryTranslator {
             return null;
         }
     }
-
-
-    private FrontEndQuery frontEndQuery;
-    private SchemaInterpretation objectType;
-
-    public QueryTranslator(FrontEndQuery frontEndQuery, SchemaInterpretation objectType) {
-        this.frontEndQuery = frontEndQuery;
-        this.objectType = objectType;
-    }
-
-    public Query translate() {
-        return translate(frontEndQuery);
-    }
-
 
 }

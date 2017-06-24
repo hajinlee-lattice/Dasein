@@ -3,29 +3,14 @@ package com.latticeengines.domain.exposed.util;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
-import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.Sort;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 
 public final class ReverseQueryTranslator {
-
-    public static FrontEndQuery translate(Query query) {
-        FrontEndQuery result = new FrontEndQuery();
-        FrontEndRestriction restriction = translateRestriction(query.getRestriction());
-        result.setRestriction(restriction);
-        result.setFreeFormTextSearch(query.getFreeFormTextSearch());
-        result.setPageFilter(query.getPageFilter());
-        result.setSort(translateSort(query.getSort()));
-        return result;
-    }
 
     public static FrontEndRestriction translateRestriction(Restriction restriction) {
         if (restriction == null) {
@@ -67,27 +52,6 @@ public final class ReverseQueryTranslator {
         throw new RuntimeException(String.format("Restriction is not in the correct format: %s", restriction));
     }
 
-    private static FrontEndSort translateSort(Sort sort) {
-        List<AttributeLookup> lookups = sort.getLookups().stream().map(l -> (AttributeLookup) l).collect(Collectors.toList());
-        return new FrontEndSort(lookups, sort.getDescending());
-    }
+    //TODO: may need a method to combine restriction and statistics to populate bktId
 
-    private Query query;
-
-    @Deprecated
-    public ReverseQueryTranslator(Query query) {
-        this.query = query;
-    }
-
-    @Deprecated
-    public FrontEndQuery translate() {
-        FrontEndQuery result = new FrontEndQuery();
-
-//        FrontEndRestriction restriction = translateRestriction(query.getRestriction());
-//        result.setRestriction(restriction);
-//        result.setFreeFormTextSearch(query.getFreeFormTextSearch());
-//        result.setPageFilter(query.getPageFilter());
-//        result.setSort(query.getSort());
-        return result;
-    }
 }
