@@ -291,7 +291,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             'Online Presence': '#a981e1',
             'Technology Profile': '#70bf4a',
             'Website Keywords': '#f6b300',
-            'Website Profile': '#26649b'
+            'Website Profile': '#26649b',
+            'Lead Information': '#f966bf'
         }
         for (var i = 0; i < possibleNumberofCategories; i++) {
             var categoryName = categoryList[i].categoryName,
