@@ -39,10 +39,6 @@ public class DataCollectionFunctionalTestNGBase extends MetadataFunctionalTestNG
         collectionName = dataCollection.getName();
     }
 
-    protected void addTableToCollection(Table table) {
-        addTableToCollection(table, TableRoleInCollection.ConsolidatedAccount);
-    }
-
     protected void addTableToCollection(Table table, TableRoleInCollection role) {
         if (tableEntityMgr.findByName(table.getName()) == null) {
             tableEntityMgr.create(table);
