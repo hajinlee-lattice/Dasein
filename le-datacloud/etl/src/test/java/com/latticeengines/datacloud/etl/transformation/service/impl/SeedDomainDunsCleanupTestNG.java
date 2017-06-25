@@ -62,29 +62,29 @@ public class SeedDomainDunsCleanupTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
     @Override
-    String getPathToUploadBaseData() {
+    protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
-    String getPathForResult() {
+    protected String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(source.getSourceName());
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
         return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
             configuration.setName("SeedDomainDunsCleanup");
@@ -179,7 +179,7 @@ public class SeedDomainDunsCleanupTestNG
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         Object[][] expectedData = { //
                 { "2", "e.com", "1" }, //

@@ -78,12 +78,12 @@ public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -94,7 +94,7 @@ public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
         ObjectMapper om = new ObjectMapper();
@@ -297,7 +297,7 @@ public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         Object[][] expectedData = getExpectedRecordList();

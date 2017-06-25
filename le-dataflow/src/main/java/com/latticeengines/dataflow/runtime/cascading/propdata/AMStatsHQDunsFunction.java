@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import static com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsHQDunsFunction2.calculateHQDuns;
+
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -80,37 +82,6 @@ public class AMStatsHQDunsFunction extends BaseOperation<Map> //
         result.set(hqDunsFieldLoc, hqDuns);
 
         functionCall.getOutputCollector().add(result);
-    }
-
-    private String calculateHQDuns(int subIndicator, int statusCode, //
-            String duns, String dduns, String gduns) {
-        String hqDuns = null;
-
-        if (statusCode == 0 && subIndicator == 0) {
-            // Site type - Stand Alone Business
-            // Site D-U-N-S = DDUNS = HQ DUNS
-
-            hqDuns = duns;
-        } else if (statusCode == 1 && subIndicator == 0) {
-            // Site type - Global HQ
-            // GDUNS = DDUNS = HQ DUNS
-
-            hqDuns = (dduns == null) ? gduns : dduns;
-        } else if (statusCode == 1 && subIndicator == 3) {
-            // Site type - Subsidiary
-            // Site D-U-N-S = HQ DUNS
-
-            hqDuns = duns;
-        } else if (statusCode == 0 && subIndicator == 3) {
-            // Site type - Single Site Subsidiary
-            // If Site D-U-N-S = DDUNS, the HQ DUNS
-
-            if (duns.equalsIgnoreCase(dduns)) {
-                hqDuns = duns;
-            }
-        }
-
-        return hqDuns;
     }
 
     public static class Params {

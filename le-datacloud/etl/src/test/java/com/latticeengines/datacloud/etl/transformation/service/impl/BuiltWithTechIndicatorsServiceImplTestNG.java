@@ -65,12 +65,12 @@ public class BuiltWithTechIndicatorsServiceImplTestNG
     }
 
     @Override
-    TransformationService<BasicTransformationConfiguration> getTransformationService() {
+    protected TransformationService<BasicTransformationConfiguration> getTransformationService() {
         return service;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -80,7 +80,7 @@ public class BuiltWithTechIndicatorsServiceImplTestNG
     }
 
     @Override
-    BasicTransformationConfiguration createTransformationConfiguration() {
+    protected BasicTransformationConfiguration createTransformationConfiguration() {
         BasicTransformationConfiguration configuration = new BasicTransformationConfiguration();
         configuration.setVersion(targetVersion);
         return configuration;

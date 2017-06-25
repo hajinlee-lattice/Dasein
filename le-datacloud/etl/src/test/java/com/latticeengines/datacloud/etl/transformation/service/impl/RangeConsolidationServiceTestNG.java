@@ -57,7 +57,7 @@ public class RangeConsolidationServiceTestNG
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
             configuration.setName("RangeConsolidation");
@@ -104,29 +104,29 @@ public class RangeConsolidationServiceTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
     @Override
-    String getPathToUploadBaseData() {
+    protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    String getPathForResult() {
+    protected String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         String[][] expectedData = { { "0-1M", "201-500", ">10,000" }, { "null", "null", "null" },
                 { "101-250M", "0", "1-10" } };

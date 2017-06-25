@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,22 +23,42 @@ public class BucketExpandFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 2798963376075410999L;
 
+    public static final String DIM_PREFIX = "_Dim_";
+    public static final String DEDUP_PREFIX = "_Dedup_";
+
     private final List<DCEncodedAttr> encodedAttrs;
     private final Set<String> excludeAttrs;
+    private final List<String> dimAttrs;
+    private final List<String> dedupFields;
     private final Map<String, BucketAlgorithm> bucketAttrs;
 
-    private final Map<String, Integer> attrIdMap = new HashMap<>();
-    private final Map<Integer, Integer> argIdToAttrIdMap = new HashMap<>();
+    private final Map<String, Integer> attrIdMap = new HashMap<>();  // field name to arg pos
+    private final Map<Integer, Integer> argIdToAttrIdMap = new HashMap<>();  // arg pos to attr id
     private final Map<Integer, DCEncodedAttr> encAttrArgPos = new HashMap<>();
     private final Map<Integer, BucketAlgorithm> bktAttrArgPos = new HashMap<>();
+    private final Map<String, Integer> dimIdMap = new HashMap<>();  // field name to arg pos
 
-    // expand a row into multiple records of (attrId, bktId)
-    public BucketExpandFunction(List<DCEncodedAttr> encodedAttrs, Set<String> excludeAttrs, Map<String, BucketAlgorithm> bucketAttrs,
-            String attrIdField, String bktIdField) {
-        super(new Fields(attrIdField, bktIdField));
+    // expand a row into multiple records of (attrId, bktId, dim ...)
+    public BucketExpandFunction(List<DCEncodedAttr> encodedAttrs, Set<String> excludeAttrs, List<String> dimAttrs,
+                                List<String> dedupFields, Map<String, BucketAlgorithm> bucketAttrs, String attrIdField, String bktIdField) {
+        super(constructDeclaration(dimAttrs, dedupFields, attrIdField, bktIdField));
         this.encodedAttrs = encodedAttrs;
         this.excludeAttrs = excludeAttrs;
+        this.dimAttrs = dimAttrs;
+        this.dedupFields = dedupFields;
         this.bucketAttrs = bucketAttrs;
+    }
+
+    private static Fields constructDeclaration(List<String> dimAttrs, List<String> dedupAttrs,String attrIdField, String bktIdField) {
+        if (dimAttrs == null || dimAttrs.isEmpty()) {
+            return new Fields(attrIdField, bktIdField);
+        }
+        List<String> allFields = new ArrayList<>();
+        allFields.add(attrIdField);
+        allFields.add(bktIdField);
+        dimAttrs.forEach(dim -> allFields.add(DIM_PREFIX + dim));
+        dedupAttrs.forEach(f -> allFields.add(DEDUP_PREFIX + f));
+        return new Fields(allFields.toArray(new String[allFields.size()]));
     }
 
     @Override
@@ -59,8 +80,8 @@ public class BucketExpandFunction extends BaseOperation implements Function {
                     BucketAlgorithm algorithm = bktAttrArgPos.get(i);
                     bktId = BucketEncodeFunction.bucket(value, algorithm);
                 }
-                if  (bktId > 0) {
-                    Tuple tuple = new Tuple(attrId, bktId);
+                if (bktId > 0) {
+                    Tuple tuple = constructResult(arguments, attrId, bktId);
                     functionCall.getOutputCollector().add(tuple);
                 }
             } else if (encAttrArgPos.containsKey(i)) {
@@ -70,12 +91,29 @@ public class BucketExpandFunction extends BaseOperation implements Function {
                     int attrId = attrIdMap.get(bktAttr.getNominalAttr());
                     int bktId = BitCodecUtils.getBits((long) value, bktAttr.getLowestBit(), bktAttr.getNumBits());
                     if (bktId > 0) {
-                        Tuple tuple = new Tuple(attrId, bktId);
+                        Tuple tuple = constructResult(arguments, attrId, bktId);
                         functionCall.getOutputCollector().add(tuple);
                     }
                 }
             }
         }
+    }
+
+    private Tuple constructResult(TupleEntry arguments, int attrId, int bktId) {
+        Tuple tuple = new Tuple(attrId, bktId);
+        if (dimAttrs != null && !dimAttrs.isEmpty()) {
+            for (String dimAttr: dimAttrs) {
+                Object obj = arguments.getObject(dimAttr);
+                tuple.add(obj);
+            }
+        }
+        if (dedupFields != null && !dedupFields.isEmpty()) {
+            for (String dedup: dedupFields) {
+                Object obj = arguments.getObject(dedup);
+                tuple.add(obj);
+            }
+        }
+        return tuple;
     }
 
     private void initArgPosMap(TupleEntry arguments) {
@@ -120,7 +158,7 @@ public class BucketExpandFunction extends BaseOperation implements Function {
                     }
                 } else {
                     String fieldName = (String) arguments.getFields().get(i);
-                    if (!excludeAttrs.contains(fieldName)) {
+                    if (!excludeAttrs.contains(fieldName)){
                         map.put(fieldName, attrIdx++);
                     }
                 }
@@ -143,7 +181,6 @@ public class BucketExpandFunction extends BaseOperation implements Function {
                 argIdToAttrIdMap.putAll(map);
             }
         }
-
     }
 
 }

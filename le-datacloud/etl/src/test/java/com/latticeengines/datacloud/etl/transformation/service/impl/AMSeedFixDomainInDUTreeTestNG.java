@@ -70,12 +70,12 @@ public class AMSeedFixDomainInDUTreeTestNG extends
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -86,7 +86,7 @@ public class AMSeedFixDomainInDUTreeTestNG extends
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
 
@@ -174,7 +174,7 @@ public class AMSeedFixDomainInDUTreeTestNG extends
     };
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         Map<Long, GenericRecord> recordMap = new HashMap<>();

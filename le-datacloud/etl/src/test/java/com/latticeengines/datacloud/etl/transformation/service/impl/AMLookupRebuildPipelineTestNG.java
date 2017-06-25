@@ -27,8 +27,8 @@ import com.latticeengines.datacloud.dataflow.transformation.AMSeedSecondDomainCl
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterLookupRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedSecondDomainCleanupConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AccountMasterLookupRebuildConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
@@ -71,22 +71,22 @@ public class AMLookupRebuildPipelineTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
     @Override
-    String getPathToUploadBaseData() {
+    protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
@@ -157,7 +157,7 @@ public class AMLookupRebuildPipelineTestNG
     }
 
     @Override
-    String getPathForResult() {
+    protected String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
@@ -217,7 +217,7 @@ public class AMLookupRebuildPipelineTestNG
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
 
         Object[][] expectedData = {

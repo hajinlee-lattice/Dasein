@@ -58,22 +58,22 @@ public class FeaturePivotServiceImplTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
     @Override
-    String getPathToUploadBaseData() {
+    protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
             configuration.setName("FeaturePivoted");
@@ -107,14 +107,14 @@ public class FeaturePivotServiceImplTestNG
     }
 
     @Override
-    String getPathForResult() {
+    protected String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(source.getSourceName());
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
         return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
         Object[][] expectedData = new Object[][] { { "hpsystem.com", 26766, 26766, 11, 55, 0 },
                 { "primrosehillschool.com", 67978, 67978, 8, 83, 0 },

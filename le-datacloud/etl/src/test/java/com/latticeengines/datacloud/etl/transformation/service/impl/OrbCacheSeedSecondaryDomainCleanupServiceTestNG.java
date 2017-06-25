@@ -68,12 +68,12 @@ public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -83,7 +83,7 @@ public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
@@ -183,7 +183,7 @@ public class OrbCacheSeedSecondaryDomainCleanupServiceTestNG
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         Object[][] expectedData = { //

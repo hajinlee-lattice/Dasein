@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketedFilterConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
@@ -193,7 +194,8 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         targetTable.setNamePrefix(statsTablePrefix);
         step.setTargetTable(targetTable);
 
-        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
+        CalculateStatsConfig conf = new CalculateStatsConfig();
+        step.setConfiguration(appendEngineConf(conf, heavyEngineConfig()));
         return step;
     }
 

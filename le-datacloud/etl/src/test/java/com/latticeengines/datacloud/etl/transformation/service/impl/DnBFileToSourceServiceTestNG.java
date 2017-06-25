@@ -68,22 +68,22 @@ public class DnBFileToSourceServiceTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
     @Override
-    String getPathToUploadBaseData() {
+    protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
@@ -125,14 +125,14 @@ public class DnBFileToSourceServiceTestNG
     }
 
     @Override
-    String getPathForResult() {
+    protected String getPathForResult() {
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
         return hdfsPathBuilder.constructTransformationSourceDir(source, targetVersion).toString();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         String[] expectedDuns = { "970372808", "970372809", "970372810", "970372811", "970372812", "970372813",
                 "970372814", "970372815", "970372816" };

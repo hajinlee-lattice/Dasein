@@ -86,12 +86,12 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -101,7 +101,7 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
         ObjectMapper om = new ObjectMapper();
@@ -309,7 +309,7 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         Object[][] expectedData = getExpectedRecordList();

@@ -189,7 +189,7 @@ public class TblDrivenTransformationTestNG
         
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
             configuration.setName("TblDrivenTransform");
@@ -286,29 +286,29 @@ public class TblDrivenTransformationTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return new GeneralSource("Amtest");
     }
 
     @Override
-    String getPathToUploadBaseData() {
+    protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    String getPathForResult() {
+    protected String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
 
         int rowNum = 0;

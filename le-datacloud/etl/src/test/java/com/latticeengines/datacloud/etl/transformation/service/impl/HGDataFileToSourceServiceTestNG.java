@@ -61,22 +61,22 @@ public class HGDataFileToSourceServiceTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
     @Override
-    String getPathToUploadBaseData() {
+    protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
@@ -116,13 +116,13 @@ public class HGDataFileToSourceServiceTestNG
     }
 
     @Override
-    String getPathForResult() {
+    protected String getPathForResult() {
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
         return hdfsPathBuilder.constructTransformationSourceDir(source, targetVersion).toString();
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         String[][] expectedData = new String[][] { { "gersonco.com", "Louis M. Gerson Co. Inc." },
                 { null, "Boston Steel Fabricators Inc." }, { "eckelacoustic.com", "Eckel Industries" },

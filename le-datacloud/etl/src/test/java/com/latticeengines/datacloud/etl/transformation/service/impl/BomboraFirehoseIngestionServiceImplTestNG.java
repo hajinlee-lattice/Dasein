@@ -24,17 +24,17 @@ public class BomboraFirehoseIngestionServiceImplTestNG
     BomboraFirehose source;
 
     @Override
-    TransformationService<BomboraFirehoseConfiguration> getTransformationService() {
+    protected TransformationService<BomboraFirehoseConfiguration> getTransformationService() {
         return refreshService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
     @Override
-    BomboraFirehoseConfiguration createTransformationConfiguration() {
+    protected BomboraFirehoseConfiguration createTransformationConfiguration() {
         List<String> versionsToProcess = new ArrayList<>();
         versionsToProcess.add(baseSourceVersion);
         BomboraFirehoseConfiguration conf = refreshService.createTransformationConfiguration(versionsToProcess, null);
@@ -42,5 +42,5 @@ public class BomboraFirehoseIngestionServiceImplTestNG
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {}
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {}
 }

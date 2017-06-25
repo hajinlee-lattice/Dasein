@@ -42,12 +42,12 @@ public class HGDataCleanServiceImplTestNG extends TransformationServiceImplTestN
     }
 
     @Override
-    TransformationService<HGDataCleanConfiguration> getTransformationService() {
+    protected TransformationService<HGDataCleanConfiguration> getTransformationService() {
         return hgDataCleanService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -57,7 +57,7 @@ public class HGDataCleanServiceImplTestNG extends TransformationServiceImplTestN
     }
 
     @Override
-    HGDataCleanConfiguration createTransformationConfiguration() {
+    protected HGDataCleanConfiguration createTransformationConfiguration() {
         HGDataCleanConfiguration configuration = new HGDataCleanConfiguration();
         configuration.setVersion(targetVersion);
         calendar.set(2016, Calendar.AUGUST, 1);
@@ -71,7 +71,7 @@ public class HGDataCleanServiceImplTestNG extends TransformationServiceImplTestN
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int recordsToCheck = 100;
         int pos = 0;

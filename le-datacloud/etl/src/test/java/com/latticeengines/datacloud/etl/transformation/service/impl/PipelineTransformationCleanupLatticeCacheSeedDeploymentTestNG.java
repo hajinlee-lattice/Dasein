@@ -102,12 +102,12 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -118,7 +118,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
 
         PipelineTransformationRequest request = new PipelineTransformationRequest();
 
@@ -276,7 +276,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         Map<String, GenericRecord> recordMap = new HashMap<>();

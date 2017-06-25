@@ -26,12 +26,12 @@ public abstract class PipelineTransformationTestNGBase
     protected DataCloudVersionEntityMgr versionEntityMgr;
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -53,17 +53,21 @@ public abstract class PipelineTransformationTestNGBase
         return null;
     }
 
-    protected String setDataFlowEngine(String conf, String engine) throws IOException {
+    protected String setDataFlowEngine(String conf, String engine) {
         TransformationFlowParameters.EngineConfiguration engineConfiguration = new TransformationFlowParameters.EngineConfiguration();
         engineConfiguration.setEngine(engine);
         return setDataFlowEngine(conf, engineConfiguration);
     }
 
     protected String setDataFlowEngine(String conf,
-            TransformationFlowParameters.EngineConfiguration engineConfiguration) throws IOException {
-        ObjectNode on = om.valueToTree(om.readTree(conf));
-        on.set("EngineConfig", om.valueToTree(engineConfiguration));
-        return om.writeValueAsString(on);
+            TransformationFlowParameters.EngineConfiguration engineConfiguration) {
+        try {
+            ObjectNode on = om.valueToTree(om.readTree(conf));
+            on.set("EngineConfig", om.valueToTree(engineConfiguration));
+            return om.writeValueAsString(on);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

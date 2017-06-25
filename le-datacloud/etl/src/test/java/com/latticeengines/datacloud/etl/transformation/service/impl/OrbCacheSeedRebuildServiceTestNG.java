@@ -74,22 +74,22 @@ public class OrbCacheSeedRebuildServiceTestNG
     }
 
     @Override
-    TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
         return pipelineTransformationService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
     @Override
-    String getPathToUploadBaseData() {
+    protected String getPathToUploadBaseData() {
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
 
@@ -295,14 +295,14 @@ public class OrbCacheSeedRebuildServiceTestNG
     }
 
     @Override
-    String getPathForResult() {
+    protected String getPathForResult() {
         Source targetSource = sourceService.findBySourceName(targetSourceName);
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         Object[][] expectedData = { { "1", "google.com", "Company1", "101-250M", ">10,000", "Media" },
                 { "3", "yahoo.com", "Company3", "null", "201-500", "null" },
@@ -352,7 +352,7 @@ public class OrbCacheSeedRebuildServiceTestNG
         verifyIntermediateResultAvroRecords(records);
     }
 
-    void verifyIntermediateResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyIntermediateResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         Object[][] expectedData = {
                 { "1", "Company1", "company", 50000, 50000, 50000L, 50000L, 50000L, 50000L, 50000L, ">10,000",

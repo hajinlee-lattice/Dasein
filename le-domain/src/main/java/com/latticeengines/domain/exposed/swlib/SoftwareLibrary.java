@@ -58,12 +58,7 @@ public enum SoftwareLibrary {
     public static List<SoftwareLibrary> getLoadingSequence(Module module, List<SoftwareLibrary> libs) {
         TopologicalTraverse traverse = new TopologicalTraverse();
         List<Dependency> init = libs.stream().map(l -> new Dependency(module, l)).collect(Collectors.toList());
-        List<Dependency> deps = new ArrayList<>();
-        traverse.traverse(init, (object, ctx) -> {
-            if (object instanceof Dependency) {
-                deps.add((Dependency) object);
-            }
-        });
+        List<Dependency> deps = traverse.sort(init, (dep) -> new Dependency(dep.module, dep.lib));
         List<SoftwareLibrary> depLibs = new ArrayList<>();
         // not use stream, because not sure how it handles ordering, which is important here.
         deps.forEach(d -> depLibs.add(d.lib));

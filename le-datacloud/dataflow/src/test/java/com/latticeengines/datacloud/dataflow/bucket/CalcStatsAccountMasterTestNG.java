@@ -9,9 +9,11 @@ import org.apache.avro.generic.GenericRecord;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 
 public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
@@ -60,8 +62,10 @@ public class CalcStatsAccountMasterTestNG extends DataCloudDataFlowFunctionalTes
     }
 
     private TransformationFlowParameters getParameters() {
+        CalculateStatsConfig conf = new CalculateStatsConfig();
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Arrays.asList("AccountMasterBucketed", "AccountMasterProfile"));
+        parameters.setConfJson(JsonUtils.serialize(conf));
         return parameters;
     }
 

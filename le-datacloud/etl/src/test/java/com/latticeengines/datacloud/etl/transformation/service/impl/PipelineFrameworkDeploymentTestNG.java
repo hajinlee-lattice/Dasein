@@ -137,7 +137,7 @@ public class PipelineFrameworkDeploymentTestNG extends PipelineTransformationDep
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         return currentConfig.get();
     }
 
@@ -290,7 +290,7 @@ public class PipelineFrameworkDeploymentTestNG extends PipelineTransformationDep
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         // correctness is tested in the dataflow functional test
         log.info("Start to verify records one by one.");
         Integer rowCount = 0;

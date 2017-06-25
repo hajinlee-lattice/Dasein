@@ -402,8 +402,7 @@ public class Node {
     }
 
     public Node retain(String... outputFields) {
-        return new Node(builder.register(new RetainOperation(opInput(identifier), new FieldList(outputFields))),
-                builder);
+        return retain(new FieldList(outputFields));
     }
 
     public Node groupByAndRetain(FieldList outputFields, FieldList groupByFields, FieldList sortingFields) {
@@ -417,7 +416,7 @@ public class Node {
     }
 
     public Node discard(String... toDiscard) {
-        return new Node(builder.addDiscard(identifier, new FieldList(toDiscard)), builder);
+        return discard(new FieldList(toDiscard));
     }
 
     public Node checkpoint() {

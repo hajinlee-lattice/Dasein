@@ -166,7 +166,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         return currentConfig;
     }
 
@@ -311,7 +311,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
 
         log.info("Start to verify records one by one.");
         Integer rowCount = 0;

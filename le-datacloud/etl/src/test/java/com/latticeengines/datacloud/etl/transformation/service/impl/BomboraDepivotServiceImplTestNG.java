@@ -23,17 +23,17 @@ public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformation
     BomboraDepivoted source;
 
     @Override
-    TransformationService<BomboraDepivotConfiguration> getTransformationService() {
+    protected TransformationService<BomboraDepivotConfiguration> getTransformationService() {
         return refreshService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
     @Override
-    BomboraDepivotConfiguration createTransformationConfiguration() {
+    protected BomboraDepivotConfiguration createTransformationConfiguration() {
         BomboraDepivotConfiguration conf = new BomboraDepivotConfiguration();
         conf.setSourceName(source.getSourceName());
         conf.setSourceConfigurations(new HashMap<String, String>());
@@ -45,5 +45,5 @@ public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformation
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {}
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {}
 }

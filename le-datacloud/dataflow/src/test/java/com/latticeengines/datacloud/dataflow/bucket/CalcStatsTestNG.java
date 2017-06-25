@@ -22,18 +22,20 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunctionalTestNGBase;
 import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
 import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 
 public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
-    private static final int ENC_ATTR_1 = 4;
-    private static final int ENC_ATTR_2 = 5;
-    private static final int ENC_ATTR_3 = 6;
+    private static final int ENC_ATTR_1 = 0;
+    private static final int ENC_ATTR_2 = 1;
+    private static final int ENC_ATTR_3 = 2;
 
-    private static final String PROFILE = "profile";
+    protected static final String PROFILE = "profile";
 
     @Override
     protected String getFlowBeanName() {
@@ -75,20 +77,20 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
     private TransformationFlowParameters prepareInput() {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of("EAttr1", Long.class), //
+                Pair.of("EAttr2", Long.class), //
+                Pair.of("EAttr3", Long.class), //
                 Pair.of(ATTR_RENAMED_ROW_ID, Long.class), //
                 Pair.of(ATTR_RELAY_STR, String.class), //
                 Pair.of(ATTR_RELAY_INT, Integer.class), //
-                Pair.of("IgnoreField", String.class), //
-                Pair.of("EAttr1", Long.class), //
-                Pair.of("EAttr2", Long.class), //
-                Pair.of("EAttr3", Long.class) //
+                Pair.of("IgnoreField", String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1L, "String1", 0, "hello", 0L, 0L, 0L }, //
-                { 2L, "String2", 200, "hello", 0L, 0L, 0L }, //
-                { 3L, "String3", null, "hello", 0L, 0L, 0L }, //
-                { 4L, null, 10, "hello", 0L, 0L, 0L }, //
-                { 5L, "String5", 4, "hello", 0L, 0L, 0L } //
+                { 0L, 0L, 0L, 1L, "String1", 0, "hello" }, //
+                { 0L, 0L, 0L, 2L, "String2", 200, "hello" }, //
+                { 0L, 0L, 0L, 3L, "String3", null, "hello" }, //
+                { 0L, 0L, 0L, 4L, null, 10, "hello" }, //
+                { 0L, 0L, 0L, 5L, "String5", 4, "hello" } //
         };
 
         populateIntervalInt(data);
@@ -105,6 +107,7 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
 
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Arrays.asList(AVRO_INPUT, PROFILE));
+        parameters.setConfJson(JsonUtils.serialize(new CalculateStatsConfig()));
         return parameters;
     }
 
@@ -113,72 +116,162 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         return Collections.singletonMap(PROFILE, "/tmp/profile/" + PROFILE + ".avro");
     }
 
-    private void populateIntervalInt(Object[][] data) {
-        updateIntervalInt(data, 0, 0);
-        updateIntervalInt(data, 1, 1);
-        updateIntervalInt(data, 2, 35);
-        updateIntervalInt(data, 3, 100);
-        updateIntervalInt(data, 4, null);
+    protected void populateIntervalInt(Object[][] data) {
+        Integer val = null;
+        for (int i = 0; i < data.length; i++) {
+            switch (i % 5) {
+                case 0:
+                    val = 0;
+                    break;
+                case 1:
+                    val = 1;
+                    break;
+                case 2:
+                    val = 35;
+                    break;
+                case 3:
+                    val = 100;
+                    break;
+                case 4:
+                    val = null;
+            }
+            updateIntervalInt(data, i, val);
+        }
     }
 
     private void updateIntervalInt(Object[][] data, int rowNumber, Integer value) {
         data[rowNumber][ENC_ATTR_1] = BucketTestUtils.setIntervalInt((long) data[rowNumber][ENC_ATTR_1], value);
     }
 
-    private void populateIntervalDouble(Object[][] data) {
-        updateIntervalDouble(data, 0, null);
-        updateIntervalDouble(data, 1, 2.8);
-        updateIntervalDouble(data, 2, 10.0);
-        updateIntervalDouble(data, 3, -1.4E9);
-        updateIntervalDouble(data, 4, null);
+    protected void populateIntervalDouble(Object[][] data) {
+        Double val = null;
+        for (int i = 0; i < data.length; i++) {
+            switch (i % 5) {
+                case 0:
+                    val = null;
+                    break;
+                case 1:
+                    val = 2.8;
+                    break;
+                case 2:
+                    val = 10.0;
+                    break;
+                case 3:
+                    val = -1.4E9;
+                    break;
+                case 4:
+                    val = null;
+            }
+            updateIntervalDouble(data, i, val);
+        }
     }
 
     private void updateIntervalDouble(Object[][] data, int rowNumber, Double value) {
         data[rowNumber][ENC_ATTR_1] = BucketTestUtils.setIntervalDouble((long) data[rowNumber][ENC_ATTR_1], value);
     }
 
-    private void populateCatString(Object[][] data) {
-        updateCatString(data, 0, "Value1");
-        updateCatString(data, 1, null);
-        updateCatString(data, 2, "Value2");
-        updateCatString(data, 3, null);
-        updateCatString(data, 4, "Value3");
+    protected void populateCatString(Object[][] data) {
+        String val = null;
+        for (int i = 0; i < data.length; i++) {
+            switch (i % 5) {
+                case 0:
+                    val = "Value1";
+                    break;
+                case 1:
+                    val = null;
+                    break;
+                case 2:
+                    val = "Value2";
+                    break;
+                case 3:
+                    val = null;
+                    break;
+                case 4:
+                    val = "Value3";
+            }
+            updateCatString(data, i, val);
+        }
     }
 
     private void updateCatString(Object[][] data, int rowNumber, String value) {
         data[rowNumber][ENC_ATTR_2] = BucketTestUtils.setCatString((long) data[rowNumber][ENC_ATTR_2], value);
     }
 
-    private void populateCatMapString(Object[][] data) {
-        updateCatMapString(data, 0, "Group1A");
-        updateCatMapString(data, 1, "Group3B");
-        updateCatMapString(data, 2, "Group1B");
-        updateCatMapString(data, 3, null);
-        updateCatMapString(data, 4, null);
+    protected void populateCatMapString(Object[][] data) {
+        String val = null;
+        for (int i = 0; i < data.length; i++) {
+            switch (i % 5) {
+                case 0:
+                    val = "Group1A";
+                    break;
+                case 1:
+                    val = "Group3B";
+                    break;
+                case 2:
+                    val = "Group1B";
+                    break;
+                case 3:
+                    val = null;
+                    break;
+                case 4:
+                    val = null;
+            }
+            updateCatMapString(data, i, val);
+        }
     }
 
     private void updateCatMapString(Object[][] data, int rowNumber, String value) {
         data[rowNumber][ENC_ATTR_2] = BucketTestUtils.setCatMapString((long) data[rowNumber][ENC_ATTR_2], value);
     }
 
-    private void populateBooleans(Object[][] data) {
-        updateBooleans(data, 0, new Boolean[] { true, false, true, null });
-        updateBooleans(data, 1, new Boolean[] { true, false, false, null });
-        updateBooleans(data, 2, new Boolean[] { true, null, null, null });
-        updateBooleans(data, 3, new Boolean[] { true, false, true, null });
-        updateBooleans(data, 4, new Boolean[] { null, false, false, null });
+    protected void populateBooleans(Object[][] data) {
+        Boolean[] val = null;
+        for (int i = 0; i < data.length; i++) {
+            switch (i % 5) {
+                case 0:
+                    val = new Boolean[] { true, false, true, null };
+                    break;
+                case 1:
+                    val = new Boolean[] { true, false, false, null };
+                    break;
+                case 2:
+                    val = new Boolean[] { true, null, null, null };
+                    break;
+                case 3:
+                    val = new Boolean[] { true, false, true, null };
+                    break;
+                case 4:
+                    val = new Boolean[] { null, false, false, null };
+            }
+            updateBooleans(data, i, val);
+        }
     }
 
     private void updateBooleans(Object[][] data, int rowNumber, Boolean[] booleans) {
         data[rowNumber][ENC_ATTR_2] = BucketTestUtils.setBooleans((long) data[rowNumber][ENC_ATTR_2], booleans);
     }
 
-    private void populateYesBits(Object[][] data) {
-        updateYesBits(data, 0, new int[] { 3, 1026 });
-        updateYesBits(data, 1, new int[] {});
-        updateYesBits(data, 2, new int[] { 3 });
-        updateYesBits(data, 3, new int[] { 1026 });
-        updateYesBits(data, 4, new int[] { 1, 5 });
+    protected void populateYesBits(Object[][] data) {
+        int[] val = null;
+        for (int i = 0; i < data.length; i++) {
+            switch (i % 5) {
+                case 0:
+                    val = new int[] { 3, 1026 };
+                    break;
+                case 1:
+                    val = new int[] {};
+                    break;
+                case 2:
+                    val = new int[] { 3 };
+                    break;
+                case 3:
+                    val = new int[] { 1026 };
+                    break;
+                case 4:
+                    val = new int[] { 1, 5 };
+            }
+            updateYesBits(data, i, val);
+        }
     }
 
     private void updateYesBits(Object[][] data, int rowNumber, int[] trueBits) {

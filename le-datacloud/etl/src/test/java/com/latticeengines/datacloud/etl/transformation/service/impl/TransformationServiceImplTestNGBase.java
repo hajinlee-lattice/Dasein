@@ -65,17 +65,17 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
     protected String targetVersion = HdfsPathBuilder.dateFormat.format(new Date());
     protected Calendar calendar = GregorianCalendar.getInstance();
 
-    abstract TransformationService<T> getTransformationService();
+    protected abstract TransformationService<T> getTransformationService();
 
-    abstract Source getSource();
+    protected abstract Source getSource();
 
-    abstract String getPathToUploadBaseData();
+    protected abstract String getPathToUploadBaseData();
 
-    abstract T createTransformationConfiguration();
+    protected abstract T createTransformationConfiguration();
 
-    abstract String getPathForResult();
+    protected abstract String getPathForResult();
 
-    abstract void verifyResultAvroRecords(Iterator<GenericRecord> records);
+    protected abstract void verifyResultAvroRecords(Iterator<GenericRecord> records);
 
     @BeforeMethod(groups = { "functional", "deployment", "pipeline1", "pipeline2" })
     public void setUp() throws Exception {

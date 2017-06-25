@@ -24,10 +24,10 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.AccountMaster;
+import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceBucketer;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceSorter;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.StatsCalculator;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
@@ -40,7 +40,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
     private static final Log log = LogFactory.getLog(AccountMasterBucketTestNG.class);
 
     @Autowired
-    private AccountMaster accountMaster;
+    protected AccountMaster accountMaster;
 
     @Test(groups = "pipeline1")
     public void testTransformation() throws Exception {
@@ -66,7 +66,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
             configuration.setName("AccountMasterBucket");
@@ -94,7 +94,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         // correctness is tested in the dataflow functional test
         log.info("Start to verify records one by one.");
         int rowCount = 0;
@@ -115,7 +115,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         Assert.assertEquals(rowCount, 1000);
     }
 
-    private TransformationStepConfig profile() {
+    protected TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
         List<String> baseSources = Collections.singletonList(accountMaster.getSourceName());
         step.setBaseSources(baseSources);
@@ -137,7 +137,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         return step;
     }
 
-    private TransformationStepConfig bucket() {
+    protected TransformationStepConfig bucket() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setBaseSources(Collections.singletonList(accountMaster.getSourceName()));
         step.setInputSteps(Collections.singletonList(1));
@@ -146,10 +146,10 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         return step;
     }
 
-    private TransformationStepConfig calcStats() {
+    protected TransformationStepConfig calcStats() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(0, 2));
-        step.setTransformer(StatsCalculator.TRANSFORMER_NAME);
+        step.setTransformer(CalculateStats.TRANSFORMER_NAME);
         step.setConfiguration("{}");
         step.setTargetSource("AccountMasterBucketedStats");
         return step;

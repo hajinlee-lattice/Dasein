@@ -57,7 +57,7 @@ public class SourceSorterTestNG extends PipelineTransformationTestNGBase {
     }
 
     @Override
-    PipelineTransformationConfiguration createTransformationConfiguration() {
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
             configuration.setName("SortAM");
@@ -84,7 +84,7 @@ public class SourceSorterTestNG extends PipelineTransformationTestNGBase {
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {}
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {}
 
     private void verifyFileSplitting() throws IOException {
         String resultDir = getPathForResult();

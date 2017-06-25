@@ -66,12 +66,12 @@ public class BomboraWeeklyAggServiceImplTestNG
     }
 
     @Override
-    TransformationService<BasicTransformationConfiguration> getTransformationService() {
+    protected TransformationService<BasicTransformationConfiguration> getTransformationService() {
         return bomboraWeeklyAggService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -81,7 +81,7 @@ public class BomboraWeeklyAggServiceImplTestNG
     }
 
     @Override
-    BasicTransformationConfiguration createTransformationConfiguration() {
+    protected BasicTransformationConfiguration createTransformationConfiguration() {
         BasicTransformationConfiguration configuration = new BasicTransformationConfiguration();
         configuration.setVersion(targetVersion);
         List<String> baseVersions = new ArrayList<String>();
@@ -120,7 +120,7 @@ public class BomboraWeeklyAggServiceImplTestNG
 
     @SuppressWarnings("static-access")
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         try {
             Date aggDate = hdfsPathBuilder.dateFormat.parse(targetVersion);
             int rowNum = 0;

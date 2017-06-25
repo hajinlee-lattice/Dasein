@@ -1,5 +1,8 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import static com.latticeengines.dataflow.runtime.cascading.propdata.BucketConsolidateAggregator.deserializeBktCnts;
+import static com.latticeengines.dataflow.runtime.cascading.propdata.BucketConsolidateAggregator.serializeBktCnts;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +17,11 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidateAggregator.Context>
-        implements Aggregator<BucketConsolidateAggregator.Context> {
+public class StatsDedupAggregator extends BaseAggregator<StatsDedupAggregator.Context>
+        implements Aggregator<StatsDedupAggregator.Context> {
 
-    private static final long serialVersionUID = -4558848041315363629L;
+    private static final long serialVersionUID = 1176540918011684429L;
+    public static final String ALL = "__ALL__";
 
     public static class Context extends BaseAggregator.Context {
         Map<Integer, Long> bktCounts = new HashMap<>();
@@ -25,20 +29,20 @@ public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidat
         Tuple result = new Tuple();
     }
 
-    private final String bktIdField;
-    private final String bktCntField;
+    private final String cntField;
+    private final String bktsField;
     private final List<String> grpByFields;
 
-    private Integer bktIdArgPos;
-    private Integer bktCntArgPos;
+    private Integer cntArgPos;
+    private Integer bktsArgPos;
 
-    // grpFields + bktsField + cntField
-    public BucketConsolidateAggregator(List<String> grpByFields, String bktIdField, String bktCntField, String cntField,
-            String bktsField) {
+    // grpFields + cntField + bktsField
+    // if rollup is null, means simply merge bkt cnts
+    public StatsDedupAggregator(List<String> grpByFields, String dedupField, String cntField, String bktsField) {
         super(generateFieldDeclaration(grpByFields, cntField, bktsField));
         this.grpByFields = grpByFields;
-        this.bktIdField = bktIdField;
-        this.bktCntField = bktCntField;
+        this.cntField = cntField;
+        this.bktsField = bktsField;
     }
 
     private static Fields generateFieldDeclaration(List<String> grpByFields, String cntField, String bktsField) {
@@ -65,11 +69,17 @@ public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidat
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
         updateArgPos(arguments);
-        int bktId = (int) arguments.getObject(bktIdArgPos);
-        long bktCnt = (long) arguments.getObject(bktCntArgPos);
-        context.bktCounts.put(bktId, bktCnt);
-        if (bktId > 0) {
-            context.count += bktCnt;
+        String bktsStr = (String) arguments.getObject(bktsArgPos);
+        if (StringUtils.isNotBlank(bktsStr)) {
+            Map<Integer, Long> bktCnts = deserializeBktCnts(bktsStr);
+            bktCnts.forEach((bktId, bktCnt) -> {
+                if (!context.bktCounts.containsKey(bktId)) {
+                    // only put when there is not count
+                    context.bktCounts.put(bktId, bktCnt);
+                }
+            });
+            long cnt = (long) arguments.getObject(cntArgPos);
+            context.count += cnt;
         }
         return context;
     }
@@ -84,29 +94,11 @@ public class BucketConsolidateAggregator extends BaseAggregator<BucketConsolidat
         return result;
     }
 
-    static String serializeBktCnts(Map<Integer, Long> bktCnts) {
-        List<String> tokens = new ArrayList<>();
-        bktCnts.forEach((i, c) -> tokens.add(String.format("%d:%d", i, c)));
-        return StringUtils.join(tokens, "|");
-    }
-
-    static Map<Integer, Long> deserializeBktCnts(String bktsStr) {
-        String[] pairs = bktsStr.split("\\|");
-        Map<Integer, Long> bktCnts = new HashMap<>();
-        for (String pair: pairs) {
-            String[] tokens = pair.split(":");
-            Integer bktId = Integer.valueOf(tokens[0]);
-            Long bktCnt = Long.valueOf(tokens[1]);
-            bktCnts.put(bktId, bktCnt);
-        }
-        return bktCnts;
-    }
-
     private void updateArgPos(TupleEntry arguments) {
-        if (bktIdArgPos == null) {
-            int[] pos = arguments.getFields().getPos(new Fields(bktIdField, bktCntField));
-            bktIdArgPos = pos[0];
-            bktCntArgPos = pos[1];
+        if (cntArgPos == null) {
+            int[] pos = arguments.getFields().getPos(new Fields(cntField, bktsField));
+            cntArgPos = pos[0];
+            bktsArgPos = pos[1];
         }
     }
 

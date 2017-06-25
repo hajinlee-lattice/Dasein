@@ -47,12 +47,12 @@ public class BomboraDomainServiceImplTestNG
     }
 
     @Override
-    TransformationService<BasicTransformationConfiguration> getTransformationService() {
+    protected TransformationService<BasicTransformationConfiguration> getTransformationService() {
         return bomboraDomainService;
     }
 
     @Override
-    Source getSource() {
+    protected Source getSource() {
         return source;
     }
 
@@ -63,7 +63,7 @@ public class BomboraDomainServiceImplTestNG
     }
 
     @Override
-    BasicTransformationConfiguration createTransformationConfiguration() {
+    protected BasicTransformationConfiguration createTransformationConfiguration() {
         BasicTransformationConfiguration configuration = new BasicTransformationConfiguration();
         configuration.setVersion(targetVersion);
         return configuration;
@@ -75,7 +75,7 @@ public class BomboraDomainServiceImplTestNG
     }
 
     @Override
-    void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         Set<Long> ids = new HashSet<Long>();
