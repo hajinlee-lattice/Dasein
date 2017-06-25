@@ -5,9 +5,13 @@ import org.springframework.http.HttpStatus;
 public class RemoteLedpException extends LedpException {
 
     private static final long serialVersionUID = -5707442145945244202L;
-    
-	private String remoteStackTrace;
+
+    private String remoteStackTrace;
     private HttpStatus httpStatus;
+
+    public RemoteLedpException(LedpCode code) {
+        super(code);
+    }
 
     public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code) {
         super(code);

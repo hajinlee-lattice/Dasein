@@ -14,6 +14,8 @@ import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -98,12 +100,25 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowJob.setApplicationId("applicationid_0001");
         workflowJobEntityMgr.create(workflowJob);
 
+        JobProxy jobProxy = mock(JobProxy.class);
+        when(jobProxy.getJobStatus(any(String.class)))
+                .thenAnswer(new Answer<com.latticeengines.domain.exposed.dataplatform.JobStatus>() {
+
+                    @Override
+                    public com.latticeengines.domain.exposed.dataplatform.JobStatus answer(InvocationOnMock invocation)
+                            throws Throwable {
+                        throw new RemoteLedpException(LedpCode.LEDP_00002);
+                    }
+
+                });
+
+        ((WorkflowContainerServiceImpl) workflowContainerService).setJobProxy(jobProxy);
         Job job = workflowContainerService.getJobFromWorkflowJobAndYarn(workflowJob);
 
         assertEquals(job.getJobStatus(), JobStatus.FAILED);
 
         workflowJob = workflowJobEntityMgr.findByApplicationId("applicationid_0001");
-
+        assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED);
     }
 
 }
