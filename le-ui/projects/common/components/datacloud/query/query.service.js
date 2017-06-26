@@ -89,7 +89,7 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.addRestriction = function(attribute) {
-        attribute.resourceType = attribute.resourceType || 'BucketedAccountMaster';
+        attribute.resourceType = attribute.resourceType || 'AccountMaster';
 
         var attributesFound = this.findAttributes(attribute.columnName);
         var attributes = attributesFound.attributes;

@@ -38,7 +38,7 @@ angular
     this.GetSegments = function() {
         var deferred = $q.defer(),
             result,
-            url = '/pls/metadatasegments/all';
+            url = '/pls/datacollection/segments';
 
         $http({
             method: 'GET',
@@ -66,7 +66,7 @@ angular
     this.GetSegmentByName = function(name) {
         var deferred = $q.defer(),
             result,
-            url = '/pls/metadatasegments/name/' + name;
+            url = '/pls/datacollection/segments/' + name;
 
         $http({
             method: 'GET',
@@ -96,7 +96,7 @@ angular
 
         $http({
             method: 'POST',
-            url: '/pls/metadatasegments/',
+            url: '/pls/datacollection/segments',
             data: segment,
             headers: {
                 'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ angular
     this.DeleteSegment = function(segmentName) {
         var deferred = $q.defer(),
             result = {},
-            url = '/pls/metadatasegments/' + segmentName;
+            url = '/pls/datacollection/segments/' + segmentName;
 
         $http({
             method: 'DELETE',

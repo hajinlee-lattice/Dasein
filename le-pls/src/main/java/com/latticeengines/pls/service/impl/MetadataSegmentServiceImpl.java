@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -10,14 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentPropertyName;
-import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.QueryTranslator;
 import com.latticeengines.domain.exposed.util.ReverseQueryTranslator;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
-import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("metadataSegmentService")
@@ -26,9 +25,6 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     @Autowired
     private SegmentProxy segmentProxy;
-
-    @Autowired
-    private AccountProxy accountProxy;
 
     @Override
     public List<MetadataSegment> getSegments() {
@@ -84,13 +80,16 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     private void updateStatistics(MetadataSegment segment) {
-        Query query = Query.builder().where(segment.getRestriction()).build();
+        // TODO: put random count there, before we have data in redshift.
+        Random random = new Random(System.currentTimeMillis());
+        segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts, random.nextInt(1000));
 
-        try {
-            long count = accountProxy.getCount(MultiTenantContext.getTenant().getId(), query);
-            segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts, count);
-        } catch (Exception e) {
-            log.error(String.format("Failed to update statistics for segment %s", segment.getName()), e);
-        }
+//        Query query = Query.builder().where(segment.getRestriction()).build();
+//        try {
+//            long count = accountProxy.getCount(MultiTenantContext.getTenant().getId(), query);
+//            segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts, count);
+//        } catch (Exception e) {
+//            log.error(String.format("Failed to update statistics for segment %s", segment.getName()), e);
+//        }
     }
 }

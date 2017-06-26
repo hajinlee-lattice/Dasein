@@ -4,7 +4,7 @@ angular.module('common.datacloud.query.factory.restriction', [])
         this.lhs = {
             columnLookup: {
                 column_name: columnName,
-                object_type: objectType || 'BucketedAccountMaster'
+                object_type: objectType || 'AccountMaster'
             }
         };
         this.range = range;
@@ -28,7 +28,10 @@ angular.module('common.datacloud.query.factory.restriction', [])
     };
 
     BucketRestriction.getObjectType = function(bucketRestriction) {
-        return bucketRestriction.lhs.columnLookup.object_type || 'BucketedAccountMaster';
+        if (bucketRestriction.lhs.columnLookup.object_type === 'BucketedAccountMaster') {
+            bucketRestriction.lhs.columnLookup.object_type = 'AccountMaster'
+        }
+        return bucketRestriction.lhs.columnLookup.object_type || 'AccountMaster';
     };
 
     BucketRestriction.getRange = function(bucketRestriction) {
