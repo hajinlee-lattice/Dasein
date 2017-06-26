@@ -108,9 +108,6 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
         builder.microServiceHostPort(microserviceHostPort);
         RedshiftPublishWorkflowConfiguration config = builder.build();
 
-        applicationContext = softwareLibraryService.loadSoftwarePackages("workflowapi", applicationContext,
-                versionManager);
-        workflowService.registerJob(config.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(config.getWorkflowName(), config);
         waitForCompletion(workflowId);
         verify(table.getName(), 5);
