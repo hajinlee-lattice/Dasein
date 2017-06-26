@@ -290,13 +290,17 @@ public class ProcessorContext {
         customizedSelection = jobConfiguration.getMatchInput().getCustomSelection();
 
         decisionGraph = jobConfiguration.getMatchInput().getDecisionGraph();
-        if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
-            useRemoteDnB = jobConfiguration.getMatchInput().getUseRemoteDnB();
+        if (Boolean.TRUE.equals(jobConfiguration.getMatchInput().getFetchOnly())) {
+            useRemoteDnB = true;
         } else {
-            useRemoteDnB = zkConfigurationService.fuzzyMatchEnabled(space);
+            if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
+                useRemoteDnB = jobConfiguration.getMatchInput().getUseRemoteDnB();
+            } else {
+                useRemoteDnB = zkConfigurationService.fuzzyMatchEnabled(space);
+            }
+            useRemoteDnB = useRemoteDnB && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
+            useRemoteDnB = useRemoteDnB && zkConfigurationService.useRemoteDnBGlobal();
         }
-        useRemoteDnB = useRemoteDnB && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
-        useRemoteDnB = useRemoteDnB && zkConfigurationService.useRemoteDnBGlobal();
         log.info("Use remote DnB ? " + useRemoteDnB);
         if (StringUtils.isEmpty(decisionGraph)) {
             decisionGraph = defaultGraph;
