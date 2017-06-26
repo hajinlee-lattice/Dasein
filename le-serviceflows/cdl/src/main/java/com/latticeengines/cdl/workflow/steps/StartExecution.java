@@ -42,7 +42,7 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
 
         if (execution == null) {
             putObjectInContext(CONSOLIDATE_INPUT_TABLES, Collections.EMPTY_LIST);
-        } else if (execution.getWorkflowId() != jobId) {
+        } else if (execution.getWorkflowId().longValue() != jobId.longValue()) {
             throw new RuntimeException(
                     String.format("current active execution has a workflow id %s, which is different from %s ",
                             execution.getWorkflowId(), jobId));
