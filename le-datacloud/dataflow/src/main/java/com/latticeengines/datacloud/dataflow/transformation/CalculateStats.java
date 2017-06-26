@@ -139,7 +139,7 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         stats = stats.retain(new FieldList(toRetain));
 
         // sort and merge to single file
-        return resultDimName(stats);
+        return resumeDimName(stats);
     }
 
     // find rows need to handle dedup
@@ -333,8 +333,11 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
     }
 
 
-    private Node resultDimName(Node node) {
+    private Node resumeDimName(Node node) {
         List<String> modifiedName = getGeneratedDimAttrs();
+        if (modifiedName.isEmpty()) {
+            return node;
+        }
         List<String> originalName = dimensions.stream().map(AttrDimension::getName).collect(Collectors.toList());
         return node.rename(new FieldList(modifiedName), new FieldList(originalName));
     }
