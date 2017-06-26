@@ -63,7 +63,8 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
         // Merge into target table
         miniDomainDunsList = miniDomainDunsList.merge(storeDunsValues);
         // Remove Nulls
-        String checkNullExpression = config.getOutputDataSetValue() + " != null ";
+        String checkNullExpression = config.getOutputDataSetValue() + " != null  && " + "!"
+                + config.getOutputDataSetValue() + ".equals(\"\")";
         miniDomainDunsList = miniDomainDunsList.filter(checkNullExpression,
                 new FieldList(config.getOutputDataSetValue()));
         // De-duplication
@@ -91,7 +92,7 @@ public class MiniAMDomainDunsFlow extends ConfigurableFlowBase<MiniAMDomainDunsC
         String checkNullGuDuns = DNB_GU_VALUE + " != null ";
         storeDnbGu = storeDnbGu.filter(checkNullGuDuns, new FieldList(DNB_GU_VALUE));
 
-        // Deduplication
+        // De-duplication
         storeDnbGu = storeDnbGu.groupByAndLimit(new FieldList(DNB_GU_VALUE), 1);
 
         /*

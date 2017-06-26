@@ -174,7 +174,7 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
                 { null, null, "Visa", "Foster city", "California", "United States" },
                 { "citrix.com", null, "Citrix", "Santa Clara", "California", "United States" },
                 { null, "987624588", "Nvedia", "Santa Clara", "California", "United States" },
-                { "krux.com", null, "Krux", "San Francisco", "California", "United States" } };
+                { "krux.com", "", "Krux", "San Francisco", "California", "United States" } };
         uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data);
     }
 

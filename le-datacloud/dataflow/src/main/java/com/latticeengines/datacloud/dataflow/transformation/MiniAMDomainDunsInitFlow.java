@@ -58,9 +58,11 @@ public class MiniAMDomainDunsInitFlow extends ConfigurableFlowBase<MiniAMDomainD
             // Merge
             goldenDataDomainSet = goldenDataDomainSet.merge(goldenDataDunsSet);
             // Remove nulls
-            String checkNullExpression = config.getOutputDataSetValue() + " != null ";
+            String checkNullExpression = config.getOutputDataSetValue() + " != null && " + "!"
+                    + config.getOutputDataSetValue() + ".equals(\"\")";
             goldenDataDomainSet = goldenDataDomainSet.filter(checkNullExpression,
                     new FieldList(config.getOutputDataSetValue()));
+
             // De-duplication
             goldenDataDomainSet = goldenDataDomainSet.groupByAndLimit(new FieldList(miniAMAttr), 1);
             goldenSetResult = goldenDataDomainSet;
