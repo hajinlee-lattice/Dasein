@@ -57,6 +57,7 @@ import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.eai.service.impl.vdb.converter.VdbTableToAvroTypeConverter;
 import com.latticeengines.eai.service.impl.vdb.converter.VdbValueConverter;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 @Component("vdbTableImportService")
@@ -387,6 +388,7 @@ public class VdbTableImportServiceImpl extends ImportService {
             if (importVdbTableConfiguration == null) {
                 continue;
             }
+            long startTime = System.currentTimeMillis();
             try {
                 setExtractContextForVdbTable(table, context, importVdbTableConfiguration);
                 String queryDataUrl = vdbConnectorConfiguration.getGetQueryDataEndpoint();
@@ -438,16 +440,20 @@ public class VdbTableImportServiceImpl extends ImportService {
                     for (Attribute attr : table.getAttributes()) {
                         attributeMap.put(attr.getName(), attr);
                     }
+                    long getDLDataResultTime = 0;
                     while (!error) {
                         try {
                             if (needNewFile) {
+                                getDLDataResultTime = 0;
                                 dataContainer = new DataContainer(vdbValueConverter, table);
                                 needNewFile = false;
                             }
                             VdbQueryDataResult vdbQueryDataResult = null;
                             try {
+                                long readDLStartTime = System.currentTimeMillis();
                                 vdbQueryDataResult = dataLoaderService.getQueryDataResult(queryDataUrl,
                                         vdbGetQueryData);
+                                getDLDataResultTime += System.currentTimeMillis() - readDLStartTime;
                             } catch (Exception e) {
                                 log.error(String.format("Errors occur when get data from DL! Exception: %s",
                                         e.toString()));
@@ -473,13 +479,15 @@ public class VdbTableImportServiceImpl extends ImportService {
                             if (dataContainer.getLocalDataFile().length() >= sizePerFile) {
                                 dataContainer.endContainer();
                                 String fileName = generateAvroFileName(avroFileName, fileIndex);
-                                copyToHdfs(dataContainer, targetPath + "/" + fileName, yarnConfiguration);
+                                try (PerformanceTimer timer = new PerformanceTimer("DL copy to hdfs")) {
+                                    copyToHdfs(dataContainer, targetPath + "/" + fileName, yarnConfiguration);
+                                }
                                 fileIndex++;
                                 needNewFile = true;
                                 importJobDetail.setProcessedRecords(startRow);
                                 eaiImportJobDetailService.updateImportJobDetail(importJobDetail);
                                 dataContainer.getLocalDataFile().delete();
-
+                                log.info(String.format("Get data from DL takes %d ms", getDLDataResultTime));
                             }
 
                         } catch (Exception e) {
@@ -512,6 +520,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                     importJobDetail.setProcessedRecords(totalRows);
                     importJobDetail.setStatus(ImportStatus.SUCCESS);
                     eaiImportJobDetailService.updateImportJobDetail(importJobDetail);
+                    log.info(String.format("Total load data from DL takes %d ms", System.currentTimeMillis() - startTime));
                 } else {
                     throw new LedpException(LedpCode.LEDP_17015, new String[] {vdbLoadTableStatus.getMessage()});
                 }
