@@ -162,7 +162,8 @@ angular.module('common.datacloud.query.builder', [])
                 var attribute = group[fieldName];
                 for (var i = 0; i < attribute.buckets.length; i++) {
                     restrictions[groupKey].push({
-                        bucketRestriction: new BucketRestriction(fieldName, attribute.objectType, attribute.buckets[i].range)
+                        // attribute.range will be removed in new data format
+                        bucketRestriction: new BucketRestriction(fieldName, attribute.objectType, attribute.buckets[i].range, attribute.attr, attribute.buckets[i].bkt)
                     });
                 }
             }

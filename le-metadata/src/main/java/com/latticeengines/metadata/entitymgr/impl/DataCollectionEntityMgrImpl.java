@@ -191,6 +191,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         segmentEntityMgr.upsertStats(masterSeg.getName(), statisticsContainer);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public String getDefaultCollectionName() {
         return getDefaultCollection().getName();
     }

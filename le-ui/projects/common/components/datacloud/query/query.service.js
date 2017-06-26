@@ -89,7 +89,7 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.addRestriction = function(attribute) {
-        attribute.resourceType = attribute.resourceType || 'AccountMaster';
+        attribute.resourceType = attribute.resourceType || 'LatticeAccount';
 
         var attributesFound = this.findAttributes(attribute.columnName);
         var attributes = attributesFound.attributes;
@@ -107,7 +107,9 @@ angular.module('common.datacloud.query.service',[
         if (!found) {
             groupKey = groupKey || 'all';
             this.restriction[groupKey].push({
-                bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.range)
+                // columnName + resourceType + range will be removed in new data format
+                // use attr + bkt instead
+                bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.range, attribute.attr, attribute.bkt)
             });
             this.updateUiState(attribute.columnName, 1, this.restriction.all.length + this.restriction.any.length);
         }

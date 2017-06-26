@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.metadata.dao.SegmentDao;
 import com.latticeengines.metadata.dao.SegmentPropertyDao;
+import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
@@ -55,6 +56,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
 
     @Autowired
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
+
+    @Autowired
+    private DataCollectionEntityMgr dataCollectionEntityMgr;
 
     @Override
     public BaseDao<MetadataSegment> getDao() {
@@ -89,12 +93,20 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Override
     public void createOrUpdate(MetadataSegment segment) {
         segment.setTenant(MultiTenantContext.getTenant());
+        if (segment.getDataCollection() == null) {
+            String defaultCollectionName = dataCollectionEntityMgr.getDefaultCollectionName();
+            DataCollection defaultCollection = dataCollectionEntityMgr.getDataCollection(defaultCollectionName);
+            segment.setDataCollection(defaultCollection);
+        }
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
             MetadataSegment master = findMasterSegment(segment.getDataCollection().getName());
             if (master != null && !master.getName().equals(segment.getName())) {
                 // master exists and not the incoming one
                 segment.setMasterSegment(false);
             }
+        }
+        if (StringUtils.isBlank(segment.getName())) {
+            segment.setName(NamingUtils.timestamp("Segment"));
         }
 
         MetadataSegment existing = findByName(segment.getName());

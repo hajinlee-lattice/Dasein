@@ -103,11 +103,6 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
     @JsonProperty("attributes")
     private List<Attribute> attributeDependencies = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "segment")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("statistics_containers")
-    private List<StatisticsContainer> statisticsContainers = new ArrayList<>();
-
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
     private Long tenantId;
