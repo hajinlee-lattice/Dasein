@@ -73,7 +73,8 @@ angular
                 if (!vm.selectedFile) {
                     return false;
                 }
-                if(vm.selectedFile.size > (GB * GBLimit)) {
+
+                if(!vm.params.noSizeLimit && vm.selectedFile.size > (GB * GBLimit)) {
                     ServiceErrorUtility.showBanner({data: {errorMsg: 'Your file is too large.  Please try again with a file that is smaller then ' + GBLimit + 'GB.'}});
                     return;
                 }

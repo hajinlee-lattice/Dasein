@@ -27,7 +27,8 @@ angular.module('mainApp.create.csvBulkUpload', [
         defaultMessage: "Example: us-target-list.csv",
         modelId: $stateParams.modelId,
         compressed: true,
-        schema: null
+        schema: null,
+        noSizeLimit: true
     }
 
     vm.fileSelect = function(result) {

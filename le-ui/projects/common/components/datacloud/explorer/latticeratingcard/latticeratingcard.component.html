@@ -41,7 +41,7 @@
         </ul>
         <div class="rating-slices">
             <div class="rating-slice" ng-repeat="slice in vm.latticeRatings.slices">
-                <strong>{{slice}}x</strong>
+                <strong>{{slice.toFixed(1)}}x</strong>
             </div>
         </div>
     </div>
