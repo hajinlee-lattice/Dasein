@@ -1,9 +1,7 @@
 import calendar
-from collections import OrderedDict
-from pandas import DataFrame
 import logging
 import time
-
+from collections import OrderedDict
 from leframework.codestyle import overrides
 from leframework.model.state import State
 
@@ -30,14 +28,15 @@ class ModelDetailGenerator(State):
         allData = mediator.allDataPostTransform
         testData = mediator.data
         result["TestingLeads"] = testData.shape[0]
-        if '__TRAINING__' in allData.columns.values:
-            trainingData = allData[allData['__TRAINING__'] == 1]
-            allData = DataFrame.append(trainingData, testData)
-            result["TrainingLeads"] = trainingData.shape[0]
-            result["TotalLeads"] = result["TrainingLeads"] + result["TestingLeads"]
-        else:
-            result["TotalLeads"] = allData.shape[0]
-            result["TrainingLeads"] = result["TotalLeads"] - result["TestingLeads"]
+        # #PLS-4158 cannot simply update total counts here
+        # if '__TRAINING__' in allData.columns.values:
+        #     trainingData = allData[allData['__TRAINING__'] == 1]
+        #     allData = DataFrame.append(trainingData, testData)
+        #     result["TrainingLeads"] = trainingData.shape[0]
+        #     result["TotalLeads"] = result["TrainingLeads"] + result["TestingLeads"]
+        # else:
+        result["TotalLeads"] = allData.shape[0]
+        result["TrainingLeads"] = result["TotalLeads"] - result["TestingLeads"]
 
         # Conversions
         result["TotalConversions"] = int(allData[schema["target"]].sum())
