@@ -34,7 +34,7 @@ public class AccountResource implements DanteAccountInterface {
     @ApiOperation(value = "get Dante accounts")
     @PreAuthorize("hasRole('View_PLS_PLAYS')")
     public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count,
-            @RequestParam String customerSpace) {
+            @RequestParam("customerSpace") String customerSpace) {
         return ResponseDocument.successResponse(accountService.getAccounts(count, customerSpace));
     }
 }

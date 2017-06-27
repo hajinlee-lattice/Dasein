@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
+import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
@@ -17,8 +18,6 @@ import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
 @Component("oauth2Service")
 public class Oauth2ServiceImpl implements Oauth2Interface {
-
-    private static final String CLIENT_ID_LP = "lp";
 
     @Autowired
     private Oauth2RestApiProxy oauth2RestApiProxy;
@@ -39,6 +38,11 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
 
     @Override
     public OAuth2AccessToken createOAuth2AccessToken(String tenantId, String appId) {
+        return createOAuth2AccessToken(tenantId, appId, OauthClientType.LP);
+    }
+
+    @Override
+    public OAuth2AccessToken createOAuth2AccessToken(String tenantId, String appId, OauthClientType type) {
         if (StringUtils.isEmpty(appId)) {
             // use null if appId is empty
             appId = null;
@@ -48,13 +52,13 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
         user.setUserId(tenantId);
         user.setPassword(oauth2RestApiProxy.createAPIToken(tenantId));
 
-        OAuth2RestTemplate oAuth2RestTemplate = null;
+        OAuth2RestTemplate oAuth2RestTemplate;
 
         if (StringUtils.isEmpty(appId)) {
-            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2Url, user.getUserId(),
-                    user.getPassword(), CLIENT_ID_LP);
+            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2Url, user.getUserId(), user.getPassword(),
+                    type.getValue());
         } else {
-            oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(user, CLIENT_ID_LP, appId);
+            oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(user, type.getValue(), appId);
         }
         OAuth2AccessToken token1 = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
         Oauth2AccessToken token2 = new Oauth2AccessToken();

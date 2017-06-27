@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.network.exposed.dante.DanteTalkingPointInterface;
 
@@ -52,10 +54,19 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
 
     @RequestMapping(value = "/play/{playExternalID}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "get a Dante Talking Point ")
+    @ApiOperation(value = "find all Dante Talking Points for the given play")
     @PreAuthorize("hasRole('View_PLS_Plays')")
     public ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(@PathVariable String playExternalID) {
         return ResponseDocument.successResponse(talkingPointService.findAllByPlayID(playExternalID));
+    }
+
+    @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "get the server url and oAuth token to preview Dante Talking Point")
+    @PreAuthorize("hasRole('View_PLS_Plays')")
+    public ResponseDocument<DantePreviewResources> getPreviewResources(
+            @RequestParam("customerSpace") String customerSpace) {
+        return ResponseDocument.successResponse(talkingPointService.getPreviewResources(customerSpace));
     }
 
     @RequestMapping(value = "/{talkingPointExternalID}", method = RequestMethod.DELETE)

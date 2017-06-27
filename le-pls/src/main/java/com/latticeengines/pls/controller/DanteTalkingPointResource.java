@@ -15,8 +15,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.dante.DanteTalkingPointProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.wordnik.swagger.annotations.Api;
 
 import io.swagger.annotations.ApiOperation;
@@ -54,6 +59,18 @@ public class DanteTalkingPointResource {
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(@PathVariable String playExternalID) {
         return danteTalkingPointProxy.findAllByPlayID(playExternalID);
+    }
+
+    @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "get the server url and oAuth token for Dante authentication via Oauth")
+    @PreAuthorize("hasRole('View_PLS_Plays')")
+    public ResponseDocument<DantePreviewResources> getPreviewResources() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_38008);
+        }
+        return danteTalkingPointProxy.getPreviewResources(customerSpace.toString());
     }
 
     @RequestMapping(value = "/{talkingPointExternalID}", method = RequestMethod.DELETE)

@@ -601,7 +601,8 @@ public enum LedpCode {
     LEDP_38006("Failed to parse account attributes from MetadataDocument"), //
     LEDP_38007("Failed to populate account attributes"), //
     LEDP_38008("No tenant not found for the request"), //
-    LEDP_38009("Invalid Customer space {0}");
+    LEDP_38009("Invalid Customer space {0}"), //
+    LEDP_38010("Unable to compile talking point preview resources");
 
     private String message;
 

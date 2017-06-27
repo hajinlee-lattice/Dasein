@@ -39,6 +39,11 @@
             <artifactId>le-monitor</artifactId>
             <version>${le.monitor.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-network</artifactId>
+            <version>${le.network.version}</version>
+        </dependency>
     </dependencies>
 
     <parent>
@@ -58,6 +63,7 @@
         <le.dantedb.version>3.7.0-SNAPSHOT</le.dantedb.version>
         <le.camille.version>3.7.0-SNAPSHOT</le.camille.version>
         <le.monitor.version>3.7.0-SNAPSHOT</le.monitor.version>
+        <le.network.version>3.7.0-SNAPSHOT</le.network.version>
     </properties>
 
 </project>

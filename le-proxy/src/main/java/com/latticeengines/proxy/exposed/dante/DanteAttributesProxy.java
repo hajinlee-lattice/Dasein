@@ -5,7 +5,6 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.network.exposed.dante.DanteAttributesInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -18,13 +17,13 @@ public class DanteAttributesProxy extends MicroserviceRestApiProxy implements Da
 
     @SuppressWarnings("unchecked")
     public ResponseDocument<Map<String, String>> getAccountAttributes(String customerSpace) {
-        String url = constructUrl("/accountattributes");
+        String url = constructUrl("/accountattributes?customerSpace=" + customerSpace);
         return get("getAccountAttributes", url, ResponseDocument.class);
     }
 
     @SuppressWarnings("unchecked")
     public ResponseDocument<Map<String, String>> getRecommendationAttributes(String customerSpace) {
-        String url = constructUrl("/recommendationattributes");
+        String url = constructUrl("/recommendationattributes?customerSpace=" + customerSpace);
         return get("getRecommendationAttributes", url, ResponseDocument.class);
     }
 }

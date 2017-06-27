@@ -4,24 +4,32 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.proxy.exposed.dante.DanteTalkingPointProxy;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
 public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringContextTests {
+
+    private final ObjectMapper objMapper = new ObjectMapper();
 
     @Autowired
     private DanteTalkingPointProxy danteTalkingPointProxy;
@@ -59,7 +67,6 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
         dtp.setValue("New Deployment Test Talking Point");
 
         danteTalkingPointProxy.createOrUpdate(dtp);
-        ObjectMapper objMapper = new ObjectMapper();
         dtp = objMapper.convertValue(danteTalkingPointProxy.findByExternalID(externalID).getResult(),
                 new TypeReference<DanteTalkingPoint>() {
                 });
@@ -85,4 +92,32 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
         Assert.assertNull(dtp, "Failure Cause: Talking point was not deleted");
     }
 
+    // private <T> getFromResponse(Object response, Class<T> clazz) {
+    // ObjectMapper objMapper = new ObjectMapper();
+    // return objMapper.convertValue(response,
+    // objMapper.getTypeFactory().constructParametricType(Object.class, clazz));
+    // }
+
+    @Test(groups = "deployment")
+    public void testDanteOauth() {
+        String testTenantName = "OauthTest.OauthTest.Production";
+        ResponseDocument<DantePreviewResources> response = danteTalkingPointProxy.getPreviewResources(testTenantName);
+
+        Assert.assertNotNull(response);
+        Assert.assertNull(response.getErrors());
+        Assert.assertNotNull(response.getResult());
+
+        DantePreviewResources dpr = objMapper.convertValue(response.getResult(),
+                new TypeReference<DantePreviewResources>() {
+                });
+        String url = dpr.getUrl() + "/tenants/oauthtotenant";
+        RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + dpr.getoAuthToken());
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        String tenantNameViaToken = restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
+        Assert.assertNotNull(tenantNameViaToken);
+        Assert.assertEquals(tenantNameViaToken, testTenantName);
+    }
 }

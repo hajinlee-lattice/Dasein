@@ -70,5 +70,4 @@ public class TalkingPointServiceImplTestNG extends AbstractTestNGSpringContextTe
         dtp = talkingPointEntityMgr.findByField("External_ID", externalID);
         Assert.assertNull(dtp, "Failure Cause: Talking point was not deleted");
     }
-
 }

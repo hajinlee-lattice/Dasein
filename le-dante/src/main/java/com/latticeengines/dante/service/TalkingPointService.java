@@ -2,6 +2,7 @@ package com.latticeengines.dante.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
 public interface TalkingPointService {
@@ -14,4 +15,5 @@ public interface TalkingPointService {
 
     void delete(DanteTalkingPoint dtp);
 
+    DantePreviewResources getPreviewResources(String customerSpace);
 }

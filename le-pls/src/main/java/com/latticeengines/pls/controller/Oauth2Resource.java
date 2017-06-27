@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 
 import io.swagger.annotations.Api;
@@ -39,19 +40,30 @@ public class Oauth2Resource {
     @ApiOperation(value = "Generate an Oauth2 Access for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token_External')")
     public String createOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId,
-            @RequestParam(value = "app_id", required = false) String appId) {
-        log.info("Generating access token for tenant " + tenantId + ", app_id '" + appId + "'");
-        return oauth2Service.createOAuth2AccessToken(tenantId, appId).getValue();
+            @RequestParam(value = "app_id", required = false) String appId,
+            @RequestParam(value = "clientType", required = false) String clientType) {
+        OauthClientType client = OauthClientType.LP;
+        if (clientType != null && !clientType.isEmpty()) {
+            try {
+                client = OauthClientType.valueOf(clientType);
+            } catch (Exception e) {
+                log.error("Unable to parse OAuthClientType for " + clientType, e);
+                log.info("Using the default OAuthClientType " + OauthClientType.LP.getValue());
+            }
+        }
+        log.info("Generating access token for tenant " + tenantId + ", app_id '" + appId + "', clientType "
+                + client.getValue());
+        return oauth2Service.createOAuth2AccessToken(tenantId, appId, client).getValue();
     }
 
     @RequestMapping(value = "/accesstoken/json", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Generate an Oauth2 Access for a tenant")
+    @ApiOperation(value = "Generate an Oauth2 Access token for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
     public String createJsonOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId,
             @RequestParam(value = "app_id", required = false) String appId) {
         log.info("Generating access token for tenant " + tenantId + ", app_id '" + appId + "'");
         String token = oauth2Service.createOAuth2AccessToken(tenantId, appId).getValue();
-        return JsonUtils.serialize(ImmutableMap.<String, String> of("token", token));
+        return JsonUtils.serialize(ImmutableMap.of("token", token));
     }
 }
