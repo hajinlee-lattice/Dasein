@@ -167,6 +167,7 @@
         <module>sqoop</module>
         <module>objectapi</module>
         <module>dante</module>
+        <module>cdl</module>
     </modules>
 
 </project>

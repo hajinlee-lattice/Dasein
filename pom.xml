@@ -71,5 +71,6 @@
         <module>le-ulysses</module>
         <module>le-dantedb</module>
         <module>le-dante</module>
+        <module>le-serviceapps</module>
     </modules>
 </project>

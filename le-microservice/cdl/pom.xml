@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-${component-name}</artifactId>
+    <packaging>war</packaging>
+    <name>le-${component-name}</name>
+    <description>LE CDL</description>
+
+    <properties>
+        <component-name>cdl</component-name>
+    </properties>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-microservice-parent</artifactId>
+        <version>3.7.0-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceapps-cdl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-microservice</artifactId>
+            <version>${le.microservice.version}</version>
+            <classifier>classes</classifier>
+        </dependency>
+    </dependencies>
+</project>

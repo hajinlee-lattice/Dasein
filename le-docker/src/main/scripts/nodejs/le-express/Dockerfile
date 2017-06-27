@@ -36,6 +36,7 @@ RUN npm install grunt-cli -g \
 
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
+RUN yum update -y
 ADD le-ui.tar.gz /opt/node
 RUN mv /opt/node/le-ui /opt/node/app \
     && cd /opt/node/app \
