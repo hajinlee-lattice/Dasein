@@ -12,8 +12,10 @@ import org.testng.annotations.BeforeMethod;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.workflow.core.DataPlatformInfrastructure;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
 @ContextConfiguration(locations = { "classpath:test-workflow-context.xml" })
@@ -29,6 +31,9 @@ public class WorkflowTestNGBase extends SecurityFunctionalTestNGBase {
 
     @Autowired
     protected WorkflowService workflowService;
+
+    @Autowired
+    protected WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Autowired
     private TenantService tenantService;
@@ -66,6 +71,7 @@ public class WorkflowTestNGBase extends SecurityFunctionalTestNGBase {
         tenant1.setId(customerSpace.toString());
         tenant1.setName(customerSpace.toString());
         tenantService.registerTenant(tenant1);
+        MultiTenantContext.setTenant(tenant1);
         return customerSpace;
     }
 

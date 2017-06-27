@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 
 public interface WorkflowService {
@@ -18,9 +19,9 @@ public interface WorkflowService {
 
     WorkflowExecutionId start(String workflowName, WorkflowConfiguration workflowConfiguration);
 
-    WorkflowExecutionId restart(WorkflowExecutionId workflowId);
+    WorkflowExecutionId restart(WorkflowExecutionId workflowId, WorkflowJob workflowJob);
 
-    WorkflowExecutionId restart(WorkflowInstanceId workflowId);
+    WorkflowExecutionId restart(WorkflowInstanceId workflowId, WorkflowJob workflowJob);
 
     void stop(WorkflowExecutionId workflowId);
 

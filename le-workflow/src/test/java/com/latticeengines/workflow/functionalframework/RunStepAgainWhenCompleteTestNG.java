@@ -13,6 +13,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
 
@@ -32,8 +34,9 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
     public void testRunCompletedStepAgainWorkflow() throws Exception {
         failableStep.setFail(true);
         WorkflowConfiguration configuration = new WorkflowConfiguration();
-        CustomerSpace customerSpace = CustomerSpace.parse("Workflow_Tenant");
-        configuration.setContainerConfiguration("completedStepAgainWorkflow", customerSpace, "CompletedStepAgainWorkflow");
+        CustomerSpace customerSpace = CustomerSpace.parse(WORKFLOW_TENANT);
+        configuration.setContainerConfiguration("completedStepAgainWorkflow", customerSpace,
+                "CompletedStepAgainWorkflow");
         WorkflowExecutionId workflowId = workflowService.start(runCompletedStepAgainWorkflow.name(), configuration);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> stepNames = workflowService.getStepNames(workflowId);
@@ -42,12 +45,19 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
         assertEquals(status, BatchStatus.FAILED);
 
         failableStep.setFail(false);
-        WorkflowExecutionId restartedWorkflowId = workflowService.restart(workflowId);
+        String appid = "appid_1";
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setTenant(MultiTenantContext.getTenant());
+        workflowJob.setApplicationId(appid);
+        workflowJobEntityMgr.create(workflowJob);
+        WorkflowExecutionId restartedWorkflowId = workflowService.restart(workflowId, workflowJob);
         status = workflowService.waitForCompletion(restartedWorkflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> restartedStepNames = workflowService.getStepNames(restartedWorkflowId);
         assertTrue(restartedStepNames.contains(runAgainWhenCompleteStep.name()));
         assertFalse(restartedStepNames.contains(successfulStep.name()));
         assertEquals(status, BatchStatus.COMPLETED);
+        assertEquals(workflowJobEntityMgr.findByApplicationId(appid).getWorkflowId().longValue(),
+                restartedWorkflowId.getId());
     }
 
 }

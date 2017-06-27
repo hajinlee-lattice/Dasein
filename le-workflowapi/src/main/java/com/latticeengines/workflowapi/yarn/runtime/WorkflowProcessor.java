@@ -1,6 +1,5 @@
 package com.latticeengines.workflowapi.yarn.runtime;
 
-import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,6 +12,7 @@ import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -65,10 +65,12 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         String swlib = workflowConfig.getSwpkgName();
         if (StringUtils.isBlank(swlib)) {
             log.info("Enriching application context with all sw packages available.");
-            appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(), appContext, versionManager);
+            appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(),
+                    appContext, versionManager);
         } else {
             log.info("Enriching application context with sw package " + swlib);
-            appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(), swlib, appContext, versionManager);
+            appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(), swlib,
+                    appContext, versionManager);
         }
         workflowService.registerJob(workflowConfig.getWorkflowName(), appContext);
 
@@ -82,7 +84,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
             if (workflowConfig.isRestart()) {
                 log.info("Restarting workflow " + workflowConfig.getWorkflowIdToRestart().getId());
-                workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart());
+                workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart(), workflowJob);
             } else {
                 workflowId = workflowContainerService.start(workflowConfig.getWorkflowName(), workflowJob,
                         workflowConfig);

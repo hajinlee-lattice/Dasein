@@ -20,7 +20,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.functionalframework.AnotherSuccessfulStep;
 import com.latticeengines.workflow.functionalframework.FailableStep;
@@ -119,13 +121,20 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         assertEquals(status, BatchStatus.FAILED);
 
         failableStep.setFail(false);
-        WorkflowExecutionId restartedWorkflowId = workflowService.restart(workflowId);
+        String appid = "appid_2";
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setTenant(MultiTenantContext.getTenant());
+        workflowJob.setApplicationId(appid);
+        workflowJobEntityMgr.create(workflowJob);
+        WorkflowExecutionId restartedWorkflowId = workflowService.restart(workflowId, workflowJob);
         status = workflowService.waitForCompletion(restartedWorkflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> restartedStepNames = workflowService.getStepNames(restartedWorkflowId);
         assertFalse(restartedStepNames.contains(successfulStep.name()));
         assertTrue(restartedStepNames.contains(failableStep.name()));
         assertTrue(restartedStepNames.contains(anotherSuccessfulStep.name()));
         assertEquals(status, BatchStatus.COMPLETED);
+        assertEquals(workflowJobEntityMgr.findByApplicationId(appid).getWorkflowId().longValue(),
+                restartedWorkflowId.getId());
     }
 
     @Test(groups = "functional")

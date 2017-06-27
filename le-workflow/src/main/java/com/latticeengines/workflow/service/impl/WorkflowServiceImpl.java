@@ -191,7 +191,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowExecutionId restart(WorkflowInstanceId workflowInstanceId) {
+    public WorkflowExecutionId restart(WorkflowInstanceId workflowInstanceId, WorkflowJob workflowJob) {
         Long jobExecutionId = -1L;
         List<Long> jobExecutions;
         try {
@@ -204,24 +204,26 @@ public class WorkflowServiceImpl implements WorkflowService {
         jobExecutionId = jobExecutions.get(0);
         log.info(String.format("Restarting workflowId:%d from most recent jobExecutionId:%d.",
                 workflowInstanceId.getId(), jobExecutionId));
-        return restart(new WorkflowExecutionId(jobExecutionId));
+        return restart(new WorkflowExecutionId(jobExecutionId), workflowJob);
     }
 
     @Override
-    public WorkflowExecutionId restart(WorkflowExecutionId workflowExecutionId) {
-        Long id = 0L;
+    public WorkflowExecutionId restart(WorkflowExecutionId workflowExecutionId, WorkflowJob workflowJob) {
+        Long jobExecutionId = 0L;
 
         try {
-            id = jobOperator.restart(workflowExecutionId.getId());
+            jobExecutionId = jobOperator.restart(workflowExecutionId.getId());
+            workflowJob.setWorkflowId(jobExecutionId);
+            workflowJobEntityMgr.registerWorkflowId(workflowJob);
             log.info(String.format("Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
-                    workflowExecutionId.getId(), id));
+                    workflowExecutionId.getId(), jobExecutionId));
         } catch (JobInstanceAlreadyCompleteException | NoSuchJobExecutionException | NoSuchJobException
                 | JobRestartException | JobParametersInvalidException e) {
             throw new LedpException(LedpCode.LEDP_28002, e, new String[] { String.valueOf(workflowExecutionId.getId()),
                     String.valueOf(workflowExecutionId.getId()) });
         }
 
-        return new WorkflowExecutionId(id);
+        return new WorkflowExecutionId(jobExecutionId);
     }
 
     @Override
