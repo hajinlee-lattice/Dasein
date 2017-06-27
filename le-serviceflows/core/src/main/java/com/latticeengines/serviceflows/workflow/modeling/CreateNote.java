@@ -36,7 +36,12 @@ public class CreateNote extends BaseModelStep<ModelStepConfiguration> {
             NoteParams noteParams = new NoteParams();
             noteParams.setContent(content);
             noteParams.setUserName(userName);
-            noteParams.setOrigin(ModelNotesOrigin.Note.getOrigin());
+            if(sourceModelSummary != null) {
+                noteParams.setOrigin(ModelNotesOrigin.REMODEL.getOrigin());
+            }
+            else {
+                noteParams.setOrigin(ModelNotesOrigin.MODELCREATED.getOrigin());
+            }
 
             log.info(String.format("Create a new note by user %s", userName));
             for(String modelId : modelIds) {

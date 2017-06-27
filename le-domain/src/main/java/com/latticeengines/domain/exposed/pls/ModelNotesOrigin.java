@@ -2,8 +2,9 @@ package com.latticeengines.domain.exposed.pls;
 
 public enum ModelNotesOrigin {
 
-    Note("Note"),
-    Remodel("Remodel");
+    NOTE("NOTE"),
+    REMODEL("REMODEL"),
+    MODELCREATED("MODEL CREATED");
 
     private ModelNotesOrigin(String origin) {
         this.setOrigin(origin);

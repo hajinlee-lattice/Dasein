@@ -76,7 +76,7 @@ public class ModelNotesServiceImpl implements ModelNotesService {
             copyNote.setLastModificationTimestamp(note.getLastModificationTimestamp());
             copyNote.setLastModifiedByUser(note.getLastModifiedByUser());
             copyNote.setNotesContents(note.getNotesContents());
-            copyNote.setOrigin(ModelNotesOrigin.Remodel.getOrigin());
+            copyNote.setOrigin(note.getOrigin());
             copyNote.setParentModelId(fromModelSummaryId);
             copyNote.setModelSummary(toSummary);
             copyNote.setId(UUID.randomUUID().toString());

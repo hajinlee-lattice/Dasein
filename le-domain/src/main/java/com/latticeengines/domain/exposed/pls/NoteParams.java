@@ -11,7 +11,7 @@ public class NoteParams {
     private String content;
 
     @JsonProperty("origin")
-    private String Origin = "Note";
+    private String Origin = "NOTE";
 
     public String getUserName() {
         return userName;
