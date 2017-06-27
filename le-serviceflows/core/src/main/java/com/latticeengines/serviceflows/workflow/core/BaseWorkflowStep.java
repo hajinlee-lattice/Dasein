@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.core;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -290,7 +291,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         if (workflow == null) {
             log.warn("There is no workflow conifguration of class " + workflowClass.getSimpleName() + " in context.");
             try {
-                workflow = workflowClass.newInstance();
+                Class<?> builderClass = Arrays.asList(workflowClass.getDeclaredClasses()).stream()
+                        .filter(c -> c.getSimpleName().equals("Builder")).distinct().findFirst().orElse(null);
+                Object builder = builderClass.newInstance();
+                Method build = builderClass.getMethod("build", new Class<?>[] {});
+                workflow = (WorkflowConfiguration) build.invoke(builder);
             } catch (Exception e) {
                 throw new RuntimeException(
                         String.format("Can't instantiate workflow configuration %s", workflowClass.getSimpleName()), e);
@@ -306,6 +311,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         registry.forEach((name, config) -> {
             Class<?> configClass = stepConfigClasses.get(name);
             BaseStepConfiguration step = (BaseStepConfiguration) getObjectFromContext(name, configClass);
+            if (step == null) {
+                step = (BaseStepConfiguration) JsonUtils.deserialize(config, configClass);
+            }
             step.setSkipStep(true);
             putObjectInContext(name, step);
             log.info("Set step " + configClass.getSimpleName() + " to be skipped.");
