@@ -134,6 +134,7 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
         return trueBits;
     }
 
+    @SuppressWarnings("unchecked")
     private List<Integer> encodeString(TupleEntry arguments, BitCodeBook codeBook, String key) {
         String value = (String) arguments.getObject(valueField);
         if (StringUtils.isBlank(value)) {
@@ -143,11 +144,16 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
         if (binValue == null) {
             return emptyList();
         }
-        List<Integer> trueBits = new ArrayList<>();
         Integer bitUnit = codeBook.getBitUnit();
-        for (int i = 0; i < binValue.length(); i++) {
+        String zeros = String.join("", Collections.nCopies(bitUnit, "0"));
+        binValue = (zeros + binValue).substring(binValue.length());
+        if (binValue.length() != bitUnit) {
+            return emptyList();
+        }
+        List<Integer> trueBits = new ArrayList<>();
+        for (int i = bitUnit - 1; i >= 0; i--) {
             if (binValue.charAt(i) == '1') {
-                trueBits.add(codeBook.getBitPosForKey(key) + bitUnit - binValue.length() + i);
+                trueBits.add(codeBook.getBitPosForKey(key) + bitUnit - 1 - i);
             }
         }
         return trueBits;
