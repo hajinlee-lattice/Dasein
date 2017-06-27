@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.DerivedSource;
@@ -13,7 +12,6 @@ public class BomboraSurgePivoted implements DerivedSource, DomainBased {
 
     private static final long serialVersionUID = -4970128975902663484L;
 
-    @Autowired
     private GeneralSource bomboraSurge = new GeneralSource("BomboraSurge");
 
     @Override
