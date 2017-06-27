@@ -76,6 +76,39 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         return workflowJobService.submit(configuration);
     }
 
+    public ApplicationId retryLatestFailed(String datafeedName) {
+        DataFeed datafeed = metadataProxy.findDataFeedByName(MultiTenantContext.getCustomerSpace().toString(),
+                datafeedName);
+        log.info(String.format("data feed %s status: %s", datafeedName, datafeed.getStatus()));
+        DataFeedExecution execution = datafeed.getActiveExecution();
+
+        Status datafeedStatus = datafeed.getStatus();
+        if (!datafeedStatus.isAllowConsolidation()) {
+            throw new RuntimeException("we can't launch any consolidate workflow now as it is not ready.");
+        } else if (execution != null && execution.getStatus() == DataFeedExecution.Status.Started) {
+            if (execution.getWorkflowId() == null //
+                    || !workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId())).getJobStatus()
+                            .isTerminated()) {
+                throw new RuntimeException(
+                        "we can't launch any consolidate workflow now as there is one already running.");
+            } else {
+                log.info(String.format(
+                        "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
+                        execution, datafeed));
+                metadataProxy.failExecution(MultiTenantContext.getCustomerSpace().toString(), datafeedName,
+                        datafeedStatus.getName());
+            }
+        } else if (execution == null || execution.getStatus() != DataFeedExecution.Status.Failed) {
+            throw new RuntimeException("we can't retart consolidate workflow as the most recent one is not failed");
+        }
+        if (execution.getWorkflowId() == null) {
+            throw new RuntimeException("we can't retart consolidate workflow as the last workflow has fatal error!");
+        }
+        execution = metadataProxy.retryLatestExecution(MultiTenantContext.getCustomerSpace().toString(), datafeedName);
+        log.info(String.format("restarted execution of %s with status: %s", datafeedName, execution.getStatus()));
+        return workflowJobService.restart(execution.getWorkflowId());
+    }
+
     private WorkflowConfiguration generateConfiguration(String datafeedName, Status initialDataFeedStatus) {
         DataCollection dataCollection = dataCollectionProxy
                 .getDefaultDataCollection(MultiTenantContext.getCustomerSpace().toString());

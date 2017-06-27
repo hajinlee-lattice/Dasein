@@ -140,6 +140,21 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
+    public DataFeedExecution retryLatestExecution(String datafeedName) {
+        DataFeed datafeed = findByNameInflated(datafeedName);
+        DataFeedExecution execution = datafeed.getActiveExecution();
+        execution.setStatus(DataFeedExecution.Status.Started);
+        log.info(String.format("restarting execution %s", execution));
+        datafeedExecutionEntityMgr.update(execution);
+
+        datafeed.setStatus(Status.Consolidating);
+        log.info(String.format("restarting execution: updating data feed to %s", datafeed));
+        update(datafeed);
+        return execution;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
             Status datafeedStatus) {
         DataFeed datafeed = findByNameInflated(datafeedName);

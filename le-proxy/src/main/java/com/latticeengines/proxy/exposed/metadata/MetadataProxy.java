@@ -281,4 +281,11 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
         put("updateDataFeedStatus", url, null);
     }
 
+    @Override
+    public DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeeds/{datafeedName}/restartexecution",
+                customerSpace, datafeedName);
+        return post("restartExecution", url, null, DataFeedExecution.class);
+    }
+
 }

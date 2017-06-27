@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -15,7 +14,7 @@ public interface WorkflowJobService {
 
     ApplicationId submit(WorkflowConfiguration configuration);
 
-    AppSubmission restart(String jobId);
+    ApplicationId restart(Long jobId);
 
     void cancel(String jobId);
 

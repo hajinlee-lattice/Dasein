@@ -27,7 +27,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements WorkflowI
     }
 
     @Override
-    public AppSubmission restartWorkflowExecution(String workflowId) {
+    public AppSubmission restartWorkflowExecution(Long workflowId) {
         String url = constructUrl("/job/{workflowId}/restart", workflowId);
         return post("restartWorkflow", url, null, AppSubmission.class);
     }

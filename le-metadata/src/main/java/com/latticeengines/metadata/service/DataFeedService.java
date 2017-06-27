@@ -19,4 +19,6 @@ public interface DataFeedService {
 
     DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 
+    DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName);
+
 }

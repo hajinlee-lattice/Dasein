@@ -147,4 +147,24 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
 
     }
 
+    @Test(groups = "functional", dependsOnMethods = "finishExecution")
+    public void retryLatestExecution() {
+        DataFeedExecution exec1 = datafeedEntityMgr.updateExecutionWithTerminalStatus(DATA_FEED_NAME,
+                DataFeedExecution.Status.Failed, Status.InitialLoaded);
+        assertEquals(exec1.getStatus(), DataFeedExecution.Status.Failed);
+
+        datafeedEntityMgr.retryLatestExecution(DATA_FEED_NAME);
+
+        DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
+        assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
+        assertEquals(df.getExecutions().size(), 1);
+        assertEquals(df.getStatus(), Status.Consolidating);
+
+        DataFeedExecution exec = df.getExecutions().get(0);
+        assertEquals(exec.getStatus(), DataFeedExecution.Status.Started);
+        assertEquals(exec.getImports().size(), exec1.getImports().size());
+        assertEquals(exec.getImports().get(0).getDataTable().getAttributes().size(), 1);
+
+    }
+
 }

@@ -12,7 +12,7 @@ public interface WorkflowInterface {
 
     AppSubmission submitWorkflowExecution(WorkflowConfiguration config);
 
-    AppSubmission restartWorkflowExecution(String workflowId);
+    AppSubmission restartWorkflowExecution(Long workflowId);
 
     WorkflowExecutionId getWorkflowId(String applicationId);
 

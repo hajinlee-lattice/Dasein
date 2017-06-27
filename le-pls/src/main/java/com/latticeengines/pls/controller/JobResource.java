@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.pls.service.WorkflowJobService;
 
@@ -67,7 +67,7 @@ public class JobResource {
     @ResponseBody
     @ApiOperation(value = "Restart a previous job")
     @PreAuthorize("hasRole('Edit_PLS_Jobs')")
-    public AppSubmission restart(@PathVariable String jobId) {
-        return workflowJobService.restart(jobId);
+    public ResponseDocument<String> restart(@PathVariable Long jobId) {
+        return ResponseDocument.successResponse(workflowJobService.restart(jobId).toString());
     }
 }

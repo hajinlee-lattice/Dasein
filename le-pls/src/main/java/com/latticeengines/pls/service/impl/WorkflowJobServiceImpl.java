@@ -46,8 +46,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private ModelSummaryService modelSummaryService;
 
     @Override
-    public AppSubmission restart(String jobId) {
-        return workflowProxy.restartWorkflowExecution(jobId);
+    public ApplicationId restart(Long jobId) {
+        AppSubmission submission = workflowProxy.restartWorkflowExecution(jobId);
+        String applicationId = submission.getApplicationIds().get(0);
+
+        log.info(String.format("Resubmitted workflow with application id %s", applicationId));
+        return ConverterUtils.toApplicationId(applicationId);
     }
 
     @Override
@@ -58,8 +62,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public List<Job> findAllWithType(String type) {
         Tenant tenantWithPid = getTenant();
-        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid "
-                + tenantWithPid.getPid());
+        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid(), type);
         if (jobs == null) {
             jobs = Collections.emptyList();
@@ -70,8 +73,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public Job findByApplicationId(String applicationId) {
         Tenant tenantWithPid = getTenant();
-        log.debug("Finding job for application Id " + applicationId + " with pid "
-                + tenantWithPid.getPid());
+        log.debug("Finding job for application Id " + applicationId + " with pid " + tenantWithPid.getPid());
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
         return job;
     }
@@ -86,8 +88,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     public List<Job> findAll() {
         Tenant tenantWithPid = getTenant();
-        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid "
-                + tenantWithPid.getPid());
+        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         if (jobs == null) {
             return Collections.emptyList();
@@ -105,8 +106,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         for (Job job : jobs) {
             String modelId = null;
-            if (job.getInputs() != null
-                    && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
+            if (job.getInputs() != null && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
                 modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
             } else if (job.getOutputs() != null
                     && job.getOutputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
@@ -121,13 +121,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 if (modelSummary.getStatus() == ModelSummaryStatus.DELETED) {
                     job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
                 }
-                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                        modelSummary.getDisplayName());
-                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
-                        modelSummary.getModelType());
+                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
+                job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE, modelSummary.getModelType());
             } else {
-                log.warn(String.format(
-                        "ModelSummary: %s for job: %s cannot be found in the database. Please check",
+                log.warn(String.format("ModelSummary: %s for job: %s cannot be found in the database. Please check",
                         modelId, job.getId()));
                 job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
             }
@@ -142,11 +139,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 getJobSourceFileExists(job.getApplicationId()).toString());
 
         String modelId = null;
-        if (job.getInputs() != null
-                && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
+        if (job.getInputs() != null && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
             modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-        } else if (job.getOutputs() != null
-                && job.getOutputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
+        } else if (job.getOutputs() != null && job.getOutputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
             modelId = job.getOutputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
         }
         if (modelId == null) {
@@ -158,13 +153,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             if (modelSummary.getStatus() == ModelSummaryStatus.DELETED) {
                 job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
             }
-            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME,
-                    modelSummary.getDisplayName());
-            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE,
-                    modelSummary.getModelType());
+            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, modelSummary.getDisplayName());
+            job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_TYPE, modelSummary.getModelType());
         } else {
-            log.warn(String.format(
-                    "ModelSummary: %s for job: %s cannot be found in the database. Please check",
+            log.warn(String.format("ModelSummary: %s for job: %s cannot be found in the database. Please check",
                     modelId, job.getId()));
             job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DELETED, "true");
         }
@@ -178,8 +170,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);
 
-        log.info(String.format("Submitted %s with application id %s",
-                configuration.getWorkflowName(), applicationId));
+        log.info(String.format("Submitted %s with application id %s", configuration.getWorkflowName(), applicationId));
         return ConverterUtils.toApplicationId(applicationId);
     }
 

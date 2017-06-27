@@ -156,7 +156,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifyFirstImport")
-    public void importSecondData() {
+    public void importSecondData() throws Exception {
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importSecondData")

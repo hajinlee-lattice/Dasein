@@ -110,4 +110,9 @@ public class DataFeedServiceImpl implements DataFeedService {
         throw new RuntimeException(
                 String.format("Can't finish this execution due to datafeed status is %s", initialDataFeedStatus));
     }
+
+    @Override
+    public DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName) {
+        return datafeedEntityMgr.retryLatestExecution(datafeedName);
+    }
 }

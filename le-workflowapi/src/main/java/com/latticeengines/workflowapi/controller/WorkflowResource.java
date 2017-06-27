@@ -47,8 +47,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ResponseBody
     @ApiOperation(value = "Create a workflow execution in a Yarn container")
     @Override
-    public AppSubmission submitWorkflowExecution(
-            @RequestBody WorkflowConfiguration workflowConfig) {
+    public AppSubmission submitWorkflowExecution(@RequestBody WorkflowConfiguration workflowConfig) {
         return new AppSubmission(Arrays.<ApplicationId> asList(
                 new ApplicationId[] { workflowContainerService.submitWorkFlow(workflowConfig) }));
     }
@@ -57,13 +56,12 @@ public class WorkflowResource implements WorkflowInterface {
     @ResponseBody
     @ApiOperation(value = "Restart a previous workflow execution")
     @Override
-    public AppSubmission restartWorkflowExecution(@PathVariable String workflowId) {
-        WorkflowExecutionId workflowExecutionId = new WorkflowExecutionId(Long.valueOf(workflowId));
+    public AppSubmission restartWorkflowExecution(@PathVariable Long workflowId) {
+        WorkflowExecutionId workflowExecutionId = new WorkflowExecutionId(workflowId);
         WorkflowStatus status = workflowService.getStatus(workflowExecutionId);
 
         if (status == null) {
-            throw new LedpException(LedpCode.LEDP_28017,
-                    new String[] { String.valueOf(workflowId) });
+            throw new LedpException(LedpCode.LEDP_28017, new String[] { String.valueOf(workflowId) });
         } else if (!WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
             throw new LedpException(LedpCode.LEDP_28018,
                     new String[] { String.valueOf(workflowId), status.getStatus().name() });
@@ -106,8 +104,7 @@ public class WorkflowResource implements WorkflowInterface {
 
     private WorkflowExecutionId getWorkflowIdFromAppId(String applicationId) {
         log.info("getWorkflowId for applicationId:" + applicationId);
-        return workflowContainerService
-                .getWorkflowId(ConverterUtils.toApplicationId(applicationId));
+        return workflowContainerService.getWorkflowId(ConverterUtils.toApplicationId(applicationId));
     }
 
     @RequestMapping(value = "/job/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -131,8 +128,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ResponseBody
     @ApiOperation(value = "Get list of workflow executions for a tenant filtered by job type")
     @Override
-    public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid,
-            @RequestParam("type") String type) {
+    public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid, @RequestParam("type") String type) {
         List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid, type);
         return jobs;
     }

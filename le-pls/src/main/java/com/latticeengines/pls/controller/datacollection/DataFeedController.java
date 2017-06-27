@@ -35,11 +35,18 @@ public class DataFeedController {
                 consolidateAndPublishWorkflowSubmitter.submit(datafeedName).toString());
     }
 
+    @RequestMapping(value = "/{datafeedName}/consolidate/restart", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Restart a previous failed consolidate execution")
+    public ResponseDocument<String> restart(@PathVariable String datafeedName) {
+        return ResponseDocument
+                .successResponse(consolidateAndPublishWorkflowSubmitter.retryLatestFailed(datafeedName).toString());
+    }
+
     @RequestMapping(value = "/{datafeedName}/assemble", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Invoke calculate stats workflow. Returns the job id.")
     public ResponseDocument<String> assemble(@PathVariable String datafeedName) {
-        return ResponseDocument
-                .successResponse(calculateStatsWorkflowSubmitter.submit(datafeedName).toString());
+        return ResponseDocument.successResponse(calculateStatsWorkflowSubmitter.submit(datafeedName).toString());
     }
 }
