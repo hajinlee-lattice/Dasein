@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,7 +31,6 @@ public class AccountResource implements DanteAccountInterface {
     @RequestMapping(value = "/{count}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get Dante accounts")
-    @PreAuthorize("hasRole('View_PLS_PLAYS')")
     public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count,
             @RequestParam("customerSpace") String customerSpace) {
         return ResponseDocument.successResponse(accountService.getAccounts(count, customerSpace));

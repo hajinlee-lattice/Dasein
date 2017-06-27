@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +29,6 @@ public class AttributeResource implements DanteAttributesInterface {
     @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get account attributes for this tenant")
-    @PreAuthorize("hasRole('View_PLS_PLAYS')")
     public ResponseDocument<Map<String, String>> getAccountAttributes(
             @RequestParam("customerSpace") String customerSpace) {
         return ResponseDocument.successResponse(attributeService.getAccountAttributes(customerSpace));
@@ -39,7 +37,6 @@ public class AttributeResource implements DanteAttributesInterface {
     @RequestMapping(value = "/recommendationattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get recommendation attributes")
-    @PreAuthorize("hasRole('View_PLS_PLAYS')")
     public ResponseDocument<Map<String, String>> getRecommendationAttributes(
             @RequestParam("customerSpace") String customerSpace) {
         return ResponseDocument.successResponse(attributeService.getRecommendationAttributes(customerSpace));

@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +37,6 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create a Dante Talking Point ")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<?> createOrUpdate(@RequestBody DanteTalkingPoint talkingPoint) {
         talkingPointService.createOrUpdate(talkingPoint);
         return SimpleBooleanResponse.successResponse();
@@ -47,7 +45,6 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @RequestMapping(value = "/{externalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
-    @PreAuthorize("hasRole('View_PLS_Plays')")
     public ResponseDocument<DanteTalkingPoint> findByExternalID(@PathVariable String externalID) {
         return ResponseDocument.successResponse(talkingPointService.findByExternalID(externalID));
     }
@@ -55,7 +52,6 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @RequestMapping(value = "/play/{playExternalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "find all Dante Talking Points for the given play")
-    @PreAuthorize("hasRole('View_PLS_Plays')")
     public ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(@PathVariable String playExternalID) {
         return ResponseDocument.successResponse(talkingPointService.findAllByPlayID(playExternalID));
     }
@@ -63,7 +59,6 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get the server url and oAuth token to preview Dante Talking Point")
-    @PreAuthorize("hasRole('View_PLS_Plays')")
     public ResponseDocument<DantePreviewResources> getPreviewResources(
             @RequestParam("customerSpace") String customerSpace) {
         return ResponseDocument.successResponse(talkingPointService.getPreviewResources(customerSpace));
@@ -72,7 +67,6 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @RequestMapping(value = "/{talkingPointExternalID}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete a Dante Talking Point ")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<?> delete(@PathVariable String talkingPointExternalID) {
         DanteTalkingPoint talkingPoint = talkingPointService.findByExternalID(talkingPointExternalID);
         talkingPointService.delete(talkingPoint);
