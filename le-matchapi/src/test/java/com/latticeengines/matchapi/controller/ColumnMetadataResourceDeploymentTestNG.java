@@ -26,7 +26,7 @@ public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTe
     @Test(groups = "deployment", enabled = false)
     public void testPredefined() {
         for (Predefined predefined: Predefined.values()) {
-            List<ColumnMetadata> columnMetadataList = columnMetadataProxy.columnSelection(predefined, null);
+            List<ColumnMetadata> columnMetadataList = columnMetadataProxy.columnSelection(predefined, "1.0.0");
             Assert.assertNotNull(columnMetadataList);
             for (ColumnMetadata columnMetadata : columnMetadataList) {
                 Assert.assertTrue(
@@ -39,7 +39,7 @@ public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTe
     @Test(groups = "deployment", enabled = false)
     public void testLeadEnrichment() {
         List<ColumnMetadata> columnMetadataList =
-                columnMetadataProxy.columnSelection(Predefined.LeadEnrichment, null);
+                columnMetadataProxy.columnSelection(Predefined.LeadEnrichment, "1.0.0");
         Assert.assertNotNull(columnMetadataList);
         for (ColumnMetadata columnMetadata : columnMetadataList) {
             Assert.assertNotNull(columnMetadata.getDisplayName());

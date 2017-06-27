@@ -1,0 +1,2315 @@
+[
+  {
+    "ColumnId": "ACCT_CREDIT_RATING_0A26EF631F",
+    "ColumnName": "ACCT_CREDIT_RATING_0A26EF631F",
+    "DisplayName": "ACCT_CREDIT_RATING_0A26EF631F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_DUNSNUMBER_C19195597A",
+    "ColumnName": "ACCT_DUNSNUMBER_C19195597A",
+    "DisplayName": "ACCT_DUNSNUMBER_C19195597A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_ETOV2_C5836CBB17",
+    "ColumnName": "ACCT_ETOV2_C5836CBB17",
+    "DisplayName": "ACCT_ETOV2_C5836CBB17",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_ETOV3_4A360727E0",
+    "ColumnName": "ACCT_ETOV3_4A360727E0",
+    "DisplayName": "ACCT_ETOV3_4A360727E0",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_ETOV4_B50B4FCB97",
+    "ColumnName": "ACCT_ETOV4_B50B4FCB97",
+    "DisplayName": "ACCT_ETOV4_B50B4FCB97",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_ETOV5_74CB5B61D2",
+    "ColumnName": "ACCT_ETOV5_74CB5B61D2",
+    "DisplayName": "ACCT_ETOV5_74CB5B61D2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_ETOV_D0F5DC5D0E",
+    "ColumnName": "ACCT_ETOV_D0F5DC5D0E",
+    "DisplayName": "ACCT_ETOV_D0F5DC5D0E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_FIT_SCORE_02308E850B",
+    "ColumnName": "ACCT_FIT_SCORE_02308E850B",
+    "DisplayName": "ACCT_FIT_SCORE_02308E850B",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_I_RANK_PCTCHANGE_3MONTH_8637BF23DD",
+    "ColumnName": "ACCT_I_RANK_PCTCHANGE_3MONTH_8637BF23DD",
+    "DisplayName": "ACCT_I_RANK_PCTCHANGE_3MONTH_8637BF23DD",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A",
+    "ColumnName": "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A",
+    "DisplayName": "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_I_RANK_PCTCHANGE_9MONTH_A0AAF5CAEA",
+    "ColumnName": "ACCT_I_RANK_PCTCHANGE_9MONTH_A0AAF5CAEA",
+    "DisplayName": "ACCT_I_RANK_PCTCHANGE_9MONTH_A0AAF5CAEA",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_OWNERID_7F5ACED131",
+    "ColumnName": "ACCT_OWNERID_7F5ACED131",
+    "DisplayName": "ACCT_OWNERID_7F5ACED131",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_OWNERSHIP_110BD19C8A",
+    "ColumnName": "ACCT_OWNERSHIP_110BD19C8A",
+    "DisplayName": "ACCT_OWNERSHIP_110BD19C8A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PARENTID_C9795CBDCE",
+    "ColumnName": "ACCT_PARENTID_C9795CBDCE",
+    "DisplayName": "ACCT_PARENTID_C9795CBDCE",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PHONE_12A8493365",
+    "ColumnName": "ACCT_PHONE_12A8493365",
+    "DisplayName": "ACCT_PHONE_12A8493365",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PLAY_DISPLAY_NAME_F75C86D01F",
+    "ColumnName": "ACCT_PLAY_DISPLAY_NAME_F75C86D01F",
+    "DisplayName": "ACCT_PLAY_DISPLAY_NAME_F75C86D01F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_ACCOUNT_ID_9A87DCB1FC",
+    "ColumnName": "ACCT_PL_ACCOUNT_ID_9A87DCB1FC",
+    "DisplayName": "ACCT_PL_ACCOUNT_ID_9A87DCB1FC",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_CONTACT_ID_676A7A86BC",
+    "ColumnName": "ACCT_PL_CONTACT_ID_676A7A86BC",
+    "DisplayName": "ACCT_PL_CONTACT_ID_676A7A86BC",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_CREATION_DATE_7088439623",
+    "ColumnName": "ACCT_PL_CREATION_DATE_7088439623",
+    "DisplayName": "ACCT_PL_CREATION_DATE_7088439623",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_CRMLEAD_EXTERNAL_ID_E9FF6DE801",
+    "ColumnName": "ACCT_PL_CRMLEAD_EXTERNAL_ID_E9FF6DE801",
+    "DisplayName": "ACCT_PL_CRMLEAD_EXTERNAL_ID_E9FF6DE801",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_DISPLAY_NAME_E9E26FB9C7",
+    "ColumnName": "ACCT_PL_DISPLAY_NAME_E9E26FB9C7",
+    "DisplayName": "ACCT_PL_DISPLAY_NAME_E9E26FB9C7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_ISACTIVE_BD61462974",
+    "ColumnName": "ACCT_PL_ISACTIVE_BD61462974",
+    "DisplayName": "ACCT_PL_ISACTIVE_BD61462974",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_LIKELIHOOD_A5FBD72C39",
+    "ColumnName": "ACCT_PL_LIKELIHOOD_A5FBD72C39",
+    "DisplayName": "ACCT_PL_LIKELIHOOD_A5FBD72C39",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_MONETARY_VALUE_30E0F3D241",
+    "ColumnName": "ACCT_PL_MONETARY_VALUE_30E0F3D241",
+    "DisplayName": "ACCT_PL_MONETARY_VALUE_30E0F3D241",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_NORMALIZED_SCORE_2447FB15A9",
+    "ColumnName": "ACCT_PL_NORMALIZED_SCORE_2447FB15A9",
+    "DisplayName": "ACCT_PL_NORMALIZED_SCORE_2447FB15A9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_PLAY_ID_1D31C1D8C5",
+    "ColumnName": "ACCT_PL_PLAY_ID_1D31C1D8C5",
+    "DisplayName": "ACCT_PL_PLAY_ID_1D31C1D8C5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_PRELEAD_ID_4EE180CF2A",
+    "ColumnName": "ACCT_PL_PRELEAD_ID_4EE180CF2A",
+    "DisplayName": "ACCT_PL_PRELEAD_ID_4EE180CF2A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_PL_SIMULATION_ID_0ACF092E3F",
+    "ColumnName": "ACCT_PL_SIMULATION_ID_0ACF092E3F",
+    "DisplayName": "ACCT_PL_SIMULATION_ID_0ACF092E3F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_DETAIL_1_81B18613D3",
+    "ColumnName": "ACCT_SF_OPPTY_DETAIL_1_81B18613D3",
+    "DisplayName": "ACCT_SF_OPPTY_DETAIL_1_81B18613D3",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_DETAIL_2_096DF24F75",
+    "ColumnName": "ACCT_SF_OPPTY_DETAIL_2_096DF24F75",
+    "DisplayName": "ACCT_SF_OPPTY_DETAIL_2_096DF24F75",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_DETAIL_3_CBCD6C0DDD",
+    "ColumnName": "ACCT_SF_OPPTY_DETAIL_3_CBCD6C0DDD",
+    "DisplayName": "ACCT_SF_OPPTY_DETAIL_3_CBCD6C0DDD",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_DETAIL_4_D2ECC83671",
+    "ColumnName": "ACCT_SF_OPPTY_DETAIL_4_D2ECC83671",
+    "DisplayName": "ACCT_SF_OPPTY_DETAIL_4_D2ECC83671",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_DETAIL_5_0A3D5597A0",
+    "ColumnName": "ACCT_SF_OPPTY_DETAIL_5_0A3D5597A0",
+    "DisplayName": "ACCT_SF_OPPTY_DETAIL_5_0A3D5597A0",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_HIS_ID_1_DDDF8029BC",
+    "ColumnName": "ACCT_SF_OPPTY_HIS_ID_1_DDDF8029BC",
+    "DisplayName": "ACCT_SF_OPPTY_HIS_ID_1_DDDF8029BC",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_HIS_ID_2_0C35CC252E",
+    "ColumnName": "ACCT_SF_OPPTY_HIS_ID_2_0C35CC252E",
+    "DisplayName": "ACCT_SF_OPPTY_HIS_ID_2_0C35CC252E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_HIS_ID_3_6FB7BC5B4C",
+    "ColumnName": "ACCT_SF_OPPTY_HIS_ID_3_6FB7BC5B4C",
+    "DisplayName": "ACCT_SF_OPPTY_HIS_ID_3_6FB7BC5B4C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_HIS_ID_4_00013C429C",
+    "ColumnName": "ACCT_SF_OPPTY_HIS_ID_4_00013C429C",
+    "DisplayName": "ACCT_SF_OPPTY_HIS_ID_4_00013C429C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_HIS_ID_5_7E80088EA3",
+    "ColumnName": "ACCT_SF_OPPTY_HIS_ID_5_7E80088EA3",
+    "DisplayName": "ACCT_SF_OPPTY_HIS_ID_5_7E80088EA3",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_1_5AAEA9FAA9",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPA_1_5AAEA9FAA9",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPA_1_5AAEA9FAA9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_2_A104F294D5",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPA_2_A104F294D5",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPA_2_A104F294D5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_3_EF23C06A1D",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPA_3_EF23C06A1D",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPA_3_EF23C06A1D",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_4_AF09A4531A",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPA_4_AF09A4531A",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPA_4_AF09A4531A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_5_9FFF2C2D48",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPA_5_9FFF2C2D48",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPA_5_9FFF2C2D48",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_1_250C26F0B0",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPB_1_250C26F0B0",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPB_1_250C26F0B0",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_2_AC97B1C928",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPB_2_AC97B1C928",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPB_2_AC97B1C928",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_3_CEEB4891C9",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPB_3_CEEB4891C9",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPB_3_CEEB4891C9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_4_AC59614D56",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPB_4_AC59614D56",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPB_4_AC59614D56",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_5_67BBC20975",
+    "ColumnName": "ACCT_SF_OPPTY_NEXTSTEPB_5_67BBC20975",
+    "DisplayName": "ACCT_SF_OPPTY_NEXTSTEPB_5_67BBC20975",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TPV_MODEL_STAMP_9EE67E9CA0",
+    "ColumnName": "ACCT_TPV_MODEL_STAMP_9EE67E9CA0",
+    "DisplayName": "ACCT_TPV_MODEL_STAMP_9EE67E9CA0",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXARANK_PERCENTILE_RA_7E915F082C",
+    "ColumnName": "ACCT_TP_ALEXARANK_PERCENTILE_RA_7E915F082C",
+    "DisplayName": "ACCT_TP_ALEXARANK_PERCENTILE_RA_7E915F082C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXAUSRANK_PERC_RATING_932182450A",
+    "ColumnName": "ACCT_TP_ALEXAUSRANK_PERC_RATING_932182450A",
+    "DisplayName": "ACCT_TP_ALEXAUSRANK_PERC_RATING_932182450A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXAVIEWSPERUSER_76B157D8CB",
+    "ColumnName": "ACCT_TP_ALEXAVIEWSPERUSER_76B157D8CB",
+    "DisplayName": "ACCT_TP_ALEXAVIEWSPERUSER_76B157D8CB",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXAVIEWSPERUSER_PERC_DCA8A825F3",
+    "ColumnName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC_DCA8A825F3",
+    "DisplayName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC_DCA8A825F3",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXAVIEWSPERUSER_PERC__9C23580A26",
+    "ColumnName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC__9C23580A26",
+    "DisplayName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC__9C23580A26",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_4D33D54625",
+    "ColumnName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_4D33D54625",
+    "DisplayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_4D33D54625",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_A71578B9E1",
+    "ColumnName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_A71578B9E1",
+    "DisplayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_A71578B9E1",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_3204324CBE",
+    "ColumnName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_3204324CBE",
+    "DisplayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_3204324CBE",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_DDAAE3A3A9",
+    "ColumnName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_DDAAE3A3A9",
+    "DisplayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_DDAAE3A3A9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_E3D6FA62C5",
+    "ColumnName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_E3D6FA62C5",
+    "DisplayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_E3D6FA62C5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_EB7F1E8A8E",
+    "ColumnName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_EB7F1E8A8E",
+    "DisplayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_EB7F1E8A8E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_BUSINESSINDUSTRY_C084181874",
+    "ColumnName": "ACCT_TP_BUSINESSINDUSTRY_C084181874",
+    "DisplayName": "ACCT_TP_BUSINESSINDUSTRY_C084181874",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_BUSINESSPRIMARYSIC4DIGI_86939C62B4",
+    "ColumnName": "ACCT_TP_BUSINESSPRIMARYSIC4DIGI_86939C62B4",
+    "DisplayName": "ACCT_TP_BUSINESSPRIMARYSIC4DIGI_86939C62B4",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_BUSINESSSICDESCRIPTION_24952FE74F",
+    "ColumnName": "ACCT_TP_BUSINESSSICDESCRIPTION_24952FE74F",
+    "DisplayName": "ACCT_TP_BUSINESSSICDESCRIPTION_24952FE74F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_FACEBOOK_LIKES_2MONTHSA_8471388C40",
+    "ColumnName": "ACCT_TP_FACEBOOK_LIKES_2MONTHSA_8471388C40",
+    "DisplayName": "ACCT_TP_FACEBOOK_LIKES_2MONTHSA_8471388C40",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_1AB3078C3C",
+    "ColumnName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_1AB3078C3C",
+    "DisplayName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_1AB3078C3C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_E4E243AC9B",
+    "ColumnName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_E4E243AC9B",
+    "DisplayName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_E4E243AC9B",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_FD2AC62470",
+    "ColumnName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_FD2AC62470",
+    "DisplayName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_FD2AC62470",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_FACEBOOK_LIKES_CURRENTM_A7A9CF4321",
+    "ColumnName": "ACCT_TP_FACEBOOK_LIKES_CURRENTM_A7A9CF4321",
+    "DisplayName": "ACCT_TP_FACEBOOK_LIKES_CURRENTM_A7A9CF4321",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_FACEBOOK_LIKES_LASTMONT_B6932AF338",
+    "ColumnName": "ACCT_TP_FACEBOOK_LIKES_LASTMONT_B6932AF338",
+    "DisplayName": "ACCT_TP_FACEBOOK_LIKES_LASTMONT_B6932AF338",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_INTELLISCORE_BC64967AA9",
+    "ColumnName": "ACCT_TP_INTELLISCORE_BC64967AA9",
+    "DisplayName": "ACCT_TP_INTELLISCORE_BC64967AA9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_PDINTELLISCORE_RATING_143793F7F0",
+    "ColumnName": "ACCT_TP_PDINTELLISCORE_RATING_143793F7F0",
+    "DisplayName": "ACCT_TP_PDINTELLISCORE_RATING_143793F7F0",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHADWORDSCOST_FFC0C9C2D3",
+    "ColumnName": "ACCT_TP_SEMRUSHADWORDSCOST_FFC0C9C2D3",
+    "DisplayName": "ACCT_TP_SEMRUSHADWORDSCOST_FFC0C9C2D3",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_808226D6CC",
+    "ColumnName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_808226D6CC",
+    "DisplayName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_808226D6CC",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_D378281527",
+    "ColumnName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_D378281527",
+    "DisplayName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_D378281527",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_47DD043941",
+    "ColumnName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_47DD043941",
+    "DisplayName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_47DD043941",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_47F7B3B032",
+    "ColumnName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_47F7B3B032",
+    "DisplayName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_47F7B3B032",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_791A0B64EF",
+    "ColumnName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_791A0B64EF",
+    "DisplayName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_791A0B64EF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHORGANICCOST_DF3664D040",
+    "ColumnName": "ACCT_TP_SEMRUSHORGANICCOST_DF3664D040",
+    "DisplayName": "ACCT_TP_SEMRUSHORGANICCOST_DF3664D040",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHORGANICCOST_INDU_0C33F40A5D",
+    "ColumnName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_0C33F40A5D",
+    "DisplayName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_0C33F40A5D",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHORGANICCOST_INDU_F6DFEF04D5",
+    "ColumnName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_F6DFEF04D5",
+    "DisplayName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_F6DFEF04D5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHORGANICTRAFFIC_28F5CB7D5C",
+    "ColumnName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_28F5CB7D5C",
+    "DisplayName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_28F5CB7D5C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_0CAD2C2222",
+    "ColumnName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_0CAD2C2222",
+    "DisplayName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_0CAD2C2222",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_965B5E1AB6",
+    "ColumnName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_965B5E1AB6",
+    "DisplayName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_965B5E1AB6",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_2MONT_D12355AA81",
+    "ColumnName": "ACCT_TP_TWITTER_FOLLOWERS_2MONT_D12355AA81",
+    "DisplayName": "ACCT_TP_TWITTER_FOLLOWERS_2MONT_D12355AA81",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_3MAVG_74CFD72D61",
+    "ColumnName": "ACCT_TP_TWITTER_FOLLOWERS_3MAVG_74CFD72D61",
+    "DisplayName": "ACCT_TP_TWITTER_FOLLOWERS_3MAVG_74CFD72D61",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_3FA45F1F09",
+    "ColumnName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_3FA45F1F09",
+    "DisplayName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_3FA45F1F09",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_D665CC9024",
+    "ColumnName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_D665CC9024",
+    "DisplayName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_D665CC9024",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_CURRE_6D5EF2597D",
+    "ColumnName": "ACCT_TP_TWITTER_FOLLOWERS_CURRE_6D5EF2597D",
+    "DisplayName": "ACCT_TP_TWITTER_FOLLOWERS_CURRE_6D5EF2597D",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_LASTM_893764C2D0",
+    "ColumnName": "ACCT_TP_TWITTER_FOLLOWERS_LASTM_893764C2D0",
+    "DisplayName": "ACCT_TP_TWITTER_FOLLOWERS_LASTM_893764C2D0",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_WEBSITEENGAGEMENT_D2BD84AB5A",
+    "ColumnName": "ACCT_TP_WEBSITEENGAGEMENT_D2BD84AB5A",
+    "DisplayName": "ACCT_TP_WEBSITEENGAGEMENT_D2BD84AB5A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "ACCT_TP_YEARSONLINE_ADCC1A1A87",
+    "ColumnName": "ACCT_TP_YEARSONLINE_ADCC1A1A87",
+    "DisplayName": "ACCT_TP_YEARSONLINE_ADCC1A1A87",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "AccountId",
+    "ColumnName": "AccountId",
+    "DisplayName": "LEAccountIDLong",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Address1",
+    "ColumnName": "Address1",
+    "DisplayName": "Address1",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Address2",
+    "ColumnName": "Address2",
+    "DisplayName": "Address2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Address_Street_1",
+    "ColumnName": "Address_Street_1",
+    "DisplayName": "Address_Street_1",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "BestLikelihood",
+    "ColumnName": "BestLikelihood",
+    "DisplayName": "BestLikelihood",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_ACCOUNT_EMAIL_AA7FA7BEA3",
+    "ColumnName": "CUSTOM_ACCOUNT_EMAIL_AA7FA7BEA3",
+    "DisplayName": "CUSTOM_ACCOUNT_EMAIL_AA7FA7BEA3",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_AMOUNT_A1F8667141",
+    "ColumnName": "CUSTOM_AMOUNT_A1F8667141",
+    "DisplayName": "CUSTOM_AMOUNT_A1F8667141",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_ANTICIPATED_AVG_TRANS_SI_61156D4B7B",
+    "ColumnName": "CUSTOM_ANTICIPATED_AVG_TRANS_SI_61156D4B7B",
+    "DisplayName": "CUSTOM_ANTICIPATED_AVG_TRANS_SI_61156D4B7B",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_CFG_TRAININGSET_US_E16FE9F723",
+    "ColumnName": "CUSTOM_CFG_TRAININGSET_US_E16FE9F723",
+    "DisplayName": "CUSTOM_CFG_TRAININGSET_US_E16FE9F723",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_CUST_ID_257EDAAB4D",
+    "ColumnName": "CUSTOM_CUST_ID_257EDAAB4D",
+    "DisplayName": "CUSTOM_CUST_ID_257EDAAB4D",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DATAPROVIDER_LOAD_D99F23F18C",
+    "ColumnName": "CUSTOM_DATAPROVIDER_LOAD_D99F23F18C",
+    "DisplayName": "CUSTOM_DATAPROVIDER_LOAD_D99F23F18C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DOMAIN_CREATION_DATE_2409DDFC3B",
+    "ColumnName": "CUSTOM_DOMAIN_CREATION_DATE_2409DDFC3B",
+    "DisplayName": "CUSTOM_DOMAIN_CREATION_DATE_2409DDFC3B",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DO_NOT_CALL_7ABC200B5F",
+    "ColumnName": "CUSTOM_DO_NOT_CALL_7ABC200B5F",
+    "DisplayName": "CUSTOM_DO_NOT_CALL_7ABC200B5F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_ECOMMERCE_CERTAINTY_14EA76A76E",
+    "ColumnName": "CUSTOM_DP_ECOMMERCE_CERTAINTY_14EA76A76E",
+    "DisplayName": "CUSTOM_DP_ECOMMERCE_CERTAINTY_14EA76A76E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_ECONOMIC_FOOTPRINT_4A39D727ED",
+    "ColumnName": "CUSTOM_DP_ECONOMIC_FOOTPRINT_4A39D727ED",
+    "DisplayName": "CUSTOM_DP_ECONOMIC_FOOTPRINT_4A39D727ED",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_INCOMING_LINKS_EA64999A6F",
+    "ColumnName": "CUSTOM_DP_INCOMING_LINKS_EA64999A6F",
+    "DisplayName": "CUSTOM_DP_INCOMING_LINKS_EA64999A6F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_PAGES_26D0C36EDF",
+    "ColumnName": "CUSTOM_DP_PAGES_26D0C36EDF",
+    "DisplayName": "CUSTOM_DP_PAGES_26D0C36EDF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_SHOPPING_CART_SYSTEM_20B9A6D4E6",
+    "ColumnName": "CUSTOM_DP_SHOPPING_CART_SYSTEM_20B9A6D4E6",
+    "DisplayName": "CUSTOM_DP_SHOPPING_CART_SYSTEM_20B9A6D4E6",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_SITE_TRAFFIC_ESTIMATI_74D81C8579",
+    "ColumnName": "CUSTOM_DP_SITE_TRAFFIC_ESTIMATI_74D81C8579",
+    "DisplayName": "CUSTOM_DP_SITE_TRAFFIC_ESTIMATI_74D81C8579",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_SSL_CERTIFICATE_B0D11E3744",
+    "ColumnName": "CUSTOM_DP_SSL_CERTIFICATE_B0D11E3744",
+    "DisplayName": "CUSTOM_DP_SSL_CERTIFICATE_B0D11E3744",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_SSL_END_DATE_C7D6A92BED",
+    "ColumnName": "CUSTOM_DP_SSL_END_DATE_C7D6A92BED",
+    "DisplayName": "CUSTOM_DP_SSL_END_DATE_C7D6A92BED",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_SSL_ISSUER_COMMON_NAM_9EC692C60F",
+    "ColumnName": "CUSTOM_DP_SSL_ISSUER_COMMON_NAM_9EC692C60F",
+    "DisplayName": "CUSTOM_DP_SSL_ISSUER_COMMON_NAM_9EC692C60F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_SSL_START_DATE_1F118E40B7",
+    "ColumnName": "CUSTOM_DP_SSL_START_DATE_1F118E40B7",
+    "DisplayName": "CUSTOM_DP_SSL_START_DATE_1F118E40B7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_SSL_TYPE_6C3DC792E0",
+    "ColumnName": "CUSTOM_DP_SSL_TYPE_6C3DC792E0",
+    "DisplayName": "CUSTOM_DP_SSL_TYPE_6C3DC792E0",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_DP_WEBSITE_TYPE_33EDCADC15",
+    "ColumnName": "CUSTOM_DP_WEBSITE_TYPE_33EDCADC15",
+    "DisplayName": "CUSTOM_DP_WEBSITE_TYPE_33EDCADC15",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_FIRST_TRANSACTION_DATE_3D893F4277",
+    "ColumnName": "CUSTOM_FIRST_TRANSACTION_DATE_3D893F4277",
+    "DisplayName": "CUSTOM_FIRST_TRANSACTION_DATE_3D893F4277",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_FULL_SHARE_CHECKOUT_D97C257C93",
+    "ColumnName": "CUSTOM_FULL_SHARE_CHECKOUT_D97C257C93",
+    "DisplayName": "CUSTOM_FULL_SHARE_CHECKOUT_D97C257C93",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_BUYER_CREDIT_ED1466A6DE",
+    "ColumnName": "CUSTOM_HAS_BUYER_CREDIT_ED1466A6DE",
+    "DisplayName": "CUSTOM_HAS_BUYER_CREDIT_ED1466A6DE",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_EBAY_MASTERCARD_EB4839AD60",
+    "ColumnName": "CUSTOM_HAS_EBAY_MASTERCARD_EB4839AD60",
+    "DisplayName": "CUSTOM_HAS_EBAY_MASTERCARD_EB4839AD60",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_MONEY_MARKET_FUND_0F02B31810",
+    "ColumnName": "CUSTOM_HAS_MONEY_MARKET_FUND_0F02B31810",
+    "DisplayName": "CUSTOM_HAS_MONEY_MARKET_FUND_0F02B31810",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_PAYPAL_ADVANCED_EA65B10125",
+    "ColumnName": "CUSTOM_HAS_PAYPAL_ADVANCED_EA65B10125",
+    "DisplayName": "CUSTOM_HAS_PAYPAL_ADVANCED_EA65B10125",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_PAYPAL_DEBIT_CARD_1559FDB505",
+    "ColumnName": "CUSTOM_HAS_PAYPAL_DEBIT_CARD_1559FDB505",
+    "DisplayName": "CUSTOM_HAS_PAYPAL_DEBIT_CARD_1559FDB505",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_PAYPAL_PLUS_CE827950A6",
+    "ColumnName": "CUSTOM_HAS_PAYPAL_PLUS_CE827950A6",
+    "DisplayName": "CUSTOM_HAS_PAYPAL_PLUS_CE827950A6",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_PAYPAL_PRO_APPLICATI_86B988891F",
+    "ColumnName": "CUSTOM_HAS_PAYPAL_PRO_APPLICATI_86B988891F",
+    "DisplayName": "CUSTOM_HAS_PAYPAL_PRO_APPLICATI_86B988891F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_PAYPAL_PRO_APPROVED_8AA810356A",
+    "ColumnName": "CUSTOM_HAS_PAYPAL_PRO_APPROVED_8AA810356A",
+    "DisplayName": "CUSTOM_HAS_PAYPAL_PRO_APPROVED_8AA810356A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_VIRTUAL_DEBIT_CARD_D1C72AE604",
+    "ColumnName": "CUSTOM_HAS_VIRTUAL_DEBIT_CARD_D1C72AE604",
+    "DisplayName": "CUSTOM_HAS_VIRTUAL_DEBIT_CARD_D1C72AE604",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_9C600487DF",
+    "ColumnName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_9C600487DF",
+    "DisplayName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_9C600487DF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_F2285D90D2",
+    "ColumnName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_F2285D90D2",
+    "DisplayName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_F2285D90D2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_INDUSTRY_USER_PROVIDED_37A5FF05EB",
+    "ColumnName": "CUSTOM_INDUSTRY_USER_PROVIDED_37A5FF05EB",
+    "DisplayName": "CUSTOM_INDUSTRY_USER_PROVIDED_37A5FF05EB",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_CLOSED_418BD42888",
+    "ColumnName": "CUSTOM_IS_CLOSED_418BD42888",
+    "DisplayName": "CUSTOM_IS_CLOSED_418BD42888",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_CUSTOMER_300B627A42",
+    "ColumnName": "CUSTOM_IS_CUSTOMER_300B627A42",
+    "DisplayName": "CUSTOM_IS_CUSTOMER_300B627A42",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_EBAY_MEMBER_7FD5172EE2",
+    "ColumnName": "CUSTOM_IS_EBAY_MEMBER_7FD5172EE2",
+    "DisplayName": "CUSTOM_IS_EBAY_MEMBER_7FD5172EE2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_LARGE_ENTERPRISE_42B07659E1",
+    "ColumnName": "CUSTOM_IS_LARGE_ENTERPRISE_42B07659E1",
+    "DisplayName": "CUSTOM_IS_LARGE_ENTERPRISE_42B07659E1",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_NETNEW_PROSPECT_14D680508E",
+    "ColumnName": "CUSTOM_IS_NETNEW_PROSPECT_14D680508E",
+    "DisplayName": "CUSTOM_IS_NETNEW_PROSPECT_14D680508E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_PARTNER_0F99469DCB",
+    "ColumnName": "CUSTOM_IS_PARTNER_0F99469DCB",
+    "DisplayName": "CUSTOM_IS_PARTNER_0F99469DCB",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_PROSPECT_8EDA09BB26",
+    "ColumnName": "CUSTOM_IS_PROSPECT_8EDA09BB26",
+    "DisplayName": "CUSTOM_IS_PROSPECT_8EDA09BB26",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_RESTRICTED_2B18E95E7F",
+    "ColumnName": "CUSTOM_IS_RESTRICTED_2B18E95E7F",
+    "DisplayName": "CUSTOM_IS_RESTRICTED_2B18E95E7F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_TELESALES_ACQ_Y_N_829B11D1B3",
+    "ColumnName": "CUSTOM_IS_TELESALES_ACQ_Y_N_829B11D1B3",
+    "DisplayName": "CUSTOM_IS_TELESALES_ACQ_Y_N_829B11D1B3",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_IS_VERIFIED_62D5F05DD7",
+    "ColumnName": "CUSTOM_IS_VERIFIED_62D5F05DD7",
+    "DisplayName": "CUSTOM_IS_VERIFIED_62D5F05DD7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_L6M_TPV_MODELREADY_B07A71F485",
+    "ColumnName": "CUSTOM_L6M_TPV_MODELREADY_B07A71F485",
+    "DisplayName": "CUSTOM_L6M_TPV_MODELREADY_B07A71F485",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_NTPV_12M_PREINACTIVE_476EFF99A8",
+    "ColumnName": "CUSTOM_NTPV_12M_PREINACTIVE_476EFF99A8",
+    "DisplayName": "CUSTOM_NTPV_12M_PREINACTIVE_476EFF99A8",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_NUM_CONF_BANK_ACCOUNTS_2B6CC17D1F",
+    "ColumnName": "CUSTOM_NUM_CONF_BANK_ACCOUNTS_2B6CC17D1F",
+    "DisplayName": "CUSTOM_NUM_CONF_BANK_ACCOUNTS_2B6CC17D1F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_NUM_TRANS_L12M_BCA0C660C2",
+    "ColumnName": "CUSTOM_NUM_TRANS_L12M_BCA0C660C2",
+    "DisplayName": "CUSTOM_NUM_TRANS_L12M_BCA0C660C2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_PAYPAL_5BB4AB47D7",
+    "ColumnName": "CUSTOM_PAYPAL_5BB4AB47D7",
+    "DisplayName": "CUSTOM_PAYPAL_5BB4AB47D7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_PCT_ONLINE_REVENUE_AB089ECAD5",
+    "ColumnName": "CUSTOM_PCT_ONLINE_REVENUE_AB089ECAD5",
+    "DisplayName": "CUSTOM_PCT_ONLINE_REVENUE_AB089ECAD5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_PRICING_CATEGORY_A923DD7C26",
+    "ColumnName": "CUSTOM_PRICING_CATEGORY_A923DD7C26",
+    "DisplayName": "CUSTOM_PRICING_CATEGORY_A923DD7C26",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_PRODUCT_BUNDLES_AC2C1CED31",
+    "ColumnName": "CUSTOM_PRODUCT_BUNDLES_AC2C1CED31",
+    "DisplayName": "CUSTOM_PRODUCT_BUNDLES_AC2C1CED31",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_PROSPECT_FILE_NAME_F58797B857",
+    "ColumnName": "CUSTOM_PROSPECT_FILE_NAME_F58797B857",
+    "DisplayName": "CUSTOM_PROSPECT_FILE_NAME_F58797B857",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_PROSPECT_LOAD_DATE_942DC58E61",
+    "ColumnName": "CUSTOM_PROSPECT_LOAD_DATE_942DC58E61",
+    "DisplayName": "CUSTOM_PROSPECT_LOAD_DATE_942DC58E61",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_PROSPECT_SHOPPING_CART_6D9374729A",
+    "ColumnName": "CUSTOM_PROSPECT_SHOPPING_CART_6D9374729A",
+    "DisplayName": "CUSTOM_PROSPECT_SHOPPING_CART_6D9374729A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_QUANTITY_73CA98C1C7",
+    "ColumnName": "CUSTOM_QUANTITY_73CA98C1C7",
+    "DisplayName": "CUSTOM_QUANTITY_73CA98C1C7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_REFERRER_LAST_NAME_311DF014EB",
+    "ColumnName": "CUSTOM_REFERRER_LAST_NAME_311DF014EB",
+    "DisplayName": "CUSTOM_REFERRER_LAST_NAME_311DF014EB",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_REFERRER_LOCATION_F9ACA70E7C",
+    "ColumnName": "CUSTOM_REFERRER_LOCATION_F9ACA70E7C",
+    "DisplayName": "CUSTOM_REFERRER_LOCATION_F9ACA70E7C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_SFDC_LEAD_ID_E65D8CA078",
+    "ColumnName": "CUSTOM_SFDC_LEAD_ID_E65D8CA078",
+    "DisplayName": "CUSTOM_SFDC_LEAD_ID_E65D8CA078",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_SFDC_MEMBER_ID_76127986DD",
+    "ColumnName": "CUSTOM_SFDC_MEMBER_ID_76127986DD",
+    "DisplayName": "CUSTOM_SFDC_MEMBER_ID_76127986DD",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_SFDC_OPPORTUNITY_ID_RECE_E0697215FD",
+    "ColumnName": "CUSTOM_SFDC_OPPORTUNITY_ID_RECE_E0697215FD",
+    "DisplayName": "CUSTOM_SFDC_OPPORTUNITY_ID_RECE_E0697215FD",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_SFDC_PP_ACCOUNT_ID_8D2651B5AC",
+    "ColumnName": "CUSTOM_SFDC_PP_ACCOUNT_ID_8D2651B5AC",
+    "DisplayName": "CUSTOM_SFDC_PP_ACCOUNT_ID_8D2651B5AC",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TELESALES_ACQ_DT_67D841C5B9",
+    "ColumnName": "CUSTOM_TELESALES_ACQ_DT_67D841C5B9",
+    "DisplayName": "CUSTOM_TELESALES_ACQ_DT_67D841C5B9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_DCC_L12M_35F4FD859C",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_DCC_L12M_35F4FD859C",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_DCC_L12M_35F4FD859C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_DCC_L6M_83819D3348",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_DCC_L6M_83819D3348",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_DCC_L6M_83819D3348",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_EC_L12M_D399B5814D",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_EC_L12M_D399B5814D",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_EC_L12M_D399B5814D",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_EC_L6M_F4C08E6D53",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_EC_L6M_F4C08E6D53",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_EC_L6M_F4C08E6D53",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_FF_L12M_BE28941823",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_FF_L12M_BE28941823",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_FF_L12M_BE28941823",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_FF_L6M_63DE168A06",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_FF_L6M_63DE168A06",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_FF_L6M_63DE168A06",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_WPS_RM_L12M_F8AE375F8C",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L12M_F8AE375F8C",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L12M_F8AE375F8C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_WPS_RM_L6M_3859A2D114",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L6M_3859A2D114",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L6M_3859A2D114",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_WPS_UP_L12M_BCB0E4C2F5",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L12M_BCB0E4C2F5",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L12M_BCB0E4C2F5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CUSTOM_TOT_NTPV_MS_WPS_UP_L6M_0AAF3F1FB3",
+    "ColumnName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L6M_0AAF3F1FB3",
+    "DisplayName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L6M_0AAF3F1FB3",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "City",
+    "ColumnName": "City",
+    "DisplayName": "City",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Country",
+    "ColumnName": "Country",
+    "DisplayName": "Country",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "CrmAccount_External_ID",
+    "ColumnName": "CrmAccount_External_ID",
+    "DisplayName": "CrmAccount_External_ID",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Dante_Accounts",
+    "ColumnName": "Dante_Accounts",
+    "DisplayName": "Dante_Accounts",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "DisplayName",
+    "ColumnName": "DisplayName",
+    "DisplayName": "DisplayName",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Display_Name",
+    "ColumnName": "Display_Name",
+    "DisplayName": "Display_Name",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "EstimatedRevenue",
+    "ColumnName": "EstimatedRevenue",
+    "DisplayName": "EstimatedRevenue",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "External_ID",
+    "ColumnName": "External_ID",
+    "DisplayName": "External_ID",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "LastModified",
+    "ColumnName": "LastModified",
+    "DisplayName": "LastModified",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "LatticeAccountId",
+    "ColumnName": "LatticeAccountId",
+    "Description": "The idetifier of an account in Lattice Data Cloud.",
+    "DisplayName": "Lattice Account ID",
+    "FundamentalType": "alpha",
+    "Tags": [],
+    "ApprovedUsage": [],
+    "Category": "Default"
+  },
+  {
+    "ColumnId": "LeadCount",
+    "ColumnName": "LeadCount",
+    "DisplayName": "LeadCount",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "NAICSCode",
+    "ColumnName": "NAICSCode",
+    "DisplayName": "NAICSCode",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "NumberOfEmployees",
+    "ColumnName": "NumberOfEmployees",
+    "DisplayName": "NumberOfEmployees",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "OwnerDisplayName",
+    "ColumnName": "OwnerDisplayName",
+    "DisplayName": "OwnerDisplayName",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXALINKSIN_36DEAA30E9",
+    "ColumnName": "PD_DC_ALEXALINKSIN_36DEAA30E9",
+    "DisplayName": "PD_DC_ALEXALINKSIN_36DEAA30E9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXARANK_F6240F16C2",
+    "ColumnName": "PD_DC_ALEXARANK_F6240F16C2",
+    "DisplayName": "PD_DC_ALEXARANK_F6240F16C2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXAREACHPERMILLION_229EA810CE",
+    "ColumnName": "PD_DC_ALEXAREACHPERMILLION_229EA810CE",
+    "DisplayName": "PD_DC_ALEXAREACHPERMILLION_229EA810CE",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXAREACHRANK_5FA8818999",
+    "ColumnName": "PD_DC_ALEXAREACHRANK_5FA8818999",
+    "DisplayName": "PD_DC_ALEXAREACHRANK_5FA8818999",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXAUSPAGEVIEWS_E3C710BD68",
+    "ColumnName": "PD_DC_ALEXAUSPAGEVIEWS_E3C710BD68",
+    "DisplayName": "PD_DC_ALEXAUSPAGEVIEWS_E3C710BD68",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXAUSRANK_EC8ACC67F5",
+    "ColumnName": "PD_DC_ALEXAUSRANK_EC8ACC67F5",
+    "DisplayName": "PD_DC_ALEXAUSRANK_EC8ACC67F5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXAUSUSERS_481783B737",
+    "ColumnName": "PD_DC_ALEXAUSUSERS_481783B737",
+    "DisplayName": "PD_DC_ALEXAUSUSERS_481783B737",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXAVIEWSPERMILLION_DBCA5E56ED",
+    "ColumnName": "PD_DC_ALEXAVIEWSPERMILLION_DBCA5E56ED",
+    "DisplayName": "PD_DC_ALEXAVIEWSPERMILLION_DBCA5E56ED",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXAVIEWSPERUSER_6E7963331A",
+    "ColumnName": "PD_DC_ALEXAVIEWSPERUSER_6E7963331A",
+    "DisplayName": "PD_DC_ALEXAVIEWSPERUSER_6E7963331A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ALEXAVIEWSRANK_FC0C796BE7",
+    "ColumnName": "PD_DC_ALEXAVIEWSRANK_FC0C796BE7",
+    "DisplayName": "PD_DC_ALEXAVIEWSRANK_FC0C796BE7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_BUSINESSTECHNOLOGIESFIRST_4FF8982B79",
+    "ColumnName": "PD_DC_BUSINESSTECHNOLOGIESFIRST_4FF8982B79",
+    "DisplayName": "PD_DC_BUSINESSTECHNOLOGIESFIRST_4FF8982B79",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_BUSINESSTECHNOLOGIESPAYME_8795EB9414",
+    "ColumnName": "PD_DC_BUSINESSTECHNOLOGIESPAYME_8795EB9414",
+    "DisplayName": "PD_DC_BUSINESSTECHNOLOGIESPAYME_8795EB9414",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_BUSINESSTECHNOLOGIESSHOP_212C2F9F82",
+    "ColumnName": "PD_DC_BUSINESSTECHNOLOGIESSHOP_212C2F9F82",
+    "DisplayName": "PD_DC_BUSINESSTECHNOLOGIESSHOP_212C2F9F82",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_ECOMMERCETECHNOLOGIESTOPA_97B75F546C",
+    "ColumnName": "PD_DC_ECOMMERCETECHNOLOGIESTOPA_97B75F546C",
+    "DisplayName": "PD_DC_ECOMMERCETECHNOLOGIESTOPA_97B75F546C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FACEBOOK_LIKES_E8567E4791",
+    "ColumnName": "PD_DC_FACEBOOK_LIKES_E8567E4791",
+    "DisplayName": "PD_DC_FACEBOOK_LIKES_E8567E4791",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREAVERAGEDOCUMENTSIZ_52178C9041",
+    "ColumnName": "PD_DC_FEATUREAVERAGEDOCUMENTSIZ_52178C9041",
+    "DisplayName": "PD_DC_FEATUREAVERAGEDOCUMENTSIZ_52178C9041",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURECURRENCYEURO_6857DCA092",
+    "ColumnName": "PD_DC_FEATURECURRENCYEURO_6857DCA092",
+    "DisplayName": "PD_DC_FEATURECURRENCYEURO_6857DCA092",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURECURRENCYJAPANYEN_8BB47AF6A7",
+    "ColumnName": "PD_DC_FEATURECURRENCYJAPANYEN_8BB47AF6A7",
+    "DisplayName": "PD_DC_FEATURECURRENCYJAPANYEN_8BB47AF6A7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURECURRENCYSWISSFRANC_95B2ABBAEE",
+    "ColumnName": "PD_DC_FEATURECURRENCYSWISSFRANC_95B2ABBAEE",
+    "DisplayName": "PD_DC_FEATURECURRENCYSWISSFRANC_95B2ABBAEE",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURECURRENCYUKPOUND_9A5D64BE4B",
+    "ColumnName": "PD_DC_FEATURECURRENCYUKPOUND_9A5D64BE4B",
+    "DisplayName": "PD_DC_FEATURECURRENCYUKPOUND_9A5D64BE4B",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURECURRENCYUSDOLLAR_1F54F2F7DB",
+    "ColumnName": "PD_DC_FEATURECURRENCYUSDOLLAR_1F54F2F7DB",
+    "DisplayName": "PD_DC_FEATURECURRENCYUSDOLLAR_1F54F2F7DB",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREGLOBALBAG_931627B421",
+    "ColumnName": "PD_DC_FEATUREGLOBALBAG_931627B421",
+    "DisplayName": "PD_DC_FEATUREGLOBALBAG_931627B421",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREGLOBALBASKET_333797FBFF",
+    "ColumnName": "PD_DC_FEATUREGLOBALBASKET_333797FBFF",
+    "DisplayName": "PD_DC_FEATUREGLOBALBASKET_333797FBFF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREGLOBALCART_D09AED4E1F",
+    "ColumnName": "PD_DC_FEATUREGLOBALCART_D09AED4E1F",
+    "DisplayName": "PD_DC_FEATUREGLOBALCART_D09AED4E1F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREGLOBALPRODUCT_D42DFA860E",
+    "ColumnName": "PD_DC_FEATUREGLOBALPRODUCT_D42DFA860E",
+    "DisplayName": "PD_DC_FEATUREGLOBALPRODUCT_D42DFA860E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREGLOBALSHOP_4D47CDAEC9",
+    "ColumnName": "PD_DC_FEATUREGLOBALSHOP_4D47CDAEC9",
+    "DisplayName": "PD_DC_FEATUREGLOBALSHOP_4D47CDAEC9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREGLOBALSTORE_080076D315",
+    "ColumnName": "PD_DC_FEATUREGLOBALSTORE_080076D315",
+    "DisplayName": "PD_DC_FEATUREGLOBALSTORE_080076D315",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREINPUTVALUEADDTOBAG_9B872D2CA8",
+    "ColumnName": "PD_DC_FEATUREINPUTVALUEADDTOBAG_9B872D2CA8",
+    "DisplayName": "PD_DC_FEATUREINPUTVALUEADDTOBAG_9B872D2CA8",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREINPUTVALUEADDTOBAS_DE8208656F",
+    "ColumnName": "PD_DC_FEATUREINPUTVALUEADDTOBAS_DE8208656F",
+    "DisplayName": "PD_DC_FEATUREINPUTVALUEADDTOBAS_DE8208656F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREINPUTVALUEADDTOCAR_7C91B22555",
+    "ColumnName": "PD_DC_FEATUREINPUTVALUEADDTOCAR_7C91B22555",
+    "DisplayName": "PD_DC_FEATUREINPUTVALUEADDTOCAR_7C91B22555",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREINTLCOMMERCE_EFE348969B",
+    "ColumnName": "PD_DC_FEATUREINTLCOMMERCE_EFE348969B",
+    "DisplayName": "PD_DC_FEATUREINTLCOMMERCE_EFE348969B",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREJAVASCRIPTBAG_8C15013C08",
+    "ColumnName": "PD_DC_FEATUREJAVASCRIPTBAG_8C15013C08",
+    "DisplayName": "PD_DC_FEATUREJAVASCRIPTBAG_8C15013C08",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREJAVASCRIPTBASKET_E5E10E334C",
+    "ColumnName": "PD_DC_FEATUREJAVASCRIPTBASKET_E5E10E334C",
+    "DisplayName": "PD_DC_FEATUREJAVASCRIPTBASKET_E5E10E334C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREJAVASCRIPTCART_E87B8A8779",
+    "ColumnName": "PD_DC_FEATUREJAVASCRIPTCART_E87B8A8779",
+    "DisplayName": "PD_DC_FEATUREJAVASCRIPTCART_E87B8A8779",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREJAVASCRIPTPRODUCT_E0749BDB07",
+    "ColumnName": "PD_DC_FEATUREJAVASCRIPTPRODUCT_E0749BDB07",
+    "DisplayName": "PD_DC_FEATUREJAVASCRIPTPRODUCT_E0749BDB07",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREJAVASCRIPTSHOP_C29FB799D6",
+    "ColumnName": "PD_DC_FEATUREJAVASCRIPTSHOP_C29FB799D6",
+    "DisplayName": "PD_DC_FEATUREJAVASCRIPTSHOP_C29FB799D6",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREJAVASCRIPTSTORE_BB9FDE3130",
+    "ColumnName": "PD_DC_FEATUREJAVASCRIPTSTORE_BB9FDE3130",
+    "DisplayName": "PD_DC_FEATUREJAVASCRIPTSTORE_BB9FDE3130",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREREFSRCBAG_56CDDE32AA",
+    "ColumnName": "PD_DC_FEATUREREFSRCBAG_56CDDE32AA",
+    "DisplayName": "PD_DC_FEATUREREFSRCBAG_56CDDE32AA",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREREFSRCBASKET_96A5841B62",
+    "ColumnName": "PD_DC_FEATUREREFSRCBASKET_96A5841B62",
+    "DisplayName": "PD_DC_FEATUREREFSRCBASKET_96A5841B62",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREREFSRCCART_F179D7C31E",
+    "ColumnName": "PD_DC_FEATUREREFSRCCART_F179D7C31E",
+    "DisplayName": "PD_DC_FEATUREREFSRCCART_F179D7C31E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREREFSRCPRODUCT_7360050DE4",
+    "ColumnName": "PD_DC_FEATUREREFSRCPRODUCT_7360050DE4",
+    "DisplayName": "PD_DC_FEATUREREFSRCPRODUCT_7360050DE4",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREREFSRCSHOP_BD1145229F",
+    "ColumnName": "PD_DC_FEATUREREFSRCSHOP_BD1145229F",
+    "DisplayName": "PD_DC_FEATUREREFSRCSHOP_BD1145229F",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATUREREFSRCSTORE_CEC5F567C7",
+    "ColumnName": "PD_DC_FEATUREREFSRCSTORE_CEC5F567C7",
+    "DisplayName": "PD_DC_FEATUREREFSRCSTORE_CEC5F567C7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMADDITEM_3A678867C2",
+    "ColumnName": "PD_DC_FEATURETERMADDITEM_3A678867C2",
+    "DisplayName": "PD_DC_FEATURETERMADDITEM_3A678867C2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMADDTOBAG_F6A71AF160",
+    "ColumnName": "PD_DC_FEATURETERMADDTOBAG_F6A71AF160",
+    "DisplayName": "PD_DC_FEATURETERMADDTOBAG_F6A71AF160",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMADDTOBASKET_BD99188FFF",
+    "ColumnName": "PD_DC_FEATURETERMADDTOBASKET_BD99188FFF",
+    "DisplayName": "PD_DC_FEATURETERMADDTOBASKET_BD99188FFF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMADDTOCART_017C8F8F69",
+    "ColumnName": "PD_DC_FEATURETERMADDTOCART_017C8F8F69",
+    "DisplayName": "PD_DC_FEATURETERMADDTOCART_017C8F8F69",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMASSOCIATIONMAN_5C94FE8075",
+    "ColumnName": "PD_DC_FEATURETERMASSOCIATIONMAN_5C94FE8075",
+    "DisplayName": "PD_DC_FEATURETERMASSOCIATIONMAN_5C94FE8075",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMBAG_6091C4A343",
+    "ColumnName": "PD_DC_FEATURETERMBAG_6091C4A343",
+    "DisplayName": "PD_DC_FEATURETERMBAG_6091C4A343",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMBARGAIN_C37466A6D6",
+    "ColumnName": "PD_DC_FEATURETERMBARGAIN_C37466A6D6",
+    "DisplayName": "PD_DC_FEATURETERMBARGAIN_C37466A6D6",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMBASKET_64285026C0",
+    "ColumnName": "PD_DC_FEATURETERMBASKET_64285026C0",
+    "DisplayName": "PD_DC_FEATURETERMBASKET_64285026C0",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMBILLINGADDRESS_8753A9B6A9",
+    "ColumnName": "PD_DC_FEATURETERMBILLINGADDRESS_8753A9B6A9",
+    "DisplayName": "PD_DC_FEATURETERMBILLINGADDRESS_8753A9B6A9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMBILLINGSOLUTIO_5BC832F7F3",
+    "ColumnName": "PD_DC_FEATURETERMBILLINGSOLUTIO_5BC832F7F3",
+    "DisplayName": "PD_DC_FEATURETERMBILLINGSOLUTIO_5BC832F7F3",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMBUSINESSMANAGE_D4879C01B2",
+    "ColumnName": "PD_DC_FEATURETERMBUSINESSMANAGE_D4879C01B2",
+    "DisplayName": "PD_DC_FEATURETERMBUSINESSMANAGE_D4879C01B2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMBUY_ED68682A4D",
+    "ColumnName": "PD_DC_FEATURETERMBUY_ED68682A4D",
+    "DisplayName": "PD_DC_FEATURETERMBUY_ED68682A4D",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCART_A332CA0D46",
+    "ColumnName": "PD_DC_FEATURETERMCART_A332CA0D46",
+    "DisplayName": "PD_DC_FEATURETERMCART_A332CA0D46",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCATALOG_24D8AA6480",
+    "ColumnName": "PD_DC_FEATURETERMCATALOG_24D8AA6480",
+    "DisplayName": "PD_DC_FEATURETERMCATALOG_24D8AA6480",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCHECKOUT_16ED68E665",
+    "ColumnName": "PD_DC_FEATURETERMCHECKOUT_16ED68E665",
+    "DisplayName": "PD_DC_FEATURETERMCHECKOUT_16ED68E665",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCOMMERCESOLUTI_1DCAFA6186",
+    "ColumnName": "PD_DC_FEATURETERMCOMMERCESOLUTI_1DCAFA6186",
+    "DisplayName": "PD_DC_FEATURETERMCOMMERCESOLUTI_1DCAFA6186",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCONTINUESHOPPI_D0C8063380",
+    "ColumnName": "PD_DC_FEATURETERMCONTINUESHOPPI_D0C8063380",
+    "DisplayName": "PD_DC_FEATURETERMCONTINUESHOPPI_D0C8063380",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCREATEACCOUNT_136A55CF29",
+    "ColumnName": "PD_DC_FEATURETERMCREATEACCOUNT_136A55CF29",
+    "DisplayName": "PD_DC_FEATURETERMCREATEACCOUNT_136A55CF29",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307",
+    "ColumnName": "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307",
+    "DisplayName": "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCREATEASTORE_62EFC56514",
+    "ColumnName": "PD_DC_FEATURETERMCREATEASTORE_62EFC56514",
+    "DisplayName": "PD_DC_FEATURETERMCREATEASTORE_62EFC56514",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCROSSCHANNELCO_CDB20B600A",
+    "ColumnName": "PD_DC_FEATURETERMCROSSCHANNELCO_CDB20B600A",
+    "DisplayName": "PD_DC_FEATURETERMCROSSCHANNELCO_CDB20B600A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCROWDFUNDING_FFFB4236F7",
+    "ColumnName": "PD_DC_FEATURETERMCROWDFUNDING_FFFB4236F7",
+    "DisplayName": "PD_DC_FEATURETERMCROWDFUNDING_FFFB4236F7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCUSTOMERSERVIC_AFAA629156",
+    "ColumnName": "PD_DC_FEATURETERMCUSTOMERSERVIC_AFAA629156",
+    "DisplayName": "PD_DC_FEATURETERMCUSTOMERSERVIC_AFAA629156",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMCUSTOMERSUPPOR_74116EE72E",
+    "ColumnName": "PD_DC_FEATURETERMCUSTOMERSUPPOR_74116EE72E",
+    "DisplayName": "PD_DC_FEATURETERMCUSTOMERSUPPOR_74116EE72E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMDEAL_A53AABFEE9",
+    "ColumnName": "PD_DC_FEATURETERMDEAL_A53AABFEE9",
+    "DisplayName": "PD_DC_FEATURETERMDEAL_A53AABFEE9",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMECOMMERCEPLATF_334CBC96A7",
+    "ColumnName": "PD_DC_FEATURETERMECOMMERCEPLATF_334CBC96A7",
+    "DisplayName": "PD_DC_FEATURETERMECOMMERCEPLATF_334CBC96A7",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMECOMMERCESOFTW_0DBE95CC65",
+    "ColumnName": "PD_DC_FEATURETERMECOMMERCESOFTW_0DBE95CC65",
+    "DisplayName": "PD_DC_FEATURETERMECOMMERCESOFTW_0DBE95CC65",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMECOMMERCESOFTW_558DBD29BC",
+    "ColumnName": "PD_DC_FEATURETERMECOMMERCESOFTW_558DBD29BC",
+    "DisplayName": "PD_DC_FEATURETERMECOMMERCESOFTW_558DBD29BC",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMEVENTMANAGEMEN_68D7F85E38",
+    "ColumnName": "PD_DC_FEATURETERMEVENTMANAGEMEN_68D7F85E38",
+    "DisplayName": "PD_DC_FEATURETERMEVENTMANAGEMEN_68D7F85E38",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMFORMBUILDER_0CB4131FE5",
+    "ColumnName": "PD_DC_FEATURETERMFORMBUILDER_0CB4131FE5",
+    "DisplayName": "PD_DC_FEATURETERMFORMBUILDER_0CB4131FE5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMFREEONLINESTOR_50814B3138",
+    "ColumnName": "PD_DC_FEATURETERMFREEONLINESTOR_50814B3138",
+    "DisplayName": "PD_DC_FEATURETERMFREEONLINESTOR_50814B3138",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMFREESHIPPING_9B4AA18889",
+    "ColumnName": "PD_DC_FEATURETERMFREESHIPPING_9B4AA18889",
+    "DisplayName": "PD_DC_FEATURETERMFREESHIPPING_9B4AA18889",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMFREQUENTLYASKE_C1A71E3CF3",
+    "ColumnName": "PD_DC_FEATURETERMFREQUENTLYASKE_C1A71E3CF3",
+    "DisplayName": "PD_DC_FEATURETERMFREQUENTLYASKE_C1A71E3CF3",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMFUNDRAISINGSOF_2088658937",
+    "ColumnName": "PD_DC_FEATURETERMFUNDRAISINGSOF_2088658937",
+    "DisplayName": "PD_DC_FEATURETERMFUNDRAISINGSOF_2088658937",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMFUNDRAISING_74655FC552",
+    "ColumnName": "PD_DC_FEATURETERMFUNDRAISING_74655FC552",
+    "DisplayName": "PD_DC_FEATURETERMFUNDRAISING_74655FC552",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMMARKETPLACE_9A605A999A",
+    "ColumnName": "PD_DC_FEATURETERMMARKETPLACE_9A605A999A",
+    "DisplayName": "PD_DC_FEATURETERMMARKETPLACE_9A605A999A",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMMEMBERSHIPMANA_5F6BB5750B",
+    "ColumnName": "PD_DC_FEATURETERMMEMBERSHIPMANA_5F6BB5750B",
+    "DisplayName": "PD_DC_FEATURETERMMEMBERSHIPMANA_5F6BB5750B",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMMYACCOUNT_A8F1F4E862",
+    "ColumnName": "PD_DC_FEATURETERMMYACCOUNT_A8F1F4E862",
+    "DisplayName": "PD_DC_FEATURETERMMYACCOUNT_A8F1F4E862",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMONLINESTOREBUI_600B41EB86",
+    "ColumnName": "PD_DC_FEATURETERMONLINESTOREBUI_600B41EB86",
+    "DisplayName": "PD_DC_FEATURETERMONLINESTOREBUI_600B41EB86",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMORDERHISTORY_ED7B4AC178",
+    "ColumnName": "PD_DC_FEATURETERMORDERHISTORY_ED7B4AC178",
+    "DisplayName": "PD_DC_FEATURETERMORDERHISTORY_ED7B4AC178",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMORDERSTATUS_9E0E44E0CF",
+    "ColumnName": "PD_DC_FEATURETERMORDERSTATUS_9E0E44E0CF",
+    "DisplayName": "PD_DC_FEATURETERMORDERSTATUS_9E0E44E0CF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMPAYMENTMETHOD_69B21B83AF",
+    "ColumnName": "PD_DC_FEATURETERMPAYMENTMETHOD_69B21B83AF",
+    "DisplayName": "PD_DC_FEATURETERMPAYMENTMETHOD_69B21B83AF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMPAYMENTOPTION_38E62F3425",
+    "ColumnName": "PD_DC_FEATURETERMPAYMENTOPTION_38E62F3425",
+    "DisplayName": "PD_DC_FEATURETERMPAYMENTOPTION_38E62F3425",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMPAYMENTPROCESS_5AF36D2F81",
+    "ColumnName": "PD_DC_FEATURETERMPAYMENTPROCESS_5AF36D2F81",
+    "DisplayName": "PD_DC_FEATURETERMPAYMENTPROCESS_5AF36D2F81",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMPAYMENTSOLUTIO_10E8BC8DCD",
+    "ColumnName": "PD_DC_FEATURETERMPAYMENTSOLUTIO_10E8BC8DCD",
+    "DisplayName": "PD_DC_FEATURETERMPAYMENTSOLUTIO_10E8BC8DCD",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMPAYWALL_A6571B4551",
+    "ColumnName": "PD_DC_FEATURETERMPAYWALL_A6571B4551",
+    "DisplayName": "PD_DC_FEATURETERMPAYWALL_A6571B4551",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMPHPECOMMERCEPL_D3FCA1D2A2",
+    "ColumnName": "PD_DC_FEATURETERMPHPECOMMERCEPL_D3FCA1D2A2",
+    "DisplayName": "PD_DC_FEATURETERMPHPECOMMERCEPL_D3FCA1D2A2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMPLUGINFORWORDP_B90B6EA567",
+    "ColumnName": "PD_DC_FEATURETERMPLUGINFORWORDP_B90B6EA567",
+    "DisplayName": "PD_DC_FEATURETERMPLUGINFORWORDP_B90B6EA567",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMPRICE_FFB3E2A887",
+    "ColumnName": "PD_DC_FEATURETERMPRICE_FFB3E2A887",
+    "DisplayName": "PD_DC_FEATURETERMPRICE_FFB3E2A887",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMPRODUCT_C24CBDA059",
+    "ColumnName": "PD_DC_FEATURETERMPRODUCT_C24CBDA059",
+    "DisplayName": "PD_DC_FEATURETERMPRODUCT_C24CBDA059",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMRECURRINGBILLI_9E9281BEF1",
+    "ColumnName": "PD_DC_FEATURETERMRECURRINGBILLI_9E9281BEF1",
+    "DisplayName": "PD_DC_FEATURETERMRECURRINGBILLI_9E9281BEF1",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMRETAIL_4BFA113250",
+    "ColumnName": "PD_DC_FEATURETERMRETAIL_4BFA113250",
+    "DisplayName": "PD_DC_FEATURETERMRETAIL_4BFA113250",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMRETURNPOLICY_242DC935FA",
+    "ColumnName": "PD_DC_FEATURETERMRETURNPOLICY_242DC935FA",
+    "DisplayName": "PD_DC_FEATURETERMRETURNPOLICY_242DC935FA",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMREVIEW_300F39E867",
+    "ColumnName": "PD_DC_FEATURETERMREVIEW_300F39E867",
+    "DisplayName": "PD_DC_FEATURETERMREVIEW_300F39E867",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSALE_6FADFF494E",
+    "ColumnName": "PD_DC_FEATURETERMSALE_6FADFF494E",
+    "DisplayName": "PD_DC_FEATURETERMSALE_6FADFF494E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSCHEDULINGANDA_3C7D12C705",
+    "ColumnName": "PD_DC_FEATURETERMSCHEDULINGANDA_3C7D12C705",
+    "DisplayName": "PD_DC_FEATURETERMSCHEDULINGANDA_3C7D12C705",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSEARCH_E3C0C3ABB5",
+    "ColumnName": "PD_DC_FEATURETERMSEARCH_E3C0C3ABB5",
+    "DisplayName": "PD_DC_FEATURETERMSEARCH_E3C0C3ABB5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSECUREORDER_E9AD304259",
+    "ColumnName": "PD_DC_FEATURETERMSECUREORDER_E9AD304259",
+    "DisplayName": "PD_DC_FEATURETERMSECUREORDER_E9AD304259",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSELLDIGITALDOW_1D661847F4",
+    "ColumnName": "PD_DC_FEATURETERMSELLDIGITALDOW_1D661847F4",
+    "DisplayName": "PD_DC_FEATURETERMSELLDIGITALDOW_1D661847F4",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSELLONLINE_B0AD32BA29",
+    "ColumnName": "PD_DC_FEATURETERMSELLONLINE_B0AD32BA29",
+    "DisplayName": "PD_DC_FEATURETERMSELLONLINE_B0AD32BA29",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSELLTICKETS_0E0936B53D",
+    "ColumnName": "PD_DC_FEATURETERMSELLTICKETS_0E0936B53D",
+    "DisplayName": "PD_DC_FEATURETERMSELLTICKETS_0E0936B53D",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSHIPPINGADDRES_4DDB79EF9E",
+    "ColumnName": "PD_DC_FEATURETERMSHIPPINGADDRES_4DDB79EF9E",
+    "DisplayName": "PD_DC_FEATURETERMSHIPPINGADDRES_4DDB79EF9E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSHIPPINGANDHAN_1D1D151554",
+    "ColumnName": "PD_DC_FEATURETERMSHIPPINGANDHAN_1D1D151554",
+    "DisplayName": "PD_DC_FEATURETERMSHIPPINGANDHAN_1D1D151554",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSHIPPINGINFO_05D852CDCE",
+    "ColumnName": "PD_DC_FEATURETERMSHIPPINGINFO_05D852CDCE",
+    "DisplayName": "PD_DC_FEATURETERMSHIPPINGINFO_05D852CDCE",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSHIPPINGPOLICY_F5C2A2BA3E",
+    "ColumnName": "PD_DC_FEATURETERMSHIPPINGPOLICY_F5C2A2BA3E",
+    "DisplayName": "PD_DC_FEATURETERMSHIPPINGPOLICY_F5C2A2BA3E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSHOPBY_7989A99E2C",
+    "ColumnName": "PD_DC_FEATURETERMSHOPBY_7989A99E2C",
+    "DisplayName": "PD_DC_FEATURETERMSHOPBY_7989A99E2C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSHOPPINGCARTPL_8F997F8756",
+    "ColumnName": "PD_DC_FEATURETERMSHOPPINGCARTPL_8F997F8756",
+    "DisplayName": "PD_DC_FEATURETERMSHOPPINGCARTPL_8F997F8756",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSHOPPINGCARTSO_A0D77067DF",
+    "ColumnName": "PD_DC_FEATURETERMSHOPPINGCARTSO_A0D77067DF",
+    "DisplayName": "PD_DC_FEATURETERMSHOPPINGCARTSO_A0D77067DF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSHOP_331151D1CF",
+    "ColumnName": "PD_DC_FEATURETERMSHOP_331151D1CF",
+    "DisplayName": "PD_DC_FEATURETERMSHOP_331151D1CF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSOFTWAREFORNON_E461FCB328",
+    "ColumnName": "PD_DC_FEATURETERMSOFTWAREFORNON_E461FCB328",
+    "DisplayName": "PD_DC_FEATURETERMSOFTWAREFORNON_E461FCB328",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMSTORE_38A5985FE2",
+    "ColumnName": "PD_DC_FEATURETERMSTORE_38A5985FE2",
+    "DisplayName": "PD_DC_FEATURETERMSTORE_38A5985FE2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMWEBBUILDER_C8E736387E",
+    "ColumnName": "PD_DC_FEATURETERMWEBBUILDER_C8E736387E",
+    "DisplayName": "PD_DC_FEATURETERMWEBBUILDER_C8E736387E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMWEBSITEBUILDER_36DF4C8869",
+    "ColumnName": "PD_DC_FEATURETERMWEBSITEBUILDER_36DF4C8869",
+    "DisplayName": "PD_DC_FEATURETERMWEBSITEBUILDER_36DF4C8869",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMWISHLIST_8A484DF7D1",
+    "ColumnName": "PD_DC_FEATURETERMWISHLIST_8A484DF7D1",
+    "DisplayName": "PD_DC_FEATURETERMWISHLIST_8A484DF7D1",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMYOURACCOUNT_6814729195",
+    "ColumnName": "PD_DC_FEATURETERMYOURACCOUNT_6814729195",
+    "DisplayName": "PD_DC_FEATURETERMYOURACCOUNT_6814729195",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FEATURETERMYOURSTORE_8F56F19E77",
+    "ColumnName": "PD_DC_FEATURETERMYOURSTORE_8F56F19E77",
+    "DisplayName": "PD_DC_FEATURETERMYOURSTORE_8F56F19E77",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FUNDINGAMOUNT_93F3A7DC87",
+    "ColumnName": "PD_DC_FUNDINGAMOUNT_93F3A7DC87",
+    "DisplayName": "PD_DC_FUNDINGAMOUNT_93F3A7DC87",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_FUNDINGFISCALYEAR_F4000FBB88",
+    "ColumnName": "PD_DC_FUNDINGFISCALYEAR_F4000FBB88",
+    "DisplayName": "PD_DC_FUNDINGFISCALYEAR_F4000FBB88",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_HPANUMPAGES_F62070D93D",
+    "ColumnName": "PD_DC_HPANUMPAGES_F62070D93D",
+    "DisplayName": "PD_DC_HPANUMPAGES_F62070D93D",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_JOBSASOF_B6C9EBF2B6",
+    "ColumnName": "PD_DC_JOBSASOF_B6C9EBF2B6",
+    "DisplayName": "PD_DC_JOBSASOF_B6C9EBF2B6",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_JOBSRECENTJOBS_7949D3FC95",
+    "ColumnName": "PD_DC_JOBSRECENTJOBS_7949D3FC95",
+    "DisplayName": "PD_DC_JOBSRECENTJOBS_7949D3FC95",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_JOBSTRENDSTRING_384036BEC4",
+    "ColumnName": "PD_DC_JOBSTRENDSTRING_384036BEC4",
+    "DisplayName": "PD_DC_JOBSTRENDSTRING_384036BEC4",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_MATCHEDDOMAIN_CC3D72116D",
+    "ColumnName": "PD_DC_MATCHEDDOMAIN_CC3D72116D",
+    "DisplayName": "PD_DC_MATCHEDDOMAIN_CC3D72116D",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_SEMRUSHADWORDSCOST_2D345AA19C",
+    "ColumnName": "PD_DC_SEMRUSHADWORDSCOST_2D345AA19C",
+    "DisplayName": "PD_DC_SEMRUSHADWORDSCOST_2D345AA19C",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_SEMRUSHADWORDSKEYWORDS_18930AA801",
+    "ColumnName": "PD_DC_SEMRUSHADWORDSKEYWORDS_18930AA801",
+    "DisplayName": "PD_DC_SEMRUSHADWORDSKEYWORDS_18930AA801",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_SEMRUSHADWORDSTRAFFIC_3C36F78623",
+    "ColumnName": "PD_DC_SEMRUSHADWORDSTRAFFIC_3C36F78623",
+    "DisplayName": "PD_DC_SEMRUSHADWORDSTRAFFIC_3C36F78623",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_SEMRUSHORGANICCOST_42067622B2",
+    "ColumnName": "PD_DC_SEMRUSHORGANICCOST_42067622B2",
+    "DisplayName": "PD_DC_SEMRUSHORGANICCOST_42067622B2",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_SEMRUSHORGANICKEYWORDS_819E898E8B",
+    "ColumnName": "PD_DC_SEMRUSHORGANICKEYWORDS_819E898E8B",
+    "DisplayName": "PD_DC_SEMRUSHORGANICKEYWORDS_819E898E8B",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_SEMRUSHORGANICTRAFFIC_182F3ACEB1",
+    "ColumnName": "PD_DC_SEMRUSHORGANICTRAFFIC_182F3ACEB1",
+    "DisplayName": "PD_DC_SEMRUSHORGANICTRAFFIC_182F3ACEB1",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_SEMRUSHRANK_E4164C190E",
+    "ColumnName": "PD_DC_SEMRUSHRANK_E4164C190E",
+    "DisplayName": "PD_DC_SEMRUSHRANK_E4164C190E",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_TOTAL_AMOUNT_RAISED_5C025CC0C5",
+    "ColumnName": "PD_DC_TOTAL_AMOUNT_RAISED_5C025CC0C5",
+    "DisplayName": "PD_DC_TOTAL_AMOUNT_RAISED_5C025CC0C5",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_TWITTER_FOLLOWERS_466D79437B",
+    "ColumnName": "PD_DC_TWITTER_FOLLOWERS_466D79437B",
+    "DisplayName": "PD_DC_TWITTER_FOLLOWERS_466D79437B",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "PD_DC_TWITTER_TWEETS_F1D1AFBCBF",
+    "ColumnName": "PD_DC_TWITTER_TWEETS_F1D1AFBCBF",
+    "DisplayName": "PD_DC_TWITTER_TWEETS_F1D1AFBCBF",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "SICCode",
+    "ColumnName": "SICCode",
+    "DisplayName": "SICCode",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "SalesforceAccountID",
+    "ColumnName": "SalesforceAccountID",
+    "DisplayName": "SalesforceAccountID",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "StateProvince",
+    "ColumnName": "StateProvince",
+    "DisplayName": "StateProvince",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "State_Province",
+    "ColumnName": "State_Province",
+    "DisplayName": "State_Province",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Territory",
+    "ColumnName": "Territory",
+    "DisplayName": "Territory",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Territory_External_ID",
+    "ColumnName": "Territory_External_ID",
+    "DisplayName": "Territory_External_ID",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "TopLeads",
+    "ColumnName": "TopLeads",
+    "DisplayName": "TopLeads",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "TotalMonetaryValue",
+    "ColumnName": "TotalMonetaryValue",
+    "DisplayName": "TotalMonetaryValue",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "URL",
+    "ColumnName": "URL",
+    "DisplayName": "URL",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Vertical",
+    "ColumnName": "Vertical",
+    "DisplayName": "Vertical",
+    "Tags": [],
+    "ApprovedUsage": []
+  },
+  {
+    "ColumnId": "Zip",
+    "ColumnName": "Zip",
+    "DisplayName": "Zip",
+    "Tags": [],
+    "ApprovedUsage": []
+  }
+]

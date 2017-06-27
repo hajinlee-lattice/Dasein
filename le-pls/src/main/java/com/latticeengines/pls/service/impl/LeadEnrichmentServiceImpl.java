@@ -53,7 +53,7 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
     public List<LeadEnrichmentAttribute> getAvailableAttributes() {
         try {
             List<LeadEnrichmentAttribute> attributes = new ArrayList<LeadEnrichmentAttribute>();
-            List<ColumnMetadata> columns = columnMetadataProxy.columnSelection(Predefined.LeadEnrichment, null);
+            List<ColumnMetadata> columns = columnMetadataProxy.columnSelection(Predefined.LeadEnrichment, "1.0.0");
             for (ColumnMetadata column : columns) {
                 LeadEnrichmentAttribute attribute = toLeadEnrichmentAttribute(column);
                 attributes.add(attribute);

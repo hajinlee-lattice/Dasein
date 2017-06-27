@@ -42,8 +42,7 @@ public class ColumnMetadataResource {
     public List<ColumnMetadata> columnSelection(@PathVariable Predefined selectName,
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         try {
-            ColumnMetadataService columnMetadataService = beanDispatcher
-                    .getColumnMetadataService(dataCloudVersion);
+            ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
             return columnMetadataService.fromPredefinedSelection(selectName, dataCloudVersion);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25006, e, new String[] { selectName.getName() });

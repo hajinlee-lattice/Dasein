@@ -13,6 +13,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.SegmentService;
@@ -40,6 +42,19 @@ public class DefaultDataCollectionResource {
     public DataCollection getDataCollection(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.getDataCollection(customerSpace, null);
+    }
+
+    @RequestMapping(value = "/tables", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get the default data collection")
+    public Table getTable(@PathVariable String customerSpace, TableRoleInCollection role) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        List<Table> tables = dataCollectionService.getTables(customerSpace, null, role);
+        if (tables == null || tables.isEmpty()) {
+            return null;
+        } else {
+            return tables.get(0);
+        }
     }
 
     @RequestMapping(value = "/segments", method = RequestMethod.GET, headers = "Accept=application/json")

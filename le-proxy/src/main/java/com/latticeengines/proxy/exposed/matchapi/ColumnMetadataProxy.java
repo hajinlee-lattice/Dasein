@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -29,8 +30,12 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private static final String AM_REPO = "AMCollection";
 
     private WatcherCache<String, List<ColumnMetadata>> enrichmentColumnsCache;
+    private WatcherCache<String, List<ColumnMetadata>> segmentColumnsCache;
     private WatcherCache<String, DataCloudVersion> latestDataCloudVersionCache;
     private WatcherCache<String, AttributeRepository> amAttrRepoCache;
+
+    private Map<Predefined, WatcherCache<String, List<ColumnMetadata>>> columnCacheMap = new HashMap<>();
+
     private boolean scheduled = false;
 
     @SuppressWarnings("unchecked")
@@ -41,13 +46,6 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     @SuppressWarnings("unchecked")
     @PostConstruct
     private void postConstruct() {
-        enrichmentColumnsCache = WatcherCache.builder() //
-                .name("EnrichmentColumnsCache") //
-                .watch(AMApiUpdate.name()) //
-                .maximum(20) //
-                .load(dataCloudVersion -> requestColumnSelection(Predefined.Enrichment, (String) dataCloudVersion)) //
-                .initKeys(new String[] { "" }) //
-                .build();
         latestDataCloudVersionCache = WatcherCache.builder() //
                 .name("LatestDataCloudVersionCache") //
                 .watch(AMApiUpdate.name()) //
@@ -55,6 +53,22 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                 .load(compatibleVersion -> requestLatestVersion((String) compatibleVersion)) //
                 .initKeys(new String[] { "" }) //
                 .build();
+        enrichmentColumnsCache = WatcherCache.builder() //
+                .name("EnrichmentColumnsCache") //
+                .watch(AMApiUpdate.name()) //
+                .maximum(20) //
+                .load(dataCloudVersion -> requestColumnSelection(Predefined.Enrichment, (String) dataCloudVersion)) //
+                .initKeys(new String[] { latestDataCloudVersionCache.get("").getVersion() }) //
+                .build();
+        segmentColumnsCache = WatcherCache.builder() //
+                .name("SegmentColumnsCache") //
+                .watch(AMApiUpdate.name()) //
+                .maximum(20) //
+                .load(dataCloudVersion -> requestColumnSelection(Predefined.Segment, (String) dataCloudVersion)) //
+                .initKeys(new String[] { latestDataCloudVersionCache.get("").getVersion() }) //
+                .build();
+        columnCacheMap.put(Predefined.Enrichment, enrichmentColumnsCache);
+        columnCacheMap.put(Predefined.Segment, segmentColumnsCache);
         amAttrRepoCache = WatcherCache.builder() //
                 .name("AMAttrRepoCache") //
                 .watch(AMApiUpdate.name()) //
@@ -68,6 +82,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         synchronized (this) {
             if (!scheduled) {
                 enrichmentColumnsCache.scheduleInit(10, TimeUnit.MINUTES);
+                segmentColumnsCache.scheduleInit(11, TimeUnit.MINUTES);
                 scheduled = true;
             }
         }
@@ -75,12 +90,12 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     @Override
     public List<ColumnMetadata> columnSelection(Predefined selectName, String dataCloudVersion) {
-        if (Predefined.Enrichment.equals(selectName)) {
+        if (columnCacheMap.containsKey(selectName)) {
             try {
                 if (StringUtils.isEmpty(dataCloudVersion)) {
                     dataCloudVersion = "";
                 }
-                return enrichmentColumnsCache.get(dataCloudVersion);
+                return columnCacheMap.get(selectName).get(dataCloudVersion);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to get enrichment column metadata from loading cache.", e);
             }

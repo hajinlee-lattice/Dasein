@@ -36,6 +36,13 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("get stats", url, StatisticsContainer.class);
     }
 
+    public Table getTableInDefaultCollection(String customerSpace, TableRoleInCollection tableRole) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/tables?role={tableRole}", //
+                shortenCustomerSpace(customerSpace), tableRole);
+        return get("getTable", url, Table.class);
+    }
+
     // full collection apis
 
     public List<Table> getAllTables(String customerSpace, String collectionName) {

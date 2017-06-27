@@ -9,8 +9,10 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public interface DataLakeService {
 
     List<ColumnMetadata> getAttributes(Integer start, Integer limit);
+    List<ColumnMetadata> getAttributesInEntity(BusinessEntity entity);
     Statistics getStatistics();
 
     Statistics getDemoStatistics();
+    List<ColumnMetadata> getDemoAttributes(BusinessEntity entity);
 
 }
