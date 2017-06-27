@@ -291,7 +291,7 @@ public class ProcessorContext {
 
         decisionGraph = jobConfiguration.getMatchInput().getDecisionGraph();
         if (Boolean.TRUE.equals(jobConfiguration.getMatchInput().getFetchOnly())) {
-            useRemoteDnB = true;
+            useRemoteDnB = false;
         } else {
             if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
                 useRemoteDnB = jobConfiguration.getMatchInput().getUseRemoteDnB();
