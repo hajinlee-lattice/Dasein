@@ -145,11 +145,11 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
             }
         }
 
-        Map<String, Pair<BitCodeBook, List<String>>> toReturn = new HashMap<>();
-        for (String encodedClolumn : codeBooks) {
-            BitCodeBook codeBook = codeBookMap.get(encodedClolumn);
-            List<String> decodeFields = decodeFieldMap.get(encodedClolumn);
-            toReturn.put(encodedClolumn, Pair.of(codeBook, decodeFields));
+        Map<String, Pair<BitCodeBook, List<String>>> toReturn = new HashMap<>();    // encodedColumn-><bitCodeBook, List<decodedColumn>>
+        for (String encodedColumn : codeBooks) {
+            BitCodeBook codeBook = codeBookMap.get(encodedColumn);
+            List<String> decodeFields = decodeFieldMap.get(encodedColumn);
+            toReturn.put(encodedColumn, Pair.of(codeBook, decodeFields));
         }
 
         return toReturn;
@@ -193,6 +193,8 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Map<String, Integer>> bitPosMap = new HashMap<>();
         Map<String, BitCodeBook.DecodeStrategy> decodeStrategyMap = new HashMap<>();
+        Map<String, Map<String, Object>> valueDictRevMap = new HashMap<>();
+        Map<String, Integer> bitUnitMap = new HashMap<>();
         for (AccountMasterColumn column : accountMasterColumnService.scan(dataCloudVersion)) {
             String decodeStrategyStr = column.getDecodeStrategy();
             if (StringUtils.isEmpty(decodeStrategyStr)) {
@@ -216,8 +218,24 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                 try {
                     BitCodeBook.DecodeStrategy decodeStrategy = BitCodeBook.DecodeStrategy.valueOf(decodeStr);
                     decodeStrategyMap.put(encodedColumn, decodeStrategy);
+                    switch(decodeStrategy) {
+                    case ENUM_STRING:
+                        String valueDictStr = jsonNode.get("ValueDict").asText();
+                        String[] valueDictArr = valueDictStr.split("\\|\\|");
+                        Map<String, Object> valueDictRev = new HashMap<>();
+                        for (int i = 0; i < valueDictArr.length; i++) {
+                            valueDictRev.put(Integer.toBinaryString(i + 1), valueDictArr[i]);
+                        }
+                        valueDictRevMap.put(encodedColumn, valueDictRev);
+                    case NUMERIC_INT:
+                        Integer bitUnit = Integer.valueOf(jsonNode.get("BitUnit").asText());
+                        bitUnitMap.put(encodedColumn, bitUnit); // for all the decodeStrategy above
+                        break;
+                    default:
+                        break;
+                    }
                 } catch (Exception e) {
-                    log.error("Could not understand decode strategy");
+                    log.error("Could not understand decode strategy", e);
                 }
             }
             if (codeBookLookup.containsKey(columnName)) {
@@ -241,6 +259,8 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
             }
             BitCodeBook codeBook = new BitCodeBook(entry.getValue());
             codeBook.setBitsPosMap(bitPosMap.get(entry.getKey()));
+            codeBook.setBitUnit(bitUnitMap.get(entry.getKey()));
+            codeBook.setValueDictRev(valueDictRevMap.get(entry.getKey()));
             codeBookMap.put(entry.getKey(), codeBook);
         }
     }
@@ -317,8 +337,8 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                 log.error(e);
             }
         }
-        ConcurrentMap<String, BitCodeBook> newCodeBookMap = new ConcurrentHashMap<>();
-        ConcurrentMap<String, String> newCodeBookLookup = new ConcurrentHashMap<>();
+        ConcurrentMap<String, BitCodeBook> newCodeBookMap = new ConcurrentHashMap<>(); // encodedColumn->bitCodeBook
+        ConcurrentMap<String, String> newCodeBookLookup = new ConcurrentHashMap<>(); // column->encodedColumn
         constructCodeBookMap(newCodeBookMap, newCodeBookLookup, version.getVersion());
         completeCodeBookCache.put(version.getVersion(), newCodeBookMap);
         codeBookLookup.put(version.getVersion(), newCodeBookLookup);

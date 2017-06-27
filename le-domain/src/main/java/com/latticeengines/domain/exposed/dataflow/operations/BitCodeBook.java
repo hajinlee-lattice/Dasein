@@ -21,6 +21,7 @@ public class BitCodeBook implements Serializable {
     private DecodeStrategy decodeStrategy;
     private String encodedColumn;
     private Map<Object, String> valueDict; // eg. A||B||C -> null:00, A:01, B:10, C:11
+    private Map<String, Object> valueDictRev;   // eg. A||B||C -> 00:null, 01:A, 10:B, 11:C
     private Integer bitUnit;
 
     public BitCodeBook() {
@@ -104,6 +105,14 @@ public class BitCodeBook implements Serializable {
         this.bitUnit = bitUnit;
     }
 
+    public Map<String, Object> getValueDictRev() {
+        return valueDictRev;
+    }
+
+    public void setValueDictRev(Map<String, Object> valueDictRev) {
+        this.valueDictRev = valueDictRev;
+    }
+
     public enum Algorithm {
         KEY_EXISTS
     }
@@ -137,6 +146,9 @@ public class BitCodeBook implements Serializable {
         switch (getDecodeStrategy()) {
         case BOOLEAN_YESNO:
             return assignSingleDigitBitPos(decodeFields, bitPositionIdx);
+        case NUMERIC_INT:
+        case ENUM_STRING:
+            return assignMultipleDigitBitPos(decodeFields, bitPositionIdx);
         default:
             return null;
         }
@@ -154,11 +166,29 @@ public class BitCodeBook implements Serializable {
         return ArrayUtils.toPrimitive(bitPoses.toArray(new Integer[bitPoses.size()]));
     }
 
+    private int[] assignMultipleDigitBitPos(List<String> decodeFields, Map<String, Integer> bitPositionIdx) {
+        List<Integer> bitPoses = new ArrayList<>();
+        for (String field : decodeFields) {
+            Integer bitPos = getBitPosForKey(field);
+            if (bitPos != null) {
+                bitPositionIdx.put(field, bitPoses.size());
+                for (int i = 0; i < getBitUnit(); i++) {
+                    bitPoses.add(bitPos + i);
+                }
+            }
+        }
+        return ArrayUtils.toPrimitive(bitPoses.toArray(new Integer[bitPoses.size()]));
+    }
+
     public Map<String, Object> translateBits(boolean[] bits, List<String> decodeFields,
             Map<String, Integer> bitPositionIdx) {
         switch (getDecodeStrategy()) {
         case BOOLEAN_YESNO:
             return translateBitsToYesNo(bits, decodeFields, bitPositionIdx);
+        case NUMERIC_INT:
+            return translateBitsToInt(bits, decodeFields, bitPositionIdx);
+        case ENUM_STRING:
+            return translateBitsToEnumString(bits, decodeFields, bitPositionIdx);
         default:
             throw new UnsupportedOperationException("Unsupported decode strategy " + getDecodeStrategy());
         }
@@ -172,6 +202,43 @@ public class BitCodeBook implements Serializable {
                 int idx = bitPositionIdx.get(decodeField);
                 boolean bit = bits[idx];
                 valueMap.put(decodeField, bit ? "Yes" : "No");
+            }
+        }
+        return valueMap;
+    }
+
+    private Map<String, Object> translateBitsToInt(boolean[] bits, List<String> decodeFields,
+            Map<String, Integer> bitPositionIdx) {
+        Map<String, Object> valueMap = new HashMap<>();
+        for (String decodeField : decodeFields) {
+            if (bitPositionIdx.containsKey(decodeField)) {
+                int idx = bitPositionIdx.get(decodeField);
+                boolean notNull = bits[idx + getBitUnit() - 1]; // highest bit is null indicator
+                if (notNull) {
+                    int value = 0;
+                    for (int i = getBitUnit() - 2; i >= 0; i--) {
+                        value = (value << 1) + (bits[idx + i] ? 1 : 0);
+                    }
+                    valueMap.put(decodeField, value);
+                } else {
+                    valueMap.put(decodeField, null);
+                }
+            }
+        }
+        return valueMap;
+    }
+
+    private Map<String, Object> translateBitsToEnumString(boolean[] bits, List<String> decodeFields,
+            Map<String, Integer> bitPositionIdx) {
+        Map<String, Object> valueMap = new HashMap<>();
+        for (String decodeField : decodeFields) {
+            if (bitPositionIdx.containsKey(decodeField)) {
+                int idx = bitPositionIdx.get(decodeField);
+                int value = 0;
+                for (int i = getBitUnit() - 1; i >= 0; i--) {
+                    value = (value << 1) + (bits[idx + i] ? 1 : 0);
+                }
+                valueMap.put(decodeField, getValueDictRev().get(Integer.toBinaryString(value)));
             }
         }
         return valueMap;

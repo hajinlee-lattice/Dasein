@@ -188,7 +188,7 @@ public class BitEncodeUtils {
                 switch (decodeStrategy) {
                 case ENUM_STRING:
                     for (int i = 0; i < valueDictArr.length; i++) {
-                        valueDict.put(valueDictArr[i], Integer.toBinaryString(i + 1));  // All 0s is left for null
+                        valueDict.put(valueDictArr[i], Integer.toBinaryString(i + 1));  // All 0s is for null
                     }
                     break;
                 default:
