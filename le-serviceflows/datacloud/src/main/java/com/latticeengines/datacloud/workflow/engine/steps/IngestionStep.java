@@ -218,13 +218,14 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                     .status(ProgressStatus.FINISHED).commit(true);
             HdfsUtils.rmdir(yarnConfiguration, tmpDestDir.toString());
             log.info("Ingestion finished. Progress: " + progress.toString());
+            checkCompleteVersionFromSftp(progress.getIngestion(), progress.getVersion());
         } else {
             progress = ingestionProgressService.updateProgress(progress)
                     .status(ProgressStatus.FAILED).commit(true);
             log.error("Ingestion failed. Progress: " + progress.toString());
         }
 
-        checkCompleteVersionFromSftp(progress.getIngestion(), progress.getVersion());
+
     }
 
     @SuppressWarnings("static-access")

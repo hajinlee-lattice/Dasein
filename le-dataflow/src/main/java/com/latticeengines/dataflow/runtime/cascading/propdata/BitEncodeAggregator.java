@@ -20,6 +20,7 @@ import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Context>
         implements Aggregator<BitEncodeAggregator.Context> {
@@ -107,6 +108,7 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
         return emptyList();
     }
     
+    @SuppressWarnings("unchecked")
     private List<Integer> encodeInt(TupleEntry arguments, BitCodeBook codeBook, String key) {
         Integer value = (Integer) arguments.getObject(valueField);
         if (value == null) {
@@ -114,13 +116,19 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
         }
         String binValue = Integer.toBinaryString(value);
         Integer bitUnit = codeBook.getBitUnit();
-        if (binValue.length() > bitUnit) {
+        String zeros = String.join("", Collections.nCopies(bitUnit - 1, "0"));
+        binValue = (zeros + binValue).substring(binValue.length());
+        binValue = "1" + binValue; // When encoding integer, fist bit is the
+                                   // indicator that value is null or not.
+                                   // 1:not null, 0: null
+
+        if (binValue.length() != bitUnit) {
             return emptyList();
         }
         List<Integer> trueBits = new ArrayList<>();
-        for (int i = 0; i < binValue.length(); i++) {
+        for (int i = bitUnit - 1; i >= 0; i--) {
             if (binValue.charAt(i) == '1') {
-                trueBits.add(codeBook.getBitPosForKey(key) + bitUnit - binValue.length() + i);
+                trueBits.add(codeBook.getBitPosForKey(key) + bitUnit - 1 - i);
             }
         }
         return trueBits;

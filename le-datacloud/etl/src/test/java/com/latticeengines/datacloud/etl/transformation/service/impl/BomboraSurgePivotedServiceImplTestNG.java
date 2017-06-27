@@ -148,11 +148,11 @@ public class BomboraSurgePivotedServiceImplTestNG
     }
 
     private Object[][] data = new Object[][] { //
-            { 1, "google.com", topics[0], 75, "A" }, //
-            { 2, "google.com", topics[1], 55, "B" }, //
-            { 3, "yahoo.com", topics[0], 45, "B" }, //
-            { 4, "yahoo.com", topics[2], 25, "A" }, //
-            { 5, "apple.com", "Dummy Topic", 15, "C" },
+            { 1, "google.com", topics[0], 75, "A" }, // Very High
+            { 2, "google.com", topics[1], 55, "B" }, // High
+            { 3, "yahoo.com", topics[0], 45, "B" }, // Medium
+            { 4, "yahoo.com", topics[2], 25, "A" }, // Low
+            { 5, "apple.com", "Dummy Topic", 15, "C" }, // Very Low
     };
 
     private void prepareBomboraSurge() {

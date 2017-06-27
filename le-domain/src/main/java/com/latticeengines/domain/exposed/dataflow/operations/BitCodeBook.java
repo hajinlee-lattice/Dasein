@@ -20,7 +20,7 @@ public class BitCodeBook implements Serializable {
     private Algorithm encodeAlgo;
     private DecodeStrategy decodeStrategy;
     private String encodedColumn;
-    private Map<Object, String> valueDict; // eg. A||B||C -> A:00, B:01, C:10
+    private Map<Object, String> valueDict; // eg. A||B||C -> null:00, A:01, B:10, C:11
     private Integer bitUnit;
 
     public BitCodeBook() {
