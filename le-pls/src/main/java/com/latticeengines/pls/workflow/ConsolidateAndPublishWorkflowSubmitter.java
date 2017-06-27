@@ -56,7 +56,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         Status datafeedStatus = datafeed.getStatus();
         if (!datafeedStatus.isAllowConsolidation()) {
             throw new RuntimeException("we can't launch any consolidate workflow now as it is not ready.");
-        } else if (execution.getStatus() == DataFeedExecution.Status.Started) {
+        } else if (execution != null && execution.getStatus() == DataFeedExecution.Status.Started) {
             if (execution.getWorkflowId() == null //
                     || !workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId())).getJobStatus()
                             .isTerminated()) {

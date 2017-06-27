@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 
 public interface DataFeedExecutionEntityMgr extends BaseEntityMgr<DataFeedExecution> {
 
-    DataFeedExecution findByExecutionId(long executionId);
+    DataFeedExecution findByExecutionId(Long executionId);
 
     DataFeedExecution findConsolidatingExecution(DataFeed datafeed);
 

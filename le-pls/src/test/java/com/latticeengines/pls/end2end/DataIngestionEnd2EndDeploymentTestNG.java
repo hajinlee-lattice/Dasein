@@ -170,6 +170,9 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondConsolidate")
     public void secondAssemble() {
         log.info("Start second assembling ...");
+        ApplicationId appId = dataFeedProxy.assemble(DATA_FEED_NAME);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondAssemble")
@@ -336,18 +339,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(firstTenant);
 
-        // DataFeedTask task = new DataFeedTask();
-        // task.setDataFeed(datafeed);
-        // task.setActiveJob("1");
-        // task.setEntity(SchemaInterpretation.Account.name());
-        // task.setSource("VDB");
-        // task.setStatus(DataFeedTask.Status.Active);
-        // task.setSourceConfig("config");
-        // task.setImportTemplate(importTable);
-        // task.setImportData(dataTable);
-        // task.setStartTime(new Date());
-        // task.setLastImported(new Date());
-        // datafeed.addTask(task);
         dataCollectionProxy.addDataFeed(firstTenant.getId(), DATA_COLLECTION_NAME, datafeed);
     }
 }

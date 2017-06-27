@@ -289,6 +289,12 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         WorkflowConfiguration workflow = getObjectFromContext(workflowClass.getName(), workflowClass);
         if (workflow == null) {
             log.warn("There is no workflow conifguration of class " + workflowClass.getSimpleName() + " in context.");
+            try {
+                workflow = workflowClass.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        String.format("Can't instantiate workflow configuration %s", workflowClass.getSimpleName()), e);
+            }
         }
         log.info("Trying to skip embedded workflow " + workflow.getName());
         Map<String, Class<?>> stepConfigClasses = workflow.getStepConfigClasses();

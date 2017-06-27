@@ -43,7 +43,10 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public DataFeedExecution findByExecutionId(long executionId) {
+    public DataFeedExecution findByExecutionId(Long executionId) {
+        if (executionId == null) {
+            return null;
+        }
         DataFeedExecution execution = findByField("pid", executionId);
         inflateDataFeedImport(execution);
         return execution;
@@ -68,7 +71,7 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     }
 
     private void inflateDataFeedImport(DataFeedExecution execution) {
-        if (!execution.getImports().isEmpty()) {
+        if (execution != null && !execution.getImports().isEmpty()) {
             for (DataFeedImport datafeedImport : execution.getImports()) {
                 TableEntityMgr.inflateTable(datafeedImport.getDataTable());
             }

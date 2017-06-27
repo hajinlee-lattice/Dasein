@@ -80,9 +80,9 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(name = "ACTIVE_EXECUTION", nullable = false)
+    @Column(name = "ACTIVE_EXECUTION", nullable = true)
     @JsonIgnore
-    private Long activeExecutionId = 1L;
+    private Long activeExecutionId;
 
     @Transient
     @JsonProperty("active_execution")

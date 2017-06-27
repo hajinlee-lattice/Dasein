@@ -2,6 +2,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import java.util.Date;
 
@@ -105,8 +106,9 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
     public void retrieve() {
         DataFeed retrieved = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
         assertEquals(retrieved.getName(), datafeed.getName());
-        assertEquals(retrieved.getActiveExecution().getPid(), datafeed.getActiveExecutionId());
-        assertEquals(retrieved.getExecutions().size(), 1);
+        assertNull(retrieved.getActiveExecutionId());
+        assertNull(retrieved.getActiveExecution());
+        assertEquals(retrieved.getExecutions().size(), 0);
         assertEquals(retrieved.getTasks().size(), 1);
         assertEquals(retrieved.getTasks().get(0).getImportTemplate().getTableType(), TableType.IMPORTTABLE);
         assertNotNull(retrieved.getTasks().get(0).getImportTemplate().getPid());
@@ -137,15 +139,11 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
 
         DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
-        assertEquals(df.getExecutions().size(), 2);
+        assertEquals(df.getExecutions().size(), 1);
         assertEquals(df.getStatus(), Status.InitialConsolidated);
 
         assertEquals(exec1.getStatus(), df.getExecutions().get(0).getStatus());
         assertEquals(exec1.getImports().size(), df.getTasks().size());
-
-        DataFeedExecution exec2 = df.getExecutions().get(1);
-        assertEquals(exec2.getStatus(), DataFeedExecution.Status.Active);
-        assertEquals(exec2.getImports().size(), 0);
 
     }
 

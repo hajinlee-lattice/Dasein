@@ -5,6 +5,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,7 +90,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public Table peekFirstDataTable(DataFeedTask datafeedTask) {
         Table table = datafeedTaskTableDao.peekFirstDataTable(datafeedTask);
         TableEntityMgr.inflateTable(table);
@@ -214,7 +215,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, Long dataFeedId) {
         DataFeedTask dataFeedTask = datafeedTaskDao.getDataFeedTask(source, dataFeedType, entity, dataFeedId);
         if (dataFeedTask != null) {
@@ -225,7 +226,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(Long pid) {
         DataFeedTask dataFeedTask = datafeedTaskDao.findByField("PID", pid);
         if (dataFeedTask != null) {

@@ -25,7 +25,6 @@ import com.latticeengines.metadata.dao.DataFeedDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
-import com.latticeengines.metadata.entitymgr.DataFeedImportEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -40,9 +39,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Autowired
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
-
-    @Autowired
-    private DataFeedImportEntityMgr datafeedImportEntityMgr;
 
     @Autowired
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
@@ -72,12 +68,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             task.setDataFeed(datafeed);
             datafeedTaskEntityMgr.create(task);
         }
-        DataFeedExecution execution = new DataFeedExecution();
-        execution.setDataFeed(datafeed);
-        execution.setStatus(DataFeedExecution.Status.Active);
-        datafeedExecutionEntityMgr.create(execution);
-        datafeed.setActiveExecutionId(execution.getPid());
-        datafeed.setActiveExecution(execution);
         log.info(String.format("created data feed %s.", datafeed));
         update(datafeed);
     }
@@ -101,7 +91,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             TableEntityMgr.inflateTable(datafeedTask.getImportData());
         }
         DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecutionId());
-        datafeed.setActiveExecution(execution);
+        if (execution != null) {
+            datafeed.setActiveExecution(execution);
+        }
         return datafeed;
     }
 
@@ -125,15 +117,16 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         tasks.forEach(task -> task.setImportData(datafeedTaskEntityMgr.pollFirstDataTable(task)));
         List<DataFeedImport> imports = tasks.stream().map(DataFeedImportUtils::createImportFromTask)
                 .collect(Collectors.toList());
-        DataFeedExecution execution = datafeed.getActiveExecution();
+
+        DataFeedExecution execution = new DataFeedExecution();
+        execution.setDataFeed(datafeed);
         execution.setStatus(DataFeedExecution.Status.Started);
         execution.addImports(imports);
-        for (DataFeedImport datafeedImport : imports) {
-            datafeedImportEntityMgr.create(datafeedImport);
-        }
         log.info(String.format("starting execution %s", execution));
-        datafeedExecutionEntityMgr.update(execution);
+        datafeedExecutionEntityMgr.create(execution);
 
+        datafeed.setActiveExecutionId(execution.getPid());
+        datafeed.setActiveExecution(execution);
         datafeed.setStatus(Status.Consolidating);
         tasks = datafeed.getTasks();
         tasks.forEach(task -> {
@@ -157,12 +150,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         execution.setStatus(status);
         datafeedExecutionEntityMgr.update(execution);
 
-        DataFeedExecution newExecution = new DataFeedExecution();
-        newExecution.setDataFeed(datafeed);
-        newExecution.setStatus(DataFeedExecution.Status.Active);
-        datafeedExecutionEntityMgr.create(newExecution);
-
-        datafeed.setActiveExecutionId(newExecution.getPid());
         datafeed.setStatus(datafeedStatus);
         log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName, datafeed));
         datafeedDao.update(datafeed);
