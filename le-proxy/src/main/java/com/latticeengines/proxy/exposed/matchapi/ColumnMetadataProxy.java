@@ -58,14 +58,14 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                 .watch(AMApiUpdate.name()) //
                 .maximum(20) //
                 .load(dataCloudVersion -> requestColumnSelection(Predefined.Enrichment, (String) dataCloudVersion)) //
-                .initKeys(new String[] { latestDataCloudVersionCache.get("").getVersion() }) //
+                .initKeys(new String[] { "2.0.4" }) //
                 .build();
         segmentColumnsCache = WatcherCache.builder() //
                 .name("SegmentColumnsCache") //
                 .watch(AMApiUpdate.name()) //
                 .maximum(20) //
                 .load(dataCloudVersion -> requestColumnSelection(Predefined.Segment, (String) dataCloudVersion)) //
-                .initKeys(new String[] { latestDataCloudVersionCache.get("").getVersion() }) //
+                .initKeys(new String[] { "2.0.4" }) //
                 .build();
         columnCacheMap.put(Predefined.Enrichment, enrichmentColumnsCache);
         columnCacheMap.put(Predefined.Segment, segmentColumnsCache);
