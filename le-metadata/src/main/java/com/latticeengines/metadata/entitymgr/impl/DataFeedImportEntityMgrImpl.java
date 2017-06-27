@@ -34,7 +34,7 @@ public class DataFeedImportEntityMgrImpl extends BaseEntityMgrImpl<DataFeedImpor
             dataFeedImport.getDataTable().setTableType(TableType.DATATABLE);
             tableEntityMgr.create(dataFeedImport.getDataTable());
         }
-        super.create(dataFeedImport);
+        datafeedImportDao.create(dataFeedImport);
     }
 
 }
