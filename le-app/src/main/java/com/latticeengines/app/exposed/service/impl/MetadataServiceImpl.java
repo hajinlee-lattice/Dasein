@@ -64,7 +64,7 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public Statistics getStatistics() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        StatisticsContainer container = dataCollectionProxy.getStatsInDefaultColellction(customerSpace);
+        StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
             return container.getStatistics();
         }

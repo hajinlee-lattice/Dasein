@@ -7,7 +7,6 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.metadata.dao.SegmentDao;
 
@@ -21,13 +20,16 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
 
     @SuppressWarnings("rawtypes")
     @Override
-    public MetadataSegment findByDataCollectionAndName(String dataCollectionName, String name) {
+    public MetadataSegment findMasterSegment(String collectionName) {
         Session session = sessionFactory.getCurrentSession();
         Class<MetadataSegment> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "from %s as segment inner join fetch segment.dataCollection as dataCollection where dataCollection.name = '%s' and segment.name = '%s'",
-                entityClz.getSimpleName(), dataCollectionName, name);
+        String queryPattern = "select seg from %s as seg";
+        queryPattern += " join seg.dataCollection as dc";
+        queryPattern += " where dc.name = :collectionName";
+        queryPattern += " and seg.isMasterSegment is true";
+        String queryStr = String.format(queryPattern, entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
+        query.setParameter("collectionName", collectionName);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -35,19 +37,4 @@ public class SegmentDaoImpl extends BaseDaoImpl<MetadataSegment> implements Segm
         return (MetadataSegment) list.get(0);
     }
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public MetadataSegment findByNameWithSegmentationDataCollection(String name) {
-        Session session = sessionFactory.getCurrentSession();
-        Class<MetadataSegment> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "from %s as segment inner join fetch segment.dataCollection as dataCollection where dataCollection.type = '%s' and segment.name = '%s'",
-                entityClz.getSimpleName(), DataCollectionType.Segmentation, name);
-        Query query = session.createQuery(queryStr);
-        List list = query.list();
-        if (list.size() == 0) {
-            return null;
-        }
-        return (MetadataSegment) list.get(0);
-    }
 }

@@ -36,27 +36,26 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Override
-    public List<DataCollection> getDataCollections(String customerSpace) {
-        return dataCollectionEntityMgr.findAll();
-    }
-
-    @Override
     public DataCollection getDataCollection(String customerSpace, String collectionName) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
         return dataCollectionEntityMgr.getDataCollection(collectionName);
     }
 
     @Override
-    public DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection) {
-        DataCollection existing = dataCollectionEntityMgr.getDataCollection(dataCollection.getName());
-        if (existing != null) {
-            dataCollectionEntityMgr.removeDataCollection(existing.getName());
-        }
-        dataCollectionEntityMgr.createDataCollection(dataCollection);
-        return getDataCollection(customerSpace, dataCollection.getName());
+    public DataCollection getOrCreateDefaultCollection(String customerSpace) {
+        return dataCollectionEntityMgr.getOrCreateDefaultCollection();
     }
 
     @Override
     public void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
+
         Table table = tableEntityMgr.findByName(tableName);
         if (table == null) {
             throw new IllegalArgumentException(
@@ -76,6 +75,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public void addStats(String customerSpace, String collectionName, StatisticsContainer container) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
         DataCollection dataCollection = getDataCollection(customerSpace, collectionName);
         if (dataCollection == null) {
             throw new IllegalArgumentException(
@@ -86,18 +89,29 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Override
     public StatisticsContainer getStats(String customerSpace, String collectionName) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
         return statisticsContainerEntityMgr.findInMasterSegment(collectionName);
     }
 
     @Override
     public List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
         log.info("Getting all tables of role " + tableRole + " in collection " + collectionName);
         return dataCollectionEntityMgr.getTablesOfRole(collectionName, tableRole);
     }
 
     public AttributeRepository getAttrRepo(String customerSpace, String collectionName) {
-        String notNullCollectioName = StringUtils.isBlank(collectionName)
-                ? dataCollectionEntityMgr.getDefaultCollectionName() : collectionName;
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
+        final String notNullCollectioName = collectionName;
         StatisticsContainer statisticsContainer = getStats(customerSpace, notNullCollectioName);
         if (statisticsContainer == null) {
             return null;

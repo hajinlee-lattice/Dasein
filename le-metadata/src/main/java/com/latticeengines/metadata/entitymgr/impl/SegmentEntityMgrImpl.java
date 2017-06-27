@@ -94,8 +94,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     public void createOrUpdate(MetadataSegment segment) {
         segment.setTenant(MultiTenantContext.getTenant());
         if (segment.getDataCollection() == null) {
-            String defaultCollectionName = dataCollectionEntityMgr.getDefaultCollectionName();
-            DataCollection defaultCollection = dataCollectionEntityMgr.getDataCollection(defaultCollectionName);
+            DataCollection defaultCollection = dataCollectionEntityMgr.getOrCreateDefaultCollection();
             segment.setDataCollection(defaultCollection);
         }
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
@@ -136,10 +135,11 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findMasterSegment(String collectionName) {
-        return segmentDao.findAll().stream() //
-                .filter(s -> s.getDataCollection().getName().equals(collectionName)) //
-                .filter(s -> Boolean.TRUE.equals(s.getMasterSegment())) //
-                .map(this::inflate).findFirst().orElse(null);
+        MetadataSegment segment = segmentDao.findMasterSegment(collectionName);
+        if (segment != null) {
+            inflate(segment);
+        }
+        return segment;
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

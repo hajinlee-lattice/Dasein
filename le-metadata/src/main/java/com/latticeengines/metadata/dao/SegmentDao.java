@@ -5,7 +5,5 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
 public interface SegmentDao extends BaseDao<MetadataSegment> {
 
-    MetadataSegment findByDataCollectionAndName(String querySourceName, String name);
-
-    MetadataSegment findByNameWithSegmentationDataCollection(String name);
+    MetadataSegment findMasterSegment(String collectionName);
 }

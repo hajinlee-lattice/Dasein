@@ -120,7 +120,7 @@ public class DataCollectionEntityMgrImplTestNG extends DataCollectionFunctionalT
     @Test(groups = "functional", dependsOnMethods = "retrieve")
     public void recreate() {
         DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(collectionName);
-        String newCollectionName = NamingUtils.timestamp("DataCollection");
+        String newCollectionName = NamingUtils.timestamp("DC");
         retrieved.setName(newCollectionName);
         dataCollectionEntityMgr.createOrUpdate(retrieved);
 

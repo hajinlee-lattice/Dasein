@@ -75,11 +75,9 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        String collectionName = configuration.getDataCollectionName();
-        Table masterTable = dataCollectionProxy.getTable(customerSpace, collectionName,
-                TableRoleInCollection.ConsolidatedAccount);
+        Table masterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
         if (masterTable == null) {
-            throw new IllegalStateException("Cannot find the master table in collection " + collectionName);
+            throw new IllegalStateException("Cannot find the master table in default collection");
         }
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 masterTable.getName()));
@@ -263,9 +261,8 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         if (profileTable == null) {
             throw new RuntimeException("Failed to find profile table in customer " + customerSpace);
         }
-        String collectionName = configuration.getDataCollectionName();
-        dataCollectionProxy.upsertTable(customerSpace, collectionName, profileTableName, TableRoleInCollection.Profile);
-        profileTable = dataCollectionProxy.getTable(customerSpace, collectionName, TableRoleInCollection.Profile);
+        dataCollectionProxy.upsertTable(customerSpace, profileTableName, TableRoleInCollection.Profile);
+        profileTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile);
         if (profileTable == null) {
             throw new IllegalStateException("Cannot find the upserted profile table in data collection.");
         }
@@ -274,9 +271,9 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         if (bktTable == null) {
             throw new RuntimeException("Failed to find bucketed table in customer " + customerSpace);
         }
-        dataCollectionProxy.upsertTable(customerSpace, collectionName, sortedTableName,
+        dataCollectionProxy.upsertTable(customerSpace, sortedTableName,
                 TableRoleInCollection.BucketedAccount);
-        bktTable = dataCollectionProxy.getTable(customerSpace, collectionName, TableRoleInCollection.BucketedAccount);
+        bktTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.BucketedAccount);
         if (bktTable == null) {
             throw new IllegalStateException("Cannot find the upserted bucketed table in data collection.");
         }

@@ -10,11 +10,9 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 
 public interface DataCollectionService {
 
-    List<DataCollection> getDataCollections(String customerSpace);
-
     DataCollection getDataCollection(String customerSpace, String collectionName);
 
-    DataCollection createOrUpdateDataCollection(String customerSpace, DataCollection dataCollection);
+    DataCollection getOrCreateDefaultCollection(String customerSpace);
 
     void addStats(String customerSpace, String collectionName, StatisticsContainer container);
 

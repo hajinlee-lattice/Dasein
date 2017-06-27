@@ -44,7 +44,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public List<MetadataSegment> getSegments(String customerSpace) {
-        String collectionName = dataCollectionEntityMgr.getDefaultCollectionName();
+        String collectionName = dataCollectionEntityMgr.getOrCreateDefaultCollection().getName();
         return segmentEntityMgr.findAllInCollection(collectionName);
     }
 

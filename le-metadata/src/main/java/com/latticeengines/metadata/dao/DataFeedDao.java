@@ -5,4 +5,6 @@ import com.latticeengines.domain.exposed.metadata.DataFeed;
 
 public interface DataFeedDao extends BaseDao<DataFeed> {
 
+    DataFeed findDefaultFeed(String collectionName);
+
 }

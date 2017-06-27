@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -24,6 +25,9 @@ public class DataFeedExecutionListener extends LEJobListener {
     private MetadataProxy metadataProxy;
 
     @Autowired
+    private DataFeedProxy dataFeedProxy;
+
+    @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Override
@@ -33,21 +37,18 @@ public class DataFeedExecutionListener extends LEJobListener {
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-        String datafeedName = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_NAME);
         String customerSpace = job.getTenant().getId();
         String initialDataFeedStatus = job
                 .getInputContextValue(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS);
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            DataFeedExecution execution = metadataProxy.finishExecution(customerSpace, datafeedName,
-                    initialDataFeedStatus);
+            DataFeedExecution execution = dataFeedProxy.finishExecution(customerSpace, initialDataFeedStatus);
             log.info(String.format("trying to finish running execution %s", execution));
             if (execution.getStatus() != Status.Consolidated) {
                 throw new RuntimeException("Can't finish execution");
             }
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("workflow failed!");
-            DataFeedExecution execution = metadataProxy.failExecution(customerSpace, datafeedName,
-                    initialDataFeedStatus);
+            DataFeedExecution execution = dataFeedProxy.failExecution(customerSpace, initialDataFeedStatus);
             log.info(String.format("trying to fail running execution %s", execution));
             if (execution.getStatus() != Status.Failed) {
                 throw new RuntimeException("Can't fail execution");

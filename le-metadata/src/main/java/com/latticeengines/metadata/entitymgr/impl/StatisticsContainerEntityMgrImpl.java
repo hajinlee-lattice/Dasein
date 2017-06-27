@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,8 +17,8 @@ import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("statisticsContainerEntityMgr")
-public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<StatisticsContainer> implements
-        StatisticsContainerEntityMgr {
+public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<StatisticsContainer>
+        implements StatisticsContainerEntityMgr {
 
     @Autowired
     private StatisticsContainerDao statisticsContainerDao;
@@ -70,7 +71,8 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public StatisticsContainer findInMasterSegment(String collectionName) {
-        collectionName = StringUtils.isBlank(collectionName) ? dataCollectionEntityMgr.getDefaultCollectionName() : collectionName;
+        collectionName = StringUtils.isBlank(collectionName)
+                ? dataCollectionEntityMgr.getOrCreateDefaultCollection().getName() : collectionName;
         return statisticsContainerDao.findInMasterSegment(collectionName);
     }
 }

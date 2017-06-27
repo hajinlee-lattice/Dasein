@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.Sor
 import com.latticeengines.domain.exposed.serviceflows.cdl.CalculateStatsWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
@@ -35,38 +35,35 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
     private String s3Bucket;
 
     @Autowired
-    private MetadataProxy metadataProxy;
-
-    @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
-    public ApplicationId submit(String datafeedName) {
+    @Autowired
+    private DataFeedProxy dataFeedProxy;
+
+    public ApplicationId submit() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
-        DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(MultiTenantContext.getCustomerSpace().toString());
+        DataCollection dataCollection = dataCollectionProxy
+                .getDefaultDataCollection(MultiTenantContext.getCustomerSpace().toString());
         if (dataCollection == null) {
             throw new LedpException(LedpCode.LEDP_37014);
         }
         log.info("Found default data collection " + dataCollection.getName());
-        String dataCollectionName = dataCollection.getName();
-        log.info(String.format("Submitting calculate stats workflow for data collection %s for customer %s",
-                dataCollectionName, customerSpace));
-        DataFeed datafeed = metadataProxy.findDataFeedByName(MultiTenantContext.getCustomerSpace().toString(),
-                datafeedName);
+        log.info(String.format("Submitting calculate stats workflow for customer %s", customerSpace));
+        DataFeed datafeed = dataFeedProxy.getDataFeed(MultiTenantContext.getCustomerSpace().toString());
         Status datafeedStatus = datafeed.getStatus();
-        log.info(String.format("data feed %s status: %s", datafeedName, datafeedStatus.getName()));
+        log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
         if (datafeedStatus == Status.Active || datafeedStatus == Status.InitialConsolidated) {
-            metadataProxy.updateDataFeedStatus(customerSpace.toString(), datafeedName, Status.Finalizing.getName());
-            Table masterTableInDb = dataCollectionProxy.getTable(customerSpace.toString(), dataCollectionName,
+            dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), Status.Finalizing.getName());
+            Table masterTableInDb = dataCollectionProxy.getTable(customerSpace.toString(),
                     TableRoleInCollection.ConsolidatedAccount);
             if (masterTableInDb == null) {
                 throw new LedpException(LedpCode.LEDP_37003,
                         new String[] { TableRoleInCollection.ConsolidatedAccount.name() });
             }
-            CalculateStatsWorkflowConfiguration configuration = generateConfiguration(dataCollectionName, datafeedName,
-                    datafeedStatus);
+            CalculateStatsWorkflowConfiguration configuration = generateConfiguration(datafeedStatus);
             return workflowJobService.submit(configuration);
         } else {
             throw new RuntimeException(
@@ -75,15 +72,12 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
 
     }
 
-    public CalculateStatsWorkflowConfiguration generateConfiguration(String collectionName, String datafeedName,
-            Status status) {
+    public CalculateStatsWorkflowConfiguration generateConfiguration(Status status) {
         return new CalculateStatsWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(MultiTenantContext.getCustomerSpace()) //
-                .dataCollectionName(collectionName) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .inputProperties(ImmutableMap.<String, String> builder()
-                        .put(WorkflowContextConstants.Inputs.DATAFEED_NAME, datafeedName) //
                         .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //
                         .build()) //
                 .build();

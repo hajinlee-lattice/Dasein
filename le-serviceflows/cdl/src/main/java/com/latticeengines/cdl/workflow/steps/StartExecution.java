@@ -14,14 +14,14 @@ import com.latticeengines.domain.exposed.metadata.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("startExecution")
 public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration> {
 
     @Autowired
-    private MetadataProxy metadataProxy;
+    private DataFeedProxy dataFeedProxy;
 
     @Override
     public void execute() {
@@ -32,12 +32,11 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
         exportDataToRedshiftConfig.setSkipStep(!isActive);
         putObjectInContext(ExportDataToRedshiftConfiguration.class.getName(), exportDataToRedshiftConfig);
 
-        DataFeedExecution execution = metadataProxy.updateExecutionWorkflowId(
-                configuration.getCustomerSpace().toString(), configuration.getDataFeedName(), jobId);
+        DataFeedExecution execution = dataFeedProxy.updateExecutionWorkflowId(
+                configuration.getCustomerSpace().toString(), jobId);
         log.info(String.format("current running execution %s", execution));
 
-        DataFeed datafeed = metadataProxy.findDataFeedByName(configuration.getCustomerSpace().toString(),
-                configuration.getDataFeedName());
+        DataFeed datafeed = dataFeedProxy.getDataFeed(configuration.getCustomerSpace().toString());
         execution = datafeed.getActiveExecution();
 
         if (execution == null) {

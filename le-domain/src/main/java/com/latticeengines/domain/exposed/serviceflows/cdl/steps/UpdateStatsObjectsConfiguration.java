@@ -11,23 +11,11 @@ public class UpdateStatsObjectsConfiguration extends BaseStepConfiguration {
     @NotNull
     private CustomerSpace customerSpace;
 
-    @JsonProperty("data_collection_name")
-    @NotNull
-    private String dataCollectionName;
-
     public CustomerSpace getCustomerSpace() {
         return this.customerSpace;
     }
 
     public void setCustomerSpace(CustomerSpace customerSpace) {
         this.customerSpace = customerSpace;
-    }
-
-    public String getDataCollectionName() {
-        return dataCollectionName;
-    }
-
-    public void setDataCollectionName(String dataCollectionName) {
-        this.dataCollectionName = dataCollectionName;
     }
 }

@@ -81,7 +81,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         String customerSpace = MultiTenantContext.getTenant().getId();
         TableRoleInCollection role = entity.getServingStore();
-        Table batchTable = dataCollectionProxy.getTableInDefaultCollection(customerSpace, role);
+        Table batchTable = dataCollectionProxy.getTable(customerSpace, role);
         Stream<ColumnMetadata> stream = batchTable.getAttributes().stream() //
                 .map(Attribute::getColumnMetadata) //
                 .sorted(Comparator.comparing(ColumnMetadata::getColumnId));
@@ -98,7 +98,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Override
     public Statistics getStatistics() {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        StatisticsContainer container = dataCollectionProxy.getStatsInDefaultColellction(customerSpace);
+        StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
             return container.getStatistics();
         }

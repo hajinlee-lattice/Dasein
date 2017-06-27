@@ -1,10 +1,5 @@
 package com.latticeengines.metadata.controller;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -40,15 +35,11 @@ public class DataCollectionResourceTestNG extends DataCollectionFunctionalTestNG
     }
 
     @Test(groups = "functional")
-    public void createDataCollection_assertCreated() {
-        dataCollectionProxy.createOrUpdateDataCollection(customerSpace1, DATA_COLLECTION);
-        dataCollectionProxy.upsertTable(customerSpace1, DATA_COLLECTION.getName(), TABLE1, TableRoleInCollection.ConsolidatedAccount);
-
-        DataCollection retrieved = dataCollectionProxy.getDataCollection(customerSpace1, DATA_COLLECTION.getName());
-        assertNotNull(retrieved);
-        assertEquals(retrieved.getName(), COLLECTION_NAME);
-
-        List<Table> tables = dataCollectionProxy.getAllTables(customerSpace1, DATA_COLLECTION.getName());
-        Assert.assertEquals(tables.size(), 1);
+    public void getDefaultDataCollection() {
+        DataCollection collection = dataCollectionProxy.getDefaultDataCollection(customerSpace1);
+        Assert.assertEquals(collection.getName(), dataCollection.getName());
+        dataCollectionProxy.upsertTable(customerSpace1, TABLE1, TableRoleInCollection.ConsolidatedAccount);
+        Table table = dataCollectionProxy.getTable(customerSpace1, TableRoleInCollection.ConsolidatedAccount);
+        Assert.assertNotNull(table);
     }
 }

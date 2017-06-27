@@ -9,7 +9,9 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
-    DataCollection createDataCollection(DataCollection dataCollection);
+    DataCollection getOrCreateDefaultCollection();
+
+    DataCollection getDefaultCollectionReadOnly();
 
     DataCollection getDataCollection(String name);
 
@@ -22,6 +24,4 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
     void removeTableFromCollection(String collectionName, String tableName);
 
     void upsertStatsForMasterSegment(String collectionName, StatisticsContainer statisticsContainer);
-
-    String getDefaultCollectionName();
 }

@@ -17,11 +17,11 @@ public abstract class CDLDeploymentTestNGBase extends PlsDeploymentTestNGBase {
     protected String customerSpace;
 
     public void setupTenant() {
-        testBed.bootstrapForProduct(LatticeProduct.LPA3);
-        customerSpace = CustomerSpace.parse(testBed.getMainTestTenant().getId()).toString();
-        DataCollection dataCollection = new DataCollection();
-        dataCollection.setType(DataCollectionType.Segmentation);
-        dataCollection = dataCollectionProxy.createOrUpdateDataCollection(customerSpace, dataCollection);
-        dataCollectionName = dataCollection.getName();
+//        testBed.bootstrapForProduct(LatticeProduct.LPA3);
+//        customerSpace = CustomerSpace.parse(testBed.getMainTestTenant().getId()).toString();
+//        DataCollection dataCollection = new DataCollection();
+//        dataCollection.setType(DataCollectionType.Segmentation);
+//        dataCollection = dataCollectionProxy.createOrUpdateDataCollection(customerSpace, dataCollection);
+//        dataCollectionName = dataCollection.getName();
     }
 }

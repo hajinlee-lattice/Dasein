@@ -43,11 +43,6 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
-        public Builder datafeedName(String datafeedName) {
-            startExecutionConfiguration.setDataFeedName(datafeedName);
-            return this;
-        }
-
         public Builder hdfsToRedshiftConfiguration(HdfsToRedshiftConfiguration hdfsToRedshiftConfiguration) {
             redshiftPublishWorkflowConfigurationBuilder.hdfsToRedshiftConfiguration(hdfsToRedshiftConfiguration);
             return this;

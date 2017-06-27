@@ -69,7 +69,6 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
     private String srcIdField;
     Map<MatchKey, List<String>> keyMap = null;
     Boolean isActive = false;
-    private String collectionName;
 
     private int mergeStep;
     private int matchStep;
@@ -88,7 +87,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
     protected void onPostTransformationCompleted() {
         Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(outputMasterTablePrefix, pipelineVersion));
-        dataCollectionProxy.upsertTable(customerSpace.toString(), collectionName, newMasterTable.getName(),
+        dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(),
                 TableRoleInCollection.ConsolidatedAccount);
         if (isBucketing()) {
             Table diffTable = metadataProxy.getTable(customerSpace.toString(),
@@ -115,8 +114,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
             inputTableNames.add(table.getName());
         }
 
-        collectionName = configuration.getDataCollectionName();
-        Table masterTable = dataCollectionProxy.getTable(customerSpace.toString(), collectionName,
+        Table masterTable = dataCollectionProxy.getTable(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedAccount);
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
             log.info("There has been no master table for this data collection. Creating a new one");
@@ -130,7 +128,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
 
         isActive = getObjectFromContext(IS_ACTIVE, Boolean.class);
         if (isBucketing()) {
-            Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(), collectionName,
+            Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(),
                     TableRoleInCollection.Profile);
             profileTableName = profileTable.getName();
             log.info("Set profileTableName=" + profileTableName);

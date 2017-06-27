@@ -35,15 +35,15 @@ public class StatisticsContainerResourceTestNG extends DataCollectionFunctionalT
         Statistics statistics = new Statistics();
         statistics.getCategories().put(Category.ACCOUNT_INFORMATION, new CategoryStatistics());
         container.setStatistics(statistics);
-        dataCollectionProxy.upsertStats(customerSpace1, collectionName, container);
-        container = dataCollectionProxy.getStats(customerSpace1, collectionName);
+        dataCollectionProxy.upsertStats(customerSpace1, container);
+        container = dataCollectionProxy.getStats(customerSpace1);
         System.out.println("stats name = " + container.getName());
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreate")
     public void testRetrieve() {
         // from collection
-        StatisticsContainer retrieved = dataCollectionProxy.getStats(customerSpace1, collectionName);
+        StatisticsContainer retrieved = dataCollectionProxy.getStats(customerSpace1);
         assertEquals(retrieved.getStatistics().getCategories().size(), container.getStatistics().getCategories().size());
         assertTrue(retrieved.getStatistics().getCategories().containsKey(Category.ACCOUNT_INFORMATION));
 

@@ -36,14 +36,6 @@ public class DataCollectionResource {
     @Autowired
     private DataFeedService dataFeedService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get all data collections")
-    public List<DataCollection> getDataCollections(@PathVariable String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getDataCollections(customerSpace);
-    }
-
     @RequestMapping(value = "/{collectionName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data collection by name.")
@@ -59,15 +51,6 @@ public class DataCollectionResource {
             @RequestParam(value = "role", required = false) TableRoleInCollection tableRole) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.getTables(customerSpace, collectionName, tableRole);
-    }
-
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Create or update data collection")
-    public DataCollection createOrUpdateDataCollection(@PathVariable String customerSpace, //
-            @RequestBody DataCollection dataCollection) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.createOrUpdateDataCollection(customerSpace, dataCollection);
     }
 
     @RequestMapping(value = "/{collectionName}/tables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")

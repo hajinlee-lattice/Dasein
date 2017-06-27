@@ -51,14 +51,11 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     public void execute() {
         log.info("Inside UpdateStatsObjects execute()");
         String customerSpaceStr = configuration.getCustomerSpace().toString();
-        String collectionName = configuration.getDataCollectionName();
-        Table masterTable = dataCollectionProxy.getTable(customerSpaceStr, collectionName,
-                TableRoleInCollection.ConsolidatedAccount);
+        Table masterTable = dataCollectionProxy.getTable(customerSpaceStr, TableRoleInCollection.ConsolidatedAccount);
         if (masterTable == null) {
             throw new NullPointerException("Master table for Stats Object Calculation is not found.");
         }
-        Table profileTable = dataCollectionProxy.getTable(customerSpaceStr, collectionName,
-                TableRoleInCollection.Profile);
+        Table profileTable = dataCollectionProxy.getTable(customerSpaceStr, TableRoleInCollection.Profile);
         if (profileTable == null) {
             throw new NullPointerException("Profile table for Stats Object Calculation is not found.");
         }
@@ -71,7 +68,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         }
 
         StatisticsContainer statsContainer = constructStatsContainer(masterTable, statsTable);
-        dataCollectionProxy.upsertStats(customerSpaceStr, collectionName, statsContainer);
+        dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
     }
 
     @Override

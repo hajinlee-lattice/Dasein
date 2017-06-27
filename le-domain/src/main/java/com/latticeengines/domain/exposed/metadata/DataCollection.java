@@ -16,11 +16,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -39,8 +39,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
         "TENANT_ID", "NAME" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DataCollection extends BaseMetadataPropertyOwner<DataCollectionProperty>
-        implements HasName, HasTenant, HasTenantId, HasPid, HasProperties<DataCollectionProperty> {
+public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +50,7 @@ public class DataCollection extends BaseMetadataPropertyOwner<DataCollectionProp
 
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
+    @Index(name = "IX_NAME")
     private String name;
 
     @JsonIgnore
@@ -62,11 +62,6 @@ public class DataCollection extends BaseMetadataPropertyOwner<DataCollectionProp
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
-
-    @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "owner")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("properties")
-    private List<DataCollectionProperty> properties = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "dataCollection")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -145,16 +140,6 @@ public class DataCollection extends BaseMetadataPropertyOwner<DataCollectionProp
     }
 
 
-    @Override
-    public List<DataCollectionProperty> getProperties() {
-        return properties;
-    }
-
-    @Override
-    public void setProperties(List<DataCollectionProperty> properties) {
-        this.properties = properties;
-    }
-
     // =====
     // Use datafeed entity mgr
     private List<DataFeed> getDatafeeds() {
@@ -176,17 +161,5 @@ public class DataCollection extends BaseMetadataPropertyOwner<DataCollectionProp
         this.segments = segments;
     }
     // =====
-
-    @JsonIgnore
-    @Transient
-    public DataCollectionPropertyBag getDataCollectionPropertyBag() {
-        return new DataCollectionPropertyBag(properties);
-    }
-
-    @Override
-    @JsonIgnore
-    protected Class<DataCollectionProperty> getPropertyClz() {
-        return DataCollectionProperty.class;
-    }
 
 }

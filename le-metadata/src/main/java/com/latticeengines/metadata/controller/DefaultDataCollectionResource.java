@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -80,6 +83,27 @@ public class DefaultDataCollectionResource {
     public AttributeRepository getAttrRepo(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.getAttrRepo(customerSpace, null);
+    }
+
+    @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create or insert a table into the collection")
+    public SimpleBooleanResponse upsertTable(@PathVariable String customerSpace, //
+            @PathVariable String tableName, //
+            @RequestParam(value = "role") TableRoleInCollection role) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.upsertTable(customerSpace, null, tableName, role);
+        return SimpleBooleanResponse.successResponse();
+    }
+
+    @RequestMapping(value = "/stats", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create or update the main statistics of the collection")
+    public SimpleBooleanResponse upsertStats(@PathVariable String customerSpace, //
+                                          @RequestBody StatisticsContainer statisticsContainer) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.addStats(customerSpace, null, statisticsContainer);
+        return SimpleBooleanResponse.successResponse();
     }
 
 }

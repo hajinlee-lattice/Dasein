@@ -15,21 +15,20 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionProperty;
 import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
 import com.latticeengines.domain.exposed.metadata.DataCollectionType;
+import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.metadata.dao.DataCollectionDao;
-import com.latticeengines.metadata.dao.DataCollectionPropertyDao;
 import com.latticeengines.metadata.dao.DataCollectionTableDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -52,40 +51,11 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     private SegmentEntityMgr segmentEntityMgr;
 
     @Autowired
-    private DataCollectionPropertyDao dataCollectionPropertyDao;
+    private DataFeedEntityMgr dataFeedEntityMgr;
 
     @Override
     public DataCollectionDao getDao() {
         return dataCollectionDao;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    @Override
-    public DataCollection createDataCollection(DataCollection dataCollection) {
-        if (StringUtils.isBlank(dataCollection.getName())) {
-            dataCollection.setName(NamingUtils.timestamp("DataCollection"));
-        }
-        if (getDataCollection(dataCollection.getName()) != null) {
-            throw new IllegalStateException("Data collection " + dataCollection.getName() + " already exist.");
-        }
-        if (dataCollection.getType() == null) {
-            dataCollection.setType(DataCollectionType.Segmentation);
-        }
-        dataCollection.setTenant(MultiTenantContext.getTenant());
-        if (StringUtils.isBlank(dataCollection.getName())) {
-            dataCollection.setName(NamingUtils.timestamp("DataCollection"));
-        }
-        dataCollectionDao.create(dataCollection);
-        for (DataCollectionProperty dataCollectionProperty : dataCollection.getProperties()) {
-            dataCollectionProperty.setOwner(dataCollection);
-            dataCollectionPropertyDao.create(dataCollectionProperty);
-        }
-        if (segmentEntityMgr.findMasterSegment(dataCollection.getName()) == null) {
-            // create master segment
-            MetadataSegment segment = masterSegment(dataCollection);
-            segmentEntityMgr.createOrUpdate(segment);
-        }
-        return getDataCollection(dataCollection.getName());
     }
 
     private MetadataSegment masterSegment(DataCollection dataCollection) {
@@ -101,19 +71,19 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return segment;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private DataFeed defaultFeed(DataCollection dataCollection) {
+        DataFeed dataFeed = new DataFeed();
+        dataFeed.setName(NamingUtils.timestamp("DF"));
+        dataFeed.setStatus(DataFeed.Status.Initing);
+        dataFeed.setTenant(MultiTenantContext.getTenant());
+        dataFeed.setDataCollection(dataCollection);
+        return dataFeed;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection getDataCollection(String name) {
-        DataCollection dataCollection;
-        if (StringUtils.isBlank(name)) {
-            dataCollection = getDefaultCollection();
-        } else {
-            dataCollection = dataCollectionDao.findByField("name", name);
-        }
-        if (dataCollection != null) {
-            HibernateUtils.inflateDetails(dataCollection.getProperties());
-        }
-        return dataCollection;
+        return dataCollectionDao.findByField("name", name);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -130,7 +100,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     @Override
     public List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole) {
-        collectionName = StringUtils.isBlank(collectionName) ? getDefaultCollectionName() : collectionName;
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole);
         if (tableNames == null) {
             return Collections.emptyList();
@@ -144,8 +113,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role) {
         Table table = tableEntityMgr.findByName(tableName);
         if (table != null) {
-            DataCollection collection = StringUtils.isBlank(collectionName) ? getDefaultCollection()
-                    : getDataCollection(collectionName);
+            DataCollection collection = getDataCollection(collectionName);
             DataCollectionTable dataCollectionTable = dataCollectionTableDao.findByNames(collectionName, tableName);
             if (dataCollectionTable == null) {
                 dataCollectionTable = new DataCollectionTable();
@@ -163,7 +131,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void removeTableFromCollection(String collectionName, String tableName) {
-        collectionName = StringUtils.isBlank(collectionName) ? getDefaultCollectionName() : collectionName;
         DataCollectionTable dataCollectionTable = dataCollectionTableDao.findByNames(collectionName, tableName);
         if (dataCollectionTable != null) {
             dataCollectionTableDao.delete(dataCollectionTable);
@@ -173,8 +140,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void upsertStatsForMasterSegment(String collectionName, StatisticsContainer statisticsContainer) {
-        DataCollection dataCollection = StringUtils.isBlank(collectionName) ? getDefaultCollection()
-                : getDataCollection(collectionName);
+        DataCollection dataCollection = getDataCollection(collectionName);
         if (dataCollection == null) {
             throw new IllegalArgumentException("Cannot find data collection named " + collectionName);
         }
@@ -192,11 +158,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public String getDefaultCollectionName() {
-        return getDefaultCollection().getName();
-    }
-
-    private DataCollection getDefaultCollection() {
+    @Override
+    public DataCollection getOrCreateDefaultCollection() {
         List<DataCollection> collections = dataCollectionDao.findAll();
         if (collections == null || collections.isEmpty()) {
             return createDefaultCollection();
@@ -208,15 +171,47 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
                 + "Cannot determine which one is the default.");
     }
 
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public DataCollection getDefaultCollectionReadOnly() {
+        List<DataCollection> collections = dataCollectionDao.findAll();
+        if (collections == null || collections.isEmpty()) {
+            throw new RuntimeException("Default collection has not been created yet.");
+        }
+        if (collections.size() == 1) {
+            return collections.get(0);
+        }
+        throw new RuntimeException("There are " + collections.size() + " data collections in current tenant. "
+                + "Cannot determine which one is the default.");
+    }
+
     private DataCollection createDefaultCollection() {
         DataCollection dataCollection = new DataCollection();
-        dataCollection.setType(DataCollectionType.Segmentation);
+        return createDataCollection(dataCollection);
+    }
+
+    private DataCollection createDataCollection(DataCollection dataCollection) {
+        if (StringUtils.isBlank(dataCollection.getName())) {
+            dataCollection.setName(NamingUtils.timestamp("DC"));
+        }
+        if (getDataCollection(dataCollection.getName()) != null) {
+            throw new IllegalStateException("Data collection " + dataCollection.getName() + " already exist.");
+        }
+        if (dataCollection.getType() == null) {
+            dataCollection.setType(DataCollectionType.Segmentation);
+        }
         dataCollection.setTenant(MultiTenantContext.getTenant());
-        dataCollection.setName(NamingUtils.timestamp("DataCollection"));
         dataCollectionDao.create(dataCollection);
-        MetadataSegment segment = masterSegment(dataCollection);
-        segmentEntityMgr.createOrUpdate(segment);
-        return dataCollection;
+        if (segmentEntityMgr.findMasterSegment(dataCollection.getName()) == null) {
+            // create master segment
+            MetadataSegment segment = masterSegment(dataCollection);
+            segmentEntityMgr.createOrUpdate(segment);
+        }
+        // create default feed
+        DataFeed dataFeed = defaultFeed(dataCollection);
+        dataFeedEntityMgr.createOrUpdate(dataFeed);
+        return getDataCollection(dataCollection.getName());
     }
 
 }

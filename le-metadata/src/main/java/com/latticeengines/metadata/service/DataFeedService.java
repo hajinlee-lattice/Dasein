@@ -13,6 +13,8 @@ public interface DataFeedService {
 
     DataFeed createDataFeed(String customerSpace, String collectionName, DataFeed datafeed);
 
+    DataFeed getOrCreateDataFeed(String customerSpace);
+
     void updateDataFeed(String customerSpace, String datafeedName, String status);
 
     DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);

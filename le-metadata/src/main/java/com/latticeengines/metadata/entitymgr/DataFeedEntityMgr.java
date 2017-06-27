@@ -18,6 +18,7 @@ public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
 
     DataFeed findByNameInflated(String datafeedName);
 
-    DataFeedExecution retryLatestExecution(String datafeedName);
+    DataFeed findDefaultFeed();
 
+    DataFeedExecution retryLatestExecution(String datafeedName);
 }

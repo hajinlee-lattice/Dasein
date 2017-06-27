@@ -1,7 +1,5 @@
 package com.latticeengines.pls.controller.datacollection;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,8 +33,7 @@ public class DataFeedTaskController {
                                      @RequestParam (value = "feedtype") String feedtype,
                                      @RequestParam (value = "entity") String entity,
                                      @RequestParam (value = "datafeedname") String datafeedName,
-                                     @RequestBody String metadata,
-                                     HttpServletRequest request) {
+                                     @RequestBody String metadata) {
         return JsonUtils.serialize(ImmutableMap.of("task_id",
                 dataFeedTaskManagerService.createDataFeedTask(feedtype, entity, source, datafeedName, metadata)));
     }

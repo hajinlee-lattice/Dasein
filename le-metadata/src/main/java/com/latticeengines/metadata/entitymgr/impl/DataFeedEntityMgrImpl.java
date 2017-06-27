@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,12 +55,16 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(DataFeed datafeed) {
-        String dataCollectionName = datafeed.getDataCollection().getName();
-        datafeed.setTenant(MultiTenantContext.getTenant());
-        DataCollection dataCollection = dataCollectionEntityMgr.getDataCollection(dataCollectionName);
-        if (dataCollection == null) {
-            throw new IllegalStateException("Data collection " + dataCollectionName + " does not exist");
+        DataCollection dataCollection;
+        if (datafeed.getDataCollection() == null || StringUtils.isBlank(datafeed.getDataCollection().getName())) {
+            dataCollection = dataCollectionEntityMgr.getOrCreateDefaultCollection();
+        } else {
+            dataCollection = dataCollectionEntityMgr.getDataCollection(datafeed.getDataCollection().getName());
         }
+        if (dataCollection == null) {
+            throw new IllegalStateException("Cannot find the data collection that supposed to own the data feed.");
+        }
+        datafeed.setTenant(MultiTenantContext.getTenant());
         datafeed.setDataCollection(dataCollection);
         datafeed.setStatus(Status.Initing);
         super.create(datafeed);
@@ -75,6 +80,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findByName(String datafeedName) {
+        datafeedName = StringUtils.isBlank(datafeedName) ? findDefaultFeed().getName() : datafeedName;
         return findByField("name", datafeedName);
     }
 
@@ -171,5 +177,13 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedDao.update(datafeed);
         return execution;
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public DataFeed findDefaultFeed() {
+        DataCollection collection = dataCollectionEntityMgr.getDefaultCollectionReadOnly();
+        return datafeedDao.findDefaultFeed(collection.getName());
+    }
+
 
 }

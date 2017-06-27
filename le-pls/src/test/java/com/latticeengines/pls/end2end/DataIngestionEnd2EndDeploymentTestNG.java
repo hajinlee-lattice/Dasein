@@ -38,9 +38,6 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
-import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -54,16 +51,12 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.proxy.TestDataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final Log log = LogFactory.getLog(DataIngestionEnd2EndDeploymentTestNG.class);
-
-    private static final String DATA_COLLECTION_NAME = "DATA_COLLECTION_NAME";
-
-    private static final String DATA_FEED_NAME = "DATA_FEED_NAME";
 
     private static final String DL_TENANT_NAME = "ManualELQ_2016_1215_1051";
 
@@ -77,13 +70,13 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     private WorkflowProxy workflowProxy;
 
     @Autowired
-    private MetadataProxy metadataProxy;
-
-    @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
     @Autowired
-    private TestDataFeedProxy dataFeedProxy;
+    private DataFeedProxy dataFeedProxy;
+
+    @Autowired
+    private TestDataFeedProxy testDataFeedProxy;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -105,7 +98,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Tenant retrieved = testBed.getMainTestTenant();
         Assert.assertEquals(retrieved.getId(), CustomerSpace.parse(DL_TENANT_NAME).toString());
 
-        attachProtectedProxy(dataFeedProxy);
+        attachProtectedProxy(testDataFeedProxy);
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(firstTenant));
 
         log.info("Test environment setup finished.");
@@ -125,21 +118,21 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
             long endMillis = System.currentTimeMillis();
             checkExtractFolderExist(startMillis, endMillis);
         }
-        metadataProxy.updateDataFeedStatus(firstTenant.getId(), DATA_FEED_NAME, Status.InitialLoaded.getName());
+        dataFeedProxy.updateDataFeedStatus(firstTenant.getId(), Status.InitialLoaded.getName());
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importData")
     public void initialConsolidate() {
         log.info("Start consolidating data ...");
-        ApplicationId appId = dataFeedProxy.consolidate(DATA_FEED_NAME);
+        ApplicationId appId = testDataFeedProxy.consolidate();
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "initialConsolidate")
     public void firstAssemble() {
-        log.info("Start assembling data collection ...");
-        ApplicationId appId = dataFeedProxy.assemble(DATA_FEED_NAME);
+        log.info("Start profiling data collection ...");
+        ApplicationId appId = testDataFeedProxy.profile();
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
@@ -147,7 +140,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "firstAssemble")
     public void verifyFirstImport() throws IOException {
         String customerSpace = CustomerSpace.parse(firstTenant.getId()).toString();
-        StatisticsContainer statisticsContainer = dataCollectionProxy.getStatsInDefaultColellction(customerSpace);
+        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(customerSpace);
         Assert.assertNotNull(statisticsContainer);
         // save stats to a local json to help create verifications
         File statsJson = new File("stats.json");
@@ -162,15 +155,15 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importSecondData")
     public void secondConsolidate() {
         log.info("Start second consolidating ...");
-        ApplicationId appId = dataFeedProxy.consolidate(DATA_FEED_NAME);
+        ApplicationId appId = testDataFeedProxy.consolidate();
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondConsolidate")
     public void secondAssemble() {
-        log.info("Start second assembling ...");
-        ApplicationId appId = dataFeedProxy.assemble(DATA_FEED_NAME);
+        log.info("Start second profiling ...");
+        ApplicationId appId = testDataFeedProxy.profile();
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
@@ -188,11 +181,9 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     private void mockAvroData() throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(DL_TENANT_NAME);
         URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/pls/end2end/cdl/Extract_Accounts_0.avro");
-        Table importTemplate = null;
-
-        // DataFeedTask dataFeedTask = new DataFeedTask();
-        DataFeedTask dataFeedTask = metadataProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
-                "Account", DATA_FEED_NAME);
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
+                "Account");
+        Table importTemplate;
         if (dataFeedTask == null) {
             Schema schema = AvroUtils.readSchemaFromLocalFile(dataUrl.getPath());
             importTemplate = MetadataConverter.getTable(schema, new ArrayList<>(), null, null, false);
@@ -208,8 +199,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
             dataFeedTask.setSourceConfig("Not specified");
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
-
-            metadataProxy.createDataFeedTask(customerSpace.toString(), DATA_FEED_NAME, dataFeedTask);
+            dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
         } else {
             importTemplate = dataFeedTask.getImportTemplate();
         }
@@ -225,11 +215,8 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
         Extract e = createExtract(hdfsUri, 1000L);
 
-        dataFeedTask = metadataProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", "Account",
-                DATA_FEED_NAME);
-
-        metadataProxy.registerExtract(customerSpace.toString(), dataFeedTask.getPid().toString(),
-                importTemplate.getName(), e);
+        dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", "Account");
+        dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getPid().toString(), importTemplate.getName(), e);
     }
 
     private Extract createExtract(String path, long processedRecords) {
@@ -318,27 +305,14 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void createDataFeed() {
-        DataCollection dataCollection = new DataCollection();
-        dataCollection.setName(DATA_COLLECTION_NAME);
-        dataCollection.setType(DataCollectionType.Segmentation);
-        dataCollectionProxy.createOrUpdateDataCollection(firstTenant.getId(), dataCollection);
-
-        DataCollection defaultCollectin = dataCollectionProxy.getDefaultDataCollection(firstTenant.getId());
-        Assert.assertEquals(defaultCollectin.getName(), DATA_COLLECTION_NAME);
-
-        DataFeed datafeed = new DataFeed();
-        datafeed.setName(DATA_FEED_NAME);
-
+        dataFeedProxy.getDataFeed(firstTenant.getId());
         Table importTable = new Table();
         importTable.setName("importTable");
         importTable.setDisplayName(importTable.getName());
         importTable.setTenant(firstTenant);
-
         Table dataTable = new Table();
         dataTable.setName("dataTable");
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(firstTenant);
-
-        dataCollectionProxy.addDataFeed(firstTenant.getId(), DATA_COLLECTION_NAME, datafeed);
     }
 }

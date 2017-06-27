@@ -13,7 +13,7 @@ import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 public class TestDataFeedProxy extends ProtectedRestApiProxy {
 
     public TestDataFeedProxy() {
-        super(PropertyUtils.getProperty("common.test.pls.url"), "pls/datacollection/datafeeds");
+        super(PropertyUtils.getProperty("common.test.pls.url"), "pls/datacollection/datafeed");
     }
 
     @Override
@@ -22,8 +22,8 @@ public class TestDataFeedProxy extends ProtectedRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId consolidate(String datafeedName) {
-        String url = constructUrl("/{datafeedName}/consolidate", datafeedName);
+    public ApplicationId consolidate() {
+        String url = constructUrl("/consolidate");
         ResponseDocument<String> responseDoc = post("kickoff consolidate", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
@@ -33,8 +33,8 @@ public class TestDataFeedProxy extends ProtectedRestApiProxy {
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId assemble(String datafeedName) {
-        String url = constructUrl("/{datafeedName}/assemble", datafeedName);
+    public ApplicationId profile() {
+        String url = constructUrl("/profile");
         ResponseDocument<String> responseDoc = post("kickoff finalize", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return null;

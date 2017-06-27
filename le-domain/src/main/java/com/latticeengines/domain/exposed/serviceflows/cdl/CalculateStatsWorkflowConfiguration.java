@@ -6,7 +6,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class CalculateStatsWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -25,12 +24,6 @@ public class CalculateStatsWorkflowConfiguration extends BaseCDLWorkflowConfigur
             calculateStatsConfiguration.setCustomerSpace(customerSpace);
             updateStatsObjectsConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
-            return this;
-        }
-
-        public Builder dataCollectionName(String dataCollectionName) {
-            calculateStatsConfiguration.setDataCollectionName(dataCollectionName);
-            updateStatsObjectsConfiguration.setDataCollectionName(dataCollectionName);
             return this;
         }
 

@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
+import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.DataFeedService;
 
 @Component("datafeedService")
@@ -23,6 +25,9 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Autowired
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
+
+    @Autowired
+    private DataCollectionService dataCollectionService;
 
     @Override
     public DataFeedExecution startExecution(String customerSpace, String datafeedName) {
@@ -43,6 +48,9 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     public DataFeed createDataFeed(String customerSpace, String collectionName, DataFeed datafeed) {
+        if (StringUtils.isBlank(collectionName)) {
+            collectionName = dataCollectionService.getOrCreateDefaultCollection(customerSpace).getName();
+        }
         DataFeed existing = datafeedEntityMgr.findByName(datafeed.getName());
         if (existing != null) {
             log.warn("There is already a data feed called " + datafeed.getName() + ". Delete it first.");
@@ -54,6 +62,13 @@ public class DataFeedServiceImpl implements DataFeedService {
         log.info("Creating a new datafeed named " + datafeed.getName() + " in collection " + collectionName);
         datafeedEntityMgr.create(datafeed);
         return datafeed;
+    }
+
+    @Override
+    public DataFeed getOrCreateDataFeed(String customerSpace) {
+        dataCollectionService.getOrCreateDefaultCollection(customerSpace);
+        DataFeed dataFeed = datafeedEntityMgr.findDefaultFeed();
+        return findDataFeedByName(customerSpace, dataFeed.getName());
     }
 
     @Override
@@ -113,6 +128,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     public DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName) {
-        return datafeedEntityMgr.retryLatestExecution(datafeedName);
+        DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+        return datafeedEntityMgr.retryLatestExecution(datafeed.getName());
     }
 }
