@@ -8,7 +8,6 @@ RUN rm -rf $CATALINA_HOME/webapps/ROOT \
 
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
-RUN yum update -y
 COPY context.xml $CATALINA_HOME/webapps/manager/META-INF/context.xml
 COPY context.xml $CATALINA_HOME/webapps/host-manager/META-INF/context.xml
 COPY server.xml $CATALINA_HOME/conf/server.xml
