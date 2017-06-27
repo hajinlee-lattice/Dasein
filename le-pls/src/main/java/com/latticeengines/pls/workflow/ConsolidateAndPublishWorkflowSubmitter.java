@@ -27,7 +27,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -41,9 +40,6 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -105,8 +101,8 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         if (execution.getWorkflowId() == null) {
             throw new RuntimeException("we can't retart consolidate workflow as the last workflow has fatal error!");
         }
-        execution = metadataProxy.retryLatestExecution(MultiTenantContext.getCustomerSpace().toString(), datafeedName);
-        log.info(String.format("restarted execution of %s with status: %s", datafeedName, execution.getStatus()));
+        execution = dataFeedProxy.retryLatestExecution(MultiTenantContext.getCustomerSpace().toString());
+        log.info(String.format("restarted execution of %s with status: %s", execution.getStatus()));
         return workflowJobService.restart(execution.getWorkflowId());
     }
 
