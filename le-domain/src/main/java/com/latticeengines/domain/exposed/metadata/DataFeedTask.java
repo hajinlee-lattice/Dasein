@@ -49,6 +49,10 @@ public class DataFeedTask implements HasPid, Serializable {
     @JoinColumn(name = "`FK_FEED_ID`", nullable = false)
     private DataFeed dataFeed;
 
+    @Column(name = "UNIQUE_ID", nullable = false)
+    @JsonProperty("unique_id")
+    private String uniqueId;
+
     @Column(name = "SOURCE", nullable = false)
     @JsonProperty("source")
     private String source;
@@ -117,6 +121,14 @@ public class DataFeedTask implements HasPid, Serializable {
 
     public void setDataFeed(DataFeed dataFeed) {
         this.dataFeed = dataFeed;
+    }
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
     }
 
     public String getSource() {

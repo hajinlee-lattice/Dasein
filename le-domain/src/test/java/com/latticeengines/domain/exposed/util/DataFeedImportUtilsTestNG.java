@@ -7,6 +7,7 @@ import java.util.Date;
 
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
@@ -32,6 +33,7 @@ public class DataFeedImportUtilsTestNG {
         task.setImportData(null);
         task.setStartTime(new Date());
         task.setLastImported(new Date());
+        task.setUniqueId(NamingUtils.uuid("DataFeedTask"));
 
         DataFeedImport dfImport = DataFeedImportUtils.createImportFromTask(task);
         assertEquals(dfImport.getEntity(), task.getEntity());

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
@@ -51,6 +52,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             return getIdentifierFromDataFeedTask(dataFeed.getName(), dataFeedTask);
         } else {
             dataFeedTask = new DataFeedTask();
+            dataFeedTask.setUniqueId(NamingUtils.uuid("DataFeedTask"));
             dataFeedTask.setImportTemplate(newMeta);
             dataFeedTask.setStatus(DataFeedTask.Status.Active);
             dataFeedTask.setEntity(entity);

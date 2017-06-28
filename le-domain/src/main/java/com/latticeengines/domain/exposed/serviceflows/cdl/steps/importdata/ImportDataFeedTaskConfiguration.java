@@ -6,29 +6,18 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceSte
 public class ImportDataFeedTaskConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("data_feed_task_id")
-    private Long dataFeedTaskId;
-
-//    @JsonProperty("staging_dir")
-//    private String stagingDir;
+    private String dataFeedTaskId;
 
     @JsonProperty("import_config")
     private String importConfig;
 
-    public Long getDataFeedTaskId() {
+    public String getDataFeedTaskId() {
         return dataFeedTaskId;
     }
 
-    public void setDataFeedTaskId(Long dataFeedTaskId) {
+    public void setDataFeedTaskId(String dataFeedTaskId) {
         this.dataFeedTaskId = dataFeedTaskId;
     }
-
-//    public String getStagingDir() {
-//        return stagingDir;
-//    }
-//
-//    public void setStagingDir(String stagingDir) {
-//        this.stagingDir = stagingDir;
-//    }
 
     public String getImportConfig() {
         return importConfig;

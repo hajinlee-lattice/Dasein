@@ -237,6 +237,17 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public DataFeedTask getDataFeedTask(String uniqueId) {
+        DataFeedTask dataFeedTask = datafeedTaskDao.findByField("UNIQUE_ID", uniqueId);
+        if (dataFeedTask != null) {
+            TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
+            TableEntityMgr.inflateTable(dataFeedTask.getImportData());
+        }
+        return dataFeedTask;
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByTaskId(Long taskId) {
         DataFeedTask dataFeedTask = datafeedTaskDao.findByField("PID", taskId);

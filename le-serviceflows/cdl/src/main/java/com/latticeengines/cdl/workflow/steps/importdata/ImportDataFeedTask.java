@@ -35,14 +35,13 @@ public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfi
     @Override
     public void execute() {
         log.info("Start import data feed task.");
-        Long taskId = configuration.getDataFeedTaskId();
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(configuration.getCustomerSpace().toString(), taskId
-                .toString());
-        importTable(taskId, dataFeedTask);
+        String taskUniqueId = configuration.getDataFeedTaskId();
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(configuration.getCustomerSpace().toString(), taskUniqueId);
+        importTable(taskUniqueId, dataFeedTask);
     }
 
-    private void importTable(Long taskId, DataFeedTask dataFeedTask) {
-        EaiJobConfiguration importConfig = setupConfiguration(taskId, dataFeedTask);
+    private void importTable(String taskUniqueId, DataFeedTask dataFeedTask) {
+        EaiJobConfiguration importConfig = setupConfiguration(taskUniqueId, dataFeedTask);
         AppSubmission submission = eaiProxy.submitEaiJob(importConfig);
         String applicationId = submission.getApplicationIds().get(0);
         dataFeedTask.setActiveJob(applicationId);
@@ -50,22 +49,21 @@ public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfi
         waitForAppId(applicationId);
     }
 
-    private ImportConfiguration setupConfiguration(Long taskId, DataFeedTask dataFeedTask) {
+    private ImportConfiguration setupConfiguration(String taskUniqueId, DataFeedTask dataFeedTask) {
         ImportConfiguration importConfig = new ImportConfiguration();
         if (dataFeedTask == null) {
-            throw new RuntimeException(String.format("Cannot find data feed task for id %s", taskId.toString()));
+            throw new RuntimeException(String.format("Cannot find data feed task for id %s", taskUniqueId));
         }
         String source = dataFeedTask.getSource();
         if (source.equals(SourceType.VISIDB.getName())) {
             importConfig.setCustomerSpace(configuration.getCustomerSpace());
             importConfig.setProperty(ImportProperty.IMPORT_CONFIG_STR, configuration.getImportConfig());
             List<String> identifiers = new ArrayList<>();
-            identifiers.add(taskId.toString());
+            identifiers.add(taskUniqueId);
             importConfig.setProperty(ImportProperty.COLLECTION_IDENTIFIERS, JsonUtils.serialize(identifiers));
 
             SourceImportConfiguration sourceImportConfig = new SourceImportConfiguration();
             sourceImportConfig.setSourceType(SourceType.VISIDB);
-            //sourceImportConfig.setTables(configuration.getTables());
             importConfig.addSourceConfiguration(sourceImportConfig);
 
         } else {

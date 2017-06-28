@@ -11,7 +11,9 @@ public interface DataFeedTaskService {
 
     DataFeedTask getDataFeedTask(String customerSpace, Long taskId);
 
+    DataFeedTask getDataFeedTask(String customerSpace, String uniqueId);
+
     void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
 
-    void registerExtract(String customerSpace, Long taskId, String tableName, Extract extract);
+    void registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract);
 }

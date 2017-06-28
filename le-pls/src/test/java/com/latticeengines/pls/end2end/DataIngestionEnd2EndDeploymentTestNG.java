@@ -33,6 +33,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -198,6 +199,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
             dataFeedTask.setSourceConfig("Not specified");
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
+            dataFeedTask.setUniqueId(NamingUtils.uuid("DataFeedTask"));
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
         } else {
             importTemplate = dataFeedTask.getImportTemplate();

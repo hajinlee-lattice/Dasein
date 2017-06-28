@@ -45,13 +45,18 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
+    public DataFeedTask getDataFeedTask(String customerSpace, String uniqueId) {
+        return dataFeedTaskEntityMgr.getDataFeedTask(uniqueId);
+    }
+
+    @Override
     public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
         dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask);
     }
 
     @Override
-    public void registerExtract(String customerSpace, Long taskId, String tableName, Extract extract) {
-        DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskId);
+    public void registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract) {
+        DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
         dataFeedTaskEntityMgr.registerExtract(dataFeedTask, tableName, extract);
     }
 }

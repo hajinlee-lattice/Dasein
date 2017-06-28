@@ -40,12 +40,14 @@ public class DataFeedTaskController {
     }
 
     @Deprecated
-    @RequestMapping(value = "/datafeedtask/import/{taskIdentifier:\\w+\\.\\w+\\.\\w+\\.\\w+}", method = RequestMethod.POST, headers =
+    @RequestMapping(value = "/datafeedtask/import/{taskIdentifier}", method = RequestMethod.POST, headers =
             "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
-    public String startImportJobDeprecated(@PathVariable String taskIdentifier, @RequestBody String metadata) {
+    public String startImportJobDeprecated(@PathVariable String taskIdentifier,
+                               @RequestParam (value = "source", required = false, defaultValue = "VisiDB") String source,
+                               @RequestBody String metadata) {
         return JsonUtils.serialize(ImmutableMap.of("application_id",
-                dataFeedTaskManagerService.submitImportJob(taskIdentifier, metadata)));
+                dataFeedTaskManagerService.submitImportJob(taskIdentifier, source, metadata)));
     }
 }

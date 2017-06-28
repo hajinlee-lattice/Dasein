@@ -36,6 +36,7 @@ public class DataFeedTaskResource {
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
     public void updateDataFeedTask(@PathVariable String customerSpace, @RequestBody DataFeedTask dataFeedTask) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask);
     }
 
@@ -54,7 +55,7 @@ public class DataFeedTaskResource {
     @ApiOperation(value = "Get data feed task")
     public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String taskId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataFeedTaskService.getDataFeedTask(customerSpace, Long.parseLong(taskId));
+        return dataFeedTaskService.getDataFeedTask(customerSpace, taskId);
     }
 
     @RequestMapping(value = "/registerextract/{taskId}/{tableName}", method = RequestMethod.POST,
@@ -65,7 +66,7 @@ public class DataFeedTaskResource {
                                 @PathVariable String tableName,
                                 @RequestBody Extract extract) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataFeedTaskService.registerExtract(customerSpace, Long.parseLong(taskId), tableName, extract);
+        dataFeedTaskService.registerExtract(customerSpace, taskId, tableName, extract);
     }
 
 }

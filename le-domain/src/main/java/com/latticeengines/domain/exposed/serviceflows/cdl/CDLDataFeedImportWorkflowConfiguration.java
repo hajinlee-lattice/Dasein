@@ -6,18 +6,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
-//    private String microServiceHostPort;
-
     public CDLDataFeedImportWorkflowConfiguration() {
     }
-
-//    public String getMicroServiceHostPort() {
-//        return microServiceHostPort;
-//    }
-//
-//    public void setMicroServiceHostPort(String microServiceHostPort) {
-//        this.microServiceHostPort = microServiceHostPort;
-//    }
 
     public static class Builder {
         private CDLDataFeedImportWorkflowConfiguration configuration = new
@@ -31,18 +21,13 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
-//        public Builder microServiceHostPort(String microServiceHostPort) {
-//            configuration.setMicroServiceHostPort(microServiceHostPort);
-//            return this;
-//        }
-
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             importDataFeedTaskConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
-        public Builder dataFeedTaskId(Long dataFeedTaskId) {
+        public Builder dataFeedTaskId(String dataFeedTaskId) {
             importDataFeedTaskConfiguration.setDataFeedTaskId(dataFeedTaskId);
             return this;
         }
@@ -51,11 +36,6 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
             importDataFeedTaskConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
-
-//        public Builder stagingDir(String stagingDir) {
-//            importDataFeedTaskConfiguration.setStagingDir(stagingDir);
-//            return this;
-//        }
 
         public Builder importConfig(String importConfig) {
             importDataFeedTaskConfiguration.setImportConfig(importConfig);

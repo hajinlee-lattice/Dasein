@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
@@ -94,6 +95,7 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         task.setImportData(dataTable);
         task.setStartTime(new Date());
         task.setLastImported(new Date());
+        task.setUniqueId(NamingUtils.uuid("DataFeedTask"));
         datafeed.addTask(task);
 
         datafeedEntityMgr.create(datafeed);

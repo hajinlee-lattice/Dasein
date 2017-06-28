@@ -23,7 +23,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         return new CDLDataFeedImportWorkflowConfiguration.Builder()
                 .customer(customerSpace)
                 .microServiceHostPort(microserviceHostPort)
-                .dataFeedTaskId(dataFeedTask.getPid())
+                .dataFeedTaskId(dataFeedTask.getUniqueId())
                 .importConfig(connectorConfig)
                 .build();
     }
