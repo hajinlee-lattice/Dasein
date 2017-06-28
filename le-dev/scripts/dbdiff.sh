@@ -14,6 +14,11 @@ elif [ "${ENV}" = "qa" ]; then
     PASSWORD="Lattice123"
 fi
 
+echo 'regenerate ddl'
+pushd $WSHOME/le-db &&
+mvn -DskipTests clean install &&
+popd
+
 echo 'using mysqldiff to find db diff ...'
 mysqldiff \
     --server1=root:${PASSWORD}@${AURORA_URL} \
@@ -24,4 +29,6 @@ mysqldiff \
     --difftype=sql \
     ${DB}:${DB} > ${ENV}_diff.sql
 
-python combine_sql.py -d ${ENV}_diff.sql -g ${WSHOME}/ddl_pls_multitenant_mysql5innodb.sql -o ${ENV}_update.sql
+python combine_sql.py -d ${ENV}_diff.sql -g ${WSHOME}/le-db/ddl_pls_multitenant_mysql5innodb.sql -o ${ENV}_upgrade.sql
+
+echo "upgrade script is generated at ${PWD}/${ENV}_upgrade.sql and ${PWD}/${ENV}_upgrade.sql.2"

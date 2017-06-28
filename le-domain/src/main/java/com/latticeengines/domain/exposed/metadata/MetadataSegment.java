@@ -63,7 +63,7 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
     private String displayName;
 
     @JsonProperty("description")
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", length = 1000)
     private String description;
 
     @JsonIgnore

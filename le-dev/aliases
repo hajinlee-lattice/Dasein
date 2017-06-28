@@ -139,6 +139,9 @@ alias dkpush='bash $WSHOME/le-dev/scripts/docker_push.sh'
 alias conda-on='source $ANACONDA_HOME/bin/activate lattice'
 alias conda-off='source $ANACONDA_HOME/bin/deactivate'
 
+alias dbdiff-qa='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh qa && popd'
+alias dbdiff-prod='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh prod && popd'
+
 alias dk-setupenv='source $WSHOME/le-dev/scripts/setup_dkenv.sh'
 alias dk-up='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml up -d --remove-orphan'
 alias dk-down='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml down'

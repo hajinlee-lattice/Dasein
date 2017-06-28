@@ -4,6 +4,8 @@ TABLE_TO_DELETE = []
 TABLE_TO_CREATE = []
 ALTER_TABLE_LINE = None
 ALTER_TABLE_DROP_LINES = []
+DROP_FKS = []
+CREATE_FKS = []
 
 LINES_TO_FILE = []
 
@@ -21,9 +23,7 @@ def main():
         ofile.write('USE `PLS_MultiTenant`;\n')
 
     process_diff(diff_file)
-    with open(out_file, 'a') as ofile:
-        for line in LINES_TO_FILE:
-            ofile.write(line)
+    cleanup_script(out_file)
 
     LINES_TO_FILE=[]
     process_ddl(ddl_file)
@@ -69,6 +69,8 @@ def process_diff_line(line, flags):
 def process_alter_table_line(line, flags):
     global ALTER_TABLE_LINE
     global ALTER_TABLE_DROP_LINES
+    global DROP_FKS
+    global CREATE_FKS
     if 'ALTER TABLE' in line:
         # first line
         ALTER_TABLE_LINE = line
@@ -76,6 +78,10 @@ def process_alter_table_line(line, flags):
 
     if flags['alter_table_drop_events']:
         ALTER_TABLE_DROP_LINES.append(line)
+        key = find_fk_to_be_drop(line)
+        if key is not None:
+            print "Find a FK to be dropped: " + line.replace('\n', '').replace('`pls_multitenant`.', '`PLS_MultiTenant`.')
+            DROP_FKS.append(key)
         return
     else:
         if ALTER_TABLE_LINE is not None:
@@ -90,8 +96,23 @@ def process_alter_table_line(line, flags):
                 ALTER_TABLE_DROP_LINES = []
             ALTER_TABLE_LINE = None
         LINES_TO_FILE.append(line)
+        key = find_fk_to_be_created(line)
+        if key is not None:
+            print "Find a FK to be creataed: " + line.replace('\n', '').replace('`pls_multitenant`.', '`PLS_MultiTenant`.')
+            CREATE_FKS.append(key)
         if line.strip() == '':
             flags['alter_table_block'] = False
+
+def find_fk_to_be_drop(line):
+    if 'DROP FOREIGN KEY' in line:
+        key = line.split('DROP FOREIGN KEY')[1].strip()
+        key = key.replace(";", "").replace(",", "")
+        return key
+
+def find_fk_to_be_created(line):
+    if 'ADD CONSTRAINT' in line and 'FOREIGN KEY' in line:
+        key = line.split('ADD CONSTRAINT')[1].split('FOREIGN KEY')[0].strip()
+        return key
 
 def process_missing_table_line(line, missing_on_remote):
     global TABLE_TO_DELETE
@@ -112,6 +133,50 @@ def process_missing_table_line(line, missing_on_remote):
             print "found a table can be deleted from remote server: " + table
             TABLE_TO_DELETE.append(table)
         return True
+
+def cleanup_script(outfile):
+    global LINES_TO_FILE
+
+    lines = []
+    for line in LINES_TO_FILE:
+        if len(line.replace(',', '').strip()) == 0:
+            # skip empty line
+            continue
+        key = find_fk_to_be_drop(line)
+        if key is None:
+            key = find_fk_to_be_created(line)
+        if key is not None:
+            # this line is about create or drop foreign key
+            if key in DROP_FKS and key in CREATE_FKS:
+                # skip drop and create the same fk
+                continue
+        lines.append(line)
+
+    LINES_TO_FILE = []
+    in_alter_table_block = False
+    alter_table_block = []
+    for line in lines:
+        if 'ALTER TABLE' in line:
+            # end of previous block
+            if len(alter_table_block) > 1:
+                for l in alter_table_block:
+                    LINES_TO_FILE.append(l)
+            # new alter block
+            alter_table_block = [ line ]
+            in_alter_table_block = True
+        elif in_alter_table_block:
+            alter_table_block.append(line)
+        elif len(line.strip()):
+            # end of a block
+            if len(alter_table_block) > 1:
+                for l in alter_table_block:
+                    LINES_TO_FILE.append(l)
+            in_alter_table_block = False
+            alter_table_block = []
+
+    with open(outfile, 'a') as ofile:
+        for line in LINES_TO_FILE:
+            ofile.write(line)
 
 
 def process_ddl(ddl_file):
