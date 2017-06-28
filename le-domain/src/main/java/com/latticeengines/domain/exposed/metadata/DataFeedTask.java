@@ -23,6 +23,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -49,8 +50,9 @@ public class DataFeedTask implements HasPid, Serializable {
     @JoinColumn(name = "`FK_FEED_ID`", nullable = false)
     private DataFeed dataFeed;
 
-    @Column(name = "UNIQUE_ID", nullable = false)
+    @Column(name = "UNIQUE_ID", unique = true, nullable = false)
     @JsonProperty("unique_id")
+    @Index(name = "IX_UNIQUE_ID")
     private String uniqueId;
 
     @Column(name = "SOURCE", nullable = false)
