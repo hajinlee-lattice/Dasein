@@ -15,9 +15,13 @@
                 background-color: white;
                 border-radius: 4px;
                 border: solid 1px #d0d0d0;
+                .dashboard-section-header,
+                .dashboard-section-content,
+                .dashboard-section-footer {
+                    padding: 10px 30px;
+                }
                 .dashboard-section-header {
                     @include flex-item(0 1 auto);
-                    padding: 10px 30px;
                     border-bottom: 1px solid #d0d0d0;
                     h2 {
                         background-repeat: no-repeat;
@@ -28,11 +32,49 @@
                 }
                 .dashboard-section-content {
                     @include flex-item(1 1 auto);
-                    padding: 30px;
+                    .dashboard-section-content-subsection {
+                        position: relative;
+                        border-radius: 4px;
+                        border: solid 1px #d0d0d0;
+                        padding: 10px;
+                        padding-left: 60px;
+                        margin: 10px 0;
+                        background-repeat: no-repeat;
+                        background-position: 20px;
+                        h3 {
+                            font-weight: normal;
+                        }
+                        h4 {
+                            font-weight: bold;
+                        }
+                        h3, h4 {
+                            font-size: 15px;
+                            margin-right: 85px;
+                            overflow: hidden;
+                        }
+                        .controls {
+                            position: absolute;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            right: 10px;
+                            li {
+                                display: inline-block;
+                                padding: 0 5px;
+                            }
+                        }
+                        &.rating_ {
+                            background-image: url(/assets/images/ico-ratings.png);
+                        }
+                        &.segment {
+                            background-image: url(/assets/images/ico-segments.png);
+                        }
+                        &.talking-points {
+                            background-image: url('/assets/images/ico-insights.png');
+                        }
+                    }
                 }
                 .dashboard-section-footer {
                     @include flex-item(0 1 auto);
-                    padding: 10px 30px;
                     border-top: 1px solid #d0d0d0;
                     text-align: right;
                 }
@@ -46,6 +88,13 @@
                     h2 {
                         padding: 0;
                         background: none;
+                    }
+                }
+            }
+            &.talking-points {
+                .dashboard-section-header {
+                    h2 {
+                        background-image: url('/assets/images/ico-insights.png');
                     }
                 }
             }

@@ -80,14 +80,13 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 })
 .service('CgTalkingPointService', function($q, $http, $state) {
     this.host = '/pls'; //default
-    
+
     this.getTalkingPoints = function(play_name){
         var deferred = $q.defer();
         $http({
             method: 'GET',
             url: this.host + '/dantetalkingpoints/play/' + play_name
         }).then(function(response){
-            console.log('CgTalkingPointService.getTalkingPoints',response.data);
             deferred.resolve(response.data);
         });
         return deferred.promise;

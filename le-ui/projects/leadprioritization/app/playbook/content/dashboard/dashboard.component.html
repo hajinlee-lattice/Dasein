@@ -8,8 +8,28 @@
                     Created by someone on <time>{{vm.play.timestamp-1000|date:'M/d/yyyy'}}</time>
                 </div>
                 <div class="dashboard-section-content">
-                    <a ui-sref="home.playbook.wizard.settings({play_name: vm.play.name})">temp edit link</a>
-                    <pre>{{vm.play|json}}</pre>
+                    <p>
+                        {{vm.play.description}}
+                    </p>
+                    <div class="dashboard-section-content-subsection rating_">
+                        <h3>Rating</h3>
+                        <h4>Rating name 1</h4>
+                    </div>
+                    <div class="dashboard-section-content-subsection segment">
+                        <h3>Segment</h3>
+                        <h4>{{vm.play.segment}}</h4>
+                        <ul class="controls">
+                            <li>Change</li>
+                            <li>X</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <a ui-sref="home.playbook.wizard.settings({play_name: vm.play.name})">temp edit link</a><br />
+                        <a href="#" ng-click="showPlayData = !showPlayData">debugging: show play data</a>
+                        <div ng-show="showPlayData">
+                            <pre>{{vm.play|json}}</pre>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -20,7 +40,19 @@
                     <h2>Talking points:</h2>
                 </div>
                 <div class="dashboard-section-content">
-                    <pre>{{vm.talkingPoints|json}}</pre>
+                    <div class="dashboard-section-content-subsection talking-points">
+                        <h4>{{vm.talkingPoints.length}} talking points have been created</h4>
+                        <ul class="controls">
+                            <li>Edit</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <a href="#" ng-click="showTalkingPointsData = !showTalkingPointsData">debugging: show talking points data</a>
+                        <div ng-show="showTalkingPointsData">
+                            <pre>{{vm.talkingPoints|json}}</pre>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

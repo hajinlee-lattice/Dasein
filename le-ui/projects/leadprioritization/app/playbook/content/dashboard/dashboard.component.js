@@ -17,7 +17,7 @@ angular.module('lp.playbook.dashboard', [
     $q.when($stateParams.play_name, function() {
         if(play_name) {
             CgTalkingPointStore.getTalkingPoints(play_name).then(function(results){
-                console.log('got talking points');
+                console.log('got talking points', results);
             });
         }
 
