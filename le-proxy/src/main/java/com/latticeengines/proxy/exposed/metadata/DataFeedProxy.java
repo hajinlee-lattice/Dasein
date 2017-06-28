@@ -85,7 +85,7 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
 
     public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks", shortenCustomerSpace(customerSpace));
-        post("updateDataFeedTask", url, dataFeedTask, Void.class);
+        put("updateDataFeedTask", url, dataFeedTask);
     }
 
     public void registerExtract(String customerSpace, String taskId, String tableName, Extract extract) {
