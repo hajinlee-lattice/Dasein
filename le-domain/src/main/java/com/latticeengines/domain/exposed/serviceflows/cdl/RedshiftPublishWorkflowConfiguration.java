@@ -1,8 +1,11 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 
 public class RedshiftPublishWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -32,8 +35,8 @@ public class RedshiftPublishWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
-        public Builder sourceTable(Table sourceTable) {
-            exportDataToRedshiftConfiguration.setSourceTable(sourceTable);
+        public Builder sourceTables(Map<BusinessEntity, Table> sourceTables) {
+            exportDataToRedshiftConfiguration.setSourceTables(sourceTables);
             return this;
         }
 

@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
@@ -94,7 +95,9 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         putStringValueInContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.FALSE.toString());
         upsertTables(configuration.getCustomerSpace().toString(), profileTableName, sortedTableName);
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
-        putObjectInContext(TABLE_GOING_TO_REDSHIFT, sortedTable);
+        Map<BusinessEntity, Table> entityTableMap = new HashMap<>();
+        entityTableMap.put(BusinessEntity.Account, sortedTable);
+        putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
     }
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {
@@ -223,7 +226,8 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         conf.setPartitions(500);
         conf.setSplittingThreads(maxSplitThreads);
         conf.setCompressResult(false);
-        conf.setSortingField(masterTableSortKeys.get(0)); //TODO: only support single sort key now
+        conf.setSortingField(masterTableSortKeys.get(0)); // TODO: only support
+                                                          // single sort key now
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
@@ -271,8 +275,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         if (bktTable == null) {
             throw new RuntimeException("Failed to find bucketed table in customer " + customerSpace);
         }
-        dataCollectionProxy.upsertTable(customerSpace, sortedTableName,
-                TableRoleInCollection.BucketedAccount);
+        dataCollectionProxy.upsertTable(customerSpace, sortedTableName, TableRoleInCollection.BucketedAccount);
         bktTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.BucketedAccount);
         if (bktTable == null) {
             throw new IllegalStateException("Cannot find the upserted bucketed table in data collection.");

@@ -7,7 +7,6 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +15,10 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.ConsolidateDataBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -33,42 +31,18 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
-import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
-@Component("consolidateData")
-public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataConfiguration> {
+@Component("consolidateAccountData")
+public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ConsolidateData.class);
+    private static final Log log = LogFactory.getLog(ConsolidateAccountData.class);
 
-    private String inputMasterTableName;
-    private String profileTableName;
-
-    private static final String outputMasterTablePrefix = "Account";
-    private static final String consolidatedTablePrefix = "ConsolidatedTable";
-    private static final String accountId = TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name();
-    private static final List<String> masterTableSortKeys = TableRoleInCollection.ConsolidatedAccount
-            .getForeignKeysAsStringList();
-
-    private CustomerSpace customerSpace = null;
-
-    @Autowired
-    protected MetadataProxy metadataProxy;
-
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
-
-    private List<String> inputTableNames = new ArrayList<>();
     private String srcIdField;
-    Map<MatchKey, List<String>> keyMap = null;
-    Boolean isActive = false;
+    private Map<MatchKey, List<String>> keyMap = null;
 
     private int mergeStep;
     private int matchStep;
@@ -78,73 +52,13 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
     private int sortStep;
 
     @Override
-    protected TransformationWorkflowConfiguration executePreTransformation() {
-        initializeConfiguration();
-        return generateWorkflowConf();
-    }
-
-    @Override
-    protected void onPostTransformationCompleted() {
-        Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(outputMasterTablePrefix, pipelineVersion));
-        dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(),
-                TableRoleInCollection.ConsolidatedAccount);
-        if (isBucketing()) {
-            Table diffTable = metadataProxy.getTable(customerSpace.toString(),
-                    TableUtils.getFullTableName(consolidatedTablePrefix, pipelineVersion));
-            if (diffTable == null) {
-                throw new RuntimeException("Diff table has not been created.");
-            }
-            putObjectInContext(TABLE_GOING_TO_REDSHIFT, diffTable);
-        }
-        putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);
-    }
-
-    private void initializeConfiguration() {
-        customerSpace = configuration.getCustomerSpace();
-        List<Table> inputTables = getListObjectFromContext(CONSOLIDATE_INPUT_TABLES, Table.class);
-        if (inputTables == null || inputTables.isEmpty()) {
-            throw new RuntimeException("There is no input tables to consolidate.");
-        }
-        inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
-                : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
-                        : t.getLastModifiedKey().getLastModifiedTimestamp())
-                .reversed());
-        for (Table table : inputTables) {
-            inputTableNames.add(table.getName());
-        }
-
-        Table masterTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedAccount);
-        if (masterTable == null || masterTable.getExtracts().isEmpty()) {
-            log.info("There has been no master table for this data collection. Creating a new one");
-        } else {
-            inputMasterTableName = masterTable.getName();
-        }
-        log.info("Set inputMasterTableName=" + inputMasterTableName);
-
+    protected void initializeConfiguration() {
+        super.initializeConfiguration();
         srcIdField = configuration.getIdField();
         keyMap = configuration.getMatchKeyMap();
-
-        isActive = getObjectFromContext(IS_ACTIVE, Boolean.class);
-        if (isBucketing()) {
-            Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                    TableRoleInCollection.Profile);
-            profileTableName = profileTable.getName();
-            log.info("Set profileTableName=" + profileTableName);
-        }
     }
 
-    private TransformationWorkflowConfiguration generateWorkflowConf() {
-        PipelineTransformationRequest request = getConcolidateReqest();
-        return transformationProxy.getWorkflowConf(request, configuration.getPodId());
-    }
-
-    private boolean isBucketing() {
-        return Boolean.TRUE.equals(isActive);
-    }
-
-    private PipelineTransformationRequest getConcolidateReqest() {
+    public PipelineTransformationRequest getConsolidateRequest() {
         try {
 
             PipelineTransformationRequest request = new PipelineTransformationRequest();
@@ -234,7 +148,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(outputMasterTablePrefix);
-        targetTable.setPrimaryKey(accountId);
+        targetTable.setPrimaryKey(primaryKey);
         step3.setTargetTable(targetTable);
         return step3;
     }
@@ -248,7 +162,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
             targetTable.setNamePrefix(consolidatedTablePrefix);
-            targetTable.setPrimaryKey(accountId);
+            targetTable.setPrimaryKey(primaryKey);
             step4.setTargetTable(targetTable);
         }
         return step4;
@@ -285,7 +199,7 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(consolidatedTablePrefix);
-//        targetTable.setPrimaryKey(accountId);
+        // targetTable.setPrimaryKey(accountId);
         step6.setTargetTable(targetTable);
         return step6;
     }
@@ -341,6 +255,16 @@ public class ConsolidateData extends BaseTransformWrapperStep<ConsolidateDataCon
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
         return keyMap;
+    }
+
+    @Override
+    public BusinessEntity getBusinessEntity() {
+        return BusinessEntity.Account;
+    }
+
+    @Override
+    public boolean isBucketing() {
+        return Boolean.TRUE.equals(isActive);
     }
 
 }

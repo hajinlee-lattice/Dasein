@@ -3,6 +3,7 @@ package com.latticeengines.workflowapi.flows;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
@@ -97,13 +99,14 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
                 .append(tableName).append("a.avro").toString();
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFilePath, dest);
         Table table = MetadataConverter.getTable(yarnConfiguration, dest);
-
+        Map<BusinessEntity, Table> sourceTables = new HashMap<>();
+        sourceTables.put(BusinessEntity.Account, table);
         HdfsToRedshiftConfiguration exportConfig = createExportBaseConfig();
         exportConfig.setCreateNew(true);
         exportConfig.setAppend(true);
         RedshiftPublishWorkflowConfiguration.Builder builder = new RedshiftPublishWorkflowConfiguration.Builder();
         builder.hdfsToRedshiftConfiguration(exportConfig);
-        builder.sourceTable(table);
+        builder.sourceTables(sourceTables);
         builder.customer(DEMO_CUSTOMERSPACE);
         builder.microServiceHostPort(microserviceHostPort);
         RedshiftPublishWorkflowConfiguration config = builder.build();
@@ -122,11 +125,13 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
                 .append(tableName).append("b.avro").toString();
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFilePath, dest);
         Table table = MetadataConverter.getTable(yarnConfiguration, dest);
+        Map<BusinessEntity, Table> sourceTables = new HashMap<>();
+        sourceTables.put(BusinessEntity.Account, table);
 
         HdfsToRedshiftConfiguration exportConfig = createExportBaseConfig();
         RedshiftPublishWorkflowConfiguration.Builder builder = new RedshiftPublishWorkflowConfiguration.Builder();
         builder.hdfsToRedshiftConfiguration(exportConfig);
-        builder.sourceTable(table);
+        builder.sourceTables(sourceTables);
         builder.customer(DEMO_CUSTOMERSPACE);
         builder.microServiceHostPort(microserviceHostPort);
         RedshiftPublishWorkflowConfiguration config = builder.build();

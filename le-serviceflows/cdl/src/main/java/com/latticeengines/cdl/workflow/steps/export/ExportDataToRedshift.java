@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
@@ -30,19 +33,22 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     @Autowired
     private MetadataProxy metadataProxy;
 
-    private Table sourceTable;
+    private Map<BusinessEntity, Table> entityTableMap;
     private boolean needToSplit;
 
     @Override
     public void execute() {
         log.info("Inside ExportData execute()");
-        sourceTable = getObjectFromContext(TABLE_GOING_TO_REDSHIFT, Table.class);
+        entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
         needToSplit = Boolean.valueOf(getStringValueFromContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT));
-        if (sourceTable == null) {
-            sourceTable = configuration.getSourceTable();
+        if (entityTableMap == null) {
+            entityTableMap = configuration.getSourceTables();
         }
-        renameTable();
-        exportData();
+        for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
+            Table sourceTable = entry.getValue();
+            renameTable(sourceTable);
+            exportData(sourceTable);
+        }
 
     }
 
@@ -50,19 +56,22 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     public void onExecutionCompleted() {
         boolean dropSourceTable = Boolean.TRUE.equals(configuration.getDropSourceTable());
         if (dropSourceTable) {
-            log.info("Drop source table " + sourceTable.getName());
-            metadataProxy.deleteTable(getConfiguration().getCustomerSpace().toString(), sourceTable.getName());
+            for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
+                Table sourceTable = entry.getValue();
+                log.info("Drop source table " + sourceTable.getName());
+                metadataProxy.deleteTable(getConfiguration().getCustomerSpace().toString(), sourceTable.getName());
+            }
         }
     }
 
-    private void exportData() {
-        EaiJobConfiguration exportConfig = setupExportConfig();
+    private void exportData(Table sourceTable) {
+        EaiJobConfiguration exportConfig = setupExportConfig(sourceTable);
         AppSubmission submission = eaiProxy.submitEaiJob(exportConfig);
         putStringValueInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0).toString());
         waitForAppId(submission.getApplicationIds().get(0).toString());
     }
 
-    private void renameTable() {
+    private void renameTable(Table sourceTable) {
         String goodName = AvroUtils.getAvroFriendlyString(sourceTable.getName());
         if (!goodName.equalsIgnoreCase(sourceTable.getName())) {
             log.info("Renaming table " + sourceTable.getName() + " to " + goodName);
@@ -71,7 +80,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         }
     }
 
-    private ExportConfiguration setupExportConfig() {
+    private ExportConfiguration setupExportConfig(Table sourceTable) {
         HdfsToRedshiftConfiguration exportConfig = configuration.getHdfsToRedshiftConfiguration();
         exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
         exportConfig.setExportTargetPath(sourceTable.getName());
