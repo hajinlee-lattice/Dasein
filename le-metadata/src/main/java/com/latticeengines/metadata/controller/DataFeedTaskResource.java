@@ -1,7 +1,5 @@
 package com.latticeengines.metadata.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.metadata.service.DataFeedTaskService;
@@ -19,45 +18,42 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "metadata", description = "REST resource for metadata data feed task")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/datafeedtask")
+@RequestMapping(value = "/customerspaces/{customerSpace}/datafeed/tasks")
 public class DataFeedTaskResource {
 
     @Autowired
     private DataFeedTaskService dataFeedTaskService;
 
-    @RequestMapping(value = "{dataFeedName}/create", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create data feed task")
-    public void createDataFeedTask(@PathVariable String customerSpace, @PathVariable String dataFeedName,
-                                   @RequestBody DataFeedTask dataFeedTask, HttpServletRequest request) {
-        dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedName, dataFeedTask);
+    public void createDataFeedTask(@PathVariable String customerSpace, @RequestBody DataFeedTask dataFeedTask) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedTask);
     }
 
-    @RequestMapping(value = "/update", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
-    public void updateDataFeedTask(@PathVariable String customerSpace, @RequestBody DataFeedTask dataFeedTask,
-                                   HttpServletRequest request) {
+    public void updateDataFeedTask(@PathVariable String customerSpace, @RequestBody DataFeedTask dataFeedTask) {
         dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask);
     }
 
-    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}/{dataFeedName}",
+    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}",
             method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
     public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
-                                        @PathVariable String dataFeedType, @PathVariable String entity,
-                                        @PathVariable String dataFeedName,
-                                        HttpServletRequest request) {
-        return dataFeedTaskService.getDataFeedTask(customerSpace, source, dataFeedType, entity, dataFeedName);
+                                        @PathVariable String dataFeedType, @PathVariable String entity) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getDataFeedTask(customerSpace, source, dataFeedType, entity);
     }
 
-    @RequestMapping(value = "/{taskId}", method = RequestMethod.GET, headers =
-            "Accept=application/json")
+    @RequestMapping(value = "/{taskId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
-    public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String taskId,
-                                        HttpServletRequest request) {
+    public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String taskId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getDataFeedTask(customerSpace, Long.parseLong(taskId));
     }
 
@@ -67,7 +63,8 @@ public class DataFeedTaskResource {
     @ApiOperation(value = "Update data feed task")
     public void registerExtract(@PathVariable String customerSpace, @PathVariable String taskId,
                                 @PathVariable String tableName,
-                                @RequestBody Extract extract, HttpServletRequest request) {
+                                @RequestBody Extract extract) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataFeedTaskService.registerExtract(customerSpace, Long.parseLong(taskId), tableName, extract);
     }
 

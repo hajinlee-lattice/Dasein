@@ -3,9 +3,7 @@ package com.latticeengines.domain.exposed.metadata;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -30,7 +28,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
@@ -210,48 +207,10 @@ public class DataFeedTask implements HasPid, Serializable {
         this.tables = tables;
     }
 
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
     public enum Status {
-        Initiating("initiating"), //
-        Active("active"), //
-        Updated("updated"), //
-        Deleting("deleting");
-
-        private final String name;
-        private static Map<String, Status> nameMap;
-
-        static {
-            nameMap = new HashMap<>();
-            for (Status status : Status.values()) {
-                nameMap.put(status.getName(), status);
-            }
-        }
-
-        Status(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public String toString() {
-            return this.name;
-        }
-
-        public static Status fromName(String name) {
-            if (name == null) {
-                return null;
-            }
-            if (nameMap.containsKey(name)) {
-                return nameMap.get(name);
-            } else {
-                throw new IllegalArgumentException("Cannot find a data feed status with name " + name);
-            }
-        }
+        Initiating, //
+        Active, //
+        Updated, //
+        Deleting
     }
 }

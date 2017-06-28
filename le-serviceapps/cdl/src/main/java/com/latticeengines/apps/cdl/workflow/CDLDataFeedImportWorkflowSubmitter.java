@@ -1,13 +1,13 @@
-package com.latticeengines.pls.workflow;
+package com.latticeengines.apps.cdl.workflow;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
+import com.latticeeingines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
 
-@Deprecated
 @Component
 public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 

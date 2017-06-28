@@ -8,7 +8,7 @@
     <description>LE CDL</description>
 
     <properties>
-        <component-name>cdl</component-name>
+        <component-name>cdl-microservice</component-name>
     </properties>
 
     <parent>

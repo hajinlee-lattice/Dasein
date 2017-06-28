@@ -3,7 +3,6 @@ package com.latticeengines.cdl.workflow.steps.importdata;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +16,9 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("importDataFeed")
@@ -30,13 +30,13 @@ public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfi
     private EaiProxy eaiProxy;
 
     @Autowired
-    private MetadataProxy metadataProxy;
+    private DataFeedProxy dataFeedProxy;
 
     @Override
     public void execute() {
         log.info("Start import data feed task.");
         Long taskId = configuration.getDataFeedTaskId();
-        DataFeedTask dataFeedTask = metadataProxy.getDataFeedTask(configuration.getCustomerSpace().toString(), taskId
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(configuration.getCustomerSpace().toString(), taskId
                 .toString());
         importTable(taskId, dataFeedTask);
     }
@@ -46,13 +46,11 @@ public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfi
         AppSubmission submission = eaiProxy.submitEaiJob(importConfig);
         String applicationId = submission.getApplicationIds().get(0);
         dataFeedTask.setActiveJob(applicationId);
-        metadataProxy.updateDataFeedTask(importConfig.getCustomerSpace().toString(), dataFeedTask);
+        dataFeedProxy.updateDataFeedTask(importConfig.getCustomerSpace().toString(), dataFeedTask);
         waitForAppId(applicationId);
     }
 
     private ImportConfiguration setupConfiguration(Long taskId, DataFeedTask dataFeedTask) {
-
-
         ImportConfiguration importConfig = new ImportConfiguration();
         if (dataFeedTask == null) {
             throw new RuntimeException(String.format("Cannot find data feed task for id %s", taskId.toString()));

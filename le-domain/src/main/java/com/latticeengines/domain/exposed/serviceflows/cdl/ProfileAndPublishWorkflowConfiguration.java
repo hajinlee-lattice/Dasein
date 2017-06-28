@@ -7,20 +7,20 @@ import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
 
-public class CalculateStatsWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
-    private CalculateStatsWorkflowConfiguration() {
+    private ProfileAndPublishWorkflowConfiguration() {
     }
 
     public static class Builder {
 
-        private CalculateStatsWorkflowConfiguration configuration = new CalculateStatsWorkflowConfiguration();
+        private ProfileAndPublishWorkflowConfiguration configuration = new ProfileAndPublishWorkflowConfiguration();
         private CalculateStatsStepConfiguration calculateStatsConfiguration = new CalculateStatsStepConfiguration();
         private UpdateStatsObjectsConfiguration updateStatsObjectsConfiguration = new UpdateStatsObjectsConfiguration();
         private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("calculateStatsWorkflow", customerSpace, "calculateStatsWorkflow");
+            configuration.setContainerConfiguration("profileAndPublishWorkflow", customerSpace, "profileAndPublishWorkflow");
             calculateStatsConfiguration.setCustomerSpace(customerSpace);
             updateStatsObjectsConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
@@ -42,7 +42,7 @@ public class CalculateStatsWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
-        public CalculateStatsWorkflowConfiguration build() {
+        public ProfileAndPublishWorkflowConfiguration build() {
             configuration.add(calculateStatsConfiguration);
             configuration.add(updateStatsObjectsConfiguration);
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());

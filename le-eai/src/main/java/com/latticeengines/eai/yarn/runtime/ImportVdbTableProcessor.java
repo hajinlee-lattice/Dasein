@@ -7,11 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,18 +28,13 @@ import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
-import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.eai.service.EaiImportJobDetailService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.remote.exposed.service.DataLoaderService;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 
 @Component("importVdbTableProcessor")
 public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
@@ -56,13 +49,10 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
     private EaiMetadataService eaiMetadataService;
 
     @Autowired
-    private DataLoaderService dataLoaderService;
-
-    @Autowired
     private EaiImportJobDetailService eaiImportJobDetailService;
 
     @Autowired
-    private MetadataProxy metadataProxy;
+    private DataFeedProxy dataFeedProxy;
 
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
@@ -110,7 +100,7 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
                     for (String taskId : identifiers) {
                         Extract extract = extracts.get(tableTemplates.get(taskId).getName());
                         if (extract != null) {
-                            metadataProxy.registerExtract(importConfig.getCustomerSpace().toString(),
+                            dataFeedProxy.registerExtract(importConfig.getCustomerSpace().toString(),
                                     taskId, tableTemplates.get(taskId).getName(), extract);
                         }
                     }
@@ -141,7 +131,7 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
     private HashMap<String, Table> getTableMap(String customerSpace, List<String> taskIds) {
         HashMap<String, Table> tables = new HashMap<>();
         for (String taskId : taskIds) {
-            DataFeedTask dataFeedTask = metadataProxy.getDataFeedTask(customerSpace, taskId);
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, taskId);
             if (dataFeedTask != null) {
                 tables.put(taskId, dataFeedTask.getImportTemplate());
             }

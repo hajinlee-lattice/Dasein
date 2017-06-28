@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.service.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,19 +24,15 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     private DataFeedService dataFeedService;
 
     @Override
-    public void createDataFeedTask(String customerSpace, String dataFeedName, DataFeedTask dataFeedTask) {
-        if (StringUtils.isBlank(dataFeedName)) {
-            dataFeedName = dataFeedService.getOrCreateDataFeed(customerSpace).getName();
-        }
-        DataFeed dataFeed = dataFeedEntityMgr.findByName(dataFeedName);
+    public void createDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         dataFeedTask.setDataFeed(dataFeed);
         dataFeedTaskEntityMgr.create(dataFeedTask);
     }
 
     @Override
-    public DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType, String entity,
-            String dataFeedName) {
-        DataFeed dataFeed = dataFeedEntityMgr.findByNameInflated(dataFeedName);
+    public DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType, String entity) {
+        DataFeed dataFeed = dataFeedEntityMgr.findDefaultFeed();
         if (dataFeed == null) {
             return null;
         }

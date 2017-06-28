@@ -1,29 +1,20 @@
-package com.latticeengines.pls.workflow;
+package com.latticeengines.apps.cdl.workflow;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeeingines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportVdbTableAndPublishWorkflowConfiguration;
-import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
-@Deprecated
 @Component
 public class ImportVdbTableAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     private static final Logger log = Logger.getLogger(ImportVdbTableAndPublishWorkflowSubmitter.class);
-
-    @Autowired
-    private EaiJobDetailProxy eaiJobDetailProxy;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     public ApplicationId submit(VdbLoadTableConfig loadConfig) {
         String customSpace = CustomerSpace.parse(loadConfig.getTenantId()).toString();

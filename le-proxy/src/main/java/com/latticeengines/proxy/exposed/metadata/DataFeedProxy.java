@@ -56,44 +56,41 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
 
     public DataFeedExecution retryLatestExecution(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/restartexecution",
-                customerSpace);
+                shortenCustomerSpace(customerSpace));
         return post("restartExecution", url, null, DataFeedExecution.class);
     }
 
     public Boolean dataFeedTaskExist(String customerSpace, String dataFeedType, String entity) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/exist/{dataFeedType}/{entity}",
-                customerSpace, dataFeedType, entity);
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/exist/{dataFeedType}/{entity}",
+                shortenCustomerSpace(customerSpace), dataFeedType, entity);
         return get("dataFeedTaskExist", url, Boolean.class);
     }
 
     public void createDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
-        String dataFeedName = getDataFeed(customerSpace).getName();
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{dataFeedName}/create", customerSpace,
-                dataFeedName);
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks", shortenCustomerSpace(customerSpace));
         post("createDataFeedTask", url, dataFeedTask, Void.class);
     }
 
     public DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType, String entity) {
-        String dataFeedName = getDataFeed(customerSpace).getName();
         String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeedtask/{source}/{dataFeedType}/{entity}/{dataFeedName}",
-                customerSpace, source, dataFeedType, entity, dataFeedName);
+                "/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}",
+                shortenCustomerSpace(customerSpace), source, dataFeedType, entity);
         return get("getDataFeedTask", url, DataFeedTask.class);
     }
 
     public DataFeedTask getDataFeedTask(String customerSpace, String id) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/{id}", customerSpace, id);
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{id}", shortenCustomerSpace(customerSpace), id);
         return get("getDataFeedTaskById", url, DataFeedTask.class);
     }
 
     public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/update", customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks", shortenCustomerSpace(customerSpace));
         post("updateDataFeedTask", url, dataFeedTask, Void.class);
     }
 
     public void registerExtract(String customerSpace, String taskId, String tableName, Extract extract) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeedtask/registerextract/{taskId}/{tableName}",
-                customerSpace, taskId, tableName);
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/registerextract/{taskId}/{tableName}",
+                shortenCustomerSpace(customerSpace), taskId, tableName);
         post("registerExtract", url, extract, Void.class);
     }
 

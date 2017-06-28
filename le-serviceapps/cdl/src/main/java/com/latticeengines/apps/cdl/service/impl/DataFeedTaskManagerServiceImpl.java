@@ -1,28 +1,24 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
+import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
+import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.service.DataFeedMetadataService;
-import com.latticeengines.pls.service.DataFeedTaskManagerService;
-import com.latticeengines.pls.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("dataFeedTaskManagerService")
 public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerService {
-
-    private static final Log log = LogFactory.getLog(DataFeedTaskManagerServiceImpl.class);
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -34,8 +30,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter;
 
     @Override
-    public String createDataFeedTask(String feedType, String entity, String source, String datafeedName,
-                                           String metadata) {
+    public String createDataFeedTask(String feedType, String entity, String source, String metadata) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         Table newMeta = dataFeedMetadataService.getMetadata(metadata);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(metadata);
@@ -43,18 +38,17 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (tenant == null) {
             throw new RuntimeException(String.format("Cannot find the tenant %s", customerSpace.getTenantId()));
         }
-        MultiTenantContext.setTenant(tenant);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask != null) {
             Table originMeta = dataFeedTask.getImportTemplate();
             if (!dataFeedMetadataService.compareMetadata(originMeta, newMeta)) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
-
                 //metadataProxy.createTable(customerSpace.toString(), newMeta.getName(), newMeta);
                 dataFeedTask.setImportTemplate(newMeta);
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);
             }
-            return getIdentifierFromDataFeedTask(datafeedName, dataFeedTask);
+            DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
+            return getIdentifierFromDataFeedTask(dataFeed.getName(), dataFeedTask);
         } else {
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setImportTemplate(newMeta);
@@ -72,7 +66,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             //dataFeedTask.setDataFeed(getDataFeed(customerSpace.toString(), datafeedName));
             //metadataProxy.createTable(customerSpace.toString(), newMeta.getName(), newMeta);
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
-            return getIdentifierFromDataFeedTask(datafeedName, dataFeedTask);
+            DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
+            return getIdentifierFromDataFeedTask(dataFeed.getName(), dataFeedTask);
         }
     }
 

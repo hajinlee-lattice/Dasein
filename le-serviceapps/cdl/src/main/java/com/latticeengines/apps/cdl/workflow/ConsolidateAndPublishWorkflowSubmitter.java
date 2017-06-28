@@ -1,4 +1,4 @@
-package com.latticeengines.pls.workflow;
+package com.latticeengines.apps.cdl.workflow;
 
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeeingines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
@@ -28,9 +30,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-@Deprecated
 @Component
 public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
@@ -48,8 +48,8 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
-    public ApplicationId submit() {
-        DataFeed datafeed = dataFeedProxy.getDataFeed(MultiTenantContext.getCustomerSpace().toString());
+    public ApplicationId submit(String customerSpace) {
+        DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeed.getStatus()));
         DataFeedExecution execution = datafeed.getActiveExecution();
 
@@ -66,17 +66,17 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 log.info(String.format(
                         "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
                         execution, datafeed));
-                dataFeedProxy.failExecution(MultiTenantContext.getCustomerSpace().toString(), datafeedStatus.getName());
+                dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
             }
         }
-        execution = dataFeedProxy.startExecution(MultiTenantContext.getCustomerSpace().toString());
+        execution = dataFeedProxy.startExecution(customerSpace);
         log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
-        WorkflowConfiguration configuration = generateConfiguration(datafeed.getName(), datafeedStatus);
+        WorkflowConfiguration configuration = generateConfiguration(customerSpace, datafeedStatus);
         return workflowJobService.submit(configuration);
     }
 
-    public ApplicationId retryLatestFailed() {
-        DataFeed datafeed = dataFeedProxy.getDataFeed(MultiTenantContext.getCustomerSpace().toString());
+    public ApplicationId retryLatestFailed(String customerSpace) {
+        DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         log.info(String.format("data feed status: %s", datafeed.getStatus()));
         DataFeedExecution execution = datafeed.getActiveExecution();
 
@@ -93,26 +93,26 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 log.info(String.format(
                         "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
                         execution, datafeed));
-                dataFeedProxy.failExecution(MultiTenantContext.getCustomerSpace().toString(),
+                dataFeedProxy.failExecution(customerSpace,
                         datafeedStatus.getName());
             }
         } else if (execution == null || execution.getStatus() != DataFeedExecution.Status.Failed) {
-            throw new RuntimeException("we can't retart consolidate workflow as the most recent one is not failed");
+            throw new RuntimeException("we can't restart consolidate workflow as the most recent one is not failed");
         }
         if (execution.getWorkflowId() == null) {
-            throw new RuntimeException("we can't retart consolidate workflow as the last workflow has fatal error!");
+            throw new RuntimeException("we can't restart consolidate workflow as the last workflow has fatal error!");
         }
-        execution = dataFeedProxy.retryLatestExecution(MultiTenantContext.getCustomerSpace().toString());
+        execution = dataFeedProxy.retryLatestExecution(customerSpace);
         log.info(String.format("restarted execution of %s with status: %s", execution.getStatus()));
         return workflowJobService.restart(execution.getWorkflowId());
     }
 
-    private WorkflowConfiguration generateConfiguration(String datafeedName, Status initialDataFeedStatus) {
+    private WorkflowConfiguration generateConfiguration(String customerSpace, Status initialDataFeedStatus) {
         DataCollection dataCollection = dataCollectionProxy
-                .getDefaultDataCollection(MultiTenantContext.getCustomerSpace().toString());
+                .getDefaultDataCollection(customerSpace);
         return new ConsolidateAndPublishWorkflowConfiguration.Builder() //
                 .initialDataFeedStatus(initialDataFeedStatus) //
-                .customer(MultiTenantContext.getCustomerSpace()) //
+                .customer(CustomerSpace.parse(customerSpace)) //
                 .microServiceHostPort(microserviceHostPort) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .inputProperties(ImmutableMap.<String, String> builder()

@@ -49,7 +49,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.proxy.TestDataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -76,7 +76,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     private DataFeedProxy dataFeedProxy;
 
     @Autowired
-    private TestDataFeedProxy testDataFeedProxy;
+    private CDLProxy cdlProxy;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -98,7 +98,6 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Tenant retrieved = testBed.getMainTestTenant();
         Assert.assertEquals(retrieved.getId(), CustomerSpace.parse(DL_TENANT_NAME).toString());
 
-        attachProtectedProxy(testDataFeedProxy);
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(firstTenant));
 
         log.info("Test environment setup finished.");
@@ -124,7 +123,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importData")
     public void initialConsolidate() {
         log.info("Start consolidating data ...");
-        ApplicationId appId = testDataFeedProxy.consolidate();
+        ApplicationId appId = cdlProxy.consolidate(firstTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
@@ -132,7 +131,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "initialConsolidate")
     public void firstAssemble() {
         log.info("Start profiling data collection ...");
-        ApplicationId appId = testDataFeedProxy.profile();
+        ApplicationId appId = cdlProxy.profile(firstTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
@@ -155,20 +154,20 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importSecondData")
     public void secondConsolidate() {
         log.info("Start second consolidating ...");
-        ApplicationId appId = testDataFeedProxy.consolidate();
+        ApplicationId appId = cdlProxy.consolidate(firstTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondConsolidate")
-    public void secondAssemble() {
+    public void secondProfile() {
         log.info("Start second profiling ...");
-        ApplicationId appId = testDataFeedProxy.profile();
+        ApplicationId appId = cdlProxy.profile(firstTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondAssemble")
+    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondProfile")
     public void verifySecondImport() {
 
     }

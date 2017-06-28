@@ -50,7 +50,7 @@ public class DataFeedResourceTestNG extends DataCollectionFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCrud() {
-        DataFeed retrievedDataFeed = metadataProxy.findDataFeedByName(customerSpace1, DATAFEED_NAME);
+        DataFeed retrievedDataFeed = dataFeedProxy.getDataFeed(customerSpace1);
         Assert.assertNotNull(retrievedDataFeed);
         Assert.assertTrue(retrievedDataFeed.getStatus() == Status.Initing);
 
