@@ -46,7 +46,7 @@ UI_APPS = ["lpi", "adminconsole"]
 API_APPS = [ 'playmaker', 'scoringapi', 'ulysses' ]
 APP_APPS = [ 'lpi', 'pls' ]
 OAUTH_APPS = [ 'oauth2' ]
-ADMINCONSOLE_APPS = [ 'adminconsole', 'matchapi', 'metadata', 'api', 'cdl' ]
+ADMINCONSOLE_APPS = [ 'adminconsole', 'matchapi', 'api', 'cdl' ]
 
 PARAM_TOMCAT_SECURITY_GROUP = Parameter("TomcatSecurityGroupId", "The security group to be used by tomcat", type="AWS::EC2::SecurityGroup::Id")
 PARAM_NODEJS_SECURITY_GROUP = Parameter("NodeJsSecurityGroupId", "The security group to be used by nodejs", type="AWS::EC2::SecurityGroup::Id")
@@ -232,7 +232,6 @@ def create_public_load_balancers(env, tg_map):
     adminconsole_lsnr = create_listener(adminconsole_lb, tg_map["adminconsole"])
     resources.append(adminconsole_lsnr)
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["matchapi"], "/match/*"))
-    resources.append(create_listener_rule(adminconsole_lsnr, tg_map["metadata"], "/metadata/*"))
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["cdl"], "/cdl/*"))
     resources.append(create_listener_rule(adminconsole_lsnr, tg_map["api"], "/api/*"))
 
