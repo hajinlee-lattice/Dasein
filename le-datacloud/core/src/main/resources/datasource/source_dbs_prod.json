@@ -1,6 +1,6 @@
 [
   {
-    "Url" : "jdbc:sqlserver://bodcprodvsql231.prod.lattice.local:1433;databaseName=LDC_SourceDB;",
+    "Url" : "jdbc:sqlserver://bodcprodvsql231.prod.lattice.local:1433;databaseName=LDC_SourceDB;sendStringParametersAsUnicode=false",
     "Username": "DLTransfer",
     "Password": "Q1nh4HIYGkg4OnQIEbEuiw=="
   }

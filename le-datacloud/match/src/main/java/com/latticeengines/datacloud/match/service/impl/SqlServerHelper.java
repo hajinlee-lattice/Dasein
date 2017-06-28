@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,10 +17,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,7 +171,7 @@ public class SqlServerHelper implements DbHelper {
             }
         }
 
-        String sql;
+        Pair<String, List<String>> sqlWithArgs;
         if (context.getInput().getFetchOnly()) {
             Set<String> latticeAccountIds = new HashSet<>();
             for (InternalOutputRecord record : context.getInternalResults()) {
@@ -176,9 +179,9 @@ public class SqlServerHelper implements DbHelper {
                     latticeAccountIds.add(record.getLatticeAccountId());
                 }
             }
-            sql = constructSqlQueryForFetching(involvedPartitions, targetColumns, latticeAccountIds);
+            sqlWithArgs = constructSqlQueryForFetching(involvedPartitions, targetColumns, latticeAccountIds);
         } else {
-            sql = constructSqlQuery(involvedPartitions, targetColumns, context.getDomains(),
+            sqlWithArgs = constructSqlQuery(involvedPartitions, targetColumns, context.getDomains(),
                     context.getNameLocations());
         }
 
@@ -186,7 +189,7 @@ public class SqlServerHelper implements DbHelper {
                 MAX_RETRIES);
         for (JdbcTemplate jdbcTemplate : jdbcTemplates) {
             try {
-                List<Map<String, Object>> queryResult = query(jdbcTemplate, sql);
+                List<Map<String, Object>> queryResult = query(jdbcTemplate, sqlWithArgs);
                 context.setResultSet(queryResult);
                 break;
             } catch (Exception e) {
@@ -195,7 +198,7 @@ public class SqlServerHelper implements DbHelper {
         }
 
         // send to collector
-        for  (String domain: context.getDomains()) {
+        for (String domain : context.getDomains()) {
             domainCollectService.enqueue(domain);
         }
 
@@ -277,15 +280,18 @@ public class SqlServerHelper implements DbHelper {
     public void fetchMatchResult(MatchContext context) {
     }
 
-    private String constructSqlQuery(Set<String> involvedPartitions, Set<String> targetColumns,
+    private Pair<String, List<String>> constructSqlQuery(Set<String> involvedPartitions, Set<String> targetColumns,
             Collection<String> domains, Collection<NameLocation> nameLocations) {
-
+        List<String> args = new ArrayList<>();
         String sql = String.format("SELECT p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s]",
                 MatchConstants.LID_FIELD, MatchConstants.DOMAIN_FIELD, MatchConstants.NAME_FIELD,
                 MatchConstants.COUNTRY_FIELD, MatchConstants.STATE_FIELD, MatchConstants.CITY_FIELD);
         sql += (targetColumns.isEmpty() ? "" : ", [" + StringUtils.join(targetColumns, "], [") + "]");
         sql += "\nFROM " + fromJoinClause(involvedPartitions);
-        sql += "\nWHERE p1.[" + MatchConstants.DOMAIN_FIELD + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
+        sql += "\nWHERE p1.[" + MatchConstants.DOMAIN_FIELD + "] IN ( ";
+        sql += StringUtils.join(domains.stream().map(d -> "?").collect(Collectors.toList()), " , ");
+        sql += " )\n";
+        args.addAll(domains);
 
         for (NameLocation nameLocation : nameLocations) {
             if (StringUtils.isEmpty(nameLocation.getCountry())) {
@@ -293,34 +299,38 @@ public class SqlServerHelper implements DbHelper {
             }
             if (StringUtils.isNotEmpty(nameLocation.getName()) && StringUtils.isNotEmpty(nameLocation.getState())) {
                 sql += " OR ( ";
-                sql += String.format("p1.[%s] = '%s'", MatchConstants.NAME_FIELD,
-                        nameLocation.getName().replace("'", "''"));
+                sql += String.format("p1.[%s] = ? ", MatchConstants.NAME_FIELD);
+                args.add(nameLocation.getName());
                 if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
-                    sql += String.format(" AND p1.[%s] = '%s'", MatchConstants.COUNTRY_FIELD,
-                            nameLocation.getCountry().replace("'", "''"));
+                    sql += String.format(" AND p1.[%s] = ? ", MatchConstants.COUNTRY_FIELD);
+                    args.add(nameLocation.getCountry());
                 }
                 if (StringUtils.isNotEmpty(nameLocation.getState())) {
-                    sql += String.format(" AND p1.[%s] = '%s'", MatchConstants.STATE_FIELD,
-                            nameLocation.getState().replace("'", "''"));
+                    sql += String.format(" AND p1.[%s] = ? ", MatchConstants.STATE_FIELD);
+                    args.add(nameLocation.getState());
                 }
                 if (StringUtils.isNotEmpty(nameLocation.getCity())) {
-                    sql += String.format(" AND p1.[%s] = '%s'", MatchConstants.CITY_FIELD,
-                            nameLocation.getCity().replace("'", "''"));
+                    sql += String.format(" AND p1.[%s] = ? ", MatchConstants.CITY_FIELD);
+                    args.add(nameLocation.getCity());
                 }
-                sql += " )\n";
+                sql += ")\n";
             }
         }
-        return sql;
+
+        return Pair.of(sql, args);
     }
 
-    private String constructSqlQueryForFetching(Set<String> involvedPartitions, Set<String> targetColumns,
-            Collection<String> latticeAccountIds) {
+    private Pair<String, List<String>> constructSqlQueryForFetching(Set<String> involvedPartitions,
+            Set<String> targetColumns, Collection<String> latticeAccountIds) {
+        List<String> args = new ArrayList<>();
         String sql = String.format("SELECT p1.[%s]", MatchConstants.LID_FIELD);
         sql += (targetColumns.isEmpty() ? "" : ", [" + StringUtils.join(targetColumns, "], [") + "]");
         sql += "\nFROM " + fromJoinClause(involvedPartitions);
-        sql += "\nWHERE p1.[" + MatchConstants.LID_FIELD + "] IN ('" + StringUtils.join(latticeAccountIds, "', '")
-                + "')\n";
-        return sql;
+        sql += "\nWHERE p1.[" + MatchConstants.LID_FIELD + "] IN (";
+        sql += StringUtils.join(latticeAccountIds.stream().map(d -> "?").collect(Collectors.toList()), " , ");
+        sql += ")\n";
+        args.addAll(latticeAccountIds);
+        return Pair.of(sql, args);
     }
 
     private String fromJoinClause(Set<String> partitions) {
@@ -330,16 +340,23 @@ public class SqlServerHelper implements DbHelper {
         int p = 1;
         for (String partition : partitions) {
             p++;
-            clause += String.format("\n INNER JOIN [%s] p%d WITH(NOLOCK) ON p1.[%s]=p%d.[%s]", partition, p,
-                    MatchConstants.LID_FIELD, p, MatchConstants.LID_FIELD);
+            clause += String.format(
+                    "\n INNER JOIN [%s] p%d WITH(NOLOCK) ON p1.[%s]=p%d.[%s]",
+                    partition, p, MatchConstants.LID_FIELD, p, MatchConstants.LID_FIELD);
         }
 
         return clause;
     }
 
-    private List<Map<String, Object>> query(JdbcTemplate jdbcTemplate, String sql) {
+    private List<Map<String, Object>> query(JdbcTemplate jdbcTemplate, Pair<String, List<String>> sqlWithArgs) {
+        String sql = sqlWithArgs.getLeft();
+        String[] args = sqlWithArgs.getRight().toArray(new String[sqlWithArgs.getRight().size()]);
+        int[] argTypes = new int[args.length];
+        for (int i = 0; i < args.length; i++) {
+            argTypes[i] = Types.VARCHAR;
+        }
         Long beforeQuerying = System.currentTimeMillis();
-        List<Map<String, Object>> results = jdbcTemplate.queryForList(sql);
+        List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, args, argTypes);
         String url = "";
         try {
             DriverManagerDataSource dataSource = (DriverManagerDataSource) jdbcTemplate.getDataSource();

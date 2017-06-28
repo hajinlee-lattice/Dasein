@@ -27,7 +27,7 @@ else:
 
 LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
-              'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante']
+              'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante', 'cdl']
 
 PRESETS = {
     'lp': {
