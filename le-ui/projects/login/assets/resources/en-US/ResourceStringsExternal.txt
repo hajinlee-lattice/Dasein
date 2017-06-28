@@ -1,4 +1,5 @@
 LOGIN_COPYRIGHT={0}, Lattice Engines, Inc.
+LOGIN_TO_LATTICE=to Lattice Engines
 COMPANY_REGMARK=Lattice Engines
 LOGIN_USERNAME=Email
 LOGIN_PASSWORD=Password

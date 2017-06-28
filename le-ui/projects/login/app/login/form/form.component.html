@@ -41,6 +41,7 @@
                 ng-disabled="$ctrl.loginInProgress">
             {{$ctrl.ResourceUtility.getString('LOGIN_LABEL')}}
         </button>
+        <span class="login-label">{{$ctrl.ResourceUtility.getString('LOGIN_TO_LATTICE')}}&reg;</span>
         <i ng-show="$ctrl.loginInProgress" class="fa fa-spinner fa-pulse fa-fw"></i>
         <div class="secondary-actions_">
             <a href="javascript:void(0)" data-ng-click="$ctrl.forgotPasswordClick($event)">
