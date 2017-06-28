@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
+import com.latticeengines.pls.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -41,6 +42,9 @@ public class PlayResource {
 
     @Autowired
     private PlayLaunchService playLaunchService;
+
+    @Autowired
+    private PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -91,6 +95,8 @@ public class PlayResource {
         Play play = playService.getPlayByName(playName);
         playLaunch.setPlay(play);
         playLaunchService.create(playLaunch);
+        String appId = playLaunchWorkflowSubmitter.submit(playLaunch.getLaunchId()).toString();
+        playLaunch.setJobId(appId);
         return playLaunch;
     }
 

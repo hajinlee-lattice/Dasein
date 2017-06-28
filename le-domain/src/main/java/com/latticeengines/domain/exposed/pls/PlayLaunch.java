@@ -94,6 +94,9 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @JsonProperty("table")
     private Table table;
 
+    @Transient
+    private String jobId;
+
     @Override
     public Long getPid() {
         return pid;
@@ -185,5 +188,13 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @JsonIgnore
     public Long getTenantId() {
         return this.tenantId;
+    }
+
+    public void setJobId(String jobId) {
+        this.jobId = jobId;
+    }
+
+    public String getJobId() {
+        return jobId;
     }
 }
