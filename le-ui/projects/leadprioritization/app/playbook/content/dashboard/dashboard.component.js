@@ -2,9 +2,10 @@ angular.module('lp.playbook.dashboard', [
     'mainApp.appCommon.utilities.TimestampIntervalUtility'
 ])
 .controller('PlaybookDashboard', function(
-    $stateParams, PlaybookWizardStore, TimestampIntervalUtility, CgTalkingPointStore, TalkingPointAttributes, TalkingPoints
+    $q, $stateParams, PlaybookWizardStore, TimestampIntervalUtility, CgTalkingPointStore, TalkingPointAttributes, TalkingPoints
 ) {
-    var vm = this;
+    var vm = this,
+        play_name = $stateParams.play_name;
 
     angular.extend(vm, {
         TimestampIntervalUtility: TimestampIntervalUtility,
@@ -13,9 +14,18 @@ angular.module('lp.playbook.dashboard', [
         talkingPoints: TalkingPoints
     });
 
+    $q.when($stateParams.play_name, function() {
+        if(play_name) {
+            CgTalkingPointStore.getTalkingPoints(play_name).then(function(results){
+                console.log('got talking points');
+            });
+        }
+
+    });
+
     PlaybookWizardStore.clear();
-    if($stateParams.play_name) {
-        PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+    if(play_name) {
+        PlaybookWizardStore.getPlay(play_name).then(function(play){
             vm.play = play;
         });
     }

@@ -170,7 +170,7 @@ angular
                 },
                 SelectedSegment: function($q, PlaybookWizardStore, QueryStore) {
                     var deferred = $q.defer();
-                    var segment = PlaybookWizardStore.getSavedSegment()
+                    var segment = PlaybookWizardStore.getSavedSegment();
                     QueryStore.setupStore(segment).then(function() {
                         deferred.resolve(segment);
                     });

@@ -145,6 +145,7 @@ angular.module('lp.playbook')
 
     this.setPlay = function(play) {
         this.currentPlay = play;
+        this.savedSegment = play.segment;
     }
 
     this.getCurrentPlay = function() {
@@ -190,7 +191,6 @@ angular.module('lp.playbook')
 })
 .service('PlaybookWizardService', function($q, $http, $state) {
     this.host = '/pls'; //default
-
 
     this.getPlays = function() {
 

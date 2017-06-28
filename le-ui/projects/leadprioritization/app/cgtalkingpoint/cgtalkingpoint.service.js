@@ -9,8 +9,21 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         this.talkingPoints = talkingPoints;
     };
 
-    this.getTalkingPoints = function() {
-        return this.talkingPoints;
+    this.getTalkingPoints = function(play_name) {
+        if(!play_name) {
+            return this.talkingPoints;
+        }
+        var deferred = $q.defer();
+        if(this.talkingPoints.length) {
+            deferred.resolve(this.talkingPoints);
+        } else {
+            CgTalkingPointService.getTalkingPoints(play_name).then(function(data){
+                this.talkingPoints = data;
+                deferred.resolve(data);
+            });
+            deferred.resolve([]);
+        }
+        return deferred.promise;
     };
 
     this.getDanteUrl = function() {
@@ -60,12 +73,26 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     };
 
-    this.generateLeadPreviewObject = function() {
+    this.generateLeadPreviewObject = function(play_name) {
         var PLACEHOLDER =UNKNOWN_UNTIL_LAUNCHED = null;
         return {"context":"lpipreview","notion":"lead","notionObject":{"ExpectedValue":UNKNOWN_UNTIL_LAUNCHED,"ExternalProbability":UNKNOWN_UNTIL_LAUNCHED,"LastLaunched":UNKNOWN_UNTIL_LAUNCHED,"Lift":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketDisplayName":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketOffset":UNKNOWN_UNTIL_LAUNCHED,"ModelID":null,"Percentile":UNKNOWN_UNTIL_LAUNCHED,"PlayDescription":PLACEHOLDER,"PlayDisplayName":PLACEHOLDER,"PlayID":PLACEHOLDER,"PlaySolutionType":null,"PlayTargetProductName":"D200-L","PlayType":"crosssell","Probability":UNKNOWN_UNTIL_LAUNCHED,"Rank":2,"Theme":"Sell Secure Star into Impravata owners","TalkingPoints":null}};
     };
 })
-.service('CgTalkingPointService', function($q) {
+.service('CgTalkingPointService', function($q, $http, $state) {
+    this.host = '/pls'; //default
+    
+    this.getTalkingPoints = function(play_name){
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/dantetalkingpoints/play/' + play_name
+        }).then(function(response){
+            console.log('CgTalkingPointService.getTalkingPoints',response.data);
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
     this.getDanteUrl = function() {
         var deferred = $q.defer();
 

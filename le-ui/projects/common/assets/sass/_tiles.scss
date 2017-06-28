@@ -31,6 +31,9 @@ This is the tile system used in PD
 		width: 70%;
 	}
 }
+.tile-body {
+  overflow: hidden;
+}
 .list-item {
     -webkit-order: 0;
     order: 0;

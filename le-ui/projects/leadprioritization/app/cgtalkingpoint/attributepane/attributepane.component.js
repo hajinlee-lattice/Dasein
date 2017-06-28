@@ -19,9 +19,16 @@ angular.module('lp.cg.talkingpoint.attributepane', [
 
             var originalTop = $element[0].offsetTop;
             function handleWindowScroll(evt) {
-                var scrollY = evt.currentTarget.scrollY;
+                var scrollY = evt.currentTarget.scrollY,
+                    paneBottom = $element.offset().top + $element.outerHeight(),
+                    container = $element.parents('.container')[0],
+                    $container = angular.element(container),
+                    containerBottom = $container.offset().top + $container.outerHeight();
+
                 if (scrollY > originalTop) {
-                    $element[0].style.top = (scrollY - originalTop + 78) + 'px';
+                    if(paneBottom < containerBottom) {
+                        $element[0].style.top = (scrollY - originalTop + 78) + 'px';
+                    }
                 } else {
                     $element[0].style.top = '';
                 }

@@ -11,7 +11,8 @@ angular.module('lp.cg.talkingpoint.preview', [])
         controllerAs: 'vm'
     };
 })
-.controller('cgTalkingPointPreviewCtrl', function ($scope, $sce, $element, CgTalkingPointStore) {
+.controller('cgTalkingPointPreviewCtrl', function ($scope, $stateParams, $sce, $element, CgTalkingPointStore) {
+    console.log($scope.play, $stateParams.play_name);
     var talkingPoints = CgTalkingPointStore.getTalkingPoints();
     var iframe = null;
 
