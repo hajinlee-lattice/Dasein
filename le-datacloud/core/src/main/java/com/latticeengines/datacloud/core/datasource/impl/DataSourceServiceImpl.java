@@ -36,12 +36,7 @@ public class DataSourceServiceImpl implements DataSourceService {
 
     @PostConstruct
     private void postConstruct() {
-        scheduler.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                cleanupJdbcTemplatePool();
-            }
-        }, TimeUnit.MINUTES.toMillis(10));
+        scheduler.scheduleWithFixedDelay(() -> cleanupJdbcTemplatePool(), TimeUnit.MINUTES.toMillis(10));
     }
 
     @Override

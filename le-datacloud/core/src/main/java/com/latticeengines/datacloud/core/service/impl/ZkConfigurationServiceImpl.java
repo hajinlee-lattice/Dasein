@@ -92,6 +92,7 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
             }
             return connections;
         } catch (Exception e) {
+            log.error("Failed to get Connections in Pool", e);
             return null;
         }
     }
