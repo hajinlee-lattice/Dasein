@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -20,7 +21,6 @@ import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Context>
         implements Aggregator<BitEncodeAggregator.Context> {
@@ -97,7 +97,9 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
             } else {
                 switch (codeBook.getDecodeStrategy()) {
                 case NUMERIC_INT:
-                    return encodeInt(arguments, codeBook, key);
+                    return encodeInt(arguments, codeBook, key, true);
+                case NUMERIC_UNSIGNED_INT:
+                    return encodeInt(arguments, codeBook, key, false);
                 case ENUM_STRING:
                     return encodeString(arguments, codeBook, key);
                 default:
@@ -109,7 +111,33 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
     }
     
     @SuppressWarnings("unchecked")
-    private List<Integer> encodeInt(TupleEntry arguments, BitCodeBook codeBook, String key) {
+    private List<Integer> encodeInt(TupleEntry arguments, BitCodeBook codeBook, String key, boolean signed) {
+        Integer value = (Integer) arguments.getObject(valueField);
+        if (value == null) {
+            return emptyList();
+        }
+        String binValue = Integer.toBinaryString(value);
+        Integer bitUnit = codeBook.getBitUnit();
+        String zeros = String.join("", Collections.nCopies(bitUnit - 1, "0"));
+        binValue = (zeros + binValue).substring(binValue.length());
+        binValue = "1" + binValue; // When encoding integer, fist bit is the
+                                   // indicator that value is null or not.
+                                   // 1:not null, 0: null
+
+        if (binValue.length() != bitUnit) {
+            return emptyList();
+        }
+        List<Integer> trueBits = new ArrayList<>();
+        for (int i = bitUnit - 1; i >= 0; i--) {
+            if (binValue.charAt(i) == '1') {
+                trueBits.add(codeBook.getBitPosForKey(key) + bitUnit - 1 - i);
+            }
+        }
+        return trueBits;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Integer> encodeUnsignedInt(TupleEntry arguments, BitCodeBook codeBook, String key) {
         Integer value = (Integer) arguments.getObject(valueField);
         if (value == null) {
             return emptyList();

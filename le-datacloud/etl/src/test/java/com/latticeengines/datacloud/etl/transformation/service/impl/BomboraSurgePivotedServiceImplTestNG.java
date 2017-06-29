@@ -265,7 +265,7 @@ public class BomboraSurgePivotedServiceImplTestNG
     private void prepareBitCodeBook() {
         compoScoreCodeBook = new BitCodeBook();
         compoScoreDecodeFields = new ArrayList<>();
-        compoScoreCodeBook.setDecodeStrategy(DecodeStrategy.NUMERIC_INT);
+        compoScoreCodeBook.setDecodeStrategy(DecodeStrategy.NUMERIC_UNSIGNED_INT);
         Map<String, Integer> bitsPosMap = new HashMap<>();
         bitsPosMap.put("BmbrSurge_2in1PCs_CompScore", 0);
         bitsPosMap.put("BmbrSurge_3DPrinting_CompScore", 8);

@@ -228,7 +228,8 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                         }
                         valueDictRevMap.put(encodedColumn, valueDictRev);
                     case NUMERIC_INT:
-                        Integer bitUnit = Integer.valueOf(jsonNode.get("BitUnit").asText());
+                    case NUMERIC_UNSIGNED_INT:
+                        Integer bitUnit = jsonNode.get("BitUnit").asInt();
                         bitUnitMap.put(encodedColumn, bitUnit); // for all the decodeStrategy above
                         break;
                     default:

@@ -118,7 +118,10 @@ public class BitCodeBook implements Serializable {
     }
 
     public enum DecodeStrategy {
-        BOOLEAN_YESNO, NUMERIC_INT, ENUM_STRING
+        BOOLEAN_YESNO, //
+        NUMERIC_INT, //
+        NUMERIC_UNSIGNED_INT, //
+        ENUM_STRING, //
     }
 
     public Map<String, Object> decode(String encodedStr, List<String> decodeFields) {
@@ -147,6 +150,7 @@ public class BitCodeBook implements Serializable {
         case BOOLEAN_YESNO:
             return assignSingleDigitBitPos(decodeFields, bitPositionIdx);
         case NUMERIC_INT:
+        case NUMERIC_UNSIGNED_INT:
         case ENUM_STRING:
             return assignMultipleDigitBitPos(decodeFields, bitPositionIdx);
         default:
@@ -186,7 +190,9 @@ public class BitCodeBook implements Serializable {
         case BOOLEAN_YESNO:
             return translateBitsToYesNo(bits, decodeFields, bitPositionIdx);
         case NUMERIC_INT:
-            return translateBitsToInt(bits, decodeFields, bitPositionIdx);
+            return translateBitsToInt(bits, decodeFields, bitPositionIdx, true);
+        case NUMERIC_UNSIGNED_INT:
+            return translateBitsToInt(bits, decodeFields, bitPositionIdx, false);
         case ENUM_STRING:
             return translateBitsToEnumString(bits, decodeFields, bitPositionIdx);
         default:
@@ -208,7 +214,7 @@ public class BitCodeBook implements Serializable {
     }
 
     private Map<String, Object> translateBitsToInt(boolean[] bits, List<String> decodeFields,
-            Map<String, Integer> bitPositionIdx) {
+            Map<String, Integer> bitPositionIdx, boolean signed) {
         Map<String, Object> valueMap = new HashMap<>();
         for (String decodeField : decodeFields) {
             if (bitPositionIdx.containsKey(decodeField)) {
