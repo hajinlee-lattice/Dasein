@@ -20,7 +20,7 @@ cd $WSHOME/le-domain
 mvn -DskipTests clean install 2> /tmp/errors.txt
 processErrors
 
-for project in 'db' 'dataplatform' 'scoring' 'quartzclient' 'metadata'
+for project in 'db' 'dataplatform' 'scoring' 'quartzclient' 'metadata' 'datadb' 
 do
     echo "Deploying ${project} to local MySQL" &&
     pushd $WSHOME/le-$project &&
@@ -34,6 +34,7 @@ source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 
 . $WSHOME/le-dev/scripts/setupdb_pls_multitenant.sh
 . $WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
+. $WSHOME/le-dev/scripts/setupdb_datadb.sh
 . $WSHOME/le-dev/scripts/setupdb_leadscoringdb.sh
 . $WSHOME/le-dev/scripts/setupdb_scoringdb.sh
 . $WSHOME/le-dev/scripts/setupdb_oauth2.sh

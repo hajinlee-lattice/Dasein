@@ -31,6 +31,7 @@
         <module>le-remote</module>
         <module>le-scheduler</module>
         <module>le-parent</module>
+        <module>le-datadb</module>
         <module>le-db</module>
         <module>le-query</module>
         <module>le-swlib</module>
