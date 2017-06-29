@@ -123,8 +123,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<TableRoleInCollection> roles = AttributeRepository.extractServingRoles(statistics);
         Map<TableRoleInCollection, Table> tableMap = new HashMap<>();
         roles.forEach(role -> {
-            Table table = getTables(customerSpace, notNullCollectioName, role).get(0);
-            tableMap.put(role, table);
+            List<Table> tables = getTables(customerSpace, notNullCollectioName, role);
+            if (tables != null && !tables.isEmpty()) {
+                tableMap.put(role, tables.get(0));
+            }
         });
         return AttributeRepository.constructRepo(statistics, tableMap, CustomerSpace.parse(customerSpace),
                 notNullCollectioName);
