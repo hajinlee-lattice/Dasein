@@ -17,4 +17,6 @@ public interface ArchiveService {
 
     DataImportedFromDB getSource();
 
+    String getBeanName();
+
 }

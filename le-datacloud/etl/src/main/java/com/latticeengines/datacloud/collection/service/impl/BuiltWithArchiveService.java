@@ -22,6 +22,11 @@ public class BuiltWithArchiveService extends AbstractCollectionArchiveService im
     BuiltWith source;
 
     @Override
+    public String getBeanName() {
+        return "builtWithArchiveService";
+    }
+
+    @Override
     public CollectedSource getSource() { return source; }
 
     @Override

@@ -27,6 +27,11 @@ public class HGDataPivotService extends AbstractPivotService implements PivotSer
     HGDataPivoted source;
 
     @Override
+    public String getBeanName() {
+        return "hgDataPivotService";
+    }
+
+    @Override
     public PivotedSource getSource() { return source; }
 
     @Override

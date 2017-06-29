@@ -22,6 +22,11 @@ public class AlexaArchiveService extends AbstractCollectionArchiveService implem
     Alexa source;
 
     @Override
+    public String getBeanName() {
+        return "alexaArchiveService";
+    }
+
+    @Override
     public CollectedSource getSource() {
         return source;
     }

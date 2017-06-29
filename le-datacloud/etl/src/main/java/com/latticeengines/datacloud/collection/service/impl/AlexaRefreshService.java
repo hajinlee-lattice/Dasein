@@ -27,6 +27,11 @@ public class AlexaRefreshService extends AbstractMostRecentService implements Re
     AlexaMostRecent source;
 
     @Override
+    public String getBeanName() {
+        return "alexaRefreshService";
+    }
+
+    @Override
     public MostRecentSource getSource() {
         return source;
     }

@@ -27,6 +27,11 @@ public class HGDataRefreshService extends AbstractRefreshService implements Refr
     HGData source;
 
     @Override
+    public String getBeanName() {
+        return "hgDataRefreshService";
+    }
+
+    @Override
     public DerivedSource getSource() { return source; }
 
     @Override

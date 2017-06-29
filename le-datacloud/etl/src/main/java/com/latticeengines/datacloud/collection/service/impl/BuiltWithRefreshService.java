@@ -27,6 +27,11 @@ public class BuiltWithRefreshService extends AbstractMostRecentService implement
     BuiltWithMostRecent source;
 
     @Override
+    public String getBeanName() {
+        return "builtWithRefreshService";
+    }
+
+    @Override
     public MostRecentSource getSource() {
         return source;
     }

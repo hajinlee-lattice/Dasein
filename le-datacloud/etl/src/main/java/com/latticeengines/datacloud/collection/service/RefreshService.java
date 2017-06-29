@@ -23,4 +23,6 @@ public interface RefreshService {
 
     void purgeOldVersions();
 
+    String getBeanName();
+
 }

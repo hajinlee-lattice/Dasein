@@ -91,12 +91,12 @@ public class PropDataScheduler {
 
     private void registerArchiveJob(DataImportedFromDB source) throws SchedulerException {
         ArchiveService service = progressOrchestrator.getArchiveService(source);
-        scheduleJob(source, "archiveService", service, ArchiveScheduler.class);
+        scheduleJob(source, service.getBeanName(), service, ArchiveScheduler.class);
     }
 
     private void registerRefreshJob(DerivedSource source) throws SchedulerException {
         RefreshService service = progressOrchestrator.getRefreshService(source);
-        scheduleJob(source, "refreshService", service, RefreshScheduler.class);
+        scheduleJob(source, service.getBeanName(), service, RefreshScheduler.class);
     }
 
     private void scheduleJob(Source source, String serviceName, Object service, Class<? extends Job> jobClass)

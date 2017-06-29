@@ -22,6 +22,11 @@ public class HGDataRawArchiveService extends AbstractBulkArchiveService implemen
     HGDataRaw source;
 
     @Override
+    public String getBeanName() {
+        return "hgDataRawArchiveService";
+    }
+
+    @Override
     public BulkSource getSource() { return source; }
 
     @Override

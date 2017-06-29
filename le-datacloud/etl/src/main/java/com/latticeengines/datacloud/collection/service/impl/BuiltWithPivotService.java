@@ -27,6 +27,11 @@ public class BuiltWithPivotService extends AbstractPivotService implements Pivot
     BuiltWithPivoted source;
 
     @Override
+    public String getBeanName() {
+        return "builtWithPivotService";
+    }
+
+    @Override
     public PivotedSource getSource() { return source; }
 
     @Override

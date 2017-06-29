@@ -22,6 +22,11 @@ public class FeatureArchiveService extends AbstractCollectionArchiveService impl
     Feature source;
 
     @Override
+    public String getBeanName() {
+        return "featureArchiveService";
+    }
+
+    @Override
     public CollectedSource getSource() { return source; }
 
     @Override

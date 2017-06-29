@@ -27,6 +27,11 @@ public class OrbIntelligenceRefreshService extends AbstractMostRecentService imp
     OrbIntelligenceMostRecent source;
 
     @Override
+    public String getBeanName() {
+        return "orbIntelligenceRefreshService";
+    }
+
+    @Override
     public MostRecentSource getSource() {
         return source;
     }

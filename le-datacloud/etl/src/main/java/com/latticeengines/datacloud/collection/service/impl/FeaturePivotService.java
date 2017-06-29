@@ -27,6 +27,11 @@ public class FeaturePivotService extends AbstractPivotService implements PivotSe
     FeaturePivoted source;
 
     @Override
+    public String getBeanName() {
+        return "featurePivotService";
+    }
+
+    @Override
     public PivotedSource getSource() { return source; }
 
     @Override

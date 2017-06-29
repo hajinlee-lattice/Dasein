@@ -22,6 +22,11 @@ public class OrbIntelligenceArchiveService extends AbstractCollectionArchiveServ
     OrbIntelligence source;
 
     @Override
+    public String getBeanName() {
+        return "orbIntelligenceArchiveService";
+    }
+
+    @Override
     public CollectedSource getSource() { return source; }
 
     @Override

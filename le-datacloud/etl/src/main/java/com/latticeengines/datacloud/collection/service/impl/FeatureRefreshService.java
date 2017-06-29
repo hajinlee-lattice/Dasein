@@ -26,6 +26,11 @@ public class FeatureRefreshService extends AbstractMostRecentService implements 
     FeatureMostRecent source;
 
     @Override
+    public String getBeanName() {
+        return "featureRefreshService";
+    }
+
+    @Override
     public MostRecentSource getSource() {
         return source;
     }
