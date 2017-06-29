@@ -11,7 +11,6 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -28,11 +27,9 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
     public static final String WORKFLOW_PREFIX = "WORKFLOW_";
 
     @Autowired
-    @Qualifier("springBatchDataSource")
     private DataSource dataSource;
 
     @Autowired
-    @Qualifier("springBatchTransactionManager")
     private PlatformTransactionManager transactionManager;
 
     @Autowired
