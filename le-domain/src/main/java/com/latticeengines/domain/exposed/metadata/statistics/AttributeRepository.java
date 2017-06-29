@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -102,7 +101,7 @@ public class AttributeRepository {
 
     private static Map<TableRoleInCollection, String> getTableNameMap(Map<TableRoleInCollection, Table> tableMap) {
         Map<TableRoleInCollection, String> map = new HashMap<>();
-        tableMap.forEach((r, t) -> map.put(r, AvroUtils.getAvroFriendlyString(t.getName())));
+        tableMap.forEach((r, t) -> map.put(r, t.getName()));
         return map;
     }
 
