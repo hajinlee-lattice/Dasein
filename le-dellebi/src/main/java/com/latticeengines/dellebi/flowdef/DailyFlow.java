@@ -118,8 +118,11 @@ public class DailyFlow {
         long startTime = System.currentTimeMillis();
 
         Properties properties = new Properties();
+        log.info("-----------DEBUG-----------"); // Will be removed
         for (Map.Entry<String, String> entry : yarnConfiguration) {
             properties.put(entry.getKey(), entry.getValue());
+            log.info(entry.getKey() + ": " + entry.getValue()); // Will be
+                                                                // removed
         }
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
