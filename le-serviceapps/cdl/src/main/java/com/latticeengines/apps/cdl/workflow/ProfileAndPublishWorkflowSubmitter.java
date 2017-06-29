@@ -54,7 +54,7 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
         if (datafeedStatus == Status.Active || datafeedStatus == Status.InitialConsolidated) {
-            dataFeedProxy.updateDataFeedStatus(customerSpace, Status.Finalizing.getName());
+            dataFeedProxy.updateDataFeedStatus(customerSpace, Status.Profiling.getName());
             Table masterTableInDb = dataCollectionProxy.getTable(customerSpace,
                     TableRoleInCollection.ConsolidatedAccount);
             if (masterTableInDb == null) {

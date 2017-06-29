@@ -247,7 +247,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
                                 // store
 
         Consolidating("consolidating", false), //
-        Finalizing("finalizing", false), //
+        Profiling("profiling", false), //
         Deleting("deleting", false);
 
         private final String name;

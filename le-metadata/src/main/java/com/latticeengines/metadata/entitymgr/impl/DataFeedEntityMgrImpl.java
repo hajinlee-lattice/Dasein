@@ -182,6 +182,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findDefaultFeed() {
         DataCollection collection = dataCollectionEntityMgr.getDefaultCollectionReadOnly();
+        if (collection == null) {
+            throw new IllegalStateException("Default collection has not been initialized.");
+        }
         return datafeedDao.findDefaultFeed(collection.getName());
     }
 

@@ -57,7 +57,7 @@ public class CalculateStatsWorkflowSubmitter extends WorkflowSubmitter {
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
         if (datafeedStatus == Status.Active || datafeedStatus == Status.InitialConsolidated) {
-            dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), Status.Finalizing.getName());
+            dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), Status.Profiling.getName());
             Table masterTableInDb = dataCollectionProxy.getTable(customerSpace.toString(),
                     TableRoleInCollection.ConsolidatedAccount);
             if (masterTableInDb == null) {
