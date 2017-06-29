@@ -35,6 +35,9 @@ public class PlayLaunchWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBas
         PlayLaunchWorkflowConfiguration workflowConfig = new PlayLaunchWorkflowConfiguration.Builder() //
                 .customer(PMML_CUSTOMERSPACE) //
                 .workflow("playLaunchWorkflow") //
+                .inputProperties(inputProperties) //
+                .playName("DUMMY_PLAY_NAME") //
+                .playLaunchId("DUMMY_PLAY_LAUNCH_ID") //
                 .build();
 
         return workflowConfig;

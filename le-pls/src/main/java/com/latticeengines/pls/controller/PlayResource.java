@@ -95,8 +95,9 @@ public class PlayResource {
         Play play = playService.getPlayByName(playName);
         playLaunch.setPlay(play);
         playLaunchService.create(playLaunch);
-        String appId = playLaunchWorkflowSubmitter.submit(playLaunch.getLaunchId()).toString();
-        playLaunch.setJobId(appId);
+        String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+        playLaunch.setApplicationId(appId);
+        playLaunchService.update(playLaunch);
         return playLaunch;
     }
 

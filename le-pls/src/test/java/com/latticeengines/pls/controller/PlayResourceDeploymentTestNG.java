@@ -128,6 +128,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(playLaunch.getPid());
         Assert.assertNotNull(playLaunch.getLastUpdatedTimestamp());
         Assert.assertEquals(playLaunch.getLastUpdatedTimestamp(), playLaunch.getCreatedTimestamp());
+        Assert.assertNotNull(playLaunch.getApplicationId());
         Assert.assertNotNull(playLaunch.getLaunchState());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
     }

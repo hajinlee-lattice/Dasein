@@ -18,10 +18,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -456,5 +458,31 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
 
         return url;
+    }
+
+    public PlayLaunch getPlayLaunch(CustomerSpace customerSpace, //
+            String playName, //
+            String launchId) {
+        try {
+            String url = constructUrl("pls/internal/plays/" + playName + "/launches/" + launchId,
+                    customerSpace.toString());
+
+            log.debug("Get from " + url);
+            PlayLaunch playLauch = restTemplate.getForObject(url, PlayLaunch.class);
+
+            return playLauch;
+        } catch (Exception e) {
+            throw new RuntimeException("getPlayLaunch: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
+    public void updatePlayLaunch(CustomerSpace customerSpace, //
+            String playName, //
+            String launchId, //
+            LaunchState action) {
+        String url = constructUrl("pls/internal/plays/" + playName + "/launches/" + launchId, customerSpace.toString());
+        url += "?state=" + action.name();
+
+        restTemplate.put(url, null);
     }
 }

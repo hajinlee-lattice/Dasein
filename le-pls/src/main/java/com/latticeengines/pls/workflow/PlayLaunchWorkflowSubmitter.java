@@ -7,6 +7,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
@@ -15,15 +16,16 @@ public class PlayLaunchWorkflowSubmitter extends WorkflowSubmitter {
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(PlayLaunchWorkflowSubmitter.class);
 
-    public ApplicationId submit(String launchId) {
+    public ApplicationId submit(PlayLaunch playLaunch) {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "playLaunchWorkflow");
-        inputProperties.put("playLaunchId", launchId);
 
         PlayLaunchWorkflowConfiguration configuration = new PlayLaunchWorkflowConfiguration.Builder()
                 .customer(getCustomerSpace()) //
                 .workflow("playLaunchWorkflow") //
                 .inputProperties(inputProperties) //
+                .playName(playLaunch.getPlay().getName()) //
+                .playLaunchId(playLaunch.getLaunchId()) //
                 .build();
         return workflowJobService.submit(configuration);
     }

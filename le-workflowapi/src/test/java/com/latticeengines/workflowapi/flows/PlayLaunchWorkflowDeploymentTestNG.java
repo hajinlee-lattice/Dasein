@@ -14,6 +14,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends PlayLaunchWorkflowTestNG
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PlayLaunchWorkflowDeploymentTestNG.class);
 
+    WorkflowExecutionId workflowId = null;
+
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupForPlayLaunch();
@@ -28,8 +30,12 @@ public class PlayLaunchWorkflowDeploymentTestNG extends PlayLaunchWorkflowTestNG
     public void testWorkflow() throws Exception {
         PlayLaunchWorkflowConfiguration configuration = generatePlayLaunchWorkflowConfiguration();
         workflowService.registerJob(configuration.getWorkflowName(), applicationContext);
-        WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
+        workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
+    }
 
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = {
+            "testWorkflow" }, expectedExceptions = AssertionError.class)
+    public void testWorkflowStatus() throws Exception {
         waitForCompletion(workflowId);
     }
 }

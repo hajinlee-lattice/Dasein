@@ -17,6 +17,16 @@ public class PlayLaunchWorkflowConfiguration extends BaseLPWorkflowConfiguration
             return this;
         }
 
+        public Builder playName(String playName) {
+            initStepConf.setPlayName(playName);
+            return this;
+        }
+
+        public Builder playLaunchId(String playLaunchId) {
+            initStepConf.setPlayLaunchId(playLaunchId);
+            return this;
+        }
+
         public Builder workflow(String workflowName) {
             configuration.setWorkflowName(workflowName);
             configuration.setName(workflowName);

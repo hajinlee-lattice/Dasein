@@ -82,6 +82,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
+    @JsonProperty("ApplicationId")
+    @Column(name = "APPLICATION_ID", nullable = true)
+    private String applicationId;
+
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
@@ -93,9 +97,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @Transient
     @JsonProperty("table")
     private Table table;
-
-    @Transient
-    private String jobId;
 
     @Override
     public Long getPid() {
@@ -165,6 +166,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
         this.play = play;
     }
 
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
     @JsonIgnore
     public Tenant getTenant() {
         return this.tenant;
@@ -188,13 +197,5 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @JsonIgnore
     public Long getTenantId() {
         return this.tenantId;
-    }
-
-    public void setJobId(String jobId) {
-        this.jobId = jobId;
-    }
-
-    public String getJobId() {
-        return jobId;
     }
 }

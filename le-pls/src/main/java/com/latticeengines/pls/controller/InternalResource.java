@@ -64,6 +64,7 @@ import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.BucketedScore;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
+import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -71,6 +72,7 @@ import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
@@ -88,6 +90,7 @@ import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNotesService;
 import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -184,6 +187,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private ModelNotesService modelNotesService;
+
+    @Autowired
+    private PlayLaunchService playLaunchService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -1248,7 +1254,8 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean createNote(@PathVariable String modelSummaryId, @RequestBody NoteParams noteParams) {
-        log.debug(String.format("ModelSummary %s's ModelNotes created by %s", modelSummaryId, noteParams.getUserName()));
+        log.debug(
+                String.format("ModelSummary %s's ModelNotes created by %s", modelSummaryId, noteParams.getUserName()));
         modelNotesService.create(modelSummaryId, noteParams);
         return true;
     }
@@ -1257,8 +1264,36 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Insert one note for certain model summary.")
     public boolean copyNotes(@PathVariable String fromModelSummaryId, @PathVariable String toModelSummaryId) {
-        log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNotes", fromModelSummaryId, toModelSummaryId));
+        log.debug(String.format("Copy notes from ModelSummary %s to ModelSummary %s ModelNotes", fromModelSummaryId,
+                toModelSummaryId));
         modelNotesService.copyNotes(fromModelSummaryId, toModelSummaryId);
         return true;
+    }
+
+    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get play launch.")
+    public PlayLaunch getPlayLaunch(@PathVariable("tenantId") String tenantId, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId) {
+        log.debug(String.format("Get play launch %s playName %s launchId", playName, launchId));
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        return playLaunchService.findByLaunchId(launchId);
+    }
+
+    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.PUT)
+    @ResponseBody
+    @ApiOperation(value = "Update play launch state.")
+    public PlayLaunch updatePlayLaunch(@PathVariable("tenantId") String tenantId, //
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, //
+            @RequestParam("state") LaunchState state) {
+        log.debug(String.format("Update play launch state for %s playName %s launchId", playName, launchId));
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        playLaunch.setLaunchState(state);
+        return playLaunchService.update(playLaunch);
     }
 }

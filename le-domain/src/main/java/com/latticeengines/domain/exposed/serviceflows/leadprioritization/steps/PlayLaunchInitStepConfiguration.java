@@ -5,6 +5,8 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class PlayLaunchInitStepConfiguration extends BaseStepConfiguration {
     private CustomerSpace customerSpace;
+    private String playName;
+    private String playLaunchId;
 
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
@@ -14,4 +16,19 @@ public class PlayLaunchInitStepConfiguration extends BaseStepConfiguration {
         this.customerSpace = customerSpace;
     }
 
+    public String getPlayName() {
+        return playName;
+    }
+
+    public void setPlayName(String playName) {
+        this.playName = playName;
+    }
+
+    public String getPlayLaunchId() {
+        return playLaunchId;
+    }
+
+    public void setPlayLaunchId(String playLaunchId) {
+        this.playLaunchId = playLaunchId;
+    }
 }
