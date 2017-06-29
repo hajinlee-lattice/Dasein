@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,7 +87,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             Boolean result = partialDownload();
             if (result) {
                 modelSummaryDownloadFlagEntityMgr.removeDownloadedFlag(System.currentTimeMillis()
-                        - 24 * 60 * 60 * 1000L);
+                        - TimeUnit.HOURS.toMillis(2));
             }
             return result;
         }

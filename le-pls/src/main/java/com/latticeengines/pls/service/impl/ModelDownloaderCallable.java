@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -61,7 +62,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     public Boolean call() throws Exception {
         String startingHdfsPoint = modelServiceHdfsBaseDir + "/"
                 + CustomerSpace.parse(tenant.getId()) + "/models";
-        final Long tenantRegistrationTime = tenant.getRegisteredTime();
+        final long acceptTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
 
             @Override
@@ -70,12 +71,28 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                     return false;
                 }
 
-                if (file.getModificationTime() < tenantRegistrationTime) {
+                if (file.getModificationTime() < acceptTime) {
                     return false;
                 }
 
                 String name = file.getPath().getName().toString();
                 return name.equals("modelsummary.json");
+            }
+
+        };
+
+        HdfsUtils.HdfsFileFilter folderFilter = new HdfsUtils.HdfsFileFilter() {
+
+            @Override
+            public boolean accept(FileStatus file) {
+                if (file == null) {
+                    return false;
+                }
+
+                if (file.getModificationTime() < acceptTime) {
+                    return false;
+                }
+                return true;
             }
 
         };
@@ -89,7 +106,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         List<String> files = new ArrayList<>();
         try {
             long startTime = System.currentTimeMillis();
-            files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
+            files = HdfsUtils.getFilesForDirRecursiveWithFilterOnDir(yarnConfiguration, startingHdfsPoint, filter, folderFilter);
             long recursiveGetFilesTime = System.currentTimeMillis() - startTime;
             if (recursiveGetFilesTime > 1000) {
                 log.info(String.format("Recursive get files from %s duration: %d milliseconds",
