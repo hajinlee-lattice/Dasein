@@ -150,9 +150,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
             masterSeg = masterSegment(dataCollection);
             segmentEntityMgr.create(masterSeg);
         }
-        if (masterSeg == null) {
-            throw new IllegalStateException("Cannot find master segment of the collection " + collectionName);
-        }
         segmentEntityMgr.upsertStats(masterSeg.getName(), statisticsContainer);
     }
 
