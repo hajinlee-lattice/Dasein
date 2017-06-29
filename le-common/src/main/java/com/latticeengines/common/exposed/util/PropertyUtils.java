@@ -27,7 +27,6 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
     @Override
     protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props)
             throws BeansException {
-
         propertiesMap = new HashMap<>();
 
         if (log.isDebugEnabled()) {
@@ -56,18 +55,20 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
         Pattern pattern = Pattern.compile("(\\$\\{(\\w+)\\})");
         for (Object key : props.keySet()) {
             String value = (String) props.get(key);
-            while (true) {
-                Matcher matcher = pattern.matcher(value);
-                if (!matcher.find()) {
-                    break;
+            if (value.contains("$")) {
+                while (true) {
+                    Matcher matcher = pattern.matcher(value);
+                    if (!matcher.find()) {
+                        break;
+                    }
+                    String placeholder = matcher.group(2);
+                    String replacement = resolvePlaceholder(placeholder, props, springSystemPropertiesMode);
+                    if (replacement == null) {
+                        replacement = "";
+                    }
+                    value = matcher.replaceFirst(replacement);
+                    log.debug(String.format("%s: %s", key, value));
                 }
-                String placeholder = matcher.group(2);
-                String replacement = resolvePlaceholder(placeholder, props, springSystemPropertiesMode);
-                if (replacement == null) {
-                    replacement = "";
-                }
-                value = matcher.replaceFirst(replacement);
-                log.debug(String.format("%s: %s", key, value));
             }
             props.put(key, value);
             propertiesMap.put((String) key, value);
