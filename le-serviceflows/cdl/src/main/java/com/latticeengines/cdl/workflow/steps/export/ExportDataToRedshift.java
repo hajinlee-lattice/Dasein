@@ -72,11 +72,12 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     }
 
     private void renameTable(Table sourceTable) {
+        String oldName = sourceTable.getName();
         String goodName = AvroUtils.getAvroFriendlyString(sourceTable.getName());
-        if (!goodName.equalsIgnoreCase(sourceTable.getName())) {
+        if (!goodName.equalsIgnoreCase(oldName)) {
             log.info("Renaming table " + sourceTable.getName() + " to " + goodName);
             sourceTable.setName(goodName);
-            metadataProxy.updateTable(configuration.getCustomerSpace().toString(), goodName, sourceTable);
+            metadataProxy.updateTable(configuration.getCustomerSpace().toString(), oldName, sourceTable);
         }
     }
 
