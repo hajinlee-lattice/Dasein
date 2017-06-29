@@ -67,8 +67,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private void exportData(Table sourceTable) {
         EaiJobConfiguration exportConfig = setupExportConfig(sourceTable);
         AppSubmission submission = eaiProxy.submitEaiJob(exportConfig);
-        putStringValueInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0).toString());
-        waitForAppId(submission.getApplicationIds().get(0).toString());
+        putStringValueInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0));
+        waitForAppId(submission.getApplicationIds().get(0));
     }
 
     private void renameTable(Table sourceTable) {

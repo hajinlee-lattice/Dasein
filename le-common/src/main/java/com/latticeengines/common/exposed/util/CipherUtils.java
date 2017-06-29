@@ -128,20 +128,14 @@ public class CipherUtils {
      * decryption
      */
     public static String generateKey() {
-        try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance(CIPHER_METHOD);
-            keyGenerator.init(128);
-            return Base64.encodeBase64String(keyGenerator.generateKey().getEncoded());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return Base64.encodeBase64String(generateSalt());
     }
 
     private static byte[] generateSalt() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance(CIPHER_METHOD);
             keyGenerator.init(128);
-            return Arrays.copyOfRange(keyGenerator.generateKey().getEncoded(), 0, 16);
+            return keyGenerator.generateKey().getEncoded();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
