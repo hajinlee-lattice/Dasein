@@ -6,6 +6,7 @@ angular.module('lp.playbook')
     this.rating = this.rating || {};
     this.savedSegment = this.savedSegment || null;
     this.currentPlay = this.currentPlay || null;
+    this.playLaunches = this.playLaunches || null;
 
 
     this.clear = function() {
@@ -13,10 +14,13 @@ angular.module('lp.playbook')
         this.rating = {};
         this.savedSegment = null;
         this.currentPlay = null;
+        this.playLaunches = null;
+
         this.settings_form = {
             play_display_name: '',
             play_description: ''
         }
+        
         this.segment_form = {
             segment_selection: ''
         }
@@ -179,6 +183,17 @@ angular.module('lp.playbook')
         });
     }
 
+    this.getPlayLaunches = function(play_name) {
+        var deferred = $q.defer();
+        if(this.playLaunches) {
+            return this.playLaunches;
+        } else {
+            PlaybookWizardService.playLaunches(play_name).then(function(data){
+                deferred.resolve(data);
+            });
+            return deferred.promise;
+        }
+    }
     this.launchPlay = function(play) {
         var deferred = $q.defer();
         console.log(play);
@@ -273,6 +288,17 @@ angular.module('lp.playbook')
             method: 'POST',
             url: this.host + '/play',
             data: opts
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.playLaunches = function(play_name) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/play/' + play_name + '/launches'
         }).then(function(response){
             deferred.resolve(response.data);
         });

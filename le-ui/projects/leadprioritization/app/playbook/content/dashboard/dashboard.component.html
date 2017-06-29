@@ -25,11 +25,30 @@
                     </div>
                     <div>
                         <a ui-sref="home.playbook.wizard.settings({play_name: vm.play.name})">temp edit link</a><br />
-                        <a href="#" ng-click="showPlayData = !showPlayData">debugging: show play data</a>
+                        <a href="#" ng-click="showPlayData = !showPlayData">debugging: {{!showPlayData ? "show" : "hide"}} play data</a>
                         <div ng-show="showPlayData">
-                            <pre>{{vm.play|json}}</pre>
+                            <pre>vm.play: {{vm.play|json}}</pre>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-section launch-history">
+            <div class="dashboard-section-container">
+                <div class="dashboard-section-header">
+                    <h2>Last launch</h2>
+                </div>
+                <div class="dashboard-section-content">
+                    <div>
+                        <a href="#" ng-click="showLaunchData = !showLaunchData">debugging: {{!showLaunchData ? "show" : "hide"}} launches data</a>
+                        <div ng-show="showLaunchData">
+                            <pre>vm.launchHistory: {{vm.launchHistory|json}}</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="dashboard-section-footer">
+                    <span ng-if="vm.play.timestamp">Launched {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
                 </div>
             </div>
         </div>
@@ -37,7 +56,7 @@
         <div class="dashboard-section talking-points">
             <div class="dashboard-section-container">
                 <div class="dashboard-section-header">
-                    <h2>Talking points:</h2>
+                    <h2>Insights</h2>
                 </div>
                 <div class="dashboard-section-content">
                     <div class="dashboard-section-content-subsection talking-points">
@@ -48,37 +67,23 @@
                     </div>
 
                     <div>
-                        <a href="#" ng-click="showTalkingPointsData = !showTalkingPointsData">debugging: show talking points data</a>
+                        <a href="#" ng-click="showTalkingPointsData = !showTalkingPointsData">debugging: {{!showTalkingPointsData ? "show" : "hide"}} talking points data</a>
                         <div ng-show="showTalkingPointsData">
-                            <pre>{{vm.talkingPoints|json}}</pre>
+                            <pre>vm.talkingPoints: {{vm.talkingPoints|json}}</pre>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="dashboard-section notes">
+        <div class="dashboard-section ratings">
             <div class="dashboard-section-container">
                 <div class="dashboard-section-header">
-                    <h2>Notes:</h2>
+                    <h2>Account ratings</h2>
                 </div>
                 <div class="dashboard-section-content">
-                    <pre>{{vm.notes|json}}</pre>
-                </div> 
-            </div>
-        </div>
 
-        <div class="dashboard-section launch-history">
-            <div class="dashboard-section-container">
-                <div class="dashboard-section-header">
-                    <h2>Last launch:</h2>
-                </div>
-                <div class="dashboard-section-content">
-                    <pre>{{vm.launchHistory|json}}</pre>
-                </div>
-                <div class="dashboard-section-footer">
-                    <span ng-if="vm.play.timestamp">Launched {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
-                </div>
+                </div> 
             </div>
         </div>
     </div>

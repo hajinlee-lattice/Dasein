@@ -16,8 +16,12 @@ angular.module('lp.playbook.dashboard', [
 
     $q.when($stateParams.play_name, function() {
         if(play_name) {
+            PlaybookWizardStore.getPlayLaunches(play_name).then(function(results){
+                vm.launchHistory = results;
+            });
+
             CgTalkingPointStore.getTalkingPoints(play_name).then(function(results){
-                console.log('got talking points', results);
+                vm.talkingPoints = results;
             });
         }
 
