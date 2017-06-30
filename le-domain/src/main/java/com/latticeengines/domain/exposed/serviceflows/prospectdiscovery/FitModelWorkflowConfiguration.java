@@ -18,7 +18,6 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.Ru
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunImportSummaryDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunScoreTableDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class FitModelWorkflowConfiguration extends BasePDWorkflowConfiguration {
 
@@ -41,7 +40,7 @@ public class FitModelWorkflowConfiguration extends BasePDWorkflowConfiguration {
         private RunAttributeLevelSummaryDataFlowsConfiguration attrLevelSummaryDataFlows = new RunAttributeLevelSummaryDataFlowsConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            fitModel.setCustomerSpace(customerSpace);
+            fitModel.setContainerConfiguration("fitModelWorkflow", customerSpace, "FitModelWorkflow");
             microservice.setCustomerSpace(customerSpace);
             return this;
         }
