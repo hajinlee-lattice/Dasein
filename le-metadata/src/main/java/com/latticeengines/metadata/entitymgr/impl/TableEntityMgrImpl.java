@@ -142,6 +142,14 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 } catch (IOException e) {
                     log.error(String.format("Failed to delete extract %s", p));
                 }
+                String schemaPath = p.replace("/Tables/", "/TableSchemas/");
+                try {
+                    if (HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
+                        HdfsUtils.rmdir(yarnConfiguration, schemaPath);
+                    }
+                } catch (IOException e) {
+                    log.error(String.format("Failed to delete extract schema %s", schemaPath));
+                }
             });
         }
     }
