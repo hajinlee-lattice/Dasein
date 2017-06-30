@@ -38,7 +38,6 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     private boolean scheduled = false;
 
-    @SuppressWarnings("unchecked")
     public ColumnMetadataProxy() {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
     }
@@ -142,7 +141,6 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return metadataList;
     }
 
-    @SuppressWarnings({ "unchecked" })
     public AttributeRepository getAttrRepo() {
         return amAttrRepoCache.get(AM_REPO);
     }

@@ -132,26 +132,31 @@ public class WatcherCache<K, V> {
             this.cacheName = watcherName;
         }
 
+        @SuppressWarnings("rawtypes")
         public Builder name(String cacheName) {
             this.cacheName = cacheName;
             return this;
         }
 
+        @SuppressWarnings("rawtypes")
         public Builder watch(CamilleWatcher watcher) {
             this.watcherName = watcher.name();
             return this;
         }
 
+        @SuppressWarnings("rawtypes")
         public Builder load(Function<K, V> load) {
             this.load = load;
             return this;
         }
 
+        @SuppressWarnings("rawtypes")
         public Builder maximum(int capacity) {
             this.capacity = capacity;
             return this;
         }
 
+        @SuppressWarnings("rawtypes")
         public Builder initKeys(Object[] initKeys) {
             this.initKeys = initKeys;
             return this;
