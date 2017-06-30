@@ -9,4 +9,7 @@ public class FilterBucketedParameters extends TransformationFlowParameters {
     @JsonProperty("original_attrs")
     public List<String> originalAttrs;
 
+    @JsonProperty("enc_attr_prefix")
+    public String encAttrPrefix;
+
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.datacloud.etl.transformation.transformer.impl.BucketedFilter.TRANSFORMER_NAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETED_FILTER;
 
 import java.util.HashSet;
@@ -9,13 +10,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.dataflow.transformation.FilterBucketed;
-import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.dataflow.FilterBucketedParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketedFilterConfig;
@@ -58,6 +59,7 @@ public class BucketedFilter extends AbstractDataflowTransformer<BucketedFilterCo
     protected void preDataFlowProcessing(TransformStep step, String workflowDir, FilterBucketedParameters parameters,
                                          BucketedFilterConfig configuration) {
         parameters.originalAttrs = configuration.getOriginalAttrs();
+        parameters.encAttrPrefix = configuration.getEncAttrPrefix();
     }
 
     @Override
@@ -74,9 +76,10 @@ public class BucketedFilter extends AbstractDataflowTransformer<BucketedFilterCo
 
     private Schema modifyBaseSchema(Schema baseSchema, FilterBucketedParameters parameters) {
         Set<String> originalFieldSet = new HashSet<>(parameters.originalAttrs);
+        String encAttrPrefix = StringUtils.isBlank(parameters.encAttrPrefix) ? CEAttr : parameters.encAttrPrefix;
         List<String> toRemove = baseSchema.getFields().stream() //
                 .map(Schema.Field::toString) //
-                .filter(f -> !originalFieldSet.contains(f) || BucketEncodeUtils.isEAttr(f)) //
+                .filter(f -> !originalFieldSet.contains(f) && !f.startsWith(encAttrPrefix)) // not in original, and not CEAttr
                 .collect(Collectors.toList());
         return AvroUtils.removeFields(baseSchema, toRemove.toArray(new String[toRemove.size()]));
     }

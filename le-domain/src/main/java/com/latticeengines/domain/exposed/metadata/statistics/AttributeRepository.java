@@ -112,14 +112,19 @@ public class AttributeRepository {
         lookups.forEach(lookup -> {
             BusinessEntity entity = lookup.getEntity();
             TableRoleInCollection role = entity.getServingStore();
-            Table table = tableMap.get(role);
-            if (!attrMaps.containsKey(role)) {
-                Map<String, ColumnMetadata> attrMap = expandAttrsInTable(table);
-                attrMaps.put(role, attrMap);
+            if (tableMap.containsKey(role)) {
+                Table table = tableMap.get(role);
+                if (!attrMaps.containsKey(role)) {
+                    Map<String, ColumnMetadata> attrMap = expandAttrsInTable(table);
+                    attrMaps.put(role, attrMap);
+                }
+                Map<String, ColumnMetadata> attrMap = attrMaps.get(role);
+                ColumnMetadata attribute = attrMap.get(lookup.getAttribute());
+                if (attribute == null) {
+                    throw new RuntimeException("Cannot find metadata for attribute " + lookup);
+                }
+                attributes.put(lookup, attribute);
             }
-            Map<String, ColumnMetadata> attrMap = attrMaps.get(role);
-            ColumnMetadata attribute = attrMap.get(lookup.getAttribute());
-            attributes.put(lookup, attribute);
         });
         return attributes;
     }
@@ -132,11 +137,10 @@ public class AttributeRepository {
 
     private static Map<AttributeLookup, AttributeStats> expandStats(Statistics statistics) {
         Map<AttributeLookup, AttributeStats> statsMap = new HashMap<>();
-        statistics.getCategories().values().forEach(cat -> {
-            cat.getSubcategories().values().forEach(subcat -> {
-                statsMap.putAll(subcat.getAttributes());
-            });
-        });
+        statistics.getCategories().values().forEach(cat -> //
+                cat.getSubcategories().values().forEach(subcat -> {
+            statsMap.putAll(subcat.getAttributes());
+        }));
         return statsMap;
     }
 

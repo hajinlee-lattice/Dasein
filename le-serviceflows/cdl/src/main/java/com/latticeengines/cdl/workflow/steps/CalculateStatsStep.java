@@ -205,6 +205,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         step.setInputSteps(Collections.singletonList(bucketStep));
         step.setTransformer(TRANSFORMER_BUCKETED_FILTER);
         BucketedFilterConfig conf = new BucketedFilterConfig();
+        conf.setEncAttrPrefix(CEAttr);
         conf.setOriginalAttrs(originalAttrs);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
