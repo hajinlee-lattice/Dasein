@@ -3,9 +3,6 @@ package com.latticeengines.domain.exposed.datacloud.dataflow;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.StringUtils;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,9 +20,7 @@ public class DCBucketedAttr extends BucketedAttribute implements Serializable {
 
     public DCBucketedAttr(String nominalAttr, String sourceAttr, int lowestBit, int numBits) {
         super(nominalAttr, new ArrayList<>(), lowestBit, numBits);
-        if (!nominalAttr.equals(sourceAttr)) {
-            this.sourceAttr = sourceAttr;
-        }
+        this.sourceAttr = sourceAttr;
     }
 
     @JsonProperty("dec_strat")
@@ -59,10 +54,5 @@ public class DCBucketedAttr extends BucketedAttribute implements Serializable {
 
     public void setSourceAttr(String sourceAttr) {
         this.sourceAttr = sourceAttr;
-    }
-
-    @JsonIgnore
-    public String resolveSourceAttr() {
-        return StringUtils.isBlank(sourceAttr) ? getNominalAttr() : sourceAttr;
     }
 }

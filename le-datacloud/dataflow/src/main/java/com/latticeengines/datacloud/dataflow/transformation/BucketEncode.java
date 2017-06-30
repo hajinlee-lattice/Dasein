@@ -94,7 +94,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                     if (!posMap.containsKey(key)) {
                         posMap.put(key, new HashMap<>());
                     }
-                    posMap.get(key).put(bktAttr.resolveSourceAttr(), decodeStrategy.getBitPosition());
+                    posMap.get(key).put(bktAttr.getSourceAttr(), decodeStrategy.getBitPosition());
                 }
             }
         }
@@ -119,7 +119,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                 if (bktAttr.getDecodedStrategy() != null) {
                     srcAttr = bktAttr.getDecodedStrategy().getEncodedColumn();
                 } else {
-                    srcAttr = bktAttr.resolveSourceAttr();
+                    srcAttr = bktAttr.getSourceAttr();
                 }
                 if (inputFieldSet.contains(srcAttr)) {
                     neededFields.add(srcAttr);
