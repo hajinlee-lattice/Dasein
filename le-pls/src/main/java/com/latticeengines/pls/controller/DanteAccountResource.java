@@ -22,9 +22,10 @@ import com.wordnik.swagger.annotations.Api;
 
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "danteaccounts", description = "REST resource for Dante Accounts")
+@Api(value = "dante/accounts", description = "REST resource for Dante Accounts")
 @RestController
-@RequestMapping("/danteaccounts")
+@RequestMapping("/dante/accounts")
+@PreAuthorize("hasRole('View_PLS_Plays')")
 public class DanteAccountResource {
     private static final Logger log = Logger.getLogger(DanteAccountResource.class);
 
@@ -34,7 +35,6 @@ public class DanteAccountResource {
     @RequestMapping(value = "/{count}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {

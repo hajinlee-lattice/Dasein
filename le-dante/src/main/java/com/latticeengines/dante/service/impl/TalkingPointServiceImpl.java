@@ -46,11 +46,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     public List<DanteTalkingPoint> findAllByPlayID(String playExternalID) {
-        List<DanteTalkingPoint> tps = talkingPointEntityMgr.findAllByPlayID(playExternalID);
-        if (tps != null && tps.size() > 0)
-            return tps;
-        else
-            throw new LedpException(LedpCode.LEDP_38002, new String[] { playExternalID });
+        return talkingPointEntityMgr.findAllByPlayID(playExternalID);
     }
 
     @Override

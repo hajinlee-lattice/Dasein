@@ -26,9 +26,10 @@ import com.wordnik.swagger.annotations.Api;
 
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "dantetalkingpoints", description = "REST resource for Dante Talking Points")
+@Api(value = "dante/talkingpoints", description = "REST resource for Dante Talking Points")
 @RestController
-@RequestMapping("/dantetalkingpoints")
+@RequestMapping("/dante/talkingpoints")
+@PreAuthorize("hasRole('View_PLS_Plays')")
 public class DanteTalkingPointResource {
 
     private static final Logger log = Logger.getLogger(DanteTalkingPointResource.class);
@@ -48,7 +49,6 @@ public class DanteTalkingPointResource {
     @RequestMapping(value = "/{externalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<DanteTalkingPoint> findByExternalID(@PathVariable String externalID) {
         return danteTalkingPointProxy.findByExternalID(externalID);
     }
@@ -56,7 +56,6 @@ public class DanteTalkingPointResource {
     @RequestMapping(value = "/play/{playExternalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(@PathVariable String playExternalID) {
         return danteTalkingPointProxy.findAllByPlayID(playExternalID);
     }
@@ -64,7 +63,6 @@ public class DanteTalkingPointResource {
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get the server url and oAuth token for Dante authentication via Oauth")
-    @PreAuthorize("hasRole('View_PLS_Plays')")
     public ResponseDocument<DantePreviewResources> getPreviewResources() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {

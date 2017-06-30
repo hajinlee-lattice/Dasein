@@ -263,7 +263,6 @@
         <security:intercept-url pattern="pls/tenant/**" access="hasRole('VIEW_PLS_DATA')"/>
     </security:http>
 
-
     <security:http use-expressions="true"
                    pattern="/pls/play/**"
                    authentication-manager-ref="authenticationManager"
@@ -274,13 +273,21 @@
     </security:http>
 
     <security:http use-expressions="true"
+                   pattern="/pls/dante/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+    </security:http>
+
+    <security:http use-expressions="true"
                    pattern="/pls/modelnotes/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
-    
+
     <security:http use-expressions="true"
                    pattern="/pls/datacollection/**"
                    authentication-manager-ref="authenticationManager"

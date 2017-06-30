@@ -20,9 +20,10 @@ import com.wordnik.swagger.annotations.Api;
 
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "danteattributes", description = "REST resource for attributes related to Dante notions")
+@Api(value = "dante/attributes", description = "REST resource for attributes related to Dante notions")
 @RestController
-@RequestMapping("/danteattributes")
+@RequestMapping("/dante/attributes")
+@PreAuthorize("hasRole('View_PLS_Plays')")
 public class DanteAttributesResource {
 
     private static final Logger log = Logger.getLogger(DanteAttributesResource.class);
@@ -33,7 +34,6 @@ public class DanteAttributesResource {
     @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get account attributes for this tenant")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<Map<String, String>> getAccountAttributes() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
@@ -45,7 +45,6 @@ public class DanteAttributesResource {
     @RequestMapping(value = "/recommendationattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get recommendation attributes")
-    @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<Map<String, String>> getRecommendationAttributes() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
