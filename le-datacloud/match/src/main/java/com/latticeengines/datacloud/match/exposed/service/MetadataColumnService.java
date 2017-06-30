@@ -18,6 +18,4 @@ public interface MetadataColumnService<E extends MetadataColumn> extends HasData
 
     void updateMetadataColumns(String dataCloudVersion, List<ColumnMetadata> columnMetadatas);
 
-    List<E> getUpToDateMetadataColumns(List<String> columnId, String dataCloudVersion);
-
 }

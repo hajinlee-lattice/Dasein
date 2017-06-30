@@ -161,7 +161,7 @@ public class AccountMasterColumnMetadataServiceImplTestNG
         COLUMN_3.setExternalColumnId(COLUMN_ID_3);
         COLUMN_SELECTION.setColumns(Arrays.asList(COLUMN_1, COLUMN_2, COLUMN_3));
         List<ColumnMetadata> updatedColumnMetadatas = accountMasterColumnMetadataService
-                .fromSelectionUpdated(COLUMN_SELECTION, DATA_CLOUD_VERSION_1);
+                .fromSelection(COLUMN_SELECTION, DATA_CLOUD_VERSION_1);
         COLUMN_METADATA_1.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL_ALLINSIGHTS));
         COLUMN_METADATA_2.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL_MODELINSIGHTS));
         COLUMN_METADATA_3.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL));

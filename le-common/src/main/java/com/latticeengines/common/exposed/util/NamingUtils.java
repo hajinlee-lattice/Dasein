@@ -31,4 +31,8 @@ public final class NamingUtils {
         return original + "_" + uuid.toString().replace("-", "_");
     }
 
+    public static String getFormatedDate() {
+        return DATE_FORMAT.format(new Date());
+    }
+
 }

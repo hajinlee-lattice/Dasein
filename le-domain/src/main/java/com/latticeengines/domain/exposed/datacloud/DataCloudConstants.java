@@ -10,7 +10,6 @@ public final class DataCloudConstants {
 
     public static final String ACCOUNT_MASTER_COLUMN = "AccountMasterColumn";
     public static final String ACCOUNT_MASTER = "AccountMaster";
-    public static final String ACCOUNT_MASTER_BUCKETED = "AccountMasterBucketed";
     public static final String ACCOUNT_MASTER_COLLECTION = "AMCollection";
 
     public static final String LATTIC_ID = "LatticeID";
@@ -23,7 +22,6 @@ public final class DataCloudConstants {
     public static final String ATTR_NUM_EMP_RANGE = "LE_EMPLOYEE_RANGE";
     public static final String ATTR_REV_RANGE = "LE_REVENUE_RANGE";
     public static final String ATTR_NUM_LOC_RANGE = "LE_NUMBER_OF_LOCATIONS";
-    public static final String BUCKETED_ACCOUNT_MASTER_TABLE_NAME = "AccountMasterBucketed";
 
     public static final String PROFILE_STAGE = "Profiling";
     public static final String PROFILE_ATTR_ATTRNAME = "AttrName";
@@ -33,8 +31,6 @@ public final class DataCloudConstants {
     public static final String PROFILE_ATTR_LOWESTBIT = "LowestBit";
     public static final String PROFILE_ATTR_NUMBITS = "NumBits";
     public static final String PROFILE_ATTR_BKTALGO = "BktAlgo";
-    public static final String PROFILE_ATTR_SRC = "Attribute_Source";
-    public static final String PROFILE_ATTR_SRC_CUSTOMER = "CUSTOMER";
 
     public static final String CEAttr = "CEAttr";
     public static final String EAttr = "EAttr";
@@ -44,14 +40,11 @@ public final class DataCloudConstants {
     public static final String STATS_ATTR_BKTS = "BktCounts";
     public static final String STATS_ATTR_ALGO = PROFILE_ATTR_BKTALGO;
 
-    public static final String SOURCE_AM_PROFILE = "AccountMasterProfile";
-
     public static final String TRANSFORMER_AM_ENRICHER = "AMAttrEnricher";
     public static final String TRANSFORMER_PROFILER = "SourceProfiler";
     public static final String TRANSFORMER_BUCKETER = "sourceBucketer";
     public static final String TRANSFORMER_BUCKETED_FILTER = "bucketedFilter";
     public static final String TRANSFORMER_STATS_CALCULATOR = "statsCalculator";
     public static final String TRANSFORMER_SORTER = "sourceSorter";
-    public static final String TRANSFORMER_COPIER = "sourceCopier";
     public static final String TRANSFORMER_MATCH = "bulkMatchTransformer";
 }

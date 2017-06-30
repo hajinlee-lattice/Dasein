@@ -123,7 +123,7 @@ public class WatcherCache<K, V> {
         private Function<K, V> load;
         private String cacheName;
         private String watcherName;
-        private K[] initKeys;
+        private Object[] initKeys;
         private int capacity = 10;
 
         Builder() {
@@ -151,7 +151,7 @@ public class WatcherCache<K, V> {
             return this;
         }
 
-        public Builder initKeys(K[] initKeys) {
+        public Builder initKeys(Object[] initKeys) {
             this.initKeys = initKeys;
             return this;
         }

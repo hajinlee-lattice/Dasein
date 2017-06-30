@@ -1,53 +1,37 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMMedataUpdate;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMRelease;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+import com.latticeengines.camille.exposed.watchers.NodeWatcher;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.newrelic.api.agent.Trace;
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
 
     private static final Log log = LogFactory.getLog(BaseMetadataColumnServiceImpl.class);
 
-    @Value("${datacloud.match.metadatacolumn.refresh.minute:19}")
-    private long refreshInterval;
-
-    @Autowired
-    @Qualifier("commonTaskScheduler")
-    private ThreadPoolTaskScheduler scheduler;
-
     @PostConstruct
     private void postConstruct() {
-        loadCache();
-        scheduler.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                loadCache();
-            }
-        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(refreshInterval)),
-                TimeUnit.MINUTES.toMillis(refreshInterval));
+        initWatcher();
     }
 
     @Override
@@ -67,16 +51,16 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             metadataColumns.add(updateSavedMetadataColumn(dataCloudVersion, columnMetadata));
         }
         getMetadataColumnEntityMgr().updateMetadataColumns(dataCloudVersion, metadataColumns);
+        NodeWatcher.updateWatchedData(AMMedataUpdate.name(), NamingUtils.getFormatedDate());
+        // pause 2 sec for watchers to update
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            log.warn(e);
+        }
     }
 
     @Override
-    public List<E> getUpToDateMetadataColumns(List<String> columnIds, String dataCloudVersion) {
-        loadCache();
-        return getMetadataColumns(columnIds, dataCloudVersion);
-    }
-
-    @Override
-    @Trace
     @MatchStep
     public List<E> getMetadataColumns(List<String> columnIds, String dataCloudVersion) {
         List<E> toReturn = new ArrayList<>();
@@ -111,7 +95,6 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
-    @Trace
     @MatchStep(threshold = 100L)
     public E getMetadataColumn(String columnId, String dataCloudVersion) {
         ConcurrentMap<String, ConcurrentMap<String, E>> whiteColumnCaches = getWhiteColumnCache();
@@ -131,14 +114,12 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         }
     }
 
-    @Trace
     private E loadColumnMetadataById(String columnId, String dataCloudVersion) {
         synchronized (getWhiteColumnCache()) {
             return performThreadSafeColumnMetadataLoading(columnId, dataCloudVersion);
         }
     }
 
-    @Trace
     private E performThreadSafeColumnMetadataLoading(String columnId, String dataCloudVersion) {
         E column;
         try {
@@ -167,26 +148,38 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         }
     }
 
-    private void loadCache() {
+    private void refreshCaches() {
         List<String> allVersions = getAllVersions();
         for (String dataCloudVersion : allVersions) {
-            if (refreshCacheNeeded(dataCloudVersion)) {
-                log.info("Start loading black and white column caches for version " + dataCloudVersion);
-                List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
-                ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
-                for (E column : columns) {
-                    whiteColumnCache.put(column.getColumnId(), column);
-                }
-                synchronized (getWhiteColumnCache()) {
-                    getWhiteColumnCache().put(dataCloudVersion, whiteColumnCache);
-                }
-                synchronized (getBlackColumnCache()) {
-                    getBlackColumnCache().clear();
-                }
-                log.info(
-                        "Loaded " + whiteColumnCache.size() + " columns into white cache. version=" + dataCloudVersion);
+            log.info("Start loading black and white column caches for version " + dataCloudVersion);
+            List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+            ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
+            for (E column : columns) {
+                whiteColumnCache.put(column.getColumnId(), column);
             }
+            synchronized (getWhiteColumnCache()) {
+                getWhiteColumnCache().put(dataCloudVersion, whiteColumnCache);
+            }
+            synchronized (getBlackColumnCache()) {
+                getBlackColumnCache().clear();
+            }
+            log.info(
+                    "Loaded " + whiteColumnCache.size() + " columns into white cache. version=" + dataCloudVersion);
         }
+    }
+
+    private void initWatcher() {
+        // both AMRelease and AMMetadataUpdate can trigger refreshing caches
+        NodeWatcher.registerWatcher(AMRelease.name());
+        NodeWatcher.registerListener(AMRelease.name(), () -> {
+            log.info("ZK watcher " + AMRelease.name() + " changed, updating white and black columns caches ...");
+            refreshCaches();
+        });
+        NodeWatcher.registerWatcher(AMMedataUpdate.name());
+        NodeWatcher.registerListener(AMMedataUpdate.name(), () -> {
+            log.info("ZK watcher " + AMMedataUpdate.name() + " changed, updating white and black columns caches ...");
+            refreshCaches();
+        });
     }
 
     abstract protected MetadataColumnEntityMgr<E> getMetadataColumnEntityMgr();

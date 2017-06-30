@@ -2,18 +2,13 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,14 +32,11 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("accountMasterColumnMetadataService")
 public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<AccountMasterColumn> {
-    private static final Log log = LogFactory.getLog(AccountMasterColumnMetadataServiceImpl.class);
 
     private AttributeRepository attrRepo;
 
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
-
-    private ConcurrentMap<String, Date> cachedRefreshDate = new ConcurrentHashMap<>();
 
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
@@ -60,29 +52,8 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
     }
 
     @Override
-    protected boolean isLatestVersion(String dataCloudVersion) {
-        return getLatestVersion().equals(dataCloudVersion);
-    }
-
-    @Override
     protected String getLatestVersion() {
         return versionEntityMgr.currentApprovedVersion().getVersion();
-    }
-
-    @Override
-    protected boolean refreshCacheNeeded() {
-        DataCloudVersion approvedVersion = versionEntityMgr.currentApprovedVersion();
-        String approvedVersionValue = approvedVersion.getVersion();
-        Date approvedVersionDate = approvedVersion.getMetadataRefreshDate();
-        Date cachedDate = cachedRefreshDate.get(approvedVersionValue);
-        if (approvedVersionDate == null || (cachedDate != null && approvedVersionDate.compareTo(cachedDate) <= 0)) {
-            log.info("Metadata Refresh Date : " + approvedVersionDate
-                    + " Cache is already update-to-date as per the metadata refresh date so not refreshing it again");
-            return false;
-        }
-        cachedRefreshDate.put(approvedVersionValue, approvedVersionDate);
-        log.info("Metadata Refresh Date : " + approvedVersionDate + " Refreshing cache");
-        return true;
     }
 
     @Override

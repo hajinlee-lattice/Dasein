@@ -1,26 +1,22 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMRelease;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
@@ -36,44 +32,19 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
 
     private static final Log log = LogFactory.getLog(BaseColumnMetadataServiceImpl.class);
 
-    @Value("${datacloud.match.columnmetadata.refresh.minute:17}")
-    private long refreshInterval;
-
-    private ConcurrentMap<Predefined, List<ColumnMetadata>> predefinedMetaDataCache = new ConcurrentHashMap<>();
-
-    @Autowired
-    @Qualifier("commonTaskScheduler")
-    private ThreadPoolTaskScheduler scheduler;
-
-    // Not used for now, will use when figured out logic
-    @SuppressWarnings("unused")
-    @Autowired
-    private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
-
-    protected abstract boolean isLatestVersion(String dataCloudVersion);
+    private WatcherCache<ImmutablePair<String, Predefined>, List<ColumnMetadata>> predefinedMetaDataCache;
 
     protected abstract String getLatestVersion();
 
     @PostConstruct
     private void postConstruct() {
-        loadCache();
-        scheduler.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                loadCache();
-            }
-        }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(refreshInterval)),
-                TimeUnit.MINUTES.toMillis(refreshInterval));
+        initCache();
     }
 
     @Override
     public List<ColumnMetadata> fromPredefinedSelection(Predefined predefined,
             String dataCloudVersion) {
-        if (isLatestVersion(dataCloudVersion)) {
-            return predefinedMetaDataCache.get(predefined);
-        } else {
-            return fromMetadataColumnService(predefined, dataCloudVersion);
-        }
+        return predefinedMetaDataCache.get(ImmutablePair.of(dataCloudVersion, predefined));
     }
 
     @Override
@@ -81,12 +52,6 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     public List<ColumnMetadata> fromSelection(ColumnSelection selection, String dataCloudVersion) {
         List<E> metadataColumns = getMetadataColumnService()
                 .getMetadataColumns(selection.getColumnIds(), dataCloudVersion);
-        return toColumnMetadata(metadataColumns);
-    }
-
-    @Override
-    public List<ColumnMetadata> fromSelectionUpdated(ColumnSelection selection, String dataCloudVersion) {
-        List<E> metadataColumns = getMetadataColumnService().getUpToDateMetadataColumns(selection.getColumnIds(), dataCloudVersion);
         return toColumnMetadata(metadataColumns);
     }
 
@@ -211,22 +176,23 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         }
     }
 
-    private void loadCache() {
-        if (refreshCacheNeeded()) {
-            String latestVersion = getLatestVersion();
-            log.info("Start loading black and white column caches for version " + latestVersion);
-            for (Predefined selection : Predefined.values()) {
-                try {
-                    predefinedMetaDataCache.put(selection, fromMetadataColumnService(selection, latestVersion));
-                } catch (Exception e) {
-                    log.error("Failed to load Cache! Type=" + selection, e);
-                }
-            }
-        } else {
-            log.info("Cache is already update-to-date as per the metadata refresh date so not refreshing it again");
-        }
+    @SuppressWarnings("unchecked")
+    private void initCache() {
+        String currentApproved = getLatestVersion();
+        List<ImmutablePair<String, Predefined>> predefinedForLatestVersion = Predefined.supportedSelections.stream() //
+                .map(p -> ImmutablePair.of(currentApproved, p)).collect(Collectors.toList());
+        ImmutablePair<String, Predefined>[] initKeys = predefinedForLatestVersion
+                .toArray(new ImmutablePair[predefinedForLatestVersion.size()]);
+         predefinedMetaDataCache = WatcherCache.builder() //
+                .name("PredefinedSelectionCacheForRTSCache") //
+                .watch(AMRelease.name()) //
+                .maximum(10) //
+                .load(key -> {
+                    ImmutablePair<String, Predefined> pair = (ImmutablePair<String, Predefined>) key;
+                    return fromMetadataColumnService(pair.getRight(), pair.getLeft());
+                }) //
+                .initKeys(initKeys) //
+                .build();
     }
-
-    abstract protected boolean refreshCacheNeeded();
 
 }

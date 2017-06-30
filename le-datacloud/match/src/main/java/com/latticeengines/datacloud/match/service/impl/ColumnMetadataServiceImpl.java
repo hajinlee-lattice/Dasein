@@ -30,18 +30,8 @@ public class ColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<Ext
     }
 
     @Override
-    protected boolean isLatestVersion(String dataCloudVersion) {
-        return true;
-    }
-
-    @Override
     protected String getLatestVersion() {
         return latstRtsCache;
-    }
-
-    @Override
-    protected boolean refreshCacheNeeded() {
-        return true;
     }
 
     @Override
