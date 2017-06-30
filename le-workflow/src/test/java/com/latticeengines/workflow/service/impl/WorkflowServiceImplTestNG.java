@@ -8,6 +8,8 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
@@ -38,6 +40,7 @@ import com.latticeengines.workflow.functionalframework.WorkflowWithFailingListen
 
 public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
+    private static final Log log = LogFactory.getLog(WorkflowServiceImplTestNG.class);
     @Autowired
     private WorkflowService workflowService;
 
@@ -189,7 +192,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
         workflowService.stop(workflowId);
         List<String> stepNames = workflowService.getStepNames(workflowId);
-
+        log.info("stepnames: " + stepNames);
         assertTrue(stepNames.contains(successfulStep.name()));
         assertTrue(stepNames.contains(sleepableStep.name()));
         assertFalse(stepNames.contains(anotherSuccessfulStep.name()));
