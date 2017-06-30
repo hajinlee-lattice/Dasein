@@ -74,6 +74,11 @@ public class BucketedFilter extends AbstractDataflowTransformer<BucketedFilterCo
         return null;
     }
 
+    @Override
+    protected boolean needBaseAvsc() {
+        return true;
+    }
+
     private Schema modifyBaseSchema(Schema baseSchema, FilterBucketedParameters parameters) {
         Set<String> originalFieldSet = new HashSet<>(parameters.originalAttrs);
         String encAttrPrefix = StringUtils.isBlank(parameters.encAttrPrefix) ? CEAttr : parameters.encAttrPrefix;
