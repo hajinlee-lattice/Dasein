@@ -37,7 +37,7 @@ public class DanteTalkingPointResource {
     @Autowired
     DanteTalkingPointProxy danteTalkingPointProxy;
 
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create a Dante Talking Point ")
