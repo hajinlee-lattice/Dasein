@@ -8,7 +8,6 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
 
     <import resource="classpath:scoring-mapreduce-context.xml" />
-    <import resource="classpath:dataplatform-context.xml" />
     <import resource="classpath:scoring-yarn-client-context.xml" />
     <import resource="classpath:scoring-yarn-context.xml" />
 

@@ -18,16 +18,7 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
-        <property name="locations">
-            <list>
-                <value>file:latticeengines.properties</value>
-            </list>
-        </property>
-        <property name="ignoreUnresolvablePlaceholders" value="false" />
-        <property name="ignoreResourceNotFound" value="false" />
-    </bean>
-
+    <import resource="classpath:common-am-properties-context.xml"/>
     <bean id="itemProcessor" class="com.latticeengines.scoring.yarn.runtime.ScoringProcessor" />
 
     <import resource="classpath:batch-amjob/yarn-batch-appmaster-context.xml" />
