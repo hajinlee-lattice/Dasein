@@ -85,7 +85,7 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
                 if (!colsToDecode.containsKey(codeBookKey)) {
                     colsToDecode.put(codeBookKey, new ArrayList<>());
                 }
-                colsToDecode.get(codeBookKey).add(bktAttr.getSourceAttr());
+                colsToDecode.get(codeBookKey).add(bktAttr.resolveSourceAttr());
             }
         }
         return colsToDecode;
@@ -126,15 +126,15 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
             int bktIdx;
             if (decodeStrategy == null) {
                 // simple field
-                Integer posInArg = argPosMap.get(bktAttr.getSourceAttr());
+                Integer posInArg = argPosMap.get(bktAttr.resolveSourceAttr());
                 if (posInArg == null) {
-                    throw new RuntimeException("Cannot find the source attr " + bktAttr.getSourceAttr()
+                    throw new RuntimeException("Cannot find the source attr " + bktAttr.resolveSourceAttr()
                             + " for bkt attr " + bktAttr.getNominalAttr());
                 }
                 Object value = arguments.getObject(posInArg);
                 bktIdx = bucket(value, algo);
             } else {
-                bktIdx = bucket(decodedValues.get(bktAttr.getSourceAttr()), algo);
+                bktIdx = bucket(decodedValues.get(bktAttr.resolveSourceAttr()), algo);
             }
             encoded = BitCodecUtils.setBits(encoded, lowestBit, numBits, bktIdx);
         }

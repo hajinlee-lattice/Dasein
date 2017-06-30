@@ -94,7 +94,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                     if (!posMap.containsKey(key)) {
                         posMap.put(key, new HashMap<>());
                     }
-                    posMap.get(key).put(bktAttr.getSourceAttr(), decodeStrategy.getBitPosition());
+                    posMap.get(key).put(bktAttr.resolveSourceAttr(), decodeStrategy.getBitPosition());
                 }
             }
         }
@@ -119,7 +119,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                 if (bktAttr.getDecodedStrategy() != null) {
                     srcAttr = bktAttr.getDecodedStrategy().getEncodedColumn();
                 } else {
-                    srcAttr = bktAttr.getSourceAttr();
+                    srcAttr = bktAttr.resolveSourceAttr();
                 }
                 if (inputFieldSet.contains(srcAttr)) {
                     neededFields.add(srcAttr);
@@ -135,7 +135,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         for (DCEncodedAttr encAttr : encAttrs) {
             DCEncodedAttr encodedAttr2 = new DCEncodedAttr(encAttr.getEncAttr());
             for (DCBucketedAttr bktAttr : encAttr.getBktAttrs()) {
-                String srcAttr = bktAttr.getSourceAttr();
+                String srcAttr = bktAttr.resolveSourceAttr();
                 BitDecodeStrategy decodeStrategy = bktAttr.getDecodedStrategy();
                 if (inputFieldSet.contains(srcAttr)) {
                     // it must be a simple field

@@ -35,7 +35,7 @@ public class FilterBucketed extends TypesafeDataFlowBuilder<FilterBucketedParame
         Set<String> originalFields = new HashSet<>(parameters.originalAttrs);
         String encAttrPrefix = StringUtils.isBlank(parameters.encAttrPrefix) ? CEAttr : parameters.encAttrPrefix;
         sourceFieldNames.removeIf(f -> !originalFields.contains(f) && !f.startsWith(encAttrPrefix));
-        log.info("Keeping these fields: " + StringUtils.join(sourceFieldNames, ", "));
+
         return source.retain(new FieldList(sourceFieldNames));
     }
 
