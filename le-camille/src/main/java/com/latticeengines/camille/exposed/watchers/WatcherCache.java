@@ -3,6 +3,7 @@ package com.latticeengines.camille.exposed.watchers;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +27,7 @@ public class WatcherCache<K, V> {
     private final String cacheName;
     private final String watcherName;
     private final Object[] initKeys;
+    private final Callable<Object[]> initKeysCallable;
     private final int capacity;
     private Cache<K, V> cache;
 
@@ -34,6 +36,16 @@ public class WatcherCache<K, V> {
         this.cacheName = cacheName;
         this.watcherName = watcherName;
         this.initKeys = initKeys;
+        this.capacity = capacity;
+        this.initKeysCallable = null;
+    }
+
+    WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity, Callable<Object[]> initKeysCallable) {
+        this.load = load;
+        this.cacheName = cacheName;
+        this.watcherName = watcherName;
+        this.initKeys = null;
+        this.initKeysCallable = initKeysCallable;
         this.capacity = capacity;
     }
 
@@ -69,7 +81,14 @@ public class WatcherCache<K, V> {
                 refresh();
             });
             cache = CacheBuilder.newBuilder().maximumSize(capacity).build();
-            if (initKeys != null) {
+            if (initKeysCallable != null) {
+                try {
+                    Object[] keys = initKeysCallable.call();
+                    Arrays.stream(keys).map(k -> (K) k).forEach(this::loadKey);
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to load initial keys via callable.", e);
+                }
+            } else if (initKeys != null) {
                 Arrays.stream(initKeys).map(k -> (K) k).forEach(this::loadKey);
             }
             double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
@@ -122,6 +141,7 @@ public class WatcherCache<K, V> {
 
     public static class Builder<K, V> {
         private Function<K, V> load;
+        private Callable<Object[]> initKeysCallable;
         private String cacheName;
         private String watcherName;
         private Object[] initKeys;
@@ -162,8 +182,18 @@ public class WatcherCache<K, V> {
             return this;
         }
 
+        @SuppressWarnings("rawtypes")
+        public Builder initKeys(Callable<Object[]> initKeysCallable) {
+            this.initKeysCallable = initKeysCallable;
+            return this;
+        }
+
         public WatcherCache<K, V> build() {
-            return new WatcherCache<>(cacheName, watcherName, load, capacity, initKeys);
+            if (initKeysCallable != null) {
+                return new WatcherCache<>(cacheName, watcherName, load, capacity, initKeysCallable);
+            } else {
+                return new WatcherCache<>(cacheName, watcherName, load, capacity, initKeys);
+            }
         }
 
     }

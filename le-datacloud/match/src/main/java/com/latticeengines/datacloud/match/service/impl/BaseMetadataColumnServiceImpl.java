@@ -180,6 +180,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             log.info("ZK watcher " + AMMedataUpdate.name() + " changed, updating white and black columns caches ...");
             refreshCaches();
         });
+        refreshCaches();
     }
 
     abstract protected MetadataColumnEntityMgr<E> getMetadataColumnEntityMgr();
