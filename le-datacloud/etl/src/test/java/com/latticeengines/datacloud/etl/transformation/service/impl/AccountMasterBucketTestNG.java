@@ -42,7 +42,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
     @Autowired
     protected AccountMaster accountMaster;
 
-    @Test(groups = "pipeline1")
+    @Test(groups = "functional")
     public void testTransformation() throws Exception {
         uploadBaseSourceFile(accountMaster.getSourceName(), "AMBucketTest_AM", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
