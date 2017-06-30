@@ -293,7 +293,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         if (workflow == null) {
             log.warn("There is no workflow conifguration of class " + workflowClass.getSimpleName() + " in context.");
             try {
-                Class<?> builderClass = Arrays.asList(workflowClass.getDeclaredClasses()).stream()
+                Class<?> builderClass = Arrays.stream(workflowClass.getDeclaredClasses())
                         .filter(c -> c.getSimpleName().equals("Builder")).distinct().findFirst().orElse(null);
                 Object builder = builderClass.newInstance();
                 Method build = builderClass.getMethod("build", new Class<?>[] {});
