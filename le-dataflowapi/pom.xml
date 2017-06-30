@@ -9,13 +9,6 @@
 
     <properties>
         <component-name>dataflowapi</component-name>
-        <le.common.version>3.7.0-SNAPSHOT</le.common.version>
-        <le.dataflow.version>3.7.0-SNAPSHOT</le.dataflow.version>
-        <le.dataplatform.version>3.7.0-SNAPSHOT</le.dataplatform.version>
-        <le.domain.version>3.7.0-SNAPSHOT</le.domain.version>
-        <le.scheduler.version>3.7.0-SNAPSHOT</le.scheduler.version>
-        <le.security.version>3.7.0-SNAPSHOT</le.security.version>
-        <le.proxy.version>3.7.0-SNAPSHOT</le.proxy.version>
     </properties>
 
     <parent>
@@ -82,7 +75,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
-            <version>${le.dataflow.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.latticeengines</groupId>
@@ -92,9 +85,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
-            <classifier>intf</classifier>
+            <artifactId>le-yarn</artifactId>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.mortbay.jetty</groupId>
@@ -144,86 +136,38 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
-            <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jetty</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jetty-util</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jsp-2.1</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>jsp-api-2.1</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>servlet-api-2.1</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>servlet-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javax.servlet.jsp</groupId>
-                    <artifactId>jsp-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>tomcat</groupId>
-                    <artifactId>jasper-compiler</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>tomcat</groupId>
-                    <artifactId>jasper-runtime</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.python</groupId>
-                    <artifactId>jython-standalone</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <artifactId>le-yarn</artifactId>
+            <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
-            <version>${le.common.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

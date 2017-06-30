@@ -37,16 +37,14 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
+            <artifactId>le-yarn</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-metadata</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-sqoop</artifactId>

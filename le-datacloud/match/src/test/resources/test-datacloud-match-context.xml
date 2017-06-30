@@ -8,6 +8,6 @@
 
     <import resource="classpath:datacloud-match-context.xml" />
     <import resource="classpath:common-properties-context.xml" />
-    <import resource="classpath:dataplatform-context.xml" />
+    <import resource="classpath:yarn-context.xml" />
 
 </beans>

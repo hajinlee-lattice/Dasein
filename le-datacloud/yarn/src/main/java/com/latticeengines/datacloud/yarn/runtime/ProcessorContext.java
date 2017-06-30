@@ -93,8 +93,8 @@ public class ProcessorContext {
     private ColumnSelection customizedSelection;
     private Map<MatchKey, List<String>> keyMap;
     private Integer blockSize;
-    private String rootOperationUid;
-    private String avroPath, outputAvro, outputJson;
+    private String rootOperationUid, blockOperationUid;
+    private String avroPath, outputJson;
     private MatchOutput blockOutput;
     private Date receivedAt;
     private Schema outputSchema;
@@ -107,6 +107,7 @@ public class ProcessorContext {
     private Boolean publicDomainAsNormalDomain;
     private boolean useProxy = false;
     private String decisionGraph;
+    private int splits = 1;
 
     private BlockDivider divider;
     private String blockRootDir;
@@ -160,8 +161,12 @@ public class ProcessorContext {
         return rootOperationUid;
     }
 
-    public String getOutputAvro() {
-        return outputAvro;
+    public String getOutputAvroGlob() {
+        return hdfsPathBuilder.constructMatchBlockAvroGlob(rootOperationUid, blockOperationUid);
+    }
+
+    public String getOutputAvro(int split) {
+        return hdfsPathBuilder.constructMatchBlockSplitAvro(rootOperationUid, blockOperationUid, split).toString();
     }
 
     public String getOutputJson() {
@@ -260,6 +265,10 @@ public class ProcessorContext {
         this.originalInput = originalInput;
     }
 
+    public int getSplits() {
+        return splits;
+    }
+
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
             throws Exception {
         this.jobConfiguration = jobConfiguration;
@@ -278,11 +287,14 @@ public class ProcessorContext {
         log.info("Use PodId=" + podId);
 
         rootOperationUid = jobConfiguration.getRootOperationUid();
-        String blockOperationUid = jobConfiguration.getBlockOperationUid();
-        outputAvro = hdfsPathBuilder.constructMatchBlockAvro(rootOperationUid, blockOperationUid).toString();
+        blockOperationUid = jobConfiguration.getBlockOperationUid();
         outputJson = hdfsPathBuilder.constructMatchBlockOutputFile(rootOperationUid, blockOperationUid).toString();
 
         blockRootDir = hdfsPathBuilder.constructMatchBlockDir(rootOperationUid, blockOperationUid).toString();
+        if (jobConfiguration.getMatchInput().getSplitsPerBlock() != null) {
+            splits = Math.max(1, jobConfiguration.getMatchInput().getSplitsPerBlock());
+            log.info("Generating " + splits + " splits.");
+        }
 
         CustomerSpace space = jobConfiguration.getCustomerSpace();
         tenant = new Tenant(space.toString());

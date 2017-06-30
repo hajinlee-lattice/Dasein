@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.source.DerivedSource;
 import com.latticeengines.datacloud.core.source.IngestedRawSource;
@@ -97,7 +98,8 @@ public class HdfsPathBuilder {
 
     public Path constructTableSchemaFilePath(String tableName, CustomerSpace customerSpace, String namespace) {
         String avscFile = tableName + AVRO_SCHEMA_FILE_EXTENSION;
-        return PathBuilder.buildDataTableSchemaPath(getHdfsPodId(), customerSpace, namespace).append(tableName).append(avscFile);
+        return PathBuilder.buildDataTableSchemaPath(getHdfsPodId(), customerSpace, namespace).append(tableName)
+                .append(avscFile);
     }
 
     @Deprecated
@@ -107,8 +109,8 @@ public class HdfsPathBuilder {
     }
 
     public Path constructSourceDir(String sourceName) {
-        sourceName = sourceName.endsWith(PATH_SEPARATOR) ? sourceName.substring(0,
-                sourceName.lastIndexOf(PATH_SEPARATOR)) : sourceName;
+        sourceName = sourceName.endsWith(PATH_SEPARATOR)
+                ? sourceName.substring(0, sourceName.lastIndexOf(PATH_SEPARATOR)) : sourceName;
         return propDataDir().append(SOURCES).append(sourceName);
     }
 
@@ -227,8 +229,13 @@ public class HdfsPathBuilder {
         return constructMatchDir(rootOperationUid).append(BLOCKS_SEGMENT).append(blockOperationUid);
     }
 
-    public Path constructMatchBlockAvro(String rootOperationUid, String blockOperationUid) {
-        String fileName = BLOCK + replaceHyphenAndMakeLowercase(blockOperationUid) + AVRO_FILE_EXTENSION;
+    public String constructMatchBlockAvroGlob(String rootOperationUid, String blockOperationUid) {
+        return constructMatchBlockDir(rootOperationUid, blockOperationUid).toString() + "/*.avro";
+    }
+
+    public Path constructMatchBlockSplitAvro(String rootOperationUid, String blockOperationUid, int split) {
+        String fileName = BLOCK + AvroUtils.getAvroFriendlyString(blockOperationUid) + String.format("-p-%05d", split)
+                + AVRO_FILE_EXTENSION;
         return constructMatchBlockDir(rootOperationUid, blockOperationUid).append(fileName);
     }
 

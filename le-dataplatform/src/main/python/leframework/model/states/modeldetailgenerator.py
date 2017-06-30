@@ -25,7 +25,7 @@ class ModelDetailGenerator(State):
         result["LookupID"] = self.lookupID()
         result["ModelID"] = mediator.modelId
         # Leads
-        allData = mediator.allDataPostTransform
+        allData = mediator.allDataPreTransform
         testData = mediator.data
         result["TestingLeads"] = testData.shape[0]
         # #PLS-4158 cannot simply update total counts here

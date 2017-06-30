@@ -247,6 +247,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
         matchInput.setUseRemoteDnB(true);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(false);
+        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
     }

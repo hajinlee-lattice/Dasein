@@ -8,7 +8,8 @@
     <import resource="classpath:common-am-properties-context.xml"/>
     <import resource="classpath:batch-amjob/yarn-batch-appmaster-context.xml" />
     <import resource="classpath:datacloud-yarn-context.xml" />
-    
+
+    <import resource="classpath:yarn-context.xml" />
     <import resource="classpath:swlib-context.xml" />
     <import resource="classpath:common-component-context.xml" />
 

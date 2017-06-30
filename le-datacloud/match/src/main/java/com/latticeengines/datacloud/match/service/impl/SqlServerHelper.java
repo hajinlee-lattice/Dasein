@@ -282,23 +282,31 @@ public class SqlServerHelper implements DbHelper {
 
     private Pair<String, List<String>> constructSqlQuery(Set<String> involvedPartitions, Set<String> targetColumns,
             Collection<String> domains, Collection<NameLocation> nameLocations) {
+        boolean hasDomains = domains != null && !domains.isEmpty();
         List<String> args = new ArrayList<>();
         String sql = String.format("SELECT p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s]",
                 MatchConstants.LID_FIELD, MatchConstants.DOMAIN_FIELD, MatchConstants.NAME_FIELD,
                 MatchConstants.COUNTRY_FIELD, MatchConstants.STATE_FIELD, MatchConstants.CITY_FIELD);
         sql += (targetColumns.isEmpty() ? "" : ", [" + StringUtils.join(targetColumns, "], [") + "]");
         sql += "\nFROM " + fromJoinClause(involvedPartitions);
-        sql += "\nWHERE p1.[" + MatchConstants.DOMAIN_FIELD + "] IN ( ";
-        sql += StringUtils.join(domains.stream().map(d -> "?").collect(Collectors.toList()), " , ");
-        sql += " )\n";
-        args.addAll(domains);
+        if (hasDomains) {
+            sql += "\nWHERE p1.[" + MatchConstants.DOMAIN_FIELD + "] IN ( ";
+            sql += StringUtils.join(domains.stream().map(d -> "?").collect(Collectors.toList()), " , ");
+            sql += " )\n";
+            args.addAll(domains);
+        }
 
+        boolean firstNameLoc = true;
         for (NameLocation nameLocation : nameLocations) {
             if (StringUtils.isEmpty(nameLocation.getCountry())) {
                 nameLocation.setCountry(LocationUtils.USA);
             }
             if (StringUtils.isNotEmpty(nameLocation.getName()) && StringUtils.isNotEmpty(nameLocation.getState())) {
-                sql += " OR ( ";
+                if (!hasDomains && firstNameLoc) {
+                    sql += " WHERE ( ";
+                } else {
+                    sql += " OR ( ";
+                }
                 sql += String.format("p1.[%s] = ? ", MatchConstants.NAME_FIELD);
                 args.add(nameLocation.getName());
                 if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
@@ -315,6 +323,7 @@ public class SqlServerHelper implements DbHelper {
                 }
                 sql += ")\n";
             }
+            firstNameLoc = false;
         }
 
         return Pair.of(sql, args);

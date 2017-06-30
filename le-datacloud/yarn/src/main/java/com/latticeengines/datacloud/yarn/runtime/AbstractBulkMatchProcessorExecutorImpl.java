@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -77,6 +78,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @Value("${datacloud.match.bulk.snappy.compress}")
     private boolean useSnappy;
+
+    private Random random = new Random(System.currentTimeMillis());
 
     @Override
     public void finalize(ProcessorContext processorContext) throws Exception {
@@ -183,13 +186,14 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
             records.add(builder.build());
         }
-        if (!HdfsUtils.fileExists(yarnConfiguration, processorContext.getOutputAvro())) {
+        int randomSplit = random.nextInt(processorContext.getSplits());
+        if (!HdfsUtils.fileExists(yarnConfiguration, processorContext.getOutputAvro(randomSplit))) {
             AvroUtils.writeToHdfsFile(yarnConfiguration, processorContext.getOutputSchema(),
-                    processorContext.getOutputAvro(), records, useSnappy);
+                    processorContext.getOutputAvro(randomSplit), records, useSnappy);
         } else {
-            AvroUtils.appendToHdfsFile(yarnConfiguration, processorContext.getOutputAvro(), records, useSnappy);
+            AvroUtils.appendToHdfsFile(yarnConfiguration, processorContext.getOutputAvro(randomSplit), records, useSnappy);
         }
-        log.info("Write " + records.size() + " generic records to " + processorContext.getOutputAvro());
+        log.info("Write " + records.size() + " generic records to " + processorContext.getOutputAvro(randomSplit));
     }
 
     private void appendDebugValues(List<Object> allValues, OutputRecord outputRecord) {
@@ -253,8 +257,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     private void finalizeBlock(ProcessorContext processorContext) throws IOException {
         finalizeMatchOutput(processorContext);
         generateOutputMetric(processorContext.getGroupMatchInput(), processorContext.getBlockOutput());
-        Long count = AvroUtils.count(yarnConfiguration, processorContext.getOutputAvro());
-        log.info("There are in total " + count + " records in the avro " + processorContext.getOutputAvro());
+        Long count = AvroUtils.count(yarnConfiguration, processorContext.getOutputAvroGlob());
+        log.info("There are in total " + count + " records in the avros " + processorContext.getOutputAvroGlob());
         if (processorContext.getReturnUnmatched()) {
             if (!processorContext.getExcludeUnmatchedWithPublicDomain()
                     && !processorContext.getBlockSize().equals(count.intValue())) {

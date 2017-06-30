@@ -146,6 +146,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         matchInput.setPredefinedSelection(Predefined.RTS);
         matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         matchInput.setKeyMap(keyMap);
+        matchInput.setSplitsPerBlock(8);
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);
         jobConfiguration.setName("DataCloudMatchBlock");

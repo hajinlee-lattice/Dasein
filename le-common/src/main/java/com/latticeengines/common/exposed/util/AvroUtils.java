@@ -218,10 +218,10 @@ public class AvroUtils {
         }
     }
 
-    public static Long count(final Configuration configuration, String path) {
+    public static Long count(final Configuration configuration, String glob) {
         Long count = 0L;
         try {
-            List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
+            List<String> matches = HdfsUtils.getFilesByGlob(configuration, glob);
 
             if (matches.size() == 1) {
                 return countOneFile(configuration, matches.get(0));
@@ -230,12 +230,7 @@ public class AvroUtils {
             ExecutorService executorService = Executors.newFixedThreadPool(Math.min(32, matches.size()));
             Map<String, Future<Long>> futures = new HashMap<>();
             for (final String match : matches) {
-                Future<Long> future = executorService.submit(new Callable<Long>() {
-                    @Override
-                    public Long call() throws Exception {
-                        return countOneFile(configuration, match);
-                    }
-                });
+                Future<Long> future = executorService.submit(() -> countOneFile(configuration, match));
                 futures.put(match, future);
             }
 

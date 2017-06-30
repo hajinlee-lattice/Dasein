@@ -10,7 +10,7 @@
     <import resource="classpath:datacloud-etl-madison-persistence-context.xml"/>
     <import resource="classpath:datacloud-etl-context.xml"/>
     <import resource="classpath:datacloud-dataflow-context.xml"/>
-    <import resource="classpath:dataplatform-context.xml"/>
+    <import resource="classpath:yarn-context.xml"/>
     <import resource="classpath:dataflow-context.xml"/>
 
 </beans>

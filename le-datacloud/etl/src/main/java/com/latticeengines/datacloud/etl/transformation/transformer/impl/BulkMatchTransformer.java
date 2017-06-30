@@ -32,10 +32,9 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
     protected Configuration yarnConfiguration;
 
     private static final Log log = LogFactory.getLog(AbstractTransformer.class);
-    private static String transfomerName = TRANSFORMER_MATCH;
 
     public String getName() {
-        return transfomerName;
+        return TRANSFORMER_MATCH;
     }
 
     @Override

@@ -12,7 +12,7 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.dataflowapi.controller.*" />
     </context:component-scan>
     <import resource="classpath:dataflow-context.xml"/>
-    <import resource="classpath:dataplatform-context.xml"/>
+    <import resource="classpath:yarn-context.xml"/>
     <import resource="classpath:dataflowapi-yarn-client-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:dataflowapi-aspects-context.xml"/>

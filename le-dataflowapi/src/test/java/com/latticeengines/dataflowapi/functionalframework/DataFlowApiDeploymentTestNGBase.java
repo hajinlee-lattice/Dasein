@@ -7,7 +7,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -35,7 +34,7 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
@@ -49,6 +48,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.impl.TenantEntityMgrImpl;
+import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataflowapi-context.xml" })
@@ -80,11 +80,11 @@ public class DataFlowApiDeploymentTestNGBase extends AbstractTestNGSpringContext
     @Autowired
     protected MetadataProxy metadataProxy;
 
-    protected DataPlatformFunctionalTestNGBase platformTestBase;
+    protected YarnFunctionalTestNGBase platformTestBase;
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
-        platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
+        platformTestBase = new YarnFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
         Tenant t = tenantEntityMgr.findByTenantId(CUSTOMERSPACE.toString());
         if (t != null) {

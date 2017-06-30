@@ -160,6 +160,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         matchInput.setDataCloudVersion(getDataCloudVersion());
         matchInput.setSkipKeyResolution(true);
         matchInput.setFetchOnly(true);
+        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
         config.setMatchInput(matchInput);
         step.setConfiguration(JsonUtils.serialize(config));
 

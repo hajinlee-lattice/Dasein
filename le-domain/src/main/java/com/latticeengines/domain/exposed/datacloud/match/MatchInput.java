@@ -89,6 +89,9 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("OutputBufferType")
     private IOBufferType outputBufferType;
 
+    @JsonProperty("SplitsPerBlock")
+    private Integer splitsPerBlock;
+
     @JsonProperty("YarnQueue")
     private String yarnQueue;
 
@@ -452,6 +455,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setDisableDunsValidation(boolean disableDunsValidation) {
         this.disableDunsValidation = disableDunsValidation;
+    }
+
+    public Integer getSplitsPerBlock() {
+        return splitsPerBlock;
+    }
+
+    public void setSplitsPerBlock(Integer splitsPerBlock) {
+        this.splitsPerBlock = splitsPerBlock;
     }
 
     @JsonProperty("MatchResultLocation")
