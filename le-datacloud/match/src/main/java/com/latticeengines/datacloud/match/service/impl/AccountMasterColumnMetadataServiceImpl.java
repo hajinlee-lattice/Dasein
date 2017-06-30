@@ -97,18 +97,18 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
             } catch (IOException e) {
                 throw new RuntimeException("Failed parse amstats.json", e);
             }
-            DataCloudVersion latestVersion = versionEntityMgr.latestApprovedForMajorVersion(dataCloudVersion);
-            String redshiftTableName = latestVersion.getAmBucketedRedShiftTable();
+            DataCloudVersion fullVersion = versionEntityMgr.findVersion(dataCloudVersion);
+            String redshiftTableName = fullVersion.getAmBucketedRedShiftTable();
             if (StringUtils.isBlank(redshiftTableName)) {
-                throw new RuntimeException("There is no redshift table for the data cloud version " + latestVersion);
+                throw new RuntimeException("There is no redshift table for the data cloud version " + dataCloudVersion);
             }
             Map<TableRoleInCollection, String> tableNameMap = ImmutableMap.<TableRoleInCollection, String> builder()
                     .put(TableRoleInCollection.AccountMaster, redshiftTableName).build();
             Map<AttributeLookup, ColumnMetadata> cmMap = new HashMap<>();
             List<ColumnMetadata> amAttrs = fromPredefinedSelection(ColumnSelection.Predefined.Segment,
-                    latestVersion.getVersion());
+                    fullVersion.getVersion());
             amAttrs.forEach(cm -> cmMap.put(new AttributeLookup(BusinessEntity.LatticeAccount, cm.getName()), cm));
-            ColumnMetadata idAttr = fromPredefinedSelection(ColumnSelection.Predefined.ID, latestVersion.getVersion())
+            ColumnMetadata idAttr = fromPredefinedSelection(ColumnSelection.Predefined.ID, fullVersion.getVersion())
                     .get(0);
             cmMap.put( //
                     new AttributeLookup(BusinessEntity.LatticeAccount, InterfaceName.LatticeAccountId.name()), //
