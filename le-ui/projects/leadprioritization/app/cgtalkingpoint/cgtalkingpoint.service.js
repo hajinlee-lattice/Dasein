@@ -4,6 +4,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     this.accounts = null;
     this.attributes = null;
     this.talkingPoints = [];
+    this.talkingPointsPreviewResources = null;
 
     this.setTalkingPoints = function(talkingPoints) {
         this.talkingPoints = talkingPoints;
@@ -21,10 +22,22 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
                 this.talkingPoints = data;
                 deferred.resolve(data);
             });
-            deferred.resolve([]);
         }
         return deferred.promise;
     };
+
+    this.getTalkingPointsPreviewResources = function(){
+        var deferred = $q.defer();
+        if(this.talkingPointsPreviewResources) {
+            deferred.resolve(this.talkingPointsPreviewResources);
+        } else {
+            CgTalkingPointService.getTalkingPointsPreviewResources(play_name).then(function(data){
+                this.talkingPointsPreviewResources = data;
+                deferred.resolve(data);
+            });
+        }
+        return deferred.promise;
+    }
 
     this.saveTalkingPoint = function(opts) {
         var deferred = $q.defer();
@@ -85,6 +98,32 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         var PLACEHOLDER =UNKNOWN_UNTIL_LAUNCHED = null;
         return {"context":"lpipreview","notion":"lead","notionObject":{"ExpectedValue":UNKNOWN_UNTIL_LAUNCHED,"ExternalProbability":UNKNOWN_UNTIL_LAUNCHED,"LastLaunched":UNKNOWN_UNTIL_LAUNCHED,"Lift":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketDisplayName":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketOffset":UNKNOWN_UNTIL_LAUNCHED,"ModelID":null,"Percentile":UNKNOWN_UNTIL_LAUNCHED,"PlayDescription":PLACEHOLDER,"PlayDisplayName":PLACEHOLDER,"PlayID":PLACEHOLDER,"PlaySolutionType":null,"PlayTargetProductName":"D200-L","PlayType":"crosssell","Probability":UNKNOWN_UNTIL_LAUNCHED,"Rank":2,"Theme":"Sell Secure Star into Impravata owners","TalkingPoints":null}};
     };
+
+    this.generateTalkingPoint = function(opts) {
+        // {
+        //   "creationDate": "2017-06-30T01:28:00.516Z",
+        //   "customerID": "LECleanx",
+        //   "externalID": "TestTP1",
+        //   "playExternalID": "TestPlay1",
+        //   "value": "{\"Content\": \"Financing that fits your Business. Provide a solution unique to your business needs.\", \"Offset\": 1, \"Title\": \"Reasons to Buy\"}"
+        // }
+        var opts = opts || {};
+        opts.timestamp = opts.timestamp;
+
+        var talkingPoint = {},
+            ISOdate = (opts.timestamp ? new Date(opts.timestamp).toISOString() : '');
+
+        talkingPoint.creationDate = opts.creationDate || ISOdate;
+        talkingPoint.customerID = opts.customerID; //tenant id and will be removed eventially
+        talkingPoint.externalID = opts.externalID || '123fakeStreet'; // this will be removed someday I assume since this is supposed to be an internal id made by backend
+        talkingPoint.playExternalID = opts.playExternalID; // play_name (which is the play id)
+        talkingPoint.value = JSON.stringify({
+            Offset: opts.Offset,
+            Title: opts.Title,
+            Content: opts.Content
+        })
+        return talkingPoint;
+    }
 })
 .service('CgTalkingPointService', function($q, $http, $state) {
     this.host = '/pls'; //default
@@ -93,8 +132,18 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         var deferred = $q.defer();
         $http({
             method: 'GET',
-            url: this.host + '/pls/dante/talkingpoints/play/'  + play_name
-            //url: this.host + '/dantetalkingpoints/play/' + play_name
+            url: this.host + '/dante/talkingpoints/play/'  + play_name
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.getTalkingPointsPreviewResources = function(){
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/dante/talkingpoints/previewresources'
         }).then(function(response){
             deferred.resolve(response.data);
         });
@@ -105,7 +154,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         var deferred = $q.defer();
         $http({
             method: 'POST',
-            url: this.host + '/dantetalkingpoints',
+            url: this.host + '/dante/talkingpoints/',
             data: opts
         }).then(function(response){
             deferred.resolve(response.data);

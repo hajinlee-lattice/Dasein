@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.insights', [])
 .controller('PlaybookWizardInsights', function(
-    $scope, PlaybookWizardStore, CgTalkingPointStore, TalkingPointAttributes, TalkingPoints
+    $scope, $stateParams, PlaybookWizardStore, CgTalkingPointStore, TalkingPointAttributes, TalkingPoints, BrowserStorageUtility
 ) {
     var vm = this;
 
@@ -10,7 +10,15 @@ angular.module('lp.playbook.wizard.insights', [])
     });
 
     vm.addTalkingPoint = function() {
-        vm.talkingPoints.push({timestamp: new Date().getTime(), Title: null, Content: null, Offset: vm.talkingPoints.length, IsNew: true});
+        vm.talkingPoints.push({
+            timestamp: new Date().getTime(), 
+            Title: null, 
+            Content: null, 
+            Offset: vm.talkingPoints.length, 
+            IsNew: true, 
+            playExternalID: $stateParams.play_name,
+            customerID: BrowserStorageUtility.getClientSession().Tenant.Identifier
+        });
     };
 
     vm.onDelete = function(pos) {
@@ -30,13 +38,17 @@ angular.module('lp.playbook.wizard.insights', [])
     };
 
     function validateTalkingPoints() {
+        var talkingPoints = [];
         for (var i = 0; i < vm.talkingPoints.length; i++) {
             if (!vm.talkingPoints[i].Content || !vm.talkingPoints[i].Title) {
                 PlaybookWizardStore.setValidation('insights', false);
                 return false;
             }
+            var talkingPoint = CgTalkingPointStore.generateTalkingPoint(vm.talkingPoints[i]);
+            talkingPoints.push(talkingPoint);
         }
-        PlaybookWizardStore.setTalkingPoints(vm.talkingPoints);
+        PlaybookWizardStore.setTalkingPoints(talkingPoints);
+
         PlaybookWizardStore.setValidation('insights', true);
         return true;
     };

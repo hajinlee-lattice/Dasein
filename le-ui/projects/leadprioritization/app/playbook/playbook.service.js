@@ -1,5 +1,5 @@
 angular.module('lp.playbook')
-.service('PlaybookWizardStore', function($q, $state, PlaybookWizardService){
+.service('PlaybookWizardStore', function($q, $state, PlaybookWizardService, CgTalkingPointStore){
     var PlaybookWizardStore = this;
 
     this.settings = this.settings || {};
@@ -97,7 +97,7 @@ angular.module('lp.playbook')
     }
 
     this.nextSaveInsight = function() {
-        CgTalkingPointStore.saveTalkingPoint(PlaybookWizardStore.savedTalkingPoints);
+        CgTalkingPointStore.saveTalkingPoint(PlaybookWizardStore.savedTalkingPoints[0]);
     }
 
     this.setTalkingPoints = function(talkingPoints) {
