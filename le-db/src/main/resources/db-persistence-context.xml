@@ -12,10 +12,10 @@
         <property name="jdbcUrl" value="${db.datasource.url}"/>
         <property name="user" value="${db.datasource.user}" />
         <property name="password" value="${db.datasource.password.encrypted}" />
-        <property name="acquireIncrement" value="1"/>
-        <property name="minPoolSize" value="2"/>
-        <property name="maxPoolSize" value="8"/>
-        <property name="checkoutTimeout" value="10000"/>
+        <property name="acquireIncrement" value="4"/>
+        <property name="minPoolSize" value="8"/>
+        <property name="maxPoolSize" value="32"/>
+        <property name="checkoutTimeout" value="60000"/>
         <property name="idleConnectionTestPeriod" value="10"/>
         <property name="maxIdleTime" value="30"/>
     </bean>
