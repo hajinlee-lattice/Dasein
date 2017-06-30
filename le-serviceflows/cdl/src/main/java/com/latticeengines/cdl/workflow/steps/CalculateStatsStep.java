@@ -181,6 +181,12 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(matchStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
+        targetTable.setNamePrefix("BucketedDebug");
+        step.setTargetTable(targetTable);
+
         step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
         return step;
     }
