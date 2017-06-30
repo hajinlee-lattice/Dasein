@@ -5,10 +5,17 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
@@ -23,7 +30,7 @@ public class DanteTalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase 
         setupTestEnvironmentWithOneTenant();
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     @Test(groups = { "deployment" })
     public void testTalkingPoints() {
         switchToExternalUser();
@@ -85,5 +92,24 @@ public class DanteTalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase 
 
         Assert.assertNotNull(previewResponse);
         Assert.assertNotNull(previewResponse.getResult());
+
+        ObjectMapper objMapper = new ObjectMapper();
+        DantePreviewResources dpr = objMapper.convertValue(previewResponse.getResult(),
+                new TypeReference<DantePreviewResources>() {
+                });
+
+        Assert.assertNotNull(dpr.getDanteUrl());
+        Assert.assertNotNull(dpr.getServerUrl());
+        Assert.assertNotNull(dpr.getoAuthToken());
+
+        String url = dpr.getServerUrl() + "/tenants/oauthtotenant";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + dpr.getoAuthToken());
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        RestTemplate pmApiRestTemplate = HttpClientUtils.newRestTemplate();
+        String tenantNameViaToken = pmApiRestTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
+        Assert.assertNotNull(tenantNameViaToken);
+        Assert.assertEquals(tenantNameViaToken, mainTestTenant.getId());
     }
 }

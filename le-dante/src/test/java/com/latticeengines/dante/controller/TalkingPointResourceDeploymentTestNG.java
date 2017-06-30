@@ -92,12 +92,6 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
         Assert.assertNull(dtp, "Failure Cause: Talking point was not deleted");
     }
 
-    // private <T> getFromResponse(Object response, Class<T> clazz) {
-    // ObjectMapper objMapper = new ObjectMapper();
-    // return objMapper.convertValue(response,
-    // objMapper.getTypeFactory().constructParametricType(Object.class, clazz));
-    // }
-
     @Test(groups = "deployment")
     public void testDanteOauth() {
         String testTenantName = "OauthTest.OauthTest.Production";
@@ -110,7 +104,7 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
         DantePreviewResources dpr = objMapper.convertValue(response.getResult(),
                 new TypeReference<DantePreviewResources>() {
                 });
-        String url = dpr.getUrl() + "/tenants/oauthtotenant";
+        String url = dpr.getServerUrl() + "/tenants/oauthtotenant";
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + dpr.getoAuthToken());

@@ -21,6 +21,9 @@ import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 public class TalkingPointServiceImpl implements TalkingPointService {
     private static final Logger log = Logger.getLogger(TalkingPointServiceImpl.class);
 
+    @Value("${common.dante.url}")
+    private String danteUrl; // TODO: correct for envs
+
     @Value("${common.playmaker.url}")
     private String playmakerApiUrl;
 
@@ -54,7 +57,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         try {
             String token = oauth2RestApiProxy.createOAuth2AccessToken(CustomerSpace.parse(customerSpace).toString(),
                     oAuth2DanteAppId, OauthClientType.PLAYMAKER).getValue();
-            return new DantePreviewResources(playmakerApiUrl, token);
+            return new DantePreviewResources(danteUrl, playmakerApiUrl, token);
         } catch (LedpException e) {
             throw e;
         } catch (Exception e) {
