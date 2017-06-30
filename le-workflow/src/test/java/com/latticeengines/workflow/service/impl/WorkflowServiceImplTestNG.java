@@ -183,12 +183,12 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
     @Test(groups = "functional", enabled = true)
     public void testStop() throws Exception {
-        sleepableStep.setSleepTime(500L);
+        sleepableStep.setSleepTime(1500L);
         WorkflowExecutionId workflowId = workflowService.start(sleepableWorkflow.name(), workflowConfig);
         BatchStatus status = workflowService.getStatus(workflowId).getStatus();
         assertTrue(status.equals(BatchStatus.STARTING) || status.equals(BatchStatus.STARTED));
 
-        Thread.sleep(400L);
+        Thread.sleep(1500L);
 
         workflowService.stop(workflowId);
         List<String> stepNames = workflowService.getStepNames(workflowId);
