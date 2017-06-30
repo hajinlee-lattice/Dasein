@@ -40,6 +40,14 @@ IGNORE 1 LINES
 (PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,BucketForSegment)
 SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1);
 
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn205.csv' INTO TABLE `AccountMasterColumn`
+CHARACTER SET UTF8
+FIELDS TERMINATED BY '\t'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,AMColumnID,DataCloudVersion,DisplayName,Description,JavaClass,Category,Subcategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,@var1,@var2,Groups,DecodeStrategy,BucketForSegment)
+SET IsPremium = (@var1 = 'True' OR @var1 = 1), IsInternalEnrichment = (@var2 = 'True' OR @var2 = 1);
+
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/SourceColumn.csv' INTO TABLE `SourceColumn`
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
@@ -106,7 +114,8 @@ VALUES
   ('2.0.1', '2016-11-19', '2.0', '2016-11-19_20-32-21_UTC', '2016-11-19_05-33-46_UTC', '', '', '', 'APPROVED', NOW()),
   ('2.0.2', '2016-12-15', '2.0', '2017-01-24_23-14-40_UTC', '2017-01-04_04-49-12_UTC', '20170126', '', '', 'APPROVED', NOW()),
   ('2.0.3', '2017-02-14', '2.0', '2017-02-14_07-28-18_UTC', '2017-02-14_17-20-41_UTC', '20170301', '20170301', '', 'APPROVED', NOW()),
-  ('2.0.4', '2017-05-22', '2.0', '2017-05-18_12-54-37_UTC', '2017-05-17_17-30-29_UTC', '20170604', '20170604', 'redshift_bucketedaccountmaster', 'APPROVED', NOW());
+  ('2.0.4', '2017-05-22', '2.0', '2017-05-18_12-54-37_UTC', '2017-05-17_17-30-29_UTC', '20170604', '20170604', 'redshift_bucketedaccountmaster', 'APPROVED', NOW()),
+  ('2.0.5', '2017-06-29', '2.0', '2017-06-30_01-18-36_UTC', '2017-06-03_00-14-03_UTC', '20170629', '20170629', '', 'APPROVED', NOW());
 
 INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges)
 VALUES
