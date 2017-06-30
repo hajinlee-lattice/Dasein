@@ -60,6 +60,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
             .getForeignKeysAsStringList();
 
     private static int matchStep;
+    private static int splitStep;
     private static int profileStep;
     private static int bucketStep;
     private static int filterStep;
@@ -110,11 +111,13 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
             request.setKeepTemp(false);
             request.setEnableSlack(false);
             matchStep = 0;
-            profileStep = 1;
-            bucketStep = 2;
-            filterStep = 4;
+            splitStep = 1;
+            profileStep = 2;
+            bucketStep = 3;
+            filterStep = 5;
             // -----------
             TransformationStepConfig match = match(customerSpace, masterTableName);
+            TransformationStepConfig split = split();
             TransformationStepConfig profile = profile();
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig calc = calcStats(customerSpace, STATS_TABLE_PREFIX);
@@ -124,6 +127,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
                     match, //
+                    split, //
                     profile, //
                     bucket, //
                     calc, //
@@ -166,9 +170,26 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         return step;
     }
 
+    private TransformationStepConfig split() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = Collections.singletonList(matchStep);
+        step.setInputSteps(inputSteps);
+        step.setTransformer(TRANSFORMER_SORTER);
+
+        SorterConfig conf = new SorterConfig();
+        conf.setPartitions(cascadingPartitions * 10);
+        conf.setSplittingThreads(maxSplitThreads);
+        conf.setCompressResult(true);
+        // TODO: only support single sort key now
+        conf.setSortingField(masterTableSortKeys.get(0));
+        String confStr = appendEngineConf(conf, lightEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
     private TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(matchStep));
+        step.setInputSteps(Collections.singletonList(splitStep));
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
@@ -179,7 +200,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
 
     private TransformationStepConfig bucket() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(matchStep, profileStep));
+        step.setInputSteps(Arrays.asList(splitStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
 
         TargetTable targetTable = new TargetTable();
@@ -233,8 +254,8 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         conf.setPartitions(500);
         conf.setSplittingThreads(maxSplitThreads);
         conf.setCompressResult(false);
-        conf.setSortingField(masterTableSortKeys.get(0)); // TODO: only support
-                                                          // single sort key now
+        // TODO: only support single sort key now
+        conf.setSortingField(masterTableSortKeys.get(0));
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;

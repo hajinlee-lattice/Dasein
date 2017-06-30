@@ -39,7 +39,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     protected int workflowMemMbMax;
 
     @Value("${pls.cdl.transform.cascading.partitions}")
-    private int cascadingPartitions;
+    protected int cascadingPartitions;
 
     @Value("${pls.cdl.transform.tez.task.mem.gb}")
     private int tezMemGb;
