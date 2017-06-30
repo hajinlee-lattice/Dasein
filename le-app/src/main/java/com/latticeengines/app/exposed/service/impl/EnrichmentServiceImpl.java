@@ -1,6 +1,6 @@
 package com.latticeengines.app.exposed.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMApiUpdate;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMApiUpdate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     @PostConstruct
     public void postConstruct() {
         topAttrsCache = WatcherCache.builder() //
-                .watch(AMApiUpdate.name()) //
+                .watch(AMApiUpdate) //
                 .name("TopAttrsCache") //
                 .maximum(1) //
                 .load(key -> {
@@ -189,14 +189,6 @@ public class EnrichmentServiceImpl implements EnrichmentService {
         return getTopQuery(DataCloudConstants.ACCOUNT_MASTER, //
                 AccountMasterFact.DIM_NUM_LOC_RANGE, //
                 DataCloudConstants.ATTR_NUM_LOC_RANGE);
-    }
-
-    private void loadCache() {
-        try {
-            topAttrsCache.get(DUMMY_KEY);
-        } catch (Exception e) {
-            log.error("Failed to load top attrs cache.", e);
-        }
     }
 
     // TODO: should get root attribute name by calling some matchapi

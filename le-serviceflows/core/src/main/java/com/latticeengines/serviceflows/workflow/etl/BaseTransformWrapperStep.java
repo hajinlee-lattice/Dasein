@@ -97,7 +97,7 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     }
 
     protected TransformationFlowParameters.EngineConfiguration lightEngineConfig() {
-        if ("FLINK".equals(defaultEngine)) {
+        if ("FLINK".equalsIgnoreCase(defaultEngine)) {
             TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
             engineConf.setEngine("FLINK");
             engineConf.setPartitions(cascadingPartitions);

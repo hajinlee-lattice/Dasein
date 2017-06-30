@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMRelease;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -100,7 +100,7 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     private void initCache() {
         predefinedSelectionCache = WatcherCache.builder() //
                 .name("PredefinedSelectionCacheForRTSCache") //
-                .watch(AMRelease.name()) //
+                .watch(AMRelease) //
                 .maximum(10) //
                 .load(selection -> {
                     List<ExternalColumn> externalColumns = externalColumnService.findByColumnSelection((Predefined) selection,

@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher;
 
 public class WatcherCache<K, V> {
 
@@ -73,7 +74,7 @@ public class WatcherCache<K, V> {
             }
             double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
             log.info(
-                    String.format("Finished initializing the WatcherCache %s after %.3f secs.", watcherName, duration));
+                    String.format("Finished initializing the WatcherCache %s after %.3f secs.", cacheName, duration));
         }
     }
 
@@ -95,7 +96,7 @@ public class WatcherCache<K, V> {
             log.info("Start refreshing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
             cache.asMap().keySet().forEach(this::loadKey);
             double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
-            log.info(String.format("Finished refreshing the WatcherCache %s after %.3f secs.", watcherName, duration));
+            log.info(String.format("Finished refreshing the WatcherCache %s after %.3f secs.", cacheName, duration));
         }
     }
 
@@ -136,8 +137,8 @@ public class WatcherCache<K, V> {
             return this;
         }
 
-        public Builder watch(String watcherName) {
-            this.watcherName = watcherName;
+        public Builder watch(CamilleWatcher watcher) {
+            this.watcherName = watcher.name();
             return this;
         }
 

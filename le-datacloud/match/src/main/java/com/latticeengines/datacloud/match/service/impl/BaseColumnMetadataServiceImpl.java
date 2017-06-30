@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMRelease;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -185,7 +185,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
                 .toArray(new ImmutablePair[predefinedForLatestVersion.size()]);
          predefinedMetaDataCache = WatcherCache.builder() //
                 .name("PredefinedSelectionCacheForRTSCache") //
-                .watch(AMRelease.name()) //
+                .watch(AMRelease) //
                 .maximum(10) //
                 .load(key -> {
                     ImmutablePair<String, Predefined> pair = (ImmutablePair<String, Predefined>) key;

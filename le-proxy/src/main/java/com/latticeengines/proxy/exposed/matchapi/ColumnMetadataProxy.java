@@ -1,6 +1,6 @@
 package com.latticeengines.proxy.exposed.matchapi;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMApiUpdate;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMApiUpdate;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,21 +48,21 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private void postConstruct() {
         latestDataCloudVersionCache = WatcherCache.builder() //
                 .name("LatestDataCloudVersionCache") //
-                .watch(AMApiUpdate.name()) //
+                .watch(AMApiUpdate) //
                 .maximum(20) //
                 .load(compatibleVersion -> requestLatestVersion((String) compatibleVersion)) //
                 .initKeys(new String[] { "" }) //
                 .build();
         enrichmentColumnsCache = WatcherCache.builder() //
                 .name("EnrichmentColumnsCache") //
-                .watch(AMApiUpdate.name()) //
+                .watch(AMApiUpdate) //
                 .maximum(20) //
                 .load(dataCloudVersion -> requestColumnSelection(Predefined.Enrichment, (String) dataCloudVersion)) //
                 .initKeys(new String[] { "2.0.4" }) //
                 .build();
         segmentColumnsCache = WatcherCache.builder() //
                 .name("SegmentColumnsCache") //
-                .watch(AMApiUpdate.name()) //
+                .watch(AMApiUpdate) //
                 .maximum(20) //
                 .load(dataCloudVersion -> requestColumnSelection(Predefined.Segment, (String) dataCloudVersion)) //
                 .initKeys(new String[] { "2.0.4" }) //
@@ -71,7 +71,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         columnCacheMap.put(Predefined.Segment, segmentColumnsCache);
         amAttrRepoCache = WatcherCache.builder() //
                 .name("AMAttrRepoCache") //
-                .watch(AMApiUpdate.name()) //
+                .watch(AMApiUpdate) //
                 .maximum(1) //
                 .load(key -> getAttrRepoViaREST()) //
                 .initKeys(new String[] { AM_REPO }) //

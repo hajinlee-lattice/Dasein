@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMRelease;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -267,7 +267,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                 .toArray(new ImmutablePair[predefinedForLatestVersion.size()]);
         predefinedSelectionCache = WatcherCache.builder() //
                 .name("PredefinedSelectionCache") //
-                .watch(AMRelease.name()) //
+                .watch(AMRelease) //
                 .maximum(100) //
                 .load(key -> {
                     ImmutablePair<String, Predefined> pair = (ImmutablePair<String, Predefined>) key;
@@ -277,6 +277,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                 .build();
         codeBookCache = WatcherCache.builder() //
                 .name("CodeBookCache") //
+                .watch(AMRelease) //
                 .maximum(20) //
                 .load(version -> {
                     Map<String, BitCodeBook> codeBookMap = new HashMap<>();

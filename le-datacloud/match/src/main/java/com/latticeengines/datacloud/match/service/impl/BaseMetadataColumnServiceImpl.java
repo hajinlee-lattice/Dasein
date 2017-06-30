@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMMedataUpdate;
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatchers.AMRelease;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMMedataUpdate;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
 import java.util.ArrayList;
 import java.util.HashMap;
