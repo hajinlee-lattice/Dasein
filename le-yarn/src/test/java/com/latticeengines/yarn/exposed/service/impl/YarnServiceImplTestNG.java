@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.service.impl;
+package com.latticeengines.yarn.exposed.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -15,49 +15,49 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInf
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
+import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.YarnService;
+import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 
-public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
+public class YarnServiceImplTestNG extends YarnFunctionalTestNGBase {
 
     @Autowired
-    private ModelingJobService modelingJobService;
+    private JobService jobService;
 
     @Autowired
     private YarnService yarnService;
 
-    @Test(groups = { "functional.platform", "functional.production" })
+    @Test(groups = { "functionalm" })
     public void getSchedulerInfo() {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         assertNotNull(schedulerInfo);
     }
 
-    @Test(groups = { "functional.platform", "functional.production" })
+    @Test(groups = { "functional" })
     public void getCapacitySchedulerInfo() {
         CapacitySchedulerInfo schedulerInfo = yarnService.getCapacitySchedulerInfo();
         assertNotNull(schedulerInfo);
     }
 
-    @Test(groups = { "functional.platform", "functional.production" })
+    @Test(groups = { "functional" })
     public void getApps() {
         List<ApplicationReport> appReports = yarnService.getApplications(GetApplicationsRequest.newInstance());
         assertNotNull(appReports);
     }
 
-    @Test(groups = { "functional.platform", "functional.production" })
+    @Test(groups = { "functional" })
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-" + suffix);
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-yarn");
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "64");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
-        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         ApplicationReport appReport = yarnService.getApplication(applicationId.toString());
         assertNotNull(appReport);
@@ -66,23 +66,23 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = { "functional.platform", "functional.production" })
+    @Test(groups = { "functional" })
     public void getApplicationReportAndKillJob() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-" + suffix);
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-yarn");
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "64");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
-        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
-        ApplicationReport applicationReport = modelingJobService.getJobReportById(applicationId);
+        ApplicationReport applicationReport = jobService.getJobReportById(applicationId);
         ApplicationReport appReport = yarnService.getApplication(applicationId.toString());
         assertNotNull(appReport);
         assertNotNull(applicationReport);
 
-        modelingJobService.killJob(applicationId);
+        jobService.killJob(applicationId);
 
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
         assertEquals(status, FinalApplicationStatus.KILLED);
