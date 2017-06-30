@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:yarn="http://www.springframework.org/schema/yarn" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+      http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="hdfsEntriesList" class="java.util.ArrayList" scope="prototype" />
+    <bean id="copyEntriesList" class="java.util.ArrayList" scope="prototype" />
+
+    <bean id="defaultYarnLocalResources" class="org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean"
+        scope="prototype">
+        <property name="configuration">
+            <ref bean="yarnConfiguration" />
+        </property>
+        <property name="hdfsEntries">
+            <ref bean="hdfsEntriesList" />
+        </property>
+        <property name="copyEntries">
+            <ref bean="copyEntriesList" />
+        </property>
+    </bean>
+    
+    <import resource="classpath:default/yarn-default-yarn-client-context.xml" />
+</beans>

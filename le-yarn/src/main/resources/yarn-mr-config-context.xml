@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:hdp="http://www.springframework.org/schema/hadoop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/hadoop
+       http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
+
+    <import resource="classpath:hadoop-config-context.xml"/>
+
+    <hdp:configuration id="hadoopConfiguration" configuration-ref="baseConfiguration">
+        yarn.app.mapreduce.am.resource.cpu-vcores=1
+        mapreduce.map.memory.mb=${dataplatform.container.mapreduce.memory}
+        mapreduce.reduce.memory.mb=${dataplatform.container.mapreduce.memory}
+        mapreduce.map.cpu.vcores=${dataplatform.container.map.virtualcores}
+        mapreduce.reduce.cpu.vcores=${dataplatform.container.reduce.virtualcores}
+        mapreduce.job.queuename=Priority0.MapReduce.0
+        mapreduce.framework.name=yarn
+        mapreduce.job.user.classpath.first=true
+        yarn.resourcemanager.system-metrics-publisher.enabled=true
+        yarn.timeline-service.enabled=true
+        mapreduce.task.timeout=${dataplatform.mapreduce.task.timeout}
+    </hdp:configuration>
+
+</beans>

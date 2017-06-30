@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
+    xmlns:yarn-int="http://www.springframework.org/schema/yarn/integration"
+    xmlns:yarn-batch="http://www.springframework.org/schema/yarn/batch"
+    xmlns:int="http://www.springframework.org/schema/integration"
+    xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+    xmlns:batch="http://www.springframework.org/schema/batch"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+        http://www.springframework.org/schema/yarn/integration http://www.springframework.org/schema/yarn/integration/spring-yarn-integration.xsd
+        http://www.springframework.org/schema/yarn/batch http://www.springframework.org/schema/yarn/batch/spring-yarn-batch-2.0.xsd
+        http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+        http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="taskScheduler"
+        class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler" />
+    <bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
+    <bean id="yarnEventPublisher"
+        class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
+    <bean class="org.springframework.yarn.event.LoggingListener">
+        <constructor-arg value="info" />
+    </bean>
+
+    <import resource="classpath:yarn-config-context.xml" />
+    <import resource="classpath:yarn-client-context.xml" />
+
+    <bean id="appMasterTransactionManager"
+        class="org.springframework.batch.support.transaction.ResourcelessTransactionManager" />
+
+    <bean id="appMasterJobRepository"
+        class="org.springframework.batch.core.repository.support.MapJobRepositoryFactoryBean">
+        <property name="transactionManager" ref="appMasterTransactionManager" />
+    </bean>
+
+    <bean id="appMasterJobLauncher"
+        class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+        <property name="jobRepository" ref="appMasterJobRepository" />
+    </bean>
+
+    <context:component-scan base-package="org.springframework.yarn.batch.am" />
+
+    <bean id="appMasterItemReader"
+        class="org.springframework.batch.item.file.FlatFileItemReader">
+        <property name="resource" value="file:metadata.json" />
+        <property name="lineMapper" value="#{itemProcessor.getLineMapper()}" />
+    </bean>
+
+    <bean id="appMasterItemWriter"
+        class="com.latticeengines.yarn.exposed.runtime.SingleContainerWriter" />
+
+    <util:properties id="props">
+        <prop key="jobName">singleContainerJob</prop>
+    </util:properties>
+
+    <batch:job id="singleContainerJob" restartable="false"
+        job-repository="appMasterJobRepository">
+        <batch:step id="master">
+            <batch:tasklet transaction-manager="appMasterTransactionManager">
+                <batch:chunk reader="appMasterItemReader"
+                    processor="itemProcessor" writer="appMasterItemWriter"
+                    commit-interval="2" />
+            </batch:tasklet>
+        </batch:step>
+    </batch:job>
+
+    <yarn-batch:master job-name="singleContainerJob"
+        jobs="singleContainerJob" job-launcher="appMasterJobLauncher" />
+
+    <context:annotation-config />
+    <context:component-scan
+        base-package="com.latticeengines.yarn.exposed.service,com.latticeengines.yarn.exposed.client,com.latticeengines.yarn.exposed.runtime.progress" />
+    <!-- import resource="classpath:batch-amjob/yarn-batch-appmaster-service-context.xml" 
+        / -->
+</beans>
