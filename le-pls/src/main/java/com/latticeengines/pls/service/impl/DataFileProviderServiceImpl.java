@@ -23,8 +23,11 @@ import com.latticeengines.pls.service.impl.HdfsFileHttpDownloader.DownloadReques
 @Component("dataFileProviderService")
 public class DataFileProviderServiceImpl implements DataFileProviderService {
 
+    private static String MODEL_PROFILE_AVRO = "model_profile.avro";
+
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
+
     @Autowired
     private Configuration yarnConfiguration;
     @Autowired
@@ -56,6 +59,14 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         String trainingFilePath = summary.getModelSummaryConfiguration()
                 .getString(ProvenancePropertyName.TrainingFilePath, "");
         downloadFileByPath(request, response, mimeType, trainingFilePath);
+    }
+
+    @Override
+    public void downloadModelProfile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType) throws IOException {
+        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        String modelProfilePath = String.format("%s%s/data/%s-Event-Metadata/%s", modelingServiceHdfsBaseDir, summary
+                .getTenant().getId(), summary.getEventTableName(), MODEL_PROFILE_AVRO);
+        downloadFileByPath(request, response, mimeType, modelProfilePath);
     }
 
     @Override

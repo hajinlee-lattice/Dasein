@@ -90,6 +90,9 @@
                         <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_TRAINING_SET_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/trainingfilecsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}" ng-if="TrainingFilePath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!TrainingFilePath">N/A</a>
                         <br/></span>
+                        <span ng-if="!IsPmml">{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_MODEL_PROFILE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <a href="/files/datafiles/modelprofileavro?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}" ng-if="EventTableName">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!EventTableName">N/A</a>
+                        <br/></span>
                         <span>{{ResourceUtility.getString('MODEL_ADMIN_EXTRA_PIVOT_FILE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <a href="/files/datafiles/pivotmappingcsv?modelId={{ModelId}}&Authorization={{AuthToken}}&TenantId={{TenantId}}" ng-if="showPivotMapping && PivotArtifactPath">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a><a ng-if="!showPivotMapping || !PivotArtifactPath">N/A</a></span>
                     </td>

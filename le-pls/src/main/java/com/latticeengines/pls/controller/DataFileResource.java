@@ -159,6 +159,15 @@ public class DataFileResource {
         dataFileProviderService.downloadTrainingSet(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM);
     }
 
+    @RequestMapping(value = "/modelprofileavro", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get model profile avro file.")
+    public void getModelProfileAvroFile(@RequestParam(value = "modelId") String modelId, HttpServletRequest request,
+                                      HttpServletResponse response) throws IOException {
+        response.setHeader("Content-Encoding", "gzip");
+        dataFileProviderService.downloadModelProfile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM);
+    }
+
     @RequestMapping(value = "/sourcefilecsv/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get source file uploaded to create model or score against model")

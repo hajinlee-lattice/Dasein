@@ -16,6 +16,9 @@ public interface DataFileProviderService {
     void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response,
             String modelId, String mimeType) throws IOException;
 
+    void downloadModelProfile(HttpServletRequest request, HttpServletResponse response,
+                             String modelId, String mimeType) throws IOException;
+
     void downloadFileByApplicationId(HttpServletRequest request, HttpServletResponse response,
                                      String mimeType, String applicationId, String fileName) throws IOException;
 
