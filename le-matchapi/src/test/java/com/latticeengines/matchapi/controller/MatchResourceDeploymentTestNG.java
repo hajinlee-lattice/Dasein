@@ -34,7 +34,6 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -51,6 +50,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.matchapi.testframework.TestMatchInputService;
 import com.latticeengines.matchapi.testframework.TestMatchInputUtils;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component
 public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
@@ -162,10 +162,12 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             Assert.assertTrue(outputRecord.getResult().size() > 0);
             if (!publicDomainService.isPublicDomain(outputRecord.getResult().get(0).getPreMatchDomain())) {
                 Assert.assertTrue(outputRecord.getResult().get(0).isMatched(),
-                        JsonUtils.serialize(outputRecord.getResult().get(0)) + " should match as it is not a public domain.");
+                        JsonUtils.serialize(outputRecord.getResult().get(0))
+                                + " should match as it is not a public domain.");
             } else {
                 Assert.assertFalse(outputRecord.getResult().get(0).isMatched(),
-                        JsonUtils.serialize(outputRecord.getResult().get(0)) + " should not match as it is a public domain.");
+                        JsonUtils.serialize(outputRecord.getResult().get(0))
+                                + " should not match as it is a public domain.");
                 Assert.assertTrue(outputRecord.getResult().get(0).getErrorMessages().size() > 0);
             }
         }
@@ -361,7 +363,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
         }
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
-        //YarnUtils.kill(yarnClient, ConverterUtils.toApplicationId(blockAppId));
+        // YarnUtils.kill(yarnClient,
+        // ConverterUtils.toApplicationId(blockAppId));
         jobService.killJob(ConverterUtils.toApplicationId(blockAppId));
 
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);

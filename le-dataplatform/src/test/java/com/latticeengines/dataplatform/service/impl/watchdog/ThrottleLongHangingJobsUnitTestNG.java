@@ -20,10 +20,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.service.impl.YarnServiceImpl;
 import com.latticeengines.dataplatform.service.impl.modeling.ModelingJobServiceImpl;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.yarn.exposed.service.YarnService;
+import com.latticeengines.yarn.exposed.service.impl.YarnServiceImpl;
 
 public class ThrottleLongHangingJobsUnitTestNG {
 

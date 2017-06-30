@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization;
+import com.latticeengines.yarn.exposed.client.DefaultYarnClientCustomization;
 
 @Component("RClientCustomization")
 public class RClientCustomization extends DefaultYarnClientCustomization {

@@ -10,17 +10,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.JobNameService;
-import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.service.impl.JobServiceImpl;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
+import com.latticeengines.yarn.exposed.client.AppMasterProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
+import com.latticeengines.yarn.exposed.service.JobNameService;
+import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
 @Component("modelingJobService")
 public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJobService {
@@ -73,8 +73,8 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
         JobStatus jobStatus = new JobStatus();
         if (leafJob != null) {
             applicationId = leafJob.getId();
-            String classifierStr = (String) leafJob.getContainerPropertiesObject().get(
-                    PythonContainerProperty.METADATA_CONTENTS.name());
+            String classifierStr = (String) leafJob.getContainerPropertiesObject()
+                    .get(PythonContainerProperty.METADATA_CONTENTS.name());
             if (classifierStr != null) {
                 Classifier classifier = JsonUtils.deserialize(classifierStr, Classifier.class);
                 if (classifier != null) {
@@ -99,8 +99,8 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
             return null;
         }
         Long parentId = resubmitJob.getPid();
-        String metadata = resubmitJob.getContainerPropertiesObject().getProperty(
-                PythonContainerProperty.METADATA_CONTENTS.name());
+        String metadata = resubmitJob.getContainerPropertiesObject()
+                .getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
 
         ModelingJob newModelingJob = new ModelingJob();
         newModelingJob.setParentPid(parentId);

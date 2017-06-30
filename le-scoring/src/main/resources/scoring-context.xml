@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:task="http://www.springframework.org/schema/task"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
     <import resource="classpath:scoring-persistence-context.xml" />
     <import resource="classpath:scoring-mapreduce-context.xml" />
     <import resource="classpath:scoring-yarn-client-context.xml" />
     <import resource="classpath:common-threadpool-context.xml" />
-
-    <context:component-scan base-package="com.latticeengines.scoring" >
-        <context:exclude-filter type="aspectj" expression="com.latticeengines.scoring.controller.*" />
+    <import resource="classpath:proxy-context.xml" />
+    <import resource="classpath:monitor-alerts-context.xml" />
+    
+    <context:component-scan base-package="com.latticeengines.scoring">
+        <context:exclude-filter type="aspectj"
+            expression="com.latticeengines.scoring.controller.*" />
     </context:component-scan>
     <import resource="classpath:scoring-validation-context.xml" />
 
@@ -20,13 +22,13 @@
         <property name="jdbcUrl" value="${scoring.dao.datasource.url}" />
         <property name="dbType" value="${scoring.dao.datasource.type}" />
         <property name="user" value="${scoring.dao.datasource.user}" />
-        <property name="password" value="${scoring.dao.datasource.password.encrypted}" />
+        <property name="password"
+            value="${scoring.dao.datasource.password.encrypted}" />
     </bean>
 
     <task:executor id="scoringProcessorExecutor"
-                   pool-size="${scoring.core.pool.size}-${scoring.max.pool.size}"
-                   queue-capacity="${scoring.queue.capacity}"
-                   keep-alive="100"
-                   rejection-policy="CALLER_RUNS" />
+        pool-size="${scoring.core.pool.size}-${scoring.max.pool.size}"
+        queue-capacity="${scoring.queue.capacity}" keep-alive="100"
+        rejection-policy="CALLER_RUNS" />
 
 </beans>

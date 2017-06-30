@@ -16,14 +16,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.DataCloudProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.client.AppMasterProperty;
+import com.latticeengines.yarn.exposed.client.ContainerProperty;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("propDataYarnService")
 public class DataCloudYarnServiceImpl implements DataCloudYarnService {

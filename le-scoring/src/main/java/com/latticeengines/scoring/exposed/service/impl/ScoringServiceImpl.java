@@ -6,15 +6,15 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringProperty;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.scoring.exposed.service.ScoringService;
+import com.latticeengines.yarn.exposed.client.AppMasterProperty;
+import com.latticeengines.yarn.exposed.client.ContainerProperty;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("scoringService")
 public class ScoringServiceImpl implements ScoringService {

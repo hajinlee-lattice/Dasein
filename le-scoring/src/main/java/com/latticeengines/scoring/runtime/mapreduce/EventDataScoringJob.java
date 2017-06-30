@@ -15,13 +15,13 @@ import org.apache.hadoop.util.ToolRunner;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
-import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.exposed.runtime.mapreduce.MRJobCustomizationBase;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.runtime.mapreduce.MRJobCustomizationBase;
 
 public class EventDataScoringJob extends MRJobCustomizationBase {
 

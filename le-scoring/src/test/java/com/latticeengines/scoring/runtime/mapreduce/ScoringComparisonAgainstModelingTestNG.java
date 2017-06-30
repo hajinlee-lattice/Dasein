@@ -82,7 +82,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     protected String uuid;
 
     protected String containerId;
-    
+
     protected String path;
 
     protected String dataPath;
@@ -121,7 +121,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         modelingModelPath = customerBaseDir + "/" + tenant + "/models/Q_PLS_ModelingMulesoft_Relaunch/";
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/scores";
-        if(!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+        if (!CollectionUtils.isEmpty(dbMetadataService.showTable(scoringJdbcTemplate, inputLeadsTable))) {
             dbMetadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
         }
         dbMetadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
@@ -197,7 +197,8 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         String modelId = "ms__" + uuid + "-PLS_model";
 
         File scoringLeadFile = addColumnsToTestDataFile(modelId);
-        scoringJdbcTemplate.execute(String.format("Update [%s] Set [%s] = '%s'", inputLeadsTable, ScoringDaemonService.MODEL_GUID, modelId));
+        scoringJdbcTemplate.execute(String.format("Update [%s] Set [%s] = '%s'", inputLeadsTable,
+                ScoringDaemonService.MODEL_GUID, modelId));
         scoringDataPath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/data/1.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoringLeadFile.getAbsolutePath(), scoringDataPath);
         // delete the temp file
@@ -283,8 +284,8 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     }
 
     protected void score() throws Exception {
-        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
-                0, 4352, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable, 0,
+                4352, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(scoringCommand);
         ApplicationId appId = scoringStepYarnProcessor.executeYarnStep(scoringCommand, ScoringCommandStep.SCORE_DATA);
         waitForSuccess(appId, ScoringCommandStep.SCORE_DATA);

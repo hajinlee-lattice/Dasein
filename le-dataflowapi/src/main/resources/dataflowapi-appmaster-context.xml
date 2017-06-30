@@ -6,7 +6,7 @@
     <bean id="itemProcessor" class="com.latticeengines.dataflowapi.yarn.runtime.DataFlowProcessor" />
 
     <import resource="classpath:common-am-properties-context.xml"/>
-    <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
+    <import resource="classpath:batch-amjob/yarn-batch-appmaster-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />
     <import resource="classpath:dataflow-context.xml" />
     <import resource="classpath:dataflowapi-yarn-context.xml" />

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -29,6 +28,7 @@ import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.eai.util.EaiJobUtil;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 @Component("dynamoExportService")
 public class DynamoExportServiceImpl extends ExportService {

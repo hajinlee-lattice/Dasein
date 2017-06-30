@@ -9,23 +9,7 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean id="hdfsEntriesList" class="java.util.ArrayList" scope="prototype" />
-    <bean id="copyEntriesList" class="java.util.ArrayList" scope="prototype" />
-
-    <bean id="defaultYarnLocalResources" class="org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean"
-        scope="prototype">
-        <property name="configuration">
-            <ref bean="yarnConfiguration" />
-        </property>
-        <property name="hdfsEntries">
-            <ref bean="hdfsEntriesList" />
-        </property>
-        <property name="copyEntries">
-            <ref bean="copyEntriesList" />
-        </property>
-    </bean>
-
-    <import resource="classpath:default/dataplatform-default-yarn-client-context.xml" />
+    <import resource="classpath:yarn-client-context.xml"/>
     <import resource="classpath:R/dataplatform-R-yarn-client-context.xml" />
     <import resource="classpath:python/dataplatform-python-yarn-client-context.xml" />
 </beans>

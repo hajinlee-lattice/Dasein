@@ -20,7 +20,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -32,6 +31,7 @@ import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNG
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.eai.service.impl.file.strategy.FileEventTableImportStrategyBase;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 public class FileImportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 

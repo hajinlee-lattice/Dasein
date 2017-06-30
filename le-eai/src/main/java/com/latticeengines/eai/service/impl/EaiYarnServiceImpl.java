@@ -6,13 +6,13 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.BaseContext;
 import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.eai.service.EaiYarnService;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("eaiYarnService")
 public class EaiYarnServiceImpl implements EaiYarnService {

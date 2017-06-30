@@ -38,7 +38,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
-import com.latticeengines.dataplatform.service.impl.JobServiceImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
@@ -53,6 +52,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.ExportService;
+import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
 public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 

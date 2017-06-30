@@ -21,7 +21,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.util.Progressable;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 public class FeatureImportanceAggregator implements FileAggregator {
     private static final Log log = LogFactory.getLog(FeatureImportanceAggregator.class);

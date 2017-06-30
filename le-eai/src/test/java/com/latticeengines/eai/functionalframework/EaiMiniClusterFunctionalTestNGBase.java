@@ -8,11 +8,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClusterFunctionalTestNG;
+import com.latticeengines.yarn.functionalframework.YarnMiniClusterFunctionalTestNGBase;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
-public class EaiMiniClusterFunctionalTestNGBase extends DataplatformMiniClusterFunctionalTestNG
+public class EaiMiniClusterFunctionalTestNGBase extends YarnMiniClusterFunctionalTestNGBase
         implements EaiFunctionalTestNGInterface {
 
     @Override

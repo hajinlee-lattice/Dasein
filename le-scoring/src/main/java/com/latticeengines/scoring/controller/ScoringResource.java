@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scoring.exposed.service.ScoringService;
 import com.latticeengines.scoring.service.ScoringJobService;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

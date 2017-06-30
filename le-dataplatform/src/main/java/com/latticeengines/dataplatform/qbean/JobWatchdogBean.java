@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.YarnService;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.service.impl.JobWatchdogCallable;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
+import com.latticeengines.yarn.exposed.service.YarnService;
 
 @Component("jobWatchdog")
 public class JobWatchdogBean implements QuartzJobBean {
@@ -38,12 +38,9 @@ public class JobWatchdogBean implements QuartzJobBean {
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
         JobWatchdogCallable.Builder builder = new JobWatchdogCallable.Builder();
-        builder.modelEntityMgr(modelEntityMgr)
-                .modelingJobService(modelingJobService)
-                .throttleConfigurationEntityMgr(throttleConfigurationEntityMgr)
-                .yarnService(yarnService)
-                .jobEntityMgr(jobEntityMgr)
-                .retryWaitTime(retryWaitTime);
+        builder.modelEntityMgr(modelEntityMgr).modelingJobService(modelingJobService)
+                .throttleConfigurationEntityMgr(throttleConfigurationEntityMgr).yarnService(yarnService)
+                .jobEntityMgr(jobEntityMgr).retryWaitTime(retryWaitTime);
 
         return new JobWatchdogCallable(builder);
     }

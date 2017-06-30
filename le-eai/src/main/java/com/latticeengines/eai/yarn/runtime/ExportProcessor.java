@@ -6,12 +6,12 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 import com.latticeengines.eai.service.impl.redshift.HdfsToRedshiftService;
 import com.latticeengines.eai.service.impl.s3.HdfsToS3ExportService;
+import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 @Component("exportProcessor")
 public class ExportProcessor extends SingleContainerYarnProcessor<ExportConfiguration>

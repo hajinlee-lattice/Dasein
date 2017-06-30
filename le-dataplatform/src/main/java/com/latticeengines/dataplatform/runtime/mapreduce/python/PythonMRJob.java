@@ -11,16 +11,16 @@ import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
-import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
-import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.runtime.python.PythonMRJobType;
-import com.latticeengines.dataplatform.runtime.python.PythonMRProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.yarn.exposed.client.mapreduce.MRJobCustomization;
+import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRJobType;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 
 public class PythonMRJob extends Configured implements MRJobCustomization {
     public static final String PYTHON_MR_JOB = "pythonMRJob";
@@ -104,11 +104,11 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
             config.set("mapreduce.reduce.memory.mb", reduceMemorySize);
         }
         config.set(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersionInStack(stackName));
-        
+
         config.set("mapreduce.job.maxtaskfailures.per.tracker", "1");
         config.set("mapreduce.map.maxattempts", "1");
         config.set("mapreduce.reduce.maxattempts", "1");
-        
+
     }
 
     private void setInputFormat(Job mrJob, Properties properties, Configuration config) {

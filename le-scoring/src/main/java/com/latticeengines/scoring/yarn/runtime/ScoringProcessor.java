@@ -46,7 +46,6 @@ import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -67,6 +66,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
         implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {

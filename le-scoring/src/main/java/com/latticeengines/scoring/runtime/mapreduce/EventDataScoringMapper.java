@@ -21,7 +21,6 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
@@ -30,6 +29,7 @@ import com.latticeengines.scoring.util.ModelAndRecordInfo;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 import com.latticeengines.scoring.util.ScoringMapperPredictUtil;
 import com.latticeengines.scoring.util.ScoringMapperTransformUtil;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
@@ -67,21 +67,21 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
             ScoringMapperPredictUtil.evaluate(context, modelAndRecordInfo.getModelInfoMap().keySet());
             List<ScoreOutput> resultList = new ArrayList<>();
-            if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(), Boolean.FALSE.booleanValue()) == Boolean.TRUE
-                    .booleanValue()) {
+            if (config.getBoolean(ScoringProperty.USE_SCOREDERIVATION.name(),
+                    Boolean.FALSE.booleanValue()) == Boolean.TRUE.booleanValue()) {
                 log.info("Using score derivation to generate percentile score.");
                 Map<String, ScoreDerivation> scoreDerivationMap = ScoringMapperTransformUtil
                         .deserializeLocalScoreDerivationFiles(uris);
                 resultList = ScoringMapperPredictUtil.processScoreFilesUsingScoreDerivation(modelAndRecordInfo,
                         scoreDerivationMap, recordFileThreshold);
             } else {
-                resultList = ScoringMapperPredictUtil
-                        .processScoreFiles(modelAndRecordInfo, models, recordFileThreshold);
+                resultList = ScoringMapperPredictUtil.processScoreFiles(modelAndRecordInfo, models,
+                        recordFileThreshold);
             }
             log.info("The mapper has scored: " + resultList.size() + " records.");
             if (totalRecordCount != resultList.size()) {
-                throw new LedpException(LedpCode.LEDP_20009, new String[] { String.valueOf(totalRecordCount),
-                        String.valueOf(resultList.size()) });
+                throw new LedpException(LedpCode.LEDP_20009,
+                        new String[] { String.valueOf(totalRecordCount), String.valueOf(resultList.size()) });
             }
 
             String outputPath = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
@@ -93,11 +93,11 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             log.info("The scoring takes " + (scoringTotalTime * 1.66667e-5) + " mins");
 
         } catch (Exception e) {
-            String errorMessage = String
-                    .format("TenantId=%s leadnputQueueId=%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
-                            config.get(ScoringProperty.TENANT_ID.name()),
-                            config.get(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()), e.getMessage(),
-                            ExceptionUtils.getStackTrace(e));
+            String errorMessage = String.format(
+                    "TenantId=%s leadnputQueueId=%s Failure Step=Scoring Mapper Failure Message=%s Failure StackTrace=%s", //
+                    config.get(ScoringProperty.TENANT_ID.name()),
+                    config.get(ScoringProperty.LEAD_INPUT_QUEUE_ID.name()), e.getMessage(),
+                    ExceptionUtils.getStackTrace(e));
             log.error(errorMessage);
             File logFile = new File(config.get(ScoringProperty.LOG_DIR.name()) + "/" + UUID.randomUUID() + ".err");
             FileUtils.writeStringToFile(logFile, errorMessage);

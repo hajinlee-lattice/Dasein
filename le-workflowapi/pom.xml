@@ -89,7 +89,7 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
+            <artifactId>le-yarn</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
@@ -137,7 +137,7 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
+            <artifactId>le-yarn</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
@@ -185,7 +185,7 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
+            <artifactId>le-yarn</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>

@@ -7,7 +7,7 @@ import org.apache.hadoop.util.Progressable;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 public abstract class ProfilingAggregator implements FileAggregator {
 

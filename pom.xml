@@ -36,6 +36,7 @@
         <module>le-query</module>
         <module>le-swlib</module>
         <module>le-hadoop</module>
+        <module>le-yarn</module>
         <module>le-dataplatform</module>
         <module>le-encryption</module>
         <module>le-scoring</module>

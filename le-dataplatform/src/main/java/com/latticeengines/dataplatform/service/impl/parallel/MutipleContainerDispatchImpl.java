@@ -10,12 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.runtime.python.PythonMRJobType;
-import com.latticeengines.dataplatform.runtime.python.PythonMRProperty;
 import com.latticeengines.dataplatform.service.DispatchService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRJobType;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 
 @Component("mutipleContainerDispatcher")
 public class MutipleContainerDispatchImpl implements DispatchService {

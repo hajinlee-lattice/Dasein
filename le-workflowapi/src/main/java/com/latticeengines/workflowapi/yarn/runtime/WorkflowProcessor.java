@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -20,7 +19,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflowapi.service.WorkflowContainerService;
+import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 @StepScope
 public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConfiguration> {
@@ -35,9 +34,6 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
     @Autowired
     private WorkflowService workflowService;
-
-    @Autowired
-    private WorkflowContainerService workflowContainerService;
 
     @Autowired
     private VersionManager versionManager;
@@ -86,8 +82,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
                 log.info("Restarting workflow " + workflowConfig.getWorkflowIdToRestart().getId());
                 workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart(), workflowJob);
             } else {
-                workflowId = workflowContainerService.start(workflowConfig.getWorkflowName(), workflowJob,
-                        workflowConfig);
+                workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowJob, workflowConfig);
             }
 
             WorkflowStatus workflowStatus = workflowService.waitForCompletion(workflowId);

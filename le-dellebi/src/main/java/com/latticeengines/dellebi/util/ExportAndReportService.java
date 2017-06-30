@@ -19,7 +19,6 @@ import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -29,6 +28,7 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 public class ExportAndReportService {
 
@@ -175,7 +175,8 @@ public class ExportAndReportService {
 
         if (errorMsg == null) {
             try {
-                List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, dellEbiFlowService.getTxtDir(context) + "/*.txt");
+                List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration,
+                        dellEbiFlowService.getTxtDir(context) + "/*.txt");
                 if (files != null && files.size() > 0) {
                     boolean result = dellEbiFlowService.deleteFile(context);
                     if (result) {

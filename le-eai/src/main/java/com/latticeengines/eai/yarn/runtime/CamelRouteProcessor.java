@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.eai.service.CamelRouteService;
 import com.latticeengines.eai.service.impl.camel.SftpToHdfsRouteService;
+import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 @Component("camelRouteProcessor")
 public class CamelRouteProcessor extends SingleContainerYarnProcessor<CamelRouteConfiguration>
@@ -28,19 +28,18 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<CamelRoute
     @Autowired
     private SftpToHdfsRouteService sftpToHdfsRouteService;
 
-
     @Override
     public String process(CamelRouteConfiguration camelRouteConfig) throws Exception {
         log.info(JsonUtils.serialize(camelRouteConfig));
-         if (camelRouteConfig instanceof SftpToHdfsRouteConfiguration){
+        if (camelRouteConfig instanceof SftpToHdfsRouteConfiguration) {
             CamelContext camelContext = new DefaultCamelContext();
-            CamelRouteService<?> camelRouteService= sftpToHdfsRouteService;
+            CamelRouteService<?> camelRouteService = sftpToHdfsRouteService;
             RouteBuilder route = camelRouteService.generateRoute(camelRouteConfig);
             camelContext.addRoutes(route);
             camelContext.start();
             waitForRouteToFinish(camelRouteService, camelRouteConfig);
             camelContext.stop();
-        }else {
+        } else {
             throw new UnsupportedOperationException(
                     camelRouteConfig.getClass().getSimpleName() + " has not been implemented yet.");
         }

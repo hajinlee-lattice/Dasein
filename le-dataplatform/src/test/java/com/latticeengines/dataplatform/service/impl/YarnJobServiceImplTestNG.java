@@ -18,9 +18,9 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClusterFunctionalTestNG;
 import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.yarn.exposed.client.ContainerProperty;
 
 public class YarnJobServiceImplTestNG extends DataplatformMiniClusterFunctionalTestNG {
 

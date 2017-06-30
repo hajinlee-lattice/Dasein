@@ -36,7 +36,6 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -52,6 +51,7 @@ import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
@@ -67,7 +67,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     @Autowired
     private YarnClient defaultYarnClient;
 
-    protected DataPlatformFunctionalTestNGBase platformTestBase;
+    protected YarnFunctionalTestNGBase platformTestBase;
 
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
@@ -92,7 +92,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
     @BeforeClass(groups = { "functional", "deployment", "aws", "aws-deployment", "deployment.vdb" })
     public void setupRunEnvironment() throws Exception {
-        platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
+        platformTestBase = new YarnFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
     }
 

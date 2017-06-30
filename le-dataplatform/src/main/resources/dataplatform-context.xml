@@ -16,7 +16,7 @@
             expression="com.latticeengines.dataplatform.exposed.yarn.runtime.*" />
     </context:component-scan>
 
-    <import resource="classpath:dataplatform-yarn-config-context.xml" />
+    <import resource="classpath:yarn-context.xml" />
     <import resource="classpath:dataplatform-yarn-client-context.xml" />
     <import resource="classpath:sampling/dataplatform-mr-sampling-context.xml" />
     <import resource="classpath:sampling/dataplatform-parallel-mr-sampling-context.xml" />
@@ -30,7 +30,6 @@
     <import resource="classpath:monitor-aspects-context.xml" />
     <import resource="classpath:proxy-context.xml" />
     <import resource="classpath:remote-context.xml" />
-    <import resource="classpath:swlib-context.xml" />
     <import resource="classpath:common-component-context.xml" />
     <import resource="classpath:common-threadpool-context.xml" />
     <import resource="classpath:sqoop-context.xml" />

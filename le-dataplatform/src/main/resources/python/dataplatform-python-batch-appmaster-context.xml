@@ -20,7 +20,7 @@
     </util:properties>
 
     <context:property-placeholder location="file:latticeengines.properties" />
-    <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
+    <import resource="classpath:batch-amjob/yarn-batch-appmaster-context.xml" />
 
     <yarn:configuration />
 

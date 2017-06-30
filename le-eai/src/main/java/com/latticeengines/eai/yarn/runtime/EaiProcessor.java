@@ -5,11 +5,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
+import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 public class EaiProcessor extends SingleContainerYarnProcessor<EaiJobConfiguration>
         implements ItemProcessor<EaiJobConfiguration, String> {

@@ -14,9 +14,9 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 
 public abstract class PythonMapperBase extends Mapper<LongWritable, Text, Text, Text> {
 
@@ -41,8 +41,8 @@ public abstract class PythonMapperBase extends Mapper<LongWritable, Text, Text, 
         monitor.start();
     }
 
-    public abstract void setupClassifier(Context context, Classifier classifier) throws IOException,
-            InterruptedException;
+    public abstract void setupClassifier(Context context, Classifier classifier)
+            throws IOException, InterruptedException;
 
     @Override
     public void run(Context context) throws IOException, InterruptedException {

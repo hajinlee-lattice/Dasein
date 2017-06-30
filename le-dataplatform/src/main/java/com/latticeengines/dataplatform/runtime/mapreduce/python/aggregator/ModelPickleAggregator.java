@@ -8,12 +8,12 @@ import org.apache.hadoop.util.Progressable;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.PythonInvoker;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRUtils;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.algorithm.AggregationAlgorithm;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 
 public class ModelPickleAggregator implements FileAggregator {
 

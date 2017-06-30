@@ -6,9 +6,11 @@
     <bean id="itemProcessor" class="com.latticeengines.eai.yarn.runtime.EaiProcessor" />
 
     <import resource="classpath:common-am-properties-context.xml"/>
-    <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
+    <import resource="classpath:batch-amjob/yarn-batch-appmaster-context.xml" />
+    <import resource="classpath:yarn-context.xml" />
     <import resource="classpath:eai-yarn-context.xml" />
     <import resource="classpath:eai-import-context.xml" />
     <import resource="classpath:security-no-controller-context.xml" />
+    <import resource="classpath:remote-context.xml" />
 
 </beans>

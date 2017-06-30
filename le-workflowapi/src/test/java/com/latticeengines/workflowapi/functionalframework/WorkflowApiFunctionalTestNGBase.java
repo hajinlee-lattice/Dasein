@@ -35,7 +35,6 @@ import com.latticeengines.common.exposed.rest.URLUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -55,6 +54,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
+import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-workflowapi-context.xml" })
@@ -99,7 +99,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     protected InternalResourceRestApiProxy internalResourceProxy;
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-    protected DataPlatformFunctionalTestNGBase platformTestBase;
+    protected YarnFunctionalTestNGBase platformTestBase;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -122,7 +122,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
 
-        platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
+        platformTestBase = new YarnFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
         tenant = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
         if (tenant != null) {

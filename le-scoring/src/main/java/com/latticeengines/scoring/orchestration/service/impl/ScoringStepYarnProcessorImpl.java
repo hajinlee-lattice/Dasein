@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -46,6 +45,7 @@ import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 //import java.util.Arrays;
 

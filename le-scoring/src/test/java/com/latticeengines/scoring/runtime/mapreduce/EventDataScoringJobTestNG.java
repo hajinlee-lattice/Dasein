@@ -16,16 +16,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClusterFunctionalTestNG;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.service.impl.ScoringJobServiceImpl;
+import com.latticeengines.yarn.functionalframework.YarnMiniClusterFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-scoring-context.xml" })
-public class EventDataScoringJobTestNG extends DataplatformMiniClusterFunctionalTestNG {
+public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBase {
 
     @Autowired
     private ScoringJobService scoringJobService;

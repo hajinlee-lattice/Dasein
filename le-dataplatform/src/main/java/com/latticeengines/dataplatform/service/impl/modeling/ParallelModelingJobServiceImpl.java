@@ -14,21 +14,21 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRJob;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRUtils;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.runtime.python.PythonMRJobType;
-import com.latticeengines.dataplatform.runtime.python.PythonMRProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.yarn.exposed.client.AppMasterProperty;
+import com.latticeengines.yarn.exposed.client.ContainerProperty;
+import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRJobType;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 
 @Component("parallelModelingJobService")
 public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
@@ -81,10 +81,8 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         Properties properties = new Properties();
         String inputDir = classifier.getModelHdfsDir() + "/" + classifier.getName();
         int mapperSize = Integer.parseInt(appMasterProperties.getProperty(PythonMRProperty.MAPPER_SIZE.name()));
-        properties.put(
-                MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
-                        versionManager.getCurrentVersionInStack(stackName)));
+        properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), MRJobUtil.getPlatformShadedJarPath(yarnConfiguration,
+                versionManager.getCurrentVersionInStack(stackName)));
         try {
             if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
                 setupProfilingMRConfig(properties, classifier, mapperSize, inputDir);

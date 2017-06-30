@@ -19,8 +19,7 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -32,6 +31,7 @@ import com.latticeengines.flink.FlinkConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
+import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConfiguration> {
 

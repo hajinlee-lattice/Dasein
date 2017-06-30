@@ -6,8 +6,9 @@
     <bean id="itemProcessor" class="com.latticeengines.workflowapi.yarn.runtime.WorkflowProcessor" />
 
     <import resource="classpath:common-am-properties-context.xml"/>
-    <import resource="classpath:batch-amjob/dataplatform-batch-appmaster-context.xml" />
-    <import resource="classpath:dataplatform-context.xml" />
+    <import resource="classpath:batch-amjob/yarn-batch-appmaster-context.xml" />
     <import resource="classpath:workflow-context.xml" />
-    <import resource="classpath:workflowapi-yarn-context.xml" />
+
+    <import resource="classpath:swlib-context.xml" />
+    <import resource="classpath:common-component-context.xml" />
 </beans>

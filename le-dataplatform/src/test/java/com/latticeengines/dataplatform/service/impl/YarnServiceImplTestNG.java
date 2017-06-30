@@ -15,12 +15,12 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInf
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.client.AppMasterProperty;
+import com.latticeengines.yarn.exposed.client.ContainerProperty;
+import com.latticeengines.yarn.exposed.service.YarnService;
 
 public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -51,36 +51,31 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = { "functional.platform", "functional.production" })
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(),
-                LedpQueueAssigner.getModelingQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-" + suffix);
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "64");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
-        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient",
-                appMasterProperties,
+        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         ApplicationReport appReport = yarnService.getApplication(applicationId.toString());
         assertNotNull(appReport);
 
-        FinalApplicationStatus status = waitForStatus(applicationId,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
     @Test(groups = { "functional.platform", "functional.production" })
     public void getApplicationReportAndKillJob() throws Exception {
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(),
-                LedpQueueAssigner.getModelingQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getModelingQueueNameForSubmission());
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-" + suffix);
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "64");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
-        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient",
-                appMasterProperties,
+        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         ApplicationReport applicationReport = modelingJobService.getJobReportById(applicationId);
         ApplicationReport appReport = yarnService.getApplication(applicationId.toString());

@@ -6,15 +6,15 @@ import static org.testng.Assert.assertNotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization;
-import com.latticeengines.dataplatform.exposed.yarn.client.YarnClientCustomization;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.yarn.exposed.client.DefaultYarnClientCustomization;
+import com.latticeengines.yarn.exposed.client.YarnClientCustomization;
 
 public class PythonClientCustomizationTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private PythonClientCustomization pythonClientCustomization;
-    
+
     @Autowired
     private DefaultYarnClientCustomization defaultYarnClientCustomization;
 

@@ -6,9 +6,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportJob;
+import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 
 public class DynamoExportJob extends AvroExportJob {
 

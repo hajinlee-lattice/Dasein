@@ -24,21 +24,21 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import com.latticeengines.dataplatform.exposed.entitymanager.YarnMetricGeneratorInfoEntityMgr;
-import com.latticeengines.dataplatform.runtime.metric.CompletedJobByAppIdMeasurement;
-import com.latticeengines.dataplatform.runtime.metric.CompletedJobByAppIdMetric;
-import com.latticeengines.dataplatform.runtime.metric.CompletedJobMeasurement;
-import com.latticeengines.dataplatform.runtime.metric.CompletedJobMetric;
-import com.latticeengines.dataplatform.runtime.metric.InProgressJobMeasurement;
-import com.latticeengines.dataplatform.runtime.metric.InProgressJobMetric;
-import com.latticeengines.dataplatform.runtime.metric.QueueMeasurement;
-import com.latticeengines.dataplatform.runtime.metric.QueueMetric;
-import com.latticeengines.dataplatform.service.impl.JobNameServiceImpl;
 import com.latticeengines.domain.exposed.dataplatform.metrics.YarnMetricGeneratorInfo;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.yarn.exposed.runtime.metric.CompletedJobByAppIdMeasurement;
+import com.latticeengines.yarn.exposed.runtime.metric.CompletedJobByAppIdMetric;
+import com.latticeengines.yarn.exposed.runtime.metric.CompletedJobMeasurement;
+import com.latticeengines.yarn.exposed.runtime.metric.CompletedJobMetric;
+import com.latticeengines.yarn.exposed.runtime.metric.InProgressJobMeasurement;
+import com.latticeengines.yarn.exposed.runtime.metric.InProgressJobMetric;
+import com.latticeengines.yarn.exposed.runtime.metric.QueueMeasurement;
+import com.latticeengines.yarn.exposed.runtime.metric.QueueMetric;
+import com.latticeengines.yarn.exposed.service.impl.JobNameServiceImpl;
 
 @Component("generateYarnMetrics")
 public class GenerateYarnMetrics extends WatchdogPlugin {

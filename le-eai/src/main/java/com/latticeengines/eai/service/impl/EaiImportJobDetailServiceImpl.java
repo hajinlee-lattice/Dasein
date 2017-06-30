@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.eai.entitymanager.EaiImportJobDetailEntityMgr;
 import com.latticeengines.eai.service.EaiImportJobDetailService;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("eaiImportJobDetailService")
 public class EaiImportJobDetailServiceImpl implements EaiImportJobDetailService {

@@ -47,4 +47,7 @@ public interface WorkflowService {
 
     void registerJob(String name, ApplicationContext context);
 
+    WorkflowExecutionId start(String workflowName, WorkflowJob workflowJob,
+            WorkflowConfiguration workflowConfiguration);
+
 }

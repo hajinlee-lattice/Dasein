@@ -16,16 +16,16 @@ import org.apache.hadoop.conf.Configuration;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.algorithm.AggregationAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 
 public class PythonMRUtils {
     public static final String METADATA_JSON_PATH = "./metadata.json";
-    
+
     private static final Log log = LogFactory.getLog(PythonMRUtils.class);
-    
+
     public static String setupArchiveFilePath(Classifier classifier, String version) {
         List<String> paths = new ArrayList<String>();
         paths.add(classifier.getPythonPipelineLibHdfsPath());

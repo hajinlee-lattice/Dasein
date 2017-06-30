@@ -41,7 +41,6 @@ import com.latticeengines.datacloud.etl.SftpUtils;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProgressService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
 import com.latticeengines.datacloud.etl.service.SourceService;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
@@ -62,6 +61,7 @@ import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("ingestionStep")
 @Scope("prototype")
@@ -109,8 +109,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             progress = getConfiguration().getIngestionProgress();
             HdfsPodContext.changeHdfsPodId(progress.getHdfsPod());
             Ingestion ingestion = getConfiguration().getIngestion();
-            ProviderConfiguration providerConfiguration = getConfiguration()
-                    .getProviderConfiguration();
+            ProviderConfiguration providerConfiguration = getConfiguration().getProviderConfiguration();
             ingestion.setProviderConfiguration(providerConfiguration);
             progress.setIngestion(ingestion);
             switch (progress.getIngestion().getIngestionType()) {
@@ -196,14 +195,14 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
     private void ingestFromSftp() throws Exception {
         String destFile = progress.getDestination();
-        // Multiple jobs could be running at same time to download files to same folder. 
+        // Multiple jobs could be running at same time to download files to same
+        // folder.
         // To avoid violation, download file to unique tmp folder first.
         Path tmpDestDir = new Path(new Path(progress.getDestination()).getParent(),
                 "TMP_" + UUID.randomUUID().toString());
         Path tmpDestFile = new Path(tmpDestDir, new Path(progress.getDestination()).getName());
         progress.setDestination(tmpDestFile.toString());
-        CamelRouteConfiguration camelRouteConfig = ingestionProgressService
-                .createCamelRouteConfiguration(progress);
+        CamelRouteConfiguration camelRouteConfig = ingestionProgressService.createCamelRouteConfiguration(progress);
         progress.setDestination(destFile);
         AppSubmission submission = eaiProxy.submitEaiJob(camelRouteConfig);
         String eaiAppId = submission.getApplicationIds().get(0);
@@ -211,20 +210,17 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         JobStatus finalStatus = jobService.waitFinalJobStatus(eaiAppId.toString(), WORKFLOW_WAIT_TIME_IN_SECOND);
         if (finalStatus.getStatus() == FinalApplicationStatus.SUCCEEDED
                 && waitForFileToBeDownloaded(tmpDestFile.toString())) {
-            HdfsUtils.moveFile(yarnConfiguration, tmpDestFile.toString(),
-                    progress.getDestination());
+            HdfsUtils.moveFile(yarnConfiguration, tmpDestFile.toString(), progress.getDestination());
             Long size = HdfsUtils.getFileSize(yarnConfiguration, progress.getDestination());
-            progress = ingestionProgressService.updateProgress(progress).size(size)
-                    .status(ProgressStatus.FINISHED).commit(true);
+            progress = ingestionProgressService.updateProgress(progress).size(size).status(ProgressStatus.FINISHED)
+                    .commit(true);
             HdfsUtils.rmdir(yarnConfiguration, tmpDestDir.toString());
             log.info("Ingestion finished. Progress: " + progress.toString());
             checkCompleteVersionFromSftp(progress.getIngestion(), progress.getVersion());
         } else {
-            progress = ingestionProgressService.updateProgress(progress)
-                    .status(ProgressStatus.FAILED).commit(true);
+            progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
             log.error("Ingestion failed. Progress: " + progress.toString());
         }
-
 
     }
 
@@ -267,7 +263,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         }
         ingestionVersionService.updateCurrentVersion(ingestion, version);
     }
-    
+
     private List<String> getHdfsFileNamesByExtension(String hdfsDir, final String fileExtension) {
         HdfsFilenameFilter filter = new HdfsFilenameFilter() {
             @Override
@@ -303,8 +299,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
         SqoopImporter.Builder builder = new SqoopImporter.Builder().setCustomer(progress.getTriggeredBy())
                 .setNumMappers(config.getMappers()).setSplitColumn(config.getTimestampColumn())
-                .setTable(config.getDbTable())
-                .setTargetDir(progress.getDestination())
+                .setTable(config.getDbTable()).setTargetDir(progress.getDestination())
                 .setDbCreds(new DbCreds(credsBuilder)).setSync(false)
                 .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
         StringBuilder whereClause = new StringBuilder();
@@ -317,8 +312,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
                 startDate = HdfsPathBuilder.dateFormat.parse(currentVersion);
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                 whereClause.append(
-                        String.format("%s > '%s' AND ", config.getTimestampColumn(),
-                        dateFormat.format(startDate)));
+                        String.format("%s > '%s' AND ", config.getTimestampColumn(), dateFormat.format(startDate)));
             }
             Date endDate = HdfsPathBuilder.dateFormat.parse(progress.getVersion());
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -355,12 +349,10 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             log.error("Ingestion failed. Progress: " + progress.toString() + " SqoopImporter: " + importer.toString());
         }
 
-
     }
 
     private void ingestBySqoopToCSVGZ() throws Exception {
-        SqlToTextConfiguration config = (SqlToTextConfiguration) progress.getIngestion()
-                .getProviderConfiguration();
+        SqlToTextConfiguration config = (SqlToTextConfiguration) progress.getIngestion().getProviderConfiguration();
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
         credsBuilder.host(config.getDbHost()).port(config.getDbPort()).db(config.getDb()).user(config.getDbUser())
                 .encryptedPassword(config.getDbPwdEncrypted());
@@ -403,10 +395,12 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             otherOptions.add(config.getFieldTerminatedBy());
         }
         importer.setOtherOptions(otherOptions);
-        ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
+        ApplicationId appId = ConverterUtils
+                .toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
         JobStatus finalStatus = jobService.waitFinalJobStatus(appId.toString(), WORKFLOW_WAIT_TIME_IN_SECOND);
         if (finalStatus.getStatus() != FinalApplicationStatus.SUCCEEDED) {
-            throw new RuntimeException("Application final status is not " + FinalApplicationStatus.SUCCEEDED.toString());
+            throw new RuntimeException(
+                    "Application final status is not " + FinalApplicationStatus.SUCCEEDED.toString());
         }
         for (int i = 0; i < config.getMappers(); i++) {
             String sqoopPostfix = String.format("%05d", i);
@@ -419,8 +413,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         if (config.isCompressed()) {
             compressGzipFiles();
         }
-        progress = ingestionProgressService.updateProgress(progress)
-                .status(ProgressStatus.FINISHED).commit(true);
+        progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FINISHED).commit(true);
     }
 
     private void renameFiles() throws Exception {
@@ -432,10 +425,8 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
             Path originFile = new Path(hdfsDir, sqoopPrefix + sqoopPostfix);
             Path renameFile = new Path(progress.getDestination());
             renameFile = new Path(hdfsDir,
-                    renameFile.getName()
-                            + (sqlToTextConfig.getMappers() > 1 ? "_" + sqoopPostfix : "")
-                            + (sqlToTextConfig.getFileExtension() == null ? ""
-                                    : sqlToTextConfig.getFileExtension()));
+                    renameFile.getName() + (sqlToTextConfig.getMappers() > 1 ? "_" + sqoopPostfix : "")
+                            + (sqlToTextConfig.getFileExtension() == null ? "" : sqlToTextConfig.getFileExtension()));
             try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
                 fs.rename(originFile, renameFile);
             }
@@ -449,18 +440,12 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         for (int i = 0; i < sqlToTextConfig.getMappers(); i++) {
             Path destFile = new Path(progress.getDestination());
             Path gzHdfsPath = new Path(hdfsDir,
-                    destFile.getName()
-                            + (sqlToTextConfig.getMappers() > 1 ? "_" + String.format("%05d", i)
-                                    : "")
-                            + (sqlToTextConfig.getFileExtension() == null ? ""
-                                    : sqlToTextConfig.getFileExtension())
+                    destFile.getName() + (sqlToTextConfig.getMappers() > 1 ? "_" + String.format("%05d", i) : "")
+                            + (sqlToTextConfig.getFileExtension() == null ? "" : sqlToTextConfig.getFileExtension())
                             + EngineConstants.GZ);
             Path uncompressedFilePath = new Path(hdfsDir,
-                    destFile.getName()
-                            + (sqlToTextConfig.getMappers() > 1 ? "_" + String.format("%05d", i)
-                                    : "")
-                            + (sqlToTextConfig.getFileExtension() == null ? ""
-                                    : sqlToTextConfig.getFileExtension()));
+                    destFile.getName() + (sqlToTextConfig.getMappers() > 1 ? "_" + String.format("%05d", i) : "")
+                            + (sqlToTextConfig.getFileExtension() == null ? "" : sqlToTextConfig.getFileExtension()));
             HdfsUtils.compressGZFileWithinHDFS(yarnConfiguration, gzHdfsPath.toString(),
                     uncompressedFilePath.toString());
             HdfsUtils.rmdir(yarnConfiguration, uncompressedFilePath.toString());
@@ -481,7 +466,6 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         emailService.sendSimpleEmail(subject, content, "text/plain", Collections.singleton(config.getNotifyEmail()));
         log.info(String.format("Sent notification email to %s", config.getNotifyEmail()));
     }
-
 
     private void failByException(Exception e) {
         progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)

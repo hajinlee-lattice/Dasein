@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.yarn.client.SingleContainerClientCustomization;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
+import com.latticeengines.yarn.exposed.client.SingleContainerClientCustomization;
 
 @Component("dataflowClientCustomization")
 public class DataFlowClientCustomization extends SingleContainerClientCustomization {

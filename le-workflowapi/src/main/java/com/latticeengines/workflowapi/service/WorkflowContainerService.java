@@ -15,8 +15,6 @@ public interface WorkflowContainerService {
 
     WorkflowExecutionId getWorkflowId(ApplicationId appId);
 
-    WorkflowExecutionId start(String workflowName, WorkflowJob workflowJob, WorkflowConfiguration workflowConfiguration);
-
     Job getJobByApplicationId(String applicationId);
 
     List<Job> getJobsByTenant(long tenantPid, String type);

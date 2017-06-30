@@ -191,6 +191,15 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
+    public WorkflowExecutionId start(String workflowName, WorkflowJob workflowJob,
+            WorkflowConfiguration workflowConfiguration) {
+        long jobExecutionId = startWorkflowJob(workflowName, workflowConfiguration);
+        workflowJob.setWorkflowId(jobExecutionId);
+        workflowJobEntityMgr.registerWorkflowId(workflowJob);
+        return new WorkflowExecutionId(jobExecutionId);
+    }
+
+    @Override
     public WorkflowExecutionId restart(WorkflowInstanceId workflowInstanceId, WorkflowJob workflowJob) {
         Long jobExecutionId = -1L;
         List<Long> jobExecutions;

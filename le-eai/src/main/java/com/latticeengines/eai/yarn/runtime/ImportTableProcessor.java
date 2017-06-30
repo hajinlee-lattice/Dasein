@@ -18,7 +18,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -35,6 +34,7 @@ import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.EaiZKService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
+import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 @Component("importTableProcessor")
 public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportConfiguration>

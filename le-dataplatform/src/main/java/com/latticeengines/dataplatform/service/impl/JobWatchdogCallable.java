@@ -6,10 +6,10 @@ import java.util.concurrent.Callable;
 
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.YarnService;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.service.impl.watchdog.WatchdogPlugin;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.yarn.exposed.service.YarnService;
 import com.newrelic.api.agent.Trace;
 
 public class JobWatchdogCallable implements Callable<Boolean> {

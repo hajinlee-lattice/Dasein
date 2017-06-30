@@ -6,10 +6,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
-import com.latticeengines.dataplatform.runtime.python.PythonMRProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 
 public class PythonInvoker {
 

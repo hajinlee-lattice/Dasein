@@ -25,7 +25,7 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.workflowapi.controller.*" />
     </context:component-scan>
     <import resource="classpath:workflow-context.xml"/>
-    <import resource="classpath:dataplatform-context.xml"/>
+    <import resource="classpath:yarn-context.xml"/>
     <import resource="classpath:workflowapi-yarn-client-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
 

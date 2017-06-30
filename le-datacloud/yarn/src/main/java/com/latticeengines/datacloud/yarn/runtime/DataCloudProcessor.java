@@ -16,8 +16,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.aspect.MatchStepAspect;
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 @Component("dataCloudProcessor")
 public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJobConfiguration> {

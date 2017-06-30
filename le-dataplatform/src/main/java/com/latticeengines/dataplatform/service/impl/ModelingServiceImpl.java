@@ -44,11 +44,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
-import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.load.LoadProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.DispatchService;
@@ -81,6 +77,10 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
+import com.latticeengines.yarn.exposed.client.AppMasterProperty;
+import com.latticeengines.yarn.exposed.client.ContainerProperty;
+import com.latticeengines.yarn.exposed.mapreduce.MRJobUtil;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
@@ -225,7 +225,7 @@ public class ModelingServiceImpl implements ModelingService {
 
         m.setDataFormat("avro");
         m.setTargetsList(dataProfileConfig.getTargets());
-        m.setKeyCols(Arrays.<String>asList(new String[] { featureList.get(0) }));
+        m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
         m.setFeaturesList(featureList);
 
         m.setModelHdfsDir(m.getMetadataHdfsPath());
@@ -243,7 +243,7 @@ public class ModelingServiceImpl implements ModelingService {
         if (!StringUtils.isEmpty(dataProfileConfig.getScript())) {
             dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
         }
-        modelDefinition.addAlgorithms(Arrays.<Algorithm>asList(new Algorithm[] { dataProfileAlgorithm }));
+        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
 
@@ -269,7 +269,7 @@ public class ModelingServiceImpl implements ModelingService {
 
         m.setDataFormat("avro");
         m.setTargetsList(dataReviewConfig.getTargets());
-        m.setKeyCols(Arrays.<String>asList(new String[] { featureList.get(0) }));
+        m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
         m.setFeaturesList(featureList);
 
         m.setModelHdfsDir(m.getMetadataHdfsPath());
@@ -288,7 +288,7 @@ public class ModelingServiceImpl implements ModelingService {
         if (!StringUtils.isEmpty(dataReviewConfig.getScript())) {
             dataReviewAlgorithm.setScript(dataReviewConfig.getScript());
         }
-        modelDefinition.addAlgorithms(Arrays.<Algorithm>asList(new Algorithm[] { dataReviewAlgorithm }));
+        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataReviewAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
 
@@ -496,7 +496,8 @@ public class ModelingServiceImpl implements ModelingService {
 
         // The model quality framework specifies the production version to run;
         // keep the path as-is
-        Pattern pattern_stack_and_version = Pattern.compile("^/app/(a|b|a_aws|b_aws)/(\\d+)\\.(\\d+)\\.(\\d+)(-?.*?)/.*");
+        Pattern pattern_stack_and_version = Pattern
+                .compile("^/app/(a|b|a_aws|b_aws)/(\\d+)\\.(\\d+)\\.(\\d+)(-?.*?)/.*");
         Matcher c_stack_and_version = pattern_stack_and_version.matcher(script);
         if (c_stack_and_version.matches()) {
             return script;

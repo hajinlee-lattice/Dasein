@@ -13,12 +13,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.runtime.python.PythonMRJobType;
-import com.latticeengines.dataplatform.runtime.python.PythonMRProperty;
 import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRJobType;
+import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 
 public class PythonMRJobUnitTestNG {
 
@@ -33,7 +33,8 @@ public class PythonMRJobUnitTestNG {
         String inputDir = inputUrl.getPath();
 
         classifier = PythonMRTestUtils.setupDummyClassifier();
-        String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier, "/app/dataplatform/lib/le-dataplatform-shaded.jar", "1.0.1");
+        String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier,
+                "/app/dataplatform/lib/le-dataplatform-shaded.jar", "1.0.1");
         String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier, "1.0.1");
         String[] tokens = classifier.getPythonPipelineLibHdfsPath().split("/");
 

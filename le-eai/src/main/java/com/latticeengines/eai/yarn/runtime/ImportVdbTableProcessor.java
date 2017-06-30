@@ -17,7 +17,6 @@ import org.springframework.util.StringUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -35,10 +34,11 @@ import com.latticeengines.eai.service.EaiImportJobDetailService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
 @Component("importVdbTableProcessor")
-public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
-        ItemProcessor<ImportConfiguration, String> {
+public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<ImportConfiguration>
+        implements ItemProcessor<ImportConfiguration, String> {
 
     private static final Log log = LogFactory.getLog(ImportVdbTableProcessor.class);
 
@@ -83,7 +83,9 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
                     log.info("Initialize import job detail record");
                     initJobDetail(vdbConnectorConfiguration);
                     log.info("Import metadata");
-//                    List<Table> metadata = importService.importMetadata(sourceImportConfiguration, importContext, vdbConnectorConfiguration);
+                    // List<Table> metadata =
+                    // importService.importMetadata(sourceImportConfiguration,
+                    // importContext, vdbConnectorConfiguration);
                     HashMap<String, Table> tableTemplates = getTableMap(importConfig.getCustomerSpace().toString(),
                             identifiers);
 
@@ -93,15 +95,15 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
                     sourceImportConfiguration.setTables(metadata);
 
                     log.info("Import table data");
-                    importService.importDataAndWriteToHdfs(sourceImportConfiguration, importContext, vdbConnectorConfiguration);
-
+                    importService.importDataAndWriteToHdfs(sourceImportConfiguration, importContext,
+                            vdbConnectorConfiguration);
 
                     Map<String, Extract> extracts = eaiMetadataService.getExtractsForTable(metadata, importContext);
                     for (String taskId : identifiers) {
                         Extract extract = extracts.get(tableTemplates.get(taskId).getName());
                         if (extract != null) {
-                            dataFeedProxy.registerExtract(importConfig.getCustomerSpace().toString(),
-                                    taskId, tableTemplates.get(taskId).getName(), extract);
+                            dataFeedProxy.registerExtract(importConfig.getCustomerSpace().toString(), taskId,
+                                    tableTemplates.get(taskId).getName(), extract);
                         }
                     }
                     log.info("Finalize import job detail record");
@@ -111,14 +113,14 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
                 }
             } catch (LedpException e) {
                 switch (e.getCode()) {
-                    case LEDP_17011:
-                    case LEDP_17012:
-                    case LEDP_17013:
-                        log.error("Generate connector configuration error!");
-                        break;
-                    default:
-                        cleanup(vdbConnectorConfiguration);
-                        break;
+                case LEDP_17011:
+                case LEDP_17012:
+                case LEDP_17013:
+                    log.error("Generate connector configuration error!");
+                    break;
+                default:
+                    cleanup(vdbConnectorConfiguration);
+                    break;
                 }
 
             } catch (Exception e) {
@@ -155,9 +157,9 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
     private void initJobDetail(VdbConnectorConfiguration config) {
         log.info(String.format("Table config count: %d", config.getTableConfigurations().size()));
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
-            log.info(String.format("Collection identifier: %s",entry.getValue().getCollectionIdentifier()));
-            EaiImportJobDetail jobDetail = eaiImportJobDetailService.getImportJobDetail(entry.getValue()
-                    .getCollectionIdentifier());
+            log.info(String.format("Collection identifier: %s", entry.getValue().getCollectionIdentifier()));
+            EaiImportJobDetail jobDetail = eaiImportJobDetailService
+                    .getImportJobDetail(entry.getValue().getCollectionIdentifier());
             if (jobDetail == null) {
                 jobDetail = new EaiImportJobDetail();
                 jobDetail.setStatus(ImportStatus.SUBMITTED);
@@ -180,8 +182,8 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
 
     private void finalizeJobDetail(VdbConnectorConfiguration config) {
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
-            EaiImportJobDetail jobDetail = eaiImportJobDetailService.getImportJobDetail(entry.getValue()
-                    .getCollectionIdentifier());
+            EaiImportJobDetail jobDetail = eaiImportJobDetailService
+                    .getImportJobDetail(entry.getValue().getCollectionIdentifier());
             jobDetail.setStatus(ImportStatus.SUCCESS);
             eaiImportJobDetailService.updateImportJobDetail(jobDetail);
         }
@@ -192,8 +194,8 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
             return;
         }
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
-            EaiImportJobDetail jobDetail = eaiImportJobDetailService.getImportJobDetail(entry.getValue()
-                    .getCollectionIdentifier());
+            EaiImportJobDetail jobDetail = eaiImportJobDetailService
+                    .getImportJobDetail(entry.getValue().getCollectionIdentifier());
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, jobDetail.getTargetPath())) {
                     HdfsUtils.rmdir(yarnConfiguration, jobDetail.getTargetPath());

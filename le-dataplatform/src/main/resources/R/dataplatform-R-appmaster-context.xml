@@ -13,7 +13,7 @@
     </bean>
 
     <context:property-placeholder location="latticeengines.properties" />
-    <import resource="classpath:dataplatform-yarn-config-context.xml" />
+    <import resource="classpath:yarn-config-context.xml" />
 
     <yarn:localresources>
         <yarn:copy src="file:target/dependency/spring-beans*" dest="/lib1/" />

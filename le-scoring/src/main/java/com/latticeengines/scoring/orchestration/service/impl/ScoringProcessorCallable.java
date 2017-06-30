@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -34,6 +33,7 @@ import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.orchestration.service.ScoringStepProcessor;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
 import com.latticeengines.scoring.orchestration.service.ScoringValidationService;
+import com.latticeengines.yarn.exposed.service.JobService;
 import com.newrelic.api.agent.Trace;
 
 @Component("scoringProcessor")
@@ -228,8 +228,8 @@ public class ScoringProcessorCallable implements Callable<Long> {
             }
 
             String dedupKey = getClass().getName() + "-" + scoringCommand.getPid().toString();
-            alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(),
-                    dedupKey, details);
+            alertService.triggerCriticalEvent(LedpCode.LEDP_20000.getMessage(), clientUrl.toString(), dedupKey,
+                    details);
         }
     }
 

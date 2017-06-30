@@ -19,15 +19,15 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
+import com.latticeengines.yarn.exposed.client.ContainerProperty;
+import com.latticeengines.yarn.exposed.client.DefaultYarnClientCustomization;
+import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 
 @Component("pythonClientCustomization")
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
@@ -42,8 +42,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @Autowired
     public PythonClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //
-            @Value("${dataplatform.hdfs.stack:}") String stackName,
-            SoftwareLibraryService softwareLibraryService, //
+            @Value("${dataplatform.hdfs.stack:}") String stackName, SoftwareLibraryService softwareLibraryService, //
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir, //
             @Value("${hadoop.fs.web.defaultFS}") String webHdfs) {
         super(yarnConfiguration, versionManager, stackName, softwareLibraryService, hdfsJobBaseDir, webHdfs);
@@ -78,7 +77,6 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getDataProfileHdfsPath());
             properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());
             properties.put(PythonContainerProperty.PIPELINEDRIVER.name(), classifier.getPipelineDriver());
-
 
             properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersionInStack(stackName));
             setLatticeVersion(classifier, properties);

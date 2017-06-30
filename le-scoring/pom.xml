@@ -171,8 +171,8 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <artifactId>le-yarn</artifactId>
+            <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
                 <exclusion>
@@ -219,8 +219,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <artifactId>le-yarn</artifactId>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -269,7 +269,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
             <version>${le.dataplatform.version}</version>
-            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -424,7 +423,6 @@
             <version>${le.proxy.version}</version>
             <scope>runtime</scope>
         </dependency>
-        
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scoringapi</artifactId>
@@ -432,7 +430,11 @@
             <classifier>intf</classifier>
             <scope>test</scope>
         </dependency>
-        
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>

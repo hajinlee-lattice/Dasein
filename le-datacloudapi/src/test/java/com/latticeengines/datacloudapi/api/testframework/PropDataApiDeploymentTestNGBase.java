@@ -24,8 +24,8 @@ import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 public abstract class PropDataApiDeploymentTestNGBase extends PropDataApiAbstractTestNGBase {
 

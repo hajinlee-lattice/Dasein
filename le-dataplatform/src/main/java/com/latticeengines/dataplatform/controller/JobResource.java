@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.network.exposed.dataplatform.JobInterface;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

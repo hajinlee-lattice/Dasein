@@ -16,10 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -38,6 +34,10 @@ import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
 import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
+import com.latticeengines.yarn.exposed.client.AppMasterProperty;
+import com.latticeengines.yarn.exposed.client.ContainerProperty;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("workflowContainerService")
 public class WorkflowContainerServiceImpl implements WorkflowContainerService {
@@ -131,15 +131,6 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         job.setContainerPropertiesObject(containerProperties);
 
         return job;
-    }
-
-    @Override
-    public WorkflowExecutionId start(String workflowName, WorkflowJob workflowJob,
-            WorkflowConfiguration workflowConfiguration) {
-        long jobExecutionId = workflowService.startWorkflowJob(workflowName, workflowConfiguration);
-        workflowJob.setWorkflowId(jobExecutionId);
-        workflowJobEntityMgr.registerWorkflowId(workflowJob);
-        return new WorkflowExecutionId(jobExecutionId);
     }
 
     @Override
