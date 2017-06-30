@@ -7,6 +7,7 @@ angular.module('lp.playbook')
     this.savedSegment = this.savedSegment || null;
     this.currentPlay = this.currentPlay || null;
     this.playLaunches = this.playLaunches || null;
+    this.savedTalkingPoints = this.savedTalkingPoints || null;
 
 
     this.clear = function() {
@@ -15,12 +16,13 @@ angular.module('lp.playbook')
         this.savedSegment = null;
         this.currentPlay = null;
         this.playLaunches = null;
+        this.savedTalkingPoints = null;
 
         this.settings_form = {
             play_display_name: '',
             play_description: ''
         }
-        
+
         this.segment_form = {
             segment_selection: ''
         }
@@ -92,6 +94,18 @@ angular.module('lp.playbook')
                 $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
             }
         }
+    }
+
+    this.nextSaveInsight = function() {
+        CgTalkingPointStore.saveTalkingPoint(PlaybookWizardStore.savedTalkingPoints);
+    }
+
+    this.setTalkingPoints = function(talkingPoints) {
+        this.savedTalkingPoints = talkingPoints;
+    }
+
+    this.getTalkingPoints = function() {
+        return this.savedTalkingPoints;
     }
 
     this.setRating = function(rating) {

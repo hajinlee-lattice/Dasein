@@ -36,7 +36,7 @@ angular.module('lp.playbook.wizard.insights', [])
                 return false;
             }
         }
-
+        PlaybookWizardStore.setTalkingPoints(vm.talkingPoints);
         PlaybookWizardStore.setValidation('insights', true);
         return true;
     };

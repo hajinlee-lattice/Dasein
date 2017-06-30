@@ -12,7 +12,6 @@ angular.module('lp.playbook.wizard.rating', [])
     vm.init = function() {
         if($stateParams.play_name) {
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
-                console.log(play);
             });
         }
     }
@@ -26,7 +25,6 @@ angular.module('lp.playbook.wizard.rating', [])
     vm.checkValid = function(form) {
         PlaybookWizardStore.setValidation('rating', form.$valid);
         if(vm.stored.rating_selection) {
-            console.log(vm.stored.rating_selection);
             PlaybookWizardStore.setRating(vm.stored.rating_selection);
         }
     }
