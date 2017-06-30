@@ -20,4 +20,5 @@
     <import resource="classpath:serviceflows-cdl-workflow-context.xml"/> 
     <import resource="classpath:test-pmml-workflow-context.xml"/>
     <import resource="classpath:redshiftdb-context.xml" />
+    <import resource="classpath:datadb-context.xml"/>
 </beans>

@@ -1,5 +1,7 @@
 package com.latticeengines.datadb.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +20,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     }
 
     @Override
-    public Recommendation findByLaunchId(String launchId) {
+    public List<Recommendation> findByLaunchId(String launchId) {
         return recommendationEntityMgr.findByLaunchId(launchId);
     }
 }

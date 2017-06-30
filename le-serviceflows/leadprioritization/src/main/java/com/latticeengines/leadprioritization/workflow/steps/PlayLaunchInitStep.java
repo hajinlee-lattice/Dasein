@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datadb.service.RecommendationService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datadb.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -28,6 +30,9 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
+    @Autowired
+    private RecommendationService recommendationService;
+
     @Override
     public void execute() {
         Tenant tenant = null;
@@ -47,7 +52,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
             PlayLaunch playLauch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
 
-            executeLaunchActivity(playLauch, config);
+            executeLaunchActivity(tenant, config);
 
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
         } catch (Exception ex) {
@@ -56,7 +61,26 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     }
 
-    private void executeLaunchActivity(PlayLaunch playLauch, PlayLaunchInitStepConfiguration config) {
+    private void executeLaunchActivity(Tenant tenant, PlayLaunchInitStepConfiguration config) {
         // add processing logic
+
+        // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
+        Recommendation recommendation = createDummyRecommendation(tenant, config);
+        recommendationService.create(recommendation);
+    }
+
+    private Recommendation createDummyRecommendation(Tenant tenant, PlayLaunchInitStepConfiguration config) {
+        String LAUNCH_DESCRIPTION = "Recommendation done on " + System.currentTimeMillis();
+
+        String playName = config.getPlayName();
+        String playLaunchId = config.getPlayLaunchId();
+
+        Recommendation recommendation = new Recommendation();
+        recommendation.setDescription(LAUNCH_DESCRIPTION);
+        recommendation.setLaunchId(playName);
+        recommendation.setPlayId(playLaunchId);
+        recommendation.setTenantId(tenant.getPid());
+
+        return recommendation;
     }
 }

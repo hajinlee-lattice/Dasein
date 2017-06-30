@@ -8,6 +8,7 @@
     <name>le-serviceflows-${component-name}</name>
 
     <properties>
+        <le.datadb.version>3.7.0-SNAPSHOT</le.datadb.version>
         <le.dataflow.version>3.7.0-SNAPSHOT</le.dataflow.version>
         <le.domain.version>3.7.0-SNAPSHOT</le.domain.version>
         <le.serviceflows.core.version>3.7.0-SNAPSHOT</le.serviceflows.core.version>
@@ -31,6 +32,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-core</artifactId>
             <version>${le.serviceflows.core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-datadb</artifactId>
+            <version>${le.datadb.version}</version>
         </dependency>
 
         <dependency>
