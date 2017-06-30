@@ -22,6 +22,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -53,10 +54,12 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @Column(name = "APPLICATION_ID", nullable = true)
+    @Index(name = "IX_APPLICATION_ID")
+    @Column(name = "APPLICATION_ID")
     private String applicationId;
 
-    @Column(name = "WORKFLOW_ID", nullable = true)
+    @Index(name = "IX_WORKFLOW_ID")
+    @Column(name = "WORKFLOW_ID")
     private Long workflowId;
 
     @Column(name = "USER_ID")
