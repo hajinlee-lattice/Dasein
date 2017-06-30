@@ -42,8 +42,8 @@ public class DanteTalkingPointResource {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<?> createOrUpdate(@RequestBody DanteTalkingPoint talkingPoint) {
-        return danteTalkingPointProxy.createOrUpdate(talkingPoint);
+    public ResponseDocument<?> createOrUpdate(@RequestBody List<DanteTalkingPoint> talkingPoints) {
+        return danteTalkingPointProxy.createOrUpdate(talkingPoints);
     }
 
     @RequestMapping(value = "/{externalID}", method = RequestMethod.GET)

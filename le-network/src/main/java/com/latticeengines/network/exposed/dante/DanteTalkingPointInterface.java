@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
 public interface DanteTalkingPointInterface {
 
-    ResponseDocument<?> createOrUpdate(DanteTalkingPoint talkingPoint);
+    ResponseDocument<?> createOrUpdate(List<DanteTalkingPoint> talkingPoints);
 
     ResponseDocument<?> delete(String externalID);
 

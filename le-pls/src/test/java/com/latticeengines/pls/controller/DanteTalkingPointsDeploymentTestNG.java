@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,30 +43,27 @@ public class DanteTalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase 
         Assert.assertNotNull(recResponse);
         Assert.assertNotNull(recResponse.getResult());
 
+        List<DanteTalkingPoint> dtps = new ArrayList<>();
         DanteTalkingPoint dtp = new DanteTalkingPoint();
         dtp.setCustomerID(mainTestTenant.getId());
         dtp.setExternalID("plsDeploymentTestTP1");
         dtp.setPlayExternalID("testPLSPlayExtID");
         dtp.setValue("PLS Deployment Test Talking Point no 1");
+        dtps.add(dtp);
+
+        DanteTalkingPoint dtp1 = new DanteTalkingPoint();
+        dtp1.setCustomerID(mainTestTenant.getId());
+        dtp1.setExternalID("plsDeploymentTestTP2");
+        dtp1.setPlayExternalID("testPLSPlayExtID");
+        dtp1.setValue("PLS Deployment Test Talking Point no 2");
+        dtps.add(dtp1);
 
         ResponseDocument<?> createResponse = restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/", //
-                dtp, //
+                dtps, //
                 ResponseDocument.class);
         Assert.assertNotNull(createResponse);
         Assert.assertNull(recResponse.getErrors());
-
-        dtp.setCustomerID(mainTestTenant.getId());
-        dtp.setExternalID("plsDeploymentTestTP2");
-        dtp.setPlayExternalID("testPLSPlayExtID");
-        dtp.setValue("PLS Deployment Test Talking Point no 2");
-
-        createResponse = restTemplate.postForObject( //
-                getRestAPIHostPort() + "/pls/dante/talkingpoints/", //
-                dtp, //
-                ResponseDocument.class);
-        Assert.assertNotNull(createResponse);
-        Assert.assertNull(createResponse.getErrors());
 
         ResponseDocument<List<DanteTalkingPoint>> playTpsResponse = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/play/testPLSPlayExtID", //

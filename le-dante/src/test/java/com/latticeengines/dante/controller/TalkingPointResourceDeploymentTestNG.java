@@ -1,5 +1,6 @@
 package com.latticeengines.dante.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -48,13 +49,15 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
 
     @Test(groups = "deployment")
     public void testCreateFromService() {
+        List<DanteTalkingPoint> dtps = new ArrayList<>();
         DanteTalkingPoint dtp = new DanteTalkingPoint();
         dtp.setCustomerID("test");
         dtp.setExternalID(externalID);
         dtp.setPlayExternalID("testDPlayExtID");
         dtp.setValue("Deployment Test Talking Point");
+        dtps.add(dtp);
 
-        ResponseDocument result = danteTalkingPointProxy.createOrUpdate(dtp);
+        ResponseDocument result = danteTalkingPointProxy.createOrUpdate(dtps);
         Assert.assertNull(result.getErrors());
 
         dtp = talkingPointEntityMgr.findByExternalID(dtp.getExternalID());
@@ -63,10 +66,11 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
         Assert.assertNotNull(dtp.getLastModificationDate(), "Failure Cause: LastModificationDate is NULL");
 
         Date oldLastModificationDate = dtp.getLastModificationDate();
-
         dtp.setValue("New Deployment Test Talking Point");
+        dtps = new ArrayList<>();
+        dtps.add(dtp);
 
-        danteTalkingPointProxy.createOrUpdate(dtp);
+        danteTalkingPointProxy.createOrUpdate(dtps);
         dtp = objMapper.convertValue(danteTalkingPointProxy.findByExternalID(externalID).getResult(),
                 new TypeReference<DanteTalkingPoint>() {
                 });
@@ -79,8 +83,7 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
         Assert.assertNotEquals(dtp.getLastModificationDate(), oldLastModificationDate,
                 "Failure Cause: Lastmodification date not updated by createOrUpdate()");
 
-        List<DanteTalkingPoint> dtps = objMapper.convertValue(
-                danteTalkingPointProxy.findAllByPlayID("testDPlayExtID").getResult(),
+        dtps = objMapper.convertValue(danteTalkingPointProxy.findAllByPlayID("testDPlayExtID").getResult(),
                 new TypeReference<List<DanteTalkingPoint>>() {
                 });
 

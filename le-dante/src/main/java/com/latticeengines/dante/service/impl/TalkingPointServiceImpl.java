@@ -35,9 +35,17 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     @Autowired
     private TalkingPointEntityMgr talkingPointEntityMgr;
 
-    public String createOrUpdate(DanteTalkingPoint dtp) {
-        talkingPointEntityMgr.createOrUpdate(dtp);
-        return talkingPointEntityMgr.findByExternalID(dtp.getExternalID()).getExternalID();
+    public String createOrUpdate(List<DanteTalkingPoint> dtps) {
+        try {
+            for (DanteTalkingPoint dtp : dtps) {
+                talkingPointEntityMgr.createOrUpdate(dtp);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new LedpException(LedpCode.LEDP_38002);
+        }
+
+        return "Success";
     }
 
     public DanteTalkingPoint findByExternalID(String externalID) {

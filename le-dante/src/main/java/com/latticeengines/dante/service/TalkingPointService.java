@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
 public interface TalkingPointService {
 
-    String createOrUpdate(DanteTalkingPoint dtp);
+    String createOrUpdate(List<DanteTalkingPoint> dtp);
 
     DanteTalkingPoint findByExternalID(String externalID);
 

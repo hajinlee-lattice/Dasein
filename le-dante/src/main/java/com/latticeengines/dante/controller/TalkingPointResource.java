@@ -37,8 +37,8 @@ public class TalkingPointResource implements DanteTalkingPointInterface {
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create a Dante Talking Point ")
-    public ResponseDocument<?> createOrUpdate(@RequestBody DanteTalkingPoint talkingPoint) {
-        talkingPointService.createOrUpdate(talkingPoint);
+    public ResponseDocument<?> createOrUpdate(@RequestBody List<DanteTalkingPoint> talkingPoints) {
+        talkingPointService.createOrUpdate(talkingPoints);
         return SimpleBooleanResponse.successResponse();
     }
 

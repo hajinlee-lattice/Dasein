@@ -20,10 +20,10 @@ public class DanteTalkingPointProxy extends MicroserviceRestApiProxy implements 
         super("/dante/talkingpoints");
     }
 
-    public ResponseDocument<?> createOrUpdate(DanteTalkingPoint talkingPoint) {
+    public ResponseDocument<?> createOrUpdate(List<DanteTalkingPoint> talkingPoints) {
         String url = constructUrl("/");
         setErrorHandler(new PostResponseErrorHandler());
-        return post("createOrUpdate", url, talkingPoint, ResponseDocument.class);
+        return post("createOrUpdate", url, talkingPoints, ResponseDocument.class);
     }
 
     public ResponseDocument<?> delete(String externalID) {
