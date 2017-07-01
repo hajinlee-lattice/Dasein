@@ -55,6 +55,22 @@ public class AvroUtilsUnitTestNG {
     public void testAlignFields() throws Exception {
         Schema schema1 = new Schema.Parser()
                 .parse("{\"type\":\"record\",\"name\":\"Shuffled\",\"doc\":\"Testing data\"," + "\"fields\":[" //
+                        + "{\"name\":\"Field1\",\"type\":[\"int\",\"null\"]}," //
+                        + "{\"name\":\"Field2\",\"type\":[\"int\",\"null\"]}," //
+                        + "{\"name\":\"Field3\",\"type\":[\"int\",\"null\"]}," //
+                        + "{\"name\":\"Field4\",\"type\":[\"int\",\"null\"]}," //
+                        + "{\"name\":\"Field5\",\"type\":[\"int\",\"null\"]}]}");
+        Schema schema = AvroUtils.removeFields(schema1, new String[]{ "Field1", "Field2", "Field3" });
+        List<Schema.Field> fieldList = schema.getFields();
+        Assert.assertEquals(fieldList.size(), 2);
+        Assert.assertEquals(fieldList.get(0).name(), "Field4");
+        Assert.assertEquals(fieldList.get(1).name(), "Field5");
+    }
+
+    @Test(groups = "unit")
+    public void testRemoveFields() throws Exception {
+        Schema schema1 = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"Shuffled\",\"doc\":\"Testing data\"," + "\"fields\":[" //
                         + "{\"name\":\"Field2\",\"type\":\"int\"}," //
                         + "{\"name\":\"Field1\",\"type\":[\"int\",\"null\"]}]}");
         Schema schema2 = new Schema.Parser()

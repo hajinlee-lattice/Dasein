@@ -30,7 +30,7 @@ public class NodeWatcher {
         })));
     }
 
-    public static void registerWatcher(String watcherName) {
+    public static synchronized void registerWatcher(String watcherName) {
         if (!watchers.containsKey(watcherName)) {
             Path watcherPath = PathBuilder.buildWatcherPath(CamilleEnvironment.getPodId(), watcherName);
             NodeCache cache = CamilleEnvironment.getCamille().createNodeCache(watcherPath.toString());
@@ -44,7 +44,7 @@ public class NodeWatcher {
         }
     }
 
-    public static void registerListener(String watcherName, NodeCacheListener listener) {
+    public static synchronized void registerListener(String watcherName, NodeCacheListener listener) {
         if (!watchers.containsKey(watcherName)) {
             registerWatcher(watcherName);
         }
@@ -63,7 +63,7 @@ public class NodeWatcher {
         }
     }
 
-    public static void updateWatchedData(String watcherName, String serializedData) {
+    public static synchronized void updateWatchedData(String watcherName, String serializedData) {
         Path path = getWatcherPath(watcherName);
         if (path != null) {
             try {

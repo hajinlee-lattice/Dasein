@@ -161,6 +161,10 @@ public class ProcessorContext {
         return rootOperationUid;
     }
 
+    public String getBlockOperationUid() {
+        return blockOperationUid;
+    }
+
     public String getOutputAvroGlob() {
         return hdfsPathBuilder.constructMatchBlockAvroGlob(rootOperationUid, blockOperationUid);
     }

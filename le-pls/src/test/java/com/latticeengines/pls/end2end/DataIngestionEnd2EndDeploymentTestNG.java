@@ -217,7 +217,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Extract e = createExtract(hdfsUri, 1000L);
 
         dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", "Account");
-        dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getPid().toString(), importTemplate.getName(), e);
+        dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(), e);
     }
 
     private Extract createExtract(String path, long processedRecords) {

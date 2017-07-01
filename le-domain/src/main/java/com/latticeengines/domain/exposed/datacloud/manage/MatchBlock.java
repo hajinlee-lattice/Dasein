@@ -43,32 +43,45 @@ public class MatchBlock implements HasPid {
     @JoinColumn(name = "FK_MatchCommand", nullable = false)
     private MatchCommand matchCommand;
 
+    @JsonProperty("NumRows")
     @Column(name = "NumRows", nullable = false)
     private Integer numRows;
 
+    @JsonProperty("MatchedRows")
+    @Column(name = "MatchedRows")
+    private Integer matchedRows;
+
+    @JsonProperty("ApplicationId")
     @Column(name = "ApplicationId")
     protected String applicationId;
 
+    @JsonProperty("Progress")
     @Column(name = "Progress")
     protected Float progress;
 
+    @JsonProperty("ApplicationState")
     @Enumerated(EnumType.STRING)
     @Column(name = "ApplicationState", nullable = false, length = 20)
     private YarnApplicationState applicationState;
 
+    @JsonProperty("CreateTime")
     @Column(name = "CreateTime")
     protected Date createTime = new Date();
 
+    @JsonProperty("LatestStatusUpdate")
     @Column(name = "LatestStatusUpdate")
     protected Date latestStatusUpdate;
 
+    @JsonProperty("StateBeforeFailed")
     @Enumerated(EnumType.STRING)
     @Column(name = "StateBeforeFailed", length = 20)
     protected YarnApplicationState stateBeforeFailed;
 
+    @JsonProperty("ErrorMessage")
     @Column(name = "ErrorMessage")
     protected String errorMessage;
 
+    @JsonProperty("NumRetries")
     @Column(name = "NumRetries")
     protected int numRetries;
 
@@ -104,22 +117,26 @@ public class MatchBlock implements HasPid {
         this.matchCommand = matchCommand;
     }
 
-    @JsonProperty("NumRows")
     public Integer getNumRows() {
         return numRows;
     }
 
-    @JsonProperty("NumRows")
     public void setNumRows(Integer numRows) {
         this.numRows = numRows;
     }
 
-    @JsonProperty("ApplicationState")
+    public Integer getMatchedRows() {
+        return matchedRows;
+    }
+
+    public void setMatchedRows(Integer matchedRows) {
+        this.matchedRows = matchedRows;
+    }
+
     public YarnApplicationState getApplicationState() {
         return applicationState;
     }
 
-    @JsonProperty("ApplicationState")
     public void setApplicationState(YarnApplicationState applicationState) {
         this.applicationState = applicationState;
     }
@@ -144,72 +161,58 @@ public class MatchBlock implements HasPid {
         this.latestStatusUpdate = latestStatusUpdate;
     }
 
-    @JsonProperty("StateBeforeFailed")
     public YarnApplicationState getStateBeforeFailed() {
         return stateBeforeFailed;
     }
 
-    @JsonProperty("StateBeforeFailed")
     public void setStateBeforeFailed(YarnApplicationState stateBeforeFailed) {
         this.stateBeforeFailed = stateBeforeFailed;
     }
 
-    @JsonProperty("ErrorMessage")
     public String getErrorMessage() {
         return errorMessage;
     }
 
-    @JsonProperty("ErrorMessage")
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
-    @JsonProperty("NumRetries")
     public int getNumRetries() {
         return numRetries;
     }
 
-    @JsonProperty("NumRetries")
     public void setNumRetries(int numRetries) {
         this.numRetries = numRetries;
     }
 
-    @JsonProperty("ApplicationId")
     public String getApplicationId() {
         return applicationId;
     }
 
-    @JsonProperty("ApplicationId")
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
 
-    @JsonProperty("Progress")
     public Float getProgress() {
         return progress;
     }
 
-    @JsonProperty("Progress")
     public void setProgress(Float progress) {
         this.progress = progress;
     }
 
-    @JsonProperty("CreateTime")
     private String getCreateTimeAsString() {
         return DateTimeUtils.format(createTime);
     }
 
-    @JsonProperty("CreateTime")
     private void setCreateTimeByString(String createTimeString) {
         this.createTime = DateTimeUtils.parse(createTimeString);
     }
 
-    @JsonProperty("LatestStatusUpdate")
     private String getLatestStatusUpdateAsString() {
         return DateTimeUtils.format(latestStatusUpdate);
     }
 
-    @JsonProperty("LatestStatusUpdate")
     private void setLatestStatusUpdateByString(String latestStatusUpdateString) {
         this.latestStatusUpdate = DateTimeUtils.parse(latestStatusUpdateString);
     }

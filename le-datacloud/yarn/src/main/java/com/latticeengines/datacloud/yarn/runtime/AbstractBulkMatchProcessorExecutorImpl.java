@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
+import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
@@ -75,6 +76,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     
     @Autowired
     private DedupeHelper dedupeHelper;
+
+    @Autowired
+    private MatchCommandService matchCommandService;
 
     @Value("${datacloud.match.bulk.snappy.compress}")
     private boolean useSnappy;
@@ -274,6 +278,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                         processorContext.getBlockOutput().getStatistics().getRowsMatched(), count));
             }
         }
+        matchCommandService.updateBlock(processorContext.getBlockOperationUid()).matchedRows(count.intValue()).commit();
         processorContext.getDataCloudProcessor().setProgress(1f);
         try {
             domainCollectService.dumpQueue();

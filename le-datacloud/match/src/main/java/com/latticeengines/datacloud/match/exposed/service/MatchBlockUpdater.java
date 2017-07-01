@@ -9,6 +9,7 @@ public interface MatchBlockUpdater {
     MatchBlockUpdater status(YarnApplicationState status);
     MatchBlockUpdater progress(Float progress);
     MatchBlockUpdater errorMessage(String errorMessage);
+    MatchBlockUpdater matchedRows(int matchedRows);
     MatchBlock commit();
     
 }

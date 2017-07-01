@@ -35,6 +35,7 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchBlock;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
@@ -161,12 +162,17 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             }
 
             String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
-
             if (!StringUtils.isEmpty(configuration.getResultLocation())) {
                 avroDir = configuration.getResultLocation();
             }
-            Long count = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
-            log.info("Generated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
+            Long count = 0L;
+            List<MatchBlock> blocks = matchCommandService.getBlocks(rootOperationUid);
+            if (blocks != null && !blocks.isEmpty()) {
+                for (MatchBlock block: blocks) {
+                    count += block.getMatchedRows() != null ? block.getMatchedRows() : 0;
+                }
+            }
+            log.info("Aggregated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
                     .dnbCommands() //

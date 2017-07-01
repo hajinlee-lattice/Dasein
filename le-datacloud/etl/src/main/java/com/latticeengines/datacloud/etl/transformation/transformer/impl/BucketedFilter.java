@@ -83,9 +83,10 @@ public class BucketedFilter extends AbstractDataflowTransformer<BucketedFilterCo
         Set<String> originalFieldSet = new HashSet<>(parameters.originalAttrs);
         String encAttrPrefix = StringUtils.isBlank(parameters.encAttrPrefix) ? CEAttr : parameters.encAttrPrefix;
         List<String> toRemove = baseSchema.getFields().stream() //
-                .map(Schema.Field::toString) //
+                .map(Schema.Field::name) //
                 .filter(f -> !originalFieldSet.contains(f) && !f.startsWith(encAttrPrefix)) // not in original, and not CEAttr
                 .collect(Collectors.toList());
+        log.info("Removing " + toRemove.size() + " fields.");
         return AvroUtils.removeFields(baseSchema, toRemove.toArray(new String[toRemove.size()]));
     }
 

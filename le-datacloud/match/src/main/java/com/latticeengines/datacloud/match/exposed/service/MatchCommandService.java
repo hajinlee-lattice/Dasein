@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.match.exposed.service;
 
+import java.util.List;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
@@ -24,5 +26,7 @@ public interface MatchCommandService {
     Boolean blockIsRetriable(String blockOperationUid);
 
     MatchBlock retryBlock(String blockOperationUid, ApplicationId applicationId);
+
+    List<MatchBlock> getBlocks(String rootOperationUid);
 
 }

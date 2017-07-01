@@ -100,6 +100,11 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     }
 
     @Override
+    public List<MatchBlock> getBlocks(String rootOperationUid) {
+        return matchCommandEntityMgr.findBlocks(rootOperationUid);
+    }
+
+    @Override
     public MatchCommandUpdaterImpl update(String rootOperationUid) {
         MatchCommand matchCommand = matchCommandEntityMgr.findByRootOperationUid(rootOperationUid);
         if (matchCommand == null) {
@@ -324,6 +329,12 @@ public class MatchCommandServiceImpl implements MatchCommandService {
 
         public MatchBlockUpdaterImpl errorMessage(String errorMessage) {
             matchBlock.setErrorMessage(errorMessage);
+            return this;
+        }
+
+
+        public MatchBlockUpdater matchedRows(int matchedRows) {
+            matchBlock.setMatchedRows(matchedRows);
             return this;
         }
 
