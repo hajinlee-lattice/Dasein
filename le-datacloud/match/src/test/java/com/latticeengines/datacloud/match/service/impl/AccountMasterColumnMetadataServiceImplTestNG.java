@@ -116,7 +116,7 @@ public class AccountMasterColumnMetadataServiceImplTestNG
     }
 
     @Test(groups = "functional")
-    private void updateColumnMetadatas_assertCorrectUpdatesApplied() {
+    private void updateColumnMetadatas_assertCorrectUpdatesApplied() throws Exception {
         COLUMN_METADATA_1.setColumnId(COLUMN_ID_1);
         COLUMN_METADATA_1.setDisplayName(DISPLAY_NAME_1);
         COLUMN_METADATA_1.setDescription(UPDATED_DESCRIPTION);
@@ -162,6 +162,10 @@ public class AccountMasterColumnMetadataServiceImplTestNG
         COLUMN_2.setExternalColumnId(COLUMN_ID_2);
         COLUMN_3.setExternalColumnId(COLUMN_ID_3);
         COLUMN_SELECTION.setColumns(Arrays.asList(COLUMN_1, COLUMN_2, COLUMN_3));
+
+        // wait for cache to be refreshed
+        Thread.sleep(3000L);
+
         List<ColumnMetadata> updatedColumnMetadatas = accountMasterColumnMetadataService
                 .fromSelection(COLUMN_SELECTION, DATA_CLOUD_VERSION_1);
         COLUMN_METADATA_1.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL_ALLINSIGHTS));
