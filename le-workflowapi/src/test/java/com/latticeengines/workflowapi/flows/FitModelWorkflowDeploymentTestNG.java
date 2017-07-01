@@ -21,7 +21,7 @@ public class FitModelWorkflowDeploymentTestNG extends FitModelWorkflowTestNGBase
         setupForFitModel();
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
         FitModelWorkflowConfiguration workflowConfig = generateFitModelWorkflowConfiguration();
 
