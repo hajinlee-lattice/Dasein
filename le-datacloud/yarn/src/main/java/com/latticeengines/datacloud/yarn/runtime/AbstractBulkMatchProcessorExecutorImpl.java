@@ -278,7 +278,11 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                         processorContext.getBlockOutput().getStatistics().getRowsMatched(), count));
             }
         }
-        matchCommandService.updateBlock(processorContext.getBlockOperationUid()).matchedRows(count.intValue()).commit();
+        try {
+            matchCommandService.updateBlock(processorContext.getBlockOperationUid()).matchedRows(count.intValue()).commit();
+        } catch (Exception e) {
+            log.warn("Failed to update block matched rows.", e);
+        }
         processorContext.getDataCloudProcessor().setProgress(1f);
         try {
             domainCollectService.dumpQueue();
