@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,8 +32,8 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 @Component("propDataMadisonService")
 public class PropDataMadisonServiceImpl implements PropDataMadisonService {
@@ -58,7 +59,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    protected SqoopJobService sqoopJobService;
+    protected SqoopProxy sqoopProxy;
 
     @Value("${propdata.madison.datasource.url}")
     private String sourceJdbcUrl;
@@ -164,7 +165,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                     .setSync(false)
                     .build();
 
-            ApplicationId appId = sqoopJobService.importData(importer);
+            ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
             FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
@@ -297,7 +298,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                         .setNumMappers(1)
                         .setSync(false)
                         .build();
-                ApplicationId appId = sqoopJobService.importData(importer);
+                ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.importData(importer).getApplicationIds().get(0));
                 FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
                 if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                     throw new IllegalStateException("The final state of " + appId + " is not "
@@ -418,7 +419,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .addExtraOption("--batch")
                 .build();
 
-        ApplicationId appId = sqoopJobService.exportData(exporter);
+        ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
         if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
             throw new IllegalStateException("The final state of " + appId + " is not "
@@ -487,7 +488,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 .addExtraOption("--batch")
                 .build();
 
-        ApplicationId appId = sqoopJobService.exportData(exporter);
+        ApplicationId appId = ConverterUtils.toApplicationId(sqoopProxy.exportData(exporter).getApplicationIds().get(0));
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 24 * 3600);
         if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
             throw new IllegalStateException("The final state of " + appId + " is not "
