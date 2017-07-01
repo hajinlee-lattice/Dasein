@@ -154,7 +154,7 @@ public abstract class AbstractTransformationDataFlowService {
         jobProperties.put("mapreduce.output.fileoutputformat.compress", "true");
         jobProperties.put("mapreduce.output.fileoutputformat.compress.type", "BLOCK");
         // jobProperties.put("mapreduce.output.fileoutputformat.compress.codec",
-                "org.apache.hadoop.io.compress.SnappyCodec");
+         //       "org.apache.hadoop.io.compress.SnappyCodec");
         jobProperties.put("tez.runtime.compress", "true");
         // jobProperties.put("tez.runtime.compress.codec", "org.apache.hadoop.io.compress.SnappyCodec");
         jobProperties.put("tez.task.resource.memory.mb", String.valueOf(taskMem * 1024));
