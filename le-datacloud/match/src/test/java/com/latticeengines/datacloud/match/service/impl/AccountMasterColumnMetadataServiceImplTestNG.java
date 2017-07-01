@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -33,7 +35,7 @@ public class AccountMasterColumnMetadataServiceImplTestNG
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
-    @Autowired
+    @Resource(name = "accountMasterColumnMetadataService")
     private ColumnMetadataService accountMasterColumnMetadataService;
 
     @Autowired
