@@ -15,7 +15,7 @@
     <yarn:localresources />
 
     <yarn:environment>
-        <yarn:classpath />
+        <yarn:classpath use-yarn-app-classpath="true" delimiter=":" />
     </yarn:environment>
 
     <bean id="defaultYarnClientCustomization" class="com.latticeengines.yarn.exposed.client.DefaultYarnClientCustomization" >
