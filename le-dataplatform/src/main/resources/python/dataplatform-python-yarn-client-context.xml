@@ -8,8 +8,7 @@
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <yarn:environment>
-        <yarn:classpath use-yarn-app-classpath="true" delimiter=":">
-        </yarn:classpath>
+        <yarn:classpath use-yarn-app-classpath="true" delimiter=":" />
     </yarn:environment>
 
     <bean id="pythonClient" class="org.springframework.yarn.fs.PrototypeYarnClientFactoryBean"
