@@ -70,7 +70,7 @@ public class AccountMasterColumnMetadataServiceImplTestNG
     private static final Column COLUMN_2 = new Column();
     private static final Column COLUMN_3 = new Column();
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     public void setup() throws Exception {
         cleanupDB();
 
@@ -117,7 +117,7 @@ public class AccountMasterColumnMetadataServiceImplTestNG
         accountMasterColumnEntityMgr.create(ACCOUNT_MASTER_COLUMN_3);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     private void updateColumnMetadatas_assertCorrectUpdatesApplied() throws Exception {
         COLUMN_METADATA_1.setColumnId(COLUMN_ID_1);
         COLUMN_METADATA_1.setDisplayName(DISPLAY_NAME_1);
@@ -192,7 +192,7 @@ public class AccountMasterColumnMetadataServiceImplTestNG
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = "updateColumnMetadatas_assertCorrectUpdatesApplied")
+    @Test(groups = "functional", enabled = false, dependsOnMethods = "updateColumnMetadatas_assertCorrectUpdatesApplied")
     private void updateErroneousApprovedUsages_assertCorrectErrorThrown() {
         COLUMN_METADATA_1.setColumnId(COLUMN_ID_1);
         COLUMN_METADATA_1.setDisplayName(DISPLAY_NAME_1);
