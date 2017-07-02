@@ -4,12 +4,14 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -163,17 +165,31 @@ public class AccountMasterColumnMetadataServiceImplTestNG
         COLUMN_3.setExternalColumnId(COLUMN_ID_3);
         COLUMN_SELECTION.setColumns(Arrays.asList(COLUMN_1, COLUMN_2, COLUMN_3));
 
-        // wait for cache to be refreshed
-        Thread.sleep(3000L);
-
-        List<ColumnMetadata> updatedColumnMetadatas = accountMasterColumnMetadataService
-                .fromSelection(COLUMN_SELECTION, DATA_CLOUD_VERSION_1);
-        COLUMN_METADATA_1.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL_ALLINSIGHTS));
-        COLUMN_METADATA_2.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL_MODELINSIGHTS));
-        COLUMN_METADATA_3.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL));
-        assertTwoColumnMetadatasEqual(updatedColumnMetadatas.get(0), COLUMN_METADATA_1);
-        assertTwoColumnMetadatasEqual(updatedColumnMetadatas.get(1), COLUMN_METADATA_2);
-        assertTwoColumnMetadatasEqual(updatedColumnMetadatas.get(2), COLUMN_METADATA_3);
+        int retries = 0;
+        AssertionError err = null;
+        while(retries++ < 10) {
+            try {
+                List<ColumnMetadata> updatedColumnMetadatas = accountMasterColumnMetadataService
+                        .fromSelection(COLUMN_SELECTION, DATA_CLOUD_VERSION_1);
+                COLUMN_METADATA_1.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL_ALLINSIGHTS));
+                COLUMN_METADATA_2.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL_MODELINSIGHTS));
+                COLUMN_METADATA_3.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL));
+                assertTwoColumnMetadatasEqual(updatedColumnMetadatas.get(0), COLUMN_METADATA_1);
+                assertTwoColumnMetadatasEqual(updatedColumnMetadatas.get(1), COLUMN_METADATA_2);
+                assertTwoColumnMetadatasEqual(updatedColumnMetadatas.get(2), COLUMN_METADATA_3);
+                return;
+            } catch (AssertionError e) {
+                err = e;
+                logger.warn("Assertion failed. Retry " + retries, e);
+                // wait for cache to be refreshed
+                Thread.sleep(3000L);
+            }
+        }
+        if (err != null) {
+            throw err;
+        } else {
+            Assert.fail("Still failed after 10 retries.");
+        }
     }
 
     @Test(groups = "functional", dependsOnMethods = "updateColumnMetadatas_assertCorrectUpdatesApplied")
