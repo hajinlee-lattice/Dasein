@@ -89,7 +89,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     protected List<ModelRunEntityNames> modelRunEntityNames = new ArrayList<>();
 
     @BeforeClass(groups = "deployment")
-    public void setup() {
+    public void setup() throws Exception {
         try {
             String analyticTestStr = FileUtils.readFileToString(new File( //
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/analytictest.json")
@@ -278,7 +278,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     }
 
     @AfterClass(groups = "deployment")
-    public void tearDown()  {
+    public void tearDown() throws Exception {
         try {
             log.info("Start tearing down.");
             log.info(String.format("Attempting to delete AnalyticTest \"%s\"", analyticTest.getName()));
