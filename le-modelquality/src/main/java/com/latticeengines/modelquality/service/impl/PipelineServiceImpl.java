@@ -170,9 +170,6 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         // Now that steps have been validated and created, create the pipeline
         // and the associations
         pipelineEntityMgr.create(pipeline);
-        for (PipelineToPipelineSteps ptoPStep : pToPSteps) {
-            pipelineToPipelineStepsEntityMgr.create(ptoPStep);
-        }
 
         Pipeline p = pipelineEntityMgr.findByName(pipelineName);
         try {

@@ -11,6 +11,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,6 +53,8 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
+    private static final Log log = LogFactory.getLog(ModelQualityDeploymentTestNGBase.class);
+
     @Autowired
     protected ModelQualityProxy modelQualityProxy;
 
@@ -85,200 +89,219 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     protected List<ModelRunEntityNames> modelRunEntityNames = new ArrayList<>();
 
     @BeforeClass(groups = "deployment")
-    public void setup() throws Exception {
-
-        String analyticTestStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/analytictest.json")
-                        .getFile()));
-        AnalyticTestEntityNames analyticTestEntityNames = JsonUtils.deserialize(analyticTestStr,
-                AnalyticTestEntityNames.class);
-        AnalyticTest analyticTestPrevAlreadyExists = analyticTestEntityMgr.findByName("TestAnalyticTest");
-        if (analyticTestPrevAlreadyExists != null) {
-            System.out.println(String.format("Attempting to delete AnalyticTest \"%s\"", "TestAnalyticTest"));
-            analyticTestEntityMgr.delete(analyticTestPrevAlreadyExists);
-        }
-        AnalyticTest analyticTestAlreadyExists = analyticTestEntityMgr.findByName(analyticTestEntityNames.getName());
-        if (analyticTestAlreadyExists != null) {
-            System.out.println(
-                    String.format("Attempting to delete AnalyticTest \"%s\"", analyticTestEntityNames.getName()));
-            analyticTestEntityMgr.delete(analyticTestAlreadyExists);
-        }
-
-        String analyticPipelineStr = FileUtils.readFileToString(new File( //
-                ClassLoader
-                        .getSystemResource("com/latticeengines/modelquality/functionalframework/analyticpipeline.json")
-                        .getFile()));
-        AnalyticPipelineEntityNames analyticPipelineEntityNames = JsonUtils.deserialize(analyticPipelineStr,
-                AnalyticPipelineEntityNames.class);
-
-        List<ModelRun> existingModelRuns = modelRunEntityMgr.findAll();
-        for (ModelRun aModelRun : existingModelRuns) {
-            AnalyticPipeline anAnalyticPipeline = analyticPipelineEntityMgr
-                    .findByName(aModelRun.getAnalyticPipeline().getName());
-            if (anAnalyticPipeline.getName().equals(analyticPipelineEntityNames.getName()) //
-                    || anAnalyticPipeline.getName().equals(analyticPipline2Name)) {
-                System.out.println(String.format("Attempting to delete ModelRun \"%s\"", aModelRun.getName()));
-                modelRunEntityMgr.delete(aModelRun);
+    public void setup() {
+        try {
+            String analyticTestStr = FileUtils.readFileToString(new File( //
+                    ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/analytictest.json")
+                            .getFile()));
+            AnalyticTestEntityNames analyticTestEntityNames = JsonUtils.deserialize(analyticTestStr,
+                    AnalyticTestEntityNames.class);
+            AnalyticTest analyticTestPrevAlreadyExists = analyticTestEntityMgr.findByName("TestAnalyticTest");
+            if (analyticTestPrevAlreadyExists != null) {
+                System.out.println(String.format("Attempting to delete AnalyticTest \"%s\"", "TestAnalyticTest"));
+                analyticTestEntityMgr.delete(analyticTestPrevAlreadyExists);
             }
-        }
-
-        AnalyticPipeline analyticPipeline1AlreadyExists = analyticPipelineEntityMgr
-                .findByName(analyticPipelineEntityNames.getName());
-        if (analyticPipeline1AlreadyExists != null) {
-            System.out.println(String.format("Attempting to delete AnalyticPipeline \"%s\"",
-                    analyticPipelineEntityNames.getName()));
-            analyticPipelineEntityMgr.delete(analyticPipeline1AlreadyExists);
-        }
-        AnalyticPipeline analyticPipeline2AlreadyExists = analyticPipelineEntityMgr.findByName(analyticPipline2Name);
-        if (analyticPipeline2AlreadyExists != null) {
-            System.out.println(String.format("Attempting to delete AnalyticPipeline \"%s\"", analyticPipline2Name));
-            analyticPipelineEntityMgr.delete(analyticPipeline2AlreadyExists);
-        }
-
-        String algorithmStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/algorithm.json")
-                        .getFile()));
-        algorithm = JsonUtils.deserialize(algorithmStr, Algorithm.class);
-        Algorithm algorithmAlreadyExists = algorithmEntityMgr.findByName(algorithm.getName());
-        if (algorithmAlreadyExists == null) {
-            algorithmEntityMgr.create(algorithm);
-        }
-
-        String dataflowStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataflow.json")
-                        .getFile()));
-        dataflow = JsonUtils.deserialize(dataflowStr, DataFlow.class);
-        DataFlow dataFlowAlreadyExists = dataFlowEntityMgr.findByName(dataflow.getName());
-        if (dataFlowAlreadyExists != null) {
-            System.out.println(String.format("Attempting to delete DataFlow \"%s\"", dataflow.getName()));
-            dataFlowEntityMgr.delete(dataFlowAlreadyExists);
-        }
-        dataFlowEntityMgr.create(dataflow);
-
-        String propDataStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/propdata.json")
-                        .getFile()));
-        propData = JsonUtils.deserialize(propDataStr, PropData.class);
-        PropData propDataAlreadyExists = propDataEntityMgr.findByName(propData.getName());
-        if (propDataAlreadyExists != null) {
-            System.out.println(String.format("Attempting to delete PropData \"%s\"", propData.getName()));
-            propDataEntityMgr.delete(propDataAlreadyExists);
-        }
-        propDataEntityMgr.create(propData);
-
-        String samplingStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/sampling.json")
-                        .getFile()));
-        sampling = JsonUtils.deserialize(samplingStr, Sampling.class);
-        Sampling samplingAlreadyExists = samplingEntityMgr.findByName(sampling.getName());
-        if (samplingAlreadyExists != null) {
-            System.out.println(String.format("Attempting to delete Sampling \"%s\"", sampling.getName()));
-            samplingEntityMgr.delete(samplingAlreadyExists);
-        }
-        samplingEntityMgr.create(sampling);
-
-        PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("remediatedatarulesstep");
-        if (pipelineStepAlreadyExists == null) {
-            pipelineService.createLatestProductionPipeline();
-        }
-        pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
-        if (pipelineStepAlreadyExists != null) {
-            System.out.println("Attempting to delete PipelineStep \"assigncategorical\"");
-            pipelineStepEntityMgr.delete(pipelineStepAlreadyExists);
-        }
-
-        String pipelineStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
-                        .getFile()));
-        pipeline1 = JsonUtils.deserialize(pipelineStr, Pipeline.class);
-        Pipeline pipelineAlreadyExists = pipelineEntityMgr.findByName(pipeline1.getName());
-        if (pipelineAlreadyExists != null) {
-            System.out.println(String.format("Attempting to delete Pipeline \"%s\"", pipeline1.getName()));
-            pipelineEntityMgr.delete(pipelineAlreadyExists);
-        }
-
-        List<PipelineStep> pipeline1Steps = pipeline1.getPipelineSteps();
-        List<PipelineStepOrFile> pipeline1StepsOrFiles = new ArrayList<>();
-        for (PipelineStep p : pipeline1Steps) {
-            PipelineStepOrFile psof = new PipelineStepOrFile();
-            psof.pipelineStepName = p.getName();
-            pipeline1StepsOrFiles.add(psof);
-            
-            PipelineStep step = pipelineStepEntityMgr.findByName(p.getName());
-            if (step == null) {
-                pipelineStepEntityMgr.create(p);
+            AnalyticTest analyticTestAlreadyExists = analyticTestEntityMgr.findByName(analyticTestEntityNames.getName());
+            if (analyticTestAlreadyExists != null) {
+                log.info(String.format("Attempting to delete AnalyticTest \"%s\"", analyticTestEntityNames.getName()));
+                analyticTestEntityMgr.delete(analyticTestAlreadyExists);
+                log.info(String.format("AnalyticTest [%s] Deleted.", analyticTestEntityNames.getName()));
             }
+
+            String analyticPipelineStr = FileUtils.readFileToString(new File( //
+                    ClassLoader
+                            .getSystemResource("com/latticeengines/modelquality/functionalframework/analyticpipeline.json")
+                            .getFile()));
+            AnalyticPipelineEntityNames analyticPipelineEntityNames = JsonUtils.deserialize(analyticPipelineStr,
+                    AnalyticPipelineEntityNames.class);
+
+            List<ModelRun> existingModelRuns = modelRunEntityMgr.findAll();
+            for (ModelRun aModelRun : existingModelRuns) {
+                AnalyticPipeline anAnalyticPipeline = analyticPipelineEntityMgr
+                        .findByName(aModelRun.getAnalyticPipeline().getName());
+                if (anAnalyticPipeline.getName().equals(analyticPipelineEntityNames.getName()) //
+                        || anAnalyticPipeline.getName().equals(analyticPipline2Name)) {
+                    log.info(String.format("Attempting to delete ModelRun \"%s\"", aModelRun.getName()));
+                    modelRunEntityMgr.delete(aModelRun);
+                    log.info(String.format("ModelRun [%s] Deleted.", aModelRun.getName()));
+                }
+            }
+
+            AnalyticPipeline analyticPipeline1AlreadyExists = analyticPipelineEntityMgr
+                    .findByName(analyticPipelineEntityNames.getName());
+            if (analyticPipeline1AlreadyExists != null) {
+                log.info(String.format("Attempting to delete AnalyticPipeline \"%s\"",
+                        analyticPipelineEntityNames.getName()));
+                analyticPipelineEntityMgr.delete(analyticPipeline1AlreadyExists);
+                log.info(String.format("AnalyticPipeline [%s] Deleted.", analyticPipelineEntityNames.getName()));
+            }
+            AnalyticPipeline analyticPipeline2AlreadyExists = analyticPipelineEntityMgr.findByName(analyticPipline2Name);
+            if (analyticPipeline2AlreadyExists != null) {
+                System.out.println(String.format("Attempting to delete AnalyticPipeline \"%s\"", analyticPipline2Name));
+                analyticPipelineEntityMgr.delete(analyticPipeline2AlreadyExists);
+                log.info(String.format("AnalyticPipeline [%s] Deleted.", analyticPipeline2AlreadyExists.getName()));
+            }
+
+            String algorithmStr = FileUtils.readFileToString(new File( //
+                    ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/algorithm.json")
+                            .getFile()));
+            algorithm = JsonUtils.deserialize(algorithmStr, Algorithm.class);
+            Algorithm algorithmAlreadyExists = algorithmEntityMgr.findByName(algorithm.getName());
+            if (algorithmAlreadyExists == null) {
+                algorithmEntityMgr.create(algorithm);
+            }
+
+            String dataflowStr = FileUtils.readFileToString(new File( //
+                    ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataflow.json")
+                            .getFile()));
+            dataflow = JsonUtils.deserialize(dataflowStr, DataFlow.class);
+            DataFlow dataFlowAlreadyExists = dataFlowEntityMgr.findByName(dataflow.getName());
+            if (dataFlowAlreadyExists != null) {
+                log.info(String.format("Attempting to delete DataFlow \"%s\"", dataFlowAlreadyExists.getName()));
+                dataFlowEntityMgr.delete(dataFlowAlreadyExists);
+                log.info(String.format("DataFlow [%s] Deleted.", dataFlowAlreadyExists.getName()));
+            }
+            dataFlowEntityMgr.create(dataflow);
+
+            String propDataStr = FileUtils.readFileToString(new File( //
+                    ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/propdata.json")
+                            .getFile()));
+            propData = JsonUtils.deserialize(propDataStr, PropData.class);
+            PropData propDataAlreadyExists = propDataEntityMgr.findByName(propData.getName());
+            if (propDataAlreadyExists != null) {
+                log.info(String.format("Attempting to delete PropData \"%s\"", propDataAlreadyExists.getName()));
+                propDataEntityMgr.delete(propDataAlreadyExists);
+                log.info(String.format("PropData [%s] Deleted.", propDataAlreadyExists.getName()));
+            }
+            propDataEntityMgr.create(propData);
+
+            String samplingStr = FileUtils.readFileToString(new File( //
+                    ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/sampling.json")
+                            .getFile()));
+            sampling = JsonUtils.deserialize(samplingStr, Sampling.class);
+            Sampling samplingAlreadyExists = samplingEntityMgr.findByName(sampling.getName());
+            if (samplingAlreadyExists != null) {
+                System.out.println(String.format("Attempting to delete Sampling \"%s\"", samplingAlreadyExists.getName()));
+                samplingEntityMgr.delete(samplingAlreadyExists);
+                log.info(String.format("Sampling [%s] Deleted.", samplingAlreadyExists.getName()));
+            }
+            samplingEntityMgr.create(sampling);
+
+            PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("remediatedatarulesstep");
+            if (pipelineStepAlreadyExists == null) {
+                pipelineService.createLatestProductionPipeline();
+            }
+            pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
+            if (pipelineStepAlreadyExists != null) {
+                log.info("Attempting to delete PipelineStep \"assigncategorical\"");
+                pipelineStepEntityMgr.delete(pipelineStepAlreadyExists);
+                log.info(String.format("PipelineStep [%s] Deleted.", pipelineStepAlreadyExists.getName()));
+            }
+
+            String pipelineStr = FileUtils.readFileToString(new File( //
+                    ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/pipeline.json")
+                            .getFile()));
+            pipeline1 = JsonUtils.deserialize(pipelineStr, Pipeline.class);
+            Pipeline pipelineAlreadyExists = pipelineEntityMgr.findByName(pipeline1.getName());
+            if (pipelineAlreadyExists != null) {
+                log.info(String.format("Attempting to delete Pipeline \"%s\"", pipelineAlreadyExists.getName()));
+                pipelineEntityMgr.delete(pipelineAlreadyExists);
+                log.info(String.format("Pipeline [%s] Deleted.", pipelineAlreadyExists.getName()));
+            }
+
+            List<PipelineStep> pipeline1Steps = pipeline1.getPipelineSteps();
+            List<PipelineStepOrFile> pipeline1StepsOrFiles = new ArrayList<>();
+            for (PipelineStep p : pipeline1Steps) {
+                PipelineStepOrFile psof = new PipelineStepOrFile();
+                psof.pipelineStepName = p.getName();
+                pipeline1StepsOrFiles.add(psof);
+
+                PipelineStep step = pipelineStepEntityMgr.findByName(p.getName());
+                if (step == null) {
+                    pipelineStepEntityMgr.create(p);
+                }
+            }
+
+            pipeline1 = pipelineService.createPipeline(pipeline1.getName(), pipeline1.getDescription(),
+                    pipeline1StepsOrFiles);
+
+            String datasetStr = FileUtils.readFileToString(new File( //
+                    ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataset.json")
+                            .getFile()));
+            dataset = JsonUtils.deserialize(datasetStr, DataSet.class);
+            DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(dataset.getName());
+            if (datasetAlreadyExists != null) {
+                log.info(String.format("Attempting to delete DataSet \"%s\"", dataset.getName()));
+                dataSetEntityMgr.delete(datasetAlreadyExists);
+                log.info(String.format("DataSet [%s] Deleted.", datasetAlreadyExists.getName()));
+            }
+            dataSetEntityMgr.create(dataset);
+
+            AnalyticPipeline analyticPipeline1 = analyticPipelineService
+                    .createAnalyticPipeline(analyticPipelineEntityNames);
+
+            analyticPipelineEntityNames.setName(analyticPipline2Name);
+            analyticPipelineEntityNames.setPipeline(pipeline1.getName());
+            AnalyticPipeline analyticPipeline2 = analyticPipelineService
+                    .createAnalyticPipeline(analyticPipelineEntityNames);
+
+            analyticPipelines.add(analyticPipeline1);
+            analyticPipelines.add(analyticPipeline2);
+
+            List<String> analyticPipelineNames = new ArrayList<>();
+            analyticPipelineNames.add(analyticPipeline1.getName());
+            analyticPipelineNames.add(analyticPipeline2.getName());
+            List<String> datasetNames = new ArrayList<>();
+            datasetNames.add(dataset.getName());
+            analyticTestEntityNames.setAnalyticPipelineNames(analyticPipelineNames);
+            analyticTestEntityNames.setDataSetNames(datasetNames);
+            analyticTest = analyticTestService.createAnalyticTest(analyticTestEntityNames);
+
+            String modelRunStr = FileUtils.readFileToString(new File( //
+                    ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/modelrun.json")
+                            .getFile()));
+            ModelRunEntityNames modelRunEntityNames1 = JsonUtils.deserialize(modelRunStr, ModelRunEntityNames.class);
+            modelRunEntityNames1.setAnalyticPipelineName(analyticPipeline1.getName());
+            modelRunEntityNames1.setDataSetName(dataset.getName());
+            modelRunEntityNames1.setName("ModelQualityDeploymentTest-1");
+            ModelRunEntityNames modelRunEntityNames2 = JsonUtils.deserialize(modelRunStr, ModelRunEntityNames.class);
+            modelRunEntityNames2.setAnalyticPipelineName(analyticPipeline2.getName());
+            modelRunEntityNames2.setDataSetName(dataset.getName());
+            modelRunEntityNames2.setName("ModelQualityDeploymentTest-2");
+
+            modelRunEntityNames.add(modelRunEntityNames1);
+            modelRunEntityNames.add(modelRunEntityNames2);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail("Failed to setup environment.");
         }
-
-        pipeline1 = pipelineService.createPipeline(pipeline1.getName(), pipeline1.getDescription(),
-                pipeline1StepsOrFiles);
-
-        String datasetStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/dataset.json")
-                        .getFile()));
-        dataset = JsonUtils.deserialize(datasetStr, DataSet.class);
-        DataSet datasetAlreadyExists = dataSetEntityMgr.findByName(dataset.getName());
-        if (datasetAlreadyExists != null) {
-            System.out.println(String.format("Attempting to delete DataSet \"%s\"", dataset.getName()));
-            dataSetEntityMgr.delete(datasetAlreadyExists);
-        }
-        dataSetEntityMgr.create(dataset);
-
-        AnalyticPipeline analyticPipeline1 = analyticPipelineService
-                .createAnalyticPipeline(analyticPipelineEntityNames);
-
-        analyticPipelineEntityNames.setName(analyticPipline2Name);
-        analyticPipelineEntityNames.setPipeline(pipeline1.getName());
-        AnalyticPipeline analyticPipeline2 = analyticPipelineService
-                .createAnalyticPipeline(analyticPipelineEntityNames);
-
-        analyticPipelines.add(analyticPipeline1);
-        analyticPipelines.add(analyticPipeline2);
-
-        List<String> analyticPipelineNames = new ArrayList<>();
-        analyticPipelineNames.add(analyticPipeline1.getName());
-        analyticPipelineNames.add(analyticPipeline2.getName());
-        List<String> datasetNames = new ArrayList<>();
-        datasetNames.add(dataset.getName());
-        analyticTestEntityNames.setAnalyticPipelineNames(analyticPipelineNames);
-        analyticTestEntityNames.setDataSetNames(datasetNames);
-        analyticTest = analyticTestService.createAnalyticTest(analyticTestEntityNames);
-
-        String modelRunStr = FileUtils.readFileToString(new File( //
-                ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/modelrun.json")
-                        .getFile()));
-        ModelRunEntityNames modelRunEntityNames1 = JsonUtils.deserialize(modelRunStr, ModelRunEntityNames.class);
-        modelRunEntityNames1.setAnalyticPipelineName(analyticPipeline1.getName());
-        modelRunEntityNames1.setDataSetName(dataset.getName());
-        modelRunEntityNames1.setName("ModelQualityDeploymentTest-1");
-        ModelRunEntityNames modelRunEntityNames2 = JsonUtils.deserialize(modelRunStr, ModelRunEntityNames.class);
-        modelRunEntityNames2.setAnalyticPipelineName(analyticPipeline2.getName());
-        modelRunEntityNames2.setDataSetName(dataset.getName());
-        modelRunEntityNames2.setName("ModelQualityDeploymentTest-2");
-
-        modelRunEntityNames.add(modelRunEntityNames1);
-        modelRunEntityNames.add(modelRunEntityNames2);
     }
 
     @AfterClass(groups = "deployment")
-    public void tearDown() throws Exception {
-        System.out.println(String.format("Attempting to delete AnalyticTest \"%s\"", analyticTest.getName()));
-        analyticTestEntityMgr.delete(analyticTest);
-        System.out.println(String.format("Attempting to delete DataSet \"%s\"", dataset.getName()));
-        dataSetEntityMgr.delete(dataset);
-        System.out.println(String.format("Attempting to delete Pipeline \"%s\"", pipeline1.getName()));
-        pipelineEntityMgr.delete(pipeline1);
-        PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
-        if (pipelineStepAlreadyExists != null) {
-            System.out.println("Attempting to delete PipelineStep \"assigncategorical\"");
-            pipelineStepEntityMgr.delete(pipelineStepAlreadyExists);
+    public void tearDown()  {
+        try {
+            log.info("Start tearing down.");
+            log.info(String.format("Attempting to delete AnalyticTest \"%s\"", analyticTest.getName()));
+            analyticTestEntityMgr.delete(analyticTest);
+            log.info(String.format("Attempting to delete DataSet \"%s\"", dataset.getName()));
+            dataSetEntityMgr.delete(dataset);
+            log.info(String.format("Attempting to delete Pipeline \"%s\"", pipeline1.getName()));
+            pipelineEntityMgr.delete(pipeline1);
+            PipelineStep pipelineStepAlreadyExists = pipelineStepEntityMgr.findByName("assigncategorical");
+            if (pipelineStepAlreadyExists != null) {
+                System.out.println("Attempting to delete PipelineStep \"assigncategorical\"");
+                pipelineStepEntityMgr.delete(pipelineStepAlreadyExists);
+            }
+            log.info(String.format("Attempting to delete Sampling \"%s\"", sampling.getName()));
+            samplingEntityMgr.delete(sampling);
+            log.info(String.format("Attempting to delete PropData \"%s\"", propData.getName()));
+            propDataEntityMgr.delete(propData);
+            log.info(String.format("Attempting to delete DataFlow \"%s\"", dataflow.getName()));
+            dataFlowEntityMgr.delete(dataflow);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail("Failed to tear down environment.");
         }
-        System.out.println(String.format("Attempting to delete Sampling \"%s\"", sampling.getName()));
-        samplingEntityMgr.delete(sampling);
-        System.out.println(String.format("Attempting to delete PropData \"%s\"", propData.getName()));
-        propDataEntityMgr.delete(propData);
-        System.out.println(String.format("Attempting to delete DataFlow \"%s\"", dataflow.getName()));
-        dataFlowEntityMgr.delete(dataflow);
     }
 
     protected void setTestBed(GlobalAuthDeploymentTestBed testBed) {

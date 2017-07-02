@@ -17,6 +17,7 @@ import com.latticeengines.modelquality.dao.PipelineDao;
 import com.latticeengines.modelquality.dao.PipelineStepDao;
 import com.latticeengines.modelquality.dao.PipelineToPipelineStepsDao;
 import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
+import com.latticeengines.modelquality.entitymgr.PipelineToPipelineStepsEntityMgr;
 
 @Component("pipelineEntityMgr")
 public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implements PipelineEntityMgr {
@@ -26,6 +27,9 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
 
     @Autowired
     private PipelineToPipelineStepsDao pipelineToPipelineStepsDao;
+
+    @Autowired
+    private PipelineToPipelineStepsEntityMgr pipelineToPipelineStepsEntityMgr;
 
     @Autowired
     private PipelineStepDao pipelineStepDao;
@@ -46,8 +50,10 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
                 pipelineStepDao.create(step);
             }
         }
-
         pipelineDao.create(pipeline);
+        for (PipelineToPipelineSteps ptoPStep : pipeline.getPipelineToPipelineSteps()) {
+            pipelineToPipelineStepsEntityMgr.create(ptoPStep);
+        }
         setPipelineStepOrder(pipeline);
     }
 

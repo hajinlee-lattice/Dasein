@@ -49,7 +49,7 @@ public class Sampling implements HasName, HasPid, Fact, Dimension, SupportsLates
     private boolean parallelEnabled = false;
     
     @JsonIgnore
-    @Column(name = "VERSION", nullable = true)
+    @Column(name = "VERSION")
     private Integer version;
 
     @JsonProperty("sampling_property_defs")
