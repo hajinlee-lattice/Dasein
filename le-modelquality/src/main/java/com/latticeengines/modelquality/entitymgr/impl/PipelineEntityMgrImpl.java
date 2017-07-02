@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
@@ -53,6 +54,11 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void delete(Pipeline pipeline) {
+        Pipeline exists = findByName(pipeline.getName());
+        if (exists == null) {
+            return;
+        }
+        HibernateUtils.inflateDetails(exists.getPipelineToPipelineSteps());
         List<PipelineToPipelineSteps> steps = pipeline.getPipelineToPipelineSteps();
         for (PipelineToPipelineSteps step: steps) {
             pipelineToPipelineStepsDao.delete(step);
