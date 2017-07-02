@@ -1,5 +1,6 @@
 package com.latticeengines.pls.end2end;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -46,6 +48,7 @@ import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -140,6 +143,14 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "firstAssemble")
     public void verifyFirstImport() throws IOException {
         String customerSpace = CustomerSpace.parse(firstTenant.getId()).toString();
+        Table bucketedAccountTable = dataCollectionProxy.getTable(customerSpace,
+                BusinessEntity.Account.getServingStore());
+        Assert.assertNotNull(bucketedAccountTable);
+        List<Attribute> attributes = bucketedAccountTable.getAttributes();
+        for (Attribute attribute : attributes) {
+            System.out.println(attribute.getName());
+            Assert.assertFalse(attribute.getName().contains(CEAttr), "Should not have encoded attr in expanded table.");
+        }
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(customerSpace);
         Assert.assertNotNull(statisticsContainer);
         // save stats to a local json to help create verifications
@@ -217,7 +228,8 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Extract e = createExtract(hdfsUri, 1000L);
 
         dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", "Account");
-        dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(), e);
+        dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(),
+                e);
     }
 
     private Extract createExtract(String path, long processedRecords) {

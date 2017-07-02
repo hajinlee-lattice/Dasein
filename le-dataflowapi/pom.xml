@@ -18,65 +18,28 @@
         <relativePath>../le-microservice</relativePath>
     </parent>
 
-    <profiles>
-        <profile>
-            <id>functional</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.version}</version>
-                        <configuration>
-                            <httpConnector>
-                                <port>8085</port>
-                            </httpConnector>
-                            <webAppConfig>
-                                <extraClasspath>
-                                    ${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar;${env.TEZ_CONF_DIR}
-                                </extraClasspath>
-                            </webAppConfig>
-                            <systemProperties>
-                                <systemProperty>
-                                    <name>com.latticeengines.registerBootstrappers</name>
-                                    <value>true</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-commons</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.slf4j</groupId>
-                                <artifactId>slf4j-api</artifactId>
-                                <version>1.5.8</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.slf4j</groupId>
-                                <artifactId>slf4j-nop</artifactId>
-                                <version>1.5.8</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${project.version}</version>
             <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jettison</groupId>
+                    <artifactId>jettison</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.thoughtworks.xstream</groupId>
+                    <artifactId>xstream</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>com.latticeengines</groupId>
                     <artifactId>le-common</artifactId>

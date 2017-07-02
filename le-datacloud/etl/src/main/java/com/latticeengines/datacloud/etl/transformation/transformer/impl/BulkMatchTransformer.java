@@ -22,6 +22,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
+import java.util.Random;
+
 @Component(TRANSFORMER_MATCH)
 public class BulkMatchTransformer extends AbstractMatchTransformer {
 
@@ -60,26 +62,28 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
         String rootUid = matchCommand.getRootOperationUid();
         log.info(String.format("Waiting for match command %s to complete", rootUid));
 
-        MatchStatus status;
-        do {
-            matchCommand = matchProxy.bulkMatchStatus(rootUid);
-            status = matchCommand.getMatchStatus();
-            if (status == null) {
-                throw new LedpException(LedpCode.LEDP_28024, new String[] { rootUid });
-            }
-            String logMsg = "Match Status = " + status;
-            if (MatchStatus.MATCHING.equals(status)) {
-                Float progress = matchCommand.getProgress();
-                logMsg += String.format(": %.2f %%", progress * 100);
-            }
-            log.info(logMsg);
+        Random random = new Random(System.currentTimeMillis());
 
+        MatchStatus status = null;
+        do {
+            if (status == null || random.nextInt(100) > 95) {
+                matchCommand = matchProxy.bulkMatchStatus(rootUid);
+                status = matchCommand.getMatchStatus();
+                if (status == null) {
+                    throw new LedpException(LedpCode.LEDP_28024, new String[]{rootUid});
+                }
+                String logMsg = "Match Status = " + status;
+                if (MatchStatus.MATCHING.equals(status)) {
+                    Float progress = matchCommand.getProgress();
+                    logMsg += String.format(": %.2f %%", progress * 100);
+                }
+                log.info(logMsg);
+            }
             try {
                 Thread.sleep(5000L);
             } catch (InterruptedException e) {
                 // Ignore InterruptedException
             }
-
         } while (!status.isTerminal());
 
         if (!MatchStatus.FINISHED.equals(status)) {

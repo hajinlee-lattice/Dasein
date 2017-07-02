@@ -42,33 +42,8 @@ public class MetadataConverter {
     public static Table getTable(Configuration configuration, String path, String primaryKeyName,
             String lastModifiedKeyName) {
         try {
-            boolean isDirectory = false;
-            if (HdfsUtils.isDirectory(configuration, path)) {
-                if (path.endsWith("/")) {
-                    path = path.substring(0, path.length() - 2);
-                }
-                path = path + "/*.avro";
-                isDirectory = true;
-            }
-            List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
-
-            Schema schema = AvroUtils.getSchemaFromGlob(configuration, path);
-            List<Extract> extracts = new ArrayList<Extract>();
-            for (String match : matches) {
-                Extract extract = new Extract();
-                try (FileSystem fs = FileSystem.newInstance(configuration)) {
-                    extract.setExtractionTimestamp(fs.getFileStatus(new Path(match)).getModificationTime());
-                }
-                extract.setName("extract");
-                extracts.add(extract);
-                if (isDirectory) {
-                    extract.setPath(path);
-                    break;
-                } else {
-                    extract.setPath(match);
-                }
-            }
-
+            List<Extract> extracts = convertToExtracts(configuration, path);
+            Schema schema = AvroUtils.getSchemaFromGlob(configuration, extracts.get(0).getPath());
             Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, false);
             return table;
         } catch (Exception e) {
@@ -76,18 +51,45 @@ public class MetadataConverter {
         }
     }
 
-    public static Table getBucketedTableFromSchemaPath(Configuration configuration, String path, String primaryKeyName,
+    public static Table getBucketedTableFromSchemaPath(Configuration configuration, String avroPath, String avscPath, String primaryKeyName,
             String lastModifiedKeyName) {
         try {
             @SuppressWarnings("deprecation")
-            Schema schema = Schema.parse(HdfsUtils.getInputStream(configuration, path));
-            List<Extract> extracts = new ArrayList<Extract>();
-
+            Schema schema = Schema.parse(HdfsUtils.getInputStream(configuration, avscPath));
+            List<Extract> extracts = convertToExtracts(configuration, avroPath);
             Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, true);
             return table;
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Failed to parse metadata for avro file located at %s", path), e);
+            throw new RuntimeException(String.format("Failed to parse metadata for avro file located at %s, using avsc at %s", avroPath, avscPath), e);
         }
+    }
+
+    private static List<Extract> convertToExtracts(Configuration configuration, String avroPath) throws Exception {
+        boolean isDirectory = false;
+        if (HdfsUtils.isDirectory(configuration, avroPath)) {
+            if (avroPath.endsWith("/")) {
+                avroPath = avroPath.substring(0, avroPath.length() - 2);
+            }
+            avroPath = avroPath + "/*.avro";
+            isDirectory = true;
+        }
+        List<String> matches = HdfsUtils.getFilesByGlob(configuration, avroPath);
+        List<Extract> extracts = new ArrayList<Extract>();
+        for (String match : matches) {
+            Extract extract = new Extract();
+            try (FileSystem fs = FileSystem.newInstance(configuration)) {
+                extract.setExtractionTimestamp(fs.getFileStatus(new Path(match)).getModificationTime());
+            }
+            extract.setName("extract");
+            extracts.add(extract);
+            if (isDirectory) {
+                extract.setPath(avroPath);
+                break;
+            } else {
+                extract.setPath(match);
+            }
+        }
+        return extracts;
     }
 
     public static Table getTable(Schema schema, List<Extract> extracts, String primaryKeyName,

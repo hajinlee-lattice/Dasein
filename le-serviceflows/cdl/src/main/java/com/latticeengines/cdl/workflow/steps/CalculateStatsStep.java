@@ -55,7 +55,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
 
     private static final String PROFILE_TABLE_PREFIX = "Profile";
     private static final String STATS_TABLE_PREFIX = "Stats";
-    private static final String SORTED_TABLE_PREFIX = "Sorted";
+    private static final String SORTED_TABLE_PREFIX = TableRoleInCollection.ConsolidatedAccount.name();
     private static final List<String> masterTableSortKeys = TableRoleInCollection.ConsolidatedAccount
             .getForeignKeysAsStringList();
 
@@ -221,6 +221,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(SORTED_TABLE_PREFIX);
+        targetTable.setExpandBucketedAttrs(true);
         step.setTargetTable(targetTable);
 
         SorterConfig conf = new SorterConfig();

@@ -224,8 +224,8 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             return TableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
                     paths.toArray(new String[paths.size()]), source.getPrimaryKey());
         } else {
-            return TableUtils.createTable(yarnConfiguration, source.getSourceName(), paths.toArray(new String[paths.size()]),
-                    source.getPrimaryKey());
+            return TableUtils.createTable(yarnConfiguration, source.getSourceName(),
+                    paths.toArray(new String[paths.size()]), source.getPrimaryKey());
         }
     }
 
@@ -284,12 +284,14 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         String tableName = tableSource.getTable().getName();
         CustomerSpace customerSpace = tableSource.getCustomerSpace();
         Table table;
+        String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();
         if (expandBucketed) {
             String avscPath = hdfsPathBuilder.constructTableSchemaFilePath(tableName, customerSpace, "").toString();
-            table = MetadataConverter.getBucketedTableFromSchemaPath(yarnConfiguration, avscPath, tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey());
+            table = MetadataConverter.getBucketedTableFromSchemaPath(yarnConfiguration, avroDir, avscPath,
+                    tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey());
         } else {
-            String avroDir = hdfsPathBuilder.constructTablePath(tableName, customerSpace, "").toString();
-            table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getSinglePrimaryKey(), tableSource.getLastModifiedKey());
+            table = MetadataConverter.getTable(yarnConfiguration, avroDir, tableSource.getSinglePrimaryKey(),
+                    tableSource.getLastModifiedKey());
         }
         table.setName(tableName);
         return new TableSource(table, customerSpace);
@@ -425,8 +427,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 sourceExists = true;
             }
         } catch (Exception e) {
-            log.info(
-                    String.format("Failed to check %s %s @version %s in HDFS", source.getSourceName(),
+            log.info(String.format("Failed to check %s %s @version %s in HDFS", source.getSourceName(),
                     (source instanceof IngestionSource ? ((IngestionSource) source).getIngestionName() : ""), version));
         }
         return sourceExists;
@@ -450,7 +451,6 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
         return sourceExists;
     }
-
 
     @Override
     public void initiateSource(Source source) {

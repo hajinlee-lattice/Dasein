@@ -76,7 +76,7 @@ public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctional
         File file = unzipFile("AccountMasterBucketed.avsc");
         Configuration config = new Configuration();
         config.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
-        Table bucketedTable = MetadataConverter.getBucketedTableFromSchemaPath(config, file.getPath(), null, null);
+        Table bucketedTable = MetadataConverter.getBucketedTableFromSchemaPath(config, null, file.getPath(), null, null);
         JdbcStorage storage = new JdbcStorage();
         storage.setDatabaseName(DatabaseName.REDSHIFT);
         storage.setTableNameInStorage(tableName);

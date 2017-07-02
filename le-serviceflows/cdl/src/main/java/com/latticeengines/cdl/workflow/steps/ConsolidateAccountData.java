@@ -163,6 +163,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
             targetTable.setCustomerSpace(customerSpace);
             targetTable.setNamePrefix(consolidatedTablePrefix);
             targetTable.setPrimaryKey(primaryKey);
+            targetTable.setExpandBucketedAttrs(true);
             step4.setTargetTable(targetTable);
         }
         return step4;
@@ -199,6 +200,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(consolidatedTablePrefix);
+        targetTable.setExpandBucketedAttrs(true);
         // targetTable.setPrimaryKey(accountId);
         step6.setTargetTable(targetTable);
         return step6;
