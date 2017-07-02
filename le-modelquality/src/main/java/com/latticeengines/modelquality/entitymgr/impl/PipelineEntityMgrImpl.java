@@ -69,7 +69,7 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
         for (PipelineToPipelineSteps step: steps) {
             pipelineToPipelineStepsDao.delete(step);
         }
-        pipelineDao.delete(pipeline);
+        pipelineDao.delete(exists);
     }
 
     @Override
