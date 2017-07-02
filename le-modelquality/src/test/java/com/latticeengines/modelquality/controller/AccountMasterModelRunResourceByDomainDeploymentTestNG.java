@@ -41,7 +41,7 @@ public class AccountMasterModelRunResourceByDomainDeploymentTestNG extends BaseA
     }
 
     @Override
-    @Test(groups = "deployment", enabled = true, dataProvider = "getAccountMasterCsvFile")
+    @Test(groups = "deployment", enabled = false, dataProvider = "getAccountMasterCsvFile")
     public void runModelAccountMaster(String dataSetName, String csvFile) {
         super.runModelAccountMaster(dataSetName, csvFile);
     }
