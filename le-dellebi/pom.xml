@@ -13,7 +13,6 @@
         <cameljcifs.version>2.13.2</cameljcifs.version>
         <le.common.version>3.7.0-SNAPSHOT</le.common.version>
         <le.scheduler.version>3.7.0-SNAPSHOT</le.scheduler.version>
-        <le.dataplatform.version>3.7.0-SNAPSHOT</le.dataplatform.version>
         <jetty.version>6.1.26</jetty.version>
         <mysql.driver.version>5.1.35</mysql.driver.version>
         <le.domain.version>3.7.0-SNAPSHOT</le.domain.version>
@@ -240,8 +239,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <artifactId>le-yarn</artifactId>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.mortbay.jetty</groupId>
