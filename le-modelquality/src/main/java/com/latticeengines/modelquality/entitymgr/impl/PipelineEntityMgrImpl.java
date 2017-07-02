@@ -51,6 +51,16 @@ public class PipelineEntityMgrImpl extends BaseEntityMgrImpl<Pipeline> implement
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void delete(Pipeline pipeline) {
+        List<PipelineToPipelineSteps> steps = pipeline.getPipelineToPipelineSteps();
+        for (PipelineToPipelineSteps step: steps) {
+            pipelineToPipelineStepsDao.delete(step);
+        }
+        pipelineDao.delete(pipeline);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Pipeline findByName(String name) {
         return pipelineDao.findByField("NAME", name);
