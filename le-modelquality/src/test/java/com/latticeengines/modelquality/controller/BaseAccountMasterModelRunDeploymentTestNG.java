@@ -3,6 +3,7 @@ package com.latticeengines.modelquality.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 
@@ -53,7 +54,13 @@ public class BaseAccountMasterModelRunDeploymentTestNG extends ModelQualityDeplo
 
             PropData thisPropData = modelQualityProxy.getPropDataConfigByName(propData.getName());
             thisPropData.setName("ModelQualityDeploymentTest-AccountMaster");
-            thisPropData.setDataCloudVersion("2.0.4");
+
+            String dataCloudVersion = System.getProperty("MQ_DATACLOUD_VERSION");
+            if (StringUtils.isBlank(dataCloudVersion)) {
+                dataCloudVersion = "2.0.5";
+            }
+            logger.info("DataCloudVersion=" + dataCloudVersion);
+            thisPropData.setDataCloudVersion(dataCloudVersion);
             thisPropData.setExcludePublicDomains(true);
             PropData propDataAlreadyExists = propDataEntityMgr.findByName(thisPropData.getName());
             if (propDataAlreadyExists != null)

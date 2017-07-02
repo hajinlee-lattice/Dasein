@@ -3,6 +3,7 @@ package com.latticeengines.modelquality.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -14,7 +15,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 public class AccountMasterModelRunResourceByLocationTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
 
     @Override
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = {"deployment", "am"})
     public void setup() throws Exception {
         namedModelRunEntityNames.add("ModelQualityDeploymentTest-AccountMaster");
         namedModelRunEntityNames.add("ModelQualityDeploymentTest-DerivedColumn");
@@ -34,29 +35,39 @@ public class AccountMasterModelRunResourceByLocationTestNG extends BaseAccountMa
     }
 
     @Override
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = {"deployment", "am"})
     public void tearDown() throws Exception {
         deleteLocalEntities();
         super.tearDown();
     }
 
-    @Test(groups = "deployment", enabled = true, dataProvider = "getAccountMasterLocationCsvFile")
-    public void runModelAccountMasterLoction(String dataSetName, String csvFile) {
+    @Test(groups = "am")
+    public void runModelForOneCsv() {
+        String dataSetName = System.getProperty("MQ_DATASET");
+        String csvFile = System.getProperty("MQ_CSV");
+        if (StringUtils.isNotBlank(dataSetName) && StringUtils.isNotBlank(csvFile)) {
+            runModelAccountMaster(dataSetName, csvFile);
+        } else {
+            logger.info(String.format("Skipping run model, dataSetName=%s, csvFile = %s", dataSetName, csvFile));
+        }
+    }
+
+    @Test(groups = "deployment", enabled = false, dataProvider = "getAccountMasterLocationCsvFile")
+    public void runModelAccountMasterLocation(String dataSetName, String csvFile) {
         runModelAccountMaster(dataSetName, csvFile);
     }
 
     @DataProvider(name = "getAccountMasterLocationCsvFile")
     public Object[][] getAccountMasterLocationCsvFile() {
         return new Object[][] { //
-        // { "Mulesoft_NA_loc_AccountMaster", "Mulesoft_NA_loc.csv" }, //
-        // { "Mulesoft_Emea_loc_AccountMaster", "Mulesoft_Emea_loc.csv" }, //
-        // { "Mulesoft_Apac_loc_AccountMaster", "Mulesoft_apac_loc.csv"
-        // }, //
-        // { "Qlik_loc_AccountMaster", "Qlik_loc.csv" }, //
-        // { "HootSuite_loc_AccountMaster", "HootSuite_loc.csv" }, //
-//                { "CornerStone_loc_AccountMaster", "Corner_loc.csv" }, //
-//                { "PolyCom_loc_AccountMaster", "PolyCom_loc.csv" }, //
-         { "Tenable_loc_AccountMaster", "Tenable_loc.csv" }, //
+                { "Mulesoft_NA_loc_AccountMaster", "Mulesoft_NA_loc.csv" }, //
+                { "Mulesoft_Emea_loc_AccountMaster", "Mulesoft_Emea_loc.csv" }, //
+                { "Mulesoft_Apac_loc_AccountMaster", "Mulesoft_apac_loc.csv" }, //
+                { "Qlik_loc_AccountMaster", "Qlik_loc.csv" }, //
+                { "HootSuite_loc_AccountMaster", "HootSuite_loc.csv" }, //
+                { "CornerStone_loc_AccountMaster", "Corner_loc.csv" }, //
+                { "PolyCom_loc_AccountMaster", "PolyCom_loc.csv" }, //
+                { "Tenable_loc_AccountMaster", "Tenable_loc.csv" }, //
         };
     }
 }
