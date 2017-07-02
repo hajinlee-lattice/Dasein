@@ -4,12 +4,15 @@ ENV ZK_LOG_DIR /usr/zookeeper/logs
 ENV ZOOKEEPER_HOME /usr/zookeeper
 ENV PATH $PATH:$ZOOKEEPER_HOME/bin
 
+ENV ZK_VERSION="3.4.8"
+ENV ZK_TGZ_URL="https://www.apache.org/dyn/closer.cgi?action=download&filename=zookeeper/zookeeper-${ZK_VERSION}/zookeeper-${ZK_VERSION}.tar.gz"
+
 # zookeeper
-RUN wget http://supergsego.com/apache/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz \
-    && tar xzf zookeeper-3.4.8.tar.gz \
-	&& mv zookeeper-3.4.8 /usr/zookeeper \
+RUN wget ZK_TGZ_URL -O zookeeper-${ZK_VERSION}.tar.gz \
+    && tar xzf zookeeper-${ZK_VERSION}.tar.gz \
+	&& mv zookeeper-${ZK_VERSION} /usr/zookeeper \
 	&& mkdir -p /usr/zookeeper/logs \
-	&& rm zookeeper-3.4.8.tar.gz
+	&& rm zookeeper-${ZK_VERSION}.tar.gz
 
 RUN mkdir -p /usr/zookeeper/data; touch /usr/zookeeper/data/myid
 

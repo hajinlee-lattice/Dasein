@@ -32,7 +32,6 @@ su -l yarn -c "hdfs dfs -mkdir -p /app/${VERSION}/conf"
 
 python replace_token.py /tmp/ledp/${LE_ENVIRONMENT} ${STACK_PROFILE}
 su -l yarn -c "hdfs dfs -put -f /tmp/ledp/${LE_ENVIRONMENT}/*.properties /app/${VERSION}/conf"
-su -l yarn -c "hdfs dfs -put -f /tmp/ledp/log4j.properties /app/${VERSION}/conf"
 
 echo "cleaning up"
 rm -rf /tmp/ledp

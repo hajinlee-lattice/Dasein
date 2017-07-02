@@ -37,9 +37,6 @@
                                     <location>conf/env</location>
                                 </source>
                                 <source>
-                                    <location>src/main/resources/log4j.properties</location>
-                                </source>
-                                <source>
                                     <location>src/main/python/replace_token.py</location>
                                 </source>
                             </sources>

@@ -88,6 +88,11 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 String.format("/app/%s/conf/latticeengines.properties",
                         versionManager.getCurrentVersionInStack(stackName)), //
                 false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                String.format("/app/%s/conf/log4j.properties",
+                        versionManager.getCurrentVersionInStack(stackName)), //
+                false));
 
         if (!excludeDataplatformLib) {
             hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
@@ -179,6 +184,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
                 // "-Xdebug -Xnoagent -Djava.compiler=NONE
                 // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
+                "-Dlog4j.configuration=log4j.properties",
                 getJacocoOpt(containerProperties), //
                 getXmxSetting(containerProperties), //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //

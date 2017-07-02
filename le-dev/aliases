@@ -49,7 +49,7 @@ alias swlibdpl='dirs -c && pushd $WSHOME/le-swlib && hadoop fs -rm -r /app/swlib
 alias sfbld='dirs -c && pushd $WSHOME/le-serviceflows && mvn -T6 -DskipTests clean install && popd'
 alias sfdpl='sfbld && swlibdpl'
 
-alias cfgdplnobld='hdfs dfs -rm -r -f /app/conf || true; hdfs dfs -mkdir -p /app/conf; hdfs dfs -put $WSHOME/le-config/conf/env/dev/latticeengines.properties /app/conf;'
+alias cfgdplnobld='hdfs dfs -rm -r -f /app/conf || true; hdfs dfs -mkdir -p /app/conf; hdfs dfs -put $WSHOME/le-config/conf/env/dev/latticeengines.properties /app/conf; hdfs dfs -put $WSHOME/le-config/conf/env/dev/log4j.properties /app/conf;'
 alias cfgbld='bash $WSHOME/le-dev/scripts/cfgbld.sh'
 alias cfgdpl='cfgbld && cfgdplnobld'
 
