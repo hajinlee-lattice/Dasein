@@ -65,13 +65,8 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
     }
 
     @Override
-    protected List<String> getAllVersions() {
-        List<DataCloudVersion> dataCloudVersions = versionEntityMgr.allVerions();
-        List<String> versions = new ArrayList<>();
-        for (DataCloudVersion dataCloudVersion : dataCloudVersions) {
-            versions.add(dataCloudVersion.getVersion());
-        }
-        return versions;
+    protected String getLatestVersion() {
+        return versionEntityMgr.currentApprovedVersionAsString();
     }
 
     @Override
@@ -113,20 +108,5 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
         }
         savedAccountMasterColumn.setGroups(StringUtils.join(savedGroups, ","));
         return savedAccountMasterColumn;
-    }
-
-    @Override
-    protected boolean refreshCacheNeeded(String version) {
-        DataCloudVersion versionObject = versionEntityMgr.findVersion(version);
-        Date versionRefreshDate = versionObject.getMetadataRefreshDate();
-        Date cachedDate = cachedRefreshDate.get(version);
-        if (versionRefreshDate == null || (cachedDate != null && versionRefreshDate.compareTo(cachedDate) <= 0)) {
-            log.info("Version : " + version + " Refresh Date : " + versionRefreshDate
-                    + " Cached column selection not updated since metadata refresh date is the same");
-            return false;
-        }
-        log.info("version : " + version + "refresh date : " + versionRefreshDate + "Refreshing cache");
-        cachedRefreshDate.put(version, versionRefreshDate);
-        return true;
     }
 }
