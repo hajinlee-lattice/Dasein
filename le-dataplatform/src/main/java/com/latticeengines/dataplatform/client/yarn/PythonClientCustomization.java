@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +33,8 @@ import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 
 @Component("pythonClientCustomization")
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
+
+    private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
@@ -64,6 +68,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             String dir = properties.getProperty(ContainerProperty.JOBDIR.name());
             String metadata = properties.getProperty(PythonContainerProperty.METADATA.name());
             Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
+            log.info("Classifier in PythonContainerProperty is " + JsonUtils.pprint(classifier));
             properties.put(PythonContainerProperty.TRAINING.name(), classifier.getTrainingDataHdfsPath());
             properties.put(PythonContainerProperty.TEST.name(), classifier.getTestDataHdfsPath());
             properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), classifier.getPythonScriptHdfsPath());
