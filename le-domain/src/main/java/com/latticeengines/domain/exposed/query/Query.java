@@ -55,6 +55,9 @@ public class Query implements GraphNode {
     @JsonProperty("free_form_text_search")
     private String freeFormTextSearch;
 
+    @JsonProperty("free_form_text_search")
+    private List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes = new ArrayList<>();
+
     @JsonIgnore
     private Set<BusinessEntity> entitiesForJoin;
 
@@ -100,11 +103,17 @@ public class Query implements GraphNode {
         this.lookups = lookups;
     }
 
-    @SuppressWarnings("unchecked")
-    public void setLookups(SchemaInterpretation objectType, String... columnNames) {
-        this.lookups = new ArrayList<String>(Arrays.asList(columnNames)).stream() //
-                .map((columnName) -> new ColumnLookup(objectType, columnName)) //
+    public void setLookups(BusinessEntity businessEntity, String... attrNames) {
+        this.lookups = new ArrayList<String>(Arrays.asList(attrNames)).stream() //
+                .map((attrName) -> new AttributeLookup(businessEntity, attrName)) //
                 .collect(Collectors.toList());
+    }
+
+    public void addLookups(BusinessEntity businessEntity, String... attrNames) {
+        List<Lookup> moreLookups = new ArrayList<String>(Arrays.asList(attrNames)).stream() //
+                .map((attrName) -> new AttributeLookup(businessEntity, attrName)) //
+                .collect(Collectors.toList());
+        lookups.addAll(moreLookups);
     }
 
     public void addLookup(Lookup lookup) {
@@ -143,6 +152,14 @@ public class Query implements GraphNode {
         this.freeFormTextSearch = freeFormTextSearch;
     }
 
+    public List<FreeFormTextSearchAttribute> getFreeFormTextSearchAttributes() {
+        return freeFormTextSearchAttributes;
+    }
+
+    public void setFreeFormTextSearchAttributes(List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes) {
+        this.freeFormTextSearchAttributes = freeFormTextSearchAttributes;
+    }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
@@ -158,7 +175,6 @@ public class Query implements GraphNode {
         return ToStringBuilder.reflectionToString(this);
     }
 
-    @SuppressWarnings("unchecked")
     public List<JoinSpecification> getNecessaryJoins() {
         DepthFirstSearch search = new DepthFirstSearch();
         List<JoinSpecification> joins = new ArrayList<>();
@@ -265,7 +281,6 @@ public class Query implements GraphNode {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
         map.put("lookups", lookups);
@@ -277,5 +292,37 @@ public class Query implements GraphNode {
     @Override
     public void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+    public static class FreeFormTextSearchAttribute {
+        @JsonProperty("entity")
+        private BusinessEntity entity;
+
+        @JsonProperty("attribute")
+        private String attribute;
+
+        FreeFormTextSearchAttribute(BusinessEntity entity, String attribute) {
+            this.entity = entity;
+            this.attribute = attribute;
+        }
+
+        public BusinessEntity getEntity() {
+            return entity;
+        }
+
+        public void setEntity(BusinessEntity entity) {
+            this.entity = entity;
+        }
+
+        public String getAttribute() {
+            return attribute;
+        }
+
+        public void setAttribute(String attribute) {
+            this.attribute = attribute;
+        }
     }
 }

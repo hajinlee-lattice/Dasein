@@ -4,25 +4,24 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.network.exposed.objectapi.AccountInterface;
+import com.latticeengines.network.exposed.objectapi.EntityInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
-@Component("accountProxy")
-public class AccountProxy extends MicroserviceRestApiProxy implements AccountInterface {
-    public AccountProxy() {
+@Component("entityProxy")
+public class EntityProxy extends MicroserviceRestApiProxy implements EntityInterface {
+    public EntityProxy() {
         super("objectapi/customerspaces");
     }
 
     @Override
     public long getCount(String customerSpace, Query query) {
-        String url = constructUrl("/{customerSpace}/accounts/count", customerSpace);
+        String url = constructUrl("/{customerSpace}/entities/count", customerSpace);
         return post("getCount", url, query, Long.class);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public DataPage getData(String customerSpace, Query query) {
-        String url = constructUrl("/{customerSpace}/accounts/data", customerSpace);
+        String url = constructUrl("/{customerSpace}/entities/data", customerSpace);
         return post("getData", url, query, DataPage.class);
     }
 }

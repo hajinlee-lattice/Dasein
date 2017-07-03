@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.query;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.query.Query.FreeFormTextSearchAttribute;
+
 public class QueryBuilder {
 
     private List<Lookup> lookups = new ArrayList<>();
@@ -10,8 +12,10 @@ public class QueryBuilder {
     private Sort sort;
     private PageFilter pageFilter;
     private String freeFormTextSearch;
+    private List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes = new ArrayList<>();
 
-    QueryBuilder(){}
+    QueryBuilder() {
+    }
 
     public QueryBuilder find(BusinessEntity entity) {
         lookups.add(new EntityLookup(entity));
@@ -19,7 +23,7 @@ public class QueryBuilder {
     }
 
     public QueryBuilder select(BusinessEntity entity, String... attrs) {
-        for (String attr: attrs) {
+        for (String attr : attrs) {
             lookups.add(new AttributeLookup(entity, attr));
         }
         return this;
@@ -62,6 +66,13 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder freeTextAttributes(BusinessEntity entity, String... attrs) {
+        for (String attr : attrs) {
+            freeFormTextSearchAttributes.add(new FreeFormTextSearchAttribute(entity, attr));
+        }
+        return this;
+    }
+
     public Query build() {
         Query query = new Query();
         query.setLookups(lookups);
@@ -69,6 +80,7 @@ public class QueryBuilder {
         query.setSort(sort);
         query.setPageFilter(pageFilter);
         query.setFreeFormTextSearch(freeFormTextSearch);
+        query.setFreeFormTextSearchAttributes(freeFormTextSearchAttributes);
         return query;
     }
 

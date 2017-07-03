@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.query.evaluator.lookup.LookupResolver;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
-import com.latticeengines.query.util.AttrRepoUtils;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 

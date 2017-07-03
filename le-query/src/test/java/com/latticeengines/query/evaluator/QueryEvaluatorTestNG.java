@@ -34,8 +34,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         // bucketed attribute
         query = Query.builder() //
                 .select(BusinessEntity.LatticeAccount, "bucketed_attribute") //
-                .select(BusinessEntity.Account, "companyname")
-                .build();
+                .select(BusinessEntity.Account, "companyname").build();
         queryEvaluator.evaluate(attrRepo, query);
     }
 
@@ -104,7 +103,17 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         restriction = Restriction.builder().or(lbl2, nullLbl).build();
         query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         queryEvaluator.evaluate(attrRepo, query);
+    }
 
+    @Test(groups = "functional")
+    public void testFreeText() {
+        // freetext
+        Query query = Query.builder() //
+                .select(BusinessEntity.Account, "companyname") //
+                .freeText("intel") //
+                .freeTextAttributes(BusinessEntity.LatticeAccount, "LDC_Domain", "LDC_Name") //
+                .build();
+        queryEvaluator.evaluate(attrRepo, query);
     }
 
     @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
@@ -129,12 +138,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Restriction nameIsCity = Restriction.builder() //
                 .let(BusinessEntity.Account, "companyname").eq(BusinessEntity.Account, "city") //
                 .build();
-        Query query = Query.builder()
-                .select(BusinessEntity.Account, "id", "companyname", "city") //
+        Query query = Query.builder().select(BusinessEntity.Account, "id", "companyname", "city") //
                 .where(nameIsCity) //
                 .orderBy(BusinessEntity.Account, "companyname") //
                 .build();
         queryEvaluator.evaluate(attrRepo, query);
     }
-
 }

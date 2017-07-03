@@ -3,6 +3,7 @@ package com.latticeengines.query.evaluator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -56,7 +57,8 @@ public class QueryProcessor {
                     query.getExistsJoins());
             sqlQuery = sqlQuery.where(whereClause);
         }
-        if (StringUtils.isNotBlank(query.getFreeFormTextSearch())) {
+        if (StringUtils.isNotBlank(query.getFreeFormTextSearch())
+                && !query.getFreeFormTextSearchAttributes().isEmpty()) {
             sqlQuery = sqlQuery.where(processFreeTextSearch(query));
         }
         sqlQuery = sqlQuery.select(getSelect(resolverFactory, query.getLookups()));
@@ -90,7 +92,7 @@ public class QueryProcessor {
         List<Predicate> joinKeys = new ArrayList<>();
         for (JoinSpecification join : lookupJoins) {
             BusinessEntity target = join.getDestinationEntity();
-            attrRepoUtils.getTablePath(repository, target);
+            attrRepoUtils.getTablePath(repository, target); // TODO remove this line?
             // from all seen entities find one can join the current target
             BusinessEntity.Relationship relationship = joinedEntities.stream() //
                     .map(e -> e.join(target)) //
@@ -158,9 +160,18 @@ public class QueryProcessor {
     }
 
     private BooleanExpression processFreeTextSearch(Query query) {
-        // something like:
-        // columnPath.toUpperCase().contains(freeFormRestriction.toUpperCase())
-        return Expressions.TRUE;
-    }
+        BooleanExpression[] expressions = new BooleanExpression[query.getFreeFormTextSearchAttributes().size()];
 
+        // Just check whether each attribute LIKE '%freeFormRestriction%'
+        // These attributes are expected to exist so no metadata check required
+        expressions = query.getFreeFormTextSearchAttributes().stream() //
+                .map(attr -> {
+                    StringPath columnPath = QueryUtils.getAttributePath(attr.getEntity(), attr.getAttribute());
+                    return columnPath.toUpperCase().contains(query.getFreeFormTextSearch().toUpperCase());
+                }) //
+                .collect(Collectors.toList()) //
+                .toArray(expressions);
+
+        return Expressions.anyOf(expressions);
+    }
 }

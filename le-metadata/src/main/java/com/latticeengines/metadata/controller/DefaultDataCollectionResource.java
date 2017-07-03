@@ -78,7 +78,7 @@ public class DefaultDataCollectionResource {
     }
 
     @RequestMapping(value = "/attrrepo", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
+    @ResponseBody  
     @ApiOperation(value = "Get the attribute repository of the default collection.")
     public AttributeRepository getAttrRepo(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();

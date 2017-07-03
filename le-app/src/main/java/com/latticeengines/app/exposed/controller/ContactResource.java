@@ -15,23 +15,23 @@ import com.latticeengines.domain.exposed.query.frontend.QueryDecorator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "accounts", description = "REST resource for serving data about accounts")
+@Api(value = "contacts", description = "REST resource for serving data about contacts")
 @RestController
-@RequestMapping("/accounts")
-public class AccountResource extends BaseFrontEndEntityResource {
+@RequestMapping("/contacts")
+public class ContactResource extends BaseFrontEndEntityResource {
 
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public long getCount(@RequestBody FrontEndQuery frontEndQuery) {
-        return super.getCount(BusinessEntity.Account, frontEndQuery);
+        return super.getCount(BusinessEntity.Contact, frontEndQuery);
     }
 
     @RequestMapping(value = "/count/restriction", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified restriction")
     public long getCountForRestriction(@RequestBody FrontEndRestriction restriction) {
-        return super.getCountForRestriction(BusinessEntity.Account, restriction);
+        return super.getCountForRestriction(BusinessEntity.Contact, restriction);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class AccountResource extends BaseFrontEndEntityResource {
 
             @Override
             public BusinessEntity getLookupEntity() {
-                return BusinessEntity.Account;
+                return BusinessEntity.Contact;
             }
 
             @Override
@@ -58,17 +58,17 @@ public class AccountResource extends BaseFrontEndEntityResource {
 
             @Override
             public String[] getLDCLookups() {
-                return new String[] { "LDC_Domain", "LDC_Name", "LDC_Country", "LDC_City", "LDC_State" };
+                return new String[] {};
             }
 
             @Override
             public BusinessEntity getFreeTextSearchEntity() {
-                return BusinessEntity.LatticeAccount;
+                return BusinessEntity.Contact;
             }
 
             @Override
             public String[] getFreeTextSearchAttrs() {
-                return new String[] { "LDC_Domain", "LDC_Name" };
+                return new String[] { "" };
             }
         };
     }

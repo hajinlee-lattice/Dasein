@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("dataCollectionProxy")
@@ -27,6 +28,12 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection",
                 shortenCustomerSpace(customerSpace));
         return get("get default dataCollection", url, DataCollection.class);
+    }
+
+    public AttributeRepository getDefaultAttributeRepository(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo",
+                shortenCustomerSpace(customerSpace));
+        return get("get default attributeRepository", url, AttributeRepository.class);
     }
 
     public StatisticsContainer getStats(String customerSpace) {

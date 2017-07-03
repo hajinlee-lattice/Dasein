@@ -1,10 +1,9 @@
 package com.latticeengines.network.exposed.objectapi;
 
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.DataRequest;
 
 public interface AccountInterface {
-    long getCount(String customerSpace, Query query);
-
-    DataPage getData(String customerSpace, Query query);
+    DataPage getAccounts(String customerSpace, String start, int offset, int pageSize, boolean hasSfdcAccountId,
+            DataRequest dataRequest);
 }

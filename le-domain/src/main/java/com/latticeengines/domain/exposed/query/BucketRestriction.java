@@ -83,7 +83,6 @@ public class BucketRestriction extends Restriction {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
         Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
         map.put("attr", Collections.singletonList(attr));

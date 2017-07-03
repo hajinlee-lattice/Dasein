@@ -26,17 +26,18 @@ public class QueryTestUtils {
 
     private static AttributeRepository amAttrRepo;
 
-    static AttributeRepository getCustomerAttributeRepo() {
+    public static AttributeRepository getCustomerAttributeRepo() {
         CustomerSpace customerSpace = CustomerSpace.parse("Query");
         String collectionName = "querytest";
         Map<AttributeLookup, ColumnMetadata> attrMap = getAttrMap();
         Map<TableRoleInCollection, String> tableNameMap = new HashMap<>();
         tableNameMap.put(BucketedAccount, "querytest_table");
         tableNameMap.put(BucketedContact, "querytest_table_dup");
+        tableNameMap.put(AccountMaster, "querytest_table_dup");
         return new AttributeRepository(customerSpace, collectionName, attrMap, tableNameMap);
     }
 
-    static AttributeRepository getAMAttributeRepo() {
+    public static AttributeRepository getAMAttributeRepo() {
         if (amAttrRepo == null) {
             CustomerSpace customerSpace = CustomerSpace.parse("Query");
             String collectionName = "querytest";
@@ -62,7 +63,8 @@ public class QueryTestUtils {
 
     private static List<ColumnMetadata> getAttrsInTable() {
         List<String> simpleFields = Arrays.asList( //
-                "companyname", "id", "city", "state", "lastname", "number_of_family_members", "alexaviewsperuser");
+                "accountid", "latticeaccountid", "salesforceaccountid", "lastmodified", "companyname", "id", "city",
+                "state", "lastname", "number_of_family_members", "alexaviewsperuser");
         List<ColumnMetadata> attrInTable = new ArrayList<>();
         simpleFields.forEach(s -> attrInTable.add(new Attribute(s).getColumnMetadata()));
         Attribute bucketedAttribute = new Attribute("bucketed_attribute");

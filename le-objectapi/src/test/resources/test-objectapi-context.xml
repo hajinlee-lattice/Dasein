@@ -12,4 +12,7 @@
 
     <import resource="classpath:objectapi-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
+    <import resource="classpath:test-testframework-context.xml"/>
+    <import resource="classpath:test-redshiftdb-context.xml"/>
+
 </beans>
