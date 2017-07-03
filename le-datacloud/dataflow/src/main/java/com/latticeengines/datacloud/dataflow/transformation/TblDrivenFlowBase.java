@@ -69,7 +69,7 @@ public abstract class TblDrivenFlowBase<T extends TblDrivenTransformerConfig, E 
 
         for (int i = 0; i < tableNames.size(); i++) {
              String tblName = tableNames.get(i);
-             System.out.println("Adding source : " + tblName + "as " + sourceNames.get(i));
+            log.info("Adding source : " + tblName + " as " + sourceNames.get(i));
              sourceMap.put(sourceNames.get(i), addSource(tblName));
         }
 
