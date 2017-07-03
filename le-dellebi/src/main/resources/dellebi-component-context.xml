@@ -14,7 +14,7 @@
            http://camel.apache.org/schema/spring
        http://camel.apache.org/schema/spring/camel-spring.xsd">
     <context:annotation-config />
-    <import resource="classpath:dataplatform-context.xml"/>
+    <import resource="classpath:yarn-context.xml"/>
     <import resource="classpath:common-component-context.xml"/>
     <import resource="classpath:swlib-context.xml"/>
 
