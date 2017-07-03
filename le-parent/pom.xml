@@ -191,6 +191,12 @@
                                         <!-- exclude>org/springframework/yarn/rpc/YarnRpcAccessor*</exclude-->
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>*:spring-yarn-core</artifact>
+                                    <excludes>
+                                        <exclude>org/springframework/yarn/am/AppmasterRmTemplate*</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                         </configuration>
                         <executions>

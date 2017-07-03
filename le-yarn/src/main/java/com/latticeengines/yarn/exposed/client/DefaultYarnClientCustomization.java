@@ -90,8 +90,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/conf/log4j.properties",
-                        versionManager.getCurrentVersionInStack(stackName)), //
+                String.format("/app/%s/conf/log4j.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
 
         if (!excludeDataplatformLib) {
@@ -162,7 +161,6 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         // OOM error, then that means the requested memory is really less than
         // what can be handled.
         String xmx = minAllocationInMb > 1536 ? String.format("-Xmx%dm", minAllocationInMb - 512) : "-Xmx1024m";
-        xmx += " -XX:PermSize=256m -XX:MaxPermSize=256m";
         return xmx;
     }
 
@@ -184,8 +182,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
                 // "-Xdebug -Xnoagent -Djava.compiler=NONE
                 // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
-                "-Dlog4j.configuration=log4j.properties",
-                getJacocoOpt(containerProperties), //
+                "-Dlog4j.configuration=log4j.properties", getJacocoOpt(containerProperties), //
                 getXmxSetting(containerProperties), //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
