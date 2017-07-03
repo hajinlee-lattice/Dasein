@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
@@ -138,6 +139,7 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("AccountMasterColumn") //
+                .matchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission()) //
                 .columnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion) //
                 .excludeDataCloudAttrs(skipIdMatch) //

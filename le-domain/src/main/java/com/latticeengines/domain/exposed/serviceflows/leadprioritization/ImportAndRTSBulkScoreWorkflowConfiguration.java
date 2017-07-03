@@ -110,6 +110,11 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
             return this;
         }
 
+        public Builder matchQueue(String queue) {
+            rtsBulkScoreWorkflowConfigurationBuilder.matchQueue(queue);
+            return this;
+        }
+
         public Builder matchDestTables(String destTables) {
             rtsBulkScoreWorkflowConfigurationBuilder.matchDestTables(destTables);
             return this;

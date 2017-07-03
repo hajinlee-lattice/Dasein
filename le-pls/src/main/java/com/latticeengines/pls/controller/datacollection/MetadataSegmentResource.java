@@ -16,7 +16,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 import io.swagger.annotations.Api;
 
-@Api(value = "Data Collection Segments", description = "REST resource for segments")
+@Api(value = "data-collection-segments", description = "REST resource for segments")
 @RestController
 @RequestMapping("/datacollection/segments")
 public class MetadataSegmentResource {
