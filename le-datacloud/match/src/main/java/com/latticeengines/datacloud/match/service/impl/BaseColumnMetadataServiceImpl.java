@@ -105,7 +105,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         SchemaBuilder.FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
         SchemaBuilder.FieldBuilder<Schema> fieldBuilder;
         for (ColumnMetadata columnMetadata : columnMetadatas) {
-            String fieldName = columnMetadata.getColumnName();
+            String fieldName = columnMetadata.getColumnId();
             fieldBuilder = fieldAssembler.name(StringUtils.strip(fieldName));
             fieldBuilder = fieldBuilder.prop("Tags", "[External]");
             fieldBuilder = fieldBuilder.prop("ApprovedUsage",

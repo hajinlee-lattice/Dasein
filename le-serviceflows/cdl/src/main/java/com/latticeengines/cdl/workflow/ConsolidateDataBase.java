@@ -41,12 +41,17 @@ public abstract class ConsolidateDataBase<T extends BaseWrapperStepConfiguration
     protected Boolean isActive = false;
     protected String inputMasterTableName;
     protected String profileTableName;
-    protected String outputMasterTablePrefix;
-    protected String consolidatedTablePrefix;
-    protected String primaryKey;
-    protected List<String> masterTableSortKeys;
+
+    protected String servingStoreTablePrefix;
+    protected String servingStorePrimaryKey;
+    protected List<String> servingStoreSortKeys;
+    protected String batchStoreTablePrefix;
+    protected String batchStorePrimaryKey;
+    protected List<String> batchStoreSortKeys;
+
     protected BusinessEntity entity;
-    protected TableRoleInCollection consolidatedTable;
+    protected TableRoleInCollection batchStore;
+    protected TableRoleInCollection servingStore;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -57,11 +62,11 @@ public abstract class ConsolidateDataBase<T extends BaseWrapperStepConfiguration
     @Override
     protected void onPostTransformationCompleted() {
         Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
-                TableUtils.getFullTableName(entity.name(), pipelineVersion));
-        dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), consolidatedTable);
+                TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion));
+        dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), batchStore);
         if (isBucketing()) {
             Table diffTable = metadataProxy.getTable(customerSpace.toString(),
-                    TableUtils.getFullTableName(consolidatedTable.name(), pipelineVersion));
+                    TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion));
             if (diffTable == null) {
                 throw new RuntimeException("Diff table has not been created.");
             }
@@ -73,17 +78,19 @@ public abstract class ConsolidateDataBase<T extends BaseWrapperStepConfiguration
             entityTableMap.put(entity, diffTable);
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
         }
-        putObjectInContext(CONSOLIDATE_MASTER_TABLE, newMasterTable);
     }
 
     protected void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         entity = getBusinessEntity();
-        outputMasterTablePrefix = entity.name();
-        consolidatedTable = entity.getBatchStore();
-        consolidatedTablePrefix = consolidatedTable.name();
-        primaryKey = consolidatedTable.getPrimaryKey().name();
-        masterTableSortKeys = consolidatedTable.getForeignKeysAsStringList();
+        batchStore = entity.getBatchStore();
+        batchStoreTablePrefix = entity.name();
+        batchStorePrimaryKey = batchStore.getPrimaryKey().name();
+        batchStoreSortKeys = batchStore.getForeignKeysAsStringList();
+        servingStore = entity.getServingStore();
+        servingStoreTablePrefix = servingStore.name();
+        servingStorePrimaryKey = servingStore.getPrimaryKey().name();
+        servingStoreSortKeys = servingStore.getForeignKeysAsStringList();
         @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
                 BusinessEntity.class, List.class);
@@ -102,8 +109,7 @@ public abstract class ConsolidateDataBase<T extends BaseWrapperStepConfiguration
             inputTableNames.add(table.getName());
         }
 
-        Table masterTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedAccount);
+        Table masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore);
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
             log.info("There has been no master table for this data collection. Creating a new one");
         } else {

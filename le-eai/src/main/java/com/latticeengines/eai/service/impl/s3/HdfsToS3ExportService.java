@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.avro.Schema;
+import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
@@ -186,7 +187,7 @@ public class HdfsToS3ExportService {
 
                 private Long splitToLocal(String filePath) throws IllegalArgumentException, IOException {
                     log.info("Downloading original file " + filePath + " to local, and split into chunks of "
-                            + splitSize + " records.");
+                            + splitSize / 1024.0 / 1024.0 + " MB.");
                     Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, filePath);
                     Long recordsInFile = 0L;
                     while (iterator.hasNext()) {
@@ -194,6 +195,7 @@ public class HdfsToS3ExportService {
                         File avroFile = new File(LOCAL_CACHE + "/" + fileName);
                         try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(
                                 new GenericDatumWriter<GenericRecord>())) {
+                            writer.setCodec(CodecFactory.snappyCodec());
                             FileUtils.touch(avroFile);
                             Long fileSize = FileUtils.sizeOf(avroFile);
                             if (fileSize == 0) {

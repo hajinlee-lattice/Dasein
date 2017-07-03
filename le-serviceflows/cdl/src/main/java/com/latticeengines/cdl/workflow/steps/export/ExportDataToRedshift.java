@@ -34,13 +34,11 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private MetadataProxy metadataProxy;
 
     private Map<BusinessEntity, Table> entityTableMap;
-    private boolean needToSplit;
 
     @Override
     public void execute() {
         log.info("Inside ExportData execute()");
         entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
-        needToSplit = Boolean.valueOf(getStringValueFromContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT));
         if (entityTableMap == null) {
             entityTableMap = configuration.getSourceTables();
         }
@@ -85,7 +83,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         HdfsToRedshiftConfiguration exportConfig = configuration.getHdfsToRedshiftConfiguration();
         exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
         exportConfig.setExportTargetPath(sourceTable.getName());
-        exportConfig.setNoSplit(!needToSplit);
+        exportConfig.setNoSplit(true);
         exportConfig.setExportDestination(ExportDestination.REDSHIFT);
         RedshiftTableConfiguration redshiftTableConfig = exportConfig.getRedshiftTableConfiguration();
         redshiftTableConfig.setTableName(sourceTable.getName());

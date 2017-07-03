@@ -55,8 +55,8 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
 
     private static final String PROFILE_TABLE_PREFIX = "Profile";
     private static final String STATS_TABLE_PREFIX = "Stats";
-    private static final String SORTED_TABLE_PREFIX = TableRoleInCollection.ConsolidatedAccount.name();
-    private static final List<String> masterTableSortKeys = TableRoleInCollection.ConsolidatedAccount
+    private static final String SORTED_TABLE_PREFIX = TableRoleInCollection.BucketedAccount.name();
+    private static final List<String> masterTableSortKeys = TableRoleInCollection.BucketedAccount
             .getForeignKeysAsStringList();
 
     private static int matchStep;
@@ -92,7 +92,6 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
         putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
-        putStringValueInContext(SPLIT_LOCAL_FILE_FOR_REDSHIFT, Boolean.FALSE.toString());
         upsertTables(configuration.getCustomerSpace().toString(), profileTableName, sortedTableName);
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
         Map<BusinessEntity, Table> entityTableMap = new HashMap<>();
@@ -227,7 +226,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         SorterConfig conf = new SorterConfig();
         conf.setPartitions(500);
         conf.setSplittingThreads(maxSplitThreads);
-        conf.setCompressResult(false);
+        conf.setCompressResult(true);
         conf.setSortingField(masterTableSortKeys.get(0)); // TODO: only support
                                                           // single sort key now
         String confStr = appendEngineConf(conf, lightEngineConfig());

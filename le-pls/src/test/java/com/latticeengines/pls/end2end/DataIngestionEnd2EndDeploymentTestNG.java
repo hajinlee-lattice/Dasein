@@ -148,8 +148,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertNotNull(bucketedAccountTable);
         List<Attribute> attributes = bucketedAccountTable.getAttributes();
         for (Attribute attribute : attributes) {
-            System.out.println(attribute.getName());
-            Assert.assertFalse(attribute.getName().contains(CEAttr), "Should not have encoded attr in expanded table.");
+            Assert.assertFalse(attribute.getName().contains(CEAttr), "Should not have encoded attr " + attribute.getName() + " in expanded table.");
         }
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(customerSpace);
         Assert.assertNotNull(statisticsContainer);

@@ -57,7 +57,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MATCH_COMMAND = "MATCH_COMMAND";
     protected static final String MATCH_TABLE = "MATCH_TABLE";
     protected static final String MATCH_RESULT_TABLE = "MATCH_RESULT_TABLE";
-    protected static final String MATCH_IS_CASCADING_FLOW = "MATCH_IS_CASCADING_FLOW";
     protected static final String MATCH_PREDEFINED_SELECTION = "MATCH_PREDEFINED_SELECTION";
     protected static final String MATCH_PREDEFINED_SELECTION_VERSION = "MATCH_PREDEFINED_SELECTION_VERSION";
     protected static final String MATCH_CUSTOMIZED_SELECTION = "MATCH_CUSTOMIZED_SELECTION";
@@ -81,17 +80,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EVENT_TO_MODELID = "EVENT_TO_MODELID";
     protected static final String DATA_RULES = "DATA_RULES";
     protected static final String SOURCE_IMPORT_TABLE = "SOURCE_IMPORT_TABLE_NAME";
-    protected static final String EXECUTION = "EXECUTION";
     protected static final String TRANSFORM_PIPELINE_VERSION = "TRANSFORM_PIPELINE_VERSION";
     protected static final String CALCULATE_STATS_TARGET_TABLE = "CALCULATE_STATS_TARGET_TABLE";
     protected static final String IS_ACTIVE = "IS_ACTIVE";
     protected static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
-    // protected static final String CONSOLIDATE_INPUT_TABLES =
-    // "CONSOLIDATE_INPUT_TABLES";
-    protected static final String CONSOLIDATE_MASTER_TABLE = "CONSOLIDATE_MASTER_TABLE";
-    protected static final String CONSOLIDATE_DOING_PUBLISH = "CONSOLIDATE_DOING_PUBLISH";
     protected static final String TABLE_GOING_TO_REDSHIFT = "TABLE_GOING_TO_REDSHIFT";
-    protected static final String SPLIT_LOCAL_FILE_FOR_REDSHIFT = "SPLIT_LOCAL_FILE_FOR_REDSHIFT";
 
     @Autowired
     protected Configuration yarnConfiguration;

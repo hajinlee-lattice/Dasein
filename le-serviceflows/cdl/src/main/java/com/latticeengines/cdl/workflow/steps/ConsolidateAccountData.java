@@ -71,19 +71,19 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
             bucketStep = 4;
             sortStep = 5;
 
-            TransformationStepConfig merge = createMergeStep();
-            TransformationStepConfig match = createMatchStep();
-            TransformationStepConfig upsertMaster = createUpsertMasterStep();
-            TransformationStepConfig consolidate = createConsolidatedStep();
-            TransformationStepConfig bucket = createBucketStep();
-            TransformationStepConfig sort = createSorterStep();
+            TransformationStepConfig merge = mergeInputs();
+            TransformationStepConfig match = match();
+            TransformationStepConfig upsertMaster = mergeMaster();
+            TransformationStepConfig diff = diff();
+            TransformationStepConfig bucket = bucketDiff();
+            TransformationStepConfig sort = sortBucketedDiff();
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
             steps.add(match);
             steps.add(upsertMaster);
-            steps.add(consolidate);
             if (isBucketing()) {
+                steps.add(diff);
                 steps.add(bucket);
                 steps.add(sort);
             }
@@ -101,7 +101,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
         }
     }
 
-    private TransformationStepConfig createMergeStep() {
+    private TransformationStepConfig mergeInputs() {
         TransformationStepConfig step1 = new TransformationStepConfig();
         List<String> baseSources = inputTableNames;
         step1.setBaseSources(baseSources);
@@ -116,7 +116,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
         return step1;
     }
 
-    private TransformationStepConfig createMatchStep() {
+    private TransformationStepConfig match() {
         TransformationStepConfig step2 = new TransformationStepConfig();
         // step 1 output
         step2.setInputSteps(Collections.singletonList(mergeStep));
@@ -125,7 +125,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
         return step2;
     }
 
-    private TransformationStepConfig createUpsertMasterStep() {
+    private TransformationStepConfig mergeMaster() {
         List<String> baseSources;
         Map<String, SourceTable> baseTables;
         TargetTable targetTable;
@@ -147,29 +147,26 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
 
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(outputMasterTablePrefix);
-        targetTable.setPrimaryKey(primaryKey);
+        targetTable.setNamePrefix(batchStoreTablePrefix);
+        targetTable.setPrimaryKey(batchStorePrimaryKey);
         step3.setTargetTable(targetTable);
         return step3;
     }
 
-    private TransformationStepConfig createConsolidatedStep() {
+    private TransformationStepConfig diff() {
+        if (!isBucketing()) {
+            return null;
+        }
         TransformationStepConfig step4 = new TransformationStepConfig();
         step4.setInputSteps(Arrays.asList(matchStep, upsertMasterStep));
         step4.setTransformer("consolidateDeltaTransformer");
-        step4.setConfiguration(getConsolidateDeltaConfig());
-        if (!isBucketing()) {
-            TargetTable targetTable = new TargetTable();
-            targetTable.setCustomerSpace(customerSpace);
-            targetTable.setNamePrefix(consolidatedTablePrefix);
-            targetTable.setPrimaryKey(primaryKey);
-            targetTable.setExpandBucketedAttrs(true);
-            step4.setTargetTable(targetTable);
-        }
+        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
+        config.setSrcIdField(srcIdField);
+        step4.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step4;
     }
 
-    private TransformationStepConfig createBucketStep() {
+    private TransformationStepConfig bucketDiff() {
         if (!isBucketing()) {
             return null;
         }
@@ -188,44 +185,32 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
         return step5;
     }
 
-    private TransformationStepConfig createSorterStep() {
+    private TransformationStepConfig sortBucketedDiff() {
         if (!isBucketing()) {
             return null;
         }
         TransformationStepConfig step6 = new TransformationStepConfig();
         step6.setInputSteps(Collections.singletonList(bucketStep));
         step6.setTransformer(TRANSFORMER_SORTER);
-        step6.setConfiguration(sortStepConfiguration());
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(consolidatedTablePrefix);
+        targetTable.setNamePrefix(servingStoreTablePrefix);
+        targetTable.setPrimaryKey(servingStorePrimaryKey);
         targetTable.setExpandBucketedAttrs(true);
-        // targetTable.setPrimaryKey(accountId);
         step6.setTargetTable(targetTable);
-        return step6;
-    }
 
-    private String sortStepConfiguration() {
-        try {
-            SorterConfig config = new SorterConfig();
-            config.setPartitions(100);
-            config.setSortingField(masterTableSortKeys.get(0));
-            config.setCompressResult(false);
-            return appendEngineConf(config, lightEngineConfig());
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+        SorterConfig config = new SorterConfig();
+        config.setPartitions(100);
+        config.setSortingField(servingStoreSortKeys.get(0));
+        config.setCompressResult(true);
+        step6.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+
+        return step6;
     }
 
     private String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(srcIdField);
-        return appendEngineConf(config, lightEngineConfig());
-    }
-
-    private String getConsolidateDeltaConfig() {
-        ConsolidateDeltaTransformerConfig config = new ConsolidateDeltaTransformerConfig();
         config.setSrcIdField(srcIdField);
         return appendEngineConf(config, lightEngineConfig());
     }
