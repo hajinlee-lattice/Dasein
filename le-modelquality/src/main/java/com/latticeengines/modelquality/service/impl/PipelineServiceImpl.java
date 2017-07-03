@@ -185,12 +185,6 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
 
     private void setPipelineProperties(Pipeline pipeline, String pipelineJson) {
         String version = getVersion();
-        if (version != null && version.startsWith("a/")) {
-            version = "a_aws" + version.substring(1);
-        }
-        if (version != null && version.startsWith("b/")) {
-            version = "b_aws" + version.substring(1);
-        }
         String pythonLibScript = String.format("/app/%s/dataplatform/scripts/lepipeline.tar.gz", version);
         String pipelineScript = String.format("/app/%s/dataplatform/scripts/pipeline.py", version);
 
