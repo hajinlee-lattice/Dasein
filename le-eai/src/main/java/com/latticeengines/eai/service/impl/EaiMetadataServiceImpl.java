@@ -1,6 +1,7 @@
 package com.latticeengines.eai.service.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -132,18 +134,37 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         return metadataProxy.getTable(customerSpace, tableName);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Map<String, Extract> getExtractsForTable(List<Table> tableMetaData, ImportContext importContext) {
-        @SuppressWarnings("unchecked")
+    public Map<String, List<Extract>> getExtractsForTable(List<Table> tableMetaData, ImportContext importContext) {
+        Map<String, Boolean> mutipleExtractMap = importContext.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class);
         Map<String, String> targetPathsMap = importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
-
-        @SuppressWarnings("unchecked")
         Map<String, Long> processedRecordsMap = importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
-        HashMap<String, Extract> extracts = new HashMap<>();
+        Map<String, List<String>> multipleTargets = importContext.getProperty(ImportProperty.EXTRACT_PATH_LIST,
+                Map.class);
+        Map<String, List<Long>> multipleRecords = importContext.getProperty(ImportProperty.EXTRACT_RECORDS_LIST,
+                Map.class);
+
+        HashMap<String, List<Extract>> extracts = new HashMap<>();
         for (Table table : tableMetaData) {
-            extracts.put(table.getName(),
-                    createExtract(targetPathsMap.get(table.getName()), processedRecordsMap.get(table.getName())));
+            extracts.put(table.getName(), new ArrayList<Extract>());
+            if (mutipleExtractMap.get(table.getName())) {
+                for (int i = 0; i < multipleTargets.get(table.getName()).size(); i++) {
+                    extracts.get(table.getName()).add(createExtract(multipleTargets.get(table.getName()).get(i),
+                            multipleRecords.get(table.getName()).get(i)));
+                }
+            } else {
+                extracts.get(table.getName()).add(createExtract(targetPathsMap.get(table.getName()),
+                        processedRecordsMap.get(table.getName())));
+            }
         }
+
+
+//        HashMap<String, Extract> extracts = new HashMap<>();
+//        for (Table table : tableMetaData) {
+//            extracts.put(table.getName(),
+//                    createExtract(targetPathsMap.get(table.getName()), processedRecordsMap.get(table.getName())));
+//        }
         return extracts;
     }
 

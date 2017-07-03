@@ -17,4 +17,7 @@ public class ImportProperty extends BaseProperty {
     public static final String METADATAURL = "metadataUrl";
     public static final String IMPORT_CONFIG_STR = "importConfigStr";
     public static final String COLLECTION_IDENTIFIERS = "collectionIdentifiers";
+    public static final String MULTIPLE_EXTRACT = "multipleExtract";
+    public static final String EXTRACT_PATH_LIST = "extractPathList";
+    public static final String EXTRACT_RECORDS_LIST = "extractRecordsList";
 }

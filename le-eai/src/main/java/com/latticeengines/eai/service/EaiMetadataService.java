@@ -23,6 +23,6 @@ public interface EaiMetadataService {
 
     Table getTable(String customerSpace, String tableName);
 
-    Map<String, Extract> getExtractsForTable(List<Table> tableMetaData, ImportContext importContext);
+    Map<String, List<Extract>> getExtractsForTable(List<Table> tableMetaData, ImportContext importContext);
 
 }

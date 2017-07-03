@@ -1,12 +1,13 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.service.DataFeedService;
 import com.latticeengines.metadata.service.DataFeedTaskService;
@@ -16,9 +17,6 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Autowired
     private DataFeedTaskEntityMgr dataFeedTaskEntityMgr;
-
-    @Autowired
-    private DataFeedEntityMgr dataFeedEntityMgr;
 
     @Autowired
     private DataFeedService dataFeedService;
@@ -32,7 +30,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Override
     public DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType, String entity) {
-        DataFeed dataFeed = dataFeedEntityMgr.findDefaultFeed();
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         if (dataFeed == null) {
             return null;
         }
@@ -58,5 +56,11 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     public void registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract) {
         DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
         dataFeedTaskEntityMgr.registerExtract(dataFeedTask, tableName, extract);
+    }
+
+    @Override
+    public void registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts) {
+        DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
+        dataFeedTaskEntityMgr.registerExtracts(dataFeedTask, tableName, extracts);
     }
 }

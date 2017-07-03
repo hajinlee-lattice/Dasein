@@ -99,7 +99,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (dataFeedTask == null) {
             throw new RuntimeException("Cannot find the data feed task!");
         }
-        String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask.getPid().toString());
+        String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask.getUniqueId());
 
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig);
         return appId.toString();

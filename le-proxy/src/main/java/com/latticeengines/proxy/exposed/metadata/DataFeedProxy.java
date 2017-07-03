@@ -2,6 +2,8 @@ package com.latticeengines.proxy.exposed.metadata;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataFeed;
@@ -92,6 +94,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/registerextract/{taskId}/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);
         post("registerExtract", url, extract, Void.class);
+    }
+
+    public void registerExtracts(String customerSpace, String taskId, String tableName, List<Extract> extracts) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/registerextracts/{taskId}/{tableName}",
+                shortenCustomerSpace(customerSpace), taskId, tableName);
+        post("registerExtract", url, extracts, Void.class);
     }
 
 }

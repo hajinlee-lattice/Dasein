@@ -86,6 +86,9 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Value("${eai.vdb.file.size:10000000}")
     private int sizePerFile;
 
+    @Value("${eai.vdb.extract.size:100000000}")
+    private int recordsPerExtract;
+
     private static final int MAX_RETRIES = 3;
 
     @Override
@@ -185,14 +188,27 @@ public class VdbTableImportServiceImpl extends ImportService {
     private String getExtractTargetPath(CustomerSpace customerSpace, String collectionIdentifier) {
         EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailService.getImportJobDetail(collectionIdentifier);
         String targetPath = "";
-        if (eaiImportJobDetail != null) {
+        if (eaiImportJobDetail != null && eaiImportJobDetail.getStatus() == ImportStatus.FAILED) {
             targetPath = eaiImportJobDetail.getTargetPath();
         }
         if (StringUtils.isEmpty(targetPath)) {
-            targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
-                    PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
-                    SourceType.VISIDB.getName(),
-                    new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date()));
+            targetPath = generateNewTargetPath(customerSpace, "");
+        }
+        return targetPath;
+    }
+
+    private String generateNewTargetPath(CustomerSpace customerSpace, String oldPath) {
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
+                SourceType.VISIDB.getName(),
+                new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date()));
+        if (!StringUtils.isEmpty(oldPath)) {
+            if (targetPath.equals(oldPath)) {
+                targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
+                        PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
+                        SourceType.VISIDB.getName(),
+                        new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date(System.currentTimeMillis() + 1000L)));
+            }
         }
         return targetPath;
     }
@@ -361,14 +377,35 @@ public class VdbTableImportServiceImpl extends ImportService {
     }
 
     @SuppressWarnings("unchecked")
-    public void setExtractContextForVdbTable(Table table, ImportContext context,
-                                             ImportVdbTableConfiguration tableConfig) {
+    private void setExtractContextForVdbTable(Table table, ImportContext context,
+                                             ImportVdbTableConfiguration tableConfig, boolean multipleExtract) {
         Configuration config = context.getProperty(ImportProperty.HADOOPCONFIG, Configuration.class);
         String defaultFS = config.get(FileSystem.FS_DEFAULT_NAME_KEY);
         String targetPath = tableConfig.getExtractPath();
         String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
         context.getProperty(ImportVdbProperty.EXTRACT_PATH, Map.class).put(table.getName(), hdfsUri);
         context.getProperty(ImportVdbProperty.PROCESSED_RECORDS, Map.class).put(table.getName(), 0L);
+        if (multipleExtract) {
+            context.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class).put(table.getName(), Boolean.TRUE);
+            context.getProperty(ImportProperty.EXTRACT_PATH_LIST, Map.class).put(table.getName(), new
+                    ArrayList<String>());
+            context.getProperty(ImportProperty.EXTRACT_RECORDS_LIST, Map.class).put(table.getName(), new
+                    ArrayList<Long>());
+        } else {
+            context.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class).put(table.getName(), Boolean.FALSE);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void updateExtractContext(Table table, ImportContext context,
+                                             String targetPath, Long processedRecords) {
+        Configuration config = context.getProperty(ImportProperty.HADOOPCONFIG, Configuration.class);
+        String defaultFS = config.get(FileSystem.FS_DEFAULT_NAME_KEY);
+        String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
+        List.class.cast(context.getProperty(ImportVdbProperty.EXTRACT_PATH_LIST, Map.class).get(table.getName())).add
+                (hdfsUri);
+        List.class.cast(context.getProperty(ImportVdbProperty.EXTRACT_RECORDS_LIST, Map.class).get(table.getName()))
+                .add(processedRecords);
     }
 
     @SuppressWarnings("unchecked")
@@ -381,6 +418,8 @@ public class VdbTableImportServiceImpl extends ImportService {
         } else {
             throw new LedpException(LedpCode.LEDP_17010);
         }
+        CustomerSpace customerSpace = CustomerSpace.parse(context.getProperty(ImportProperty.CUSTOMER,
+                String.class));
         List<Table> tables = extractionConfig.getTables();
         for (Table table : tables) {
             ImportVdbTableConfiguration importVdbTableConfiguration = vdbConnectorConfiguration
@@ -389,8 +428,8 @@ public class VdbTableImportServiceImpl extends ImportService {
                 continue;
             }
             long startTime = System.currentTimeMillis();
+            int extractRecords = 0;
             try {
-                setExtractContextForVdbTable(table, context, importVdbTableConfiguration);
                 String queryDataUrl = vdbConnectorConfiguration.getGetQueryDataEndpoint();
                 String statusUrl = vdbConnectorConfiguration.getReportStatusEndpoint();
                 String queryHandle = importVdbTableConfiguration.getVdbQueryHandle();
@@ -402,6 +441,8 @@ public class VdbTableImportServiceImpl extends ImportService {
                 Configuration yarnConfiguration = context.getProperty(ImportVdbProperty.HADOOPCONFIG, Configuration.class);
                 int totalRows = importVdbTableConfiguration.getTotalRows();
                 int rowsToGet = importVdbTableConfiguration.getBatchSize();
+                boolean needMultipleExtracts = totalRows > recordsPerExtract;
+                setExtractContextForVdbTable(table, context, importVdbTableConfiguration, needMultipleExtracts);
                 EaiImportJobDetail importJobDetail = eaiImportJobDetailService.getImportJobDetail(extractIdentifier);
                 if (importJobDetail == null) {
                     log.error(String.format("Cannot find Vdb import extract record for identifier %s", extractIdentifier));
@@ -467,6 +508,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                                 log.warn(String.format("Row batch is %d, but only %d rows append to avro.", rowsToGet, rowsAppend));
                             }
                             startRow += rowsAppend;
+                            extractRecords += rowsAppend;
 
                             vdbGetQueryData.setStartRow(startRow);
                             vdbLoadTableStatus.setJobStatus("Running");
@@ -476,7 +518,7 @@ public class VdbTableImportServiceImpl extends ImportService {
 
                             reportStatus(statusUrl, vdbLoadTableStatus);
                             dataContainer.flush();
-                            if (dataContainer.getLocalDataFile().length() >= sizePerFile) {
+                            if (dataContainer.getLocalDataFile().length() >= sizePerFile || extractRecords >= recordsPerExtract) {
                                 dataContainer.endContainer();
                                 String fileName = generateAvroFileName(avroFileName, fileIndex);
                                 try (PerformanceTimer timer = new PerformanceTimer("DL copy to hdfs")) {
@@ -488,6 +530,14 @@ public class VdbTableImportServiceImpl extends ImportService {
                                 eaiImportJobDetailService.updateImportJobDetail(importJobDetail);
                                 dataContainer.getLocalDataFile().delete();
                                 log.info(String.format("Get data from DL takes %d ms", getDLDataResultTime));
+                                if (extractRecords >= recordsPerExtract) {
+                                    if (needMultipleExtracts) {
+                                        updateExtractContext(table, context, targetPath, new Long(extractRecords));
+                                        fileIndex = 0;
+                                        targetPath = generateNewTargetPath(customerSpace, targetPath);
+                                        extractRecords = 0;
+                                    }
+                                }
                             }
 
                         } catch (Exception e) {
@@ -515,8 +565,11 @@ public class VdbTableImportServiceImpl extends ImportService {
                     context.getProperty(ImportVdbProperty.PROCESSED_RECORDS, Map.class).put(table.getName(),
                             new Long(totalRows));
                     String fileName = generateAvroFileName(avroFileName, fileIndex);
-                    copyToHdfs(dataContainer, targetPath + "/" + fileName, yarnConfiguration);
+                    boolean fileCopy = copyToHdfs(dataContainer, targetPath + "/" + fileName, yarnConfiguration);
                     fileIndex++;
+                    if (needMultipleExtracts && fileCopy) {
+                        updateExtractContext(table, context, targetPath, new Long(extractRecords));
+                    }
                     importJobDetail.setProcessedRecords(totalRows);
                     importJobDetail.setStatus(ImportStatus.SUCCESS);
                     eaiImportJobDetailService.updateImportJobDetail(importJobDetail);
@@ -560,9 +613,11 @@ public class VdbTableImportServiceImpl extends ImportService {
         return rowsAppend;
     }
 
-    private void copyToHdfs(DataContainer dataContainer, String filePath, Configuration yarnConfiguration) {
+    private boolean copyToHdfs(DataContainer dataContainer, String filePath, Configuration yarnConfiguration) {
         int retries = 0;
         Exception exception = null;
+        boolean fileCopy = true;
+        log.info(String.format("Copy data container file to HDFS path %s", filePath));
         do {
             try {
                 retries++;
@@ -572,16 +627,18 @@ public class VdbTableImportServiceImpl extends ImportService {
             } catch (FileNotFoundException e) {
                 log.error(String.format("Cannot find the data container file. Exception: %s, retry attempt = %d",
                         e.toString(), retries));
-
+                fileCopy = false;
             } catch (IOException e) {
                 log.error(String.format("Cannot write stream to Hdfs. Exception: %s, retry attempt = %d",
                         e.toString(), retries));
+                exception = e;
             }
         } while (exception != null && retries <= MAX_RETRIES);
 
         if (exception != null && retries > MAX_RETRIES) {
             throw new RuntimeException(String.format("Cannot write stream to Hdfs. Exception: %s", exception.toString()));
         }
+        return fileCopy;
     }
 
     private String generateAvroFileName(String fileName, int fileIndex) {

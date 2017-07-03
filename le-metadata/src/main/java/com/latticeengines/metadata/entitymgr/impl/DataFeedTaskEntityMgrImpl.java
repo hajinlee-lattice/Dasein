@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,6 +190,27 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
                     datafeedTask.getLastImported());
             addTableToQueue(datafeedTask, datafeedTask.getImportData());
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts) {
+        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+        Table extractTable = tableEntityMgr.findByName(tableName);
+        extractTable.getExtracts().clear();
+        for (int i = 0; i < extracts.size(); i++) {
+            Extract extract = extracts.get(i);
+            Table cloneTable = TableUtils.clone(extractTable, NamingUtils.uuid("DataTable"));
+            cloneTable.setTenant(MultiTenantContext.getTenant());
+            cloneTable.addExtract(extract);
+            cloneTable.setTableType(TableType.DATATABLE);
+            tableTypeHolder.setTableType(TableType.DATATABLE);
+            log.info(String.format("data table has been consumed, adding extract to new data table %s",
+                    extractTable.getName()));
+            tableEntityMgr.create(cloneTable);
+            addTableToQueue(datafeedTask, cloneTable);
+        }
+
     }
 
     @Override

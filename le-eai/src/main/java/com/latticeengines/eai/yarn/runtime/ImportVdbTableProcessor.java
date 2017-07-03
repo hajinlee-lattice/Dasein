@@ -67,6 +67,9 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
 
         importContext.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
         importContext.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
+        importContext.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
+        importContext.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
+        importContext.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
         String collectionIdentifiers = importConfig.getProperty(ImportProperty.COLLECTION_IDENTIFIERS);
         if (!StringUtils.isEmpty(collectionIdentifiers)) {
             @SuppressWarnings("unchecked")
@@ -98,12 +101,17 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
                     importService.importDataAndWriteToHdfs(sourceImportConfiguration, importContext,
                             vdbConnectorConfiguration);
 
-                    Map<String, Extract> extracts = eaiMetadataService.getExtractsForTable(metadata, importContext);
+                    Map<String, List<Extract>> extracts = eaiMetadataService.getExtractsForTable(metadata, importContext);
                     for (String taskId : identifiers) {
-                        Extract extract = extracts.get(tableTemplates.get(taskId).getName());
-                        if (extract != null) {
-                            dataFeedProxy.registerExtract(importConfig.getCustomerSpace().toString(), taskId,
-                                    tableTemplates.get(taskId).getName(), extract);
+                        List<Extract> extract = extracts.get(tableTemplates.get(taskId).getName());
+                        if (extract != null && extract.size() > 0) {
+                            if (extract.size() == 1) {
+                                dataFeedProxy.registerExtract(importConfig.getCustomerSpace().toString(),
+                                        taskId, tableTemplates.get(taskId).getName(), extract.get(0));
+                            } else {
+                                dataFeedProxy.registerExtracts(importConfig.getCustomerSpace().toString(),
+                                        taskId, tableTemplates.get(taskId).getName(), extract);
+                            }
                         }
                     }
                     log.info("Finalize import job detail record");
@@ -184,8 +192,9 @@ public class ImportVdbTableProcessor extends SingleContainerYarnProcessor<Import
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
             EaiImportJobDetail jobDetail = eaiImportJobDetailService
                     .getImportJobDetail(entry.getValue().getCollectionIdentifier());
-            jobDetail.setStatus(ImportStatus.SUCCESS);
-            eaiImportJobDetailService.updateImportJobDetail(jobDetail);
+            if (jobDetail != null) {
+                eaiImportJobDetailService.deleteImportJobDetail(jobDetail);
+            }
         }
     }
 

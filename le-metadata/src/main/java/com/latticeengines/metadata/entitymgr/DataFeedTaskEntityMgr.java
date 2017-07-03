@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.entitymgr;
 
 import java.util.Date;
+import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
@@ -21,6 +22,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
     void clearTableQueue();
 
     void registerExtract(DataFeedTask dataFeedTask, String tableName, Extract extract);
+
+    void registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts);
 
     void addTableToQueue(DataFeedTask dataFeedTask, Table table);
 

@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -67,6 +69,17 @@ public class DataFeedTaskResource {
                                 @RequestBody Extract extract) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataFeedTaskService.registerExtract(customerSpace, taskId, tableName, extract);
+    }
+
+    @RequestMapping(value = "/registerextracts/{taskId}/{tableName}", method = RequestMethod.POST,
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update data feed task")
+    public void registerExtracts(@PathVariable String customerSpace, @PathVariable String taskId,
+                                @PathVariable String tableName,
+                                @RequestBody List<Extract> extracts) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataFeedTaskService.registerExtracts(customerSpace, taskId, tableName, extracts);
     }
 
 }
