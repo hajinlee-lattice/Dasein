@@ -55,7 +55,7 @@ public class Query implements GraphNode {
     @JsonProperty("free_form_text_search")
     private String freeFormTextSearch;
 
-    @JsonProperty("free_form_text_search")
+    @JsonProperty("free_form_text_search_attributes")
     private List<FreeFormTextSearchAttribute> freeFormTextSearchAttributes = new ArrayList<>();
 
     @JsonIgnore
