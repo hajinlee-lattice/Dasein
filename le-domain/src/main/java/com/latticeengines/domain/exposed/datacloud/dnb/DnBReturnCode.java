@@ -5,7 +5,7 @@ public enum DnBReturnCode {
     PARTIAL_SUCCESS("Batch match is partially finished with some error records."), //
     UNMATCH("No match result found"), //
     UNMATCH_TIMEOUT("No match result found because of timeout"), //
-    DISCARD("Match result is discarded"), //
+    DISCARD("Match result does not meet acceptance criteria, discarded"), //
     IN_PROGRESS("Batch match is in progress"), //
     RATE_LIMITING("Request rejected by rate limiting service"), //
     TIMEOUT("HTTP timeout"), //
