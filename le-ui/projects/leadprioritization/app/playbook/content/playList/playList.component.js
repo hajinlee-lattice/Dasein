@@ -40,6 +40,7 @@ $stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
                 editSegment: false
             };
         });
+        console.log(vm.plays);
     }
     vm.init();
 

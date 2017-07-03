@@ -189,6 +189,7 @@ angular
                     return $ocLazyLoad.load('lib/js/alasql.min.js');
                 },
                 HasRatingsAvailable: function($q, $stateParams, ModelRatingsService){
+
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;
 
