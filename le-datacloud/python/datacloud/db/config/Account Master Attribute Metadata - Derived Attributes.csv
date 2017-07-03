@@ -1,0 +1,3 @@
+Add To New Account Master,EOL Tag,Model Tag,Insights Tag,BIS Tag,Internal Enrichment Tag,External Enrichment Tag,Segmentation Tag,Segment Bucketing,ExternalColumnID,Source,SourceColumnName,Description,DataType,Display Name,Category,SubCategory,StatisticalType,DisplayDiscretizationStrategy,FundamentalType
+Y,N,Y,Y,Y,N,Y,Y,N,LDC_PrimaryIndustry,,PrimaryIndustry,The primary industry the business operates in.,NVARCHAR(500),Industry,FIRMOGRAPHICS,Other,NOMINAL,,ALPHA
+Y,N,N,N,N,Y,N,N,N,LDC_DomainSource,,DomainSource,This indicator specifies if the domain source is DnB or Lattice,NVARCHAR(10),Domain Source,FIRMOGRAPHICS,Other,NOMINAL,,ALPHA

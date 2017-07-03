@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import MySQLdb
 import logging
-import pymssql
+import csv
 from datacloud.common.cipher import decrypt
 
 logger = logging.getLogger(__name__)
@@ -81,39 +81,39 @@ def create_table(conn):
         cursor.execute(sql)
         conn.commit()
 
-def read_dnb_attributes(src_conn, tgt_conn):
-    logger.info("Processing DNB attributes ...")
-    with src_conn.cursor() as cursor:
-        cursor.execute("""
-        SELECT
-           REPLACE(LTRIM(RTRIM([Internal Name])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Display Name])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Description])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Data Type])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Category])), CHAR(9), '')
-          ,'Other'
-          ,REPLACE(LTRIM(RTRIM([DnB Export Restriction SFDC])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([DnB Export Restriction - All])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Model Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Insights Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Internal Enrichment Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([External Enchrichment Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([FundamentalType])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Statistical Type])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([DisplayDiscretizationStrategy])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Availability])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Possible Values Code Table])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Segmentation Tag])), CHAR(9), '')
-          FROM DnB_Attributes
-          WHERE [Add To New Account Master] = 'Y'
-          ORDER BY [Internal Name]
-        """)
+def read_dnb_attributes(conn, file_name):
+    ex_attrs = []
+    with open(file_name,'rb') as csvFile:
+        reader = csv.DictReader(csvFile, delimiter=',', quotechar = '"')
+        for row in reader: 
+            if row["Add To New Account Master"].strip().replace("\t","") == "Y":
+                attr = []
+                attr.append(row["Internal Name"].strip().replace("\t",""))
+                attr.append(row["Display Name"].strip().replace("\t",""))
+                attr.append(row["Description"].strip().replace("\t",""))
+                attr.append(row["Data Type"].strip().replace("\t",""))
+                attr.append(row["Category"].strip().replace("\t",""))
+                attr.append('Other')
+                attr.append(row["DnB Export Restriction SFDC"].strip().replace("\t",""))
+                attr.append(row["DnB Export Restriction - All"].strip().replace("\t",""))
+                attr.append(row["Model Tag"].strip().replace("\t",""))
+                attr.append(row["Insights Tag"].strip().replace("\t",""))
+                attr.append(row["Internal Enrichment Tag"].strip().replace("\t",""))
+                attr.append(row["External Enchrichment Tag"].strip().replace("\t",""))
+                attr.append(row["FundamentalType"].strip().replace("\t",""))
+                attr.append(row["Statistical Type"].strip().replace("\t",""))
+                attr.append(row["DisplayDiscretizationStrategy"].strip().replace("\t",""))
+                attr.append(row["Availability"].strip().replace("\t",""))
+                attr.append(row["Possible Values Code Table"].strip().replace("\t",""))
+                attr.append(row["Segmentation Tag"].strip().replace("\t",""))
+                ex_attrs.append(attr)
+    ex_attrs = sorted(ex_attrs,key=lambda x: x[0])
 
-        stmts = []
-        for row in cursor:
-            item = dnb_row_to_item(row)
-            sql = """
-                INSERT INTO `AccountMaster_Attributes` (
+    stmts = []
+    for row in ex_attrs:
+        item = dnb_row_to_item(row)
+        sql = """
+                INSERT INTO AccountMaster_Attributes (
                     InternalName,
                     Source,
                     SourceJoinKey,
@@ -137,36 +137,36 @@ def read_dnb_attributes(src_conn, tgt_conn):
                     Approved_Segment
                 ) VALUES (%s)
             """ % ',\n'.join([
-                str_to_value(item['InternalName']),
-                '\'DnBCacheSeed\'',
-                '\'DUNS_NUMBER\'',
-                str_to_value(item['InternalName']),
-                str_to_value(item['DisplayName']),
-                str_to_value(item['Description']),
-                str_to_value(item['JavaClass']),
-                str_to_value(item['Category']),
-                str_to_value(item['SubCategory']),
-                str_to_value(item['ExportRestriction']),
-                str_to_value(item['FundamentalType']),
-                str_to_value(item['StatisticalType']),
-                str_to_value(item['DisplayDiscretizationStrategy']),
-                str_to_value(item['DnbAvailability']),
-                str_to_value(item['DnbCodeBook']),
-                '1' if item['Approved_Model'] else '0',
-                '1' if item['Approved_Insights'] else '0',
-                '0',
-                '1' if item['Approved_InternalEnrichment'] else '0',
-                '1' if item['Approved_ExternalEnrichment'] else '0',
-                '1' if item['Approved_Segment'] else '0'
-            ])
-            stmts.append((item['InternalName'], sql))
+                    str_to_value(item['InternalName']),
+                    '\'DnBCacheSeed\'',
+                    '\'DUNS_NUMBER\'',
+                    str_to_value(item['InternalName']),
+                    str_to_value(item['DisplayName']),
+                    str_to_value(item['Description']),
+                    str_to_value(item['JavaClass']),
+                    str_to_value(item['Category']),
+                    str_to_value(item['SubCategory']),
+                    str_to_value(item['ExportRestriction']),
+                    str_to_value(item['FundamentalType']),
+                    str_to_value(item['StatisticalType']),
+                    str_to_value(item['DisplayDiscretizationStrategy']),
+                    str_to_value(item['DnbAvailability']),
+                    str_to_value(item['DnbCodeBook']),
+                    '1' if item['Approved_Model'] else '0',
+                    '1' if item['Approved_Insights'] else '0',
+                    '0',
+                    '1' if item['Approved_InternalEnrichment'] else '0',
+                    '1' if item['Approved_ExternalEnrichment'] else '0',
+                    '1' if item['Approved_Segment'] else '0'
+                ])
+        stmts.append((item['InternalName'], sql))
 
-    with tgt_conn.cursor() as cursor:
+    with conn.cursor() as cursor:
         for n, s in stmts:
-            logger.debug("Adding DnB attribute [%s]" % n)
+            print "Adding DnB attribute [%s]" % n
             cursor.execute(s)
-        tgt_conn.commit()
-        logger.info("Inserted %d attributes from DNB." % len(stmts))
+
+        conn.commit()
 
 
 def dnb_row_to_item(row):
@@ -218,39 +218,39 @@ def dnb_row_to_item(row):
     return item
 
 
-def read_existing_attributes(src_conn, tgt_conn, table):
-    logger.info("Processing attributes in %s ..." % table)
-    with src_conn.cursor() as cursor:
-        cursor.execute("""
-        SELECT
-           REPLACE(LTRIM(RTRIM([ExternalColumnID])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Display Name])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Description])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([DataType])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Category])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([SubCategory])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Model Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Insights Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([BIS Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Internal Enrichment Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([External Enrichment Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([EOL Tag])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([FundamentalType])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([StatisticalType])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([DisplayDiscretizationStrategy])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Source])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([SourceColumnName])), CHAR(9), '')
-          ,REPLACE(LTRIM(RTRIM([Segmentation Tag])), CHAR(9), '')
-        FROM [""" + table + """]
-        WHERE [Add To New Account Master] = 'Y'
-        ORDER BY [Source], [ExternalColumnID]
-        """)
+def read_existing_attributes(conn, file_name):
+    ex_attrs = []
+    with open(file_name,'rb') as csvFile:
+        reader = csv.DictReader(csvFile, delimiter=',', quotechar = '"')
+        for row in reader: 
+            if row["Add To New Account Master"].strip().replace("\t","") == "Y":
+                attr = []
+                attr.append(row["ExternalColumnID"].strip().replace("\t",""))
+                attr.append(row["Display Name"].strip().replace("\t",""))
+                attr.append(row["Description"].strip().replace("\t",""))
+                attr.append(row["DataType"].strip().replace("\t",""))
+                attr.append(row["Category"].strip().replace("\t",""))
+                attr.append(row["SubCategory"].strip().replace("\t",""))
+                attr.append(row["Model Tag"].strip().replace("\t",""))
+                attr.append(row["Insights Tag"].strip().replace("\t",""))
+                attr.append(row["BIS Tag"].strip().replace("\t",""))
+                attr.append(row["Internal Enrichment Tag"].strip().replace("\t",""))
+                attr.append(row["External Enrichment Tag"].strip().replace("\t",""))
+                attr.append(row["EOL Tag"].strip().replace("\t",""))
+                attr.append(row["FundamentalType"].strip().replace("\t",""))
+                attr.append(row["StatisticalType"].strip().replace("\t",""))
+                attr.append(row["DisplayDiscretizationStrategy"].strip().replace("\t",""))
+                attr.append(row["Source"].strip().replace("\t",""))
+                attr.append(row["SourceColumnName"].strip().replace("\t",""))
+                attr.append(row["Segmentation Tag"].strip().replace("\t",""))
+                ex_attrs.append(attr)
+    ex_attrs = sorted(ex_attrs,key=lambda x: x[15])
 
-        stmts = []
-        for row in cursor:
-            item = existing_row_to_item(row)
-            sql = """
-                INSERT INTO `AccountMaster_Attributes` (
+    stmts = []
+    for row in ex_attrs:
+        item = existing_row_to_item(row)
+        sql = """
+                INSERT INTO AccountMaster_Attributes (
                     InternalName,
                     Source,
                     SourceJoinKey,
@@ -273,36 +273,35 @@ def read_existing_attributes(src_conn, tgt_conn, table):
                     Approved_Segment
                 ) VALUES (%s)
                 """ % ',\n'.join([
-                str_to_value(item['InternalName']),
-                str_to_value(item['Source']),
-                str_to_value(item['SourceJoinKey']),
-                str_to_value(item['SourceColumn']),
-                str_to_value(item['DisplayName']),
-                str_to_value(item['Description']),
-                str_to_value(item['JavaClass']),
-                str_to_value(item['Category']),
-                str_to_value(item['SubCategory']),
-                str_to_value(item['FundamentalType']),
-                str_to_value(item['StatisticalType']),
-                str_to_value(item['DisplayDiscretizationStrategy']),
-                '1' if item['Deprecated'] else '0',
-                '1' if item['Approved_Model'] else '0',
-                '1' if item['Approved_Insights'] else '0',
-                '1' if item['Approved_BIS'] else '0',
-                '1' if item['Approved_InternalEnrichment'] else '0',
-                '1' if item['Approved_ExternalEnrichment'] else '0',
-                "'NONE'",
-                '1' if item['Approved_Segment'] else '0'
-            ])
+                        str_to_value(item['InternalName']),
+                        str_to_value(item['Source']),
+                        str_to_value(item['SourceJoinKey']),
+                        str_to_value(item['SourceColumn']),
+                        str_to_value(item['DisplayName']),
+                        str_to_value(item['Description']),
+                        str_to_value(item['JavaClass']),
+                        str_to_value(item['Category']),
+                        str_to_value(item['SubCategory']),
+                        str_to_value(item['FundamentalType']),
+                        str_to_value(item['StatisticalType']),
+                        str_to_value(item['DisplayDiscretizationStrategy']),
+                        '1' if item['Deprecated'] else '0',
+                        '1' if item['Approved_Model'] else '0',
+                        '1' if item['Approved_Insights'] else '0',
+                        '1' if item['Approved_BIS'] else '0',
+                        '1' if item['Approved_InternalEnrichment'] else '0',
+                        '1' if item['Approved_ExternalEnrichment'] else '0',
+                        "'NONE'",
+                        '1' if item['Approved_Segment'] else '0'
+                    ])
 
-            stmts.append((item['InternalName'], item['Source'], sql))
+        stmts.append((item['InternalName'], item['Source'], sql))
 
-    with tgt_conn.cursor() as cursor:
+    with conn.cursor() as cursor:
         for n, s, q in stmts:
-            logger.debug("Adding %s attribute [%s]" % (s, n))
+            print "Adding %s attribute [%s]" % (s, n)
             cursor.execute(q)
-        tgt_conn.commit()
-        logger.info("Inserted %d attributes from %s." % (len(stmts), table))
+        conn.commit()
 
 
 def existing_row_to_item(row):
@@ -419,19 +418,15 @@ def verify_am_attrs(conn):
             print '\n'
 
 def execute():
-    mssql_pw = decrypt(b'pUZggaLJ6AWjFLod-PlsUyXorWzjnGjLhb0fxtIUOxg=')
-    mysql_pw = decrypt(b'1AZy8-CiCvVE81AL66tHuqT6G5qwbD0zIOY1hBs45Po=')
-    mssql = pymssql.connect('bodcprodvsql231.prod.lattice.local', 'DLTransfer', mssql_pw, "LDC_ManageDB")
-    mysql = MySQLdb.connect(host="127.0.0.1", user="root", passwd=mysql_pw,db="LDC_ConfigDB")
+    pwd = decrypt(b'1AZy8-CiCvVE81AL66tHuqT6G5qwbD0zIOY1hBs45Po=')
+    conn = MySQLdb.connect(host="127.0.0.1", user="root", passwd=pwd,db="LDC_ConfigDB")
 
-    create_table(mysql)
-    read_dnb_attributes(mssql, mysql)
-    read_existing_attributes(mssql, mysql, 'Existing_Attributes')
-    read_existing_attributes(mssql, mysql, 'Derived_Attributes')
-    verify_am_attrs(mysql)
-
-    mssql.close()
-    mysql.close()
+    create_table(conn)
+    read_dnb_attributes(conn, 'Account Master Attribute Metadata - DnB Attributes.csv')
+    read_existing_attributes(conn, 'Account Master Attribute Metadata - Existing Attributes.csv')
+    read_existing_attributes(conn, 'Account Master Attribute Metadata - Derived Attributes.csv')
+    verify_am_attrs(conn)
+    conn.close()
 
 if __name__ == '__main__':
     execute()

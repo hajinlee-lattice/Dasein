@@ -84,12 +84,203 @@ def register_amprofile(conn, version):
         cursor.execute(sql)
         conn.commit()
 
+
+def register_am(conn):
+    logger.info('Registering attributes for account master rebuild')
+    with conn.cursor() as cursor:
+        sql = """
+            INSERT INTO LDC_ConfigDB.SourceAttribute (
+                Source,
+                Stage,
+                Transformer,
+                Attribute,
+                Arguments
+            )
+            SELECT 'AccountMaster',
+                   'MapStage',
+                   'mapAttribute',
+                   InternalName,
+                   CONCAT('{"target":null,"attribute":"', SourceColumn, '","Source":"', Source, '"}')
+              FROM LDC_ConfigDB.AccountMaster_Attributes
+             WHERE InternalName NOT LIKE '%TechIndicator%'
+               AND InternalName NOT LIKE '%BmbrSurge_%'
+               AND InternalName NOT IN ('DUNS_NUMBER', 'LE_DOMAIN', 'BUSINESS_NAME', 'STREET_ADDRESS', 'CITY_NAME', 'STATE_PROVINCE_NAME', 'COUNTRY_NAME', 'POSTAL_CODE', 'LE_IS_PRIMARY_DOMAIN', 'LE_IS_PRIMARY_LOCATION', 'LE_NUMBER_OF_LOCATIONS', 'LE_COMPANY_PHONE', 'LE_REVENUE_RANGE', 'LE_EMPLOYEE_RANGE')
+               AND Source IS NOT NULL
+        """
+        cursor.execute(sql)
+        conn.commit()
+
+        sql = """
+            INSERT INTO LDC_ConfigDB.SourceAttribute (
+                Source,
+                Stage,
+                Transformer,
+                Attribute,
+                Arguments
+            ) VALUES (
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'BuiltWith_TechIndicators',
+                '{"target":null,"attribute":"TechIndicators","Source":"BuiltWithTechIndicators"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'HGData_SegmentTechIndicators',
+                '{"target":null,"attribute":"SegmentTechIndicators","Source":"HGDataTechIndicators"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'HGData_SupplierTechIndicators',
+                '{"target":null,"attribute":"SupplierTechIndicators","Source":"HGDataTechIndicators"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'BmbrSurge_BucketCode',
+                '{"target":null,"attribute":"BmbrSurge_BucketCode","Source":"BomboraSurgePivoted"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'BmbrSurge_CompositeScore',
+                '{"target":null,"attribute":"BmbrSurge_CompositeScore","Source":"BomboraSurgePivoted"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'BmbrSurge_Intent',
+                '{"target":null,"attribute":"BmbrSurge_Intent","Source":"BomboraSurgePivoted"}'
+            )
+        """
+        cursor.execute(sql)
+        conn.commit()
+
+        sql = """
+            INSERT INTO LDC_ConfigDB.SourceAttribute (
+                Source,
+                Stage,
+                Transformer,
+                Attribute,
+                Arguments
+            ) VALUES (
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LatticeID',
+                '{"target":null,"attribute":"LatticeID","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_DUNS',
+                '{"target":null,"attribute":"DUNS","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_Domain',
+                '{"target":null,"attribute":"Domain","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_Name',
+                '{"target":null,"attribute":"Name","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_Street',
+                '{"target":null,"attribute":"Street","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_City',
+                '{"target":null,"attribute":"City","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_State',
+                '{"target":null,"attribute":"State","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_Country',
+                '{"target":null,"attribute":"Country","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_ZipCode',
+                '{"target":null,"attribute":"ZipCode","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LE_IS_PRIMARY_DOMAIN',
+                '{"target":null,"attribute":"LE_IS_PRIMARY_DOMAIN","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LE_IS_PRIMARY_LOCATION',
+                '{"target":null,"attribute":"LE_IS_PRIMARY_LOCATION","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LE_NUMBER_OF_LOCATIONS',
+                '{"target":null,"attribute":"LE_NUMBER_OF_LOCATIONS","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_PrimaryIndustry',
+                '{"target":null,"attribute":"PrimaryIndustry","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LE_COMPANY_PHONE',
+                '{"target":null,"attribute":"LE_COMPANY_PHONE","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LE_REVENUE_RANGE',
+                '{"target":null,"attribute":"LE_REVENUE_RANGE","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LE_EMPLOYEE_RANGE',
+                '{"target":null,"attribute":"LE_EMPLOYEE_RANGE","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'LDC_DomainSource',
+                '{"target":null,"attribute":"DomainSource","Source":"AccountMasterSeed"}'
+            )
+        """
+        cursor.execute(sql)
+        conn.commit()
+
+
 def execute():
     datacloud_version = '2.0.4'
     pwd = decrypt(b'1AZy8-CiCvVE81AL66tHuqT6G5qwbD0zIOY1hBs45Po=')
     conn = MySQLdb.connect(host="127.0.0.1", user="root", passwd=pwd)
     create_table(conn)
     register_amprofile(conn, datacloud_version)
+    register_am(conn)
+    conn.close()
 
 if __name__ == '__main__':
     execute()
