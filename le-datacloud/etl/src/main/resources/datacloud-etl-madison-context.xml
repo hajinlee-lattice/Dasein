@@ -6,7 +6,6 @@
 
     <context:component-scan base-package="com.latticeengines.datacloud.madison"/>
 
-    <import resource="classpath:datacloud-etl-madison-quartz-${PROPDATA_MADISON_QUARTZ_ENABLED:disabled}-context.xml"/>
     <import resource="classpath:datacloud-etl-madison-persistence-context.xml"/>
     <import resource="classpath:datacloud-etl-context.xml"/>
     <import resource="classpath:datacloud-dataflow-context.xml"/>

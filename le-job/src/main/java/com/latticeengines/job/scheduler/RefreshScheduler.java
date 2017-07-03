@@ -16,24 +16,24 @@ public class RefreshScheduler extends QuartzJobBean {
 
     private static final Log log = LogFactory.getLog(RefreshScheduler.class);
 
-    private RefreshService refreshService;
+    private RefreshService service;
     private ServiceFlowsZkConfigService serviceFlowsZkConfigService;
     private boolean dryrun;
 
     private RefreshExecutor getExecutor() {
-        return new RefreshExecutor(refreshService);
+        return new RefreshExecutor(service);
     }
 
     @PostConstruct
     public void postConstruct() {
-        log.info("Instantiated a RefreshScheduler fro service " + refreshService.getSource().getSourceName());
+        log.info("Instantiated a RefreshScheduler for service " + service.getSource().getSourceName());
     }
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        if (serviceFlowsZkConfigService.refreshJobEnabled(refreshService.getSource())) {
+        if (serviceFlowsZkConfigService.refreshJobEnabled(service.getSource())) {
             if (dryrun) {
-                System.out.println(refreshService.getClass().getSimpleName() + " triggered.");
+                System.out.println(service.getClass().getSimpleName() + " triggered.");
             } else {
                 getExecutor().kickOffNewProgress();
             }
@@ -43,8 +43,8 @@ public class RefreshScheduler extends QuartzJobBean {
     //==============================
     // for quartz detail bean
     //==============================
-    public void setRefreshService(RefreshService refreshService) {
-        this.refreshService = refreshService;
+    public void setService(RefreshService service) {
+        this.service = service;
     }
 
     public void setServiceFlowsZkConfigService(ServiceFlowsZkConfigService serviceFlowsZkConfigService) {

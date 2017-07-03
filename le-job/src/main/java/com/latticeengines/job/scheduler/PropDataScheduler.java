@@ -99,14 +99,16 @@ public class PropDataScheduler {
         scheduleJob(source, service.getBeanName(), service, RefreshScheduler.class);
     }
 
-    private void scheduleJob(Source source, String serviceName, Object service, Class<? extends Job> jobClass)
+    private void scheduleJob(Source source, String serviceBean, Object service, Class<? extends Job> jobClass)
             throws SchedulerException {
-        if (service != null && !scheduledJobs.contains(serviceName)) {
+        if (service != null && !scheduledJobs.contains(serviceBean)) {
             JobDetail job = JobBuilder.newJob(jobClass).usingJobData("dryrun", dryrun).build();
-            job.getJobDataMap().put(serviceName, service);
+            job.getJobDataMap().put("service", service);
             job.getJobDataMap().put("serviceFlowsZkConfigService", serviceFlowsZkConfigService);
-            scheduler.scheduleJob(job, cronTriggerForSource(source));
-            scheduledJobs.add(serviceName);
+            CronTrigger cronTrigger = cronTriggerForSource(source);
+            log.info("Schedule " + source.getSourceName() + " to " + cronTrigger.getCronExpression());
+            scheduler.scheduleJob(job, cronTrigger);
+            scheduledJobs.add(serviceBean);
         }
     }
 

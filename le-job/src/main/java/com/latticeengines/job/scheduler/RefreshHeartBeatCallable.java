@@ -3,7 +3,6 @@ package com.latticeengines.job.scheduler;
 import java.util.concurrent.Callable;
 
 import com.latticeengines.datacloud.collection.service.impl.ProgressOrchestrator;
-import com.newrelic.api.agent.Trace;
 
 public class RefreshHeartBeatCallable implements Callable<Boolean> {
 
@@ -16,7 +15,6 @@ public class RefreshHeartBeatCallable implements Callable<Boolean> {
     }
 
     @Override
-    @Trace(dispatcher = true)
     public Boolean call() throws Exception {
         orchestrator.executeRefresh();
         scheduler.reschedule();

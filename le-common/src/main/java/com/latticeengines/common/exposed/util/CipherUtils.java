@@ -76,11 +76,10 @@ public class CipherUtils {
                     secret = Arrays.copyOfRange(bytes, SALT_HINT_BYTES.length + 16, bytes.length);
                 }
                 cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), new IvParameterSpec(salt));
+                return new String(cipher.doFinal(secret), CHARSET_UTF8);
             } else {
-                secret = bytes;
-                cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), ivspec);
+                return decryptWithEmptySalt(str);
             }
-            return new String(cipher.doFinal(secret), CHARSET_UTF8);
         } catch (Exception e) {
             // fall back to old decryptor
             return decryptWithEmptySalt(str);

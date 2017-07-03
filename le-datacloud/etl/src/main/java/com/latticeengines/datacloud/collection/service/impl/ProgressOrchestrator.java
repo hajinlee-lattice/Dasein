@@ -123,12 +123,7 @@ public class ProgressOrchestrator {
         }
         final RefreshJobExecutor executor = executorMap.get(progress.getSourceName());
         if (executor != null) {
-            executorService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    executor.proceedProgress(progress);
-                }
-            });
+            executorService.submit(() -> executor.proceedProgress(progress));
         }
     }
 

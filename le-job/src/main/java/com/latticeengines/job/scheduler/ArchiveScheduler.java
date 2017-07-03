@@ -17,24 +17,24 @@ public class ArchiveScheduler extends QuartzJobBean {
 
     private static final Log log = LogFactory.getLog(ArchiveScheduler.class);
 
-    private ArchiveService archiveService;
+    private ArchiveService service;
     private ServiceFlowsZkConfigService serviceFlowsZkConfigService;
     private boolean dryrun;
 
     private ArchiveExecutor getExecutor() {
-        return new ArchiveExecutor(archiveService);
+        return new ArchiveExecutor(service);
     }
 
     @PostConstruct
     public void postConstruct() {
-        log.info("Instantiated an ArchiveScheduler fro service " + archiveService.getSource().getSourceName());
+        log.info("Instantiated an ArchiveScheduler for service " + service.getSource().getSourceName());
     }
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        if (serviceFlowsZkConfigService.refreshJobEnabled(archiveService.getSource())) {
+        if (serviceFlowsZkConfigService.refreshJobEnabled(service.getSource())) {
             if (dryrun) {
-                System.out.println(archiveService.getClass().getSimpleName() + " triggered.");
+                System.out.println(service.getClass().getSimpleName() + " triggered.");
             } else {
                 getExecutor().kickOffNewProgress();
             }
@@ -44,8 +44,8 @@ public class ArchiveScheduler extends QuartzJobBean {
     //==============================
     // for quartz detail bean
     //==============================
-    public void setArchiveService(ArchiveService archiveService) {
-        this.archiveService = archiveService;
+    public void setService(ArchiveService service) {
+        this.service = service;
     }
 
     public void setServiceFlowsZkConfigService(ServiceFlowsZkConfigService serviceFlowsZkConfigService) {
