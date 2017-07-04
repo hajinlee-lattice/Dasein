@@ -27,15 +27,12 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 @Component("accountMasterColumnService")
 public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImpl<AccountMasterColumn> {
 
-    private Log log = LogFactory.getLog(AccountMasterColumnServiceImpl.class);
-
     @Resource(name = "accountMasterColumnEntityMgr")
     private MetadataColumnEntityMgr<AccountMasterColumn> metadataColumnEntityMgr;
 
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
-    private ConcurrentMap<String, Date> cachedRefreshDate = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, ConcurrentMap<String, AccountMasterColumn>> whiteColumnCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, ConcurrentSkipListSet<String>> blackColumnCache = new ConcurrentHashMap<>();
 

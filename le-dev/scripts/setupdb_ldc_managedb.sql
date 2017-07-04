@@ -108,15 +108,6 @@ LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (SourceAttributeID,Arguments,Attribute,Source,Stage,Transformer);
 
-INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, AccountMasterHdfsVersion, AccountLookupHdfsVersion, DynamoTableSignature, DynamoTableSignature_Lookup, AMBucketedRedShiftTable, Status, MetadataRefreshDate)
-VALUES
-  ('2.0.0', '2016-08-28', '2.0', '2016-10-15_14-37-09_UTC', '2016-10-10_17-40-35_UTC', '20161015', '20161015', '', 'APPROVED', NOW()),
-  ('2.0.1', '2016-11-19', '2.0', '2016-11-19_20-32-21_UTC', '2016-11-19_05-33-46_UTC', '', '', '', 'APPROVED', NOW()),
-  ('2.0.2', '2016-12-15', '2.0', '2017-01-24_23-14-40_UTC', '2017-01-04_04-49-12_UTC', '20170126', '', '', 'APPROVED', NOW()),
-  ('2.0.3', '2017-02-14', '2.0', '2017-02-14_07-28-18_UTC', '2017-02-14_17-20-41_UTC', '20170301', '20170301', '', 'APPROVED', NOW()),
-  ('2.0.4', '2017-05-22', '2.0', '2017-05-18_12-54-37_UTC', '2017-05-17_17-30-29_UTC', '20170604', '20170604', '', 'APPROVED', NOW()),
-  ('2.0.5', '2017-06-29', '2.0', '2017-06-30_01-18-36_UTC', '2017-06-03_00-14-03_UTC', '20170629', '20170629', 'AccountMasterBucketed_2017_07_01_15_59_30_UTC', 'APPROVED', NOW());
-
 INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges)
 VALUES
   ('Trilogy', 'DunsDomainBased,DomainBased,DunsBased', '0', '0:1|1:2'),
@@ -169,5 +160,47 @@ UPDATE AccountMasterColumn
 SET Groups = REPLACE(REPLACE(Groups, ',Segment', ''), 'Segment', '')
 WHERE Groups LIKE '%Segment%'
 AND (AMColumnID LIKE 'Bmbr30%' OR AMColumnID LIKE 'Feature%');
+
+
+
+INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, Status, MetadataRefreshDate)
+VALUES
+  ('2.0.0', '2016-08-28', '2.0', 'APPROVED', NOW()),
+  ('2.0.1', '2016-11-19', '2.0', 'APPROVED', NOW()),
+  ('2.0.2', '2016-12-15', '2.0', 'APPROVED', NOW()),
+  ('2.0.3', '2017-02-14', '2.0', 'APPROVED', NOW()),
+  ('2.0.4', '2017-05-22', '2.0', 'APPROVED', NOW()),
+  ('2.0.5', '2017-06-29', '2.0', 'APPROVED', NOW());
+
+UPDATE `DataCloudVersion`
+SET
+  `DynamoTableSignature`        = '20161015',
+  `DynamoTableSignature_Lookup` = '20161015'
+WHERE `Version` = '2.0.0';
+
+UPDATE `DataCloudVersion`
+SET
+  `DynamoTableSignature` = '20170126'
+WHERE `Version` = '2.0.2';
+
+UPDATE `DataCloudVersion`
+SET
+  `DynamoTableSignature`        = '20170301',
+  `DynamoTableSignature_Lookup` = '20170604'
+WHERE `Version` = '2.0.3';
+
+UPDATE `DataCloudVersion`
+SET
+  `DynamoTableSignature`        = '20170604',
+  `DynamoTableSignature_Lookup` = '20170604'
+WHERE `Version` = '2.0.4';
+
+UPDATE `DataCloudVersion`
+SET
+  `DynamoTableSignature`        = '20170629',
+  `DynamoTableSignature_Lookup` = '20170629',
+  `AMBucketedRedShiftTable`     = 'AccountMasterBucketed_2017_07_01_15_59_30_UTC',
+  `SegmentStatsVersion`         = '2017-06-30_22-45-25_UTC'
+WHERE `Version` = '2.0.5';
 
 SET SQL_SAFE_UPDATES = 1;

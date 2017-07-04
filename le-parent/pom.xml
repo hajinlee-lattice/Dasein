@@ -326,6 +326,7 @@
                         <configuration>
                             <shutdown>kill</shutdown>
                             <reuseForks>false</reuseForks>
+                            <trimStackTrace>false</trimStackTrace>
                         </configuration>
                         <executions>
                             <execution>
@@ -452,6 +453,7 @@
                         <configuration>
                             <shutdown>kill</shutdown>
                             <reuseForks>false</reuseForks>
+                            <trimStackTrace>false</trimStackTrace>
                         </configuration>
                         <executions>
                             <execution>

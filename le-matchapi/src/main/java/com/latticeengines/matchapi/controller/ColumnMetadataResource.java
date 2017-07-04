@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "columnmetadata", description = "REST resource for column metadata")
 @RestController
@@ -78,6 +79,7 @@ public class ColumnMetadataResource {
         return columnMetadataService.findAll(dataCloudVersion);
     }
 
+    @ApiIgnore
     @RequestMapping(value = "/", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ApiOperation(value = "Update the columns for a specific cloud version")
     public void updateColumnsForDataCloudVersion(
@@ -88,8 +90,9 @@ public class ColumnMetadataResource {
         columnMetadataService.updateColumnMetadatas(dataCloudVersion, columnMetadatas);
     }
 
+    @ApiIgnore
     @RequestMapping(value = "/attrrepo", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ApiOperation(value = "Update the columns for a specific cloud version")
+    @ApiOperation(value = "Get attribute repository.")
     public AttributeRepository getAttrRepoAtVersion(
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
         if (StringUtils.isBlank(dataCloudVersion)){

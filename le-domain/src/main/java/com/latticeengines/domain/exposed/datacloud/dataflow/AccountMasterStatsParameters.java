@@ -31,7 +31,8 @@ public class AccountMasterStatsParameters extends TransformationFlowParameters {
     public static final String DUNS = "LDC_DUNS";
     public static final String DDUNS = "DOMESTIC_ULTIMATE_DUNS_NUMBER";
     public static final String GDUNS = "GLOBAL_ULTIMATE_DUNS_NUMBER";
-    public static final String HQ_DUNS = "HQ_DUNS";
+    public static final String HQ_DUNS = "_HQ_DUNS_";
+    public static final String HQ_DUNS_DOMAIN = "_HQ_DUNS_DOMAIN";
     public static final String DOMAIN = "LDC_Domain";
     public static final String DOMAIN_BCK_FIELD = "DOMAIN_BCK_FIELD";
     public static final String HQ_DUNS_PROC_INDICATOR = "HQ_DUNS_PROC_INDICATOR";

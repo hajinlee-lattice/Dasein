@@ -4,9 +4,7 @@ import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -150,17 +148,19 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     private void refreshCacheForVersion(String dataCloudVersion) {
-        log.info("Start loading black and white column caches for version " + dataCloudVersion);
-        List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
-        log.info("Read " + columns.size() + " columns from DB for version " + dataCloudVersion);
-        ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
-        for (E column : columns) {
-            whiteColumnCache.put(column.getColumnId(), column);
-        }
-        synchronized (getWhiteColumnCache()) {
-            getWhiteColumnCache().put(dataCloudVersion, whiteColumnCache);
-        }
-        log.info("Loaded " + whiteColumnCache.size() + " columns into white cache. version=" + dataCloudVersion);
+       new Thread(() -> {
+            log.info("Start loading black and white column caches for version " + dataCloudVersion);
+            List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+            log.info("Read " + columns.size() + " columns from DB for version " + dataCloudVersion);
+            ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
+            for (E column : columns) {
+                whiteColumnCache.put(column.getColumnId(), column);
+            }
+            synchronized (getWhiteColumnCache()) {
+                getWhiteColumnCache().put(dataCloudVersion, whiteColumnCache);
+            }
+            log.info("Loaded " + whiteColumnCache.size() + " columns into white cache. version=" + dataCloudVersion);
+        }).run();
     }
 
     private void initWatcher() {

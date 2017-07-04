@@ -61,7 +61,9 @@ public class AMStatsHQDunsFunction2 extends BaseOperation<Map> //
                     + " should both be valid numbers: " + e.getMessage());
         }
 
-        functionCall.getOutputCollector().add(new Tuple(hqDuns));
+        if (hqDuns != null) {
+            functionCall.getOutputCollector().add(new Tuple(hqDuns));
+        }
     }
 
     static String calculateHQDuns(int subIndicator, int statusCode, //

@@ -135,7 +135,7 @@ public class WatcherCache<K, V> {
                 cache.put(key, val);
             }
         } catch (Exception e) {
-            log.error("Failed to load WatcherCache " + cacheName + " using key " + key);
+            log.error("Failed to load WatcherCache " + cacheName + " using key " + key, e);
         }
     }
 

@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMaster
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DUNS;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.GDUNS;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS_DOMAIN;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.STATUS_CODE;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.SUBSIDIARY_INDICATOR;
 
@@ -28,11 +29,20 @@ public class AMStatsHQDuns extends ConfigurableFlowBase<TransformerConfig> {
 
     public static final String BEAN_NAME = "amStatsHQDuns";
     public static final String TRANSFORMER_NAME = "amStatsHQDunsCalculator";
+    private static final String latticeAccountId = InterfaceName.LatticeAccountId.name();
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        Node am = addSource(parameters.getBaseTables().get(0));
-        am = am.retain(new FieldList(DataCloudConstants.LATTIC_ID, //
+        Node am, amBkt;
+        if (parameters.getBaseTables().size() > 1) {
+            amBkt = addSource(parameters.getBaseTables().get(0)).renamePipe("ambkt");
+            am = addSource(parameters.getBaseTables().get(1));
+        } else {
+            am = addSource(parameters.getBaseTables().get(0));
+            amBkt = am;
+        }
+        String amId = am.getFieldNames().contains(latticeAccountId)? latticeAccountId : DataCloudConstants.LATTIC_ID;
+        am = am.retain(new FieldList(amId, //
                 DOMAIN, //
                 STATUS_CODE, //
                 SUBSIDIARY_INDICATOR, //
@@ -45,8 +55,14 @@ public class AMStatsHQDuns extends ConfigurableFlowBase<TransformerConfig> {
                 .filter(DOMAIN + " != null && " + STATUS_CODE + " != null && " + SUBSIDIARY_INDICATOR + " != null && "
                         + DUNS + " != null", new FieldList(DOMAIN, STATUS_CODE, SUBSIDIARY_INDICATOR, DUNS))
                 .renamePipe("hqduns");
-        Node result = addHQDunsValues(nodeWithProperCodes);
-        return result.retain(InterfaceName.LatticeAccountId.name(), HQ_DUNS);
+        Node hqduns = addHQDunsValues(nodeWithProperCodes);
+        hqduns = hqduns.rename(new FieldList(DOMAIN), new FieldList(HQ_DUNS_DOMAIN));
+        hqduns = hqduns.retain(latticeAccountId, HQ_DUNS_DOMAIN, HQ_DUNS);
+        if (parameters.getBaseTables().size() > 1) {
+            return amBkt.leftJoin(new FieldList(latticeAccountId), hqduns, new FieldList(latticeAccountId));
+        } else {
+            return hqduns;
+        }
     }
 
     private Node addHQDunsValues(Node nodeWithProperCodes) {

@@ -41,3 +41,4 @@ source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 . $WSHOME/le-dev/scripts/setupdb_globalauth.sh
 . $WSHOME/le-dev/scripts/setupdb_quartzdb.sh
 . $WSHOME/le-dev/scripts/setupzk.sh
+. $WSHOME/le-dev/scripts/setuphdfs.sh

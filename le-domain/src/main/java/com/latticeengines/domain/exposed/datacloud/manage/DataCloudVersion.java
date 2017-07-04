@@ -51,16 +51,24 @@ public class DataCloudVersion implements HasPid, Serializable {
     private Date createDate;
 
     @JsonIgnore
-    @Column(name = "AccountMasterHdfsVersion")
+    @Column(name = "AccountMasterHdfsVersion", length = 100)
     private String accountMasterHdfsVersion;
 
     @JsonIgnore
-    @Column(name = "AccountLookupHdfsVersion")
+    @Column(name = "AccountLookupHdfsVersion", length = 100)
     private String accountLookupHdfsVersion;
 
     @JsonIgnore
     @Column(name = "AMBucketedRedShiftTable")
     private String amBucketedRedShiftTable;
+
+    @JsonIgnore
+    @Column(name = "SegmentStatsVersion", length = 100)
+    private String segmentStatsVersion;
+
+    @JsonIgnore
+    @Column(name = "EnrichmentStatsVersion", length = 100)
+    private String enrichmentStatsVersion;
 
     @JsonIgnore
     @Column(name = "DynamoTableSignature", length = 100)
@@ -159,6 +167,22 @@ public class DataCloudVersion implements HasPid, Serializable {
 
     public void setAmBucketedRedShiftTable(String amBucketedRedShiftTable) {
         this.amBucketedRedShiftTable = amBucketedRedShiftTable;
+    }
+
+    public String getSegmentStatsVersion() {
+        return segmentStatsVersion;
+    }
+
+    public void setSegmentStatsVersion(String segmentStatsVersion) {
+        this.segmentStatsVersion = segmentStatsVersion;
+    }
+
+    public String getEnrichmentStatsVersion() {
+        return enrichmentStatsVersion;
+    }
+
+    public void setEnrichmentStatsVersion(String enrichmentStatsVersion) {
+        this.enrichmentStatsVersion = enrichmentStatsVersion;
     }
 
     public Date getMetadataRefreshDate() {

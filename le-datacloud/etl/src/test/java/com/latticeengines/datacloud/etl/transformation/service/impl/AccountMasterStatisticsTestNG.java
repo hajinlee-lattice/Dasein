@@ -1,6 +1,9 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 
+import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS_DOMAIN;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +18,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.transformation.AMStatsHQDuns;
-import com.latticeengines.datacloud.dataflow.transformation.AMStatsHQDunsJoin;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -27,7 +29,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
     private static final Log log = LogFactory.getLog(AccountMasterStatisticsTestNG.class);
 
     @Override
-    @Test(groups = "pipeline1", enabled = false)
+    @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() throws Exception {
         uploadBaseSourceFile(accountMaster.getSourceName(), "AMBucketTest_AM", baseSourceVersion);
         TransformationProgress progress = createNewProgress();
@@ -49,7 +51,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
 
     @Override
     protected String getTargetSourceName() {
-        return "AccountMasterStatistics";
+        return "AccountMasterEnrichmentStats";
     }
 
     @Override
@@ -62,14 +64,12 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             TransformationStepConfig profile = profile();
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig hqduns = hqduns();
-            TransformationStepConfig hqdunsJoin = hqdunsJoin();
             TransformationStepConfig calcStats = calcStats();
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
                     profile, //
                     bucket, //
                     hqduns, //
-                    hqdunsJoin, //
                     calcStats
             );
             // -----------
@@ -98,6 +98,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
     private TransformationStepConfig hqduns() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setBaseSources(Collections.singletonList("AccountMaster"));
+        step.setInputSteps(Collections.singletonList(1));
         step.setTransformer(AMStatsHQDuns.TRANSFORMER_NAME);
         TransformerConfig conf = new TransformerConfig();
         String confStr = setDataFlowEngine(JsonUtils.serialize(conf), "TEZ");
@@ -105,18 +106,10 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         return step;
     }
 
-    private TransformationStepConfig hqdunsJoin() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(2, 1));
-        step.setTransformer(AMStatsHQDunsJoin.TRANSFORMER_NAME);
-        step.setConfiguration("{}");
-        return step;
-    }
-
     @Override
     protected TransformationStepConfig calcStats() {
         TransformationStepConfig step = super.calcStats();
-        step.setInputSteps(Arrays.asList(0, 3));
+        step.setInputSteps(Arrays.asList(0, 2));
         CalculateStatsConfig config = new CalculateStatsConfig();
         Map<String, List<String>> dims = new HashMap<>();
         dims.put("LE_COUNTRY", null);
@@ -124,7 +117,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         dims.put("LE_REVENUE_RANGE", null);
         dims.put("LE_EMPLOYEE_RANGE", null);
         config.setDimensionGraph(dims);
-        config.setDedupFields(Collections.singletonList("HQ_DUNS"));
+        config.setDedupFields(Arrays.asList(HQ_DUNS, HQ_DUNS_DOMAIN));
         String confStr = setDataFlowEngine(JsonUtils.serialize(config), "TEZ");
         step.setConfiguration(confStr);
         step.setTargetSource("AccountMasterStatistics");

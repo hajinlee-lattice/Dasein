@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.dataflow.amstats;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTICE_ACCOUNT_ID;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.LATTIC_ID;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DDUNS;
+import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DOMAIN;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.DUNS;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.GDUNS;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS;
@@ -45,15 +46,16 @@ public class AMStatsHQDunsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 Pair.of(SUBSIDIARY_INDICATOR, String.class), //
                 Pair.of(DUNS, String.class), //
                 Pair.of(DDUNS, String.class), //
-                Pair.of(GDUNS, String.class)//
+                Pair.of(GDUNS, String.class), //
+                Pair.of(DOMAIN, String.class) //
         );
         Object[][] data = new Object[][] { //
-                { 1, "0", "0", "duns", "dduns", "gduns" }, // hqduns = duns
-                { 2, "1", "0", "duns", "dduns", "gduns" }, // hqduns = dduns
-                { 3, "1", "0", "duns", null, "gduns" },    // hqduns = gduns
-                { 4, "1", "3", "duns", "dduns", "gduns" }, // hqduns = duns
-                { 5, "0", "3", "duns", "duns", "gduns" },  // hqduns = duns
-                { 6, "0", "3", "duns", "dduns", "gduns" }, // hqduns = null
+                { 1, "0", "0", "duns", "dduns", "gduns", "1.com" }, // hqduns = duns
+                { 2, "1", "0", "duns", "dduns", "gduns", "2.com" }, // hqduns = dduns
+                { 3, "1", "0", "duns", null, "gduns", "3.com" },    // hqduns = gduns
+                { 4, "1", "3", "duns", "dduns", "gduns", "4.com" }, // hqduns = duns
+                { 5, "0", "3", "duns", "duns", "gduns", "5.com" },  // hqduns = duns
+                { 6, "0", "3", "duns", "dduns", "gduns", "6.com" }, // hqduns = null
         };
 
         uploadDataToSharedAvroInput(data, fields);
