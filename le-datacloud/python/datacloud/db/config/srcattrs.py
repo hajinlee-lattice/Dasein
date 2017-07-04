@@ -273,12 +273,11 @@ def register_am(conn):
         conn.commit()
 
 
-def execute():
-    datacloud_version = '2.0.4'
+def execute(version):
     pwd = decrypt(b'1AZy8-CiCvVE81AL66tHuqT6G5qwbD0zIOY1hBs45Po=')
     conn = MySQLdb.connect(host="127.0.0.1", user="root", passwd=pwd)
     create_table(conn)
-    register_amprofile(conn, datacloud_version)
+    register_amprofile(conn, version)
     register_am(conn)
     conn.close()
 
