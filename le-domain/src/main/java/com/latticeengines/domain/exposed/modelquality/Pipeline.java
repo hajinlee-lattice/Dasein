@@ -186,6 +186,11 @@ public class Pipeline implements HasName, HasPid, Fact, Dimension, Serializable,
     }
 
     @JsonIgnore
+    public void setPipelineToPipelineSteps(List<PipelineToPipelineSteps> pipelineSteps) {
+        this.pipelineSteps = pipelineSteps;
+    }
+
+    @JsonIgnore
     public List<PipelineToPipelineSteps> getPipelineToPipelineSteps() {
         return pipelineSteps;
     }

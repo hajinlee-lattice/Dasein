@@ -166,6 +166,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
             ptoPStep.setPipelineStep(step);
             pToPSteps.add(ptoPStep);
         }
+        pipeline.setPipelineToPipelineSteps(pToPSteps);
 
         // Now that steps have been validated and created, create the pipeline
         // and the associations
@@ -180,7 +181,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
             throw new RuntimeException(e);
         }
 
-        return p;
+        return pipelineEntityMgr.findByName(pipelineName);
     }
 
     private void setPipelineProperties(Pipeline pipeline, String pipelineJson) {
