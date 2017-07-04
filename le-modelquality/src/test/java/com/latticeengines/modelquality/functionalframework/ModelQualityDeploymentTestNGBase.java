@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.modelquality.service.AnalyticPipelineService;
 import com.latticeengines.modelquality.service.ModelRunService;
 import com.latticeengines.modelquality.service.impl.PipelineStepType;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
 import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
@@ -57,6 +58,9 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
     @Autowired
     protected ModelQualityProxy modelQualityProxy;
+
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Value("${common.test.pls.url}")
     protected String plsDeployedHostPort;
@@ -167,6 +171,9 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                     ClassLoader.getSystemResource("com/latticeengines/modelquality/functionalframework/propdata.json")
                             .getFile()));
             propData = JsonUtils.deserialize(propDataStr, PropData.class);
+            String dataCloudVersion = columnMetadataProxy.latestVersion("2.0").getVersion();
+            propData.setDataCloudVersion(dataCloudVersion);
+            log.info("Use DataCloudVersion=" + dataCloudVersion);
             PropData propDataAlreadyExists = propDataEntityMgr.findByName(propData.getName());
             if (propDataAlreadyExists != null) {
                 log.info(String.format("Attempting to delete PropData \"%s\"", propDataAlreadyExists.getName()));

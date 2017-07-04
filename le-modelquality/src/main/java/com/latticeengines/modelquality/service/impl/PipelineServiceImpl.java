@@ -171,10 +171,6 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         // and the associations
         pipelineEntityMgr.create(pipeline);
 
-        for (PipelineToPipelineSteps ptoPStep: pToPSteps) {
-            pipelineToPipelineStepsEntityMgr.createOrUpdate(ptoPStep);
-        }
-
         Pipeline p = pipelineEntityMgr.findByName(pipelineName);
         try {
             String pipelineJsonHdfsPath = createPipelineInHdfs(p);
