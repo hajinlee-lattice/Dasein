@@ -112,6 +112,13 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, dpHdfsPath, ".");
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "dataplatform", dpHdfsPath);
 
+        String log4jPath = String
+                .format("/app/%s/conf/log4j.properties", versionManager.getCurrentVersionInStack(stackName)).toString();
+        FileUtils.deleteQuietly(new File("log4j.properties"));
+        HdfsUtils.copyHdfsToLocal(yarnConfiguration, log4jPath, ".");
+        FileUtils.deleteQuietly(new File(".log4j.properties.crc"));
+        HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "log4j.properties", log4jPath);
+
         String lepropertiesPath = String.format("/app/%s/conf/latticeengines.properties",
                 versionManager.getCurrentVersionInStack(stackName));
         Properties properties = regenerateProperties(lepropertiesPath);

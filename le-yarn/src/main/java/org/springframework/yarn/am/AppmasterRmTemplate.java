@@ -17,6 +17,7 @@ package org.springframework.yarn.am;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +33,7 @@ import org.apache.hadoop.yarn.api.protocolrecords.FinishApplicationMasterRequest
 import org.apache.hadoop.yarn.api.protocolrecords.FinishApplicationMasterResponse;
 import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterRequest;
 import org.apache.hadoop.yarn.api.protocolrecords.RegisterApplicationMasterResponse;
+import org.apache.hadoop.yarn.api.records.ResourceRequest;
 import org.apache.hadoop.yarn.client.api.AMRMClient;
 import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -51,7 +53,7 @@ import org.springframework.yarn.rpc.YarnRpcCallback;
  */
 public class AppmasterRmTemplate extends YarnRpcAccessor<ApplicationMasterProtocol> implements AppmasterRmOperations {
 
-    private static final Log log = LogFactory.getLog(AppmasterCmTemplate.class);
+    private static final Log log = LogFactory.getLog(AppmasterRmTemplate.class);
 
     private AMRMClient<ContainerRequest> amRMClient;
 
@@ -104,6 +106,15 @@ public class AppmasterRmTemplate extends YarnRpcAccessor<ApplicationMasterProtoc
         return execute(new YarnRpcCallback<AllocateResponse, ApplicationMasterProtocol>() {
             @Override
             public AllocateResponse doInYarn(ApplicationMasterProtocol proxy) throws YarnException, IOException {
+                if (!request.getAskList().isEmpty()) {
+                    List<ResourceRequest> resourceRequests = request.getAskList();
+                    for (ResourceRequest resourceRequest : resourceRequests) {
+                        ContainerRequest containerRequest = new ContainerRequest(resourceRequest.getCapability(), null,
+                                null, resourceRequest.getPriority(), resourceRequest.getRelaxLocality(),
+                                resourceRequest.getNodeLabelExpression());
+                        amRMClient.addContainerRequest(containerRequest);
+                    }
+                }
                 return amRMClient.allocate(request.getProgress());
             }
         });

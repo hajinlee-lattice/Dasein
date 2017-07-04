@@ -18,9 +18,9 @@ import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.yarn.am.AppmasterRmTemplate;
 import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
+import org.springframework.yarn.am.allocate.DefaultContainerAllocator;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
@@ -53,7 +53,8 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     protected void onInit() throws Exception {
         log.info("Initializing application.");
         super.onInit();
-        monitor = new ProgressMonitor(super.getAllocator());
+        setTemplate(((DefaultContainerAllocator) getAllocator()).getRmTemplate());
+        monitor = new ProgressMonitor(getAllocator());
         yarnConfiguration = super.getConfiguration();
     }
 
@@ -81,17 +82,7 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
 
     @Override
     public void submitApplication() {
-        try {
-            AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
-            try {
-                rmTemplate.afterPropertiesSet();
-            } catch (Exception e) {
-                log.error("AppmasterRmTemplate refresh properties failed.");
-            }
-            super.submitApplication();
-        } catch (Exception e) {
-            throw e;
-        }
+        super.submitApplication();
         final String appId = getApplicationAttemptId().getApplicationId().toString();
 
         log.info("Application submitted with Application id = " + appId);
@@ -162,17 +153,7 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
 
     @Override
     protected void doStop() {
-        try {
-            AppmasterRmTemplate rmTemplate = (AppmasterRmTemplate) getTemplate();
-            try {
-                rmTemplate.afterPropertiesSet();
-            } catch (Exception e) {
-                log.error("AppmasterRmTemplate refresh properties failed.");
-            }
-            super.doStop();
-        } catch (Exception e) {
-            throw e;
-        }
+        super.doStop();
         cleanupJobDir();
         // Shut down monitor
         monitor.stop();

@@ -15,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.util.RackResolver;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
@@ -27,7 +26,7 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.yarn.am.AppmasterService;
 import org.springframework.yarn.am.YarnAppmaster;
 import org.springframework.yarn.am.allocate.AbstractAllocator;
-import org.springframework.yarn.am.container.AbstractLauncher;
+import org.springframework.yarn.am.allocate.DefaultContainerAllocator;
 import org.springframework.yarn.batch.event.JobExecutionEvent;
 import org.springframework.yarn.batch.partition.AbstractPartitionHandler;
 import org.springframework.yarn.batch.repository.BatchAppmasterService;
@@ -79,11 +78,8 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
     @Override
     protected void onInit() throws Exception {
         super.onInit();
-        if (getLauncher() instanceof AbstractLauncher) {
-            ((AbstractLauncher) getLauncher()).addInterceptor(this);
-        }
+        setTemplate(((DefaultContainerAllocator) getAllocator()).getRmTemplate());
         yarnConfiguration = getConfiguration();
-        RackResolver.init(yarnConfiguration);
     }
 
     @Override

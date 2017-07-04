@@ -60,7 +60,6 @@
 
     <context:annotation-config />
     <context:component-scan base-package="com.latticeengines.yarn.exposed.service,com.latticeengines.yarn.exposed.client"/>
-    <yarn:client app-name="pythonAppMaster" />
     <!-- bean id="yarnService" class="com.latticeengines.yarn.exposed.service.impl.YarnServiceImpl"/-->
 
 </beans>

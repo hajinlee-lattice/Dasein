@@ -181,7 +181,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
                 // "-Xdebug -Xnoagent -Djava.compiler=NONE
-                // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
+                // -Xrunjdwp:transport=dt_socket,address=4023,server=y,suspend=y",
                 "-Dlog4j.configuration=log4j.properties", getJacocoOpt(containerProperties), //
                 getXmxSetting(containerProperties), //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
