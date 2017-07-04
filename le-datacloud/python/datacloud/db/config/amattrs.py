@@ -2,8 +2,8 @@ from __future__ import absolute_import
 
 import MySQLdb
 import logging
-import csv
 from datacloud.common.cipher import decrypt
+from datacloud.common.google import read_sheet
 
 logger = logging.getLogger(__name__)
 
@@ -81,32 +81,31 @@ def create_table(conn):
         cursor.execute(sql)
         conn.commit()
 
-def read_dnb_attributes(conn, file_name):
+def read_dnb_attributes(conn):
     ex_attrs = []
-    with open(file_name,'rb') as csvFile:
-        reader = csv.DictReader(csvFile, delimiter=',', quotechar = '"')
-        for row in reader: 
-            if row["Add To New Account Master"].strip().replace("\t","") == "Y":
-                attr = []
-                attr.append(row["Internal Name"].strip().replace("\t",""))
-                attr.append(row["Display Name"].strip().replace("\t",""))
-                attr.append(row["Description"].strip().replace("\t",""))
-                attr.append(row["Data Type"].strip().replace("\t",""))
-                attr.append(row["Category"].strip().replace("\t",""))
-                attr.append('Other')
-                attr.append(row["DnB Export Restriction SFDC"].strip().replace("\t",""))
-                attr.append(row["DnB Export Restriction - All"].strip().replace("\t",""))
-                attr.append(row["Model Tag"].strip().replace("\t",""))
-                attr.append(row["Insights Tag"].strip().replace("\t",""))
-                attr.append(row["Internal Enrichment Tag"].strip().replace("\t",""))
-                attr.append(row["External Enchrichment Tag"].strip().replace("\t",""))
-                attr.append(row["FundamentalType"].strip().replace("\t",""))
-                attr.append(row["Statistical Type"].strip().replace("\t",""))
-                attr.append(row["DisplayDiscretizationStrategy"].strip().replace("\t",""))
-                attr.append(row["Availability"].strip().replace("\t",""))
-                attr.append(row["Possible Values Code Table"].strip().replace("\t",""))
-                attr.append(row["Segmentation Tag"].strip().replace("\t",""))
-                ex_attrs.append(attr)
+    sheet_data = read_sheet('DnB Attributes')
+    for row in sheet_data:
+        if row["Add To New Account Master"].strip().replace("\t","") == "Y":
+            attr = []
+            attr.append(row["Internal Name"].strip().replace("\t",""))
+            attr.append(row["Display Name"].strip().replace("\t",""))
+            attr.append(row["Description"].strip().replace("\t",""))
+            attr.append(row["Data Type"].strip().replace("\t",""))
+            attr.append(row["Category"].strip().replace("\t",""))
+            attr.append('Other')
+            attr.append(row["DnB Export Restriction SFDC"].strip().replace("\t",""))
+            attr.append(row["DnB Export Restriction - All"].strip().replace("\t",""))
+            attr.append(row["Model Tag"].strip().replace("\t",""))
+            attr.append(row["Insights Tag"].strip().replace("\t",""))
+            attr.append(row["Internal Enrichment Tag"].strip().replace("\t",""))
+            attr.append(row["External Enchrichment Tag"].strip().replace("\t",""))
+            attr.append(row["FundamentalType"].strip().replace("\t",""))
+            attr.append(row["StatisticalType"].strip().replace("\t",""))
+            attr.append(row["DisplayDiscretizationStrategy"].strip().replace("\t",""))
+            attr.append(row["Availability"].strip().replace("\t",""))
+            attr.append(row["Possible Values Code Table"].strip().replace("\t",""))
+            attr.append(row["Segmentation Tag"].strip().replace("\t",""))
+            ex_attrs.append(attr)
     ex_attrs = sorted(ex_attrs,key=lambda x: x[0])
 
     stmts = []
@@ -163,13 +162,14 @@ def read_dnb_attributes(conn, file_name):
 
     with conn.cursor() as cursor:
         for n, s in stmts:
-            print "Adding DnB attribute [%s]" % n
+            logger.info("Adding DnB attribute [%s]" % n)
             cursor.execute(s)
 
         conn.commit()
 
 
 def dnb_row_to_item(row):
+    #TODO: convert row to dictionary
     item = {
         'InternalName': row[0] if row[0] != '' else None,
         'DisplayName': row[1] if row[1] != '' else None,
@@ -218,32 +218,31 @@ def dnb_row_to_item(row):
     return item
 
 
-def read_existing_attributes(conn, file_name):
+def read_existing_attributes(conn, sheet_name):
     ex_attrs = []
-    with open(file_name,'rb') as csvFile:
-        reader = csv.DictReader(csvFile, delimiter=',', quotechar = '"')
-        for row in reader: 
-            if row["Add To New Account Master"].strip().replace("\t","") == "Y":
-                attr = []
-                attr.append(row["ExternalColumnID"].strip().replace("\t",""))
-                attr.append(row["Display Name"].strip().replace("\t",""))
-                attr.append(row["Description"].strip().replace("\t",""))
-                attr.append(row["DataType"].strip().replace("\t",""))
-                attr.append(row["Category"].strip().replace("\t",""))
-                attr.append(row["SubCategory"].strip().replace("\t",""))
-                attr.append(row["Model Tag"].strip().replace("\t",""))
-                attr.append(row["Insights Tag"].strip().replace("\t",""))
-                attr.append(row["BIS Tag"].strip().replace("\t",""))
-                attr.append(row["Internal Enrichment Tag"].strip().replace("\t",""))
-                attr.append(row["External Enrichment Tag"].strip().replace("\t",""))
-                attr.append(row["EOL Tag"].strip().replace("\t",""))
-                attr.append(row["FundamentalType"].strip().replace("\t",""))
-                attr.append(row["StatisticalType"].strip().replace("\t",""))
-                attr.append(row["DisplayDiscretizationStrategy"].strip().replace("\t",""))
-                attr.append(row["Source"].strip().replace("\t",""))
-                attr.append(row["SourceColumnName"].strip().replace("\t",""))
-                attr.append(row["Segmentation Tag"].strip().replace("\t",""))
-                ex_attrs.append(attr)
+    sheet_data = read_sheet(sheet_name)
+    for row in sheet_data:
+        if row["Add To New Account Master"].strip().replace("\t","") == "Y":
+            attr = []
+            attr.append(row["ExternalColumnID"].strip().replace("\t",""))
+            attr.append(row["Display Name"].strip().replace("\t",""))
+            attr.append(row["Description"].strip().replace("\t",""))
+            attr.append(row["DataType"].strip().replace("\t",""))
+            attr.append(row["Category"].strip().replace("\t",""))
+            attr.append(row["SubCategory"].strip().replace("\t",""))
+            attr.append(row["Model Tag"].strip().replace("\t",""))
+            attr.append(row["Insights Tag"].strip().replace("\t",""))
+            attr.append(row["BIS Tag"].strip().replace("\t",""))
+            attr.append(row["Internal Enrichment Tag"].strip().replace("\t",""))
+            attr.append(row["External Enrichment Tag"].strip().replace("\t",""))
+            attr.append(row["EOL Tag"].strip().replace("\t",""))
+            attr.append(row["FundamentalType"].strip().replace("\t",""))
+            attr.append(row["StatisticalType"].strip().replace("\t",""))
+            attr.append(row["DisplayDiscretizationStrategy"].strip().replace("\t",""))
+            attr.append(row["Source"].strip().replace("\t",""))
+            attr.append(row["SourceColumnName"].strip().replace("\t",""))
+            attr.append(row["Segmentation Tag"].strip().replace("\t",""))
+            ex_attrs.append(attr)
     ex_attrs = sorted(ex_attrs,key=lambda x: x[15])
 
     stmts = []
@@ -299,12 +298,14 @@ def read_existing_attributes(conn, file_name):
 
     with conn.cursor() as cursor:
         for n, s, q in stmts:
-            print "Adding %s attribute [%s]" % (s, n)
+            source = s if s is not None else 'Derived'
+            logger.info("Adding %s attribute [%s]" % (source, n))
             cursor.execute(q)
         conn.commit()
 
 
 def existing_row_to_item(row):
+    #TODO: convert row to dictionary
     item = {
         'InternalName': row[0] if row[0] != '' else None,
         'DisplayName': row[1] if row[1] != '' else None,
@@ -422,9 +423,9 @@ def execute():
     conn = MySQLdb.connect(host="127.0.0.1", user="root", passwd=pwd,db="LDC_ConfigDB")
 
     create_table(conn)
-    read_dnb_attributes(conn, 'Account Master Attribute Metadata - DnB Attributes.csv')
-    read_existing_attributes(conn, 'Account Master Attribute Metadata - Existing Attributes.csv')
-    read_existing_attributes(conn, 'Account Master Attribute Metadata - Derived Attributes.csv')
+    read_dnb_attributes(conn)
+    read_existing_attributes(conn, 'Existing Attributes')
+    read_existing_attributes(conn, 'Derived Attributes')
     verify_am_attrs(conn)
     conn.close()
 

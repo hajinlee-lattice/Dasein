@@ -29,7 +29,9 @@ conda install -y pymssql pycrypto
 
 conda install -y -c bioconda mysqlclient
 
-pip install argparse pyyaml pytest pytest-pythonpath
+pip install argparse pyyaml pytest pytest-pythonpath pytest-xdist
+
+pip install --upgrade google-api-python-client
 
 source ${ANACONDA_HOME}/bin/deactivate ${ENV_NAME}
 
