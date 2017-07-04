@@ -1,5 +1,6 @@
 package com.latticeengines.quartz.entitymanager.impl;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,8 +12,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
@@ -30,6 +29,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -97,8 +99,9 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                 }
 
                 String jobArgs = jobConfig.getJobArguments();
-                JSONObject json = new JSONObject(jobArgs);
-                String jobType = json.getString(JOB_TYPE);
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jsonNode = mapper.readValue(jobArgs, JsonNode.class);
+                String jobType = jsonNode.get(JOB_TYPE).textValue();
 
                 if (checkJobBean) {
                     QuartzJobArguments quartzJobArgs = new QuartzJobArguments();
@@ -109,9 +112,12 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                         throw new LedpException(LedpCode.LEDP_30001, new String[]{jobType});
                     }
                 }
-
-                json.remove(JOB_TYPE);
-                String jobArguments = json.toString();
+                if (jsonNode instanceof ObjectNode) {
+                    ObjectNode object = (ObjectNode) jsonNode;
+                    object.remove(JOB_TYPE);
+                }
+                String jobArguments = jsonNode.toString();
+                log.info(String.format("Adding job with arguments: %s", jobArguments));
                 JobDetail jobDetail = JobBuilder
                         .newJob(com.latticeengines.quartz.service.CustomQuartzJob.class)
                         .withIdentity(jobKey)
@@ -136,7 +142,7 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
         } catch (SchedulerException e) {
             added = false;
             log.error(e.getMessage());
-        } catch (JSONException e) {
+        } catch (IOException e) {
             added = false;
             log.error(e.getMessage());
         }

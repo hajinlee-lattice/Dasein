@@ -1,8 +1,9 @@
 package com.latticeengines.quartz.service;
 
-import org.codehaus.jettison.json.JSONObject;
-
 import java.util.concurrent.Callable;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestQuartzJobCallable implements Callable<Boolean> {
 
@@ -21,9 +22,10 @@ public class TestQuartzJobCallable implements Callable<Boolean> {
         try {
             String printArg = null;
             if (jobArgument != null && !jobArgument.isEmpty()) {
-                JSONObject json = new JSONObject(jobArgument);
-                if (json.has("printMsg")) {
-                    printArg = json.getString("printMsg");
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jsonNode = mapper.readValue(jobArgument, JsonNode.class);
+                if (jsonNode.has("printMsg")) {
+                    printArg = jsonNode.get("printMsg").textValue();
                 }
             }
             System.out.println(String.format("%s, print argument: %s, concurrent num: %d", outputMsg, printArg,
