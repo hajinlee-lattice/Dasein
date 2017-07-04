@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "contacts", description = "REST resource for serving data about contacts")
 @RestController
 @RequestMapping("/contacts")
-public class ContactResource extends BaseFrontEndEntityResource {
+public class ContactCDLResource extends BaseFrontEndEntityResource {
 
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
