@@ -76,6 +76,7 @@ window.onload = function() {
   const ui = SwaggerUIBundle({
     urls: apis,
     dom_id: '#swagger-ui',
+    docExpansion: 'none',
     presets: [
       SwaggerUIBundle.presets.apis,
       SwaggerUIStandalonePreset
