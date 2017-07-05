@@ -35,13 +35,14 @@ def get_credentials():
     store = Storage(credential_path)
     credentials = store.get()
     if not credentials or credentials.invalid:
+        logger.debug('Obtaining credentials...')
         project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         client_file = os.path.join(project_dir, 'conf', 'client_secret.json')
         flow = client.flow_from_clientsecrets(client_file, _READONLY_SCOPES)
         flow.user_agent = _APPLICATION_NAME
-        flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+        flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args(args=[])
         credentials = tools.run_flow(flow, store, flags)
-        print 'Storing credentials to ' + credential_path
+        logger.info('Storing credentials to ' + credential_path)
     return credentials
 
 
