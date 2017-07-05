@@ -69,7 +69,7 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
         jobConfig.setJobTimeout(30);
         jobConfig.setQueryApi(testJobQueryApi);
         jobConfig.setCheckJobBeanUrl(testJobCheckBeanUrl);
-        jobConfig.setJobArguments("{" + "  \"jobType\": \"testQuartzJob\"," + "  \"printMsg\": \"Hello World\"," + "}");
+        jobConfig.setJobArguments("{" + "  \"jobType\": \"testQuartzJob\"," + "  \"printMsg\": \"Hello World\"" + "}");
         schedulerEntityMgr.addJob(JOB_GROUP, jobConfig);
     }
 

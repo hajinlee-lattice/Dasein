@@ -60,7 +60,7 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
         jobTest.setCheckJobBeanUrl(testJobCheckBeanUrl);
         jobTest.setJobArguments("{" +
                 "  \"jobType\": \"testQuartzJob\"," +
-                "  \"printMsg\": \"Hello World\"," + "}");
+                "  \"printMsg\": \"Hello World\"" + "}");
         Boolean success = quartzSchedulerProxy.addJob("groupTestNG", jobTest);
         assertEquals(success, Boolean.TRUE);
     }
@@ -95,7 +95,7 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
         jobTest.setCheckJobBeanUrl(testJobCheckBeanUrl);
         jobTest.setJobArguments("{" +
                 "  \"jobType\": \"testQuartzJob\"," +
-                "  \"printMsg\": \"Hello World\"," + "}");
+                "  \"printMsg\": \"Hello World\"" + "}");
         Boolean success = quartzSchedulerProxy.addJob("groupTestNG", jobTest);
         assertEquals(success, Boolean.FALSE);
     }

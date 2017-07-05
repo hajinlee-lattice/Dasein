@@ -139,12 +139,9 @@ public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
                 updateJobSource(tenantId, jobConfig.getJobName(), sourceType);
                 added = true;
             }
-        } catch (SchedulerException e) {
+        } catch (SchedulerException|IOException e) {
             added = false;
-            log.error(e.getMessage());
-        } catch (IOException e) {
-            added = false;
-            log.error(e.getMessage());
+            log.error("Failed to add job.", e);
         }
         return added;
     }
