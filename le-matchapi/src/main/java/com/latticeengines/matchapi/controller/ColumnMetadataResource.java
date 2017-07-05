@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -77,17 +76,6 @@ public class ColumnMetadataResource {
         ColumnMetadataService columnMetadataService = beanDispatcher
                 .getColumnMetadataService(dataCloudVersion);
         return columnMetadataService.findAll(dataCloudVersion);
-    }
-
-    @ApiIgnore
-    @RequestMapping(value = "/", method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ApiOperation(value = "Update the columns for a specific cloud version")
-    public void updateColumnsForDataCloudVersion(
-            @RequestParam(value = "datacloudversion", required = true) String dataCloudVersion,
-            @RequestBody List<ColumnMetadata> columnMetadatas) {
-        ColumnMetadataService columnMetadataService = beanDispatcher
-                .getColumnMetadataService(dataCloudVersion);
-        columnMetadataService.updateColumnMetadatas(dataCloudVersion, columnMetadatas);
     }
 
     @ApiIgnore

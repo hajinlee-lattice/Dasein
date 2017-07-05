@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMMedataUpdate;
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
 import java.util.ArrayList;
@@ -15,12 +14,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
@@ -40,22 +37,6 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     @Override
     public List<E> scan(String dataCloudVersion) {
         return getMetadataColumnEntityMgr().findAll(dataCloudVersion);
-    }
-
-    @Override
-    public void updateMetadataColumns(String dataCloudVersion, List<ColumnMetadata> columnMetadatas) {
-        List<E> metadataColumns = new ArrayList<>();
-        for (ColumnMetadata columnMetadata : columnMetadatas) {
-            metadataColumns.add(updateSavedMetadataColumn(dataCloudVersion, columnMetadata));
-        }
-        getMetadataColumnEntityMgr().updateMetadataColumns(dataCloudVersion, metadataColumns);
-        NodeWatcher.updateWatchedData(AMMedataUpdate.name(), NamingUtils.getFormatedDate());
-        // pause 2 sec for watchers to update
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            log.warn(e);
-        }
     }
 
     @Override
@@ -164,15 +145,9 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     private void initWatcher() {
-        // both AMRelease and AMMetadataUpdate can trigger refreshing caches
         NodeWatcher.registerWatcher(AMRelease.name());
         NodeWatcher.registerListener(AMRelease.name(), () -> {
             log.info("ZK watcher " + AMRelease.name() + " changed, updating white and black columns caches ...");
-            refreshCaches();
-        });
-        NodeWatcher.registerWatcher(AMMedataUpdate.name());
-        NodeWatcher.registerListener(AMMedataUpdate.name(), () -> {
-            log.info("ZK watcher " + AMMedataUpdate.name() + " changed, updating white and black columns caches ...");
             refreshCaches();
         });
         refreshCaches();
@@ -185,7 +160,5 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     abstract protected ConcurrentMap<String, ConcurrentSkipListSet<String>> getBlackColumnCache();
 
     abstract protected String getLatestVersion();
-
-    abstract protected E updateSavedMetadataColumn(String dataCloudVersion, ColumnMetadata columnMetadata);
 
 }

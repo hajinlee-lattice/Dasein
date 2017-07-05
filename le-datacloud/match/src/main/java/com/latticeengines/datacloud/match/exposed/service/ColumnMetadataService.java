@@ -22,8 +22,6 @@ public interface ColumnMetadataService extends HasDataCloudVersion {
 
     List<ColumnMetadata> findAll(String dataCloudVersion);
 
-    void updateColumnMetadatas(String dataCloudVersion, List<ColumnMetadata> columnMetadatas);
-
     AttributeRepository getAttrRepo(String dataCloudVersion);
 
 }

@@ -84,13 +84,6 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     }
 
     @Override
-    public void updateColumnMetadatas(String dataCloudVersion,
-            List<ColumnMetadata> columnMetadatas) {
-        validateColumnMetadatas(dataCloudVersion, columnMetadatas);
-        getMetadataColumnService().updateMetadataColumns(dataCloudVersion, columnMetadatas);
-    }
-
-    @Override
     public Schema getAvroSchema(Predefined selectionName, String recordName,
             String dataCloudVersion) {
         List<ColumnMetadata> columnMetadatas = fromPredefinedSelection(selectionName,

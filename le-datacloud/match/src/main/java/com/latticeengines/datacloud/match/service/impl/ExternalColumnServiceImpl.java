@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
-import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 @Component("externalColumnService")
 public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<ExternalColumn> {
@@ -51,11 +48,5 @@ public class ExternalColumnServiceImpl extends BaseMetadataColumnServiceImpl<Ext
     @Override
     protected String getLatestVersion() {
         return latstRtsCache;
-    }
-
-    @Override
-    protected ExternalColumn updateSavedMetadataColumn(String dataCloudVersion, ColumnMetadata columnMetadata) {
-        // no-op
-        return externalColumnEntityMgr.findById(columnMetadata.getColumnId(), dataCloudVersion);
     }
 }
