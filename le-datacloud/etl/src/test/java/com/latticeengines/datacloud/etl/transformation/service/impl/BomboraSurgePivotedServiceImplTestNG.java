@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
@@ -195,9 +194,28 @@ public class BomboraSurgePivotedServiceImplTestNG
         return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
     }
 
+    private Object[][] expected = { //
+            { "yahoo.com", 45, null, 25, "B", null, "A", "Medium", null, "Low" },//
+            { "google.com", 75, 55, null, "A", "B", null, "Very High", "High", null }
+    };
+
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         prepareBitCodeBook();
+        Map<String, Map<String, Object>> expectedMap = new HashMap<>();
+        for (Object[] data : expected) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("BmbrSurge_2in1PCs_CompScore", data[1]);
+            map.put("BmbrSurge_3DPrinting_CompScore", data[2]);
+            map.put("BmbrSurge_401k_CompScore", data[3]);
+            map.put("BmbrSurge_2in1PCs_BuckScore", data[4]);
+            map.put("BmbrSurge_3DPrinting_BuckScore", data[5]);
+            map.put("BmbrSurge_401k_BuckScore", data[6]);
+            map.put("BmbrSurge_2in1PCs_Intent", data[7]);
+            map.put("BmbrSurge_3DPrinting_Intent", data[8]);
+            map.put("BmbrSurge_401k_Intent", data[9]);
+            expectedMap.put((String) data[0], map);
+        }
         log.info("Start to verify records one by one.");
         int rowNum = 0;
         while (records.hasNext()) {
@@ -212,16 +230,11 @@ public class BomboraSurgePivotedServiceImplTestNG
                 encodedCompoScore = encodedCompoScore.toString();
             }
             if (StringUtils.isNotBlank((String) encodedCompoScore)) {
-                try {
-                    boolean[] bits = BitCodecUtils.decodeAll((String) encodedCompoScore);
-                    // log.info(Arrays.toString(bits));
-                    Map<String, Object> compoScores = compoScoreCodeBook.decode((String) encodedCompoScore,
-                            compoScoreDecodeFields);
-                    for (Map.Entry<String, Object> entry : compoScores.entrySet()) {
-                        log.info(String.format("%s: %s", entry.getKey(), entry.getValue()));
-                    }
-                } catch (IOException e) {
-                    log.error("Fail to decode encodedCompoScore: " + encodedCompoScore);
+                Map<String, Object> compoScores = compoScoreCodeBook.decode((String) encodedCompoScore,
+                        compoScoreDecodeFields);
+                for (Map.Entry<String, Object> entry : compoScores.entrySet()) {
+                    log.info(String.format("%s: %s", entry.getKey(), entry.getValue()));
+                    Assert.assertTrue(equals(entry.getValue(), expectedMap.get(domain).get(entry.getKey())));
                 }
             }
             Object encodedBucketCode = record.get("BmbrSurge_BucketCode");
@@ -229,16 +242,11 @@ public class BomboraSurgePivotedServiceImplTestNG
                 encodedBucketCode = encodedBucketCode.toString();
             }
             if (StringUtils.isNotBlank((String) encodedBucketCode)) {
-                try {
-                    boolean[] bits = BitCodecUtils.decodeAll((String) encodedBucketCode);
-                    // log.info(Arrays.toString(bits));
-                    Map<String, Object> bucketScores = bucketScoreCodeBook.decode((String) encodedBucketCode,
-                            bucketScoreDecodeFields);
-                    for (Map.Entry<String, Object> entry : bucketScores.entrySet()) {
-                        log.info(String.format("%s: %s", entry.getKey(), entry.getValue()));
-                    }
-                } catch (IOException e) {
-                    log.error("Fail to decode encodedBucketCode: " + encodedBucketCode);
+                Map<String, Object> bucketScores = bucketScoreCodeBook.decode((String) encodedBucketCode,
+                        bucketScoreDecodeFields);
+                for (Map.Entry<String, Object> entry : bucketScores.entrySet()) {
+                    log.info(String.format("%s: %s", entry.getKey(), entry.getValue()));
+                    Assert.assertTrue(equals(entry.getValue(), expectedMap.get(domain).get(entry.getKey())));
                 }
             }
             Object encodedIntent = record.get("BmbrSurge_Intent");
@@ -246,15 +254,10 @@ public class BomboraSurgePivotedServiceImplTestNG
                 encodedIntent = encodedIntent.toString();
             }
             if (StringUtils.isNotBlank((String) encodedIntent)) {
-                try {
-                    boolean[] bits = BitCodecUtils.decodeAll((String) encodedIntent);
-                    // log.info(Arrays.toString(bits));
-                    Map<String, Object> intents = intentCodeBook.decode((String) encodedIntent, intentDecodeFields);
-                    for (Map.Entry<String, Object> entry : intents.entrySet()) {
-                        log.info(String.format("%s: %s", entry.getKey(), entry.getValue()));
-                    }
-                } catch (IOException e) {
-                    log.error("Fail to decode encodedIntent: " + encodedIntent);
+                Map<String, Object> intents = intentCodeBook.decode((String) encodedIntent, intentDecodeFields);
+                for (Map.Entry<String, Object> entry : intents.entrySet()) {
+                    log.info(String.format("%s: %s", entry.getKey(), entry.getValue()));
+                    Assert.assertTrue(equals(entry.getValue(), expectedMap.get(domain).get(entry.getKey())));
                 }
             }
             rowNum++;
