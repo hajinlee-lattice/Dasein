@@ -28,6 +28,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
 fi
 
 cp ${WSHOME}/le-dev/tomcat/server.xml ${CATALINA_HOME}/conf/server.xml
+cp ${WSHOME}/le-dev/tomcat/tomcat-users.xml ${CATALINA_HOME}/conf/tomcat-users.xml
 cp ${WSHOME}/le-dev/tomcat/catalina.sh ${CATALINA_HOME}/bin/catalina.sh
 
 mkdir -p ${CATALINA_HOME}/webapps/ms || true
