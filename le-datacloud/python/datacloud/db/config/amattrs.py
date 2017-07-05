@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 
-import MySQLdb
 import logging
-from datacloud.common.cipher import decrypt
 from datacloud.common.google import read_sheet
+from datacloud.db.config.utils import get_config_db, str_to_value
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 SOURCE_MAP = {
     'HGData_Pivoted_Source': 'HGDataPivoted',
@@ -17,7 +16,6 @@ SOURCE_MAP = {
     'MadisonLogic_30Day_Aggregated': 'Bombora30DayAgg',
     'Semrush': 'SemrushMostRecent'
 }
-
 
 DNB_CODE_COLUMNS = (
     'DOMESTIC_ULTIMATE_DnB_CITY_CODE',
@@ -40,11 +38,8 @@ DNB_CODE_COLUMNS = (
     'TRIPLE_PLAY_SEGMENT'
 )
 
-def str_to_value(s):
-    return ('\'%s\'' % s.replace("'", "''")) if s is not None else 'NULL'
-
 def create_table(conn):
-    logger.info('Recreating table [AccountMaster_Attributes]')
+    _logger.info('Recreating table [AccountMaster_Attributes]')
     with conn.cursor() as cursor:
         sql = """
         DROP TABLE IF EXISTS `AccountMaster_Attributes`;
@@ -162,7 +157,7 @@ def read_dnb_attributes(conn):
 
     with conn.cursor() as cursor:
         for n, s in stmts:
-            logger.info("Adding DnB attribute [%s]" % n)
+            _logger.info("Adding DnB attribute [%s]" % n)
             cursor.execute(s)
 
         conn.commit()
@@ -299,7 +294,7 @@ def read_existing_attributes(conn, sheet_name):
     with conn.cursor() as cursor:
         for n, s, q in stmts:
             source = s if s is not None else 'Derived'
-            logger.info("Adding %s attribute [%s]" % (source, n))
+            _logger.info("Adding %s attribute [%s]" % (source, n))
             cursor.execute(q)
         conn.commit()
 
@@ -375,7 +370,7 @@ def existing_row_to_item(row):
 
 
 def verify_am_attrs(conn):
-    logger.info("Verify generated table.")
+    _logger.info("Verify generated table.")
     with conn.cursor() as cursor:
         cursor.execute("""
         SELECT
@@ -419,9 +414,7 @@ def verify_am_attrs(conn):
             print '\n'
 
 def execute():
-    pwd = decrypt(b'1AZy8-CiCvVE81AL66tHuqT6G5qwbD0zIOY1hBs45Po=')
-    conn = MySQLdb.connect(host="127.0.0.1", user="root", passwd=pwd,db="LDC_ConfigDB")
-
+    conn = get_config_db()
     create_table(conn)
     read_dnb_attributes(conn)
     read_existing_attributes(conn, 'Existing Attributes')

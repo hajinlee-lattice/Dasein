@@ -1,13 +1,12 @@
 from __future__ import absolute_import
 
-import MySQLdb
 import logging
-from datacloud.common.cipher import decrypt
+from datacloud.db.config.utils import get_config_db
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 def create_table(conn):
-    logger.info('Recreating table [SourceAttribute]')
+    _logger.info('Recreating table [SourceAttribute]')
     with conn.cursor() as cursor:
         sql = """
         DROP TABLE IF EXISTS LDC_ConfigDB.SourceAttribute;
@@ -31,7 +30,7 @@ def create_table(conn):
         conn.commit()
 
 def register_amprofile(conn, version):
-    logger.info('Registering attributes for profiling pipeline')
+    _logger.info('Registering attributes for profiling pipeline')
     with conn.cursor() as cursor:
         sql = """
             INSERT INTO LDC_ConfigDB.SourceAttribute
@@ -86,7 +85,7 @@ def register_amprofile(conn, version):
 
 
 def register_am(conn):
-    logger.info('Registering attributes for account master rebuild')
+    _logger.info('Registering attributes for account master rebuild')
     with conn.cursor() as cursor:
         sql = """
             INSERT INTO LDC_ConfigDB.SourceAttribute (
@@ -274,8 +273,7 @@ def register_am(conn):
 
 
 def execute(version):
-    pwd = decrypt(b'1AZy8-CiCvVE81AL66tHuqT6G5qwbD0zIOY1hBs45Po=')
-    conn = MySQLdb.connect(host="127.0.0.1", user="root", passwd=pwd)
+    conn = get_config_db()
     create_table(conn)
     register_amprofile(conn, version)
     register_am(conn)
