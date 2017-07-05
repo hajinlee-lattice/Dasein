@@ -2,7 +2,7 @@ package com.latticeengines.apps.cdl.service;
 
 public interface DataFeedTaskManagerService {
 
-    String createDataFeedTask(String feedType, String entity, String source, String metadata);
+    String createDataFeedTask(String customerSpaceStr, String feedType, String entity, String source, String metadata);
 
-    String submitImportJob(String taskIdentifier, String importConfig);
+    String submitImportJob(String customerSpaceStr, String taskIdentifier, String importConfig);
 }

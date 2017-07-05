@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,26 +27,27 @@ public class DataFeedTaskController {
     @Autowired
     private DataFeedTaskManagerService dataFeedTaskManagerService;
 
-    @Deprecated
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
-    public String createDataFeedTaskDeprecated(@PathVariable String customerSpace,
-            @RequestParam(value = "source") String source, @RequestParam(value = "feedtype") String feedtype,
-            @RequestParam(value = "entity") String entity, @RequestBody String metadata) {
+    public Map<String, String> createDataFeedTaskDeprecated(@PathVariable String customerSpace,
+                                                            @RequestParam(value = "source") String source,
+                                                            @RequestParam(value = "feedtype") String feedtype,
+                                                            @RequestParam(value = "entity") String entity,
+                                                            @RequestBody String metadata) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return JsonUtils.serialize(ImmutableMap.of("task_id",
-                dataFeedTaskManagerService.createDataFeedTask(feedtype, entity, source, metadata)));
+        return ImmutableMap.of("task_id",
+                dataFeedTaskManagerService.createDataFeedTask(customerSpace, feedtype, entity, source, metadata));
     }
 
-    @Deprecated
-    @RequestMapping(value = "/import/{taskIdentifier:\\w+\\.\\w+\\.\\w+\\.\\w+}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/import/{taskIdentifier}", method = RequestMethod.POST, headers =
+            "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
-    public String startImportJobDeprecated(@PathVariable String customerSpace, @PathVariable String taskIdentifier,
-            @RequestBody String metadata) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return JsonUtils.serialize(ImmutableMap.of("application_id",
-                dataFeedTaskManagerService.submitImportJob(taskIdentifier, metadata)));
+    public Map<String, String>  startImportJobDeprecated(@PathVariable String customerSpace,
+                                                         @PathVariable String taskIdentifier,
+                                                         @RequestBody String metadata) {
+        return ImmutableMap.of("application_id",
+                dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier, metadata));
     }
 }
