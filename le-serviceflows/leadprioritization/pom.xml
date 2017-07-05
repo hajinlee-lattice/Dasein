@@ -8,7 +8,7 @@
     <name>le-serviceflows-${component-name}</name>
 
     <properties>
-        <le.datadb.version>3.7.0-SNAPSHOT</le.datadb.version>
+        <le.playmakercore.version>3.7.0-SNAPSHOT</le.playmakercore.version>
         <le.dataflow.version>3.7.0-SNAPSHOT</le.dataflow.version>
         <le.domain.version>3.7.0-SNAPSHOT</le.domain.version>
         <le.serviceflows.core.version>3.7.0-SNAPSHOT</le.serviceflows.core.version>
@@ -36,8 +36,8 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-datadb</artifactId>
-            <version>${le.datadb.version}</version>
+            <artifactId>le-playmakercore</artifactId>
+            <version>${le.playmakercore.version}</version>
         </dependency>
 
         <dependency>
