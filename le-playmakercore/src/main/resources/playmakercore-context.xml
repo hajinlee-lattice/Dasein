@@ -8,12 +8,12 @@
   http://www.springframework.org/schema/task
       http://www.springframework.org/schema/task/spring-task-3.2.xsd">
 
-	<context:component-scan base-package="com.latticeengines.datadb.playmaker" />
+	<context:component-scan base-package="com.latticeengines.playmakercore" />
 
 	<import resource="classpath:datadb-context.xml" />
 	
 	
-    <bean id="recommendationDao" class="com.latticeengines.datadb.playmaker.dao.impl.RecommendationDaoImpl">
+    <bean id="recommendationDao" class="com.latticeengines.playmakercore.dao.impl.RecommendationDaoImpl">
         <property name="sessionFactory" ref="dataSessionFactory"/>
     </bean>
 	

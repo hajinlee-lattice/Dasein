@@ -1,18 +1,20 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import java.util.Random;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datadb.playmaker.service.RecommendationService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datadb.playmaker.Recommendation;
+import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
+import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -52,7 +54,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
             PlayLaunch playLauch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
 
-            executeLaunchActivity(tenant, config);
+            executeLaunchActivity(tenant, playLauch, config);
 
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
         } catch (Exception ex) {
@@ -61,25 +63,36 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     }
 
-    private void executeLaunchActivity(Tenant tenant, PlayLaunchInitStepConfiguration config) {
+    private void executeLaunchActivity(Tenant tenant, PlayLaunch playLauch, PlayLaunchInitStepConfiguration config) {
         // add processing logic
 
         // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
-        Recommendation recommendation = createDummyRecommendation(tenant, config);
-        recommendationService.create(recommendation);
+
+        for (int i = 0; i < 3; i++) {
+            Recommendation recommendation = createDummyRecommendation(tenant, playLauch, config);
+            recommendationService.create(recommendation);
+        }
     }
 
-    private Recommendation createDummyRecommendation(Tenant tenant, PlayLaunchInitStepConfiguration config) {
-        String LAUNCH_DESCRIPTION = "Recommendation done on " + System.currentTimeMillis();
+    private Recommendation createDummyRecommendation(Tenant tenant, PlayLaunch playLauch,
+            PlayLaunchInitStepConfiguration config) {
+        Random rand = new Random();
+        String ACCOUNT_ID = "acc__" + System.currentTimeMillis() + rand.nextInt(50000);
 
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
 
         Recommendation recommendation = new Recommendation();
-        recommendation.setDescription(LAUNCH_DESCRIPTION);
-        recommendation.setLaunchId(playName);
-        recommendation.setPlayId(playLaunchId);
+        recommendation.setDescription(playLauch.getDescription());
+        recommendation.setLaunchId(playLaunchId);
+        recommendation.setPlayId(playName);
+        recommendation.setLaunchDate(playLauch.getCreatedTimestamp());
+        recommendation.setAccountId(ACCOUNT_ID);
+        recommendation.setLeAccountExternalID(ACCOUNT_ID);
         recommendation.setTenantId(tenant.getPid());
+        recommendation.setLikelihood(Math.min(0.5D, 1 / rand.nextDouble()));
+        recommendation.setSynchronizationDestination("SFDC");
+        recommendation.setPriorityDisplayName("A");
 
         return recommendation;
     }

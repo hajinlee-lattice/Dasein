@@ -87,7 +87,7 @@
 							<arguments>
 								<argument>Data_MultiTenant</argument>
 								<argument>false</argument>
-								<argument>com.latticeengines.domain.exposed.datadb.playmaker</argument>
+								<argument>com.latticeengines.domain.exposed.playmakercore</argument>
 							</arguments>
 						</configuration>
 					</execution>
