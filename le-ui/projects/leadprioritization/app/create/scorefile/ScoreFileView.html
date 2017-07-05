@@ -1,5 +1,12 @@
 <section class="container setup-import score-file">
   <form name="uploadForm" novalidate>
+
+    <div class="row" ng-if="vm.showImportError">
+      <div class="ten offset-one columns">
+        <div class="messaging error-messaging">You're file could not be scored.</div>
+      </div>
+    </div>
+
     <div class="row">
         <div class="ten offset-one columns box-outline">
           <div class="section-header">

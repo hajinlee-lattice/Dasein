@@ -13,12 +13,15 @@ angular.module('mainApp.create.csvBulkUpload', [
     vm.importErrorMsg = "";
     vm.importing = false;
     vm.uploaded = false;
-    vm.showImportError = false;
+    vm.showImportError = null;
     vm.showImportSuccess = false;
     vm.accountLeadCheck = false;
     vm.ResourceUtility = ResourceUtility;
     vm.schema = Model.ModelDetails.SourceSchemaInterpretation == 'SalesforceLead' ? 'Lead' : 'Account';
     vm.isPmml = IsPmml;
+
+
+    console.log(vm.showImportError);
 
     vm.params = {
         url: '/pls/scores/fileuploads',
