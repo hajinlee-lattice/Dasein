@@ -15,6 +15,7 @@
         <le.network.version>3.7.0-SNAPSHOT</le.network.version>
         <le.quartz.version>3.7.0-SNAPSHOT</le.quartz.version>
         <le.modelquality.version>3.7.0-SNAPSHOT</le.modelquality.version>
+        <jetty.dir>test</jetty.dir>
     </properties>
 
     <parent>

@@ -9,119 +9,14 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-parent</artifactId>
+        <artifactId>le-microservice-parent</artifactId>
         <version>3.7.0-SNAPSHOT</version>
-        <relativePath>../le-parent</relativePath>
+        <relativePath>../le-microservice</relativePath>
     </parent>
 
     <properties>
         <component-name>datacloudapi</component-name>
     </properties>
-
-    <profiles>
-        <profile>
-            <id>jetty</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.version}</version>
-                        <configuration>
-                            <httpConnector>
-                                <port>8080</port>
-                            </httpConnector>
-                            <webAppConfig>
-                                <extraClasspath>${env.HADOOP_CONF_DIR};${env.TEZ_CONF_DIR};${env.JAVA_HOME}/lib/tools.jar;</extraClasspath>
-                            </webAppConfig>
-                            <systemProperties>
-                                <systemProperty>
-                                    <name>log4j.configuration</name>
-                                    <value>file:///${project.basedir}/src/test/resources/log4j.properties</value>
-                                </systemProperty>
-                            </systemProperties>
-                            <useTestClasspath>true</useTestClasspath>
-                            <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
-                            <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
-                        </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-commons</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>collection.cli</id>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-compiler-plugin</artifactId>
-                            <version>2.3.1</version>
-                            <configuration>
-                                <source>1.7</source>
-                                <target>1.7</target>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-dependencies</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${project.build.directory}/collection-cli/lib</outputDirectory>
-                                    <overWriteReleases>false</overWriteReleases>
-                                    <overWriteSnapshots>false</overWriteSnapshots>
-                                    <overWriteIfNewer>true</overWriteIfNewer>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/log4j.properties</exclude>
-                            </excludes>
-                            <finalName>collection-cli/propdata</finalName>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
-                        <version>${maven.assembly.version}</version>
-                        <configuration>
-                            <finalName>propdata</finalName>
-                            <descriptors>
-                                <descriptor>${basedir}/src/assembly/prod.xml</descriptor>
-                                <descriptor>${basedir}/src/assembly/qa.xml</descriptor>
-                            </descriptors>
-                            <tarLongFileMode>posix</tarLongFileMode>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <dependencies>
         <dependency>

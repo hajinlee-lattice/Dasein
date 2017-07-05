@@ -19,7 +19,6 @@
         <le.proxy.version>3.7.0-SNAPSHOT</le.proxy.version>
         <le.testfwk.version>3.7.0-SNAPSHOT</le.testfwk.version>
         <le.remote.version>3.7.0-SNAPSHOT</le.remote.version>
-        <jetty.dir>test</jetty.dir>
     </properties>
 
     <parent>
