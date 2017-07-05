@@ -110,7 +110,6 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
         return emptyList();
     }
     
-    @SuppressWarnings("unchecked")
     private List<Integer> encodeInt(TupleEntry arguments, BitCodeBook codeBook, String key, boolean signed) {
         Integer value = (Integer) arguments.getObject(valueField);
         if (value == null) {
@@ -136,33 +135,7 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
         return trueBits;
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Integer> encodeUnsignedInt(TupleEntry arguments, BitCodeBook codeBook, String key) {
-        Integer value = (Integer) arguments.getObject(valueField);
-        if (value == null) {
-            return emptyList();
-        }
-        String binValue = Integer.toBinaryString(value);
-        Integer bitUnit = codeBook.getBitUnit();
-        String zeros = String.join("", Collections.nCopies(bitUnit - 1, "0"));
-        binValue = (zeros + binValue).substring(binValue.length());
-        binValue = "1" + binValue; // When encoding integer, fist bit is the
-                                   // indicator that value is null or not.
-                                   // 1:not null, 0: null
 
-        if (binValue.length() != bitUnit) {
-            return emptyList();
-        }
-        List<Integer> trueBits = new ArrayList<>();
-        for (int i = bitUnit - 1; i >= 0; i--) {
-            if (binValue.charAt(i) == '1') {
-                trueBits.add(codeBook.getBitPosForKey(key) + bitUnit - 1 - i);
-            }
-        }
-        return trueBits;
-    }
-
-    @SuppressWarnings("unchecked")
     private List<Integer> encodeString(TupleEntry arguments, BitCodeBook codeBook, String key) {
         String value = (String) arguments.getObject(valueField);
         if (StringUtils.isBlank(value)) {
