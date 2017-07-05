@@ -397,7 +397,7 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-datadb</artifactId>
+            <artifactId>le-playmakercore</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
