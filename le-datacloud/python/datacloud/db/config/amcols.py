@@ -174,24 +174,28 @@ def add_tech_indicators():
                     grp_tpls[attr['ColumnGroup']][k] = v
             _logger.info("Convert column group [%s] to jinja2 template" % attr['ColumnGroup'])
 
-    seen_cols = set()
+    seen_techs = set()
     render_grp_attrs(grp_tpls['HGData_SupplierTechIndicators'], 'HGData_SupplierTechIndicators', 'TechName',
                      "SELECT * FROM `TechIndicator` WHERE `Source` = 'HG' AND `SearchKey` = 'Supplier_Name'",
-                     to_tech_decode_strategy, seen_cols)
+                     to_tech_decode_strategy, seen_cols=seen_techs)
     render_grp_attrs(grp_tpls['HGData_SegmentTechIndicators'], 'HGData_SegmentTechIndicators', 'TechName',
                      "SELECT * FROM `TechIndicator` WHERE `Source` = 'HG' AND `SearchKey` = 'Segment_Name'",
-                     to_tech_decode_strategy, seen_cols)
+                     to_tech_decode_strategy, is_premium=True, seen_cols=seen_techs)
     render_grp_attrs(grp_tpls['BuiltWith_TechIndicators'], 'BuiltWith_TechIndicators', 'TechName',
-                     "SELECT * FROM `TechIndicator` WHERE `Source` = 'BW'", to_tech_decode_strategy, seen_cols)
+                     "SELECT * FROM `TechIndicator` WHERE `Source` = 'BW'", to_tech_decode_strategy, is_premium=True,
+                     seen_cols=seen_techs)
     render_grp_attrs(grp_tpls['BmbrSurge_BucketCode'], 'BmbrSurge_BucketCode', 'Name',
-                     "SELECT * FROM `BomboraSurge` WHERE `ValueColumn` = 'CompositeScore'", to_bmbr_decode_strategy)
+                     "SELECT * FROM `BomboraSurge` WHERE `ValueColumn` = 'CompositeScore'", to_bmbr_decode_strategy,
+                     is_premium=True)
     render_grp_attrs(grp_tpls['BmbrSurge_CompositeScore'], 'BmbrSurge_CompositeScore', 'Name',
-                     "SELECT * FROM `BomboraSurge` WHERE `ValueColumn` = 'BucketCode'", to_bmbr_decode_strategy)
+                     "SELECT * FROM `BomboraSurge` WHERE `ValueColumn` = 'BucketCode'", to_bmbr_decode_strategy,
+                     is_premium=True)
     render_grp_attrs(grp_tpls['BmbrSurge_Intent'], 'BmbrSurge_Intent', 'Name',
-                     "SELECT * FROM `BomboraSurge` WHERE `ValueColumn` = 'Intent'", to_bmbr_decode_strategy)
+                     "SELECT * FROM `BomboraSurge` WHERE `ValueColumn` = 'Intent'", to_bmbr_decode_strategy,
+                     is_premium=True)
 
 
-def render_grp_attrs(grp_tpl, grp_name, id_col, sql, to_decode_func, seen_cols=set()):
+def render_grp_attrs(grp_tpl, grp_name, id_col, sql, to_decode_func, is_premium=False, seen_cols=set()):
     conn = get_config_db()
     with conn.cursor() as cursor:
         cursor.execute(sql)
@@ -205,7 +209,7 @@ def render_grp_attrs(grp_tpl, grp_name, id_col, sql, to_decode_func, seen_cols=s
                     attr[k] = v
             attr['InternalName'] = config[id_col]
             attr['DecodeStrategy'] = to_decode_func(config)
-            attr['IsPremium'] = is_premium(config)
+            attr['IsPremium'] = is_premium
             if len(attr['InternalName']) > 64:
                 attr['InternalName'] = attr['InternalName'][:64]
             if attr['InternalName'].lower() not in seen_cols:
@@ -214,16 +218,13 @@ def render_grp_attrs(grp_tpl, grp_name, id_col, sql, to_decode_func, seen_cols=s
                 add_to_am_attrs_cache(attr)
             else:
                 _logger.info(
-                    "Skip [%s] in [%s], since already seen it in other column groups." % (attr['InternalName'], grp_name))
+                    "Skip [%s] in [%s], since already seen it in other column groups." % (
+                    attr['InternalName'], grp_name))
         sql = insert_values_sql(values)
         cursor.execute(sql)
         _logger.info("Inserted %d attrs in [%s] to AccountMasterColumn" % (len(values), grp_name))
         conn.commit()
     return seen_cols
-
-
-def is_premium(config):
-    return 'Source' in config and config['Source'] == 'HG'
 
 
 def update_approved_usages():
