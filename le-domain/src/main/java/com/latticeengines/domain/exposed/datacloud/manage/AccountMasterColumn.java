@@ -98,9 +98,6 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "DecodeStrategy", length = 1000)
     private String decodeStrategy;
 
-    @Column(name = "BucketForSegment", nullable = false)
-    private boolean bucketForSegment;
-
     @Override
     @JsonIgnore
     public Long getPid() {
@@ -268,16 +265,6 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @JsonIgnore
     public void setDecodeStrategy(String decodeStrategy) {
         this.decodeStrategy = decodeStrategy;
-    }
-
-    @JsonIgnore
-    public boolean isBucketForSegment() {
-        return bucketForSegment;
-    }
-
-    @JsonIgnore
-    public void setBucketForSegment(boolean bucketForSegment) {
-        this.bucketForSegment = bucketForSegment;
     }
 
     @JsonIgnore

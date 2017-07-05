@@ -36,7 +36,7 @@ Need a LDC_ConfigDB in your local mysql.
 Use following script to create it
 
     DROP SCHEMA IF EXISTS `LDC_ConfigDB`;
-    CREATE SCHEMA IF NOT EXISTS `LDC_ConfigDB`;
+    CREATE SCHEMA IF NOT EXISTS `LDC_ConfigDB` CHARACTER SET utf8;
     GRANT ALL ON LDC_ConfigDB.* TO root@localhost;
     USE `LDC_ConfigDB`;
     

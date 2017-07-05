@@ -1,6 +1,6 @@
 DROP SCHEMA IF EXISTS GlobalAuthentication;
 
-CREATE SCHEMA IF NOT EXISTS GlobalAuthentication;
+CREATE SCHEMA IF NOT EXISTS GlobalAuthentication CHARACTER SET utf8;
 
 GRANT ALL ON GlobalAuthentication.* TO root@localhost;
 

@@ -19,7 +19,7 @@ pushd $WSHOME/le-db &&
 mvn -DskipTests clean install &&
 popd
 
-echo 'using mysqldiff to find db diff in ${DB} ...'
+echo "using mysqldiff to find db diff in ${DB} ..."
 mysqldiff \
     --server1=root:${PASSWORD}@${AURORA_URL} \
     --server2=root:welcome@127.0.0.1 \

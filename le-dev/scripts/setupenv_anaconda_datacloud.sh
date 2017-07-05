@@ -25,7 +25,7 @@ ${ANACONDA_HOME}/bin/conda create -n ${ENV_NAME} -y python=${PY_VERSION} pip
 
 source ${ANACONDA_HOME}/bin/activate ${ENV_NAME}
 
-conda install -y pymssql pycrypto
+conda install -y pymssql pycrypto jinja2
 
 conda install -y -c bioconda mysqlclient
 

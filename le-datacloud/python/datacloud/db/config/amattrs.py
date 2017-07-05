@@ -49,6 +49,7 @@ def create_table(conn):
         CREATE TABLE `AccountMaster_Attributes` (
             PID BIGINT NOT NULL AUTO_INCREMENT,
             InternalName VARCHAR(64) NOT NULL,
+            ColumnGroup VARCHAR(64),
             Source VARCHAR(200),
             SourceJoinKey VARCHAR(200),
             SourceColumn VARCHAR(100),
@@ -237,6 +238,7 @@ def read_existing_attributes(conn, sheet_name):
             attr.append(row["Source"].strip().replace("\t",""))
             attr.append(row["SourceColumnName"].strip().replace("\t",""))
             attr.append(row["Segmentation Tag"].strip().replace("\t",""))
+            attr.append(row["ColumnGroup"].strip().replace("\t",""))
             ex_attrs.append(attr)
     ex_attrs = sorted(ex_attrs,key=lambda x: x[15])
 
@@ -246,6 +248,7 @@ def read_existing_attributes(conn, sheet_name):
         sql = """
                 INSERT INTO AccountMaster_Attributes (
                     InternalName,
+                    ColumnGroup,
                     Source,
                     SourceJoinKey,
                     SourceColumn,
@@ -268,6 +271,7 @@ def read_existing_attributes(conn, sheet_name):
                 ) VALUES (%s)
                 """ % ',\n'.join([
                         str_to_value(item['InternalName']),
+                        str_to_value(item['ColumnGroup']),
                         str_to_value(item['Source']),
                         str_to_value(item['SourceJoinKey']),
                         str_to_value(item['SourceColumn']),
@@ -303,6 +307,7 @@ def existing_row_to_item(row):
     #TODO: convert row to dictionary
     item = {
         'InternalName': row[0] if row[0] != '' else None,
+        'ColumnGroup': row[18] if row[18] != '' else None,
         'DisplayName': row[1] if row[1] != '' else None,
         'Description': row[2].replace('\n', '').replace('\r', '') if row[2] != '' else None,
         'JavaClass': None,
@@ -421,6 +426,3 @@ def execute():
     read_existing_attributes(conn, 'Derived Attributes')
     verify_am_attrs(conn)
     conn.close()
-
-if __name__ == '__main__':
-    execute()

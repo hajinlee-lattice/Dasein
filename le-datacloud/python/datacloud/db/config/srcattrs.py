@@ -279,5 +279,3 @@ def execute(version):
     register_am(conn)
     conn.close()
 
-if __name__ == '__main__':
-    execute()
