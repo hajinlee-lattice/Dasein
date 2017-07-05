@@ -3,6 +3,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Date;
+import java.util.List;
 
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,6 +132,15 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
     }
 
     @Test(groups = "functional", dependsOnMethods = "registerExtractWhenTemplateChanged")
+    public void getExtractPendingInQueueAfterFirstRegister() {
+        task = datafeedTaskEntityMgr.findByKey(task);
+        List<Extract> extracts = datafeedTaskEntityMgr.getExtractsPendingInQueue(task);
+        assertEquals(extracts.size(), 1);
+        assertEquals(extracts.get(0).getName(), "extract1");
+        assertEquals(extracts.get(0).getProcessedRecords().longValue(), 1L);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "getExtractPendingInQueueAfterFirstRegister")
     public void registerExtractWhenDataTableConsumed() {
         task = datafeedTaskEntityMgr.findByKey(task);
         task.setImportData(null);
@@ -148,6 +158,15 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
                 new Long(task.getImportData().getPid() - 1));
         assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(), extract2.getPid());
         assertEquals(task.getImportData().getDisplayName(), task.getImportTemplate().getDisplayName());
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "registerExtractWhenDataTableConsumed")
+    public void getExtractPendingInQueueAfterSecondRegister() {
+        task = datafeedTaskEntityMgr.findByKey(task);
+        List<Extract> extracts = datafeedTaskEntityMgr.getExtractsPendingInQueue(task);
+        assertEquals(extracts.size(), 1);
+        assertEquals(extracts.get(0).getName(), "extract2");
+        assertEquals(extracts.get(0).getProcessedRecords().longValue(), 2L);
     }
 
 }

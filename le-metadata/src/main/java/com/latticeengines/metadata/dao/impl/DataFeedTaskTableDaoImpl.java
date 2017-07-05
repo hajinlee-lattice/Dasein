@@ -57,15 +57,14 @@ public class DataFeedTaskTableDaoImpl extends BaseDaoImpl<DataFeedTaskTable> imp
     }
 
     @Override
-    public int getDataTableSize(DataFeedTask task) {
+    public List<DataFeedTaskTable> getDataFeedTaskTables(DataFeedTask task) {
         Session session = getSessionFactory().getCurrentSession();
         Class<DataFeedTaskTable> entityClz = getEntityClass();
-        List<?> ret = session.createCriteria(entityClz) //
+        @SuppressWarnings("unchecked")
+        List<DataFeedTaskTable> datafeedTaskTables = session.createCriteria(entityClz) //
                 .add(Restrictions.eq("dataFeedTask", task)) //
                 .list(); //
-        if (ret == null) {
-            return 0;
-        }
-        return ret.size();
+        return datafeedTaskTables;
     }
+
 }

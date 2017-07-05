@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -112,7 +114,16 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         if (datafeedTask == null) {
             return 0;
         }
-        return datafeedTaskTableDao.getDataTableSize(datafeedTask);
+        return datafeedTaskTableDao.getDataFeedTaskTables(datafeedTask).size();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<DataFeedTaskTable> getDataTables(DataFeedTask datafeedTask) {
+        if (datafeedTask == null) {
+            return Collections.emptyList();
+        }
+        return datafeedTaskTableDao.getDataFeedTaskTables(datafeedTask);
     }
 
     @Override
@@ -220,20 +231,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
         TableEntityMgr.inflateTable(datafeedTask.getImportData());
         return datafeedTask;
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void createDataFeedTask(DataFeedTask datafeedTask) {
-        create(datafeedTask);
-        Table importTemplate = datafeedTask.getImportTemplate();
-        updateReferences(importTemplate);
-        createReferences(importTemplate);
-        Table importData = datafeedTask.getImportData();
-        if (importData != null) {
-            updateReferences(importData);
-            createReferences(importData);
-        }
     }
 
     @Override
@@ -358,5 +355,17 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Transactional(propagation = Propagation.REQUIRED)
     public void update(DataFeedTask datafeedTask, Table importData, Status status, Date lastImported) {
         datafeedTaskDao.update(datafeedTask, importData, status, lastImported);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<Extract> getExtractsPendingInQueue(DataFeedTask task) {
+        List<DataFeedTaskTable> datafeedTaskTables = getDataTables(task);
+        List<Extract> extracts = new ArrayList<>();
+        datafeedTaskTables.stream().map(DataFeedTaskTable::getTable).forEach(t -> {
+            TableEntityMgr.inflateTable(t);
+            extracts.addAll(t.getExtracts());
+        });
+        return extracts;
     }
 }

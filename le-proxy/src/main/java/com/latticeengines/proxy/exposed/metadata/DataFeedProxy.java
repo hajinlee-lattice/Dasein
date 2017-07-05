@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
@@ -63,43 +64,55 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     }
 
     public Boolean dataFeedTaskExist(String customerSpace, String dataFeedType, String entity) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/exist/{dataFeedType}/{entity}",
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{dataFeedType}/{entity}/exist",
                 shortenCustomerSpace(customerSpace), dataFeedType, entity);
         return get("dataFeedTaskExist", url, Boolean.class);
     }
 
     public void createDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks",
+                shortenCustomerSpace(customerSpace));
         post("createDataFeedTask", url, dataFeedTask, Void.class);
     }
 
     public DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType, String entity) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}",
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}",
                 shortenCustomerSpace(customerSpace), source, dataFeedType, entity);
         return get("getDataFeedTask", url, DataFeedTask.class);
     }
 
     public DataFeedTask getDataFeedTask(String customerSpace, String id) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{id}", shortenCustomerSpace(customerSpace), id);
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{id}",
+                shortenCustomerSpace(customerSpace), id);
         return get("getDataFeedTaskById", url, DataFeedTask.class);
     }
 
     public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks",
+                shortenCustomerSpace(customerSpace));
         put("updateDataFeedTask", url, dataFeedTask);
     }
 
     public void registerExtract(String customerSpace, String taskId, String tableName, Extract extract) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/registerextract/{taskId}/{tableName}",
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerextract/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);
         post("registerExtract", url, extract, Void.class);
     }
 
     public void registerExtracts(String customerSpace, String taskId, String tableName, List<Extract> extracts) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/registerextracts/{taskId}/{tableName}",
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerextracts/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);
         post("registerExtract", url, extracts, Void.class);
+    }
+
+    public List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType,
+            String entity) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}/unconsolidatedextracts",
+                shortenCustomerSpace(customerSpace), source, dataFeedType, entity);
+        List<?> res = get("getExtractPendingInQueue", url, List.class);
+        return JsonUtils.convertList(res, Extract.class);
     }
 
 }

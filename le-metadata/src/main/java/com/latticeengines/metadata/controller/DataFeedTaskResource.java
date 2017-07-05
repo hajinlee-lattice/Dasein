@@ -42,12 +42,11 @@ public class DataFeedTaskResource {
         dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask);
     }
 
-    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}",
-            method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
     public DataFeedTask getDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
-                                        @PathVariable String dataFeedType, @PathVariable String entity) {
+            @PathVariable String dataFeedType, @PathVariable String entity) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getDataFeedTask(customerSpace, source, dataFeedType, entity);
     }
@@ -60,26 +59,30 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTask(customerSpace, taskId);
     }
 
-    @RequestMapping(value = "/registerextract/{taskId}/{tableName}", method = RequestMethod.POST,
-            headers = "Accept=application/json")
+    @RequestMapping(value = "/{taskId}/registerextract/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
     public void registerExtract(@PathVariable String customerSpace, @PathVariable String taskId,
-                                @PathVariable String tableName,
-                                @RequestBody Extract extract) {
+            @PathVariable String tableName, @RequestBody Extract extract) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataFeedTaskService.registerExtract(customerSpace, taskId, tableName, extract);
     }
 
-    @RequestMapping(value = "/registerextracts/{taskId}/{tableName}", method = RequestMethod.POST,
-            headers = "Accept=application/json")
+    @RequestMapping(value = "/{taskId}/registerextracts/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
     public void registerExtracts(@PathVariable String customerSpace, @PathVariable String taskId,
-                                @PathVariable String tableName,
-                                @RequestBody List<Extract> extracts) {
+            @PathVariable String tableName, @RequestBody List<Extract> extracts) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataFeedTaskService.registerExtracts(customerSpace, taskId, tableName, extracts);
+    }
+
+    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}/unconsolidatedextracts", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get unconsolidated extracts in queue")
+    public List<Extract> getExtractsPendingInQueue(@PathVariable String customerSpace, @PathVariable String source,
+            @PathVariable String dataFeedType, @PathVariable String entity) {
+        return dataFeedTaskService.getExtractsPendingInQueue(customerSpace, source, dataFeedType, entity);
     }
 
 }

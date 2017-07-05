@@ -20,4 +20,6 @@ public interface DataFeedTaskService {
     void registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract);
 
     void registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts);
+
+    List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType, String entity);
 }

@@ -63,4 +63,11 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
         dataFeedTaskEntityMgr.registerExtracts(dataFeedTask, tableName, extracts);
     }
+
+    @Override
+    public List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType,
+            String entity) {
+        DataFeedTask datafeedTask = getDataFeedTask(customerSpace, source, dataFeedType, entity);
+        return dataFeedTaskEntityMgr.getExtractsPendingInQueue(datafeedTask);
+    }
 }

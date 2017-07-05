@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.dao;
 
+import java.util.List;
+
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.DataFeedTaskTable;
@@ -11,5 +13,6 @@ public interface DataFeedTaskTableDao extends BaseDao<DataFeedTaskTable> {
 
     Table peekFirstDataTable(DataFeedTask task);
 
-    int getDataTableSize(DataFeedTask task);
+    List<DataFeedTaskTable> getDataFeedTaskTables(DataFeedTask task);
+
 }
