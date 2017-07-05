@@ -27,7 +27,6 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS_SIMPLIFIED, //
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
-            GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL, //
             GrantedRight.VIEW_PLS_CDL_DATA, //
@@ -59,7 +58,6 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_MARKETO_CREDENTIALS_SIMPLIFIED, //
             GrantedRight.EDIT_PLS_MARKETO_CREDENTIALS, //
             GrantedRight.VIEW_PLS_QUOTAS, //
-            GrantedRight.VIEW_PLS_SAMPLE_LEADS, //
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN_EXTERNAL, //
             GrantedRight.VIEW_PLS_CDL_DATA, //
             GrantedRight.VIEW_PLS_PLAYS, //

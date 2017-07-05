@@ -29,6 +29,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
     // flag schema/hash ==> must in sync with backend schema
     // =======================================================
     var flags = {
+        View_Sample_Leads : 'View_Sample_Leads',
         VIEW_REFINE_CLONE : 'View_Refine_Clone',
         EDIT_REFINE_CLONE : 'Edit_Refine_Clone',
         VIEW_REMODEL : 'View_Remodel',
