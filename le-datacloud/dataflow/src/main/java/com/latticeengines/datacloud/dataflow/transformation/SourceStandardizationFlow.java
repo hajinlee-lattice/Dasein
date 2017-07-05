@@ -22,6 +22,7 @@ import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateIndustryFromNaicsFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CountryStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DunsCleanupFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.StateStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.StringStandardizationFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.TypeConvertFunction;
@@ -36,7 +37,7 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
-@Component("sourceStandardizationFlow")
+@Component(SourceStandardizationFlow.DATAFLOW_BEAN_NAME)
 public class SourceStandardizationFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, StandardizationFlowParameter> {
     private static final Log log = LogFactory.getLog(SourceStandardizationFlow.class);
@@ -49,6 +50,10 @@ public class SourceStandardizationFlow
     private final static String IS_VALID_DOMAIN = "IsValidDomain";
     private final static String DOMAIN = "Domain";
 
+    public static final String TRANSFORMER_NAME = "standardizationTransformer";
+
+    public static final String DATAFLOW_BEAN_NAME = "sourceStandardizationFlow";
+
     @Override
     public Node construct(StandardizationFlowParameter parameters) {
         Node source = addSource(parameters.getBaseTables().get(0));
@@ -56,6 +61,9 @@ public class SourceStandardizationFlow
             switch (strategy) {
             case DOMAIN:
                 source = standardizeDomain(source, parameters.getDomainFields());
+                break;
+            case DUNS:
+                source = standardizeDuns(source, parameters.getDunsFields());
                 break;
             case COUNTRY:
                 source = standardizeCountry(source, parameters.getCountryFields(), parameters.getStandardCountries());
@@ -355,6 +363,16 @@ public class SourceStandardizationFlow
     private Node dedup(Node source, String[] dedupFields) {
         if (dedupFields != null && dedupFields.length > 0) {
             source = source.groupByAndLimit(new FieldList(dedupFields), 1);
+        }
+        return source;
+    }
+
+    private Node standardizeDuns(Node source, String[] dunsFields) {
+        if (dunsFields != null && dunsFields.length > 0) {
+            for (String dunsField : dunsFields) {
+                source = source.apply(new DunsCleanupFunction(dunsField), new FieldList(dunsField),
+                        new FieldMetadata(dunsField, String.class));
+            }
         }
         return source;
     }

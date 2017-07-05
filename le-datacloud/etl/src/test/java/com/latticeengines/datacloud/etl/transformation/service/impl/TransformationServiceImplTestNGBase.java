@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -295,5 +296,18 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
         for (TransformationProgress progress : progresses) {
             progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
         }
+    }
+
+    protected boolean equals(Object actual, Object expected) {
+        if (actual == null && expected == null) {
+            return true;
+        }
+        if (actual == null || expected == null) {
+            return false;
+        }
+        if (actual instanceof Utf8) {
+            actual = actual.toString();
+        }
+        return actual.equals(expected);
     }
 }

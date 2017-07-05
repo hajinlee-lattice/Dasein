@@ -100,8 +100,11 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("RangeMapFileNames")
     private String[] rangeMapFileNames;
 
+    @JsonProperty("DunsFields")
+    private String[] dunsFields;
+
     public enum StandardizationStrategy {
-        DOMAIN, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
+        DOMAIN, DUNS, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
     }
 
     public enum FieldType {
@@ -122,6 +125,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setDomainFields(String[] domainFields) {
         this.domainFields = domainFields;
+    }
+
+    public String[] getDunsFields() {
+        return dunsFields;
+    }
+
+    public void setDunsFields(String[] dunsFields) {
+        this.dunsFields = dunsFields;
     }
 
     public String[] getCountryFields() {

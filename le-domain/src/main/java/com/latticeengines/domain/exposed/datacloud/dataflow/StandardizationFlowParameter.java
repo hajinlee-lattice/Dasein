@@ -105,6 +105,9 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("RangeMapFileNames")
     private String[] rangeMapFileNames;
 
+    @JsonProperty("DunsFields")
+    private String[] dunsFields;
+
     @JsonProperty("StandardCountries")
     private Map<String, String> standardCountries;
 
@@ -114,6 +117,14 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setDomainFields(String[] domainFields) {
         this.domainFields = domainFields;
+    }
+
+    public String[] getDunsFields() {
+        return dunsFields;
+    }
+
+    public void setDunsFields(String[] dunsFields) {
+        this.dunsFields = dunsFields;
     }
 
     public String[] getCountryFields() {

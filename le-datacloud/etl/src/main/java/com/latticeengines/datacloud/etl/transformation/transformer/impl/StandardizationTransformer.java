@@ -11,32 +11,29 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.core.service.CountryCodeService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.DomainValidation;
+import com.latticeengines.datacloud.dataflow.transformation.SourceStandardizationFlow;
 import com.latticeengines.domain.exposed.datacloud.dataflow.StandardizationFlowParameter;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("standardizationTransformer")
+@Component(SourceStandardizationFlow.TRANSFORMER_NAME)
 public class StandardizationTransformer
         extends AbstractDataflowTransformer<StandardizationTransformerConfig, StandardizationFlowParameter> {
 
     private static final Log log = LogFactory.getLog(StandardizationTransformer.class);
-
-    private static String transfomerName = "standardizationTransformer";
-
-    private static String dataFlowBeanName = "sourceStandardizationFlow";
 
     @Autowired
     private CountryCodeService countryCodeService;
 
     @Override
     protected String getDataFlowBeanName() {
-        return dataFlowBeanName;
+        return SourceStandardizationFlow.DATAFLOW_BEAN_NAME;
     }
 
     @Override
     public String getName() {
-        return transfomerName;
+        return SourceStandardizationFlow.TRANSFORMER_NAME;
     }
 
     @Override
@@ -60,6 +57,18 @@ public class StandardizationTransformer
                 for (String domainField : config.getDomainFields()) {
                     if (StringUtils.isEmpty(domainField)) {
                         log.error("Empty string or null is not allowed for domain field");
+                        return false;
+                    }
+                }
+                break;
+            case DUNS:
+                if (config.getDunsFields() == null || config.getDunsFields().length == 0) {
+                    log.error("Duns fields are required for duns standardization");
+                    return false;
+                }
+                for (String dunsField : config.getDunsFields()) {
+                    if (StringUtils.isEmpty(dunsField)) {
+                        log.error("Empty string or null is not allowed for duns field");
                         return false;
                     }
                 }
@@ -359,6 +368,7 @@ public class StandardizationTransformer
         parameters.setConsolidateRangeStrategies(config.getConsolidateRangeStrategies());
         parameters.setRangeMapFileNames(config.getRangeMapFileNames());
         parameters.setDiscardFields(config.getDiscardFields());
+        parameters.setDunsFields(config.getDunsFields());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 
