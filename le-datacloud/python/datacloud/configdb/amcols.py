@@ -54,7 +54,6 @@ def add_static_attrs():
           `StatisticalType`,
           `FundamentalType`,
           `ApprovedUsage`,
-          `IsPremium`,
           `Groups`
     ) VALUES (
         'LatticeAccountId',
@@ -66,7 +65,6 @@ def add_static_attrs():
         NULL,
         'ALPHA',
         'None',
-        FALSE,
         'ID'
     ), (
         'IsPublicDomain',
@@ -78,7 +76,6 @@ def add_static_attrs():
         'NOMINAL',
         'BOOLEAN',
         'Model',
-        FALSE,
         'RTS'
     )
     """
@@ -201,6 +198,8 @@ def render_grp_attrs(grp_tpl, grp_name, id_col, sql, to_decode_func, is_premium=
         cursor.execute(sql)
         values = []
         for config in cursor:
+
+            # render group template to get attr
             attr = {}
             for k, v in grp_tpl.items():
                 if isinstance(v, Template):
@@ -212,6 +211,8 @@ def render_grp_attrs(grp_tpl, grp_name, id_col, sql, to_decode_func, is_premium=
             attr['IsPremium'] = is_premium
             if len(attr['InternalName']) > 64:
                 attr['InternalName'] = attr['InternalName'][:64]
+
+            # insert rendered attr
             if attr['InternalName'].lower() not in seen_cols:
                 values.append(convert_amattr_to_sql_value(attr))
                 seen_cols.add(attr['InternalName'].lower())
@@ -220,6 +221,7 @@ def render_grp_attrs(grp_tpl, grp_name, id_col, sql, to_decode_func, is_premium=
                 _logger.info(
                     "Skip [%s] in [%s], since already seen it in other column groups." % (
                     attr['InternalName'], grp_name))
+
         sql = insert_values_sql(values)
         cursor.execute(sql)
         _logger.info("Inserted %d attrs in [%s] to AccountMasterColumn" % (len(values), grp_name))
