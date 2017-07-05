@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
 import logging
-from datacloud.db.config.bomborasurge import to_decode_strategy as to_bmbr_decode_strategy
-from datacloud.db.config.techindicator import to_decode_strategy as to_tech_decode_strategy
-from datacloud.db.config.utils import get_config_db, str_to_value, bool_to_value
+from datacloud.configdb.bomborasurge import to_decode_strategy as to_bmbr_decode_strategy
+from datacloud.configdb.techindicator import to_decode_strategy as to_tech_decode_strategy
+from datacloud.configdb.utils import get_config_db, str_to_value, bool_to_value
 from jinja2 import Template
 
 _logger = logging.getLogger(__name__)

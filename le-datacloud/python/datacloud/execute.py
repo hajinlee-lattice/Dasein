@@ -5,7 +5,7 @@ import sys
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
-from db.config import config_x
+from configdb import config_x
 
 def main():
     args = parse_args()

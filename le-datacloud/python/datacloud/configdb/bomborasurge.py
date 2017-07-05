@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import json
 import logging
-from datacloud.db.config.utils import get_sql231_manage_db, get_config_db, str_to_value
+from datacloud.configdb.utils import get_sql231_manage_db, get_config_db, str_to_value
 
 _logger = logging.getLogger(__name__)
 

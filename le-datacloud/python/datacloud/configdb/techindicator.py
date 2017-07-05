@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import json
 import logging
-from datacloud.db.config.utils import get_sql231_manage_db, get_config_db, str_to_value, bool_to_value
+from datacloud.configdb.utils import get_sql231_manage_db, get_config_db, str_to_value, bool_to_value, utf8_to_latin1
 
 _logger = logging.getLogger(__name__)
 
@@ -100,7 +100,7 @@ def convert_to_mysql_item(tech):
             'BitPosition': tech['BitPosition'],
             'SubCategory': tech['SubCategory'],
             'InAM': tech['InAM'] == 1,
-            'Description': tech['Description'],
+            'Description': utf8_to_latin1(tech['Description']),
             'TechName': tech['TechName'],
         }
     except Exception:

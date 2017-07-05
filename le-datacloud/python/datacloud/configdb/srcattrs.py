@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import logging
-from datacloud.db.config.utils import get_config_db
+from datacloud.configdb.utils import get_config_db
 
 _logger = logging.getLogger(__name__)
 

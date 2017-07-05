@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import logging
 from datacloud.common.google import read_sheet
-from datacloud.db.config.utils import get_config_db, str_to_value
+from datacloud.configdb.utils import get_config_db, str_to_value
 
 _logger = logging.getLogger(__name__)
 
@@ -59,18 +59,18 @@ def create_table(conn):
             Category VARCHAR(100),
             SubCategory VARCHAR(100),
             ExportRestriction VARCHAR(20) NOT NULL,
-            Deprecated TINYINT NOT NULL DEFAULT 0,
+            Deprecated BOOLEAN NOT NULL DEFAULT FALSE,
             FundamentalType VARCHAR(100),
             StatisticalType VARCHAR(100),
             DisplayDiscretizationStrategy VARCHAR(1000),
             DnbAvailability VARCHAR(250),
             DnbCodeBook LONGTEXT,
-            Approved_Model TINYINT NOT NULL,
-            Approved_Insights TINYINT NOT NULL,
-            Approved_BIS TINYINT NOT NULL,
-            Approved_InternalEnrichment TINYINT NOT NULL,
-            Approved_ExternalEnrichment TINYINT NOT NULL,
-            Approved_Segment TINYINT NOT NULL,
+            Approved_Model BOOLEAN NOT NULL,
+            Approved_Insights BOOLEAN NOT NULL,
+            Approved_BIS BOOLEAN NOT NULL,
+            Approved_InternalEnrichment BOOLEAN NOT NULL,
+            Approved_ExternalEnrichment BOOLEAN NOT NULL,
+            Approved_Segment BOOLEAN NOT NULL,
             PRIMARY KEY (`PID`)
         ) ENGINE = InnoDB;
         """

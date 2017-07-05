@@ -34,6 +34,9 @@ def bool_to_value(s):
     return ('TRUE' if s else 'FALSE') if s is not None else 'NULL'
 
 def utf8_to_latin1(s):
+    """
+    Remove invalid charactors.
+    """
     if s is None:
         return None
     try:

@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import pytest
-from datacloud.db.config.utils import utf8_to_latin1
+from datacloud.configdb.utils import utf8_to_latin1
 
 
 @pytest.mark.parametrize("latin1, utf8", [
