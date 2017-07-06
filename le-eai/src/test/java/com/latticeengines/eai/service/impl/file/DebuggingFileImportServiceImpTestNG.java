@@ -26,12 +26,9 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
-import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.yarn.exposed.service.JobService;
 
 public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase {
 
@@ -46,9 +43,6 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
     private URL dataUrl;
 
     private String fileName = "";
-
-    @Autowired
-    private JobService jobService;
 
     @BeforeClass(groups = "manual")
     public void setup() throws Exception {
@@ -92,17 +86,6 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        verifyAllDataNotNullWithNumRows(yarnConfiguration, //
-                tables.get(0), //
-                9);
-        Counters counters = jobService.getMRJobCounters(appId.toString());
-        assertEquals(counters
-                .getCounter(com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter.IMPORTED_RECORDS)
-                .getValue(), 9);
-        assertEquals(counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 10);
-        assertEquals(counters.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue(), 5);
-        assertEquals(counters.getCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 5);
-        assertEquals(counters.getCounter(RecordImportCounter.ROW_ERROR).getValue(), 0);
     }
 
     @DataProvider
@@ -113,19 +96,6 @@ public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase
 
     private Map<String, String> getProperties(boolean useMetadataFile) {
         Map<String, String> props = new HashMap<>();
-        // if (useMetadataFile) {
-        // props.put(ImportProperty.METADATAFILE, metadataUrl.getPath());
-        // } else {
-        // String contents;
-        // try {
-        // contents = FileUtils.readFileToString(new
-        // File(metadataUrl.getPath()));
-        // } catch (Exception e) {
-        // throw new RuntimeException(e);
-        // }
-        // props.put(ImportProperty.METADATA, contents);
-        // }
-        // change file name
         props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/" + fileName);
         return props;
     }
