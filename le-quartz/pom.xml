@@ -27,32 +27,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <!-- Security related. -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
@@ -150,104 +124,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${apache.http.version}</version>
-        </dependency>
     </dependencies>
-
-    <profiles>
-        <profile>
-            <id>functional</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.version}</version>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-commons</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                        </dependencies>
-                        <configuration>
-                            <webApp>
-                                <contextPath>/</contextPath>
-                            </webApp>
-                            <httpConnector>
-                                <port>8080</port>
-                            </httpConnector>
-                            <useTestClasspath>true</useTestClasspath>
-                            <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
-                            <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>${maven.install.version}</version>
-                <executions>
-                    <execution>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <groupId>${project.parent.groupId}</groupId>
-                            <version>${project.parent.version}</version>
-                            <file>
-                                ${project.build.directory}/${project.artifactId}-${project.parent.version}.jar
-                            </file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>${maven.deploy.version}</version>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy-file</goal>
-                        </goals>
-                        <configuration>
-                            <packaging>jar</packaging>
-                            <generatePom>true</generatePom>
-                            <url>${project.distributionManagement.repository.url}</url>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <groupId>${project.parent.groupId}</groupId>
-                            <version>${project.parent.version}</version>
-                            <file>${project.build.directory}/${project.artifactId}-${project.parent.version}.jar</file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
 
