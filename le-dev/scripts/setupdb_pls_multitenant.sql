@@ -1,5 +1,5 @@
 DROP SCHEMA IF EXISTS PLS_MultiTenant;
-CREATE SCHEMA IF NOT EXISTS PLS_MultiTenant CHARACTER SET utf8;
+CREATE SCHEMA IF NOT EXISTS PLS_MultiTenant;
 GRANT ALL ON PLS_MultiTenant.* TO root@localhost;
 USE `PLS_MultiTenant`;
 
