@@ -9,7 +9,6 @@
 
     <properties>
         <component-name>workflowapi</component-name>
-        <spring.security.oauth.version>2.0.10.RELEASE</spring.security.oauth.version>
     </properties>
 
     <parent>
@@ -258,7 +257,7 @@
         <dependency>
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
-            <version>${spring.security.oauth.version}</version>
+            <version>${spring.oauth2.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.codehaus.jackson</groupId>
@@ -309,7 +308,7 @@
         <dependency>
             <groupId>org.springframework.batch</groupId>
              <artifactId>spring-batch-test</artifactId>
-            <version>3.0.7.RELEASE</version>
+            <version>${spring.batch.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

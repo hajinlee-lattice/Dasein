@@ -9,11 +9,7 @@
 
     <properties>
         <component-name>eai</component-name>
-        <camel.version>2.18.2</camel.version>
-        <camel.jackson.version>2.8.3</camel.jackson.version>
-        <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
-        <parquet.avro.version>1.4.3</parquet.avro.version>
-        <avro.version>1.7.7</avro.version>
+
     </properties>
 
     <parent>
@@ -28,7 +24,7 @@
             <plugin>
                 <groupId>org.apache.camel.maven</groupId>
                 <artifactId>camel-salesforce-maven-plugin</artifactId>
-                <version>${camel.version}</version>
+                <version>${maven.camel.salesforce.version}</version>
             </plugin>
         </plugins>
     </build>

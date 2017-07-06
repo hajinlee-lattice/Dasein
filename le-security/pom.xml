@@ -16,7 +16,6 @@
         <le.network.version>3.7.0-SNAPSHOT</le.network.version>
         <le.monitor.version>3.7.0-SNAPSHOT</le.monitor.version>
         <le.auth.version>3.7.0-SNAPSHOT</le.auth.version>
-        <spring.security.version>3.2.5.RELEASE</spring.security.version>
         <jetty.port>8084</jetty.port>
         <jetty.stop.port>10984</jetty.stop.port>
         <jetty.dir>test</jetty.dir>
@@ -177,11 +176,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>apache-log4j-extras</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-ldap</artifactId>
             <version>${spring.security.version}</version>
@@ -199,14 +193,14 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-framework-bom</artifactId>
-            <version>4.0.0.RELEASE</version>
+            <version>${spring.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>1.4</version>
+            <version>${gson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
@@ -216,7 +210,7 @@
         <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>jsr250-api</artifactId>
-            <version>1.0</version>
+            <version>${jsr250.api.version}</version>
         </dependency>
     </dependencies>
 </project>

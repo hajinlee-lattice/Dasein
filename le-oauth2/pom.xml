@@ -22,16 +22,16 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-playmaker-toplevel</artifactId>
+        <artifactId>le-playmaker-parent</artifactId>
         <version>3.7.0-SNAPSHOT</version>
-        <relativePath>../playmaker-pom.xml</relativePath>
+        <relativePath>../le-parent/playmaker-pom.xml</relativePath>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.30</version><!--$NO-MVN-MAN-VER$ -->
+            <version>${mysql.connector.version}</version><!--$NO-MVN-MAN-VER$ -->
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -160,32 +160,32 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
+            <version>${commons.lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>1.4</version><!--$NO-MVN-MAN-VER$ -->
+            <version>${gson.version}</version><!--$NO-MVN-MAN-VER$ -->
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.9</version>
+            <version>${reflections.version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
-            <version>4.0</version>
+            <version>${sqljdbc4.version}</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>
-            <version>1.2.17</version>
+            <version>${log4j.extras.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
 

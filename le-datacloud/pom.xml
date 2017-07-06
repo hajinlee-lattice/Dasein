@@ -58,19 +58,6 @@
                             </includes>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>impl</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <includes>
-                                <include>**/*</include>
-                            </includes>
-                            <classesDirectory>target/classes</classesDirectory>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
         </plugins>

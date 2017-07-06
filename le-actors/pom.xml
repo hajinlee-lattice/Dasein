@@ -9,14 +9,6 @@
 
     <properties>
         <component-name>actors</component-name>
-        <com.flink.akka-version>2.3-custom</com.flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
-        <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
-        <le.domain.version>3.7.0-SNAPSHOT</le.domain.version>
-        <le.auth.version>3.7.0-SNAPSHOT</le.auth.version>
-        <le.security.version>3.7.0-SNAPSHOT</le.security.version>
-        <le.testfwk.version>3.7.0-SNAPSHOT</le.testfwk.version>
-        <le.remote.version>3.7.0-SNAPSHOT</le.remote.version>
-        <le.monitor.version>3.7.0-SNAPSHOT</le.monitor.version>
     </properties>
 
     <parent>
@@ -31,7 +23,7 @@
         <dependency>
             <groupId>com.data-artisans</groupId> <!-- have to use data-artisans dist to be compatible with flink -->
             <artifactId>flakka-actor_2.11</artifactId>
-            <version>${com.flink.akka-version}</version>
+            <version>${flink.akka-version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
@@ -79,7 +71,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -128,14 +120,14 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
  
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
 

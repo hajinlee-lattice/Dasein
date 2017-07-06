@@ -14,18 +14,15 @@
         <le.db.version>3.7.0-SNAPSHOT</le.db.version>
         <le.oauth2.db.version>3.7.0-SNAPSHOT</le.oauth2.db.version>
         <le.monitor.version>3.7.0-SNAPSHOT</le.monitor.version>
-        <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
-        <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
-        <spring.version>4.1.6.RELEASE</spring.version>
         <start-class>com.latticeengines.playmaker.controller.RecommendationResource</start-class>
         <java.version>1.7</java.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-playmaker-toplevel</artifactId>
+        <artifactId>le-playmaker-parent</artifactId>
         <version>3.7.0-SNAPSHOT</version>
-        <relativePath>../playmaker-pom.xml</relativePath>
+        <relativePath>../le-parent/playmaker-pom.xml</relativePath>
     </parent>
     <dependencies>
         <dependency>
@@ -185,22 +182,22 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>1.4</version><!--$NO-MVN-MAN-VER$-->
+            <version>${gson.version}</version><!--$NO-MVN-MAN-VER$-->
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
+            <version>${commons.lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.9</version>
+            <version>${reflections.version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
-            <version>4.0</version>
+            <version>${sqljdbc4.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

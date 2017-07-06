@@ -420,17 +420,17 @@
         <dependency>
             <groupId>org.clapper</groupId>
             <artifactId>grizzled-slf4j_2.11</artifactId>
-            <version>1.3.0</version>
+            <version>${grizzled.slf4j_2.11.version}</version>
         </dependency>
         <dependency>
             <groupId>com.codahale.metrics</groupId>
             <artifactId>metrics-core</artifactId>
-            <version>3.0.2</version>
+            <version>${codahale.metrics.version}</version>
         </dependency>
         <dependency>
             <groupId>com.codahale.metrics</groupId>
             <artifactId>metrics-jvm</artifactId>
-            <version>3.0.2</version>
+            <version>${codahale.metrics.version}</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>

@@ -30,7 +30,6 @@
         <le.transform.version>3.7.0-SNAPSHOT</le.transform.version>
         <le.hadoop.version>3.7.0-SNAPSHOT</le.hadoop.version>
         <guava.version>19.0</guava.version>
-        <jpmml.version>1.2.14</jpmml.version>
         <jetty.port>8073</jetty.port>
         <jett.stop.port>10973</jett.stop.port>
     </properties>
@@ -41,6 +40,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>
+                    <execution>
+                        <id>make-a-jar</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -262,12 +268,6 @@
         </dependency>
 
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>apache-log4j-extras</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.jpmml</groupId>
             <artifactId>pmml-evaluator</artifactId>
             <version>${jpmml.version}</version>
@@ -298,11 +298,13 @@
             <version>8.0.15</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
+        
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>

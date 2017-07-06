@@ -9,7 +9,6 @@
 
     <properties>
         <component-name>ulysses</component-name>
-        <spring.security.version>3.2.5.RELEASE</spring.security.version>
         <jetty.port>8075</jetty.port>
         <jetty.stop.port>10975</jetty.stop.port>
     </properties>
@@ -65,12 +64,6 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${project.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-camille</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
@@ -186,24 +179,6 @@
             <artifactId>jsp-api</artifactId>
             <version>${javax.jsp.version}</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>apache-log4j-extras</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${springfox.swagger.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${springfox.swagger.version}</version>
         </dependency>
 
     </dependencies>

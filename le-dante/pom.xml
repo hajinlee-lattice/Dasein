@@ -11,38 +11,38 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dantedb</artifactId>
-            <version>${le.dantedb.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
-            <version>${le.testfwk.version}</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
-            <version>${le.camille.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-network</artifactId>
-            <version>${le.network.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -55,15 +55,6 @@
 
     <properties>
         <component-name>dante</component-name>
-        <le.common.version>3.7.0-SNAPSHOT</le.common.version>
-        <le.db.version>3.7.0-SNAPSHOT</le.db.version>
-        <le.domain.version>3.7.0-SNAPSHOT</le.domain.version>
-        <le.proxy.version>3.7.0-SNAPSHOT</le.proxy.version>
-        <le.testfwk.version>3.7.0-SNAPSHOT</le.testfwk.version>
-        <le.dantedb.version>3.7.0-SNAPSHOT</le.dantedb.version>
-        <le.camille.version>3.7.0-SNAPSHOT</le.camille.version>
-        <le.monitor.version>3.7.0-SNAPSHOT</le.monitor.version>
-        <le.network.version>3.7.0-SNAPSHOT</le.network.version>
     </properties>
 
 </project>

@@ -9,12 +9,8 @@
 
     <properties>
         <component-name>dellebi</component-name>
-        <camel.version>2.14.0</camel.version>
-        <cameljcifs.version>2.13.2</cameljcifs.version>
         <le.common.version>3.7.0-SNAPSHOT</le.common.version>
         <le.scheduler.version>3.7.0-SNAPSHOT</le.scheduler.version>
-        <jetty.version>6.1.26</jetty.version>
-        <mysql.driver.version>5.1.35</mysql.driver.version>
         <le.domain.version>3.7.0-SNAPSHOT</le.domain.version>
         <le.quartzclient.version>3.7.0-SNAPSHOT</le.quartzclient.version>
     </properties>
@@ -30,12 +26,12 @@
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
             <artifactId>jetty-util</artifactId>
-            <version>${jetty.version}</version>
+            <version>${mortbay.jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
             <artifactId>jetty</artifactId>
-            <version>${jetty.version}</version>
+            <version>${mortbay.jetty.version}</version>
         </dependency>
 
         <dependency>
@@ -301,7 +297,7 @@
         <dependency>
             <groupId>org.apache-extras.camel-extra</groupId>
             <artifactId>camel-jcifs</artifactId>
-            <version>${cameljcifs.version}</version>
+            <version>${camel.jcifs.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.avro</groupId>
@@ -317,7 +313,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.driver.version}</version>
+            <version>${mysql.connector.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
