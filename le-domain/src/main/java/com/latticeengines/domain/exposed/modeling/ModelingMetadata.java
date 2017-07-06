@@ -48,8 +48,10 @@ public class ModelingMetadata {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class KV implements LikeMapEntry {
+        @JsonProperty("Key")
         private String key;
 
+        @JsonProperty("Value")
         private Object value;
 
         public KV() {
