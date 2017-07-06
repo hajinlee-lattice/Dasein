@@ -26,7 +26,7 @@ public class VdbMetadataFieldUnitTestNG {
         Assert.assertEquals(field1.hashCode(), field2.hashCode());
     }
 
-    @Test(groups = "unit", dataProvider = "vdbMetadataFieldDataProviderEqualsArgs")
+    @Test(groups = "unit", dataProvider = "vdbMetadataFieldDataProviderNotEqualsArgs")
     public void testNotEquals(VdbMetadataField field) {
         VdbMetadataField fieldBase = getTestField();
         Assert.assertFalse(fieldBase.equals(field));
