@@ -21,7 +21,6 @@ def login(args):
 
 def push(args):
     tag_for_remote(args)
-    config = AwsEnvironment(args.environment)
     print "pushing image %s:%s to repo ..." % (args.image, args.remotetag)
 
     if args.environment != "dev":
@@ -31,10 +30,12 @@ def push(args):
         login_cmd = "echo skipping docker login ..."
     else:
         login_cmd = login_internal(args.environment)
-        
-    reg_url = config.ecr_registry()
+
     if args.environment == 'dev':
         reg_url = NEXUS_DOCKER_REGISTRY
+    else:
+        config = AwsEnvironment(args.environment)
+        reg_url = config.ecr_registry()
     destination = reg_url + "/" + NAMESPACE + "/" + args.image + ":" + args.remotetag
     subprocess.call(login_cmd + "; docker push %s" % destination, shell=True)
     subprocess.call("docker rmi " + destination, shell=True)
@@ -51,9 +52,10 @@ def purge(args):
     purge_internal(args.environment, args.image)
 
 def pull_internal(environment, image, remotetag, localtag, skiplogin=False, withf=False):
-    registry = AwsEnvironment(environment).ecr_registry()
     if environment == 'dev':
         registry = NEXUS_DOCKER_REGISTRY
+    else:
+        registry = AwsEnvironment(environment).ecr_registry()
     source = registry + "/" + NAMESPACE + "/" + image + ":" + remotetag
     if skiplogin:
         subprocess.call("docker pull %s" % source, shell=True)
@@ -102,11 +104,12 @@ def purge_internal(environment, image):
 
 
 def tag_for_remote(args):
-    config = AwsEnvironment(args.environment)
     source = NAMESPACE + "/" +  args.image + ":" + args.localtag
-    reg_url = config.ecr_registry()
     if args.environment == 'dev':
         reg_url = NEXUS_DOCKER_REGISTRY
+    else:
+        config = AwsEnvironment(args.environment)
+        reg_url = config.ecr_registry()
     destination = reg_url + "/" + NAMESPACE + "/" + args.image + ":" + args.remotetag
     print "tagging image %s as %s ..." % (source, destination)
     if args.withf:
