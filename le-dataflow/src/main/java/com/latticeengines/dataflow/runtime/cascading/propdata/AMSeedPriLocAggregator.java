@@ -112,7 +112,7 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         } else if (res < 0) {
             return context;
         }
-        res = checkRuleEqualStrings(arguments.getString(duDunsField), arguments.getString(guDunsField), context.duDuns,
+        res = checkRuleEqualStrings(arguments.getString(dunsField), arguments.getString(guDunsField), context.duns,
                 context.guDuns);
         if (res > 0) {
             return update(context, arguments);

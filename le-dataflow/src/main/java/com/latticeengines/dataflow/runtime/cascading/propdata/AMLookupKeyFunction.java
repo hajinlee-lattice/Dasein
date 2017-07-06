@@ -11,7 +11,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-public class AccountMasterLookupKeyFunction extends BaseOperation implements Function {
+public class AMLookupKeyFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 5238703196548002861L;
 
@@ -21,7 +21,7 @@ public class AccountMasterLookupKeyFunction extends BaseOperation implements Fun
     private String stateColumn;
     private String zipCodeColumn;
 
-    public AccountMasterLookupKeyFunction(String keyColumn, String domainColumn, String dunsColumn,
+    public AMLookupKeyFunction(String keyColumn, String domainColumn, String dunsColumn,
             String countryColumn, String stateColumn, String zipCodeColumn) {
         super(new Fields(keyColumn));
         this.domainColumn = domainColumn;
