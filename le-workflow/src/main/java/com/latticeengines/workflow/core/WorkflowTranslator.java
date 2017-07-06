@@ -4,10 +4,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
-import com.latticeengines.workflow.listener.FailureReportingListener;
-import com.latticeengines.workflow.listener.LEJobListener;
-
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -33,6 +29,9 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.Workflow;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.listener.FailureReportingListener;
+import com.latticeengines.workflow.listener.LEJobListener;
 import com.latticeengines.workflow.listener.LogJobListener;
 
 @Configuration
@@ -53,8 +52,8 @@ public class WorkflowTranslator {
 
     @PostConstruct
     public void init() {
-        jobBuilderFactory = new LEJobBuilderFactory(jobRepository, new LogJobListener(), new FailureReportingListener(
-                workflowJobEntityMgr));
+        jobBuilderFactory = new LEJobBuilderFactory(jobRepository, new LogJobListener(),
+                new FailureReportingListener(workflowJobEntityMgr));
     }
 
     public Job buildWorkflow(String name, Workflow workflow) throws Exception {
@@ -93,8 +92,7 @@ public class WorkflowTranslator {
                 JobParameters jobParameters = stepExecution.getJobParameters();
                 step.setJobParameters(jobParameters);
 
-                ExecutionContext executionContext = stepExecution.getJobExecution()
-                        .getExecutionContext();
+                ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
                 step.setExecutionContext(executionContext);
 
                 if (!step.isDryRun()) {
@@ -117,8 +115,8 @@ public class WorkflowTranslator {
             }
 
             private void validateConfiguration(final AbstractStep<?> step) {
-                Set<AnnotationValidationError> validationErrors = beanValidationService.validate(step
-                        .getConfiguration());
+                Set<AnnotationValidationError> validationErrors = beanValidationService
+                        .validate(step.getConfiguration());
                 if (validationErrors.size() > 0) {
                     StringBuilder validationErrorStringBuilder = new StringBuilder();
                     for (AnnotationValidationError annotationValidationError : validationErrors) {

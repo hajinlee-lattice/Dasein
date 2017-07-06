@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -282,9 +283,19 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     protected void skipEmbeddedWorkflow(Class<? extends WorkflowConfiguration> workflowClass) {
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(workflowClass);
+        stepConfigMap.forEach((name, step) -> {
+            step.setSkipStep(true);
+            putObjectInContext(name, step);
+            log.info("Set step " + name + " to be skipped.");
+        });
+    }
+
+    protected Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(
+            Class<? extends WorkflowConfiguration> workflowClass) {
         WorkflowConfiguration workflow = getObjectFromContext(workflowClass.getName(), workflowClass);
         if (workflow == null) {
-            log.warn("There is no workflow conifguration of class " + workflowClass.getSimpleName() + " in context.");
+            log.warn("There is no workflow configuration of class " + workflowClass.getSimpleName() + " in context.");
             try {
                 Class<?> builderClass = Arrays.stream(workflowClass.getDeclaredClasses())
                         .filter(c -> c.getSimpleName().equals("Builder")).distinct().findFirst().orElse(null);
@@ -296,23 +307,23 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                         String.format("Can't instantiate workflow configuration %s", workflowClass.getSimpleName()), e);
             }
         }
-        log.info("Trying to skip embedded workflow " + workflow.getName());
-        Map<String, Class<?>> stepConfigClasses = workflow.getStepConfigClasses();
-        if (stepConfigClasses.isEmpty()) {
-            log.info("Cannot find any step config classes for embedded workflow " + workflow.getName());
-            return;
-        }
         Map<String, String> registry = workflow.getConfigRegistry();
-        registry.forEach((name, config) -> {
-            Class<?> configClass = stepConfigClasses.get(name);
-            BaseStepConfiguration step = (BaseStepConfiguration) getObjectFromContext(name, configClass);
-            if (step == null) {
-                step = (BaseStepConfiguration) JsonUtils.deserialize(config, configClass);
+        return registry.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> {
+            Class<?> configClass = null;
+            try {
+                configClass = Class.forName(e.getKey());
+            } catch (ClassNotFoundException e1) {
+                throw new RuntimeException(String.format("unable to find class %s", e.getKey()), e1);
             }
-            step.setSkipStep(true);
-            putObjectInContext(name, step);
-            log.info("Set step " + configClass.getSimpleName() + " to be skipped.");
-        });
-    }
+            BaseStepConfiguration step = (BaseStepConfiguration) getObjectFromContext(e.getKey(), configClass);
+            if (step == null) {
+                step = (BaseStepConfiguration) getConfigurationFromJobParameters(configClass);
+                if (step == null) {
+                    step = (BaseStepConfiguration) JsonUtils.deserialize(e.getValue(), configClass);
+                }
+            }
+            return step;
+        }));
 
+    }
 }

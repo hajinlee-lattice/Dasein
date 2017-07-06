@@ -13,7 +13,6 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataFeed;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
@@ -25,7 +24,6 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.Sor
 import com.latticeengines.domain.exposed.serviceflows.cdl.ConsolidateAndPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -35,9 +33,6 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = Logger.getLogger(ConsolidateAndPublishWorkflowSubmitter.class);
-
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -93,8 +88,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 log.info(String.format(
                         "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
                         execution, datafeed));
-                dataFeedProxy.failExecution(MultiTenantContext.getCustomerSpace().toString(),
-                        datafeedStatus.getName());
+                dataFeedProxy.failExecution(MultiTenantContext.getCustomerSpace().toString(), datafeedStatus.getName());
             }
         } else if (execution == null || execution.getStatus() != DataFeedExecution.Status.Failed) {
             throw new RuntimeException("we can't retart consolidate workflow as the most recent one is not failed");
@@ -108,8 +102,6 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private WorkflowConfiguration generateConfiguration(String datafeedName, Status initialDataFeedStatus) {
-        DataCollection dataCollection = dataCollectionProxy
-                .getDefaultDataCollection(MultiTenantContext.getCustomerSpace().toString());
         return new ConsolidateAndPublishWorkflowConfiguration.Builder() //
                 .initialDataFeedStatus(initialDataFeedStatus) //
                 .customer(MultiTenantContext.getCustomerSpace()) //
@@ -118,7 +110,6 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, initialDataFeedStatus.getName()) //
                         .build()) //
-                .dataCollectionName(dataCollection.getName()) //
                 .idField(InterfaceName.LEAccountIDLong.name()) //
                 .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder() //
                         .put(MatchKey.Domain, Collections.singletonList("URL")) //

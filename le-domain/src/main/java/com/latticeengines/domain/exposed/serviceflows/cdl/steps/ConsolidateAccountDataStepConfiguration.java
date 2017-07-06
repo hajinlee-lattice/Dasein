@@ -7,13 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
-import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class ConsolidateDataConfiguration extends BaseWrapperStepConfiguration {
-
-    @JsonProperty("data_collection_name")
-    @NotNull
-    private String dataCollectionName;
+public class ConsolidateAccountDataStepConfiguration extends ConsolidateDataBaseConfiguration {
 
     @JsonProperty("id_field")
     @NotEmptyString
@@ -23,12 +19,9 @@ public class ConsolidateDataConfiguration extends BaseWrapperStepConfiguration {
     @JsonProperty("match_key_map")
     Map<MatchKey, List<String>> matchKeyMap = null;
 
-    public String getDataCollectionName() {
-        return dataCollectionName;
-    }
-
-    public void setDataCollectionName(String dataCollectionName) {
-        this.dataCollectionName = dataCollectionName;
+    public ConsolidateAccountDataStepConfiguration() {
+        super();
+        this.businessEntity = BusinessEntity.Account;
     }
 
     public String getIdField() {
@@ -46,5 +39,4 @@ public class ConsolidateDataConfiguration extends BaseWrapperStepConfiguration {
     public void setMatchKeyMap(Map<MatchKey, List<String>> matchKeyMap) {
         this.matchKeyMap = matchKeyMap;
     }
-
 }

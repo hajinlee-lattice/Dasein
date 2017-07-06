@@ -19,10 +19,7 @@ public class ConsolidateAndPublishWorkflow extends AbstractWorkflow<ConsolidateA
     private StartExecution startExecution;
 
     @Autowired
-    private ConsolidateAccountWrapper consolidateAccountWrapper;
-
-    @Autowired
-    private ConsolidateContactWrapper consolidateContactWrapper;
+    private ConsolidateDataWorkflow consolidateDataWorkflow;
 
     @Autowired
     private RedshiftPublishWorkflow redshiftPublishWorkflow;
@@ -39,8 +36,7 @@ public class ConsolidateAndPublishWorkflow extends AbstractWorkflow<ConsolidateA
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(startExecution) //
-                .next(consolidateAccountWrapper) //
-                // .next(consolidateContactWrapper) //
+                .next(consolidateDataWorkflow) //
                 .next(redshiftPublishWorkflow) //
                 .listener(datafeedExecutionListener) //
                 .build();

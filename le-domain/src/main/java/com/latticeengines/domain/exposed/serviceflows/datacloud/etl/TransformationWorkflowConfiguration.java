@@ -49,11 +49,14 @@ public class TransformationWorkflowConfiguration extends BaseDataCloudWorkflowCo
             prepareConfig.setRootOperationUid(rootOperationUid);
             prepareConfig.setHdfsPodId(hdfsPodId);
             prepareConfig.setInternalResourceHostPort(internalResourceHostPort);
-            prepareConfig.setTransformationConfiguration(JsonUtils.serialize(transformationConfiguration));
+            if (transformationConfiguration != null) {
+                prepareConfig.setTransformationConfiguration(JsonUtils.serialize(transformationConfiguration));
+                prepareConfig.setTransformationConfigurationClasspath(
+                        transformationConfiguration.getClass().getCanonicalName());
+            }
 
             prepareConfig.setServiceBeanName(serviceBeanName);
-            prepareConfig
-                    .setTransformationConfigurationClasspath(transformationConfiguration.getClass().getCanonicalName());
+
             configuration.add(prepareConfig);
             configuration.add(executeStep);
 

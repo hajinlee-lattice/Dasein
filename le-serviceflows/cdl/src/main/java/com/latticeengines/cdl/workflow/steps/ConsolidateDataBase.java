@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow;
+package com.latticeengines.cdl.workflow.steps;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,14 +18,15 @@ import com.latticeengines.domain.exposed.metadata.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataBaseConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
-public abstract class ConsolidateDataBase<T extends BaseWrapperStepConfiguration> extends BaseTransformWrapperStep<T> {
+public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfiguration>
+        extends BaseTransformWrapperStep<T> {
 
     protected static final Log log = LogFactory.getLog(ConsolidateDataBase.class);
 
@@ -134,6 +135,8 @@ public abstract class ConsolidateDataBase<T extends BaseWrapperStepConfiguration
 
     public abstract PipelineTransformationRequest getConsolidateRequest();
 
-    public abstract BusinessEntity getBusinessEntity();
+    public BusinessEntity getBusinessEntity() {
+        return configuration.getBusinessEntity();
+    }
 
 }

@@ -17,13 +17,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.ConsolidateDataBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDeltaTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
@@ -32,12 +30,11 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateAccountDataStepConfiguration;
 
 @Component("consolidateAccountData")
-public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataConfiguration> {
+public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccountDataStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(ConsolidateAccountData.class);
 
@@ -243,11 +240,6 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateDataC
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
         return keyMap;
-    }
-
-    @Override
-    public BusinessEntity getBusinessEntity() {
-        return BusinessEntity.Account;
     }
 
     @Override

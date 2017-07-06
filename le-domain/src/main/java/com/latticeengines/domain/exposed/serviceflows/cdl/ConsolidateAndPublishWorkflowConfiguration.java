@@ -7,7 +7,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
 
 public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -19,8 +18,7 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
 
         public ConsolidateAndPublishWorkflowConfiguration configuration = new ConsolidateAndPublishWorkflowConfiguration();
         public StartExecutionConfiguration startExecutionConfiguration = new StartExecutionConfiguration();
-        public ConsolidateDataConfiguration consolidateDataConfiguration = new ConsolidateDataConfiguration();
-
+        public ConsolidateDataWorkflowConfiguration.Builder consolidateDataConfigurationBuilder = new ConsolidateDataWorkflowConfiguration.Builder();
         public RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
 
         public Builder initialDataFeedStatus(Status initialDataFeedStatus) {
@@ -32,7 +30,7 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             configuration.setContainerConfiguration("consolidateAndPublishWorkflow", customerSpace,
                     "consolidateAndPublishWorkflow");
             startExecutionConfiguration.setCustomerSpace(customerSpace);
-            consolidateDataConfiguration.setCustomerSpace(customerSpace);
+            consolidateDataConfigurationBuilder.customer(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
             return this;
         }
@@ -48,18 +46,13 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
-        public Builder dataCollectionName(String dataCollectionName) {
-            consolidateDataConfiguration.setDataCollectionName(dataCollectionName);
-            return this;
-        }
-
         public Builder idField(String idField) {
-            consolidateDataConfiguration.setIdField(idField);
+            consolidateDataConfigurationBuilder.idField(idField);
             return this;
         }
 
         public Builder matchKeyMap(Map<MatchKey, List<String>> matchKeyMap) {
-            consolidateDataConfiguration.setMatchKeyMap(matchKeyMap);
+            consolidateDataConfigurationBuilder.matchKeyMap(matchKeyMap);
             return this;
         }
 
@@ -75,7 +68,7 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
 
         public ConsolidateAndPublishWorkflowConfiguration build() {
             configuration.add(startExecutionConfiguration);
-            configuration.add(consolidateDataConfiguration);
+            configuration.add(consolidateDataConfigurationBuilder.build());
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             return configuration;
         }

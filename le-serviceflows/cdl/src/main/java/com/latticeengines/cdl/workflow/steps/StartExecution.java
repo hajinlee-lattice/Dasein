@@ -14,8 +14,11 @@ import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.DataFeedImport;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.ConsolidateAndPublishWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataBaseConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -48,10 +51,23 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
                     String.format("current active execution has a workflow id %s, which is different from %s ",
                             execution.getWorkflowId(), jobId));
         } else {
+            Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(
+                    ConsolidateAndPublishWorkflowConfiguration.class);
+            if (stepConfigMap.isEmpty()) {
+                log.info("stepConfigMap is Empty!!!");
+            }
             Map<BusinessEntity, List<DataFeedImport>> entityImportsMap = new HashMap<>();
             execution.getImports().stream().forEach(i -> {
-                entityImportsMap.putIfAbsent(BusinessEntity.valueOf(i.getEntity()), new ArrayList<>());
-                entityImportsMap.get(BusinessEntity.valueOf(i.getEntity())).add(i);
+                BusinessEntity entity = BusinessEntity.valueOf(i.getEntity());
+                entityImportsMap.putIfAbsent(entity, new ArrayList<>());
+                entityImportsMap.get(entity).add(i);
+                stepConfigMap.entrySet().stream().filter(e -> (e.getValue() instanceof ConsolidateDataBaseConfiguration
+                        && ((ConsolidateDataBaseConfiguration) e.getValue()).getBusinessEntity().equals(entity)))
+                        .forEach(e -> {
+                            log.info("enabling consolidate step:" + e.getKey());
+                            e.getValue().setSkipStep(false);
+                            putObjectInContext(e.getKey(), e.getValue());
+                        });
             });
             putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);
         }

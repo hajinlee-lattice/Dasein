@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.ConsolidateContactData;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("consolidateContactWrapper")
