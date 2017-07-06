@@ -437,11 +437,6 @@
             <artifactId>cascading-jdbc-redshift</artifactId>
             <version>${cascading.redshift.version}</version>
         </dependency>
-        <dependency> <!-- to be removed-->
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
     </dependencies>
 
 </project>

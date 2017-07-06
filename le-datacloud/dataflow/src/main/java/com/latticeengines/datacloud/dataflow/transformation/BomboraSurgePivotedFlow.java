@@ -3,7 +3,7 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.math.IntRange;
+import org.apache.commons.lang3.Range;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ public class BomboraSurgePivotedFlow extends ConfigurableFlowBase<BomboraSurgeCo
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);
-        Map<String, Map<IntRange, String>> intentMap = FileParser.parseBomboraIntent();
+        Map<String, Map<Range<Integer>, String>> intentMap = FileParser.parseBomboraIntent();
         Node bomburaSurge = addSource(parameters.getBaseTables().get(0));
         bomburaSurge = bomburaSurge.groupByAndLimit(new FieldList(groupByFields), 1);
         bomburaSurge = addIntent(bomburaSurge, intentMap);
@@ -49,7 +49,7 @@ public class BomboraSurgePivotedFlow extends ConfigurableFlowBase<BomboraSurgeCo
         return encoded;
     }
 
-    private Node addIntent(Node node, Map<String, Map<IntRange, String>> intentMap) {
+    private Node addIntent(Node node, Map<String, Map<Range<Integer>, String>> intentMap) {
         return node.apply(new BomboraSurgeIntentFunction(INTENT, config.getCompoScoreField(),
                 config.getBucketCodeField(), intentMap), new FieldList(node.getFieldNames()),
                 new FieldMetadata(INTENT, String.class));

@@ -11,7 +11,7 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang.math.IntRange;
+import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,8 +60,8 @@ public class FileParser {
     }
 
     @SuppressWarnings("resource")
-    public static Map<String, Map<IntRange, String>> parseBomboraIntent() {
-        Map<String, Map<IntRange, String>> intentMap = new HashMap<>();
+    public static Map<String, Map<Range<Integer>, String>> parseBomboraIntent() {
+        Map<String, Map<Range<Integer>, String>> intentMap = new HashMap<>();
         InputStream is = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("etl/BomboraIntentCuration.csv");
         if (is == null) {
@@ -80,7 +80,7 @@ public class FileParser {
                 if (!intentMap.containsKey(bucketCode)) {
                     intentMap.put(bucketCode, new HashMap<>());
                 }
-                intentMap.get(bucketCode).put(new IntRange(compoScoreMin, compoScoreMax), intent);
+                intentMap.get(bucketCode).put(Range.between(compoScoreMin, compoScoreMax), intent);
             }
         } catch (IOException e) {
             throw new RuntimeException("Fail to parse AllUniqueMetroCodes.csv", e);
