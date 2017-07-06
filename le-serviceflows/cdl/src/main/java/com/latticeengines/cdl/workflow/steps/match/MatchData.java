@@ -1,7 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.match;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchConfiguration;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

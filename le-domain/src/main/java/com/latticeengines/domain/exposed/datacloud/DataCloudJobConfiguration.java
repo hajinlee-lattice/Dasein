@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.datacloud;
 import java.io.IOException;
 
 import org.apache.avro.Schema;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

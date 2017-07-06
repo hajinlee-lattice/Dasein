@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.config.Registry;
@@ -103,7 +103,7 @@ public class StatusServiceImpl implements StatusService {
                     overall = false;
                 }
             } catch (Exception e) {
-                status.put(microservice, ExceptionUtils.getFullStackTrace(e));
+                status.put(microservice, ExceptionUtils.getStackTrace(e));
                 overall = false;
             }
         }

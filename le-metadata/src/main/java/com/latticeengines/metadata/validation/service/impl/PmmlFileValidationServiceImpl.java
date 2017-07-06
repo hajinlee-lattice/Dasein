@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -57,7 +56,7 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
         } catch (LedpException le) {
             throw new RuntimeException(le);
         } catch (Exception e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
             throw new LedpException(LedpCode.LEDP_10008);
         }
     }

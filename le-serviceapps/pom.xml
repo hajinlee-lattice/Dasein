@@ -11,7 +11,6 @@
         <component-name>serviceapps</component-name>
     </properties>
 
-
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>

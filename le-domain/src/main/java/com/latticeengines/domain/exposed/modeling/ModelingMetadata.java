@@ -2,10 +2,10 @@ package com.latticeengines.domain.exposed.modeling;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.validator.LikeMapEntry;
 import com.latticeengines.common.exposed.validator.annotation.AllowedValues;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -47,8 +47,9 @@ public class ModelingMetadata {
     private List<AttributeMetadata> attributeMetadata = new ArrayList<>();
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class KV implements Map.Entry<String, Object> {
+    public static class KV implements LikeMapEntry {
         private String key;
+
         private Object value;
 
         public KV() {
@@ -59,22 +60,18 @@ public class ModelingMetadata {
             this.value = value;
         }
 
-        @JsonProperty("Key")
         public String getKey() {
             return key;
         }
 
-        @JsonProperty("Key")
         public void setKey(String key) {
             this.key = key;
         }
 
-        @JsonProperty("Value")
         public Object getValue() {
             return value;
         }
 
-        @JsonProperty("Value")
         public Object setValue(Object value) {
             Object oldValue = this.value;
             this.value = value;

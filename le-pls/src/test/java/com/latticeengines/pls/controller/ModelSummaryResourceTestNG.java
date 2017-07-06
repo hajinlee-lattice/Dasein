@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -139,7 +139,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/alerts/" + eloquaModelId,
                     String.class);
         } catch (Exception e) {
-            System.out.println(ExceptionUtils.getFullStackTrace(e));
+            e.printStackTrace();
             Assert.fail("Should NOT have thrown an exception.");
         }
         assertNotNull(response);

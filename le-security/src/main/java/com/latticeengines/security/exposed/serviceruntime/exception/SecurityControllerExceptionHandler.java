@@ -1,6 +1,6 @@
 package com.latticeengines.security.exposed.serviceruntime.exception;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,7 @@ public class SecurityControllerExceptionHandler {
     public ModelAndView handleException(AccessDeniedException e) {
 
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : ExceptionUtils
                 .getStackTrace(e);
         log.error(stackTrace);
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_18003.name(), //
@@ -40,7 +40,7 @@ public class SecurityControllerExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ModelAndView handleException(LoginException e) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : ExceptionUtils
                 .getStackTrace(e);
         log.error(stackTrace);
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", e.getCode().name(), //

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -56,7 +56,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             String requestId, boolean isDebugMode, //
             List<String> matchLogs, List<String> matchErrorLogs, //
             boolean shouldReturnAllEnrichment) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("matchAndJoin is not implemented");
     }
 
     @Override
@@ -72,7 +72,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             List<String> matchLogs, List<String> matchErrorLogs, //
             boolean shouldReturnAllEnrichment, //
             boolean enforceFuzzyMatch, boolean skipDnBCache) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("matchAndJoin is not implemented");
     }
 
     @Override

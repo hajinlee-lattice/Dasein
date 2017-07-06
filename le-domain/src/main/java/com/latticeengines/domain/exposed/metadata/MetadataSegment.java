@@ -37,7 +37,6 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import io.swagger.annotations.ApiModelProperty;
-import springfox.documentation.annotations.ApiIgnore;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_SEGMENT", uniqueConstraints = @UniqueConstraint(columnNames = {
@@ -144,13 +143,11 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
     }
 
     @JsonProperty("restriction")
-    @ApiIgnore
     public Restriction getRestriction() {
         return JsonUtils.deserialize(restrictionString, Restriction.class);
     }
 
     @JsonProperty("restriction")
-    @ApiIgnore
     public void setRestriction(Restriction restriction) {
         this.restrictionString = JsonUtils.serialize(restriction);
     }

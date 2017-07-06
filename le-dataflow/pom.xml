@@ -95,11 +95,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-api</artifactId>
-            <version>${hadoop.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-yarn-common</artifactId>
             <version>${hadoop.version}</version>
         </dependency>
@@ -441,6 +436,11 @@
             <groupId>cascading</groupId>
             <artifactId>cascading-jdbc-redshift</artifactId>
             <version>${cascading.redshift.version}</version>
+        </dependency>
+        <dependency> <!-- to be removed-->
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
         </dependency>
     </dependencies>
 

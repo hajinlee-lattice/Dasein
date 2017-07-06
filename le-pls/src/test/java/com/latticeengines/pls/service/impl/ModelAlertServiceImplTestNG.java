@@ -7,7 +7,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -146,7 +146,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
         try {
             metadataWarning = modelAlertService.generateMissingMetaDataWarnings(tenantId, modelId);
         } catch (Exception e) {
-            System.out.println(ExceptionUtils.getFullStackTrace(e));
+            System.out.println(ExceptionUtils.getStackTrace(e));
             Assert.fail("Should NOT have thrown an exception");
         }
         assertNotNull(metadataWarning);

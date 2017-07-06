@@ -49,7 +49,7 @@
         <dependency>
             <groupId>com.marketo</groupId>
             <artifactId>marketo-soap-sdk</artifactId>
-            <version>${marketo.sdk.version}</version>
+            <version>${marketo.soap.sdk.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

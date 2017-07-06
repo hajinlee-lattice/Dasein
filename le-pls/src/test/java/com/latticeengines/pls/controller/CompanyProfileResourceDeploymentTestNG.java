@@ -12,7 +12,6 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
@@ -88,7 +87,7 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
         try {
             HttpClientUtils.newRestTemplate().postForObject(url, request, CompanyProfile.class);
         } catch (Exception e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
             assertTrue(e.getMessage().contains("401"));
             thrown = true;
         }

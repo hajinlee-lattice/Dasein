@@ -1,0 +1,1765 @@
+{
+  "type" : "record",
+  "name" : "LEAccount_Extensions",
+  "doc" : "Sqoop import of LEAccount_Extensions",
+  "fields" : [ {
+    "name" : "Item_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Item_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "LinkedInName",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "LinkedInName",
+    "sqlType" : "-9"
+  }, {
+    "name" : "LinkedInPenalty",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "LinkedInPenalty",
+    "sqlType" : "8"
+  }, {
+    "name" : "LinkedInPriority",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "LinkedInPriority",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_ActiveRetirementParticipants",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_ActiveRetirementParticipants",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_ActivityLastUpdated",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_ActivityLastUpdated",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_ActivitySources",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_ActivitySources",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_ApplicationType",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_ApplicationType",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_ArraAsOf",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_ArraAsOf",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_AssetsStartOfYear",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_AssetsStartOfYear",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_AwardCategory",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_AwardCategory",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_Awards12Months",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_Awards12Months",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_AwardWebsite",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_AwardWebsite",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_AwardYear",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_AwardYear",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_business_activities_LastSynchronized",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_business_activities_LastSynchronized",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_business_financials_LastSynchronized",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_business_financials_LastSynchronized",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_business_firmographics_LastSynchronized",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_business_firmographics_LastSynchronized",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_business_funding_LastSynchronized",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_business_funding_LastSynchronized",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_business_jobs_LastSynchronized",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_business_jobs_LastSynchronized",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_BusinessCompanyPhone",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessCompanyPhone",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessDescription",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessDescription",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessECommerceSite",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessECommerceSite",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessEmailSuffix",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessEmailSuffix",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessEstablishedMonth",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "PD_BusinessEstablishedMonth",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_BusinessEstablishedYear",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "PD_BusinessEstablishedYear",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_BusinessEstimatedAnnualSales_k",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_BusinessEstimatedAnnualSales_k",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_BusinessEstimatedEmployees",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessEstimatedEmployees",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessFacebook",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessFacebook",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessFocus",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessFocus",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessHimssMembershipLevel",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessHimssMembershipLevel",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessInboundLinks",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessInboundLinks",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessIndustry",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessIndustry",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessInsuranceParticipants",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_BusinessInsuranceParticipants",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_BusinessLastSocialActivity",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessLastSocialActivity",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessLinkedIn",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessLinkedIn",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessOtherLinks",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessOtherLinks",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessPublicCompany",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessPublicCompany",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessRetirementParticipants",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_BusinessRetirementParticipants",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_BusinessSocialPresence",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessSocialPresence",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessTwitter",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessTwitter",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessType",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessType",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessUrlNumPages",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_BusinessUrlNumPages",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_BusinessVCFunded",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessVCFunded",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_BusinessWebsite",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_BusinessWebsite",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_Description",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_Description",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_ExpirationDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_ExpirationDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_FinancialsLastUpdated",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FinancialsLastUpdated",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_FinancialsSources",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FinancialsSources",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FirmagraphicsLastUpdated",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FirmagraphicsLastUpdated",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_FirmagraphicsSources",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FirmagraphicsSources",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FraudOrDishonesty",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FraudOrDishonesty",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingAgency",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingAgency",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingAmount",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "PD_FundingAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_FundingAwardAmount",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "PD_FundingAwardAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_FundingAwardDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingAwardDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_FundingAwardDesciption",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingAwardDesciption",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingContractAmount",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingContractAmount",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_FundingContractCategory",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingContractCategory",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingContractDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingContractDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_FundingContractDescription",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingContractDescription",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingContractNaics",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_FundingContractNaics",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_FundingDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_FundingDateCreated",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingDateCreated",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_FundingDateUpdated",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingDateUpdated",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_FundingFinanceRound",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingFinanceRound",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingFiscalQuarter",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_FundingFiscalQuarter",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_FundingFiscalYear",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_FundingFiscalYear",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_FundingGovAgency",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingGovAgency",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingJobCreation",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingJobCreation",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingJobsCreated",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "PD_FundingJobsCreated",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_FundingLastUpdated",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingLastUpdated",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_FundingLocalAmount",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "PD_FundingLocalAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_FundingProjectDescription",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingProjectDescription",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingProjectName",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingProjectName",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingReceived",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "PD_FundingReceived",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_FundingSources",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingSources",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingStage",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_FundingStage",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_FundingSumProjectsLast12Months",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingSumProjectsLast12Months",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_FundingTotalContractedAmount",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingTotalContractedAmount",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_FundingTotalContracts",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingTotalContracts",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_FundingTotalProjectsLast12Months",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_FundingTotalProjectsLast12Months",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_JobsAsOf",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_JobsAsOf",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_JobsDescription",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_JobsDescription",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_JobsLastUpdated",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_JobsLastUpdated",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_JobsLink",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_JobsLink",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_JobsRecentJobs",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_JobsRecentJobs",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_JobsSources",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_JobsSources",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_JobsTitle",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_JobsTitle",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_JobsTrendString",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_JobsTrendString",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_PatentApplicationFiled",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_PatentApplicationFiled",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_PatentApplicationID",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_PatentApplicationID",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_PatentGranted",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_PatentGranted",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_PatentID",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_PatentID",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_PatentsAsOf",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_PatentsAsOf",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_PatentTrend",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_PatentTrend",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_PCIAsOf",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_PCIAsOf",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_PCICount",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_PCICount",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_PCIVersion",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_PCIVersion",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_RecentPatents",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_RecentPatents",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_RetirementAssetsEOY",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_RetirementAssetsEOY",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_RetirementAssetsYOY",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_RetirementAssetsYOY",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_RevalidateDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_RevalidateDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "PD_TargetMarket",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PD_TargetMarket",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_TotalParticipantsSOY",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_TotalParticipantsSOY",
+    "sqlType" : "-5"
+  }, {
+    "name" : "PD_TotalPatents",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "PD_TotalPatents",
+    "sqlType" : "4"
+  }, {
+    "name" : "PD_VCAsOf",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PD_VCAsOf",
+    "sqlType" : "93"
+  }, {
+    "name" : "AccountLocation",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "AccountLocation",
+    "sqlType" : "-9"
+  }, {
+    "name" : "AccountManager",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "AccountManager",
+    "sqlType" : "-9"
+  }, {
+    "name" : "AccountOwner",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "AccountOwner",
+    "sqlType" : "-9"
+  }, {
+    "name" : "AccountRevenue",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "AccountRevenue",
+    "sqlType" : "8"
+  }, {
+    "name" : "Annual_Revenue",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "Annual_Revenue",
+    "sqlType" : "8"
+  }, {
+    "name" : "AnnualMaintenance",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "AnnualMaintenance",
+    "sqlType" : "8"
+  }, {
+    "name" : "ChildDUNS",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "ChildDUNS",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Client_Status",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Client_Status",
+    "sqlType" : "-9"
+  }, {
+    "name" : "CurrentStatus",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "CurrentStatus",
+    "sqlType" : "-9"
+  }, {
+    "name" : "CustomerCarePlan",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "CustomerCarePlan",
+    "sqlType" : "-9"
+  }, {
+    "name" : "DBEmployeesTotal",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "DBEmployeesTotal",
+    "sqlType" : "4"
+  }, {
+    "name" : "DBHQParentCountry",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "DBHQParentCountry",
+    "sqlType" : "-9"
+  }, {
+    "name" : "DBHQParentStateProvinceAbbrv",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "DBHQParentStateProvinceAbbrv",
+    "sqlType" : "-9"
+  }, {
+    "name" : "DCAA_List",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "DCAA_List",
+    "sqlType" : "-9"
+  }, {
+    "name" : "EPM_Marketing_Segment",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "EPM_Marketing_Segment",
+    "sqlType" : "-9"
+  }, {
+    "name" : "EstFedRevenue",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "EstFedRevenue",
+    "sqlType" : "8"
+  }, {
+    "name" : "EstSLRevenue",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "EstSLRevenue",
+    "sqlType" : "8"
+  }, {
+    "name" : "FPIDC_ActionDate",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FPIDC_ActionDate",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FPIDC_Amt",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "FPIDC_Amt",
+    "sqlType" : "4"
+  }, {
+    "name" : "FPIDC_Category",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FPIDC_Category",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Industry",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Industry",
+    "sqlType" : "-9"
+  }, {
+    "name" : "InternationalPartner",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "InternationalPartner",
+    "sqlType" : "-9"
+  }, {
+    "name" : "IsPartner",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "IsPartner",
+    "sqlType" : "-9"
+  }, {
+    "name" : "MigrationSource",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "MigrationSource",
+    "sqlType" : "-9"
+  }, {
+    "name" : "MostRecentSalesNote",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "MostRecentSalesNote",
+    "sqlType" : "-9"
+  }, {
+    "name" : "MPSIQ_AnnualReceipts",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "MPSIQ_AnnualReceipts",
+    "sqlType" : "4"
+  }, {
+    "name" : "MPSIQ_AvgNumEmployees",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "MPSIQ_AvgNumEmployees",
+    "sqlType" : "4"
+  }, {
+    "name" : "ParentDUNS",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "ParentDUNS",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PRMOwned",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PRMOwned",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Profitability_CostAmtUSD",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "Profitability_CostAmtUSD",
+    "sqlType" : "8"
+  }, {
+    "name" : "Profitability_MarginAmt",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "Profitability_MarginAmt",
+    "sqlType" : "8"
+  }, {
+    "name" : "Profitability_MarginPct",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "Profitability_MarginPct",
+    "sqlType" : "8"
+  }, {
+    "name" : "Profitability_Quarter",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Profitability_Quarter",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Profitability_RevenueAmtUSD",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "Profitability_RevenueAmtUSD",
+    "sqlType" : "8"
+  }, {
+    "name" : "Profitability_SupportCaseCount",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Profitability_SupportCaseCount",
+    "sqlType" : "4"
+  }, {
+    "name" : "Profitability_Year",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Profitability_Year",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Rating",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Rating",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Site",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Site",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Top_Lists",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Top_Lists",
+    "sqlType" : "-9"
+  }, {
+    "name" : "URL",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "URL",
+    "sqlType" : "-9"
+  }, {
+    "name" : "WebVisitDate",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "WebVisitDate",
+    "sqlType" : "-9"
+  }, {
+    "name" : "ActiveRetirementParticipants",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "ActiveRetirementParticipants",
+    "sqlType" : "4"
+  }, {
+    "name" : "Annual_Sales_Size_Code",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Annual_Sales_Size_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "ApplicationType",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "ApplicationType",
+    "sqlType" : "93"
+  }, {
+    "name" : "AssetsStartOfYear",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "AssetsStartOfYear",
+    "sqlType" : "8"
+  }, {
+    "name" : "AwardCategory",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "AwardCategory",
+    "sqlType" : "-9"
+  }, {
+    "name" : "AwardWebsite",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "AwardWebsite",
+    "sqlType" : "-9"
+  }, {
+    "name" : "AwardYear",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "AwardYear",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Bankruptcy_filed",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Bankruptcy_filed",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BankruptcyFiled",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BankruptcyFiled",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessAnnualSalesAbs",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessAnnualSalesAbs",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessAssets",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "BusinessAssets",
+    "sqlType" : "8"
+  }, {
+    "name" : "BusinessEntityType",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessEntityType",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessEstablishedYear",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessEstablishedYear",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessEstimatedAnnualSales_k",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "BusinessEstimatedAnnualSales_k",
+    "sqlType" : "4"
+  }, {
+    "name" : "BusinessEstimatedEmployees",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "BusinessEstimatedEmployees",
+    "sqlType" : "4"
+  }, {
+    "name" : "BusinessFax",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessFax",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessFirmographicsParentEmployees",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "BusinessFirmographicsParentEmployees",
+    "sqlType" : "4"
+  }, {
+    "name" : "BusinessFirmographicsParentRevenue",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "BusinessFirmographicsParentRevenue",
+    "sqlType" : "4"
+  }, {
+    "name" : "BusinessFocus",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessFocus",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessHimssMembershipLevel",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessHimssMembershipLevel",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessIndustry",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessIndustry",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessIndustrySector",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessIndustrySector",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessLastSocialActivity",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessLastSocialActivity",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessMatchCategory",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessMatchCategory",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessMatchConfidence",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessMatchConfidence",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessPrimaryNaicsDesc",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessPrimaryNaicsDesc",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessPrimarySIC4Digit",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessPrimarySIC4Digit",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessPrimarySicDesc",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessPrimarySicDesc",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessPrimaryUkSicDesc",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessPrimaryUkSicDesc",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessRetirementParticipants",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "BusinessRetirementParticipants",
+    "sqlType" : "4"
+  }, {
+    "name" : "BusinessSocialPresence",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessSocialPresence",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessType",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessType",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessVCFunded",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessVCFunded",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessWebsite",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "BusinessWebsite",
+    "sqlType" : "-9"
+  }, {
+    "name" : "DBT_of_Combined_Trade_Totals",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "DBT_of_Combined_Trade_Totals",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Derogatory_Indicator",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Derogatory_Indicator",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Derogatory_Liability_Amount_Legal_Liability_Amount",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Derogatory_Liability_Amount_Legal_Liability_Amount",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Derogatory_Liability_Amount_Sign",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Derogatory_Liability_Amount_Sign",
+    "sqlType" : "-9"
+  }, {
+    "name" : "DerogatoryIndicator",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "DerogatoryIndicator",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Description",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Description",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Employee_Size_Code",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Employee_Size_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "END_OF_ROW",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "END_OF_ROW",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Establish_Date",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Establish_Date",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Estimated_Annual_Sales_Amount",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Estimated_Annual_Sales_Amount",
+    "sqlType" : "4"
+  }, {
+    "name" : "Estimated_Annual_Sales_Amount_Sign",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Estimated_Annual_Sales_Amount_Sign",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Estimated_Number_of_Employees",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Estimated_Number_of_Employees",
+    "sqlType" : "4"
+  }, {
+    "name" : "Executive_Count",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Executive_Count",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Executive_First_Name",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Executive_First_Name",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Executive_Last_Name",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Executive_Last_Name",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Executive_Title",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Executive_Title",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Experian_Business_Identification_Number",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Experian_Business_Identification_Number",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Experian_Credit_Rating",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Experian_Credit_Rating",
+    "sqlType" : "-9"
+  }, {
+    "name" : "ExperianCreditRating",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "ExperianCreditRating",
+    "sqlType" : "-9"
+  }, {
+    "name" : "ExpirationDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "ExpirationDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "FraudOrDishonesty",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FraudOrDishonesty",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingAgency",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingAgency",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingAmount",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "FundingAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingAwardAmount",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "FundingAwardAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingAwardDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "FundingAwardDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "FundingAwardDesciption",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingAwardDesciption",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingContractAmount",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "FundingContractAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingContractCategory",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingContractCategory",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingContractDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "FundingContractDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "FundingContractDescription",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingContractDescription",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingContractNaics",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "FundingContractNaics",
+    "sqlType" : "4"
+  }, {
+    "name" : "FundingDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "FundingDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "FundingDateCreated",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "FundingDateCreated",
+    "sqlType" : "93"
+  }, {
+    "name" : "FundingDateUpdated",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "FundingDateUpdated",
+    "sqlType" : "93"
+  }, {
+    "name" : "FundingFinanceRound",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingFinanceRound",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingFiscalQuarter",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingFiscalQuarter",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingFiscalYear",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingFiscalYear",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingGovAgency",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingGovAgency",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingJobCreation",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingJobCreation",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingJobsCreated",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "FundingJobsCreated",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingLocalAmount",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "FundingLocalAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingProjectDescription",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingProjectDescription",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingProjectName",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingProjectName",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingReceived",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "FundingReceived",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingStage",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FundingStage",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingTotalContractedAmount",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "FundingTotalContractedAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "Intelliscore",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Intelliscore",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Intelliscore_Plus_214",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Intelliscore_Plus_214",
+    "sqlType" : "-9"
+  }, {
+    "name" : "JobsAsOf",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "JobsAsOf",
+    "sqlType" : "93"
+  }, {
+    "name" : "JobsDescription",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "JobsDescription",
+    "sqlType" : "-9"
+  }, {
+    "name" : "JobsLink",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "JobsLink",
+    "sqlType" : "-9"
+  }, {
+    "name" : "JobsRecentJobs",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "JobsRecentJobs",
+    "sqlType" : "4"
+  }, {
+    "name" : "JobsTitle",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "JobsTitle",
+    "sqlType" : "-9"
+  }, {
+    "name" : "JobsTrendString",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "JobsTrendString",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Judgment_count",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Judgment_count",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Last_Experian_Inquiry_Date",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Last_Experian_Inquiry_Date",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Latest_Reported_Date",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Latest_Reported_Date",
+    "sqlType" : "-9"
+  }, {
+    "name" : "LE_As_Of_Date",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "LE_As_Of_Date",
+    "sqlType" : "-9"
+  }, {
+    "name" : "LE_Business_Type",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "LE_Business_Type",
+    "sqlType" : "-9"
+  }, {
+    "name" : "LE_Business_Type_Full",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "LE_Business_Type_Full",
+    "sqlType" : "-9"
+  }, {
+    "name" : "LE_Estimated_Annual_Sales_Abs",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "LE_Estimated_Annual_Sales_Abs",
+    "sqlType" : "8"
+  }, {
+    "name" : "LE_Estimated_Annual_Sales_K",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "LE_Estimated_Annual_Sales_K",
+    "sqlType" : "4"
+  }, {
+    "name" : "LE_Last_Update_Date",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "LE_Last_Update_Date",
+    "sqlType" : "93"
+  }, {
+    "name" : "LeasingTrades",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "LeasingTrades",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Legal_Balance_Amount",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Legal_Balance_Amount",
+    "sqlType" : "4"
+  }, {
+    "name" : "Legal_Balance_Sign",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Legal_Balance_Sign",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Median_Credit_Amount",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Median_Credit_Amount",
+    "sqlType" : "4"
+  }, {
+    "name" : "Median_Credit_Amount_Sign",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Median_Credit_Amount_Sign",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Model_action",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Model_action",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Model_Code",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Model_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Model_type",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Model_type",
+    "sqlType" : "-9"
+  }, {
+    "name" : "ModelAction",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "ModelAction",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Months_in_File",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Months_in_File",
+    "sqlType" : "-9"
+  }, {
+    "name" : "MSA_Code",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "MSA_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "MSA_Description",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "MSA_Description",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Non_Profit_Indicator",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Non_Profit_Indicator",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PatentApplicationFiled",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PatentApplicationFiled",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PatentApplicationID",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PatentApplicationID",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PatentGranted",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PatentGranted",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PatentID",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PatentID",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PatentsAsOf",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PatentsAsOf",
+    "sqlType" : "93"
+  }, {
+    "name" : "PCIAsOf",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "PCIAsOf",
+    "sqlType" : "93"
+  }, {
+    "name" : "PCIVersion",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PCIVersion",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PercentileModel",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "PercentileModel",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Primary_NAICS_Code",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Primary_NAICS_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Primary_SIC_Code",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Primary_SIC_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Primary_SIC_Code_Industry_Classification",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Primary_SIC_Code_Industry_Classification",
+    "sqlType" : "-9"
+  }, {
+    "name" : "RetirementAssetsEOY",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "RetirementAssetsEOY",
+    "sqlType" : "8"
+  }, {
+    "name" : "RetirementAssetsYOY",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "RetirementAssetsYOY",
+    "sqlType" : "8"
+  }, {
+    "name" : "RevalidateDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "RevalidateDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "TargetMarket",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "TargetMarket",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Total_Account_Balance",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Total_Account_Balance",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Total_Account_Balance_Sign",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Total_Account_Balance_Sign",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Total_Combined_Trade_Lines_Count",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Total_Combined_Trade_Lines_Count",
+    "sqlType" : "-9"
+  }, {
+    "name" : "TotalParticipantsSOY",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "TotalParticipantsSOY",
+    "sqlType" : "8"
+  }, {
+    "name" : "UCCFilings",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "UCCFilings",
+    "sqlType" : "-9"
+  }, {
+    "name" : "UCCFilingsPresent",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "UCCFilingsPresent",
+    "sqlType" : "-9"
+  }, {
+    "name" : "VCAsOf",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "VCAsOf",
+    "sqlType" : "93"
+  }, {
+    "name" : "Year_Business_Started",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Year_Business_Started",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Years_in_Business_Code",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Years_in_Business_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Years_in_File",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Years_in_File",
+    "sqlType" : "4"
+  }, {
+    "name" : "MSAName",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "MSAName",
+    "sqlType" : "-9"
+  }, {
+    "name" : "ArraAsOfDate",
+    "type" : [ "null", "long" ],
+    "default" : null,
+    "columnName" : "ArraAsOfDate",
+    "sqlType" : "93"
+  }, {
+    "name" : "CCR_ExistsInList",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "CCR_ExistsInList",
+    "sqlType" : "-9"
+  }, {
+    "name" : "DUNS",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "DUNS",
+    "sqlType" : "12"
+  }, {
+    "name" : "ExistsInTrxn",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "ExistsInTrxn",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Contacts",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Contacts",
+    "sqlType" : "4"
+  }, {
+    "name" : "KnownInEloqua",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "KnownInEloqua",
+    "sqlType" : "4"
+  }, {
+    "name" : "SalesNotes",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "SalesNotes",
+    "sqlType" : "4"
+  }, {
+    "name" : "DaysSinceLastWebVisit",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "DaysSinceLastWebVisit",
+    "sqlType" : "4"
+  }, {
+    "name" : "PercentKnownEloqua",
+    "type" : [ "null", "double" ],
+    "default" : null,
+    "columnName" : "PercentKnownEloqua",
+    "sqlType" : "8"
+  }, {
+    "name" : "FPIDC_ExistsInList",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "FPIDC_ExistsInList",
+    "sqlType" : "-9"
+  } ],
+  "tableName" : "LEAccount_Extensions"
+}

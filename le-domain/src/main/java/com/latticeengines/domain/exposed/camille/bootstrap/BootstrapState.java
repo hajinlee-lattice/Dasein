@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.camille.bootstrap;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.VersionedDocument;
@@ -104,7 +104,7 @@ public class BootstrapState extends VersionedDocument {
     @Override
     public int hashCode() {
         // Don't include base class version field - no nice way to do this.
-        return HashCodeBuilder.reflectionHashCode(17, 37, this, false, getClass());
+        return HashCodeBuilder.reflectionHashCode(17, 37, this, false);
     }
 
     @Override

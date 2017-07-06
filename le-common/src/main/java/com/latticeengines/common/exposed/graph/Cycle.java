@@ -2,8 +2,8 @@ package com.latticeengines.common.exposed.graph;
 
 import java.util.List;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Cycle {
 

@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.saml.service.IdentityProviderService;
-import com.wordnik.swagger.annotations.ApiOperation;
+
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "identityproviders", description = "REST resource for managing SAML identity providers")
 @RestController

@@ -2,9 +2,7 @@ package com.latticeengines.matchapi.service.impl;
 
 import java.util.UUID;
 
-import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -21,8 +19,10 @@ import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.datacloud.match.service.impl.MatchInputValidator;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.matchapi.service.BulkMatchService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 

@@ -2,7 +2,7 @@ package com.latticeengines.datacloud.workflow.engine.steps;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;

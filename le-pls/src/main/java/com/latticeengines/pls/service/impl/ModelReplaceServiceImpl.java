@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -60,7 +59,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 
             processHdfsData(sourceTenantId, targetTenantId, sourceModelSummary, targetModelSummary);
         } catch (IOException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
             throw new RuntimeException(e);
         }
         return true;

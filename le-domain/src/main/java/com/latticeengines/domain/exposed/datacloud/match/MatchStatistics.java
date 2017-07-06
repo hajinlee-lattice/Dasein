@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.util.List;
 
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.Period;

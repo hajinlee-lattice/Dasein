@@ -1,6 +1,5 @@
 package com.latticeengines.modelquality.service.impl;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,7 +24,7 @@ public class FileModelRunServiceImplDeploymentTestNG extends ModelQualityDeploym
             ModelRun modelRun = modelRunEntityMgr.findByName(modelRunEntityNames.get(0).getName());
             modelRunEntityMgr.delete(modelRun);
         } catch (Exception ex) {
-            System.out.println(ExceptionUtils.getFullStackTrace(ex));
+            ex.printStackTrace();
             Assert.fail(ex.getMessage());
         }
     }

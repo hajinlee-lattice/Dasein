@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
@@ -37,7 +37,7 @@ public abstract class BaseExceptionHandler {
     }
 
     protected void triggerCriticalAlert(Exception e) {
-        String stackTrace = ExceptionUtils.getFullStackTrace(e);
+        String stackTrace = ExceptionUtils.getStackTrace(e);
         List<BasicNameValuePair> details = new ArrayList<>();
         details.add(new BasicNameValuePair("stackTrace", stackTrace));
         String tenant = "";

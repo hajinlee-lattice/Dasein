@@ -2,7 +2,7 @@ package com.latticeengines.camille.exposed.config.bootstrap;
 
 import java.util.Map;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

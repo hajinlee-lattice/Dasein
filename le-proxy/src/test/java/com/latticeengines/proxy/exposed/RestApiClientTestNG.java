@@ -2,7 +2,7 @@ package com.latticeengines.proxy.exposed;
 
 import static org.testng.Assert.assertTrue;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;

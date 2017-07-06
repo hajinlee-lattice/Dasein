@@ -2,7 +2,7 @@ package com.latticeengines.eai.routes.marketo;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class MarketoUrlGenerator {
 

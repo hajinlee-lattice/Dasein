@@ -7,10 +7,10 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,7 +37,7 @@ public class LedpPlaymakerExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(LedpException ex, HttpServletRequest request) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
-        String stackTrace = ex.getCause() != null ? ExceptionUtils.getFullStackTrace(ex.getCause()) : ExceptionUtils
+        String stackTrace = ex.getCause() != null ? ExceptionUtils.getStackTrace(ex.getCause()) : ExceptionUtils
                 .getStackTrace(ex);
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
@@ -59,7 +59,7 @@ public class LedpPlaymakerExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> handleException(Exception ex, HttpServletRequest request) {
-        String trace = ExceptionUtils.getFullStackTrace(ex);
+        String trace = ExceptionUtils.getStackTrace(ex);
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         log.error(String.format("tenantName=%s\n%s", tenantName, trace));
 

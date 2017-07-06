@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.apache.avro.Schema.Type;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -22,10 +22,10 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.CheckAndMapDatatyp
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainMergeAndCleanFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DunsMergeFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.MatchIDGenerationFunction;
-import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DecodedPair;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
 
 @Component("cascadingBulkMatchDataflow")
 public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<CascadingBulkMatchDataflowParameters> {

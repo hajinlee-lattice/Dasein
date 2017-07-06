@@ -1,7 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 

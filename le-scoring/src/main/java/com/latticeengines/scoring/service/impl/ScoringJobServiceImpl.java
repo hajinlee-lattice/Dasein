@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,6 @@ import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringJobUtil;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.yarn.exposed.service.JobService;
-import com.mysql.jdbc.StringUtils;
 
 @Component("scoringJobService")
 public class ScoringJobServiceImpl implements ScoringJobService {
@@ -73,12 +73,12 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     private void validateScoringConfig(ScoringConfiguration scoringConfig) {
-        if (StringUtils.isNullOrEmpty(scoringConfig.getCustomer())) {
+        if (StringUtils.isBlank(scoringConfig.getCustomer())) {
             throw new LedpException(LedpCode.LEDP_20022);
         }
 
         try {
-            if (StringUtils.isNullOrEmpty(scoringConfig.getSourceDataDir())
+            if (StringUtils.isBlank(scoringConfig.getSourceDataDir())
                     || !HdfsUtils.fileExists(yarnConfiguration, scoringConfig.getSourceDataDir())) {
                 throw new LedpException(LedpCode.LEDP_20023);
             }
@@ -86,14 +86,14 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             throw new LedpException(LedpCode.LEDP_20023, e);
         }
         try {
-            if (StringUtils.isNullOrEmpty(scoringConfig.getTargetResultDir())
+            if (StringUtils.isBlank(scoringConfig.getTargetResultDir())
                     || HdfsUtils.fileExists(yarnConfiguration, scoringConfig.getTargetResultDir())) {
                 throw new LedpException(LedpCode.LEDP_20024);
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_20024, e);
         }
-        if (StringUtils.isNullOrEmpty(scoringConfig.getUniqueKeyColumn())) {
+        if (StringUtils.isBlank(scoringConfig.getUniqueKeyColumn())) {
             throw new LedpException(LedpCode.LEDP_20025);
         }
         if (CollectionUtils.isEmpty(scoringConfig.getModelGuids())) {

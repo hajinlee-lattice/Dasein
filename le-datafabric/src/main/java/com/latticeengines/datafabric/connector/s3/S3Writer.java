@@ -2,7 +2,7 @@ package com.latticeengines.datafabric.connector.s3;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.kafka.common.TopicPartition;
@@ -31,8 +31,7 @@ class S3Writer {
         String accessKeyId = config.getProperty(S3SinkConfig.AWS_ACCESS_KEY_ID, String.class);
         String secretKey = config.getProperty(S3SinkConfig.AWS_SECRET_KEY, String.class);
         AmazonS3 s3Client;
-        if (org.apache.commons.lang.StringUtils.isNotEmpty(accessKeyId)
-                && org.apache.commons.lang.StringUtils.isNotEmpty(secretKey)) {
+        if (StringUtils.isNotEmpty(accessKeyId) && StringUtils.isNotEmpty(secretKey)) {
             AWSCredentials credentials = new BasicAWSCredentials(accessKeyId, secretKey);
             s3Client = new AmazonS3Client(credentials);
         } else {

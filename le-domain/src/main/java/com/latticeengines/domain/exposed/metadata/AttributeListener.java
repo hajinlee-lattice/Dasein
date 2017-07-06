@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import javax.persistence.PostLoad;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class AttributeListener {
 

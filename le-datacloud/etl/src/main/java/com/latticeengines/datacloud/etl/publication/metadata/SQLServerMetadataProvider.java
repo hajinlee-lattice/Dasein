@@ -3,7 +3,7 @@ package com.latticeengines.datacloud.etl.publication.metadata;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.domain.exposed.modeling.DbCreds;

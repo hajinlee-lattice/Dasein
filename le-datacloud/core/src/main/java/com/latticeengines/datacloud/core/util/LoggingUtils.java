@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.core.util;
 
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 
 import com.latticeengines.domain.exposed.datacloud.manage.Progress;

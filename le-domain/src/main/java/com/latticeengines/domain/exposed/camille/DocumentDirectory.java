@@ -14,7 +14,7 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 import com.google.common.base.Function;
 

@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.apache.avro.Schema;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -66,7 +66,7 @@ public class HdfsToRedshiftService {
                         inputStream, true);
             }
         } catch (IOException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getStackTrace(e));
             throw new RuntimeException(e);
         }
     }

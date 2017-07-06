@@ -1,6 +1,6 @@
 package com.latticeengines.security.exposed.serviceruntime.exception;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -27,7 +27,7 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(LedpException e) {
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : ExceptionUtils
                 .getStackTrace(e);
         logError(e.getCode() + "\n" + stackTrace);
         return getModelAndView(e);

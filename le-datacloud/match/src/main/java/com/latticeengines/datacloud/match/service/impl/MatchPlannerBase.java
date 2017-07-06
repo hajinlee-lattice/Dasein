@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.util.Utf8;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -305,7 +304,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             record.setParsedNameLocation(nameLocation);
             nameLocationSet.add(nameLocation);
         } catch (Exception e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
             record.setFailed(true);
             record.addErrorMessages("Error when cleanup name and location fields: " + e.getMessage());
         }

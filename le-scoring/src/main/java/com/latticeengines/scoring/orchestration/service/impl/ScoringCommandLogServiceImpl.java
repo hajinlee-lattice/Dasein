@@ -2,7 +2,7 @@ package com.latticeengines.scoring.orchestration.service.impl;
 
 import java.util.List;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -63,7 +63,7 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
 
     @Override
     public void logLedpException(ScoringCommand scoringCommand, LedpException e) {
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : "";
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : "";
         StringBuffer sb = new StringBuffer();
         sb.append("errorCode:").append(e.getCode().name()).append(" errorMessage:").append(e.getMessage())
                 .append(LINE_SEPARATOR).append(stackTrace);
@@ -77,7 +77,7 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
 
     @Override
     public void logException(ScoringCommand scoringCommand, String message, Exception e) {
-        String stackTrace = e != null ? ExceptionUtils.getFullStackTrace(e) : "";
+        String stackTrace = e != null ? ExceptionUtils.getStackTrace(e) : "";
         StringBuffer sb = new StringBuffer(message);
         sb.append(" errorMessage:").append(e.getMessage()).append(LINE_SEPARATOR).append(stackTrace);
         log(scoringCommand, sb.toString());

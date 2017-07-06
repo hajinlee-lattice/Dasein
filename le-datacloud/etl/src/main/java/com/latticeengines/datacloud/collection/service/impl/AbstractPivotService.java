@@ -3,7 +3,7 @@ package com.latticeengines.datacloud.collection.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.datacloud.collection.service.CollectionDataFlowKeysDeprecated;
 import com.latticeengines.datacloud.collection.service.PivotService;

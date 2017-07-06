@@ -1,6 +1,6 @@
 package com.latticeengines.camille.exposed;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class CamilleConfiguration {
     private String podId = null;

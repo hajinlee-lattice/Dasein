@@ -13,7 +13,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -52,7 +51,7 @@ public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
                 }
             }
         } catch (IOException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
             throw new LedpException(LedpCode.LEDP_10008);
         }
     }

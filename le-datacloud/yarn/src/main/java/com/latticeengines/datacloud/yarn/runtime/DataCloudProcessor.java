@@ -2,14 +2,13 @@ package com.latticeengines.datacloud.yarn.runtime;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -23,14 +22,9 @@ import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJobConfiguration> {
 
     private static final Log log = LogFactory.getLog(DataCloudProcessor.class);
-    private static final String SYNC_PROCESSOR = "bulkMatchProcessorExecutor";
-    private static final String ASYNC_PROCESSOR = "bulkMatchProcessorAsyncExecutor";
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private ApplicationContext appContext;
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
@@ -68,7 +62,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             String errFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid)
                     .toString();
             try {
-                HdfsUtils.writeToFile(yarnConfiguration, errFile, ExceptionUtils.getFullStackTrace(e));
+                HdfsUtils.writeToFile(yarnConfiguration, errFile, ExceptionUtils.getStackTrace(e));
             } catch (Exception e1) {
                 log.error("Failed to write error to err file.", e1);
             }

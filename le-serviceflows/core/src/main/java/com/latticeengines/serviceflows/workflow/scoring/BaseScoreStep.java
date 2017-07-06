@@ -5,8 +5,6 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -70,7 +69,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
                             + "/error.csv");
                 }
             } catch (IOException e) {
-                log.error(ExceptionUtils.getFullStackTrace(e));
+                log.error(e);
                 throw new LedpException(LedpCode.LEDP_00002);
             }
         } else {

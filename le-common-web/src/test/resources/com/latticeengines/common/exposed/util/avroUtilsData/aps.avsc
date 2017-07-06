@@ -1,0 +1,3691 @@
+{
+  "type" : "record",
+  "name" : "AnalyticPurchaseStateTop1M",
+  "doc" : "Sqoop import of AnalyticPurchaseStateTop1M",
+  "fields" : [ {
+    "name" : "AnalyticPurchaseState_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "AnalyticPurchaseState_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "LEAccount_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "LEAccount_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Period_ID",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Period_ID",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_2_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_2_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_2_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_2_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_2_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_2_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_2_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_2_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_2_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_2_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_3_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_3_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_3_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_3_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_3_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_3_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_3_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_3_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_3_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_3_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_4_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_4_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_4_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_4_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_4_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_4_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_4_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_4_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_4_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_4_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_5_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_5_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_5_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_5_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_5_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_5_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_5_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_5_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_5_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_5_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_6_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_6_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_6_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_6_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_6_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_6_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_6_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_6_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_6_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_6_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_8_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_8_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_8_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_8_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_8_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_8_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_8_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_8_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_8_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_8_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_10_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_10_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_10_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_10_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_10_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_10_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_10_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_10_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_10_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_10_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_11_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_11_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_11_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_11_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_11_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_11_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_11_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_11_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_11_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_11_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_12_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_12_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_12_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_12_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_12_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_12_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_12_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_12_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_12_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_12_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_13_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_13_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_13_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_13_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_13_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_13_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_13_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_13_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_13_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_13_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_14_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_14_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_14_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_14_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_14_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_14_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_14_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_14_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_14_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_14_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_15_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_15_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_15_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_15_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_15_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_15_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_15_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_15_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_15_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_15_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_16_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_16_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_16_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_16_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_16_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_16_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_16_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_16_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_16_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_16_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_17_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_17_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_17_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_17_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_17_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_17_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_17_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_17_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_17_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_17_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_18_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_18_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_18_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_18_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_18_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_18_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_18_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_18_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_18_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_18_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_19_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_19_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_19_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_19_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_19_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_19_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_19_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_19_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_19_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_19_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_21_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_21_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_21_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_21_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_21_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_21_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_21_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_21_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_21_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_21_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_22_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_22_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_22_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_22_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_22_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_22_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_22_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_22_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_22_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_22_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_24_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_24_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_24_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_24_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_24_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_24_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_24_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_24_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_24_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_24_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_25_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_25_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_25_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_25_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_25_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_25_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_25_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_25_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_25_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_25_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_26_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_26_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_26_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_26_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_26_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_26_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_26_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_26_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_26_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_26_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_27_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_27_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_27_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_27_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_27_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_27_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_27_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_27_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_27_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_27_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_29_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_29_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_29_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_29_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_29_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_29_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_29_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_29_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_29_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_29_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_30_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_30_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_30_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_30_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_30_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_30_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_30_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_30_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_30_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_30_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_32_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_32_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_32_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_32_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_32_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_32_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_32_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_32_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_32_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_32_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_33_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_33_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_33_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_33_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_33_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_33_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_33_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_33_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_33_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_33_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_38_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_38_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_38_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_38_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_38_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_38_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_38_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_38_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_38_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_38_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_41_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_41_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_41_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_41_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_41_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_41_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_41_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_41_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_41_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_41_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_43_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_43_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_43_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_43_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_43_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_43_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_43_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_43_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_43_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_43_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_44_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_44_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_44_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_44_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_44_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_44_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_44_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_44_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_44_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_44_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_45_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_45_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_45_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_45_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_45_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_45_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_45_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_45_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_45_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_45_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_46_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_46_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_46_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_46_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_46_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_46_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_46_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_46_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_46_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_46_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_47_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_47_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_47_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_47_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_47_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_47_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_47_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_47_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_47_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_47_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_48_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_48_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_48_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_48_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_48_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_48_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_48_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_48_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_48_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_48_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_49_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_49_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_49_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_49_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_49_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_49_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_49_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_49_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_49_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_49_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_50_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_50_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_50_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_50_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_50_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_50_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_50_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_50_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_50_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_50_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_51_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_51_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_51_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_51_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_51_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_51_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_51_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_51_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_51_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_51_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_52_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_52_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_52_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_52_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_52_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_52_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_52_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_52_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_52_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_52_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_53_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_53_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_53_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_53_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_53_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_53_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_53_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_53_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_53_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_53_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_54_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_54_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_54_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_54_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_54_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_54_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_54_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_54_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_54_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_54_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_55_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_55_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_55_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_55_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_55_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_55_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_55_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_55_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_55_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_55_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_56_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_56_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_56_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_56_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_56_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_56_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_56_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_56_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_56_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_56_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_57_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_57_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_57_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_57_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_57_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_57_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_57_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_57_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_57_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_57_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_58_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_58_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_58_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_58_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_58_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_58_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_58_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_58_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_58_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_58_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_59_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_59_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_59_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_59_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_59_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_59_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_59_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_59_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_59_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_59_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_60_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_60_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_60_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_60_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_60_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_60_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_60_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_60_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_60_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_60_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_61_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_61_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_61_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_61_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_61_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_61_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_61_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_61_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_61_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_61_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_62_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_62_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_62_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_62_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_62_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_62_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_62_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_62_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_62_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_62_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_63_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_63_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_63_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_63_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_63_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_63_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_63_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_63_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_63_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_63_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_64_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_64_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_64_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_64_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_64_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_64_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_64_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_64_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_64_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_64_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_65_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_65_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_65_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_65_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_65_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_65_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_65_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_65_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_65_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_65_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_66_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_66_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_66_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_66_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_66_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_66_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_66_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_66_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_66_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_66_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_67_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_67_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_67_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_67_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_67_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_67_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_67_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_67_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_67_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_67_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_68_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_68_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_68_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_68_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_68_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_68_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_68_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_68_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_68_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_68_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_69_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_69_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_69_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_69_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_69_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_69_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_69_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_69_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_69_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_69_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_70_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_70_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_70_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_70_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_70_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_70_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_70_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_70_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_70_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_70_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_71_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_71_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_71_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_71_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_71_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_71_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_71_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_71_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_71_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_71_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_72_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_72_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_72_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_72_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_72_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_72_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_72_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_72_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_72_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_72_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_73_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_73_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_73_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_73_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_73_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_73_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_73_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_73_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_73_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_73_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_74_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_74_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_74_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_74_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_74_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_74_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_74_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_74_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_74_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_74_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_75_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_75_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_75_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_75_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_75_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_75_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_75_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_75_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_75_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_75_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_76_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_76_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_76_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_76_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_76_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_76_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_76_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_76_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_76_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_76_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_77_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_77_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_77_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_77_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_77_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_77_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_77_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_77_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_77_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_77_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_78_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_78_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_78_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_78_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_78_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_78_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_78_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_78_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_78_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_78_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_79_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_79_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_79_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_79_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_79_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_79_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_79_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_79_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_79_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_79_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_80_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_80_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_80_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_80_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_80_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_80_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_80_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_80_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_80_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_80_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_81_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_81_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_81_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_81_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_81_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_81_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_81_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_81_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_81_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_81_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_82_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_82_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_82_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_82_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_82_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_82_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_82_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_82_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_82_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_82_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_83_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_83_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_83_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_83_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_83_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_83_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_83_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_83_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_83_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_83_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_84_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_84_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_84_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_84_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_84_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_84_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_84_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_84_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_84_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_84_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_85_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_85_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_85_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_85_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_85_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_85_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_85_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_85_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_85_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_85_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_86_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_86_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_86_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_86_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_86_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_86_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_86_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_86_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_86_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_86_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_87_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_87_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_87_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_87_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_87_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_87_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_87_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_87_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_87_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_87_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_88_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_88_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_88_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_88_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_88_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_88_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_88_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_88_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_88_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_88_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_89_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_89_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_89_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_89_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_89_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_89_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_89_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_89_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_89_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_89_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_90_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_90_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_90_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_90_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_90_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_90_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_90_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_90_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_90_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_90_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_91_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_91_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_91_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_91_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_91_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_91_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_91_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_91_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_91_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_91_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_92_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_92_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_92_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_92_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_92_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_92_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_92_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_92_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_92_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_92_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_93_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_93_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_93_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_93_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_93_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_93_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_93_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_93_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_93_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_93_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_94_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_94_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_94_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_94_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_94_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_94_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_94_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_94_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_94_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_94_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_95_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_95_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_95_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_95_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_95_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_95_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_95_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_95_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_95_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_95_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_96_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_96_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_96_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_96_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_96_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_96_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_96_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_96_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_96_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_96_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_97_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_97_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_97_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_97_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_97_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_97_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_97_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_97_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_97_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_97_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_98_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_98_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_98_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_98_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_98_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_98_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_98_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_98_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_98_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_98_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_99_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_99_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_99_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_99_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_99_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_99_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_99_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_99_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_99_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_99_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_101_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_101_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_101_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_101_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_101_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_101_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_101_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_101_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_101_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_101_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_102_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_102_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_102_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_102_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_102_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_102_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_102_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_102_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_102_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_102_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_103_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_103_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_103_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_103_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_103_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_103_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_103_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_103_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_103_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_103_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_104_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_104_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_104_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_104_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_104_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_104_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_104_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_104_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_104_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_104_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_105_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_105_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_105_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_105_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_105_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_105_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_105_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_105_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_105_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_105_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_106_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_106_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_106_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_106_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_106_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_106_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_106_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_106_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_106_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_106_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_107_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_107_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_107_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_107_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_107_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_107_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_107_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_107_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_107_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_107_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_108_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_108_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_108_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_108_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_108_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_108_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_108_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_108_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_108_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_108_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_109_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_109_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_109_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_109_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_109_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_109_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_109_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_109_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_109_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_109_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_110_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_110_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_110_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_110_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_110_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_110_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_110_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_110_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_110_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_110_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_112_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_112_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_112_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_112_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_112_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_112_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_112_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_112_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_112_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_112_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_113_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_113_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_113_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_113_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_113_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_113_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_113_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_113_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_113_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_113_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_114_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_114_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_114_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_114_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_114_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_114_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_114_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_114_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_114_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_114_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_115_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_115_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_115_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_115_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_115_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_115_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_115_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_115_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_115_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_115_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_116_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_116_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_116_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_116_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_116_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_116_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_116_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_116_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_116_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_116_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_117_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_117_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_117_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_117_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_117_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_117_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_117_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_117_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_117_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_117_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_118_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_118_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_118_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_118_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_118_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_118_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_118_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_118_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_118_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_118_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_119_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_119_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_119_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_119_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_119_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_119_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_119_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_119_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_119_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_119_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_121_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_121_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_121_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_121_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_121_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_121_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_121_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_121_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_121_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_121_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_122_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_122_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_122_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_122_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_122_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_122_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_122_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_122_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_122_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_122_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_123_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_123_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_123_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_123_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_123_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_123_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_123_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_123_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_123_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_123_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_124_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_124_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_124_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_124_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_124_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_124_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_124_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_124_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_124_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_124_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_125_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_125_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_125_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_125_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_125_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_125_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_125_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_125_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_125_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_125_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_126_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_126_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_126_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_126_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_126_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_126_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_126_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_126_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_126_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_126_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_127_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_127_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_127_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_127_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_127_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_127_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_127_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_127_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_127_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_127_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_128_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_128_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_128_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_128_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_128_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_128_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_128_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_128_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_128_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_128_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_129_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_129_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_129_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_129_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_129_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_129_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_129_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_129_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_129_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_129_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_130_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_130_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_130_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_130_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_130_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_130_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_130_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_130_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_130_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_130_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_131_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_131_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_131_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_131_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_131_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_131_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_131_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_131_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_131_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_131_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_132_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_132_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_132_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_132_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_132_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_132_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_132_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_132_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_132_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_132_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_133_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_133_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_133_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_133_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_133_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_133_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_133_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_133_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_133_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_133_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_134_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_134_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_134_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_134_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_134_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_134_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_134_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_134_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_134_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_134_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_135_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_135_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_135_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_135_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_135_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_135_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_135_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_135_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_135_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_135_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_136_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_136_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_136_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_136_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_136_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_136_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_136_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_136_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_136_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_136_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_137_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_137_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_137_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_137_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_137_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_137_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_137_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_137_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_137_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_137_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_138_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_138_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_138_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_138_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_138_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_138_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_138_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_138_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_138_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_138_Revenue_Momentum_3",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_139_Offset",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_139_Offset",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_139_Revenue",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_139_Revenue",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_139_Units",
+    "type" : [ "null", "int" ],
+    "default" : null,
+    "columnName" : "Product_139_Units",
+    "sqlType" : "4"
+  }, {
+    "name" : "Product_139_Revenue_RollingSum_6",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_139_Revenue_RollingSum_6",
+    "sqlType" : "2"
+  }, {
+    "name" : "Product_139_Revenue_Momentum_3",
+    "type" : [ "null", "string" ],
+    "default" : null,
+    "columnName" : "Product_139_Revenue_Momentum_3",
+    "sqlType" : "2"
+  } ],
+  "tableName" : "AnalyticPurchaseStateTop1M"
+}

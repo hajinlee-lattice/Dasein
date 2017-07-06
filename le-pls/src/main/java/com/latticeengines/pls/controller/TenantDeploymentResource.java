@@ -6,7 +6,7 @@ import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -81,7 +81,7 @@ public class TenantDeploymentResource {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getFullStackTrace(e)));
+                    .getStackTrace(e)));
         }
     }
 
@@ -103,7 +103,7 @@ public class TenantDeploymentResource {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getFullStackTrace(e)));
+                    .getStackTrace(e)));
         }
     }
 
@@ -121,7 +121,7 @@ public class TenantDeploymentResource {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getFullStackTrace(e)));
+                    .getStackTrace(e)));
         }
     }
 
@@ -139,7 +139,7 @@ public class TenantDeploymentResource {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getFullStackTrace(e)));
+                    .getStackTrace(e)));
         }
     }
 
@@ -157,7 +157,7 @@ public class TenantDeploymentResource {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getFullStackTrace(e)));
+                    .getStackTrace(e)));
         }
     }
 

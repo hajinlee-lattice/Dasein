@@ -3,7 +3,7 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 import java.util.Iterator;
 
 import org.apache.avro.util.Utf8;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

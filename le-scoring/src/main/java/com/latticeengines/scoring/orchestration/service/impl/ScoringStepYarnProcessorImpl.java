@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -138,7 +138,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                 HdfsUtils.rmdir(yarnConfiguration, scoringTableDir);
             }
         } catch (Exception e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getStackTrace(e));
             throw new LedpException(LedpCode.LEDP_00004, new String[] { targetDir });
         }
 

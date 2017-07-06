@@ -11,8 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.StreamUtils;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -142,7 +141,7 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
             try {
                 authResult = attemptAuthentication(request, response);
             } catch (Exception e) {
-                logger.error(ExceptionUtils.getFullStackTrace(e));
+                logger.error(e);
                 throw new AuthenticationServiceException(e.getMessage(), e);
             }
             if (authResult == null) {
@@ -152,10 +151,10 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
             try {
                 unsuccessfulAuthentication(request, response, failed);
             } catch (IOException e) {
-                logger.error(ExceptionUtils.getFullStackTrace(e));
+                logger.error(e);
                 retVal = false;
             } catch (ServletException e) {
-                logger.error(ExceptionUtils.getFullStackTrace(e));
+                logger.error(e);
                 retVal = false;
             }
             retVal = false;
@@ -164,10 +163,10 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
             try {
                 successfulAuthentication(request, response, authResult);
             } catch (IOException e) {
-                logger.error(ExceptionUtils.getFullStackTrace(e));
+                logger.error(e);
                 retVal = false;
             } catch (ServletException e) {
-                logger.error(ExceptionUtils.getFullStackTrace(e));
+                logger.error(e);
                 retVal = false;
             }
         }

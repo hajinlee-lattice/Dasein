@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.exception;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class LedpException extends RuntimeException {
 
@@ -54,7 +54,7 @@ public class LedpException extends RuntimeException {
     }
 
     public ErrorDetails getErrorDetails() {
-        String stackTrace = ExceptionUtils.getFullStackTrace(this);
+        String stackTrace = ExceptionUtils.getStackTrace(this);
         return new ErrorDetails(code, getMessage(), stackTrace);
     }
 }

@@ -1,12 +1,14 @@
 package com.latticeengines.common.exposed.validator.impl;
 
 import java.lang.annotation.Annotation;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.common.exposed.validator.AnnotationValidator;
+import com.latticeengines.common.exposed.validator.LikeMapEntry;
 import com.latticeengines.common.exposed.validator.annotation.RequiredKeysInMap;
 
 public class RequiredKeysInMapAnnotationValidator implements AnnotationValidator {
@@ -29,7 +31,13 @@ public class RequiredKeysInMapAnnotationValidator implements AnnotationValidator
             keySet.add(key);
         }
         for (Object pair : pairs) {
-            Map.Entry<String, ?> kv = (Map.Entry<String, ?>) pair;
+            Map.Entry<String, ?> kv;
+            if (pair instanceof LikeMapEntry) {
+                LikeMapEntry likeMapEntry = (LikeMapEntry) pair;
+                kv = new AbstractMap.SimpleEntry<>(likeMapEntry.getKey(), likeMapEntry.getValue());
+            } else {
+                kv = (Map.Entry<String, ?>) pair;
+            }
             if (keySet.contains(kv.getKey()) && kv.getValue() != null && !kv.getValue().equals("")) {
                 keySet.remove(kv.getKey());
             }

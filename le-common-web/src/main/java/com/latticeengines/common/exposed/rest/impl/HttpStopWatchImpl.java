@@ -3,7 +3,7 @@ package com.latticeengines.common.exposed.rest.impl;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;

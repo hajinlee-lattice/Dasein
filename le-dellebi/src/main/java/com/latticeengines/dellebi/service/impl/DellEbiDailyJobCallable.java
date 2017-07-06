@@ -2,7 +2,7 @@ package com.latticeengines.dellebi.service.impl;
 
 import java.util.concurrent.Callable;
 
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

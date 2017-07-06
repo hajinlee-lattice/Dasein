@@ -7,7 +7,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +97,7 @@ public class SegmentResource {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getFullStackTrace(e)));
+                    .getStackTrace(e)));
         }
     }
 
@@ -114,7 +114,7 @@ public class SegmentResource {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getFullStackTrace(e)));
+                    .getStackTrace(e)));
         }
     }
 
@@ -130,7 +130,7 @@ public class SegmentResource {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getFullStackTrace(e)));
+                    .getStackTrace(e)));
         }
     }
 
@@ -165,7 +165,7 @@ public class SegmentResource {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getFullStackTrace(e)));
+                    .getStackTrace(e)));
         }
     }
 

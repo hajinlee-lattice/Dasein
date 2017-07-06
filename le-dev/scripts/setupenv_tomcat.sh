@@ -31,6 +31,7 @@ cp ${WSHOME}/le-dev/tomcat/tomcat-users.xml ${CATALINA_HOME}/conf/tomcat-users.x
 cp ${WSHOME}/le-dev/tomcat/catalina.sh ${CATALINA_HOME}/bin/catalina.sh
 
 mkdir -p ${CATALINA_HOME}/webapps/ms || true
+cp -r ${CATALINA_HOME}/manager ${CATALINA_HOME}/webapps/ms
 
 sudo mkdir -p /var/log/ledp || true
 sudo chmod a+w /var/log/ledp

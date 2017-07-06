@@ -21,11 +21,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-api</artifactId>
-            <version>${hadoop.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
             <version>${le.common.version}</version>
@@ -41,17 +36,15 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- use this instead of <artifactId>persistence-api</artifactId> 
-            1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>${hibernate.jpa.version}</version>
+            <groupId>org.jpmml</groupId>
+            <artifactId>pmml-model</artifactId>
+            <version>${jpmml.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.fasterxml.version}</version>
+            <groupId>org.jpmml</groupId>
+            <artifactId>pmml-evaluator</artifactId>
+            <version>${jpmml.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -63,10 +56,17 @@
             <artifactId>commons-validator</artifactId>
             <version>${commons.validator.version}</version>
         </dependency>
+        <dependency> <!-- better exclude when depends on le-domain -->
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>${io.swagger.version}</version>
+        </dependency>
+        <!-- use this instead of <artifactId>persistence-api</artifactId>
+                    1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${commons.lang3.version}</version>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>${hibernate.jpa.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
@@ -79,16 +79,6 @@
             <artifactId>snappy-java</artifactId>
             <version>${snappy.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jpmml</groupId>
-            <artifactId>pmml-model</artifactId>
-            <version>${jpmml.model.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jpmml</groupId>
-            <artifactId>pmml-evaluator</artifactId>
-            <version>${jpmml.model.version}</version>
         </dependency>
     </dependencies>
 

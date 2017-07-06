@@ -40,39 +40,46 @@
         <maven.aspectj.version>1.8</maven.aspectj.version>
         <maven.archetype.version>3.0.1</maven.archetype.version>
         <maven.camel.salesforce.version>2.18.2</maven.camel.salesforce.version>
+        <maven.keytool.version>1.5</maven.keytool.version>
+        <maven.rpm.version>2.1-alpha-4</maven.rpm.version> <!-- upgrade ? -->
 
         <!-- dependencies with rigid version interlock, hard to upgrade -->
-        <scala.version>2.11.8</scala.version>
         <hadoop.version>2.7.1.2.3.6.0-3796</hadoop.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <spring.data.version>2.4.0.RELEASE-hdp23</spring.data.version> <!-- need ledp3 classifier -->
+        <mortbay.jetty.version>6.1.26</mortbay.jetty.version>  <!-- compatible with horton works -->
         <tez.version>0.8.2</tez.version>
-        <guava.version>16.0</guava.version>
+        <guava.version>19.0</guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
-        <hadoop.guava.version>16.0</hadoop.guava.version>
+        <hdp.guava.version>16.0</hdp.guava.version>
         <avro.version>1.7.7</avro.version>
-        <parquet.avro.version>1.4.3</parquet.avro.version>
+        <parquet.avro.version>1.4.3</parquet.avro.version> <!-- remove ? -->
         <aws.version>1.11.0</aws.version> <!-- only the version 1.11.0 is compatible with our jackson version 2.2.3 -->
         <cascading.version>3.2.1</cascading.version>
         <cascading.avro.version>3.0.0</cascading.avro.version>
         <cascading.redshift.version>3.0.0</cascading.redshift.version>
+        <!-- if until 2018 or cascading 3.3, they still do not release new version, we should move away from cascading-flink -->
         <cascading.flink.version>0.3.0</cascading.flink.version>
+        <scala.version>2.11.8</scala.version>
         <flink.version>1.2.0</flink.version> <!-- compatible with cascading flink 0.3 -->
         <grizzled.slf4j_2.11.version>1.3.0</grizzled.slf4j_2.11.version> <!-- bind to flink -->
         <codahale.metrics.version>3.0.2</codahale.metrics.version> <!-- bind to flink -->
-        <jackson.fasterxml.version>2.2.3</jackson.fasterxml.version> <!-- compatible with hadoop 2.7 -->
+        <jackson.fasterxml.version>2.8.8</jackson.fasterxml.version>
         <jackson.codehaus.version>1.9.13</jackson.codehaus.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <hibernate.jpa.version>1.0.1.Final</hibernate.jpa.version>
-        <jetty.version>9.2.19.v20160908</jetty.version>
+        <jetty.version>9.4.6.v20170531</jetty.version>
         <javax.servlet.version>3.1.0</javax.servlet.version> <!-- just keep up with tomcat version -->
         <javax.jsp.version>2.2</javax.jsp.version> <!-- just keep up with tomcat version -->
         <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
-        <mortbay.jetty.version>6.1.26</mortbay.jetty.version>  <!-- to be removed -->
+        <redshift.jdbc.version>1.2.1.1001</redshift.jdbc.version> <!-- we upload to nexus -->
+        <joda.version>2.8.1</joda.version>
+        <cronutils.version>4.0.1</cronutils.version> <!-- need to upgrade joda -->
+        <marketo.soap.sdk.version>2.7</marketo.soap.sdk.version> <!-- uploaded to nexues ? -->
 
         <!-- versions should be easy to upgrade: keep them updated! -->
         <jacoco.version>0.7.5.201505241946</jacoco.version>
-        <quartz.version>2.2.2</quartz.version>
+        <quartz.version>2.3.0</quartz.version>
         <newrelic.version>2.14.1</newrelic.version> <!-- to be removed -->
         <aspectj.version>1.8.7</aspectj.version>
         <reflections.version>0.9.9</reflections.version>
@@ -81,60 +88,56 @@
         <argparse4j.version>0.5.0</argparse4j.version> <!-- to be removed, use commons cli instead -->
         <log4j.version>1.2.17</log4j.version> <!-- to be upgraded to log4j2 or switch to sfl4j -->
         <log4j.extras.version>1.2.17</log4j.extras.version>
-        <joda.version>2.8.1</joda.version>
         <jcraft.version>0.1.53</jcraft.version>
         <springfox.swagger.version>2.7.0</springfox.swagger.version>
         <io.swagger.version>1.5.15</io.swagger.version>
-        <jpmml.model.version>1.2.15</jpmml.model.version>
-        <cronutils.version>4.0.1</cronutils.version>
-        <snappy.version>1.1.1.6</snappy.version>
+        <jpmml.version>1.2.15</jpmml.version>
+        <snappy.version>1.1.4</snappy.version>
         <curator.version>2.7.1</curator.version>
         <querydsl.version>4.1.4</querydsl.version>
         <testng.version>6.11</testng.version>
-        <mockito.version>1.8.5</mockito.version>
+        <mockito.version>2.8.47</mockito.version>
         <jsonpath.version>2.2.0</jsonpath.version>
         <gson.version>1.4</gson.version>  <!-- to be removed -->
-        <libphonenumber.version>7.7.3</libphonenumber.version>
+        <libphonenumber.version>8.5.2</libphonenumber.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
         <javax.mail.version>1.5.4</javax.mail.version>
         <jsr250.api.version>1.0</jsr250.api.version>
         <javax.el.version>2.2.4</javax.el.version>
-        <marketo.sdk.version>2.7</marketo.sdk.version>
-        <jpmml.version>1.2.14</jpmml.version>
-        <derby.version>10.10.2.0</derby.version>
+        <derby.version>10.13.1.1</derby.version>
+        <bitcoinj.version>0.14.4</bitcoinj.version>
+        <jcabi.version>1.1</jcabi.version>
         <sourceforge.csvjdbc.version>1.0.28</sourceforge.csvjdbc.version>
         <!-- Spring -->
-        <spring.version>4.0.0.RELEASE</spring.version>
+        <spring.version>4.3.9.RELEASE</spring.version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
         <spring.batch.version>3.0.7.RELEASE</spring.batch.version>
-        <spring.security.version>3.2.5.RELEASE</spring.security.version>
-        <spring.oauth2.version>2.0.10.RELEASE</spring.oauth2.version>
+        <spring.security.version>3.2.5.RELEASE</spring.security.version> <!-- need to upgrade to 4.x.x -->
+        <spring.oauth2.version>2.1.1.RELEASE</spring.oauth2.version>
         <!-- Camel -->
-        <camel.version>2.18.2</camel.version>
-        <camel.jcifs.version>2.13.2</camel.jcifs.version>
-        <camel.jackson.version>2.8.3</camel.jackson.version>
+        <camel.version>2.19.1</camel.version>
+        <camel.jcifs.version>2.18.0</camel.jcifs.version>
         <!-- DB Drivers -->
         <c3p0.version>0.9.5.2</c3p0.version>
         <influxdb.version>2.7</influxdb.version>
         <hive.version>1.1.0</hive.version>
         <sqljdbc4.version>4.0</sqljdbc4.version>
         <mysql.connector.version>5.1.30</mysql.connector.version>
-        <redshift.jdbc.version>1.2.1.1001</redshift.jdbc.version>
         <!-- commons -->
         <commons.io.version>2.5</commons.io.version>
         <commons.lang3.version>3.6</commons.lang3.version>
-        <commons.lang.version>2.6</commons.lang.version> <!-- should be migrated to commons lang3 -->
+        <commons.text.version>1.1</commons.text.version>
         <commons.cli.version>1.4</commons.cli.version>
         <commons.codec.version>1.10</commons.codec.version>
         <commons.collections.version>3.2.1</commons.collections.version> <!-- should be migrated to commons collections4 -->
-        <commons.logging.version>1.2</commons.logging.version>
+        <commons.logging.version>1.2</commons.logging.version> <!-- last update was in 2014, we should migrate away -->
         <commons.net.version>3.6</commons.net.version>
         <commons.vfs.version>1.0</commons.vfs.version> <!-- should be migrated to commons vfs2 -->
         <commons.csv.version>1.4</commons.csv.version>
-        <commons.exec.version>1.2</commons.exec.version>
-        <commons.dbcp.version>1.2.2</commons.dbcp.version>
-        <commons.validator.version>1.4.0</commons.validator.version>
-        <commons.fileupload.version>1.3.1</commons.fileupload.version>
+        <commons.exec.version>1.3</commons.exec.version>
+        <commons.dbcp.version>1.4</commons.dbcp.version> <!-- should be migrated to commons dbcp2 -->
+        <commons.validator.version>1.6</commons.validator.version>
+        <commons.fileupload.version>1.3.3</commons.fileupload.version>
 
         <!-- parameters: can be overwritten in child projects -->
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
@@ -191,7 +194,6 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
-
 
     <profiles>
         <profile>
@@ -786,7 +788,6 @@
             </plugin>
         </plugins>
 
-
         <defaultGoal>install</defaultGoal>
         <pluginManagement>
             <plugins>
@@ -955,7 +956,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>rpm-maven-plugin</artifactId>
-                    <version>2.1-alpha-4</version>
+                    <version>${maven.rpm.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -975,9 +976,9 @@
         </dependency>
 
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>${commons.lang.version}</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons.lang3.version}</version>
         </dependency>
 
         <dependency>
@@ -1011,27 +1012,15 @@
         </dependency>
 
         <dependency>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>${commons.cli.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger-ui</artifactId>
-            <version>${springfox.swagger.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>${io.swagger.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${springfox.swagger.version}</version>
+            <version>${hdp.guava.version}</version>
         </dependency>
 
         <dependency>
@@ -1053,6 +1042,18 @@
         </dependency>
 
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.fasterxml.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.fasterxml.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>${mysql.connector.version}</version>
@@ -1065,6 +1066,12 @@
         </dependency>
 
         <!-- Spring Framework Dependencies -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
@@ -1121,18 +1128,6 @@
 
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.mchange</groupId>
-            <artifactId>c3p0</artifactId>
-            <version>${c3p0.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
             <artifactId>spring-oxm</artifactId>
             <version>${spring.version}</version>
         </dependency>
@@ -1160,6 +1155,7 @@
             <artifactId>aspectjrt</artifactId>
             <version>${aspectj.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
@@ -1184,17 +1180,13 @@
 
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>commons-cli</groupId>
-            <artifactId>commons-cli</artifactId>
-            <version>${commons.cli.version}</version>
-        </dependency>
-
+        <!-- used by all projects have metric unit tests -->
+        <!-- to be moved to individual projects -->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>

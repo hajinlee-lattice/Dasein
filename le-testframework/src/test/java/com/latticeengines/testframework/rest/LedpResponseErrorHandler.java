@@ -26,13 +26,14 @@ public class LedpResponseErrorHandler extends DefaultResponseErrorHandler {
         return statusCode;
     }
 
+    @Override
     public void handleError(ClientHttpResponse response) throws IOException {
         statusCode = getHttpStatusCode(response);
         responseString = getResponseBodyAsString(response);
         throw new RuntimeException(statusCode + ": " + responseString);
     }
 
-    private HttpStatus getHttpStatusCode(ClientHttpResponse response) throws IOException {
+    protected HttpStatus getHttpStatusCode(ClientHttpResponse response) throws IOException {
         HttpStatus statusCode;
         try {
             statusCode = response.getStatusCode();
@@ -44,7 +45,7 @@ public class LedpResponseErrorHandler extends DefaultResponseErrorHandler {
         return statusCode;
     }
 
-    private byte[] getResponseBody(ClientHttpResponse response) {
+    protected byte[] getResponseBody(ClientHttpResponse response) {
         try {
             InputStream responseBody = response.getBody();
             if (responseBody != null) {
@@ -57,7 +58,7 @@ public class LedpResponseErrorHandler extends DefaultResponseErrorHandler {
         return new byte[0];
     }
 
-    private Charset getCharset(ClientHttpResponse response) {
+    protected Charset getCharset(ClientHttpResponse response) {
         HttpHeaders headers = response.getHeaders();
         MediaType contentType = headers.getContentType();
         return contentType != null ? contentType.getCharSet() : null;

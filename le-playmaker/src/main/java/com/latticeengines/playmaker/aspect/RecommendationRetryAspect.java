@@ -2,7 +2,7 @@ package com.latticeengines.playmaker.aspect;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;

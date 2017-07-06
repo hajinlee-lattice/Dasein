@@ -13,8 +13,7 @@ import java.util.Map;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
@@ -48,6 +47,7 @@ import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 import com.latticeengines.leadprioritization.workflow.steps.pmml.PMMLModelingServiceExecutor;
@@ -80,7 +80,7 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             modelApplicationIdToEventColumn.put(appId, builder.getTargets()[0]);
             putObjectInContext(MODEL_APP_IDS, modelApplicationIdToEventColumn);
         } catch (Exception e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getStackTrace(e));
             throw new LedpException(LedpCode.LEDP_28019, new String[] { configuration.getPmmlArtifactPath() });
         }
     }

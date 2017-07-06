@@ -2,7 +2,7 @@ package com.latticeengines.workflow.listener;
 
 import java.util.List;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -42,7 +42,7 @@ public class FailureReportingListener extends LEJobListener {
                         details = casted.getErrorDetails();
                     } else {
                         details = new ErrorDetails(LedpCode.LEDP_00002, exception.getMessage(),
-                                ExceptionUtils.getFullStackTrace(exception));
+                                ExceptionUtils.getStackTrace(exception));
                     }
                     job.setErrorDetails(details);
                     workflowJobEntityMgr.update(job);

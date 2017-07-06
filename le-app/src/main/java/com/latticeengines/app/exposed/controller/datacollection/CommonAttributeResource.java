@@ -2,6 +2,7 @@ package com.latticeengines.app.exposed.controller.datacollection;
 
 import java.util.List;
 
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +33,7 @@ public class CommonAttributeResource {
         return dataLakeService.getAttributes(null, null).size();
     }
 
+    @Deprecated
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes")

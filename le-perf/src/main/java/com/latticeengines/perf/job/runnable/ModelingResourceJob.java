@@ -2,7 +2,7 @@ package com.latticeengines.perf.job.runnable;
 
 import java.util.concurrent.Callable;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,7 +32,7 @@ public abstract class ModelingResourceJob<T, E> implements Callable<E> {
         try {
             return executeJob();
         } catch (Exception e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         return null;
     }

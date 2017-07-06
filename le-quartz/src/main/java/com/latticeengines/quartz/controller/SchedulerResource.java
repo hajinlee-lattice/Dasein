@@ -17,8 +17,9 @@ import com.latticeengines.domain.exposed.quartz.JobConfig;
 import com.latticeengines.domain.exposed.quartz.JobInfo;
 import com.latticeengines.domain.exposed.quartz.JobInfoDetail;
 import com.latticeengines.quartz.entitymanager.SchedulerEntityMgr;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "quartz", description = "REST resource for quartz")
 @RestController

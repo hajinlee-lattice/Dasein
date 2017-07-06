@@ -2,7 +2,7 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python.aggregator;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.Progressable;
 

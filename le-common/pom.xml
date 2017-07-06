@@ -9,8 +9,6 @@
 
     <properties>
         <component-name>common</component-name>
-        <bitcoinj.version>0.14.3</bitcoinj.version>
-        <jcabi.version>1.1</jcabi.version>
     </properties>
 
     <parent>
@@ -23,14 +21,14 @@
     <dependencies>
         <!-- Declare this explicitly to mask the inherited previous versions. -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet.version}</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${apache.http.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring.version}</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>${apache.http.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -215,25 +213,9 @@
             <version>${jetty.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${apache.http.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>${apache.http.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.joestelmach</groupId>
             <artifactId>natty</artifactId>
             <version>0.11</version>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-swagger2</artifactId>
-            <version>${springfox.swagger.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.cronutils</groupId>
@@ -244,16 +226,6 @@
             <groupId>com.jcabi</groupId>
             <artifactId>jcabi-manifests</artifactId>
             <version>${jcabi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.fasterxml.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.fasterxml.version}</version>
         </dependency>
         <dependency>
             <groupId>org.bitcoinj</groupId>

@@ -3,6 +3,7 @@ package com.latticeengines.metadata.service.impl;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +28,7 @@ public class MetadataServiceImplUnitTestNG {
     public void validateTableMetadata() throws Exception {
         String metadataFile = ClassLoader.getSystemResource(
                 "com/latticeengines/metadata/controller/invalidmetadata.avsc").getPath();
-        ModelingMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(new File(metadataFile)), ModelingMetadata.class);
+        ModelingMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(new File(metadataFile), Charset.forName("UTF-8")), ModelingMetadata.class);
         Map<String, Set<AnnotationValidationError>> errors = metadataService.validateTableMetadata(null, metadata);
         assertTrue(errors.size() > 0);
     }

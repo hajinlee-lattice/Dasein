@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +38,6 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,8 +50,6 @@ public class LatticeInsightsResource {
     public static final String INSIGHTS_PATH = "/insights";
 
     public static final String STATS_PATH = "/stats";
-
-    private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
     private AttributeService attributeService;

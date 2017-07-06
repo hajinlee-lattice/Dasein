@@ -6,21 +6,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.FiniteDuration;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
 
 import com.latticeengines.actors.exposed.traveler.TravelLog;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
@@ -37,6 +31,12 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.FiniteDuration;
 
 @Component
 public class FuzzyMatchServiceImpl implements FuzzyMatchService {
@@ -263,7 +263,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     record.log(logEntry.getMessage());
                 } else {
                     record.log(logEntry.getMessage() + "\n"
-                            + StringEscapeUtils.escapeJson(ExceptionUtils.getFullStackTrace(logEntry.getThrowable())));
+                            + StringEscapeUtils.escapeJson(ExceptionUtils.getStackTrace(logEntry.getThrowable())));
                     record.getErrorMessages().add(logEntry.getMessage() + " : " + logEntry.getThrowable().getMessage());
                 }
             }

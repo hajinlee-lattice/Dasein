@@ -3,6 +3,7 @@ package com.latticeengines.objectapi.controller;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import com.latticeengines.network.exposed.objectapi.AccountInterface;
 import com.latticeengines.objectapi.service.AccountQueryService;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
-import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
 

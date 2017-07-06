@@ -2,7 +2,7 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;

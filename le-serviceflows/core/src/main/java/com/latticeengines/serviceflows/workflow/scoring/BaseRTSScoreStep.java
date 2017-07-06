@@ -7,8 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +25,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -140,7 +139,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
                 scoringConfig.setImportErrorPath(importErrorPath);
             }
         } catch (IOException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
             throw new LedpException(LedpCode.LEDP_00002);
         }
 

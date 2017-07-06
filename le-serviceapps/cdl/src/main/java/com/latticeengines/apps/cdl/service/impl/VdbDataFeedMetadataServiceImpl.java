@@ -2,7 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.HashMap;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;

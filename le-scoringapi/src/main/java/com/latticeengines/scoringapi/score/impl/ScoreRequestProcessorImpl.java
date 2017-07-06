@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -103,7 +104,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         boolean shouldSkipScoring = false;
 
         if (!isCalledViaApiConsole || !StringStandardizationUtils.objectIsNullOrEmptyString(request.getModelId())) {
-            if (org.apache.commons.lang.StringUtils.isBlank(request.getModelId())) {
+            if (StringUtils.isBlank(request.getModelId())) {
                 throw new ScoringApiException(LedpCode.LEDP_31101);
             }
 
@@ -538,7 +539,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         List<ModelSummary> originalOrderModelSummaryList = new ArrayList<>();
         for (RecordModelTuple tuple : originalOrderParsedTupleList) {
             String modelId = tuple.getModelId();
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(modelId)) {
+            if (StringUtils.isNotEmpty(modelId)) {
                 ModelSummary modelSummary = null;
                 if (scoringArtifactsMap.get(modelId).getValue() != null) {
                     modelSummary = scoringArtifactsMap.get(modelId).getValue().getModelSummary();
@@ -806,7 +807,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         for (Record record : records) {
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
                 // check if modelId is valid
-                if (org.apache.commons.lang.StringUtils.isBlank(modelId)) {
+                if (StringUtils.isBlank(modelId)) {
                     throw new ScoringApiException(LedpCode.LEDP_31101);
                 }
                 uniqueModelIds.add(modelId);
@@ -847,7 +848,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     private String getIdIfAvailable(InterpretedFields interpretedFields, Map<String, Object> record) {
         String value = "";
-        if (!org.apache.commons.lang.StringUtils.isBlank(interpretedFields.getRecordId())) {
+        if (!StringUtils.isBlank(interpretedFields.getRecordId())) {
             Object id = record.get(interpretedFields.getRecordId());
             if (!StringStandardizationUtils.objectIsNullOrEmptyString(id)) {
                 value = String.valueOf(id);

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
@@ -237,7 +238,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
 
         if (modelSummary != null && modelSummary.getPredefinedSelection() != null) {
             String version = null;
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(modelSummary.getPredefinedSelectionVersion())) {
+            if (StringUtils.isNotEmpty(modelSummary.getPredefinedSelectionVersion())) {
                 version = modelSummary.getPredefinedSelectionVersion();
             }
             predefinedSelections.put(modelSummary.getPredefinedSelection(), version);

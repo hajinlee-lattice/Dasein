@@ -41,8 +41,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -117,7 +117,7 @@ public class AvroUtils {
 
         if (!errorMsgs.isEmpty()) {
             throw new IllegalArgumentException("Shuffled and ordered schemas do not match, cannot align.\n"
-                    + org.apache.commons.lang.StringUtils.join(errorMsgs, "\n"));
+                    + StringUtils.join(errorMsgs, "\n"));
         }
 
         shuffledJson.set("fields", newFields);
@@ -510,7 +510,7 @@ public class AvroUtils {
 
     public static Type convertSqlTypeToAvro(String type) throws IllegalArgumentException, IllegalAccessException {
         // the argument 'type' looks like NVARCHAR(MAX), or NVARCHAR(255), etc.
-        String typeStr = org.apache.commons.lang.StringUtils.substringBefore(type.toLowerCase(), "(");
+        String typeStr = StringUtils.substringBefore(type.toLowerCase(), "(");
 
         if ("DATETIME".equalsIgnoreCase(typeStr)) {
             typeStr = "TIMESTAMP".toLowerCase();
@@ -578,7 +578,7 @@ public class AvroUtils {
     }
 
     public static Type getAvroType(String javaClassName) {
-        if (org.apache.commons.lang.StringUtils.isEmpty(javaClassName)) {
+        if (StringUtils.isEmpty(javaClassName)) {
             return null;
         }
         switch (javaClassName) {

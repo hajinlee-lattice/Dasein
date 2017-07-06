@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +118,7 @@ public class PythonScriptModelService extends ModelServiceBase {
             copyHdfsData(sourceTenantId, targetTenantId, eventTableName, cpTrainingTable.getName(),
                     cpEventTable.getName(), modelSummary);
         } catch (IOException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
             throw new LedpException(LedpCode.LEDP_18111,
                     new String[] { modelSummary.getName(), sourceTenantId, targetTenantId });
         }

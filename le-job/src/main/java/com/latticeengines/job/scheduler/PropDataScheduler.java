@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.CronScheduleBuilder;

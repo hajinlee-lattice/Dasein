@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.JobParameters;
@@ -61,7 +61,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
                     }
                 }
             } catch (ClassNotFoundException e) {
-                log.error(ExceptionUtils.getFullStackTrace((e)));
+                log.error(ExceptionUtils.getStackTrace((e)));
                 return false;
             }
         }

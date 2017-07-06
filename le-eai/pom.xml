@@ -9,7 +9,6 @@
 
     <properties>
         <component-name>eai</component-name>
-
     </properties>
 
     <parent>
@@ -24,7 +23,7 @@
             <plugin>
                 <groupId>org.apache.camel.maven</groupId>
                 <artifactId>camel-salesforce-maven-plugin</artifactId>
-                <version>${maven.camel.salesforce.version}</version>
+                <version>${camel.version}</version>
             </plugin>
         </plugins>
     </build>
@@ -33,12 +32,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${camel.jackson.version}</version>
+            <version>${jackson.fasterxml.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${camel.jackson.version}</version>
+            <version>${jackson.fasterxml.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -170,11 +169,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>${apache.http.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
             <version>${apache.http.version}</version>
         </dependency>
         <dependency>
@@ -444,20 +438,15 @@
         <dependency>
             <groupId>net.sourceforge.csvjdbc</groupId>
             <artifactId>csvjdbc</artifactId>
-            <version>1.0.28</version>
+            <version>${sourceforge.csvjdbc.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.mangofactory</groupId>
-            <artifactId>swagger-springmvc</artifactId>
-            <version>0.9.4</version>
-        </dependency>
-        
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>4.0.0.RELEASE</version>
+            <version>${spring.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-network</artifactId>
@@ -489,7 +478,7 @@
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
             <artifactId>jetty</artifactId>
-            <version>6.1.26</version>
+            <version>${mortbay.jetty.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

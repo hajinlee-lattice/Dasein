@@ -3,7 +3,7 @@ package com.latticeengines.camille.exposed.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.camille.exposed.config.cache.ConfigurationCache;
 import com.latticeengines.camille.exposed.translators.PathTranslator;

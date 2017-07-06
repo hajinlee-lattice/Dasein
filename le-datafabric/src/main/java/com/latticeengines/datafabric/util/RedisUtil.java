@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datafabric.RedisIndex;

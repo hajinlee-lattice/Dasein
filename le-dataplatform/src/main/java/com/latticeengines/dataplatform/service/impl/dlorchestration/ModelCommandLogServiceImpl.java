@@ -2,7 +2,7 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import java.util.List;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -69,7 +69,7 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
 
     @Override
     public void logLedpException(ModelCommand modelCommand, LedpException e) {
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : "";
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : "";
         StringBuffer sb = new StringBuffer();
         sb.append("errorCode:").append(e.getCode().name()).append(" errorMessage:").append(e.getMessage())
                 .append(LINE_SEPARATOR).append(stackTrace);
@@ -83,7 +83,7 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
 
     @Override
     public void logException(ModelCommand modelCommand, String message, Exception e) {
-        String stackTrace = e != null ? ExceptionUtils.getFullStackTrace(e) : "";
+        String stackTrace = e != null ? ExceptionUtils.getStackTrace(e) : "";
         StringBuffer sb = new StringBuffer(message);
         sb.append(" errorMessage:").append(e.getMessage()).append(LINE_SEPARATOR).append(stackTrace);
         log(modelCommand, sb.toString());

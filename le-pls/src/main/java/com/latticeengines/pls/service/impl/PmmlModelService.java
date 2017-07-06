@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -110,7 +109,7 @@ public class PmmlModelService extends ModelServiceBase {
 
             copyHdfsData(sourceTenantId, targetTenantId, eventTableName, "", cpEventTable, modelSummary);
         } catch (IOException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
             throw new LedpException(LedpCode.LEDP_18111,
                     new String[] { modelSummary.getName(), sourceTenantId, targetTenantId });
         }

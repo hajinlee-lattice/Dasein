@@ -1,6 +1,6 @@
 package com.latticeengines.security.exposed.serviceruntime.exception;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -18,7 +18,7 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(RemoteLedpException e) {
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : ExceptionUtils
                 .getStackTrace(e);
         if (e.getRemoteStackTrace() != null) {
             stackTrace = stackTrace + "\nCaused remotely by...\n" + e.getRemoteStackTrace();
@@ -30,7 +30,7 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(LedpException e) {
-        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getStackTrace(e.getCause()) : ExceptionUtils
                 .getStackTrace(e);
         logError(e);
         return getModelAndView(e, stackTrace);
@@ -39,7 +39,7 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(Exception e) {
-        String stackTrace = ExceptionUtils.getFullStackTrace(e);
+        String stackTrace = ExceptionUtils.getStackTrace(e);
         logError(e);
         triggerCriticalAlert(e);
         return getModelAndView(e, stackTrace);
@@ -48,7 +48,7 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     @ExceptionHandler
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ModelAndView handleException(LoginException e) {
-        String stackTrace = ExceptionUtils.getFullStackTrace(e);
+        String stackTrace = ExceptionUtils.getStackTrace(e);
         logError(e);
         triggerCriticalAlert(e);
         return getModelAndView(e, stackTrace);

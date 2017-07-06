@@ -137,11 +137,6 @@ public class TestExceptionHandler extends FrontEndFacingExceptionHandler {
             }
 
             @Override
-            public String changeSessionId() {
-                return null;
-            }
-
-            @Override
             public boolean isRequestedSessionIdValid() {
                 return false;
             }
@@ -161,35 +156,7 @@ public class TestExceptionHandler extends FrontEndFacingExceptionHandler {
                 return false;
             }
 
-            @Override
-            public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
-                return false;
-            }
 
-            @Override
-            public void login(String username, String password) throws ServletException {
-
-            }
-
-            @Override
-            public void logout() throws ServletException {
-
-            }
-
-            @Override
-            public Collection<Part> getParts() throws IOException, ServletException {
-                return null;
-            }
-
-            @Override
-            public Part getPart(String name) throws IOException, ServletException {
-                return null;
-            }
-
-            @Override
-            public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
-                return null;
-            }
 
             @Override
             public Object getAttribute(String name) {
@@ -213,11 +180,6 @@ public class TestExceptionHandler extends FrontEndFacingExceptionHandler {
 
             @Override
             public int getContentLength() {
-                return 0;
-            }
-
-            @Override
-            public long getContentLengthLong() {
                 return 0;
             }
 
@@ -339,42 +301,6 @@ public class TestExceptionHandler extends FrontEndFacingExceptionHandler {
             @Override
             public int getLocalPort() {
                 return 0;
-            }
-
-            @Override
-            public ServletContext getServletContext() {
-                return null;
-            }
-
-            @Override
-            public AsyncContext startAsync() throws IllegalStateException {
-                return null;
-            }
-
-            @Override
-            public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse)
-                    throws IllegalStateException {
-                return null;
-            }
-
-            @Override
-            public boolean isAsyncStarted() {
-                return false;
-            }
-
-            @Override
-            public boolean isAsyncSupported() {
-                return false;
-            }
-
-            @Override
-            public AsyncContext getAsyncContext() {
-                return null;
-            }
-
-            @Override
-            public DispatcherType getDispatcherType() {
-                return null;
             }
         };
     }

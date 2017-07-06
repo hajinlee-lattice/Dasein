@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +77,7 @@ public class PerfLoadTestNGBase {
         try {
             fs = FileSystem.get(yarnConfiguration);
         } catch (IOException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
         }
         modelDef = produceModelDef(0);
     }
@@ -100,14 +99,14 @@ public class PerfLoadTestNGBase {
             prop.load(IOUtils.toInputStream(props));
         } catch (FileNotFoundException e) {
             log.error("property file '" + propertyPath + "' not found in the classpath");
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
         } catch (IOException e) {
-            log.error(ExceptionUtils.getFullStackTrace(e));
+            log.error(e);
         } finally {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                log.error(ExceptionUtils.getFullStackTrace(e));
+                log.error(e);
             }
         }
         return prop;

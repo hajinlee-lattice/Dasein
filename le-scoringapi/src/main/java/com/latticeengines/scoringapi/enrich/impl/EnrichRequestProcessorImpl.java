@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -32,9 +33,9 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
 
     @Override
     public EnrichResponse process(CustomerSpace space, EnrichRequest request, String requestId) {
-        if (org.apache.commons.lang.StringUtils.isBlank(request.getDomain())
-                && org.apache.commons.lang.StringUtils.isBlank(request.getCompany())
-                && org.apache.commons.lang.StringUtils.isBlank(request.getDUNS())) {
+        if (StringUtils.isBlank(request.getDomain())
+                && StringUtils.isBlank(request.getCompany())
+                && StringUtils.isBlank(request.getDUNS())) {
             throw new ScoringApiException(LedpCode.LEDP_31199);
         }
         requestInfo.put("Source", Strings.nullToEmpty(request.getSource()));

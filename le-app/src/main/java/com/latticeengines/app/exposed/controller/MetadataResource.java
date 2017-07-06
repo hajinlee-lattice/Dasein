@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.app.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 // This is used for saving/retrieving attributes in lattice insights with customizations for UI purposes
 @Api(value = "metadata", description = "Common REST resource for retrieving attribute-level metadata")

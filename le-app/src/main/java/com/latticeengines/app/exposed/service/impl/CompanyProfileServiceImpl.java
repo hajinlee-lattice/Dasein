@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
@@ -31,9 +34,6 @@ import com.latticeengines.domain.exposed.ulysses.CompanyProfile;
 import com.latticeengines.domain.exposed.ulysses.CompanyProfileRequest;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
-import com.mysql.jdbc.StringUtils;
-
-import javax.annotation.PostConstruct;
 
 @Component("companyProfileService")
 public class CompanyProfileServiceImpl implements CompanyProfileService {
@@ -79,7 +79,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         matchInput.setFields(fields);
         matchInput.setData(data);
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.Enrichment);
-        if (StringUtils.isNullOrEmpty(dataCloudVersion)) {
+        if (StringUtils.isBlank(dataCloudVersion)) {
             dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         }
         matchInput.setUseRemoteDnB(enforceFuzzyMatch);

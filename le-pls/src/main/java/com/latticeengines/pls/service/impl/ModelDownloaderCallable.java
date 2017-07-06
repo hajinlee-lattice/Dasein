@@ -10,8 +10,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -173,7 +172,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 HdfsUtils.rmdir(yarnConfiguration, file);
             } catch (IOException e) {
                 // Will trigger PagerDuty alert
-                log.fatal(ExceptionUtils.getFullStackTrace(e));
+                log.fatal(e);
             } catch (ConstraintViolationException e) {
                 log.info(String.format(
                         "Cannot create model summary with Id %s, constraint violation. Hdfs file: %s, TenantId: %s",
