@@ -3,7 +3,6 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,13 +11,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
@@ -40,6 +39,7 @@ import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
@@ -123,8 +123,6 @@ public class InternalResource extends InternalResourceBase {
     private static final String adUsername = "testuser1";
     private static final String adPassword = "Lattice1";
     private static final String TENANT_ID_PATH = "{tenantId:\\w+\\.\\w+\\.\\w+}";
-    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
-    private static final String UTC = "UTC";
     private static final Integer BUCKET_0 = 99;
     private static final Integer BUCKET_1 = 95;
     private static final Integer BUCKET_2 = 85;
@@ -211,12 +209,6 @@ public class InternalResource extends InternalResourceBase {
 
     @Value("${pls.current.stack:}")
     private String currentStack;
-
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
-
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-    }
 
     @RequestMapping(value = "/targetmarkets/default/"
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
@@ -431,8 +423,8 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
-        if (!StringStandardizationUtils.objectIsNullOrEmptyString(start)) {
-            lastUpdateTime = dateFormat.parse(start).getTime();
+        if (StringUtils.isNotEmpty(start)) {
+            lastUpdateTime = DateTimeUtils.convertToLongUTCISO8601(start);
         }
         return modelSummaryEntityMgr.findTotalCount(lastUpdateTime, considerAllStatus);
 
@@ -451,8 +443,8 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         long lastUpdateTime = 0;
-        if (!StringStandardizationUtils.objectIsNullOrEmptyString(start)) {
-            lastUpdateTime = dateFormat.parse(start).getTime();
+        if (StringUtils.isNotEmpty(start)) {
+            lastUpdateTime = DateTimeUtils.convertToLongUTCISO8601(start);
         }
         return postProcessModelSummaryList(
                 modelSummaryEntityMgr.findPaginatedModels(lastUpdateTime, considerAllStatus, offset, maximum), false);

@@ -1,13 +1,11 @@
 package com.latticeengines.scoringinternalapi.controller;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -81,10 +80,6 @@ public abstract class BaseScoring extends CommonBase {
 
     private static final String TOTAL_TIME_PREFIX = "total_";
 
-    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
-
-    private static final String UTC = "UTC";
-
     @Autowired
     protected OAuthUserEntityMgr oAuthUserEntityMgr;
 
@@ -93,12 +88,6 @@ public abstract class BaseScoring extends CommonBase {
 
     @Autowired
     private ScoreRequestProcessor scoreRequestProcessor;
-
-    public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
-
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-    }
 
     protected List<Model> getActiveModels(HttpServletRequest request, ModelType type, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
@@ -219,7 +208,7 @@ public abstract class BaseScoring extends CommonBase {
             CustomerSpace customerSpace) {
         ScoreRequestMetrics metrics = new ScoreRequestMetrics();
         metrics.setHasWarning(warnings.hasWarnings());
-        metrics.setScore((int) response.getScore());
+        metrics.setScore(response.getScore());
         metrics.setSource(StringUtils.trimToEmpty(scoreRequest.getSource()));
         metrics.setRule(StringUtils.trimToEmpty(scoreRequest.getRule()));
         metrics.setTenantId(customerSpace.toString());
@@ -393,12 +382,12 @@ public abstract class BaseScoring extends CommonBase {
         try {
             Date startDate = null;
             if (!StringUtils.isEmpty(start)) {
-                startDate = dateFormat.parse(start);
+                startDate = DateTimeUtils.convertToDateUTCISO8601(start);
             } else {
                 // if no start date is specified then default start date is
                 // start of epoch time 1971-1-1
                 startDate = new Date(0);
-                start = dateFormat.format(startDate);
+                start = DateTimeUtils.convertToStringUTCISO8601(startDate);
             }
             return start;
         } catch (Exception e) {

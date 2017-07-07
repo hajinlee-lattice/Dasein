@@ -17,6 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
@@ -30,7 +31,6 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
-import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
@@ -174,7 +174,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
     private int getModelCount(int n, boolean considerAllStatus, Date lastUpdateTime, boolean shouldAssert) {
         String url = apiHostPort + "/score/modeldetails/count?considerAllStatus=" + considerAllStatus;
         if (lastUpdateTime != null) {
-            url += "&start=" + BaseScoring.dateFormat.format(lastUpdateTime);
+            url += "&start=" + DateTimeUtils.convertToStringUTCISO8601(lastUpdateTime);
         }
 
         ResponseEntity<Integer> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null, Integer.class);
@@ -306,7 +306,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
             int offset, int maximum) {
         String url = serviceHostPort
                 + "/modeldetails?considerAllStatus={considerAllStatus}&offset={offset}&maximum={maximum}&start={start}";
-        String startStr = BaseScoring.dateFormat.format(start);
+        String startStr = DateTimeUtils.convertToStringUTCISO8601(start);
         System.out.println(url);
         ResponseEntity<List<ModelDetail>> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
                 new ParameterizedTypeReference<List<ModelDetail>>() {

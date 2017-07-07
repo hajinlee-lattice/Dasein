@@ -19,6 +19,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -43,7 +44,6 @@ import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
-import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunctionalTestNGBase {
@@ -356,7 +356,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
             Assert.assertNotNull(model.getStatus());
             Assert.assertNotNull(model.getLastModifiedTimestamp());
 
-            Assert.assertNotNull(BaseScoring.dateFormat.parse(model.getLastModifiedTimestamp()));
+            Assert.assertNotNull(DateTimeUtils.convertToDateUTCISO8601(model.getLastModifiedTimestamp()));
 
             checkFields(model.getModel().getName(), model.getFields(), modelNamePrefix, fieldDisplayNamePrefix);
         }

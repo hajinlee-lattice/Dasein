@@ -2,11 +2,9 @@ package com.latticeengines.proxy.exposed.scoringapi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpStatus;
@@ -16,6 +14,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -58,14 +57,6 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
         }
     }
 
-    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
-    private static final String UTC = "UTC";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
-
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
-    }
-
     public InternalScoringApiProxy() {
         super(PropertyUtils.getProperty("common.scoringapi.url"), "/scoreinternal/score");
         setErrorHandler(new ScoringErrorHandler());
@@ -100,7 +91,7 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
     public int getModelCount(Date start, boolean considerAllStatus, String tenantIdentifier) {
         String url = "/modeldetails/count?considerAllStatus={considerAllStatus}&tenantIdentifier={tenantIdentifier}";
         if (start != null) {
-            String startStr = dateFormat.format(start);
+            String startStr = DateTimeUtils.convertToStringUTCISO8601(start);
             url = constructUrl(url + "&start={start}", considerAllStatus, tenantIdentifier, startStr);
         } else {
             url = constructUrl(url, considerAllStatus, tenantIdentifier);
@@ -113,7 +104,7 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
             String tenantIdentifier) {
         String url = "/modeldetails?considerAllStatus={considerAllStatus}&offset={offset}&maximum={maximum}&tenantIdentifier={tenantIdentifier}";
         if (start != null) {
-            String startStr = dateFormat.format(start);
+            String startStr = DateTimeUtils.convertToStringUTCISO8601(start);
             url = constructUrl(url + "&start={start}", considerAllStatus, offset, maximum, tenantIdentifier, startStr);
         } else {
             url = constructUrl(url, considerAllStatus, offset, maximum, tenantIdentifier);

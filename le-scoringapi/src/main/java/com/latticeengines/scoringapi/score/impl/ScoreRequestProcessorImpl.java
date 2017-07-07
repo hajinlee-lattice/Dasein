@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -56,7 +57,6 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.match.Matcher;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 import com.latticeengines.scoringapi.transform.RecordTransformer;
-import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 @Component("scoreRequestProcessor")
 public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implements ScoreRequestProcessor {
@@ -253,7 +253,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     public List<RecordScoreResponse> process(CustomerSpace space, BulkRecordScoreRequest request, //
             boolean isDebug, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId) {
         List<RecordScoreResponse> scoreResponse = new ArrayList<>();
-        String requestTimestamp = BaseScoring.dateFormat.format(new Date());
+        String requestTimestamp = DateTimeUtils.convertToStringUTCISO8601(new Date());
 
         try {
             split("requestPreparation");

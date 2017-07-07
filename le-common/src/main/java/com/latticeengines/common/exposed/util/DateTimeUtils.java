@@ -28,15 +28,19 @@ public class DateTimeUtils {
         latest = calendar.getTime().getTime();
     }
 
-    public static long getTimestampUTCISO8601(String date) {
+    public static Date convertToDateUTCISO8601(String dateString) {
         try {
-            return dateFormat.parse(date).getTime();
+            return dateFormat.parse(dateString);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String getDateUTCISO8601(Date date) {
+    public static long convertToLongUTCISO8601(String dateString) {
+        return convertToDateUTCISO8601(dateString).getTime();
+    }
+
+    public static String convertToStringUTCISO8601(Date date) {
         return dateFormat.format(date);
     }
 

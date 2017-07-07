@@ -33,6 +33,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.modeling.ModelExtractor;
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -67,7 +68,6 @@ import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
-import com.latticeengines.scoringinternalapi.controller.BaseScoring;
 
 @Component("modelRetriever")
 public class ModelRetrieverImpl implements ModelRetriever {
@@ -744,7 +744,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     private String convertLongTimestampToString(Long lastModifiedTimestamp) {
-        return BaseScoring.dateFormat.format(new Date(lastModifiedTimestamp));
+        return DateTimeUtils.convertToStringUTCISO8601(new Date(lastModifiedTimestamp));
     }
 
     @VisibleForTesting

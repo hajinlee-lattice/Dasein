@@ -23,7 +23,10 @@ public class AccountQueryServiceImpl implements AccountQueryService {
     @Override
     public Query generateAccountQuery(String start, int offset, int pageSize, boolean hasSfdcAccountId,
             DataRequest dataRequest) {
-        long lastModifiedTime = DateTimeUtils.getTimestampUTCISO8601(start);
+        if (dataRequest == null) {
+            dataRequest = new DataRequest();
+        }
+        long lastModifiedTime = DateTimeUtils.convertToLongUTCISO8601(start);
 
         List<Restriction> restrictions = new ArrayList<>();
         Restriction lastModifiedRestriction = Restriction.builder().let(BusinessEntity.Account, "lastmodified")
