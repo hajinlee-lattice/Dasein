@@ -17,6 +17,9 @@ public class EntityLookup extends Lookup {
         this.entity = entity;
     }
 
+    public EntityLookup() {
+    }
+
     public BusinessEntity getEntity() {
         return entity;
     }

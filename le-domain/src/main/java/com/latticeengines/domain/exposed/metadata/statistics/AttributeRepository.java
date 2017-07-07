@@ -52,6 +52,9 @@ public class AttributeRepository {
         this.tableNameMap = tableNameMap;
     }
 
+    public AttributeRepository() {
+    }
+
     public ColumnMetadata getColumnMetadata(AttributeLookup attributeLookup) {
         return cmMap.get(attributeLookup);
     }

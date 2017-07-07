@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class DataRequest {
 
     @JsonProperty("attributes")
-    @ApiModelProperty(value = "List of attributes to return in addition to accountid, salesforceaccountid, latticeaccountid")
+    @ApiModelProperty(required = false, value = "List of attributes to return in addition to accountid, salesforceaccountid, latticeaccountid")
     private List<String> attributes = new ArrayList<>();
 
     @JsonProperty("account_ids")
