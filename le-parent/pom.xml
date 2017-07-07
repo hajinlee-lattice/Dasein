@@ -41,7 +41,7 @@
         <maven.archetype.version>3.0.1</maven.archetype.version>
         <maven.camel.salesforce.version>2.18.2</maven.camel.salesforce.version>
         <maven.keytool.version>1.5</maven.keytool.version>
-        <maven.rpm.version>2.1-alpha-4</maven.rpm.version> <!-- upgrade ? -->
+        <maven.rpm.version>2.1.5</maven.rpm.version> <!-- upgrade ? -->
 
         <!-- dependencies with rigid version interlock, hard to upgrade -->
         <hadoop.version>2.7.1.2.3.6.0-3796</hadoop.version>

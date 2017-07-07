@@ -32,12 +32,6 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
     @Autowired
     protected YarnClient yarnClient;
 
-    @Value("${pls.cdl.transform.workflow.mem.mb}")
-    protected int workflowMemMb;
-
-    @Value("${pls.cdl.transform.workflow.mem.mb.max}")
-    protected int workflowMemMbMax;
-
     @Value("${pls.cdl.transform.cascading.partitions}")
     protected int cascadingPartitions;
 
