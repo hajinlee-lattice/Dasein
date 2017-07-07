@@ -16,14 +16,17 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
-import com.esotericsoftware.minlog.Log;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.service.SourceService;
@@ -42,6 +45,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public abstract class TransformationServiceImplTestNGBase<T extends TransformationConfiguration> extends
         DataCloudEtlFunctionalTestNGBase {
 
+    private static final Log log = LogFactory.getLog(TransformationServiceImplTestNGBase.class);
+
     private static final int MAX_LOOPS = 100;
 
     @Autowired
@@ -55,6 +60,12 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     @Autowired
     protected MetadataProxy metadataProxy;
+
+    @Autowired
+    protected HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     Source source;
 
@@ -196,7 +207,7 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
         try {
             HdfsUtils.rmdir(yarnConfiguration, tableDir);
         } catch (Exception ex) {
-            Log.warn("can not delete table dir=" + tableDir, ex);
+            log.warn("can not delete table dir=" + tableDir, ex);
         }
     }
 
@@ -245,7 +256,27 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     protected void confirmResultFile(TransformationProgress progress) {
         String path = getPathForResult();
-        System.out.println("Checking for result file: " + path);
+        log.info("Checking for result file: " + path);
+        Iterator<GenericRecord> records = getGenericRecords(path);
+        verifyResultAvroRecords(records);
+    }
+
+    protected void confirmIntermediateSource(Source source, String version) {
+        if (StringUtils.isBlank(version)) {
+            version = hdfsSourceEntityMgr.getCurrentVersion(source);
+        }
+        String path = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
+        log.info(String.format("Checking result of intermediate source %s @%s: %s", source.getSourceName(), version,
+                path));
+        Iterator<GenericRecord> records = getGenericRecords(path);
+        verifyIntermediateResult(source.getSourceName(), records);
+    }
+
+    protected void verifyIntermediateResult(String source, Iterator<GenericRecord> records) {
+
+    }
+
+    private Iterator<GenericRecord> getGenericRecords(String path) {
         List<String> files;
         try {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, path);
@@ -260,9 +291,8 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
             }
             Assert.assertTrue(file.endsWith(SUCCESS_FLAG));
         }
-
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path + "/*.avro");
-        verifyResultAvroRecords(records);
+        return records;
     }
 
     protected Iterator<GenericRecord> iterateSource(String sourceName) {
