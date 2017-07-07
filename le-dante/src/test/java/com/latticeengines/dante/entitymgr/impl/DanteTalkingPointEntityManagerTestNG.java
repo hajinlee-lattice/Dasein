@@ -9,23 +9,23 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
+import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
-public class TalkingPointEntityManagerTestNG extends AbstractTestNGSpringContextTests {
+public class DanteTalkingPointEntityManagerTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private TalkingPointEntityMgr talkingPointEntityMgr;
+    private DanteTalkingPointEntityMgr danteTalkingPointEntityMgr;
 
     private final String externalID = "talkingPointTestExtID";
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        DanteTalkingPoint dtp = talkingPointEntityMgr.findByExternalID(externalID);
+        DanteTalkingPoint dtp = danteTalkingPointEntityMgr.findByExternalID(externalID);
         if (dtp != null)
-            talkingPointEntityMgr.delete(dtp);
+            danteTalkingPointEntityMgr.delete(dtp);
     }
 
     @Test(groups = "functional")
@@ -37,19 +37,17 @@ public class TalkingPointEntityManagerTestNG extends AbstractTestNGSpringContext
         dtp.setPlayExternalID("testPlayExtID");
         dtp.setValue("Some Talking Point");
 
-        talkingPointEntityMgr.create(dtp);
+        danteTalkingPointEntityMgr.create(dtp);
 
-        dtp = null;
-
-        dtp = talkingPointEntityMgr.findByExternalID(externalID);
+        dtp = danteTalkingPointEntityMgr.findByExternalID(externalID);
         Assert.assertNotNull(dtp);
         Assert.assertNotNull(dtp.getCreationDate());
         Assert.assertNotNull(dtp.getLastModificationDate());
         Assert.assertEquals(dtp.getPlayExternalID(), "testPlayExtID");
 
-        talkingPointEntityMgr.delete(dtp);
+        danteTalkingPointEntityMgr.delete(dtp);
 
-        dtp = talkingPointEntityMgr.findByField("External_ID", externalID);
+        dtp = danteTalkingPointEntityMgr.findByField("External_ID", externalID);
         Assert.assertNull(dtp);
     }
 }

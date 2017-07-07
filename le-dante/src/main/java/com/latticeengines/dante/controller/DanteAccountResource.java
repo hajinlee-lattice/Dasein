@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.dante.service.AccountService;
+import com.latticeengines.dante.service.DanteAccountService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.network.exposed.dante.DanteAccountInterface;
@@ -22,17 +22,17 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "dante", description = "REST resource for Dante Account operations")
 @RestController
 @RequestMapping("/accounts")
-public class AccountResource implements DanteAccountInterface {
-    private static final Logger log = Logger.getLogger(AccountResource.class);
+public class DanteAccountResource implements DanteAccountInterface {
+    private static final Logger log = Logger.getLogger(DanteAccountResource.class);
 
     @Autowired
-    AccountService accountService;
+    DanteAccountService danteAccountService;
 
     @RequestMapping(value = "/{count}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get Dante accounts")
     public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count,
             @RequestParam("customerSpace") String customerSpace) {
-        return ResponseDocument.successResponse(accountService.getAccounts(count, customerSpace));
+        return ResponseDocument.successResponse(danteAccountService.getAccounts(count, customerSpace));
     }
 }

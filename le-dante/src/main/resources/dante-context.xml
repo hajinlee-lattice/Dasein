@@ -15,5 +15,13 @@
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
+
+    <bean id="danteTalkingPointDao" class="com.latticeengines.dante.dao.impl.DanteTalkingPointDaoImpl">
+        <property name="sessionFactory" ref="danteSessionFactory"/>
+    </bean>
+
+    <bean id="danteAccountCacheDao" class="com.latticeengines.dante.dao.impl.DanteAccountDaoImpl">
+        <property name="sessionFactory" ref="danteSessionFactory"/>
+    </bean>
 </beans>
 

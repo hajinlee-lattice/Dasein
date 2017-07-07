@@ -18,17 +18,17 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dante.metadata.BaseObjectMetadata;
 import com.latticeengines.dante.metadata.MetadataDocument;
 import com.latticeengines.dante.metadata.NotionMetadata;
-import com.latticeengines.dante.service.AttributeService;
+import com.latticeengines.dante.service.DanteAttributeService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-@Component("attributesService")
-public class AttributeServiceImpl implements AttributeService {
+@Component("danteAttributesService")
+public class DanteAttributeServiceImpl implements DanteAttributeService {
 
-    private static final Logger log = Logger.getLogger(AttributeServiceImpl.class);
+    private static final Logger log = Logger.getLogger(DanteAttributeServiceImpl.class);
     private final Path metadataDocumentPath = new Path("/MetadataDocument.json");
     private final String danteAccountKey = "DanteAccount";
     private final String recomendationAttributesFilePath = "com/latticeengines/dante/metadata/RecommendationAttributes.json";

@@ -1,4 +1,4 @@
-package com.latticeengines.dante.entitymgr.impl;
+package com.latticeengines.dante.controller;
 
 import java.util.List;
 
@@ -10,20 +10,23 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dante.entitymgr.AccountEntityMgr;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
+import com.latticeengines.proxy.exposed.dante.DanteAccountProxy;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
-public class AccountEntityMgrTestNG extends AbstractTestNGSpringContextTests {
+public class DanteAccountResourceDeploymentTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
-    private AccountEntityMgr accountCacheEntityMgr;
+    private DanteAccountProxy danteAccountProxy;
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testGetAccounts() {
-        List<DanteAccount> accounts = accountCacheEntityMgr.getAccounts(10, "LECLEANX");
+        // Todo: create test tenant, add accounts in dante and then test this
+        ResponseDocument<List<DanteAccount>> result = danteAccountProxy.getAccounts(10, "LECLEANX.LECLEANX.Production");
 
-        Assert.assertNotNull(accounts);
-        Assert.assertEquals(accounts.size(), 10);
+        Assert.assertNotNull(result);
+        Assert.assertNull(result.getErrors());
+        Assert.assertEquals(result.getResult().size(), 10);
     }
 }

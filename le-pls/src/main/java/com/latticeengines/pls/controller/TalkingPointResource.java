@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.proxy.exposed.dante.DanteTalkingPointProxy;
+import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.wordnik.swagger.annotations.Api;
 
@@ -30,12 +30,12 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/dante/talkingpoints")
 @PreAuthorize("hasRole('View_PLS_Plays')")
-public class DanteTalkingPointResource {
+public class TalkingPointResource {
 
-    private static final Logger log = Logger.getLogger(DanteTalkingPointResource.class);
+    private static final Logger log = Logger.getLogger(TalkingPointResource.class);
 
     @Autowired
-    DanteTalkingPointProxy danteTalkingPointProxy;
+    TalkingPointProxy talkingPointProxy;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
@@ -43,21 +43,21 @@ public class DanteTalkingPointResource {
     @ApiOperation(value = "Create a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<?> createOrUpdate(@RequestBody List<DanteTalkingPoint> talkingPoints) {
-        return danteTalkingPointProxy.createOrUpdate(talkingPoints);
+        return talkingPointProxy.createOrUpdate(talkingPoints);
     }
 
     @RequestMapping(value = "/{externalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
     public ResponseDocument<DanteTalkingPoint> findByExternalID(@PathVariable String externalID) {
-        return danteTalkingPointProxy.findByExternalID(externalID);
+        return talkingPointProxy.findByExternalID(externalID);
     }
 
     @RequestMapping(value = "/play/{playExternalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
     public ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(@PathVariable String playExternalID) {
-        return danteTalkingPointProxy.findAllByPlayID(playExternalID);
+        return talkingPointProxy.findAllByPlayID(playExternalID);
     }
 
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
@@ -68,7 +68,7 @@ public class DanteTalkingPointResource {
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        return danteTalkingPointProxy.getPreviewResources(customerSpace.toString());
+        return talkingPointProxy.getPreviewResources(customerSpace.toString());
     }
 
     @RequestMapping(value = "/{talkingPointExternalID}", method = RequestMethod.DELETE)
@@ -76,6 +76,6 @@ public class DanteTalkingPointResource {
     @ApiOperation(value = "Delete a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<?> delete(@PathVariable String talkingPointExternalID) {
-        return danteTalkingPointProxy.delete(talkingPointExternalID);
+        return talkingPointProxy.delete(talkingPointExternalID);
     }
 }

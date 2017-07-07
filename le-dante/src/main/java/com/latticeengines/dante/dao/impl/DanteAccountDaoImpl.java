@@ -7,14 +7,14 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dante.dao.AccountCacheDao;
+import com.latticeengines.dante.dao.DanteAccountDao;
 import com.latticeengines.dantedb.exposed.dao.impl.BaseDanteDaoImpl;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 
-@Component("accountCacheDao")
-public class AccountCacheDaoImpl extends BaseDanteDaoImpl<DanteAccount> implements AccountCacheDao {
+@Component("danteAccountCacheDao")
+public class DanteAccountDaoImpl extends BaseDanteDaoImpl<DanteAccount> implements DanteAccountDao {
 
-    private static final Logger log = Logger.getLogger(AccountCacheDaoImpl.class);
+    private static final Logger log = Logger.getLogger(DanteAccountDaoImpl.class);
 
     @Override
     protected Class<DanteAccount> getEntityClass() {

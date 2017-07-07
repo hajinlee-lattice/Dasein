@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
+import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
@@ -33,12 +33,12 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     private Oauth2RestApiProxy oauth2RestApiProxy;
 
     @Autowired
-    private TalkingPointEntityMgr talkingPointEntityMgr;
+    private DanteTalkingPointEntityMgr danteTalkingPointEntityMgr;
 
     public String createOrUpdate(List<DanteTalkingPoint> dtps) {
         try {
             for (DanteTalkingPoint dtp : dtps) {
-                talkingPointEntityMgr.createOrUpdate(dtp);
+                danteTalkingPointEntityMgr.createOrUpdate(dtp);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -49,7 +49,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     public DanteTalkingPoint findByExternalID(String externalID) {
-        DanteTalkingPoint tp = talkingPointEntityMgr.findByExternalID(externalID);
+        DanteTalkingPoint tp = danteTalkingPointEntityMgr.findByExternalID(externalID);
         if (tp != null)
             return tp;
         else
@@ -57,7 +57,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     public List<DanteTalkingPoint> findAllByPlayID(String playExternalID) {
-        return talkingPointEntityMgr.findAllByPlayID(playExternalID);
+        return danteTalkingPointEntityMgr.findAllByPlayID(playExternalID);
     }
 
     @Override
@@ -74,6 +74,6 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     public void delete(DanteTalkingPoint dtp) {
-        talkingPointEntityMgr.delete(dtp);
+        danteTalkingPointEntityMgr.delete(dtp);
     }
 }

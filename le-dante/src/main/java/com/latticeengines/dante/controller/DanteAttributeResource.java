@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.dante.service.AttributeService;
+import com.latticeengines.dante.service.DanteAttributeService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.network.exposed.dante.DanteAttributesInterface;
 
@@ -20,18 +20,18 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "dante", description = "REST resource for attributes related to Dante notions")
 @RestController
 @RequestMapping("/attributes")
-public class AttributeResource implements DanteAttributesInterface {
-    private static final Logger log = Logger.getLogger(AttributeResource.class);
+public class DanteAttributeResource implements DanteAttributesInterface {
+    private static final Logger log = Logger.getLogger(DanteAttributeResource.class);
 
     @Autowired
-    private AttributeService attributeService;
+    private DanteAttributeService danteAttributeService;
 
     @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get account attributes for this tenant")
     public ResponseDocument<Map<String, String>> getAccountAttributes(
             @RequestParam("customerSpace") String customerSpace) {
-        return ResponseDocument.successResponse(attributeService.getAccountAttributes(customerSpace));
+        return ResponseDocument.successResponse(danteAttributeService.getAccountAttributes(customerSpace));
     }
 
     @RequestMapping(value = "/recommendationattributes", method = RequestMethod.GET)
@@ -39,6 +39,6 @@ public class AttributeResource implements DanteAttributesInterface {
     @ApiOperation(value = "get recommendation attributes")
     public ResponseDocument<Map<String, String>> getRecommendationAttributes(
             @RequestParam("customerSpace") String customerSpace) {
-        return ResponseDocument.successResponse(attributeService.getRecommendationAttributes(customerSpace));
+        return ResponseDocument.successResponse(danteAttributeService.getRecommendationAttributes(customerSpace));
     }
 }

@@ -8,34 +8,34 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.dante.dao.TalkingPointDao;
-import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
+import com.latticeengines.dante.dao.DanteTalkingPointDao;
+import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
 import com.latticeengines.dantedb.exposed.dao.BaseDanteDao;
 import com.latticeengines.dantedb.exposed.entitymgr.impl.BaseDanteEntityMgrImpl;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
-@Component("talkingPointEntityMgr")
-public class TalkingPointEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteTalkingPoint>
-        implements TalkingPointEntityMgr {
+@Component("danteTalkingPointEntityMgr")
+public class DanteTalkingPointEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteTalkingPoint>
+        implements DanteTalkingPointEntityMgr {
 
-    private static final Logger log = Logger.getLogger(TalkingPointEntityMgrImpl.class);
+    private static final Logger log = Logger.getLogger(DanteTalkingPointEntityMgrImpl.class);
 
     @Autowired
-    private TalkingPointDao talkingPointDao;
+    private DanteTalkingPointDao danteTalkingPointDao;
 
     @Override
     public BaseDanteDao<DanteTalkingPoint> getDao() {
-        return talkingPointDao;
+        return danteTalkingPointDao;
     }
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public DanteTalkingPoint findByExternalID(String externalId) {
-        return talkingPointDao.findByExternalID(externalId);
+        return danteTalkingPointDao.findByExternalID(externalId);
     }
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public List<DanteTalkingPoint> findAllByPlayID(String playID) {
-        return talkingPointDao.findAllByPlayID(playID);
+        return danteTalkingPointDao.findAllByPlayID(playID);
     }
 
 }

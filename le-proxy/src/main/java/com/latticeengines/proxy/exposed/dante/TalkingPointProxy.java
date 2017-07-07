@@ -9,14 +9,14 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.network.exposed.dante.DanteTalkingPointInterface;
+import com.latticeengines.network.exposed.dante.TalkingPointInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.security.exposed.serviceruntime.exception.PostResponseErrorHandler;
 
-@Component("danteTalkingPointProxy")
-public class DanteTalkingPointProxy extends MicroserviceRestApiProxy implements DanteTalkingPointInterface {
+@Component("talkingPointProxy")
+public class TalkingPointProxy extends MicroserviceRestApiProxy implements TalkingPointInterface {
 
-    public DanteTalkingPointProxy() {
+    public TalkingPointProxy() {
         super("/dante/talkingpoints");
     }
 

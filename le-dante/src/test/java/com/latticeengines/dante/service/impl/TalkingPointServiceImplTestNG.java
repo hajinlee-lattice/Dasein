@@ -13,7 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
+import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
@@ -25,15 +25,15 @@ public class TalkingPointServiceImplTestNG extends AbstractTestNGSpringContextTe
     private TalkingPointService talkingPointService;
 
     @Autowired
-    private TalkingPointEntityMgr talkingPointEntityMgr;
+    private DanteTalkingPointEntityMgr danteTalkingPointEntityMgr;
 
     private final String externalID = "talkingPointFTestExtID";
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        DanteTalkingPoint dtp = talkingPointEntityMgr.findByExternalID(externalID);
+        DanteTalkingPoint dtp = danteTalkingPointEntityMgr.findByExternalID(externalID);
         if (dtp != null)
-            talkingPointEntityMgr.delete(dtp);
+            danteTalkingPointEntityMgr.delete(dtp);
     }
 
     @Test(groups = "functional")
@@ -68,9 +68,9 @@ public class TalkingPointServiceImplTestNG extends AbstractTestNGSpringContextTe
 
         Assert.assertEquals(dtps.size(), 1, "Failure Cause: Talking Points not found by findByPlayID");
 
-        talkingPointEntityMgr.delete(dtp);
+        danteTalkingPointEntityMgr.delete(dtp);
 
-        dtp = talkingPointEntityMgr.findByField("External_ID", externalID);
+        dtp = danteTalkingPointEntityMgr.findByField("External_ID", externalID);
         Assert.assertNull(dtp, "Failure Cause: Talking point was not deleted");
     }
 }

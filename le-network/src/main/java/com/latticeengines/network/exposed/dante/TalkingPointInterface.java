@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
-public interface DanteTalkingPointInterface {
+public interface TalkingPointInterface {
 
     ResponseDocument<?> createOrUpdate(List<DanteTalkingPoint> talkingPoints);
 

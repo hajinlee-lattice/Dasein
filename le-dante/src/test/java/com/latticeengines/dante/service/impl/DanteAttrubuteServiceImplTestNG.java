@@ -1,6 +1,7 @@
 package com.latticeengines.dante.service.impl;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -20,15 +21,15 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
-import com.latticeengines.dante.service.AttributeService;
+import com.latticeengines.dante.service.DanteAttributeService;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
-public class AttrubuteServiceImplTestNG extends AbstractTestNGSpringContextTests {
+public class DanteAttrubuteServiceImplTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
-    private AttributeService attributeService;
+    private DanteAttributeService danteAttributeService;
 
     private final Path metadataDocumentPath = new Path("/MetadataDocument.json");
 
@@ -44,7 +45,8 @@ public class AttrubuteServiceImplTestNG extends AbstractTestNGSpringContextTests
                 .append(PathConstants.DANTE) //
                 .append(metadataDocumentPath);
         String metadataDoc = FileUtils.readFileToString(new File(ClassLoader
-                .getSystemResource("com/latticeengines/dante/testframework/MetadataDocument.json").getFile()));
+                .getSystemResource("com/latticeengines/dante/testframework/MetadataDocument.json").getFile()),
+                Charset.defaultCharset());
 
         Document doc = new Document();
         doc.setData(metadataDoc);
@@ -53,14 +55,14 @@ public class AttrubuteServiceImplTestNG extends AbstractTestNGSpringContextTests
 
     @Test(groups = "functional")
     public void testGetAccountAttributes() {
-        Map<String, String> attributes = attributeService.getAccountAttributes(tenantName);
+        Map<String, String> attributes = danteAttributeService.getAccountAttributes(tenantName);
         Assert.assertNotNull(attributes);
         Assert.assertEquals(27, attributes.size());
     }
 
     @Test(groups = "functional")
     public void testGetRecommendationAttributes() {
-        Map<String, String> attributes = attributeService.getRecommendationAttributes(tenantName);
+        Map<String, String> attributes = danteAttributeService.getRecommendationAttributes(tenantName);
         Assert.assertNotNull(attributes);
         Assert.assertEquals(8, attributes.size());
     }

@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
-import com.latticeengines.network.exposed.dante.DanteTalkingPointInterface;
+import com.latticeengines.network.exposed.dante.TalkingPointInterface;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "dante", description = "REST resource for Dante Talking Points CRUD operationsdas")
 @RestController
 @RequestMapping("/talkingpoints")
-public class TalkingPointResource implements DanteTalkingPointInterface {
+public class TalkingPointResource implements TalkingPointInterface {
     private static final Logger log = Logger.getLogger(TalkingPointResource.class);
 
     @Autowired

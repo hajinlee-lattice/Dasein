@@ -7,14 +7,14 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dante.dao.TalkingPointDao;
+import com.latticeengines.dante.dao.DanteTalkingPointDao;
 import com.latticeengines.dantedb.exposed.dao.impl.BaseDanteDaoImpl;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 
-@Component("talkingPointDao")
-public class TalkingPointDaoImpl extends BaseDanteDaoImpl<DanteTalkingPoint> implements TalkingPointDao {
+@Component("danteTalkingPointDao")
+public class DanteTalkingPointDaoImpl extends BaseDanteDaoImpl<DanteTalkingPoint> implements DanteTalkingPointDao {
 
-    private static final Logger log = Logger.getLogger(TalkingPointDaoImpl.class);
+    private static final Logger log = Logger.getLogger(DanteTalkingPointDaoImpl.class);
 
     @Override
     protected Class<DanteTalkingPoint> getEntityClass() {

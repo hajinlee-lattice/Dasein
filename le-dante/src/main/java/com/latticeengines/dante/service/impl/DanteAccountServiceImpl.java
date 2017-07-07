@@ -6,29 +6,29 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dante.entitymgr.AccountEntityMgr;
-import com.latticeengines.dante.service.AccountService;
+import com.latticeengines.dante.entitymgr.DanteAccountEntityMgr;
+import com.latticeengines.dante.service.DanteAccountService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-@Component("accountService")
-public class AccountServiceImpl implements AccountService {
-    private static final Logger log = Logger.getLogger(AccountServiceImpl.class);
+@Component("danteAccountService")
+public class DanteAccountServiceImpl implements DanteAccountService {
+    private static final Logger log = Logger.getLogger(DanteAccountServiceImpl.class);
 
     @Autowired
-    private AccountEntityMgr accountEntityMgr;
+    private DanteAccountEntityMgr danteAccountEntityMgr;
 
     public List<DanteAccount> getAccounts(int count, String customerSpace) {
         if (count < 1) {
             throw new LedpException(LedpCode.LEDP_38004);
         }
 
-        List<DanteAccount> accounts = accountEntityMgr.getAccounts(count, getCustomerID(customerSpace));
+        List<DanteAccount> accounts = danteAccountEntityMgr.getAccounts(count, getCustomerID(customerSpace));
 
         if (accounts == null || accounts.size() < 1) {
-            throw new LedpException(LedpCode.LEDP_38003, new String[]{customerSpace});
+            throw new LedpException(LedpCode.LEDP_38003, new String[] { customerSpace });
         } else
             return accounts;
     }
@@ -38,7 +38,7 @@ public class AccountServiceImpl implements AccountService {
             CustomerSpace customerSpace = CustomerSpace.parse(customerSpaceStr);
             return customerSpace.getTenantId();
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38009, e, new String[]{customerSpaceStr});
+            throw new LedpException(LedpCode.LEDP_38009, e, new String[] { customerSpaceStr });
         }
     }
 }
