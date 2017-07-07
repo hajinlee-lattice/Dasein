@@ -8,26 +8,40 @@ import com.latticeengines.datacloud.dataflow.utils.BitEncodeUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TechIndicatorsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("hgDataTechIndicatorsFlow")
+@Component(HGDataTechIndicatorsFlow.DATAFLOW_BEAN_NAME)
 public class HGDataTechIndicatorsFlow
-        extends TransformationFlowBase<BasicTransformationConfiguration, TransformationFlowParameters> {
+ extends ConfigurableFlowBase<TechIndicatorsConfig> {
 
-    private static String[] groupByFields = new String[] { "Domain" };
+    public static final String DATAFLOW_BEAN_NAME = "hgDataTechIndicatorsFlow";
+    public static final String TRANSFORMER_NAME = "hgDataTechIndicatorsTransformer";
 
-    @Override
-    public Class<? extends TransformationConfiguration> getTransConfClass() {
-        return BasicTransformationConfiguration.class;
-    }
+    private TechIndicatorsConfig config;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        Node source = addSource("HGDataClean");
+        config = getTransformerConfig(parameters);
+        Node source = addSource(parameters.getBaseTables().get(0));
         List<SourceColumn> sourceColumns = parameters.getColumns();
-        Node encoded = BitEncodeUtils.encode(source, groupByFields, sourceColumns);
-        return encoded.addTimestamp("Timestamp");
+        Node encoded = BitEncodeUtils.encode(source, config.getGroupByFields(), sourceColumns);
+        return encoded.addTimestamp(config.getTimestampField());
+    }
+
+    @Override
+    public String getDataFlowBeanName() {
+        return DATAFLOW_BEAN_NAME;
+    }
+
+    @Override
+    public String getTransformerName() {
+        return TRANSFORMER_NAME;
+    }
+
+    @Override
+    public Class<? extends TransformerConfig> getTransformerConfigClass() {
+        return TechIndicatorsConfig.class;
     }
 
 }

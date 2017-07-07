@@ -1,11 +1,10 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -15,42 +14,25 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.BuiltWithTechIndicatorsFlow;
-import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.datacloud.dataflow.transformation.HGDataCleanFlow;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.HGDataCleanConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TechIndicatorsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class BuiltWithTechIndicatorsServiceImplTestNG
+public class HGDataCleanTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
-    private static final Log log = LogFactory.getLog(BuiltWithTechIndicatorsServiceImplTestNG.class);
+    private static final Log log = LogFactory.getLog(HGDataCleanTestNG.class);
 
-    private final String TECH_INDICATORS = "TechIndicators";
-
-    private final String TECH_UNIX = "TechIndicator_Unix";
-    private final String TECH_MOD_SSL = "TechIndicator_mod_ssl";
-
-    private int HAS_UNIX_POS = -1;
-    private int HAS_MOD_SSL_POS = -1;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    GeneralSource source = new GeneralSource("BuiltWithTechIndicators");
-    GeneralSource baseSource = new GeneralSource("BuiltWithMostRecent");
-
-    @Autowired
-    private SourceColumnEntityMgr sourceColumnEntityMgr;
+    GeneralSource source = new GeneralSource("HGDataClean");
+    GeneralSource baseSource = new GeneralSource("HGDataRaw");
 
     @Autowired
     SourceService sourceService;
@@ -63,9 +45,8 @@ public class BuiltWithTechIndicatorsServiceImplTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional")
+    @Test(groups = "pipeline2")
     public void testTransformation() {
-        readBitPositions();
         uploadBaseAvro(baseSource, baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -100,16 +81,16 @@ public class BuiltWithTechIndicatorsServiceImplTestNG
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("BuiltWithTechIndicators");
+            configuration.setName("HGDataTechIndicators");
             configuration.setVersion(targetVersion);
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSources = new ArrayList<String>();
             baseSources.add(baseSource.getSourceName());
             step1.setBaseSources(baseSources);
-            step1.setTransformer(BuiltWithTechIndicatorsFlow.TRANSFORMER_NAME);
+            step1.setTransformer(HGDataCleanFlow.TRANSFORMER_NAME);
             step1.setTargetSource(source.getSourceName());
-            String confParamStr1 = getTransformerConfig();
+            String confParamStr1 = getHGDataCleanConfig();
             step1.setConfiguration(confParamStr1);
 
             // -----------
@@ -125,57 +106,30 @@ public class BuiltWithTechIndicatorsServiceImplTestNG
         }
     }
 
-    private String getTransformerConfig() throws JsonProcessingException {
-        TechIndicatorsConfig config = new TechIndicatorsConfig();
-        String[] groupByFields = { "Domain" };
-        config.setGroupByFields(groupByFields);
-        config.setTimestampField("Timestamp");
+    private String getHGDataCleanConfig() throws JsonProcessingException {
+        HGDataCleanConfig config = new HGDataCleanConfig();
+        config.setDomainField("URL");
+        calendar.set(2016, Calendar.AUGUST, 1);
+        config.setFakedCurrentDate(calendar.getTime());
         return om.writeValueAsString(config);
     }
 
     @Override
-    public void verifyResultAvroRecords(Iterator<GenericRecord> records) {
+    protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
         int recordsToCheck = 100;
         int pos = 0;
+        Long sixMonths = 6 * TimeUnit.DAYS.toMillis(30);
         while (pos++ < recordsToCheck && records.hasNext()) {
             GenericRecord record = records.next();
-            String domain = record.get("Domain").toString();
+            Long lastVerified = (Long) record.get("Last_Verified_Date");
+            Long timeStamp = (Long) record.get("LE_Last_Upload_Date");
             try {
-                boolean[] bits = BitCodecUtils.decode(record.get(TECH_INDICATORS).toString(),
-                        new int[]{HAS_UNIX_POS, HAS_MOD_SSL_POS});
-                if ("sandisland.com".equals(domain)) {
-                    Assert.assertTrue(bits[0]);
-                    Assert.assertTrue(bits[1]);
-                }
-            } catch (IOException e) {
+                Assert.assertTrue(timeStamp < lastVerified + sixMonths);
+            } catch (Exception e) {
                 System.out.println(record);
-                throw new RuntimeException(e);
+                throw e;
             }
-        }
-    }
-
-    private void readBitPositions() {
-        List<SourceColumn> columns = sourceColumnEntityMgr.getSourceColumns(source.getSourceName());
-        for (SourceColumn column : columns) {
-            String columnName = column.getColumnName();
-            if (TECH_UNIX.equals(columnName)) {
-                HAS_UNIX_POS = parseBitPos(column.getArguments());
-            } else if (TECH_MOD_SSL.equals(columnName)) {
-                HAS_MOD_SSL_POS = parseBitPos(column.getArguments());
-            }
-            if (Collections.min(Arrays.asList(HAS_UNIX_POS, HAS_MOD_SSL_POS)) > -1) {
-                break;
-            }
-        }
-    }
-
-    private int parseBitPos(String arguments) {
-        try {
-            JsonNode jsonNode = objectMapper.readTree(arguments);
-            return jsonNode.get("BitPosition").asInt();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

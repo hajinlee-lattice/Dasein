@@ -21,7 +21,7 @@ import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.HGDataTechIndicatorsFlow;
+import com.latticeengines.datacloud.dataflow.transformation.BuiltWithTechIndicatorsFlow;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
@@ -31,29 +31,26 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TechIndicatorsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class HGDataTechIndicatorsTestNG
+public class BuiltWithTechIndicatorsTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
-    private static final Log log = LogFactory.getLog(HGDataTechIndicatorsTestNG.class);
+    private static final Log log = LogFactory.getLog(BuiltWithTechIndicatorsTestNG.class);
 
-    private final String SEGMENT_INDICATORS = "SegmentTechIndicators";
-    private final String SUPPLIER_INDICATORS = "SupplierTechIndicators";
+    private final String TECH_INDICATORS = "TechIndicators";
 
-    private final String TECH_VMWARE = "TechIndicator_VMware";
-    private final String TECH_VSPHERE = "TechIndicator_VMwarevSphere";
+    private final String TECH_UNIX = "TechIndicator_Unix";
+    private final String TECH_MOD_SSL = "TechIndicator_mod_ssl";
 
-    private final String TECH_IBM = "TechIndicator_IBM";
-    private final String TECH_COGNOS = "TechIndicator_CognosImpromptu";
+    private int HAS_UNIX_POS = -1;
+    private int HAS_MOD_SSL_POS = -1;
 
-    private int HAS_VMWARE_POS = -1;
-    private int HAS_VSPHERE_POS = -1;
-    private int HAS_IBM_POS = -1;
-    private int HAS_COGNOS_POS = -1;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final ObjectMapper om = new ObjectMapper();
+    GeneralSource source = new GeneralSource("BuiltWithTechIndicators");
+    GeneralSource baseSource = new GeneralSource("BuiltWithMostRecent");
 
-    GeneralSource source = new GeneralSource("HGDataTechIndicators");
-    GeneralSource baseSource = new GeneralSource("HGDataClean");
+    @Autowired
+    private SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Autowired
     SourceService sourceService;
@@ -64,13 +61,11 @@ public class HGDataTechIndicatorsTestNG
     @Autowired
     private PipelineTransformationService pipelineTransformationService;
 
-    @Autowired
-    private SourceColumnEntityMgr sourceColumnEntityMgr;
+    ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "pipeline2")
+    @Test(groups = "functional")
     public void testTransformation() {
         readBitPositions();
-
         uploadBaseAvro(baseSource, baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -105,14 +100,14 @@ public class HGDataTechIndicatorsTestNG
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("HGDataTechIndicators");
+            configuration.setName("BuiltWithTechIndicators");
             configuration.setVersion(targetVersion);
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSources = new ArrayList<String>();
             baseSources.add(baseSource.getSourceName());
             step1.setBaseSources(baseSources);
-            step1.setTransformer(HGDataTechIndicatorsFlow.TRANSFORMER_NAME);
+            step1.setTransformer(BuiltWithTechIndicatorsFlow.TRANSFORMER_NAME);
             step1.setTargetSource(source.getSourceName());
             String confParamStr1 = getTransformerConfig();
             step1.setConfiguration(confParamStr1);
@@ -147,17 +142,11 @@ public class HGDataTechIndicatorsTestNG
             GenericRecord record = records.next();
             String domain = record.get("Domain").toString();
             try {
-                boolean[] bits = BitCodecUtils.decode(record.get(SEGMENT_INDICATORS).toString(),
-                        new int[]{HAS_VSPHERE_POS, HAS_COGNOS_POS});
-                boolean[] bits2 = BitCodecUtils.decode(record.get(SUPPLIER_INDICATORS).toString(),
-                        new int[]{HAS_VMWARE_POS, HAS_IBM_POS});
-                if ("avon.com".equals(domain)) {
-                    Assert.assertTrue(bits[1]);
-                    Assert.assertTrue(bits2[1]);
-                }
-                if ("arcelormittal.com".equals(domain)) {
+                boolean[] bits = BitCodecUtils.decode(record.get(TECH_INDICATORS).toString(),
+                        new int[]{HAS_UNIX_POS, HAS_MOD_SSL_POS});
+                if ("sandisland.com".equals(domain)) {
                     Assert.assertTrue(bits[0]);
-                    Assert.assertTrue(bits2[0]);
+                    Assert.assertTrue(bits[1]);
                 }
             } catch (IOException e) {
                 System.out.println(record);
@@ -170,16 +159,12 @@ public class HGDataTechIndicatorsTestNG
         List<SourceColumn> columns = sourceColumnEntityMgr.getSourceColumns(source.getSourceName());
         for (SourceColumn column : columns) {
             String columnName = column.getColumnName();
-            if (TECH_VMWARE.equals(columnName)) {
-                HAS_VMWARE_POS = parseBitPos(column.getArguments());
-            } else if (TECH_VSPHERE.equals(columnName)) {
-                HAS_VSPHERE_POS = parseBitPos(column.getArguments());
-            } else if (TECH_IBM.equals(columnName)) {
-                HAS_IBM_POS = parseBitPos(column.getArguments());
-            } else if (TECH_COGNOS.equals(columnName)) {
-                HAS_COGNOS_POS = parseBitPos(column.getArguments());
+            if (TECH_UNIX.equals(columnName)) {
+                HAS_UNIX_POS = parseBitPos(column.getArguments());
+            } else if (TECH_MOD_SSL.equals(columnName)) {
+                HAS_MOD_SSL_POS = parseBitPos(column.getArguments());
             }
-            if (Collections.min(Arrays.asList(HAS_VMWARE_POS, HAS_VSPHERE_POS, HAS_IBM_POS, HAS_COGNOS_POS)) > -1) {
+            if (Collections.min(Arrays.asList(HAS_UNIX_POS, HAS_MOD_SSL_POS)) > -1) {
                 break;
             }
         }
@@ -187,7 +172,7 @@ public class HGDataTechIndicatorsTestNG
 
     private int parseBitPos(String arguments) {
         try {
-            JsonNode jsonNode = om.readTree(arguments);
+            JsonNode jsonNode = objectMapper.readTree(arguments);
             return jsonNode.get("BitPosition").asInt();
         } catch (IOException e) {
             throw new RuntimeException(e);
