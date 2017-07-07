@@ -39,7 +39,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenant1);
 
         play = new Play();
-        play.setTimeStamp(new Date(System.currentTimeMillis()));
+        play.setTimestamp(new Date(System.currentTimeMillis()));
         play.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
         play.setDisplayName(DISPLAY_NAME);
         play.setDescription(DESCRIPTION);

@@ -71,16 +71,6 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "SEGMENT_NAME", nullable = true)
     private String segmentName;
 
-    @JsonProperty("timestamp")
-    @Column(name = "TIMESTAMP", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp;
-
-    @JsonProperty("lastupdatedtimestamp")
-    @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdatedTimeStamp;
-
     @JsonIgnore
     @Transient
     private MetadataSegment segment;
@@ -89,6 +79,10 @@ public class Play implements HasName, HasPid, HasTenantId {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_CALL_PREP_ID")
     private CallPrep callPrep;
+
+    @OneToMany
+    @JsonProperty("ratings")
+    private List<RatingObject> ratings = new ArrayList<>();
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
@@ -99,14 +93,20 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
+    @JsonProperty("timestamp")
+    @Column(name = "TIMESTAMP", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date timestamp;
 
-    @OneToMany
-    @JsonProperty("ratings")
-    private List<RatingObject> ratings = new ArrayList<>();
+    @JsonProperty("lastupdatedtimestamp")
+    @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdatedTimestamp;
 
     @JsonProperty("createdBy")
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
+
     @Override
     public Long getPid() {
         return pid;
@@ -170,6 +170,14 @@ public class Play implements HasName, HasPid, HasTenantId {
         this.callPrep = callPrep;
     }
 
+    public List<RatingObject> getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(List<RatingObject> ratings) {
+        this.ratings = ratings;
+    }
+
     @JsonIgnore
     public Tenant getTenant() {
         return this.tenant;
@@ -185,42 +193,14 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     @Override
     @JsonIgnore
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    @Override
-    @JsonIgnore
     public Long getTenantId() {
         return this.tenantId;
     }
 
-    public String generateNameStr() {
-        return String.format(PLAY_NAME_FORMAT, PLAY_NAME_PREFIX, UUID.randomUUID().toString());
-    }
-
-    public void setTimeStamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public Date getTimeStamp() {
-        return this.timestamp;
-    }
-
-    public void setLastUpdatedTimestamp(Date lastUpdatedTimeStamp) {
-        this.lastUpdatedTimeStamp = lastUpdatedTimeStamp;
-    }
-
-    public Date getLastUpdatedTimeStamp() {
-        return this.lastUpdatedTimeStamp;
-    }
-
-    public List<RatingObject> getRatings() {
-        return ratings;
-    }
-
-    public void setRatings(List<RatingObject> ratings) {
-        this.ratings = ratings;
+    @Override
+    @JsonIgnore
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
     public String getCreatedBy() {
@@ -231,9 +211,28 @@ public class Play implements HasName, HasPid, HasTenantId {
         this.createdBy = createdBy;
     }
 
+    public Date getTimestamp() {
+        return this.timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public Date getLastUpdatedTimestamp() {
+        return this.lastUpdatedTimestamp;
+    }
+
+    public void setLastUpdatedTimestamp(Date lastUpdatedTimestamp) {
+        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
 
+    public String generateNameStr() {
+        return String.format(PLAY_NAME_FORMAT, PLAY_NAME_PREFIX, UUID.randomUUID().toString());
+    }
 }

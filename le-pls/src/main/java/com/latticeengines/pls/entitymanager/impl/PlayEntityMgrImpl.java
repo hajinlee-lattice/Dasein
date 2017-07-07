@@ -34,7 +34,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
     public Play createOrUpdatePlay(Play play) {
         Date timestamp = new Date(System.currentTimeMillis());
         if (play.getName() == null) {
-            play.setTimeStamp(timestamp);
+            play.setTimestamp(timestamp);
             play.setLastUpdatedTimestamp(timestamp);
             play.setName(play.generateNameStr());
             playDao.create(play);
@@ -43,7 +43,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
             Play retrievedPlay = findByName(play.getName());
             if (retrievedPlay == null) {
                 log.warn(String.format("Play with name %s does not exist, creating it now", play.getName()));
-                play.setTimeStamp(timestamp);
+                play.setTimestamp(timestamp);
                 play.setLastUpdatedTimestamp(timestamp);
                 playDao.create(play);
                 return play;
