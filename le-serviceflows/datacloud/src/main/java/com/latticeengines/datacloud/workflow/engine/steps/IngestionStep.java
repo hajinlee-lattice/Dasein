@@ -469,7 +469,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
     private void failByException(Exception e) {
         progress = ingestionProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
-                .errorMessage(e.getMessage()).commit(true);
+                .errorMessage(e.getMessage().substring(0, 1000)).commit(true);
         log.error("Ingestion failed for progress: " + progress.toString(), e);
     }
 

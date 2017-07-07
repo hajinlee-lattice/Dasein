@@ -64,6 +64,8 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     private static final String ALEXA_VERSION_NEW = "2015-11-01_00-00-00_UTC";
     private static final String ORB_INGESTION = "OrbTest";
     private String ORB_VERSION;
+    private static final String SEMRUSH_INGESTION = "SemrushTest";
+    private static final String SEMRUSH_VERSION = "2017-07-01_00-00-00_UTC";
 
     private int timeout = 2700000;
 
@@ -79,6 +81,9 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
                 { ORB_INGESTION,
                         "{\"ClassName\":\"ApiConfiguration\",\"ConcurrentNum\":1,\"VersionUrl\":\"http://api2.orb-intelligence.com/download/release-date.txt?api_key=54aebe74-0c2e-46d2-a8d7-086cd1ee8994\",\"VersionFormat\":\"EEE MMM dd HH:mm:ss 'UTC' yyyy\",\"FileUrl\":\"http://api2.orb-intelligence.com/download/orb-db2-export-sample.zip?api_key=54aebe74-0c2e-46d2-a8d7-086cd1ee8994\",\"FileName\":\"orb-db2-export-sample.zip\"}",
                         IngestionType.API }, //
+                { SEMRUSH_INGESTION,
+                        "{\"ClassName\":\"SqlToSourceConfiguration\",\"ConcurrentNum\":1,\"DbHost\":\"10.41.1.238\\\\\\\\SQL2012\",\"DbPort\":1437,\"Db\":\"CollectionDB_Dev\",\"DbUser\":\"DLTransfer\",\"DbPwdEncrypted\":\"Q1nh4HIYGkg4OnQIEbEuiw==\",\"DbTable\":\"Semrush_MostRecent\", \"Source\":\"SemrushMostRecent\",\"TimestampColumn\":\"LE_Last_Upload_Date\",\"CollectCriteria\":\"ALL_DATA\",\"Mappers\":4}",
+                        IngestionType.SQL_TO_SOURCE }, //
         };
     }
 
@@ -89,6 +94,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
                 { DNB_INGESTION, 3, DNB_VERSION, null }, //
                 { ALEXA_INGESTION, 1, ALEXA_VERSION_NEW, 195 }, //
                 { ORB_INGESTION, 1, null, null }, //
+                { SEMRUSH_INGESTION, 1, SEMRUSH_VERSION, 10 }, //
         };
     };
 
@@ -126,6 +132,11 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         request.setSubmitter(PropDataConstants.SCAN_SUBMITTER);
         request.setFileName(DNB_FILE);
         progress = ingestionProxy.ingestInternal(DNB_INGESTION, request, POD_ID);
+        Assert.assertNotNull(progress);
+        request = new IngestionRequest();
+        request.setSubmitter(PropDataConstants.SCAN_SUBMITTER);
+        request.setSourceVersion(SEMRUSH_VERSION);
+        progress = ingestionProxy.ingestInternal(SEMRUSH_INGESTION, request, POD_ID);
         Assert.assertNotNull(progress);
         List<IngestionProgress> progresses = ingestionProxy.scan(POD_ID);
         Assert.assertTrue(CollectionUtils.isNotEmpty(progresses));
