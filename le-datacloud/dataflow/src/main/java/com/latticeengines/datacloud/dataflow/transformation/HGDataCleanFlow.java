@@ -15,26 +15,26 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DateToTimestampFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.HGDataCleanConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.HGDataCleanConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-@Component("hgDataCleanFlow")
-public class HGDataCleanFlow extends TransformationFlowBase<HGDataCleanConfiguration, TransformationFlowParameters> {
+@Component(HGDataCleanFlow.DATAFLOW_BEAN_NAME)
+public class HGDataCleanFlow extends ConfigurableFlowBase<HGDataCleanConfig> {
 
-    private static final String domainField = "URL";
+    public static final String DATAFLOW_BEAN_NAME = "hgDataCleanFlow";
+    public static final String TRANSFORMER_NAME = "hgDataCleanTransformer";
+
     private static final Long ONE_MONTH = TimeUnit.DAYS.toMillis(30);
 
-    @Override
-    public Class<? extends TransformationConfiguration> getTransConfClass() {
-        return HGDataCleanConfiguration.class;
-    }
+    private HGDataCleanConfig config;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        Node source = addSource("HGDataRaw");
-        source = source.apply(new DomainCleanupFunction(domainField, true), new FieldList(domainField),
-                new FieldMetadata(domainField, String.class));
+        config = getTransformerConfig(parameters);
+        Node source = addSource(parameters.getBaseTables().get(0));
+        source = source.apply(new DomainCleanupFunction(config.getDomainField(), true),
+                new FieldList(config.getDomainField()), new FieldMetadata(config.getDomainField(), String.class));
 
         source = source.apply(new DateToTimestampFunction("DateLastVerified"), new FieldList("DateLastVerified"),
                 new FieldMetadata("DateLastVerified", Long.class));
@@ -57,11 +57,11 @@ public class HGDataCleanFlow extends TransformationFlowBase<HGDataCleanConfigura
         aggregated = aggregated.retain(new FieldList("URL", "SupplierName", "ProductName", "HGCategory1", "HGCategory2",
                 "HGCategory1Parent", "HGCategory2Parent", "DateLastVerified", "MaxIntensity", "LocationCount"));
 
-        aggregated = aggregated.addFunction("LocationCount.intValue()", new FieldList("LocationCount"),
+        aggregated = aggregated.apply("LocationCount.intValue()", new FieldList("LocationCount"),
                 new FieldMetadata("LocationCount", Integer.class));
 
         Date now = new Date();
-        Date fakedCurrentDate = parameters.getTimestamp();
+        Date fakedCurrentDate = config.getFakedCurrentDate();
         if (fakedCurrentDate != null) {
             now = fakedCurrentDate;
         }
@@ -80,6 +80,21 @@ public class HGDataCleanFlow extends TransformationFlowBase<HGDataCleanConfigura
                 new FieldList("Last_Verified_Date", "LE_Last_Upload_Date"));
 
         return aggregated;
+    }
+
+    @Override
+    public String getDataFlowBeanName() {
+        return DATAFLOW_BEAN_NAME;
+    }
+
+    @Override
+    public String getTransformerName() {
+        return TRANSFORMER_NAME;
+    }
+
+    @Override
+    public Class<? extends TransformerConfig> getTransformerConfigClass() {
+        return HGDataCleanConfig.class;
     }
 
 }
