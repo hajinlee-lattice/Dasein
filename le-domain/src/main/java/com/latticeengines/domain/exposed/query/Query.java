@@ -304,9 +304,12 @@ public class Query implements GraphNode {
         @JsonProperty("attribute")
         private String attribute;
 
-        FreeFormTextSearchAttribute(BusinessEntity entity, String attribute) {
+        public FreeFormTextSearchAttribute(BusinessEntity entity, String attribute) {
             this.entity = entity;
             this.attribute = attribute;
+        }
+
+        public FreeFormTextSearchAttribute() {
         }
 
         public BusinessEntity getEntity() {
