@@ -11,17 +11,14 @@ import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.SeedDomainDunsCleanup;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -37,15 +34,6 @@ public class SeedDomainDunsCleanupTestNG
     GeneralSource seed = new GeneralSource("Seed");
     GeneralSource goldenDom = new GeneralSource("GoldenDom");
     GeneralSource goldenDuns = new GeneralSource("GoldenDuns");
-
-    @Autowired
-    SourceService sourceService;
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
 
     ObjectMapper om = new ObjectMapper();
 

@@ -11,12 +11,10 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.HasSqlPresence;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.FeatureMostRecent;
 import com.latticeengines.datacloud.core.source.impl.FeaturePivoted;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.dataflow.transformation.FeaturePivotFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -32,15 +30,6 @@ public class FeaturePivotServiceImplTestNG
 
     @Autowired
     FeatureMostRecent baseSource;
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    protected HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
 
     @Autowired
     private FeaturePivotFlow featurePivotFlow;

@@ -8,16 +8,13 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -29,14 +26,6 @@ public class IterativeStepTestNG extends TransformationServiceImplTestNGBase<Pip
     private static final Log log = LogFactory.getLog(MiniAMDomainDunsTestNG.class);
     GeneralSource source = new GeneralSource("DummyDataSet");
     GeneralSource baseSource = new GeneralSource("dataSet2");
-    @Autowired
-    SourceService sourceService;
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
 
     String targetSourceName = source.getSourceName();
     ObjectMapper om = new ObjectMapper();

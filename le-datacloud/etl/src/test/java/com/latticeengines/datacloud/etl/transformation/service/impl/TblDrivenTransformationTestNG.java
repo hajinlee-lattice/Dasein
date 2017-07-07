@@ -15,11 +15,9 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -48,18 +46,9 @@ public class TblDrivenTransformationTestNG
     private int numRecords;
     private String[][] keys;
     private int totalAttributes;
-    
-    @Autowired
-    SourceService sourceService;
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
     protected SourceAttributeEntityMgr sourceAttributeEntityMgr;
-
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
 
 
     ObjectMapper om = new ObjectMapper();

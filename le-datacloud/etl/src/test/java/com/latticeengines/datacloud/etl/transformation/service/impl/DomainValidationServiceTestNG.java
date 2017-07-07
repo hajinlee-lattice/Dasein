@@ -13,11 +13,9 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.DomainValidation;
 import com.latticeengines.datacloud.core.source.impl.LatticeCacheSeed;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -34,15 +32,6 @@ public class DomainValidationServiceTestNG
 
     @Autowired
     LatticeCacheSeed baseSource;
-
-    @Autowired
-    SourceService sourceService;
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
 
     String targetSourceName = "LatticeCacheSeedDomainValidation";
 

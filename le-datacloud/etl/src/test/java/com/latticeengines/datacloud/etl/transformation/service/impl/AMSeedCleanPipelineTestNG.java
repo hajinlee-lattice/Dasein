@@ -22,7 +22,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterSeed;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterSeedMerged;
@@ -33,7 +32,6 @@ import com.latticeengines.datacloud.dataflow.transformation.AMSeedCleanup;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedJunkyard;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedMarker;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedReport;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -58,12 +56,6 @@ public class AMSeedCleanPipelineTestNG
 
     @Autowired
     AccountMasterSeed accountMasterSeedSource;
-
-    @Autowired
-    SourceService sourceService;
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     String targetSourceName = "AccountMasterSeed";
     String targetVersion;

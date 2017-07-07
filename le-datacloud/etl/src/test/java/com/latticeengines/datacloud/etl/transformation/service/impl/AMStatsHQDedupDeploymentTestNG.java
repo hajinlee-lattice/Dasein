@@ -31,7 +31,6 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -51,12 +50,6 @@ public class AMStatsHQDedupDeploymentTestNG extends PipelineTransformationTestNG
 
     @Autowired
     AccountMaster baseSource;
-
-    @Autowired
-    SourceService sourceService;
-
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
 
     String targetSourceName = "AccountMasterStatsHQDuns";
     String targetVersion = "2017-05-12_01-32-12_UTC";

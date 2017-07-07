@@ -19,13 +19,11 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
 import com.latticeengines.datacloud.dataflow.transformation.AMLookupRebuild;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedPriActFix;
 import com.latticeengines.datacloud.dataflow.transformation.AMSeedSecondDomainCleanup;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMSeedPriActConfig;
@@ -44,15 +42,6 @@ public class AMLookupRebuildPipelineTestNG
 
     @Autowired
     AccountMasterLookup source;
-
-    @Autowired
-    SourceService sourceService;
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
 
     private String ams = "AccountMasterSeed";
     private String orbSecDom = "OrbCacheSeedSecondaryDomain";

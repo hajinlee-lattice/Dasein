@@ -17,13 +17,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.LatticeCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.OrbCacheSeed;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -49,15 +47,6 @@ public class PipelineTransformationSeedMergeDeploymentTestNG extends
 
     @Autowired
     private LatticeCacheSeed baseLatticeCacheSource;
-
-    @Autowired
-    private SourceService sourceService;
-
-    @Autowired
-    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
-
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
 
     String targetSourceName = "MatchResult";
     String targetVersion;
