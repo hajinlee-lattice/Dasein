@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -13,20 +14,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.BitCodecUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.BuiltWithMostRecent;
-import com.latticeengines.datacloud.core.source.impl.BuiltWithTechIndicators;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.datacloud.dataflow.transformation.BuiltWithTechIndicatorsFlow;
 import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TechIndicatorsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class BuiltWithTechIndicatorsServiceImplTestNG
-        extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {
+        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
     private static final Log log = LogFactory.getLog(BuiltWithTechIndicatorsServiceImplTestNG.class);
 
@@ -40,22 +46,26 @@ public class BuiltWithTechIndicatorsServiceImplTestNG
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    BuiltWithTechIndicators source;
-
-    @Autowired
-    BuiltWithMostRecent baseSource;
-
-    @Autowired
-    private BuiltWithTechIndicatorsService service;
+    GeneralSource source = new GeneralSource("BuiltWithTechIndicators");
+    GeneralSource baseSource = new GeneralSource("BuiltWithMostRecent");
 
     @Autowired
     private SourceColumnEntityMgr sourceColumnEntityMgr;
 
+    @Autowired
+    SourceService sourceService;
+
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    private PipelineTransformationService pipelineTransformationService;
+
+    ObjectMapper om = new ObjectMapper();
+
     @Test(groups = "functional")
     public void testTransformation() {
         readBitPositions();
-
         uploadBaseAvro(baseSource, baseSourceVersion);
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
@@ -65,8 +75,8 @@ public class BuiltWithTechIndicatorsServiceImplTestNG
     }
 
     @Override
-    protected TransformationService<BasicTransformationConfiguration> getTransformationService() {
-        return service;
+    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
+        return pipelineTransformationService;
     }
 
     @Override
@@ -76,19 +86,51 @@ public class BuiltWithTechIndicatorsServiceImplTestNG
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getBaseSources()[0], baseSourceVersion).toString();
-    }
-
-    @Override
-    protected BasicTransformationConfiguration createTransformationConfiguration() {
-        BasicTransformationConfiguration configuration = new BasicTransformationConfiguration();
-        configuration.setVersion(targetVersion);
-        return configuration;
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
     protected String getPathForResult() {
-        return hdfsPathBuilder.constructSnapshotDir(source, targetVersion).toString();
+        Source targetSource = sourceService.findBySourceName(source.getSourceName());
+        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+    }
+
+    @Override
+    protected PipelineTransformationConfiguration createTransformationConfiguration() {
+        try {
+            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+            configuration.setName("BuiltWithTechIndicators");
+            configuration.setVersion(targetVersion);
+
+            TransformationStepConfig step1 = new TransformationStepConfig();
+            List<String> baseSources = new ArrayList<String>();
+            baseSources.add(baseSource.getSourceName());
+            step1.setBaseSources(baseSources);
+            step1.setTransformer(BuiltWithTechIndicatorsFlow.TRANSFORMER_NAME);
+            step1.setTargetSource(source.getSourceName());
+            String confParamStr1 = getTransformerConfig();
+            step1.setConfiguration(confParamStr1);
+
+            // -----------
+            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+            steps.add(step1);
+
+            // -----------
+            configuration.setSteps(steps);
+
+            return configuration;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getTransformerConfig() throws JsonProcessingException {
+        TechIndicatorsConfig config = new TechIndicatorsConfig();
+        String[] groupByFields = { "Domain" };
+        config.setGroupByFields(groupByFields);
+        config.setTimestampField("Timestamp");
+        return om.writeValueAsString(config);
     }
 
     @Override

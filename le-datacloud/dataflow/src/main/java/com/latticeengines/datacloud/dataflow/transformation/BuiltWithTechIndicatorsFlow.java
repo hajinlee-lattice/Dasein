@@ -8,26 +8,40 @@ import com.latticeengines.datacloud.dataflow.utils.BitEncodeUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TechIndicatorsConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("builtWithTechIndicatorsFlow")
-public class BuiltWithTechIndicatorsFlow
-        extends TransformationFlowBase<BasicTransformationConfiguration, TransformationFlowParameters> {
+@Component(BuiltWithTechIndicatorsFlow.DATAFLOW_BEAN_NAME)
+public class BuiltWithTechIndicatorsFlow extends ConfigurableFlowBase<TechIndicatorsConfig> {
 
-    private static String[] groupByFields = new String[] { "Domain" };
+    public static final String DATAFLOW_BEAN_NAME = "builtWithTechIndicatorsFlow";
 
-    @Override
-    public Class<? extends TransformationConfiguration> getTransConfClass() {
-        return BasicTransformationConfiguration.class;
-    }
+    public static final String TRANSFORMER_NAME = "builtWithTechIndicatorsTransformer";
+
+    private TechIndicatorsConfig config;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        Node source = addSource("BuiltWithMostRecent");
+        config = getTransformerConfig(parameters);
+        Node source = addSource(parameters.getBaseTables().get(0));
         List<SourceColumn> sourceColumns = parameters.getColumns();
-        Node encoded = BitEncodeUtils.encode(source, groupByFields, sourceColumns);
-        return encoded.addTimestamp("Timestamp");
+        Node encoded = BitEncodeUtils.encode(source, config.getGroupByFields(), sourceColumns);
+        return encoded.addTimestamp(config.getTimestampField());
+    }
+
+    @Override
+    public String getDataFlowBeanName() {
+        return DATAFLOW_BEAN_NAME;
+    }
+
+    @Override
+    public String getTransformerName() {
+        return TRANSFORMER_NAME;
+    }
+
+    @Override
+    public Class<? extends TransformerConfig> getTransformerConfigClass() {
+        return TechIndicatorsConfig.class;
     }
 
 }
