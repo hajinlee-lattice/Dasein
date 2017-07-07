@@ -23,14 +23,13 @@ public class AccountQueryServiceTestNG extends ObjectApiFunctionalTestNGBase {
         Assert.assertNotNull(queryEvaluator);
     }
 
-
     @Test(groups = "functional")
     public void testAccountQuery() {
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(Arrays.asList("1", "2", "3"));
         dataRequest.setAttributes(Arrays.asList("companyname", "city", "state"));
-        Query query = accountQueryService.generateAccountQuery(DateTimeUtils.getDateUTCISO8601(new Date()), 0, 200,
-                true, dataRequest);
+        Query query = accountQueryService.generateAccountQuery(DateTimeUtils.convertToStringUTCISO8601(new Date()), 0,
+                200, true, dataRequest);
 
         queryEvaluator.evaluate(attrRepo, query);
     }
