@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 import com.latticeengines.matchapi.testframework.TestMatchInputService;
 import com.latticeengines.matchapi.testframework.TestMatchInputUtils;
@@ -380,6 +381,14 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
         Assert.assertEquals(finalStatus.getResultLocation(),
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+    }
+
+    @Test(groups = "deployment")
+    public void testGetBulkConfig() {
+        MatchInput input = createAvroBulkMatchInput(true, null, "2.0.4");
+        BulkMatchWorkflowConfiguration bulkConf = matchProxy.getBulkConfig(input, podId);
+        Assert.assertNotNull(bulkConf);
+        Assert.assertEquals(bulkConf.getSwpkgName(), "datacloud");
     }
 
     @DataProvider(name = "allDataCloudVersions")
