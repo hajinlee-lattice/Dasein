@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
@@ -23,26 +24,26 @@ public class AccountQueryServiceImpl implements AccountQueryService {
     @Override
     public Query generateAccountQuery(String start, int offset, int pageSize, boolean hasSfdcAccountId,
             DataRequest dataRequest) {
+        List<Restriction> restrictions = new ArrayList<>();
         if (dataRequest == null) {
             dataRequest = new DataRequest();
         }
-        long lastModifiedTime = DateTimeUtils.convertToLongUTCISO8601(start);
-
-        List<Restriction> restrictions = new ArrayList<>();
-        Restriction lastModifiedRestriction = Restriction.builder().let(BusinessEntity.Account, "lastmodified")
-                .gte(lastModifiedTime).build();
-        restrictions.add(lastModifiedRestriction);
+        if (StringUtils.isNotBlank(start)) {
+            long lastModifiedTime = DateTimeUtils.convertToLongUTCISO8601(start);
+            Restriction lastModifiedRestriction = Restriction.builder().let(BusinessEntity.Account, "LastModified")
+                    .gte(lastModifiedTime).build();
+            restrictions.add(lastModifiedRestriction);
+        }
 
         if (CollectionUtils.isNotEmpty(dataRequest.getAccountIds())) {
             RestrictionBuilder accoundIdRestrictionBuilder = Restriction.builder();
             RestrictionBuilder[] accountIdRestrictions = dataRequest.getAccountIds().stream()
-                    .map(id -> Restriction.builder().let(BusinessEntity.Account, "accountid").eq(id))
+                    .map(id -> Restriction.builder().let(BusinessEntity.Account, "AccountId").eq(id))
                     .toArray(RestrictionBuilder[]::new);
             accoundIdRestrictionBuilder.or(accountIdRestrictions);
             restrictions.add(accoundIdRestrictionBuilder.build());
         }
 
-        // TODO hasSfdcAccountId - need to complete null support; currently not working in le-query
         Restriction restriction = Restriction.builder().and(restrictions).build();
 
         QueryBuilder queryBuilder = Query.builder();
@@ -50,9 +51,9 @@ public class AccountQueryServiceImpl implements AccountQueryService {
             queryBuilder = queryBuilder.select(BusinessEntity.Account,
                     dataRequest.getAttributes().toArray(new String[] {}));
         }
-        queryBuilder.select(BusinessEntity.Account, "accountid", "latticeaccountid", "salesforceaccountid") //
+        queryBuilder.select(BusinessEntity.Account, "AccountId", "LatticeAccountId", "SalesforceAccountID") //
                 .where(restriction) //
-                .orderBy(BusinessEntity.Account, "accountid");
+                .orderBy(BusinessEntity.Account, "AccountId");
         Query query = queryBuilder.build();
 
         PageFilter pageFilter = new PageFilter(offset, Math.min(QueryTranslator.MAX_ROWS, pageSize));

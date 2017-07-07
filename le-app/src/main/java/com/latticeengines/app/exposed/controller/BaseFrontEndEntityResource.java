@@ -21,7 +21,7 @@ public abstract class BaseFrontEndEntityResource {
     protected abstract QueryDecorator getQueryDecorator();
 
     public long getCount(BusinessEntity businessEntity, FrontEndQuery frontEndQuery) {
-        Query query = QueryTranslator.translate(frontEndQuery);
+        Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator());
         query.addLookup(new EntityLookup(businessEntity));
         return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), query);
     }

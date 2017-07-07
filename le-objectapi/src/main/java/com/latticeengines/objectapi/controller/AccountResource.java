@@ -3,14 +3,15 @@ package com.latticeengines.objectapi.controller;
 import java.util.List;
 import java.util.Map;
 
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -23,10 +24,12 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "accounts", description = "REST resource for accounts")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}")
+@RequestMapping("/customerspaces/{customerSpace}/accounts")
 public class AccountResource implements AccountInterface {
 
     @Autowired
@@ -53,6 +56,9 @@ public class AccountResource implements AccountInterface {
      * [Based of requested columns - [Columns as per custom schema]], [Data Cloud Columns per tenant]],
      * 
      */
+    @RequestMapping(value = "/data", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve Account data for the specified parameters")
     @Override
     public DataPage getAccounts(@PathVariable String customerSpace,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
