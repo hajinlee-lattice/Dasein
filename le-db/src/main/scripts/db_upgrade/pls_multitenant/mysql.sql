@@ -20,4 +20,4 @@ primary key (`PID`)) ENGINE=InnoDB;
 alter table `DATAFEED_PROFILE` add index FK8299D49299B68AE3 (FK_FEED_ID), 
 add constraint FK8299D49299B68AE3 foreign key (FK_FEED_ID) references `DATAFEED` (`PID`) on delete cascade;
 
-
+ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD CREATED_BY varchar(255) DEFAULT "lattice@lattice-engines.com" NOT NULL;

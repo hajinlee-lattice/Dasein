@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -13,6 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -96,6 +99,14 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
+
+    @OneToMany
+    @JsonProperty("ratings")
+    private List<RatingObject> ratings = new ArrayList<>();
+
+    @JsonProperty("createdBy")
+    @Column(name = "CREATED_BY", nullable = false)
+    private String createdBy;
     @Override
     public Long getPid() {
         return pid;
@@ -202,6 +213,22 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     public Date getLastUpdatedTimeStamp() {
         return this.lastUpdatedTimeStamp;
+    }
+
+    public List<RatingObject> getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(List<RatingObject> ratings) {
+        this.ratings = ratings;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 
     @Override
