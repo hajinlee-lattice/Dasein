@@ -7,12 +7,11 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution.Status;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -20,9 +19,6 @@ import com.latticeengines.workflow.listener.LEJobListener;
 public class DataFeedExecutionListener extends LEJobListener {
 
     private static final Log log = LogFactory.getLog(DataFeedExecutionListener.class);
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Autowired
     private DataFeedProxy dataFeedProxy;

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.metadata;
+package com.latticeengines.domain.exposed.metadata.datafeed;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -87,6 +88,14 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @Transient
     @JsonProperty("active_execution")
     private DataFeedExecution activeExecution;
+
+    @Column(name = "ACTIVE_PROFILE", nullable = true)
+    @JsonIgnore
+    private Long activeProfileId;
+
+    @Transient
+    @JsonProperty("active_profile")
+    private DataFeedProfile activeProfile;
 
     @JsonIgnore
     @Transient
@@ -172,8 +181,15 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     }
 
     public void setActiveExecutionId(Long activeExecutionId) {
-        // Set it to null when executioin is finished.
         this.activeExecutionId = activeExecutionId;
+    }
+
+    public Long getActiveProfileId() {
+        return activeProfileId;
+    }
+
+    public void setActiveProfileId(Long activeProfileId) {
+        this.activeProfileId = activeProfileId;
     }
 
     public List<DataFeedTask> getTasks() {
@@ -233,25 +249,33 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     }
 
     public void setActiveExecution(DataFeedExecution activeExecution) {
-        activeExecution.setDataFeed(this);
         this.activeExecution = activeExecution;
     }
 
-    public enum Status {
-        Initing("initing", false), // no template yet
-        Initialized("initialized", false), // import is ready to run
-        InitialLoaded("initialLoaded", true), // initial import data loaded
-        InitialConsolidated("initialConsolidated", true), // initial data
-                                                          // consolidated
-        Active("active", true), // master table has formed and pushed to data
-                                // store
+    public DataFeedProfile getActiveProfile() {
+        return activeProfile;
+    }
 
-        Consolidating("consolidating", false), //
-        Profiling("profiling", false), //
-        Deleting("deleting", false);
+    public void setActiveProfile(DataFeedProfile activeProfile) {
+        this.activeProfile = activeProfile;
+    }
+
+    public enum Status {
+        Initing("initing", false, false), // no template yet
+        Initialized("initialized", false, false), // import is ready to run
+        InitialLoaded("initialLoaded", true, false), // initial import data
+                                                     // loaded
+        InitialConsolidated("initialConsolidated", true, true), // initial data
+                                                                // consolidated
+        Active("active", true, true), // master table has formed and pushed to
+                                      // data store
+        Consolidating("consolidating", true, false), //
+        Profiling("profiling", true, false), //
+        Deleting("deleting", false, false);
 
         private final String name;
         private boolean allowConsolidation;
+        private boolean allowProfile;
         private static Map<String, Status> nameMap;
 
         static {
@@ -261,9 +285,10 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
             }
         }
 
-        Status(String name, boolean allowConsolidation) {
+        Status(String name, boolean allowConsolidation, boolean allowProfile) {
             this.name = name;
             this.allowConsolidation = allowConsolidation;
+            this.allowProfile = allowProfile;
         }
 
         @JsonValue
@@ -281,6 +306,14 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
         public void setAllowConsolidation(boolean allowConsolidation) {
             this.allowConsolidation = allowConsolidation;
+        }
+
+        public boolean isAllowProfile() {
+            return allowProfile;
+        }
+
+        public void setAllowProfile(boolean allowProfile) {
+            this.allowProfile = allowProfile;
         }
 
         public static Status fromName(String name) {

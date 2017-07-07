@@ -15,12 +15,13 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
@@ -166,7 +167,15 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         assertEquals(exec.getStatus(), DataFeedExecution.Status.Started);
         assertEquals(exec.getImports().size(), exec1.getImports().size());
         assertEquals(exec.getImports().get(0).getDataTable().getAttributes().size(), 1);
+    }
 
+    @Test(groups = "functional", dependsOnMethods = "retryLatestExecution")
+    public void startProfile() {
+        DataFeedProfile profile = datafeedEntityMgr.startProfile(DATA_FEED_NAME);
+        DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
+        assertEquals(df.getStatus(), Status.Profiling);
+        assertEquals(df.getActiveProfileId(), profile.getPid());
+        assertEquals(df.getActiveExecutionId(), profile.getLatestDataFeedExecutionId());
     }
 
 }

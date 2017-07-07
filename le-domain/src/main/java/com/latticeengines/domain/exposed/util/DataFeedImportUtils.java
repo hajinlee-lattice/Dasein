@@ -8,8 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 
-import com.latticeengines.domain.exposed.metadata.DataFeedImport;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 
 public class DataFeedImportUtils {
 

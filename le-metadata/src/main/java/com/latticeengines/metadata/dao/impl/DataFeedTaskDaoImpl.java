@@ -8,9 +8,9 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask.Status;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
 import com.latticeengines.metadata.dao.DataFeedTaskDao;
 
 @Component("datafeedTaskDao")

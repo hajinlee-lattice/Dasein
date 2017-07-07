@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.metadata;
+package com.latticeengines.domain.exposed.metadata.datafeed;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_IMPORT", uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE",

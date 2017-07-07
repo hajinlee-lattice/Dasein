@@ -50,7 +50,8 @@ public class DefaultDataCollectionResource {
     @RequestMapping(value = "/tables", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the default data collection")
-    public Table getTable(@PathVariable String customerSpace, TableRoleInCollection role) {
+    public Table getTable(@PathVariable String customerSpace,
+            @RequestParam(value = "role", required = true) TableRoleInCollection role) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         List<Table> tables = dataCollectionService.getTables(customerSpace, null, role);
         if (tables == null || tables.isEmpty()) {
@@ -78,7 +79,7 @@ public class DefaultDataCollectionResource {
     }
 
     @RequestMapping(value = "/attrrepo", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody  
+    @ResponseBody
     @ApiOperation(value = "Get the attribute repository of the default collection.")
     public AttributeRepository getAttrRepo(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
@@ -100,7 +101,7 @@ public class DefaultDataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Create or update the main statistics of the collection")
     public SimpleBooleanResponse upsertStats(@PathVariable String customerSpace, //
-                                          @RequestBody StatisticsContainer statisticsContainer) {
+            @RequestBody StatisticsContainer statisticsContainer) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataCollectionService.addStats(customerSpace, null, statisticsContainer);
         return SimpleBooleanResponse.successResponse();

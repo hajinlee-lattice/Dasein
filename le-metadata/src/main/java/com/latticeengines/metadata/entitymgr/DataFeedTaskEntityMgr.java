@@ -4,11 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask.Status;
-import com.latticeengines.domain.exposed.metadata.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
 
 public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 

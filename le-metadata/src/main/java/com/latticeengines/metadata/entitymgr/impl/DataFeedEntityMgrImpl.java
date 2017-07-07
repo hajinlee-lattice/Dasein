@@ -16,16 +16,18 @@ import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.DataFeedImport;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.metadata.dao.DataFeedDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedProfileEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -40,6 +42,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Autowired
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
+
+    @Autowired
+    private DataFeedProfileEntityMgr datafeedProfileEntityMgr;
 
     @Autowired
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
@@ -99,6 +104,10 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecutionId());
         if (execution != null) {
             datafeed.setActiveExecution(execution);
+        }
+        DataFeedProfile profile = datafeedProfileEntityMgr.findByProfileId(datafeed.getActiveProfileId());
+        if (profile != null) {
+            datafeed.setActiveProfile(profile);
         }
         return datafeed;
     }
@@ -186,6 +195,25 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             throw new IllegalStateException("Default collection has not been initialized.");
         }
         return datafeedDao.findDefaultFeed(collection.getName());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public DataFeedProfile startProfile(String datafeedName) {
+        DataFeed datafeed = findByNameInflated(datafeedName);
+        if (datafeed == null) {
+            return null;
+        }
+        Long executionId = datafeed.getActiveExecutionId();
+        DataFeedProfile profile = new DataFeedProfile();
+        profile.setDataFeed(datafeed);
+        profile.setLatestDataFeedExecutionId(executionId);
+        datafeedProfileEntityMgr.create(profile);
+        datafeed.setActiveProfileId(profile.getPid());
+        datafeed.setActiveProfile(profile);
+        datafeed.setStatus(Status.Profiling);
+        update(datafeed);
+        return profile;
     }
 
 }

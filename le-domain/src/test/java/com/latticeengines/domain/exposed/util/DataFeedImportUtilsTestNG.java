@@ -8,12 +8,12 @@ import java.util.Date;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeedImport;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask.Status;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public class DataFeedImportUtilsTestNG {

@@ -2,8 +2,8 @@ package com.latticeengines.metadata.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 
 public interface DataFeedTaskService {
 

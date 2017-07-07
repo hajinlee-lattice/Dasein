@@ -7,9 +7,9 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.metadata.dao.DataFeedTaskTableDao;
 
 @Component("datafeedTaskTableDao")

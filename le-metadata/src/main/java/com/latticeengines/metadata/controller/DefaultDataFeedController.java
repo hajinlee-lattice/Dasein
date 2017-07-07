@@ -8,15 +8,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.metadata.service.DataFeedService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 /**
- * This controller assumes operation on the default datafeed in default datacollection
+ * This controller assumes operation on the default datafeed in default
+ * datacollection
  */
 @Api(value = "datafeed", description = "REST resource for default metadata data feed")
 @RestController
@@ -53,7 +55,8 @@ public class DefaultDataFeedController {
     @RequestMapping(value = "/status/{initialDataFeedStatus}/finishexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "finish data feed execution")
-    public DataFeedExecution finishExecution(@PathVariable String customerSpace, @PathVariable String initialDataFeedStatus) {
+    public DataFeedExecution finishExecution(@PathVariable String customerSpace,
+            @PathVariable String initialDataFeedStatus) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.finishExecution(customerSpace, "", initialDataFeedStatus);
     }
@@ -61,7 +64,8 @@ public class DefaultDataFeedController {
     @RequestMapping(value = "/status/{initialDataFeedStatus}/failexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "fail data feed execution")
-    public DataFeedExecution failExecution(@PathVariable String customerSpace, @PathVariable String initialDataFeedStatus) {
+    public DataFeedExecution failExecution(@PathVariable String customerSpace,
+            @PathVariable String initialDataFeedStatus) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.failExecution(customerSpace, "", initialDataFeedStatus);
     }
@@ -69,17 +73,34 @@ public class DefaultDataFeedController {
     @RequestMapping(value = "/execution/workflow/{workflowId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "update data feed execution")
-    public DataFeedExecution updateExecutionWorkflowId(@PathVariable String customerSpace, @PathVariable Long workflowId) {
+    public DataFeedExecution updateExecutionWorkflowId(@PathVariable String customerSpace,
+            @PathVariable Long workflowId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.updateExecutionWorkflowId(customerSpace, "", workflowId);
     }
-
 
     @RequestMapping(value = "/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "restart data feed execution")
     public DataFeedExecution restartExecution(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.retryLatestExecution(customerSpace, null);
+    }
+
+    @RequestMapping(value = "/startprofile", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "start data feed profile")
+    public DataFeedProfile startProfile(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return datafeedService.startProfile(customerSpace, "");
+    }
+
+    @RequestMapping(value = "/profile/workflow/{workflowId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "update data feed profile")
+    public DataFeedProfile updateProfileWorkflowId(@PathVariable String customerSpace, @PathVariable Long workflowId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return datafeedService.updateProfileWorkflowId(customerSpace, "", workflowId);
     }
 
 }

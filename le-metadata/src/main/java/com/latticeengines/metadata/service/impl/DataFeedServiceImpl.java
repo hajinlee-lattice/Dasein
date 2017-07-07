@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedProfileEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.DataFeedService;
 
@@ -25,6 +27,9 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Autowired
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
+
+    @Autowired
+    private DataFeedProfileEntityMgr datafeedProfileEntityMgr;
 
     @Autowired
     private DataCollectionService dataCollectionService;
@@ -129,6 +134,26 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName) {
         DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+        if (datafeed == null) {
+            return null;
+        }
         return datafeedEntityMgr.retryLatestExecution(datafeed.getName());
+    }
+
+    @Override
+    public DataFeedProfile startProfile(String customerSpace, String datafeedName) {
+        return datafeedEntityMgr.startProfile(datafeedName);
+    }
+
+    @Override
+    public DataFeedProfile updateProfileWorkflowId(String customerSpace, String datafeedName, Long workflowId) {
+        DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+        if (datafeed == null) {
+            return null;
+        }
+        DataFeedProfile profile = datafeed.getActiveProfile();
+        profile.setWorkflowId(workflowId);
+        datafeedProfileEntityMgr.update(profile);
+        return profile;
     }
 }

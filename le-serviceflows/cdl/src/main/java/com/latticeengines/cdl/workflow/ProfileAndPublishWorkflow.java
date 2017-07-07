@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.CalculateStatsListener;
+import com.latticeengines.cdl.workflow.steps.StartProfile;
 import com.latticeengines.cdl.workflow.steps.UpdateStatsObjects;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProfileAndPublishWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -14,6 +15,9 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("profileAndPublishWorkflow")
 public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublishWorkflowConfiguration> {
+
+    @Autowired
+    private StartProfile startProfile;
 
     @Autowired
     private CalculateStatsWrapper calculateStatsWrapper;
@@ -35,6 +39,7 @@ public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublis
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
+                .next(startProfile) //
                 .next(calculateStatsWrapper)//
                 .next(updateStatsObjects) //
                 .next(redshiftPublishWorkflow) //

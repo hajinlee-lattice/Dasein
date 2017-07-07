@@ -7,10 +7,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("dataFeedProxy")
@@ -113,6 +114,18 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
                 shortenCustomerSpace(customerSpace), source, dataFeedType, entity);
         List<?> res = get("getExtractPendingInQueue", url, List.class);
         return JsonUtils.convertList(res, Extract.class);
+    }
+
+    public DataFeedProfile startProfile(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/startprofile",
+                shortenCustomerSpace(customerSpace));
+        return post("startProfile", url, null, DataFeedProfile.class);
+    }
+
+    public DataFeedProfile updateProfileWorkflowId(String customerSpace, Long workflowId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/profile/workflow/{workflowId}",
+                shortenCustomerSpace(customerSpace), workflowId);
+        return post("updateProfileWorkflowId", url, null, DataFeedProfile.class);
     }
 
 }

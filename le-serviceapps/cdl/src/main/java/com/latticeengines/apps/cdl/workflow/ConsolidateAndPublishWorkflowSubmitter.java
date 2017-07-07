@@ -15,15 +15,16 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
-import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeed.Status;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ConsolidateAndPublishWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -50,19 +51,25 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
         Status datafeedStatus = datafeed.getStatus();
         if (!datafeedStatus.isAllowConsolidation()) {
-            throw new RuntimeException("we can't launch any consolidate workflow now as it is not ready.");
-        } else if (execution != null && execution.getStatus() == DataFeedExecution.Status.Started) {
-            if (execution.getWorkflowId() == null //
-                    || !workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId())).getJobStatus()
-                            .isTerminated()) {
+            throw new RuntimeException("We can't launch any consolidate workflow now as it is not ready.");
+        } else if (execution != null && DataFeedExecution.Status.Started.equals(execution.getStatus())) {
+            if (execution.getWorkflowId() == null) {
                 throw new RuntimeException(
-                        "we can't launch any consolidate workflow now as there is one already running.");
-            } else {
+                        "We can't launch any consolidate workflow now as there is one still running.");
+            }
+            JobStatus status = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()))
+                    .getJobStatus();
+            if (!status.isTerminated()) {
+                throw new RuntimeException(
+                        "We can't launch any consolidate workflow now as there is one still running.");
+            } else if (JobStatus.FAILED.equals(status)) {
                 log.info(String.format(
                         "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
                         execution, datafeed));
                 dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
             }
+        } else if (execution != null && DataFeedExecution.Status.Failed.equals(execution.getStatus())) {
+            log.info("current execution failed, we will start a new one");
         }
         execution = dataFeedProxy.startExecution(customerSpace);
         log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
@@ -76,25 +83,25 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         DataFeedExecution execution = datafeed.getActiveExecution();
 
         Status datafeedStatus = datafeed.getStatus();
-        if (!datafeedStatus.isAllowConsolidation()) {
-            throw new RuntimeException("we can't launch any consolidate workflow now as it is not ready.");
-        } else if (execution != null && execution.getStatus() == DataFeedExecution.Status.Started) {
-            if (execution.getWorkflowId() == null //
-                    || !workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId())).getJobStatus()
-                            .isTerminated()) {
-                throw new RuntimeException(
-                        "we can't launch any consolidate workflow now as there is one already running.");
-            } else {
+        if (execution == null || !datafeedStatus.isAllowConsolidation()) {
+            throw new RuntimeException("We can't launch any consolidate workflow now as it is not ready.");
+        } else if (DataFeedExecution.Status.Started.equals(execution.getStatus())) {
+            if (execution.getWorkflowId() == null) {
+                throw new RuntimeException("We can't retry any consolidate workflow now as we can't find workflow id.");
+            }
+            JobStatus status = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()))
+                    .getJobStatus();
+            if (JobStatus.FAILED.equals(status)) {
                 log.info(String.format(
                         "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
                         execution, datafeed));
                 dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
+            } else {
+                throw new RuntimeException(
+                        "We can't restart consolidate workflow as the most recent one is not failed");
             }
-        } else if (execution == null || execution.getStatus() != DataFeedExecution.Status.Failed) {
-            throw new RuntimeException("we can't restart consolidate workflow as the most recent one is not failed");
-        }
-        if (execution.getWorkflowId() == null) {
-            throw new RuntimeException("we can't restart consolidate workflow as the last workflow has fatal error!");
+        } else if (!DataFeedExecution.Status.Failed.equals(execution.getStatus())) {
+            throw new RuntimeException("We can't restart consolidate workflow as the most recent one is not failed");
         }
         execution = dataFeedProxy.retryLatestExecution(customerSpace);
         log.info(String.format("restarted execution of %s with status: %s", execution.getStatus()));

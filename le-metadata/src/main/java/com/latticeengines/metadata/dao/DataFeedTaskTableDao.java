@@ -3,9 +3,9 @@ package com.latticeengines.metadata.dao;
 import java.util.List;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.metadata.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 
 public interface DataFeedTaskTableDao extends BaseDao<DataFeedTaskTable> {
 

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.metadata;
+package com.latticeengines.domain.exposed.metadata.datafeed;
 
 import java.io.Serializable;
 
@@ -20,6 +20,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_TASK_TABLE", uniqueConstraints = @UniqueConstraint(columnNames = {

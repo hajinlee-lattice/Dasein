@@ -42,6 +42,7 @@
                                 <argument>com.latticeengines.domain.exposed.dataplatform.metrics</argument>
                                 <argument>com.latticeengines.domain.exposed.eai</argument>
                                 <argument>com.latticeengines.domain.exposed.metadata</argument>
+                                <argument>com.latticeengines.domain.exposed.metadata.datafeed</argument>
                                 <argument>com.latticeengines.domain.exposed.modeling</argument>
                                 <argument>com.latticeengines.domain.exposed.modeling.algorithm</argument>
                                 <argument>com.latticeengines.domain.exposed.modelquality</argument>

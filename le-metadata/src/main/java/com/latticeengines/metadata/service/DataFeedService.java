@@ -1,7 +1,8 @@
 package com.latticeengines.metadata.service;
 
-import com.latticeengines.domain.exposed.metadata.DataFeed;
-import com.latticeengines.domain.exposed.metadata.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 
 public interface DataFeedService {
 
@@ -22,5 +23,9 @@ public interface DataFeedService {
     DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 
     DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName);
+
+    DataFeedProfile startProfile(String customerSpace, String datafeedName);
+
+    DataFeedProfile updateProfileWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 
 }
