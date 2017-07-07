@@ -7,13 +7,6 @@
     <packaging>pom</packaging>
     <name>Lattice Data Platform Top Level HDFS Module</name>
 
-    <parent>
-        <groupId>com.latticeengines</groupId>
-        <artifactId>le-parent</artifactId>
-        <version>3.7.0-SNAPSHOT</version>
-        <relativePath>le-parent</relativePath>
-    </parent>
-
     <modules>
         <module>le-config/pom-config-hdfs-rpm.xml</module>
         <module>le-dataplatform/pom-dataplatform-hdfs.xml</module>

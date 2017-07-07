@@ -3,56 +3,42 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+    <groupId>com.latticeengines</groupId>
     <artifactId>le-dellebi-hdfs-rpm</artifactId>
+    <version>3.7.0-SNAPSHOT</version>
     <packaging>rpm</packaging>
     <description>LE DELLEBI NO DEPENDENCY RPM</description>
-
-    <parent>
-        <groupId>com.latticeengines</groupId>
-        <artifactId>le-parent</artifactId>
-        <version>3.7.0-SNAPSHOT</version>
-        <relativePath>../le-parent</relativePath>
-    </parent>
-
-    <properties>
-        <mapping.username>yarn</mapping.username>
-        <mapping.groupname>hdfs</mapping.groupname>
-        <pre.install.script>preinstall</pre.install.script>
-        <post.install.script>postinstall</post.install.script>
-        <le.rpm.version>3.7.0-SNAPSHOT</le.rpm.version>
-    </properties>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>rpm-maven-plugin</artifactId>
-                <version>2.1-alpha-4</version>
+                <version>2.1.5</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <!-- license>GPL (c) 2005, SWWDC</license -->
-                    <!--distribution>Trash 2005</distribution -->
                     <group>Application/Collectors</group>
-                    <!-- prefix>/usr/local</prefix -->
+                    <sourceEncoding>utf-8</sourceEncoding>
                     <changelogFile>src/main/resources/rpm/dependency/changelog</changelogFile>
                     <mappings>
                         <mapping>
                             <directory>/tmp/app/dellebi</directory>
                             <filemode>644</filemode>
-                            <username>${mapping.username}</username>
-                            <groupname>${mapping.groupname}</groupname>
+                            <username>yarn</username>
+                            <groupname>hdfs</groupname>
                             <sources>
                                 <source>
-                                    <location>target/le-dellebi-${le.rpm.version}-shaded.jar</location>
+                                    <location>target/le-dellebi-${project.version}-shaded.jar</location>
                                 </source>
                             </sources>
                         </mapping>
                     </mappings>
                     <preinstallScriptlet>
-                        <scriptFile>src/main/resources/rpm/dellebi-hdfs/scripts/${pre.install.script}</scriptFile>
+                        <scriptFile>src/main/resources/rpm/dellebi-hdfs/scripts/preinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>src/main/resources/rpm/dellebi-hdfs/scripts/${post.install.script}</scriptFile>
+                        <scriptFile>src/main/resources/rpm/dellebi-hdfs/scripts/postinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>
