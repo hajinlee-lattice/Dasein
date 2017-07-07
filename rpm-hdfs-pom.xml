@@ -7,6 +7,21 @@
     <packaging>pom</packaging>
     <name>Lattice Data Platform Top Level HDFS Module</name>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.1.5</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <group>Application/Collectors</group>
+                    <sourceEncoding>utf-8</sourceEncoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <modules>
         <module>le-config/pom-config-hdfs-rpm.xml</module>
         <module>le-dataplatform/pom-dataplatform-hdfs.xml</module>
