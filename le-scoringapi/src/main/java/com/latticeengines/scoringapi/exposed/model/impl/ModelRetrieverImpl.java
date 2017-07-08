@@ -187,6 +187,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         boolean fuzzyMatchEnabled = FeatureFlagClient.isEnabled(customerSpace,
                 LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName());
         String dataCloudVersion = modelSummary.getDataCloudVersion();
+        log.info("fuzzyMatchEnabled = " + fuzzyMatchEnabled + ", and dataCloudVersion = " + dataCloudVersion
+                + " for model " + modelId);
         if (StringUtils.isEmpty(dataCloudVersion) || dataCloudVersion.equals(RTS_DATA_CLOUD_VERSION)) {
             fields.setValidationExpression(FieldInterpretationCollections.RTS_MODEL_VALIDATION_EXPRESSION);
         } else {
