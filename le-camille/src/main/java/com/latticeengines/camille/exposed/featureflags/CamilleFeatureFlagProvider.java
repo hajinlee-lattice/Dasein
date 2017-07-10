@@ -206,7 +206,7 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
         try {
             doc = definitionCache.get();
         } catch (Exception e) {
-            log.warn("Exception occurred attempting to retrieve feature flag definitions");
+            log.warn("Exception occurred attempting to retrieve feature flag definitions", e);
             doc = null;
         }
 
@@ -228,7 +228,7 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
             toReturn = valueCache.get(new CustomerSpaceScope(space), new Path("/" + PathConstants.FEATURE_FLAGS_FILE),
                     FeatureFlagValueMap.class);
         } catch (Exception e) {
-            log.warn("Exception occurred attempting to retrieve feature flags");
+            log.warn("Exception occurred attempting to retrieve feature flags", e);
             toReturn = null;
         }
         if (toReturn == null) {
