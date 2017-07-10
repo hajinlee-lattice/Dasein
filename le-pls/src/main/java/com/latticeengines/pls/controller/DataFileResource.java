@@ -112,14 +112,12 @@ public class DataFileResource {
             throws IOException {
         response.setHeader("Content-Encoding", "gzip");
         if (eventTableType.equalsIgnoreCase("training")) {
-            try {
-                dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
-                        ".*exportrftrain.csv");
-            } catch (Exception ex) {
-                Log.warn("Final modeling file does not exist, fall back to previous modeling file!");
-                dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
-                        "postMatchEventTable.*allTraining.*.csv");
-            }
+            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
+                    "postMatchEventTable.*allTraining.*.csv");
+        } else if(eventTableType.equalsIgnoreCase("exportrftrain")) {
+            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
+                    ".*exportrftrain.csv");
+
         } else if (eventTableType.equalsIgnoreCase("test")) {
             dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                     "postMatchEventTable.*allTest.*.csv");
