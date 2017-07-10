@@ -41,7 +41,7 @@ def register_amprofile(conn, version):
              `Transformer`)
             SELECT NULL,
                    AMColumnID,
-                   'AccountMasterBucketed',
+                   'AMProfile',
                    'Profiling',
                    'SourceProfiler'
               FROM LDC_ManageDB.AccountMasterColumn
@@ -55,7 +55,10 @@ def register_amprofile(conn, version):
             INNER JOIN LDC_ManageDB.AccountMasterColumn rhs
 			ON lhs.Attribute = rhs.AMColumnID AND rhs.DataCloudVersion = '%s'
             SET lhs.Arguments = '{"IsSegment":false}'
-			WHERE rhs.Groups NOT LIKE '%%Segment%%';
+			WHERE rhs.Groups NOT LIKE '%%Segment%%'
+              AND lhs.Source = 'AMProfile'
+              AND lhs.Stage = 'Profiling'
+              AND lhs.Transformer = 'SourceProfiler';
         """ % (version)
         cursor.execute(sql)
         conn.commit()
@@ -68,7 +71,10 @@ def register_amprofile(conn, version):
 				  CASE WHEN rhs.DecodeStrategy LIKE '%%BOOLEAN_YESNO%%' THEN '"NumBits":2,"BktAlgo":"BooleanBucket"}'
 				  ELSE '}' 
 			      END)
-			WHERE rhs.Groups LIKE '%%Segment%%' AND rhs.DecodeStrategy IS NOT NULL;
+			WHERE rhs.Groups LIKE '%%Segment%%' AND rhs.DecodeStrategy IS NOT NULL
+              AND lhs.Source = 'AMProfile'
+              AND lhs.Stage = 'Profiling'
+              AND lhs.Transformer = 'SourceProfiler';;
         """ % (version)
         cursor.execute(sql)
         conn.commit()
@@ -78,7 +84,10 @@ def register_amprofile(conn, version):
             INNER JOIN LDC_ManageDB.AccountMasterColumn rhs
 			ON lhs.Attribute = rhs.AMColumnID AND rhs.DataCloudVersion = '%s'
 			SET lhs.Arguments = '{"IsSegment":true}'
-			WHERE rhs.Groups LIKE '%%Segment%%' AND lhs.Arguments IS NULL;
+			WHERE rhs.Groups LIKE '%%Segment%%' AND lhs.Arguments IS NULL
+              AND lhs.Source = 'AMProfile'
+              AND lhs.Stage = 'Profiling'
+              AND lhs.Transformer = 'SourceProfiler';;
         """ % (version)
         cursor.execute(sql)
         conn.commit()
@@ -101,8 +110,7 @@ def register_am(conn):
                    InternalName,
                    CONCAT('{"target":null,"attribute":"', SourceColumn, '","Source":"', Source, '"}')
               FROM LDC_ConfigDB.AccountMaster_Attributes
-             WHERE InternalName NOT LIKE '%TechIndicator%'
-               AND InternalName NOT LIKE '%BmbrSurge_%'
+             WHERE ColumnGroup NOT IN ('BuiltWith_TechIndicators', 'HGData_SegmentTechIndicators', 'HGData_SupplierTechIndicators', 'BmbrSurge_BucketCode', 'BmbrSurge_CompositeScore', 'BmbrSurge_Intent')
                AND InternalName NOT IN ('DUNS_NUMBER', 'LE_DOMAIN', 'BUSINESS_NAME', 'STREET_ADDRESS', 'CITY_NAME', 'STATE_PROVINCE_NAME', 'COUNTRY_NAME', 'POSTAL_CODE', 'LE_IS_PRIMARY_DOMAIN', 'LE_IS_PRIMARY_LOCATION', 'LE_NUMBER_OF_LOCATIONS', 'LE_COMPANY_PHONE', 'LE_REVENUE_RANGE', 'LE_EMPLOYEE_RANGE')
                AND Source IS NOT NULL
         """
@@ -174,49 +182,49 @@ def register_am(conn):
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_DUNS',
+                'DUNS',
                 '{"target":null,"attribute":"DUNS","Source":"AccountMasterSeed"}'
             ),(
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_Domain',
+                'Domain',
                 '{"target":null,"attribute":"Domain","Source":"AccountMasterSeed"}'
             ),(
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_Name',
+                'Name',
                 '{"target":null,"attribute":"Name","Source":"AccountMasterSeed"}'
             ),(
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_Street',
+                'Street',
                 '{"target":null,"attribute":"Street","Source":"AccountMasterSeed"}'
             ),(
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_City',
+                'City',
                 '{"target":null,"attribute":"City","Source":"AccountMasterSeed"}'
             ),(
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_State',
+                'State',
                 '{"target":null,"attribute":"State","Source":"AccountMasterSeed"}'
             ),(
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_Country',
+                'Country',
                 '{"target":null,"attribute":"Country","Source":"AccountMasterSeed"}'
             ),(
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_ZipCode',
+                'ZipCode',
                 '{"target":null,"attribute":"ZipCode","Source":"AccountMasterSeed"}'
             ),(
                 'AccountMaster',
@@ -240,7 +248,7 @@ def register_am(conn):
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_PrimaryIndustry',
+                'PrimaryIndustry',
                 '{"target":null,"attribute":"PrimaryIndustry","Source":"AccountMasterSeed"}'
             ),(
                 'AccountMaster',
@@ -264,7 +272,7 @@ def register_am(conn):
                 'AccountMaster',
                 'MapStage',
                 'mapAttribute',
-                'LDC_DomainSource',
+                'DomainSource',
                 '{"target":null,"attribute":"DomainSource","Source":"AccountMasterSeed"}'
             )
         """
