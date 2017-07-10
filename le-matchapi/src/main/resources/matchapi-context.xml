@@ -20,8 +20,4 @@
     <import resource="classpath:datacloud-match-context.xml" />
     <import resource="classpath:datacloud-match-monitor-context.xml" />
     <import resource="classpath:datacloud-yarn-client-context.xml" />
-
-    <mvc:annotation-driven/>
-    <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/" />
-    <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/" />
 </beans>

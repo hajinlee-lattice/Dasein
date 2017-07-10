@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>19.0</version>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>
@@ -82,24 +82,6 @@
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
             <version>${snappy.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-quartzclient</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.fasterxml.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.fasterxml.version}</version>
         </dependency>
 
     </dependencies>
