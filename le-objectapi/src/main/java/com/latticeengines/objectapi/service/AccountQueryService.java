@@ -5,6 +5,6 @@ import com.latticeengines.domain.exposed.query.Query;
 
 public interface AccountQueryService {
 
-    Query generateAccountQuery(String start, int offset, int pageSize, boolean hasSfdcAccountId,
+    Query generateAccountQuery(String start, Integer offset, Integer pageSize, Boolean hasSfdcAccountId,
             DataRequest dataRequest);
 }

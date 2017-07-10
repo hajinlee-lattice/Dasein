@@ -49,22 +49,16 @@ public class AccountResource implements AccountInterface {
      * https://confluence.lattice-engines.com/display/ENG/PlayMakerAPI+-+Datastore+proposal+for+Recommendation%
      * 2C+Account+Extension+and+Plays
      * 
-     * Request: Last Modification date, Offset, Max, columns, List<Integer> accountIds (OPTIONAL),
-     * hasSfdcAccountId (OPTIONAL)
-     * 
-     * Response: accountid, salesforceaccountid, latticeaccountid, lastmodified
-     * [Based of requested columns - [Columns as per custom schema]], [Data Cloud Columns per tenant]],
-     * 
      */
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Retrieve Account data for the specified parameters")
+    @ApiOperation(value = "Retrieve Account data for the specified parameters; by default returns AccountId, LatticeAccountId, SalesforceAccountID, LastModified ")
     @Override
     public DataPage getAccounts(@PathVariable String customerSpace,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
-            @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
-            @ApiParam(value = "Number of records returned above offset (max is 250 records per request)", required = true) @RequestParam(value = "pageSize", required = true) int pageSize,
-            @ApiParam(value = "hasSfdcAccountId", required = false) @RequestParam(value = "hasSfdcAccountId", required = false) boolean hasSfdcAccountId,
+            @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) Integer offset,
+            @ApiParam(value = "Number of records returned above offset (max is 250 records per request)", required = true) @RequestParam(value = "pageSize", required = true) Integer pageSize,
+            @ApiParam(value = "hasSfdcAccountId", required = false) @RequestParam(value = "hasSfdcAccountId", required = false) Boolean hasSfdcAccountId,
             @RequestBody DataRequest dataRequest) {
         Query query = accountQueryService.generateAccountQuery(start, offset, pageSize, hasSfdcAccountId, dataRequest);
 

@@ -22,14 +22,14 @@ import com.latticeengines.objectapi.service.AccountQueryService;
 public class AccountQueryServiceImpl implements AccountQueryService {
 
     @Override
-    public Query generateAccountQuery(String start, int offset, int pageSize, boolean hasSfdcAccountId,
+    public Query generateAccountQuery(String start, Integer offset, Integer pageSize, Boolean hasSfdcAccountId,
             DataRequest dataRequest) {
         List<Restriction> restrictions = new ArrayList<>();
         if (dataRequest == null) {
             dataRequest = new DataRequest();
         }
         if (StringUtils.isNotBlank(start)) {
-            long lastModifiedTime = DateTimeUtils.convertToLongUTCISO8601(start);
+            long lastModifiedTime = DateTimeUtils.convertToLongUTCISO8601(start) / 1000;
             Restriction lastModifiedRestriction = Restriction.builder().let(BusinessEntity.Account, "LastModified")
                     .gte(lastModifiedTime).build();
             restrictions.add(lastModifiedRestriction);
@@ -51,11 +51,14 @@ public class AccountQueryServiceImpl implements AccountQueryService {
             queryBuilder = queryBuilder.select(BusinessEntity.Account,
                     dataRequest.getAttributes().toArray(new String[] {}));
         }
-        queryBuilder.select(BusinessEntity.Account, "AccountId", "LatticeAccountId", "SalesforceAccountID") //
+        queryBuilder
+                .select(BusinessEntity.Account, "AccountId", "LatticeAccountId", "SalesforceAccountID", "LastModified") //
                 .where(restriction) //
                 .orderBy(BusinessEntity.Account, "AccountId");
         Query query = queryBuilder.build();
 
+        offset = (offset == null) ? 0 : offset;
+        pageSize = (pageSize == null) ? QueryTranslator.MAX_ROWS : pageSize;
         PageFilter pageFilter = new PageFilter(offset, Math.min(QueryTranslator.MAX_ROWS, pageSize));
         query.setPageFilter(pageFilter);
 
