@@ -40,6 +40,7 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
     private String LAUNCH_DESCRIPTION = "playLaunch done on " + CURRENT_TIME_MILLIS;
+    private String CREATED_BY = "lattice@lattice-engines.com";
 
     private Tenant tenant1;
 
@@ -59,6 +60,7 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Date timestamp = new Date(System.currentTimeMillis());
         play.setTimestamp(timestamp);
         play.setLastUpdatedTimestamp(timestamp);
+        play.setCreatedBy(CREATED_BY);
 
         playEntityMgr.create(play);
         play = playEntityMgr.findByName(NAME);

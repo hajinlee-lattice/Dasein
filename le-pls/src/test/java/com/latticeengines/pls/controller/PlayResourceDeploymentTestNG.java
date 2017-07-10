@@ -16,6 +16,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String PLAY_DISPLAY_NAME = "play hard";
     private static final String SEGMENT_NAME = "segment";
+    private static final String CREATED_BY = "lattice@lattice-engines.com";
     private Play play;
     private String name;
     private PlayLaunch playLaunch;
@@ -148,6 +149,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         play.setDisplayName(PLAY_DISPLAY_NAME);
         play.setSegment(segment);
         play.setSegmentName(SEGMENT_NAME);
+        play.setCreatedBy(CREATED_BY);
         return play;
     }
 

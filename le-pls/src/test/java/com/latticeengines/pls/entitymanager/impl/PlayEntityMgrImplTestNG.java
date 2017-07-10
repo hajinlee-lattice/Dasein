@@ -30,6 +30,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private final static String NEW_DISPLAY_NAME = "playHarder!";
     private final static String DESCRIPTION = "playHardest";
     private final static String SEGMENT_NAME = "segment";
+    private final static String CREATED_BY = "lattice@lattice-engines.com";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -43,6 +44,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         play.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
         play.setDisplayName(DISPLAY_NAME);
         play.setDescription(DESCRIPTION);
+        play.setCreatedBy(CREATED_BY);
         play.setTenant(tenant1);
     }
 

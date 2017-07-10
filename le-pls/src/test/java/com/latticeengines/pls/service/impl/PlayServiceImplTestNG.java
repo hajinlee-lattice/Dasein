@@ -1,5 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
@@ -20,6 +22,7 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
     private static final String PLAY_NAME = "play";
     private static final String PLAY_DISPLAY_NAME = "play hard";
     private static final String SEGMENT_NAME = "segment";
+    private static final String CREATED_BY = "lattice@lattice-engines.com";
 
     @Autowired
     private PlayService playService;
@@ -69,6 +72,8 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
         playService.deleteByName(playName);
         newPlay = playService.getPlayByName(playName);
         Assert.assertNull(newPlay);
+        List<Play> plays = playService.getAllPlays();
+        Assert.assertNotNull(plays);
     }
 
     private void assertPlay(Play play) {
@@ -87,7 +92,7 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
         play.setDisplayName(PLAY_DISPLAY_NAME);
         play.setSegment(segment);
         play.setSegmentName(SEGMENT_NAME);
-
+        play.setCreatedBy(CREATED_BY);
         return play;
     }
 

@@ -80,9 +80,9 @@ public class Play implements HasName, HasPid, HasTenantId {
     @JoinColumn(name = "FK_CALL_PREP_ID")
     private CallPrep callPrep;
 
-    @OneToMany
-    @JsonProperty("ratings")
-    private List<RatingObject> ratings = new ArrayList<>();
+    @OneToMany(fetch = FetchType.EAGER)
+    @JsonProperty("rating")
+    private List<RatingObject> rating = new ArrayList<>();
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
@@ -170,12 +170,13 @@ public class Play implements HasName, HasPid, HasTenantId {
         this.callPrep = callPrep;
     }
 
-    public List<RatingObject> getRatings() {
-        return ratings;
+
+    public List<RatingObject> getRating() {
+        return rating;
     }
 
-    public void setRatings(List<RatingObject> ratings) {
-        this.ratings = ratings;
+    public void setRating(List<RatingObject> rating) {
+        this.rating = rating;
     }
 
     @JsonIgnore
