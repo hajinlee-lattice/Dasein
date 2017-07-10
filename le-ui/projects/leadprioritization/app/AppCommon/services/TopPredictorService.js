@@ -291,14 +291,12 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             'Online Presence': '#a981e1',
             'Technology Profile': '#70bf4a',
             'Website Keywords': '#f6b300',
-            'Website Profile': '#26649b',
-            'Lead Information': '#f966bf'
+            'Website Profile': '#26649b'
         }
         for (var i = 0; i < possibleNumberofCategories; i++) {
             var categoryName = categoryList[i].categoryName,
-                color = categoryColors[categoryName] || colorChoices[i];
+                color = categoryColors[categoryName] || '#f966bf'; //colorChoices[i];
             categoryList[i].color = color;
-            //categoryList[i].color = (categoryColors[i].categoryName ? categoryColors[categoryColors[i].categoryName] : colorChoices[i]);
         }
     };
 
