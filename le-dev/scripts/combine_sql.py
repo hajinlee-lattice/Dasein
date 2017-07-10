@@ -100,13 +100,14 @@ def process_alter_table_line(line, flags):
                 LINES_TO_FILE.append("\n" + ALTER_TABLE_LINE)
                 ALTER_TABLE_DROP_LINES = []
             ALTER_TABLE_LINE = None
-        LINES_TO_FILE.append(line)
         key = find_fk_to_be_created(line)
         if key is not None:
+            line = line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE)
             print "Find a FK to be creataed: " + line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE)
             CREATE_FKS.append(key)
         if line.strip() == '':
             flags['alter_table_block'] = False
+        LINES_TO_FILE.append(line)
 
 def find_fk_to_be_drop(line):
     if 'DROP FOREIGN KEY' in line:
@@ -118,6 +119,7 @@ def find_fk_to_be_created(line):
     if 'ADD CONSTRAINT' in line and 'FOREIGN KEY' in line:
         key = line.split('ADD CONSTRAINT')[1].split('FOREIGN KEY')[0].strip()
         return key
+
 
 def process_missing_table_line(line, missing_on_remote):
     global TABLE_TO_DELETE
@@ -139,23 +141,30 @@ def process_missing_table_line(line, missing_on_remote):
             TABLE_TO_DELETE.append(table)
         return True
 
+
 def cleanup_script(outfile):
     global LINES_TO_FILE
+    global DROP_FKS
+    global CREATE_FKS
+
+    create_drop_keys = []
+    for key in DROP_FKS:
+        if key in CREATE_FKS:
+            create_drop_keys.append(key)
 
     lines = []
     for line in LINES_TO_FILE:
         if len(line.replace(',', '').strip()) == 0:
             # skip empty line
             continue
-        key = find_fk_to_be_drop(line)
-        if key is None:
-            key = find_fk_to_be_created(line)
-        if key is not None:
-            # this line is about create or drop foreign key
-            if key in DROP_FKS and key in CREATE_FKS:
+        contain_dummy_key = False
+        for key in create_drop_keys:
+            if key in line:
                 # skip drop and create the same fk
-                continue
-        lines.append(line)
+                contain_dummy_key = True
+                break
+        if not contain_dummy_key:
+            lines.append(line)
 
     LINES_TO_FILE = []
     in_alter_table_block = False
