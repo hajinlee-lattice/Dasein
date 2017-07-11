@@ -1,25 +1,13 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.io.Serializable;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-@Entity
-public class RatingObject implements HasPid, Serializable{
+
+public class RatingObject implements Serializable{
 
 
     private static final long serialVersionUID = -2370263562602858887L;
 
-    @JsonIgnore
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long pid;
 
     @JsonProperty("bucket")
     private String bucket = "A";
@@ -42,16 +30,6 @@ public class RatingObject implements HasPid, Serializable{
 
     public void setCount(int count) {
         this.count = count;
-    }
-
-    @Override
-    public Long getPid() {
-        return pid;
-    }
-
-    @Override
-    public void setPid(Long pid) {
-        this.pid = pid;
     }
 
 }

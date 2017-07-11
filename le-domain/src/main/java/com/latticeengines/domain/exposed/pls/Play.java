@@ -15,7 +15,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -80,8 +79,8 @@ public class Play implements HasName, HasPid, HasTenantId {
     @JoinColumn(name = "FK_CALL_PREP_ID")
     private CallPrep callPrep;
 
-    @OneToMany(fetch = FetchType.EAGER)
     @JsonProperty("rating")
+    @Transient
     private List<RatingObject> rating = new ArrayList<>();
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
