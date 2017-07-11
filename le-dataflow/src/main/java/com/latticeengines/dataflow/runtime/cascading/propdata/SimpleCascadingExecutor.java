@@ -65,10 +65,6 @@ public class SimpleCascadingExecutor {
 
         Schema schema = fieldMapping.getAvroSchema();
         Properties properties = new Properties();
-        for (Entry<String, String> conf : yarnConfiguration) {
-            properties.put(conf.getKey(), conf.getValue());
-        }
-
         String translatedQueue = LedpQueueAssigner
                 .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
         ExecutionEngine engine = ExecutionEngine.get(ENGINE);
