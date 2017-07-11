@@ -23,14 +23,14 @@ public class CommonStatisticsResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get statistics")
-    private Statistics getStatistics() {
+    public Statistics getStatistics() {
         return dataLakeService.getStatistics();
     }
 
     @RequestMapping(value = "/demo", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get demo statistics")
-    private Statistics getDemoStatistics() {
+    public Statistics getDemoStatistics() {
         return dataLakeService.getDemoStatistics();
     }
 

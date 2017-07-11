@@ -2,7 +2,6 @@ package com.latticeengines.app.exposed.controller.datacollection;
 
 import java.util.List;
 
-import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +16,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "metadata", description = "Common REST resource for attributes")
 @RestController
@@ -29,7 +29,7 @@ public class CommonAttributeResource {
     @RequestMapping(value = "/count", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get number of attributes")
-    private int getAttributesCount() {
+    public int getAttributesCount() {
         return dataLakeService.getAttributes(null, null).size();
     }
 
@@ -37,7 +37,7 @@ public class CommonAttributeResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes")
-    private List<ColumnMetadata> getAttributes( //
+    public List<ColumnMetadata> getAttributes( //
                                                 @ApiParam(value = "Offset for pagination of matching attributes")//
                                                 @RequestParam(value = "offset", required = false)//
                                                         Integer offset, //
@@ -50,14 +50,14 @@ public class CommonAttributeResource {
     @RequestMapping(value = "/{entity}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes for a business entity")
-    private List<ColumnMetadata> getAttributesInEntity(@PathVariable BusinessEntity entity) {
+    public List<ColumnMetadata> getAttributesInEntity(@PathVariable BusinessEntity entity) {
         return dataLakeService.getAttributesInEntity(entity);
     }
 
     @RequestMapping(value = "/{entity}/demo", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes for a business entity")
-    private List<ColumnMetadata> getDemoAttributesInEntity(@PathVariable BusinessEntity entity) {
+    public List<ColumnMetadata> getDemoAttributesInEntity(@PathVariable BusinessEntity entity) {
         return dataLakeService.getDemoAttributes(entity);
     }
 
