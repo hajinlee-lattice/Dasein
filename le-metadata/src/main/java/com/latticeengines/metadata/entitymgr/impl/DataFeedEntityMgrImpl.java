@@ -2,8 +2,8 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -16,6 +16,7 @@ import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -128,12 +129,23 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             log.info("Can't find data feed: " + datafeedName);
             return null;
         }
+
+        List<DataFeedImport> imports = new ArrayList<>();
         List<DataFeedTask> tasks = new ArrayList<>(datafeed.getTasks());
-        tasks.forEach(task -> task.setImportData(datafeedTaskEntityMgr.pollFirstDataTable(task)));
+        Iterator<DataFeedTask> iter = tasks.iterator();
+        while (iter.hasNext()) {
+            DataFeedTask task = iter.next();
+            Table dataTable = datafeedTaskEntityMgr.peekFirstDataTable(task);
+            if (dataTable != null && !dataTable.getExtracts().isEmpty()) {
+                task.setImportData(dataTable);
+                imports.add(DataFeedImportUtils.createImportFromTask(task));
+                datafeedTaskEntityMgr.pollFirstDataTable(task);
+            } else {
+                log.info("ignore task: " + task + " as this task has empty table or empty extract");
+                iter.remove();
+            }
+        }
         log.info("tasks for consolidates are: " + tasks);
-        List<DataFeedImport> imports = tasks.stream()
-                .filter(task -> task.getImportData() != null && !task.getImportData().getExtracts().isEmpty())
-                .map(DataFeedImportUtils::createImportFromTask).collect(Collectors.toList());
 
         DataFeedExecution execution = new DataFeedExecution();
         execution.setDataFeed(datafeed);
