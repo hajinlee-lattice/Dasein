@@ -380,7 +380,7 @@ def get_profile_vars(profile):
                 line = line.strip().replace('\n', '')
                 if len(line) > 0 and ('#' != line[0]):
                     key = line.split('=')[0]
-                    value = line.split('=')[1]
+                    value = line.replace(key + "=", "")
                     params[key] = value
     return params
 
