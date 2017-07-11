@@ -120,6 +120,11 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
+    public void renameTable(CustomerSpace customerSpace, String oldName, String newName) {
+        tableEntityMgr.rename(oldName, newName);
+    }
+
+    @Override
     public Map<String, Set<AnnotationValidationError>> validateTableMetadata(CustomerSpace customerSpace,
             ModelingMetadata modelingMetadata) {
         BeanValidationService validationService = new BeanValidationServiceImpl();

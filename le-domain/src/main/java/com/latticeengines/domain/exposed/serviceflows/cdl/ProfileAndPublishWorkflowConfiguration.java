@@ -42,6 +42,11 @@ public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder workflowContainerMem(int mb) {
+            configuration.setContainerMemoryMB(mb);
+            return this;
+        }
+
         public ProfileAndPublishWorkflowConfiguration build() {
             configuration.add(calculateStatsConfiguration);
             configuration.add(updateStatsObjectsConfiguration);

@@ -44,6 +44,9 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${cdl.transform.workflow.mem.mb}")
+    protected int workflowMemMb;
+
     public ApplicationId submit(String customerSpace) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeed.getStatus()));
@@ -127,6 +130,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .put(MatchKey.Zipcode, Collections.singletonList("Zip")) //
                         .build()) //
                 .dropConsolidatedTable(true) //
+                .workflowContainerMem(workflowMemMb) //
                 .build();
     }
 

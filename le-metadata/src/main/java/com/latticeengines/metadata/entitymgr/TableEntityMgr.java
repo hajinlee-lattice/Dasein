@@ -22,6 +22,8 @@ public interface TableEntityMgr {
 
     Table copy(String name, CustomerSpace targetCustomerSpace);
 
+    Table rename(String oldName, String newName);
+
     static void inflateTable(Table table) {
         if (table != null) {
             Hibernate.initialize(table.getAttributes());

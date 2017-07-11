@@ -240,6 +240,18 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         return copy;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Table rename(String oldName, String newName) {
+        Table existing = findByName(oldName);
+        if (existing == null) {
+            throw new RuntimeException(String.format("No such table with name %s", oldName));
+        }
+        existing.setName(newName);
+        tableDao.update(existing);
+        return existing;
+    }
+
     private void setTenantId(Table table) {
         Tenant tenant = MultiTenantContext.getTenant();
 

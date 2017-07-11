@@ -74,8 +74,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         String goodName = AvroUtils.getAvroFriendlyString(sourceTable.getName());
         if (!goodName.equalsIgnoreCase(oldName)) {
             log.info("Renaming table " + sourceTable.getName() + " to " + goodName);
+            metadataProxy.updateTable(configuration.getCustomerSpace().toString(), goodName, sourceTable);
             sourceTable.setName(goodName);
-            metadataProxy.updateTable(configuration.getCustomerSpace().toString(), oldName, sourceTable);
         }
     }
 

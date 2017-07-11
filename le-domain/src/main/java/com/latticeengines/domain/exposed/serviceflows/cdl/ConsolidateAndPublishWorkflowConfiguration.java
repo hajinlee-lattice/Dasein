@@ -66,6 +66,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
+        public Builder workflowContainerMem(int mb) {
+            configuration.setContainerMemoryMB(mb);
+            return this;
+        }
+
         public ConsolidateAndPublishWorkflowConfiguration build() {
             configuration.add(startExecutionConfiguration);
             configuration.add(consolidateDataConfigurationBuilder.build());

@@ -22,6 +22,8 @@ public interface MetadataService {
 
     void updateTable(CustomerSpace customerSpace, Table table);
 
+    void renameTable(CustomerSpace customerSpace, String oldName, String newName);
+
     Map<String, Set<AnnotationValidationError>> validateTableMetadata(CustomerSpace customerSpace,
             ModelingMetadata modelingMetadata);
 

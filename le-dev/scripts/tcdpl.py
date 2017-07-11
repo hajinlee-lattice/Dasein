@@ -40,7 +40,7 @@ PRESETS = {
     },
     'etl': {
         'apps': ['microservice', 'matchapi'],
-        'modules': ['metadata', 'workflowapi', 'datacloudapi']
+        'modules': ['metadata', 'workflowapi', 'datacloudapi', 'eai']
     },
     'mq': {
         'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'matchapi'],

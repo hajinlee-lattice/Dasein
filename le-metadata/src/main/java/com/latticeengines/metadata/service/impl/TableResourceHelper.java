@@ -73,7 +73,12 @@ public class TableResourceHelper {
             HttpServletRequest request) {
         log.info(String.format("updateTable(%s)", table.getName()));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
-        mdService.updateTable(space, table);
+        if (!tableName.equals(table.getName())) {
+            mdService.renameTable(space, table.getName(), tableName);
+            table.setName(tableName);
+        } else {
+            mdService.updateTable(space, table);
+        }
         return true;
     }
 

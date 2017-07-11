@@ -132,7 +132,6 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
             );
             // -----------
             request.setSteps(steps);
-            request.setContainerMemMB(workflowMemMbMax);
             return request;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -229,7 +228,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         conf.setCompressResult(true);
         conf.setSortingField(masterTableSortKeys.get(0)); // TODO: only support
                                                           // single sort key now
-        String confStr = appendEngineConf(conf, lightEngineConfig());
+        String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }

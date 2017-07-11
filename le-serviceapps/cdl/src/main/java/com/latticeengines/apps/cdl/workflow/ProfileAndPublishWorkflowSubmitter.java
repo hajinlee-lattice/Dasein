@@ -37,6 +37,9 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
+    @Value("${cdl.transform.workflow.mem.mb}")
+    protected int workflowMemMb;
+
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
@@ -92,6 +95,7 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //
                         .build()) //
+                .workflowContainerMem(workflowMemMb) //
                 .build();
     }
 

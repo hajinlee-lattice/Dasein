@@ -85,11 +85,6 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
                 steps.add(sort);
             }
             request.setSteps(steps);
-            if (isBucketing()) {
-                request.setContainerMemMB(workflowMemMb);
-            } else {
-                request.setContainerMemMB(workflowMemMbMax);
-            }
             return request;
 
         } catch (Exception e) {
