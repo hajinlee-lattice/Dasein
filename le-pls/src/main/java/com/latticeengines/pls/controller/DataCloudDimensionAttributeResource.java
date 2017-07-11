@@ -27,7 +27,7 @@ public class DataCloudDimensionAttributeResource {
     @RequestMapping(value = "/dimensions", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all top level Dimentions")
-    private List<CategoricalDimension> getAllDimensions() {
+    public List<CategoricalDimension> getAllDimensions() {
         List<CategoricalDimension> allDimensions = dimensionAttributeProxy.getAllDimensions();
         return allDimensions;
     }
@@ -35,7 +35,7 @@ public class DataCloudDimensionAttributeResource {
     @RequestMapping(value = "/attributes", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all attributes by Dimension's root Id")
-    private List<CategoricalAttribute> getAllAttributes(
+    public List<CategoricalAttribute> getAllAttributes(
             @RequestParam(value = "rootId", required = true) Long rootId) {
         List<CategoricalAttribute> allAttributes = dimensionAttributeProxy.getAllAttributes(rootId);
         return allAttributes;
