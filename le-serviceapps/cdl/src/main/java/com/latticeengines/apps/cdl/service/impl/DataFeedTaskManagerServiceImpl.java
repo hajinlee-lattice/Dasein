@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +25,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("dataFeedTaskManagerService")
 public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerService {
+
+    private static final Log log = LogFactory.getLog(DataFeedTaskManagerServiceImpl.class);
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -46,6 +50,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         Table newMeta = dataFeedMetadataService.getMetadata(metadata);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(metadata);
         if (dlTenantMappingEnabled) {
+            log.info("DL tenant mapping is enabled");
             customerSpace = mapCustomerSpace(customerSpace);
         }
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
@@ -103,6 +108,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (dlTenantMapping != null) {
             newCustomerSpace = CustomerSpace.parse(dlTenantMapping.getTenantId());
         }
+        log.info(String.format("original tenant %s, new tenant %s", customerSpace.getTenantId(),
+                newCustomerSpace.getTenantId()));
         return newCustomerSpace;
     }
 }
