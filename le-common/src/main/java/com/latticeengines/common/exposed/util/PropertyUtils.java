@@ -43,7 +43,7 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
                 try {
                     valueStr = CipherUtils.decrypt(valueStr);
                 } catch (Exception e) {
-                    throw new RuntimeException("Decryption failed when parsing properties.", e);
+                    throw new RuntimeException("Decryption failed when parsing property " + keyStr + ":" + valueStr, e);
                 }
                 props.put(keyStr, valueStr);
             }
