@@ -21,7 +21,6 @@
         <mysql.connector.version>5.1.30</mysql.connector.version>
         <log4j.extras.version>1.2.17</log4j.extras.version>
         <commons.lang3.version>3.6</commons.lang3.version>
-        <gson.version>1.4</gson.version>
         <reflections.version>0.9.9</reflections.version>
         <c3p0.version>0.9.5.2</c3p0.version>
 
