@@ -42,7 +42,7 @@ public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void createAccessAndRefreshToken() {
+    public void createAccessAndRefreshToken() throws Exception{
         setupSecurityContext(mainTestTenant);
         String appId = "DUMMY_APP";
         assertEquals(oauth2AccessTokenEntityMgr.get(tenantId, appId).getAccessToken(), "");
@@ -52,6 +52,7 @@ public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 "Cannot find the new token in DB.");
         assertEquals(oauth2AccessTokenEntityMgr.get(tenantId, appId).getAccessToken(), accessToken.getValue());
 
+        Thread.sleep(10 * 1000);
         OAuth2AccessToken accessToken2 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
         assertTrue(StringUtils.isNotEmpty(accessToken2.getValue()));
         assertFalse(hasTokenValue(oauth2AccessTokenEntityMgr.findAll(), accessToken),
@@ -60,6 +61,18 @@ public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 "Cannot find the new token in DB.");
         assertEquals(oauth2AccessTokenEntityMgr.get(tenantId, appId).getAccessToken(), accessToken2.getValue());
         assertNotEquals(oauth2AccessTokenEntityMgr.get(tenantId, appId).getAccessToken(), accessToken.getValue());
+    }
+
+    @Test (groups = "deployment")
+    public void createAccessIn10SecondsWindow() throws Exception {
+        setupSecurityContext(mainTestTenant);
+        String appId = "DUMMY_APP";
+        OAuth2AccessToken accessToken1 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
+        OAuth2AccessToken accessToken2 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
+        assertEquals(accessToken1.getValue(), accessToken2.getValue());
+        Thread.sleep(1000 * 10);
+        OAuth2AccessToken accessToken3 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
+        assertNotEquals(accessToken1.getValue(), accessToken3.getValue());
     }
 
     private boolean hasTokenValue(List<Oauth2AccessToken> tokens, OAuth2AccessToken targetToken) {

@@ -4,9 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
@@ -48,22 +50,29 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
             appId = null;
         }
 
-        OAuthUser user = new OAuthUser();
-        user.setUserId(tenantId);
-        user.setPassword(oauth2RestApiProxy.createAPIToken(tenantId));
-
-        OAuth2RestTemplate oAuth2RestTemplate;
-
-        if (StringUtils.isEmpty(appId)) {
-            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2Url, user.getUserId(), user.getPassword(),
-                    type.getValue());
-        } else {
-            oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(user, type.getValue(), appId);
+        Oauth2AccessToken token = oauth2AccessTokenEntityMgr.get(tenantId, appId);
+        long now = System.currentTimeMillis();
+        if(token.getLastModifiedTime() + 10 *1000 > now && StringUtils.isNotEmpty(token.getAccessToken())) {
+            return new DefaultOAuth2AccessToken(token.getAccessToken());
         }
-        OAuth2AccessToken token1 = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
-        Oauth2AccessToken token2 = new Oauth2AccessToken();
-        token2.setAccessToken(token1.getValue());
-        oauth2AccessTokenEntityMgr.createOrUpdate(token2, tenantId, appId);
-        return token1;
+        else {
+            OAuthUser user = new OAuthUser();
+            user.setUserId(tenantId);
+            user.setPassword(oauth2RestApiProxy.createAPIToken(tenantId));
+
+            OAuth2RestTemplate oAuth2RestTemplate;
+
+            if (StringUtils.isEmpty(appId)) {
+                oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2Url, user.getUserId(), user.getPassword(),
+                        type.getValue());
+            } else {
+                oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(user, type.getValue(), appId);
+            }
+            OAuth2AccessToken token1 = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
+            token.setAccessToken(CipherUtils.encrypt(token1.getValue()));
+            token.setLastModifiedTime(System.currentTimeMillis());
+            oauth2AccessTokenEntityMgr.createOrUpdate(token);
+            return token1;
+        }
     }
 }

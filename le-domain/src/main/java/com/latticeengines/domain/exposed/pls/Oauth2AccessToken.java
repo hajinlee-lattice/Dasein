@@ -48,6 +48,9 @@ public class Oauth2AccessToken implements HasPid, HasTenantId {
     @Column(name = "ACCESS_TOKEN", nullable = false)
     private String accessToken;
 
+    @Column(name = "LAST_MODIFIED_TIME", nullable = false)
+    private Long LastModifiedTime;
+
     @Override
     public Long getPid() {
         return pid;
@@ -95,6 +98,14 @@ public class Oauth2AccessToken implements HasPid, HasTenantId {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public Long getLastModifiedTime() {
+        return LastModifiedTime;
+    }
+
+    public void setLastModifiedTime(Long lastModifiedTime) {
+        LastModifiedTime = lastModifiedTime;
     }
 
 }

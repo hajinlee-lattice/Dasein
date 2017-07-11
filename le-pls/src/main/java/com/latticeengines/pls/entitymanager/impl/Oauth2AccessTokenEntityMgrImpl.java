@@ -46,7 +46,7 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
         }
         token = new Oauth2AccessToken();
         token.setTenant(tenant);
-
+        token.setLastModifiedTime(System.currentTimeMillis());
         if (StringUtils.isEmpty(appId)) {
             appId = null;
         }
@@ -66,6 +66,12 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
     public void createOrUpdate(Oauth2AccessToken oauth2AccessToken, String tenantId, String appId) {
         Oauth2AccessToken token = get(tenantId, appId);
         token.setAccessToken(CipherUtils.encrypt(oauth2AccessToken.getAccessToken()));
+        super.createOrUpdate(token);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void createOrUpdate(Oauth2AccessToken token) {
         super.createOrUpdate(token);
     }
 

@@ -14,4 +14,6 @@ public interface Oauth2AccessTokenEntityMgr {
     Oauth2AccessToken get(String tenantId, String appId);
 
     Oauth2AccessToken findByTenant(Tenant tenant, String appId);
+
+    void createOrUpdate(Oauth2AccessToken entity);
 }
