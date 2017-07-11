@@ -21,7 +21,7 @@ public class EntityResolver extends BaseLookupResolver<EntityLookup>
         throw new UnsupportedOperationException("Should not use entity look in where clause");
     }
 
-    public Expression<?> resolveForSelect(EntityLookup lookup) {
+    public Expression<?> resolveForSelect(EntityLookup lookup, boolean asAlias) {
         return Expressions.constant(1);
     }
 

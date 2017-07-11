@@ -31,7 +31,7 @@ public class RangeResolver extends BaseLookupResolver<RangeLookup> implements Lo
     }
 
     @Override
-    public Expression<?> resolveForSelect(RangeLookup lookup) {
+    public Expression<?> resolveForSelect(RangeLookup lookup, boolean asAlias) {
         throw new UnsupportedOperationException("Should not use range lookup in select.");
     }
 

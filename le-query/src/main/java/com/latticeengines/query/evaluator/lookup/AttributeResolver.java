@@ -36,12 +36,12 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
     }
 
     @Override
-    public Expression<?> resolveForSelect(AttributeLookup lookup) {
+    public Expression<?> resolveForSelect(AttributeLookup lookup, boolean asAlias) {
         ColumnMetadata cm = getColumnMetadata(lookup);
         if (cm == null) {
             throw new QueryEvaluationException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
-        return resolveBucketRange(lookup.getEntity(), cm, true);
+        return resolveBucketRange(lookup.getEntity(), cm, asAlias);
     }
 
     private Expression<String> resolveBucketRange(BusinessEntity entity, ColumnMetadata cm, boolean alias) {
@@ -71,7 +71,11 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
                 }
             }
         } else {
-            return QueryUtils.getAttributePath(entity, cm.getName());
+            if (alias) {
+                return QueryUtils.getAttributePath(entity, cm.getName()).as(Expressions.stringPath(cm.getName()));
+            } else {
+                return QueryUtils.getAttributePath(entity, cm.getName());
+            }
         }
     }
 

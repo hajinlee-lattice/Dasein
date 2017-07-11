@@ -20,8 +20,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     public void testLookup() {
         // simple lookup
         Query query = Query.builder() //
-                .select(BusinessEntity.Account, "companyname") //
-                .select(BusinessEntity.Contact, "lastname") //
+                .select(BusinessEntity.Account, "CompanyName") //
+                .select(BusinessEntity.Contact, "LastName") //
                 .build();
         queryEvaluator.evaluate(attrRepo, query);
 
@@ -33,8 +33,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
         // bucketed attribute
         query = Query.builder() //
-                .select(BusinessEntity.LatticeAccount, "bucketed_attribute") //
-                .select(BusinessEntity.Account, "companyname").build();
+                .select(BusinessEntity.LatticeAccount, "Bucketed_Attribute") //
+                .select(BusinessEntity.Account, "CompanyName").build();
         queryEvaluator.evaluate(attrRepo, query);
     }
 
@@ -42,33 +42,33 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     public void testRestriction() {
         // simple where clause
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, "id").eq("59129793") //
+                .let(BusinessEntity.Account, "ID").eq("59129793") //
                 .build();
         Query query = Query.builder() //
-                .select(BusinessEntity.Account, "companyname", "city") //
+                .select(BusinessEntity.Account, "CompanyName", "City") //
                 .where(restriction).build();
         queryEvaluator.evaluate(attrRepo, query); //
 
         // concrete on double
         restriction = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "alexaviewsperuser").eq(2.5) //
+                .let(BusinessEntity.LatticeAccount, "AlexaViewsPerUser").eq(2.5) //
                 .build();
         query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         queryEvaluator.evaluate(attrRepo, query); //
 
         // column eqs column
         restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, "companyname").eq(BusinessEntity.Contact, "city") //
+                .let(BusinessEntity.Account, "CompanyName").eq(BusinessEntity.Contact, "City") //
                 .build();
         query = Query.builder().where(restriction).build();
         queryEvaluator.evaluate(attrRepo, query); //
 
         // range look up
         Restriction range1 = Restriction.builder() //
-                .let(BusinessEntity.Account, "companyname").in("a", "z") //
+                .let(BusinessEntity.Account, "CompanyName").in("a", "z") //
                 .build();
         Restriction range2 = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "alexaviewsperuser").in(1.0, 3.5) //
+                .let(BusinessEntity.LatticeAccount, "AlexaViewsPerUser").in(1.0, 3.5) //
                 .build();
         restriction = Restriction.builder().and(range1, range2).build();
         query = Query.builder().where(restriction).build();
@@ -76,10 +76,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
         // half range look up
         range1 = Restriction.builder() //
-                .let(BusinessEntity.Account, "companyname").gte("a") //
+                .let(BusinessEntity.Account, "CompanyName").gte("a") //
                 .build();
         range2 = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "alexaviewsperuser").lt(3.5) //
+                .let(BusinessEntity.LatticeAccount, "AlexaViewsPerUser").lt(3.5) //
                 .build();
         restriction = Restriction.builder().and(range1, range2).build();
         query = Query.builder().where(restriction).build();
@@ -95,10 +95,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
         // bucket
         Restriction lbl2 = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "bucketed_attribute").eq("Label2") //
+                .let(BusinessEntity.LatticeAccount, "Bucketed_Attribute").eq("Label2") //
                 .build();
         Restriction nullLbl = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "bucketed_attribute").eq(null) //
+                .let(BusinessEntity.LatticeAccount, "Bucketed_Attribute").eq(null) //
                 .build();
         restriction = Restriction.builder().or(lbl2, nullLbl).build();
         query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
@@ -109,7 +109,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     public void testFreeText() {
         // freetext
         Query query = Query.builder() //
-                .select(BusinessEntity.Account, "companyname") //
+                .select(BusinessEntity.Account, "CompanyName") //
                 .freeText("intel") //
                 .freeTextAttributes(BusinessEntity.LatticeAccount, "LDC_Domain", "LDC_Name") //
                 .build();
@@ -119,7 +119,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
     public void testNonExistAttribute() {
         Query query = Query.builder() //
-                .select(BusinessEntity.Account, "companyname", "street1") //
+                .select(BusinessEntity.Account, "CompanyName", "Street1") //
                 .build();
         queryEvaluator.evaluate(attrRepo, query);
     }
@@ -127,7 +127,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
     public void testNonExistBucket() {
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "bucketed_attribute").eq("blah blah") //
+                .let(BusinessEntity.LatticeAccount, "Bucketed_Attribute").eq("blah blah") //
                 .build();
         Query query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
         queryEvaluator.evaluate(attrRepo, query);
@@ -136,11 +136,11 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testSortAndPage() {
         Restriction nameIsCity = Restriction.builder() //
-                .let(BusinessEntity.Account, "companyname").eq(BusinessEntity.Account, "city") //
+                .let(BusinessEntity.Account, "CompanyName").eq(BusinessEntity.Account, "City") //
                 .build();
-        Query query = Query.builder().select(BusinessEntity.Account, "id", "companyname", "city") //
+        Query query = Query.builder().select(BusinessEntity.Account, "ID", "CompanyName", "City") //
                 .where(nameIsCity) //
-                .orderBy(BusinessEntity.Account, "companyname") //
+                .orderBy(BusinessEntity.Account, "CompanyName") //
                 .build();
         queryEvaluator.evaluate(attrRepo, query);
     }

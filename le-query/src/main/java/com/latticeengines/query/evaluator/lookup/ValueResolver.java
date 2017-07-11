@@ -23,7 +23,7 @@ public class ValueResolver extends BaseLookupResolver<ValueLookup>
     }
 
     @Override
-    public Expression<?> resolveForSelect(ValueLookup lookup) {
+    public Expression<?> resolveForSelect(ValueLookup lookup, boolean asAlias) {
         throw new UnsupportedOperationException("Should not use range lookup in select.");
     }
 }

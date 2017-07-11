@@ -119,7 +119,7 @@ public class QueryProcessor {
         List<Expression<?>> expressions = new ArrayList<>();
         for (Lookup lookup : lookups) {
             LookupResolver resolver = factory.getLookupResolver(lookup.getClass());
-            Expression<?> expression = resolver.resolveForSelect(lookup);
+            Expression<?> expression = resolver.resolveForSelect(lookup, true);
             expressions.add(expression);
         }
         if (expressions.size() == 0) {
@@ -147,7 +147,7 @@ public class QueryProcessor {
             LookupResolver resolver = resolverFactory.getLookupResolver(AttributeLookup.class);
             for (Lookup lookup : sort.getLookups()) {
                 if (lookup instanceof AttributeLookup) {
-                    ComparableExpression<String> resolved = Expressions.asComparable(resolver.resolveForSelect(lookup));
+                    ComparableExpression<String> resolved = Expressions.asComparable(resolver.resolveForSelect(lookup, false));
                     if (sort.getDescending()) {
                         sqlQuery = sqlQuery.orderBy(resolved.desc());
                     } else {

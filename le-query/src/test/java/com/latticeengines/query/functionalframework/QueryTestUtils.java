@@ -63,11 +63,11 @@ public class QueryTestUtils {
 
     private static List<ColumnMetadata> getAttrsInTable() {
         List<String> simpleFields = Arrays.asList( //
-                "accountid", "latticeaccountid", "salesforceaccountid", "lastmodified", "companyname", "id", "city",
-                "state", "lastname", "number_of_family_members", "alexaviewsperuser");
+                "AccountId", "LatticeAccountId", "SalesForceAccountId", "LastModified", "CompanyName", "ID", "City",
+                "State", "LastName", "Number_Of_Family_Members", "AlexaViewsPerUser");
         List<ColumnMetadata> attrInTable = new ArrayList<>();
         simpleFields.forEach(s -> attrInTable.add(new Attribute(s).getColumnMetadata()));
-        Attribute bucketedAttribute = new Attribute("bucketed_attribute");
+        Attribute bucketedAttribute = new Attribute("Bucketed_Attribute");
         AttributeStats stats = new AttributeStats();
         Buckets bkts = new Buckets();
         bkts.setType(BucketType.Enum);
@@ -82,7 +82,7 @@ public class QueryTestUtils {
         bkt3.setId(2L);
         bkts.setBucketList(Arrays.asList(bkt1, bkt2, bkt3));
         stats.setBuckets(bkts);
-        bucketedAttribute.setPhysicalName("businesstechnologiespayment");
+        bucketedAttribute.setPhysicalName("BusinessTechnologiesPayment");
         bucketedAttribute.setBitOffset(1);
         bucketedAttribute.setNumOfBits(2);
         ColumnMetadata bucketCm = bucketedAttribute.getColumnMetadata();

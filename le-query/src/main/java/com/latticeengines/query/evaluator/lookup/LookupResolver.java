@@ -10,5 +10,5 @@ public interface LookupResolver<T extends Lookup> {
 
     List<ComparableExpression<String>> resolveForCompare(T lookup);
 
-    Expression<?> resolveForSelect(T lookup);
+    Expression<?> resolveForSelect(T lookup, boolean asAlias);
 }

@@ -34,7 +34,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testEntityLookup() {
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, "id").eq("59129793") //
+                .let(BusinessEntity.Account, "ID").eq("59129793") //
                 .build();
         Query query = Query.builder() //
                 .find(BusinessEntity.Account) //
@@ -49,11 +49,11 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testJoinSelect() {
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, "id").eq("59129793") //
+                .let(BusinessEntity.Account, "ID").eq("59129793") //
                 .build();
         Query query = Query.builder() //
-                .select(BusinessEntity.Contact, "companyname", "lastname") //
-                .select(BusinessEntity.Account, "city", "state") //
+                .select(BusinessEntity.Contact, "CompanyName", "LastName") //
+                .select(BusinessEntity.Account, "City", "State") //
                 .where(restriction).build();
         List<Map<String, Object>> results;
         try (PerformanceTimer timer = new PerformanceTimer("fetch data")) {
@@ -62,21 +62,21 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(results.size(), 25);
         for (Map<String, Object> row : results) {
             Assert.assertEquals(row.size(), 4);
-            Assert.assertTrue(row.containsKey("companyname"));
-            Assert.assertTrue(row.containsKey("lastname"));
-            Assert.assertTrue(row.containsKey("city"));
-            Assert.assertTrue(row.containsKey("state"));
+            Assert.assertTrue(row.containsKey("CompanyName"));
+            Assert.assertTrue(row.containsKey("LastName"));
+            Assert.assertTrue(row.containsKey("City"));
+            Assert.assertTrue(row.containsKey("State"));
         }
     }
 
     @Test(groups = "functional")
     public void testJoinLatticeAccountSelect() {
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, "id").eq("59129793") //
+                .let(BusinessEntity.Account, "ID").eq("59129793") //
                 .build();
         Query query = Query.builder() //
-                .select(BusinessEntity.Account, "companyname", "lastname") //
-                .select(BusinessEntity.LatticeAccount, "city", "state") //
+                .select(BusinessEntity.Account, "CompanyName", "LastName") //
+                .select(BusinessEntity.LatticeAccount, "City", "State") //
                 .where(restriction).build();
         List<Map<String, Object>> results;
         try (PerformanceTimer timer = new PerformanceTimer("fetch data")) {
@@ -85,17 +85,17 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(results.size(), 25);
         for (Map<String, Object> row : results) {
             Assert.assertEquals(row.size(), 4);
-            Assert.assertTrue(row.containsKey("companyname"));
-            Assert.assertTrue(row.containsKey("lastname"));
-            Assert.assertTrue(row.containsKey("city"));
-            Assert.assertTrue(row.containsKey("state"));
+            Assert.assertTrue(row.containsKey("CompanyName"));
+            Assert.assertTrue(row.containsKey("LastName"));
+            Assert.assertTrue(row.containsKey("City"));
+            Assert.assertTrue(row.containsKey("State"));
         }
     }
 
     @Test(groups = "functional")
     public void testRangeLookup() {
         Restriction range1 = Restriction.builder() //
-                .let(BusinessEntity.Account, "companyname").in("a", "z") //
+                .let(BusinessEntity.Account, "CompanyName").in("a", "z") //
                 .build();
         Query query1 = Query.builder().where(range1).build();
         long count1 = Long.MAX_VALUE;
@@ -105,7 +105,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         }
 
         Restriction range2 = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "alexaviewsperuser").in(1.0, 3.5) //
+                .let(BusinessEntity.LatticeAccount, "AlexaViewsPerUser").in(1.0, 3.5) //
                 .build();
         Query query2 = Query.builder().where(range2).build();
         long count2 = Long.MAX_VALUE;
@@ -126,7 +126,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testExists() {
         Restriction range1 = Restriction.builder() //
-                .let(BusinessEntity.Account, "companyname").in("a", "z") //
+                .let(BusinessEntity.Account, "CompanyName").in("a", "z") //
                 .build();
         Restriction restriction = Restriction.builder() //
                 .exists(BusinessEntity.Contact).that(range1) //
@@ -142,10 +142,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     public void testBitEncoded() {
         // bucket
         Restriction lbl2 = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "bucketed_attribute").eq("Label2") //
+                .let(BusinessEntity.LatticeAccount, "Bucketed_Attribute").eq("Label2") //
                 .build();
         Restriction nullLbl = Restriction.builder() //
-                .let(BusinessEntity.LatticeAccount, "bucketed_attribute").eq(null) //
+                .let(BusinessEntity.LatticeAccount, "Bucketed_Attribute").eq(null) //
                 .build();
         Restriction restriction = Restriction.builder().or(lbl2, nullLbl).build();
         Query query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
@@ -158,11 +158,11 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testSortAndPage() {
         Restriction nameIsCity = Restriction.builder() //
-                .let(BusinessEntity.Account, "companyname").eq(BusinessEntity.Account, "city") //
+                .let(BusinessEntity.Account, "CompanyName").eq(BusinessEntity.Account, "City") //
                 .build();
-        Query query = Query.builder().select(BusinessEntity.Account, "id", "companyname", "city") //
+        Query query = Query.builder().select(BusinessEntity.Account, "ID", "CompanyName", "City") //
                 .where(nameIsCity) //
-                .orderBy(BusinessEntity.Account, "companyname") //
+                .orderBy(BusinessEntity.Account, "CompanyName") //
                 .build();
 
         List<Map<String, Object>> results;
@@ -178,7 +178,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 results = queryEvaluator.run(attrRepo, query).getData();
             }
             for (Map<String, Object> result : results) {
-                String name = result.get("companyname").toString();
+                String name = result.get("CompanyName").toString();
                 if (prevName != null) {
                     Assert.assertTrue(prevName.compareTo(name) <= 0);
                 }
@@ -197,10 +197,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testFreeTextSearch() {
         Restriction nameIsCity = Restriction.builder() //
-                .let(BusinessEntity.Account, "companyname").eq(BusinessEntity.Account, "city") //
+                .let(BusinessEntity.Account, "CompanyName").eq(BusinessEntity.Account, "City") //
                 .build();
 
-        Query query = Query.builder().select(BusinessEntity.Account, "id", "companyname", "city") //
+        Query query = Query.builder().select(BusinessEntity.Account, "ID", "CompanyName", "City") //
                 .where(nameIsCity) //
                 .build();
 
@@ -209,13 +209,13 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
             results = queryEvaluator.run(attrRepo, query).getData();
         }
         Assert.assertEquals(results.size(), 211);
-        long count = results.stream().map(m -> m.get("city")).filter(v -> ((String) v).contains("AMBUR")).count();
+        long count = results.stream().map(m -> m.get("City")).filter(v -> ((String) v).contains("AMBUR")).count();
         Assert.assertEquals(count, 4);
 
-        query = Query.builder().select(BusinessEntity.Account, "id", "companyname", "city") //
+        query = Query.builder().select(BusinessEntity.Account, "ID", "CompanyName", "City") //
                 .where(nameIsCity) //
                 .freeText("AMBUR") //
-                .freeTextAttributes(BusinessEntity.Account, "city") //
+                .freeTextAttributes(BusinessEntity.Account, "City") //
                 .build();
 
         results = queryEvaluator.run(attrRepo, query).getData();
