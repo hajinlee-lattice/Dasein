@@ -35,21 +35,6 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
                 log.debug(String.format("%s: %s", key, props.getProperty(key)));
             }
         }
-        for (Object key : props.keySet()) {
-            String keyStr = key.toString();
-            String valueStr = resolvePlaceholder(keyStr, props, springSystemPropertiesMode);
-            // Decrypt credentials
-            if (keyStr.contains(CipherUtils.ENCRYPTED)) {
-                try {
-                    valueStr = CipherUtils.decrypt(valueStr);
-                } catch (Exception e) {
-                    throw new RuntimeException("Decryption failed when parsing property " + keyStr + ":" + valueStr, e);
-                }
-                props.put(keyStr, valueStr);
-            }
-            propertiesMap.put(keyStr, valueStr);
-        }
-
         // Need to replace variables because there's no convenient way to get
         // Spring to do it
         Pattern pattern = Pattern.compile("(\\$\\{(\\w+)\\})");
@@ -73,7 +58,20 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
             props.put(key, value);
             propertiesMap.put((String) key, value);
         }
-
+        for (Object key : props.keySet()) {
+            String keyStr = key.toString();
+            String valueStr = resolvePlaceholder(keyStr, props, springSystemPropertiesMode);
+            // Decrypt credentials
+            if (keyStr.contains(CipherUtils.ENCRYPTED)) {
+                try {
+                    valueStr = CipherUtils.decrypt(valueStr);
+                } catch (Exception e) {
+                    throw new RuntimeException("Decryption failed when parsing property " + keyStr + ":" + valueStr, e);
+                }
+                props.put(keyStr, valueStr);
+            }
+            propertiesMap.put(keyStr, valueStr);
+        }
         super.processProperties(beanFactory, props);
 
     }
