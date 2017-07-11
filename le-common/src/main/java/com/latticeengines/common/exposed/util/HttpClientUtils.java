@@ -86,6 +86,7 @@ public class HttpClientUtils {
                         .setConnectionManager(connectionManager) //
                         .build());
         reqFac.setConnectTimeout(10000); // 10 sec
+        reqFac.setReadTimeout(600000); // 10 min
         return reqFac;
     }
 
