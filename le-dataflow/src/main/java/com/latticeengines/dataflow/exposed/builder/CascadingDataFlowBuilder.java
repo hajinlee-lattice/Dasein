@@ -971,6 +971,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         log.info(String.format("About to run data flow %s using execution engine %s", flowName, engine.getName()));
         log.info("Using hadoop fs.defaultFS = " + config.get(FileSystem.FS_DEFAULT_NAME_KEY));
+        String appJarPath = "";
         try {
             String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataflow/lib/"
                     : "/app/" + artifactVersion + "/dataflow/lib/";
@@ -980,9 +981,12 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 String jarId = file.substring(file.lastIndexOf("/"));
                 if (jarId.contains("le-dataflow-")) {
                     jarId = "flink.jar";
+                    appJarPath = file;
+                } else {
+                    log.info("Adding " + file + " to flowdef classpath.");
+                    flowDef.addToClassPath(file);
                 }
                 extraJarsForFlink.put(jarId, file);
-                flowDef.addToClassPath(file);
             }
         } catch (Exception e) {
             log.warn("Exception retrieving library jars for this flow.");
@@ -1009,7 +1013,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             if ("yarn".endsWith(flinkMode)) {
                 String queue = dataFlowCtx.getProperty(DataFlowProperty.QUEUE, String.class);
                 String name = "Flink Session ["
-                        + dataFlowCtx.getProperty(DataFlowProperty.FLOWNAME, String.class, "Cascading Dataflow") + "]";
+                        + dataFlowCtx.getProperty(DataFlowProperty.FLOWNAME, String.class, "Cascading DataFlow") + "]";
                 YarnConfiguration yarnConf = (YarnConfiguration) config;
                 org.apache.flink.configuration.Configuration flinkConf = dataFlowCtx
                         .getProperty(DataFlowProperty.FLINKCONF, org.apache.flink.configuration.Configuration.class);
@@ -1024,6 +1028,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         try {
             AppProps.setApplicationJarClass(properties, getClass());
+            if (StringUtils.isNotBlank(appJarPath)) {
+                log.info("Set application jar path to " + appJarPath);
+                AppProps.setApplicationJarPath(properties, appJarPath);
+            }
             FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
             Flow<?> flow = flowConnector.connect(flowDef);
             flow.writeDOT("dot/wcr.dot");

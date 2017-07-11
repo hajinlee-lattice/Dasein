@@ -2,7 +2,6 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
@@ -25,6 +24,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.pipe.Pipe;
+import cascading.property.AppProps;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.util.DelimitedParser;
 import cascading.scheme.util.FieldTypeResolver;
@@ -64,14 +64,6 @@ public class SimpleCascadingExecutor {
         log.info(String.format("Delimiter: %s, Qualifier: %s", delimiter, qualifier));
 
         Schema schema = fieldMapping.getAvroSchema();
-        Properties properties = new Properties();
-        String translatedQueue = LedpQueueAssigner
-                .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
-        ExecutionEngine engine = ExecutionEngine.get(ENGINE);
-        DataFlowContext dataFlowCtx = new DataFlowContext();
-        dataFlowCtx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
-        dataFlowCtx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
-        FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
         AvroScheme avroScheme = new AvroScheme(schema);
         FieldTypeResolver fieldTypeResolver = new CustomFieldTypeResolver(fieldMapping);
         DelimitedParser delimitedParser = (treatEqualQuoteSpecial && qualifier != null)
@@ -90,6 +82,7 @@ public class SimpleCascadingExecutor {
         FlowDef flowDef = FlowDef.flowDef().setName(CSV_TO_AVRO_PIPE).addSource(csvToAvroPipe, csvTap)
                 .addTailSink(csvToAvroPipe, avroTap);
 
+        String appJarPath = "";
         try {
             String artifactVersion = versionManager.getCurrentVersionInStack(stackName);
             String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataflow/lib/"
@@ -97,12 +90,30 @@ public class SimpleCascadingExecutor {
             log.info("Using dataflow lib path = " + dataFlowLibDir);
             List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dataFlowLibDir);
             for (String file : files) {
-                flowDef.addToClassPath(file);
+                String jarId = file.substring(file.lastIndexOf("/"));
+                if (jarId.contains("le-dataflow-")) {
+                    appJarPath = file;
+                } else {
+                    log.info("Adding " + file + " to flowdef classpath.");
+                    flowDef.addToClassPath(file);
+                }
             }
         } catch (Exception e) {
             log.warn("Exception retrieving library jars for this flow.");
         }
 
+        Properties properties = new Properties();
+        if (StringUtils.isNotBlank(appJarPath)) {
+            log.info("Set application jar path to " + appJarPath);
+            AppProps.setApplicationJarPath(properties, appJarPath);
+        }
+        String translatedQueue = LedpQueueAssigner
+                .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
+        ExecutionEngine engine = ExecutionEngine.get(ENGINE);
+        DataFlowContext dataFlowCtx = new DataFlowContext();
+        dataFlowCtx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
+        dataFlowCtx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
+        FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
         Flow<?> wcFlow = flowConnector.connect(flowDef);
 
         wcFlow.complete();
