@@ -58,7 +58,7 @@ public class CommonAttributeResource {
     @ResponseBody
     @ApiOperation(value = "Get list of attributes for a business entity")
     private List<ColumnMetadata> getDemoAttributesInEntity(@PathVariable BusinessEntity entity) {
-        return dataLakeService.getAttributesInEntity(entity);
+        return dataLakeService.getDemoAttributes(entity);
     }
 
 }

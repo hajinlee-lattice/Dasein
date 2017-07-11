@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 
-import ch.qos.logback.classic.LoggerContext;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
@@ -34,18 +32,6 @@ public class BatonTool {
     }.getClass().getEnclosingClass());
 
     private static BatonService batonService = new BatonServiceImpl();
-
-    static {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
-                if (loggerFactory instanceof LoggerContext) {
-                    ((LoggerContext) loggerFactory).stop();
-                }
-            }
-        });
-    }
 
     // XXX This needs to be cleaned up
     public static void main(String[] args) throws Exception {

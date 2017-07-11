@@ -85,7 +85,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- all runtime dependencies from le-parent are provided -->
+        <!-- all runtime dependencies from le-parent are provided or test -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
@@ -132,7 +132,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>${commons.csv.version}</version>
-            <scope>provided</scope>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

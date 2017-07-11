@@ -80,10 +80,6 @@
                     <artifactId>spring-boot-starter-jetty</artifactId>
                     <groupId>org.springframework.boot</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>log4j-over-slf4j</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
             </exclusions>
         </dependency>
     </dependencies>
