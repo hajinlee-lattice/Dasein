@@ -42,4 +42,5 @@ public class Feature implements CollectedSource {
     public String getDefaultCronExpression() {
         return cronExpression;
     }
+
 }
