@@ -42,7 +42,8 @@ def load_tokens(profile):
     with open(profile) as file:
         for line in file:
             if '=' in line and ('#' != line.strip()[0]):
-                key, value = line.strip().split('=')[:2]
+                key = line.strip().replace('\n', '').split('=')[0]
+                value = line.strip().replace('\n', '')[len(key) + 1:]
                 m[key.strip()] = value.strip().replace('\n', '')
     return m
 
