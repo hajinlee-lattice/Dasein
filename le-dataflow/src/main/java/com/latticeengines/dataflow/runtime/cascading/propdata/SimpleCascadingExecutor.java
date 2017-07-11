@@ -15,12 +15,15 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.dataflow.exposed.builder.ExecutionEngine;
+import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
-import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.pipe.Pipe;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.util.DelimitedParser;
@@ -33,15 +36,19 @@ import cascading.tuple.Fields;
 public class SimpleCascadingExecutor {
     private static final Log log = LogFactory.getLog(SimpleCascadingExecutor.class);
 
-    private static final String CSV_TO_AVRO_PIPE = "pipe";
+    private static final String CSV_TO_AVRO_PIPE = "CSV2AVRO";
 
     private static final String CSV_DELIMITER = ",";
 
-    private static final String MAPREDUCE_JOB_QUEUENAME = "mapreduce.job.queuename";
-
-//    private static final String TEZ_JOB_QUEUENAME = "tez.queue.name";
+    private static final String ENGINE = "TEZ";
 
     private final Configuration yarnConfiguration;
+
+    @Autowired
+    private VersionManager versionManager;
+
+    @Value("${dataflow.hdfs.stack:}")
+    private String stackName;
 
     @Value("${dataplatform.queue.scheme:legacy}")
     private String yarnQueueScheme;
@@ -49,12 +56,6 @@ public class SimpleCascadingExecutor {
     public SimpleCascadingExecutor(Configuration yarnConfiguration) {
         this.yarnConfiguration = yarnConfiguration;
     }
-
-    @Autowired
-    private VersionManager versionManager;
-
-    @Value("${dataflow.hdfs.stack:}")
-    private String stackName;
 
     public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath,
             String delimiter, String qualifier, String charset, boolean treatEqualQuoteSpecial)
@@ -70,15 +71,11 @@ public class SimpleCascadingExecutor {
 
         String translatedQueue = LedpQueueAssigner
                 .overwriteQueueAssignment(LedpQueueAssigner.getPropDataQueueNameForSubmission(), yarnQueueScheme);
-        properties.put(MAPREDUCE_JOB_QUEUENAME, translatedQueue);
-        /*
-        properties.put(TEZ_JOB_QUEUENAME, translatedQueue);
-        properties = FlowRuntimeProps.flowRuntimeProps().setGatherPartitions(1)
-                .buildProperties(properties);
-        Hadoop2TezFlowConnector flowConnector = new Hadoop2TezFlowConnector(properties);
-        */
-
-        HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
+        ExecutionEngine engine = ExecutionEngine.get(ENGINE);
+        DataFlowContext dataFlowCtx = new DataFlowContext();
+        dataFlowCtx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
+        dataFlowCtx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
+        FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
         AvroScheme avroScheme = new AvroScheme(schema);
         FieldTypeResolver fieldTypeResolver = new CustomFieldTypeResolver(fieldMapping);
         DelimitedParser delimitedParser = (treatEqualQuoteSpecial && qualifier != null)
