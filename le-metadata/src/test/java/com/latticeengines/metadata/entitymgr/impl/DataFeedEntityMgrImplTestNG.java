@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNull;
 
 import java.util.Date;
 
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -15,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -83,6 +85,12 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         a2.setPhysicalDataType("string");
         dataTable.addAttribute(a2);
         dataTable.setTableType(TableType.DATATABLE);
+        Extract extract1 = new Extract();
+        extract1.setName("extract1");
+        extract1.setPath("path1");
+        extract1.setExtractionTimestamp(DateTime.now().getMillis());
+        extract1.setProcessedRecords(1L);
+        dataTable.addExtract(extract1);
 
         DataFeedTask task = new DataFeedTask();
         task.setDataFeed(datafeed);

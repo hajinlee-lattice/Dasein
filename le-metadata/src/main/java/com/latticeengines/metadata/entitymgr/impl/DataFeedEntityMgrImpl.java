@@ -131,7 +131,8 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         List<DataFeedTask> tasks = new ArrayList<>(datafeed.getTasks());
         tasks.forEach(task -> task.setImportData(datafeedTaskEntityMgr.pollFirstDataTable(task)));
         log.info("tasks for consolidates are: " + tasks);
-        List<DataFeedImport> imports = tasks.stream().filter(task -> task.getImportData() != null)
+        List<DataFeedImport> imports = tasks.stream()
+                .filter(task -> task.getImportData() != null && !task.getImportData().getExtracts().isEmpty())
                 .map(DataFeedImportUtils::createImportFromTask).collect(Collectors.toList());
 
         DataFeedExecution execution = new DataFeedExecution();
