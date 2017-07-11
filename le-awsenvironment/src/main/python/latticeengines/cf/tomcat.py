@@ -84,18 +84,27 @@ def tomcat_task(profile_vars, environment):
         .add_docker_label("stack", profile_vars["LE_STACK"].ref()) \
         .add_docker_label("app", PARAM_DOCKER_IMAGE.ref())
 
-    container = container.set_logging({
-        "LogDriver": "splunk",
-        "Options": {
-            "splunk-url": PARAM_SPLUNK_URL.ref(),
-            "splunk-token": PARAM_SPLUNK_TOKEN.ref(),
-            "splunk-index": "main",
-            "splunk-sourcetype": "log4j",
-            "splunk-format": "raw",
-            "splunk-gzip": "true",
-            "labels": "stack,app"
-        }})
-
+    # TODO: should also use splunk in DR
+    if environment != "dr":
+        container = container.set_logging({
+            "LogDriver": "splunk",
+            "Options": {
+                "splunk-url": PARAM_SPLUNK_URL.ref(),
+                "splunk-token": PARAM_SPLUNK_TOKEN.ref(),
+                "splunk-index": "main",
+                "splunk-sourcetype": "log4j",
+                "splunk-format": "raw",
+                "splunk-gzip": "true",
+                "labels": "stack,app"
+            }})
+    else:
+        container = container.set_logging({
+            "LogDriver": "awslogs",
+            "Options": {
+                "awslogs-group": { "Fn::Join": [ "-", ["lpi", profile_vars["LE_STACK"].ref()]] },
+                "awslogs-region": { "Ref": "AWS::Region" },
+                "awslogs-stream-prefix": PARAM_DOCKER_IMAGE.ref()
+            }})
 
     for k, p in profile_vars.items():
         container = container.set_env(k, p.ref())
