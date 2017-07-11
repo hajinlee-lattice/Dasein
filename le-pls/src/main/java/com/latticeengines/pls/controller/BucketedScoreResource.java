@@ -15,9 +15,9 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "bucketedscore", description = "REST resource for bucketed scores")
 @RestController

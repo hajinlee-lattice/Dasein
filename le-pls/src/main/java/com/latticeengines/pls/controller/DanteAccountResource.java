@@ -2,7 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,8 +19,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.dante.DanteAccountProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.wordnik.swagger.annotations.Api;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(value = "dante/accounts", description = "REST resource for Dante Accounts")
@@ -27,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/dante/accounts")
 @PreAuthorize("hasRole('View_PLS_Plays')")
 public class DanteAccountResource {
-    private static final Logger log = Logger.getLogger(DanteAccountResource.class);
+    private static final Log log = LogFactory.getLog(DanteAccountResource.class);
 
     @Autowired
     DanteAccountProxy danteAccountProxy;

@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.pls.service.MetadataSegmentService;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "data-collection-segments", description = "REST resource for segments")
 @RestController

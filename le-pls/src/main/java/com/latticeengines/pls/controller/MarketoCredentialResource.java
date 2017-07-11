@@ -19,8 +19,9 @@ import com.latticeengines.domain.exposed.pls.MarketoMatchField;
 import com.latticeengines.domain.exposed.remote.marketo.LeadField;
 import com.latticeengines.pls.service.MarketoCredentialService;
 import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "marketo", description = "REST resource for marketo credentials")
 @RestController

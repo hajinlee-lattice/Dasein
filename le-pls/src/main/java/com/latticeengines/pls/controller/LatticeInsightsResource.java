@@ -46,10 +46,10 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMa
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
-import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "latticeinsights", description = "REST resource for Lattice Insights")
 @RestController

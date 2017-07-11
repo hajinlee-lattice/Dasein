@@ -27,10 +27,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
-import com.wordnik.swagger.annotations.ApiParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "scores/apiconsole", description = "REST resource for interacting with scoringapi via APIConsole")
 @RestController

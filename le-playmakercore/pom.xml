@@ -30,11 +30,6 @@
 			<version>${le.datadb.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-			<version>${hibernate.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.latticeengines</groupId>
 			<artifactId>le-proxy</artifactId>
 			<version>${le.proxy.version}</version>

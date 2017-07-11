@@ -2,7 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,8 +23,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.wordnik.swagger.annotations.Api;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(value = "dante/talkingpoints", description = "REST resource for Dante Talking Points")
@@ -32,7 +33,7 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Plays')")
 public class TalkingPointResource {
 
-    private static final Logger log = Logger.getLogger(TalkingPointResource.class);
+    private static final Log log = LogFactory.getLog(TalkingPointResource.class);
 
     @Autowired
     TalkingPointProxy talkingPointProxy;
