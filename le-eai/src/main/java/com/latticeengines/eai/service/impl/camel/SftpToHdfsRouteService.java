@@ -88,7 +88,7 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
                         + "noop=true&" //
                         + "fileName=%s&" //
                         + "username=%s&" //
-                        + "password=%s&" //
+                        + "password=RAW(%s)&" //
                         + "stepwise=false&" //
                         + "localWorkDirectory=%s&" //
                         + "knownHostsFile=%s",
