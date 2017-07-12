@@ -15,10 +15,10 @@ public class AccountProxy extends MicroserviceRestApiProxy implements AccountInt
 
     @Override
     public DataPage getAccounts(String customerSpace, String start, Integer offset, Integer pageSize,
-            Boolean hasSfdcAccountId, DataRequest dataRequest) {
+            DataRequest dataRequest) {
         String url = constructUrl(
-                "/{customerSpace}/accounts/data?start={start}&offset={offset}&pageSize={pagesize}&hasSfdcAccountId={hasSfdcAccountId}",
-                customerSpace, start, offset, pageSize, hasSfdcAccountId);
+                "/{customerSpace}/accounts/data?start={start}&offset={offset}&pageSize={pagesize}", customerSpace,
+                start, offset, pageSize);
         return post("get Data", url, dataRequest, DataPage.class);
     }
 }

@@ -29,7 +29,7 @@ public class AccountQueryServiceTestNG extends ObjectApiFunctionalTestNGBase {
         dataRequest.setAccountIds(Arrays.asList("1", "2", "3"));
         dataRequest.setAttributes(Arrays.asList("companyname", "city", "state"));
         Query query = accountQueryService.generateAccountQuery(DateTimeUtils.convertToStringUTCISO8601(new Date()), 0,
-                200, true, dataRequest);
+                200, dataRequest);
 
         queryEvaluator.evaluate(attrRepo, query);
     }

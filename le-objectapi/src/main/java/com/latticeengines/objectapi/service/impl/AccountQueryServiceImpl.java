@@ -22,8 +22,7 @@ import com.latticeengines.objectapi.service.AccountQueryService;
 public class AccountQueryServiceImpl implements AccountQueryService {
 
     @Override
-    public Query generateAccountQuery(String start, Integer offset, Integer pageSize, Boolean hasSfdcAccountId,
-            DataRequest dataRequest) {
+    public Query generateAccountQuery(String start, Integer offset, Integer pageSize, DataRequest dataRequest) {
         List<Restriction> restrictions = new ArrayList<>();
         if (dataRequest == null) {
             dataRequest = new DataRequest();
