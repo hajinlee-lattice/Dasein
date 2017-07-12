@@ -107,7 +107,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
             throw new RuntimeException("We can't restart consolidate workflow as the most recent one is not failed");
         }
         execution = dataFeedProxy.retryLatestExecution(customerSpace);
-        log.info(String.format("restarted execution of %s with status: %s", execution.getStatus()));
+        log.info(String.format("restarted execution with status: %s", execution.getStatus()));
         return workflowJobService.restart(execution.getWorkflowId());
     }
 
