@@ -5,7 +5,6 @@
     http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <import resource="classpath:pls-context.xml"/>
-    <import resource="classpath:app-context.xml"/>
     <import resource="classpath:pls-security-context.xml"/>
     <import resource="classpath:common-jmx-component-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
