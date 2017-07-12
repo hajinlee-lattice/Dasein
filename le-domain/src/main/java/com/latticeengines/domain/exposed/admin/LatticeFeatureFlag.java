@@ -29,7 +29,8 @@ public enum LatticeFeatureFlag {
     BYPASS_DNB_CACHE("BypassDnbCache", "Bypass DnB Cache"), //
     ENABLE_CDL("EnableCdl", "Enable Customer Data Lake"), //
     ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
-    ENABLE_TALKING_POINTS("EnableTalkingPoints", "Enable Talking Points");
+    ENABLE_TALKING_POINTS("EnableTalkingPoints", "Enable Talking Points"), //
+    PLAYMAKER_DATA_SOURCE("PlayMakerDataSource", "Controls data source for PlayMakerAPI(POET/Converged Platform)");
 
     private String name;
     private String documentation;
