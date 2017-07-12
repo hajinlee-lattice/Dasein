@@ -84,6 +84,9 @@ public class Play implements HasName, HasPid, HasTenantId {
     @JsonProperty("rating")
     @Transient
     private List<RatingObject> rating = new ArrayList<>();
+    {
+        rating.add(new RatingObject());
+    }
 
     @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true)
     private Set<TalkingPoint> talkingPoints;
