@@ -88,7 +88,7 @@ public class Play implements HasName, HasPid, HasTenantId {
         rating.add(new RatingObject());
     }
 
-    @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true)
+    @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play")
     private Set<TalkingPoint> talkingPoints;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)

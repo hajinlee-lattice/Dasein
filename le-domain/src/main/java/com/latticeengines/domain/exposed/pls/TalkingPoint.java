@@ -9,12 +9,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
@@ -45,6 +48,11 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     @JsonProperty("play_id")
     @Column(name = "PLAY_ID", nullable = false)
     private Long playId;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "PLAY_ID", updatable = false, insertable = false)
+    private Play play;
 
     @JsonProperty("title")
     @Column(name = "TITLE", nullable = false)
@@ -91,6 +99,14 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
 
     public void setPlayId(Long playId) {
         this.playId = playId;
+    }
+
+    public Play getPlay() {
+        return play;
+    }
+
+    public void setPlay(Play play) {
+        this.play = play;
     }
 
     public String getTitle() {
