@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -19,7 +20,7 @@ public class TestMatchInputUtils {
     public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, List<String> inputFields, boolean resolveKeyMap) {
         MatchInput input = new MatchInput();
         input.setPredefinedSelection(Predefined.RTS);
-        input.setTenant(new Tenant("PD_Test"));
+        input.setTenant(new Tenant(DataCloudConstants.SERVICE_TENANT));
         input.setFields(inputFields);
         if (resolveKeyMap) {
             input.setKeyMap(MatchKeyUtils.resolveKeyMap(inputFields));

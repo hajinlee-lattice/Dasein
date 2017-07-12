@@ -302,7 +302,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     originalZipCode, originalPhoneNumber);
             nameLocationService.normalize(nameLocation);
             record.setParsedNameLocation(nameLocation);
-            nameLocationSet.add(nameLocation);
+            if (nameLocation.isValid()) {
+                nameLocationSet.add(nameLocation);
+            }
         } catch (Exception e) {
             log.error(e);
             record.setFailed(true);

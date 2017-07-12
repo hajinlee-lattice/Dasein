@@ -1,8 +1,12 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -151,6 +155,23 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
         Assert.assertNotNull(output);
         Assert.assertEquals(output.getResult().size(), 1);
         Assert.assertNull(output.getResult().get(0).getOutput());
+        Assert.assertFalse(output.getResult().get(0).isMatched());
+    }
+
+    @Test(groups = "functional")
+    public void testPublicDomainEmail() {
+        Object[][] data = new Object[][] { { "my@gmail.com" } };
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, new String[]{ "Email" });
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Email"));
+        input.setKeyMap(keyMap);
+        input.setPredefinedSelection(ColumnSelection.Predefined.ID);
+        input.setDataCloudVersion("1.0.0");
+        input.setSkipKeyResolution(true);
+        MatchOutput output = realTimeMatchService.match(input);
+        Assert.assertNotNull(output);
+        Assert.assertEquals(output.getResult().size(), 1);
+        Assert.assertNotNull(output.getResult().get(0).getOutput());
         Assert.assertFalse(output.getResult().get(0).isMatched());
     }
 

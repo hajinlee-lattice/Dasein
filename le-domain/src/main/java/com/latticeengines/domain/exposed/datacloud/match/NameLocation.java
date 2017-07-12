@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -120,6 +121,11 @@ public class NameLocation implements Fact, Serializable {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    @JsonIgnore
+    public boolean isValid() {
+        return (name != null || phoneNumber != null) && country != null;
     }
 
     @Override
