@@ -47,7 +47,7 @@ public class SimpleCascadingExecutor {
     @Autowired
     private VersionManager versionManager;
 
-    @Value("${dataflow.hdfs.stack:}")
+    @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
     @Value("${dataplatform.queue.scheme:legacy}")
