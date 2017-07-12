@@ -144,7 +144,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     }
 
     protected String snapshotDirInHdfs(P progress) {
-        return hdfsPathBuilder.constructSnapshotDir(getSource(), getVersionString(progress)).toString();
+        return hdfsPathBuilder.constructTransformationSourceDir(getSource(), getVersionString(progress)).toString();
     }
 
     protected boolean cleanupHdfsDir(String targetDir, P progress) {

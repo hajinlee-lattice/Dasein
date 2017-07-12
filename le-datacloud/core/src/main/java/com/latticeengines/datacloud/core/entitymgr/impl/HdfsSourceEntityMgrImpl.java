@@ -189,7 +189,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             String path = null;
             if (source instanceof TableSource) {
                 return ((TableSource) source).getTable();
-            } else if (source instanceof TransformedToAvroSource) {
+            } else if (source instanceof TransformedToAvroSource || source instanceof IngestedRawSource) {
                 path = hdfsPathBuilder.constructRawDir(source).append(version).toString();
             } else {
                 path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
