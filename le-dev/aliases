@@ -21,7 +21,7 @@ alias scoringdplnobld='hadoop fs -rm -r /app/scoring || true && hadoop fs -mkdir
 alias scoringdpl='mvn -Pshaded-yarn -DskipTests clean install && scoringdplnobld'
 
 alias dcbld='dirs -c && pushd $WSHOME/le-datacloud && mvn -T4 -DskipTests clean install && popd'
-alias dcdplnobld='hadoop fs -mkdir -p /app/datacloud/lib && hadoop fs -rm -r /app/datacloud || true && hadoop fs -mkdir -p /app/datacloud/lib && hadoop fs -copyFromLocal $WSHOME/le-datacloud/yarn/target/le-datacloud*shaded.jar /app/datacloud/lib'
+alias dcdplnobld='hadoop fs -mkdir -p /app/datacloud/lib && hadoop fs -rm -r /app/datacloud || true && hadoop fs -mkdir -p /app/datacloud/lib && hdfs dfs -copyFromLocal $WSHOME/le-datacloud/yarn/target/le-datacloud*shaded.jar /app/datacloud/lib && hdfs dfs -copyFromLocal $WSHOME/le-datacloud/etl/templates /app/datacloud'
 alias dcdpl='dcbld && dirs -c && pushd $WSHOME/le-datacloud/yarn && mvn -Pshaded-yarn -DskipTests clean install && popd && dcdplnobld'
 
 alias dpdplnobld='hadoop fs -rm -r /app/dataplatform || true && hadoop fs -mkdir -p /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/target/le-dataplatform*shaded.jar /app/dataplatform/lib && bash $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh'

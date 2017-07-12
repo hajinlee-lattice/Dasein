@@ -57,6 +57,10 @@
                                     <location>../le-datacloud/yarn/target/le-datacloud-yarn-${project.version}-shaded.jar
                                     </location>
                                 </source>
+                                <source>
+                                    <location>../le-datacloud/etl/target/templates.tar.gz
+                                    </location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>

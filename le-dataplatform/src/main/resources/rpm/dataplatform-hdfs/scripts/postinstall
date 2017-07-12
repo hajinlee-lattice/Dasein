@@ -46,6 +46,10 @@ do
     su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/dataplatform/le-$microservice*-shaded.jar /app/$VERSION/$microservice/lib"
 done
 su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/dataplatform/le-datacloud-yarn*-shaded.jar /app/$VERSION/datacloud/lib"
-rm -rf /tmp/app/dataplatform
-rm -rf /tmp/app/playmaker
-rm -rf /tmp/app/scoring
+
+rm -rf /tmp/app/datacloud/templates || true
+mkdir -p /tmp/app/datacloud/templates
+tar xzf /tmp/app/dataplatform/templates.tar.gz -C /tmp/app/datacloud/templates
+su -l yarn -c "hdfs dfs -copyFromLocal -f /tmp/app/datacloud/templates /app/$VERSION/datacloud"
+
+rm -rf /tmp/app
