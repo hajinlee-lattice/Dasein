@@ -123,11 +123,6 @@ public class NameLocation implements Fact, Serializable {
         this.phoneNumber = phoneNumber;
     }
 
-    @JsonIgnore
-    public boolean isValid() {
-        return (name != null || phoneNumber != null) && country != null;
-    }
-
     @Override
     public int hashCode() {
         return toString().hashCode();

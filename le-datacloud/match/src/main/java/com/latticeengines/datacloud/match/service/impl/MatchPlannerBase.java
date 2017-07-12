@@ -302,7 +302,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                     originalZipCode, originalPhoneNumber);
             nameLocationService.normalize(nameLocation);
             record.setParsedNameLocation(nameLocation);
-            if (nameLocation.isValid()) {
+            if (isValidNameLocation(nameLocation)) {
                 nameLocationSet.add(nameLocation);
             }
         } catch (Exception e) {
@@ -310,6 +310,11 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             record.setFailed(true);
             record.addErrorMessages("Error when cleanup name and location fields: " + e.getMessage());
         }
+    }
+
+    private static boolean isValidNameLocation(NameLocation nameLocation) {
+        return (StringUtils.isNotBlank(nameLocation.getName()) || StringUtils.isNotBlank(nameLocation.getPhoneNumber()))
+                && StringUtils.isNotBlank(nameLocation.getCountryCode());
     }
 
     private NameLocation getNameLocation(String originalName, String originalCountry, String originalState,
