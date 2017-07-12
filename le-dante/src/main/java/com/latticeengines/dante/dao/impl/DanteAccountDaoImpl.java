@@ -11,7 +11,7 @@ import com.latticeengines.dante.dao.DanteAccountDao;
 import com.latticeengines.dantedb.exposed.dao.impl.BaseDanteDaoImpl;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 
-@Component("danteAccountCacheDao")
+@Component("danteAccountDao")
 public class DanteAccountDaoImpl extends BaseDanteDaoImpl<DanteAccount> implements DanteAccountDao {
 
     private static final Logger log = Logger.getLogger(DanteAccountDaoImpl.class);

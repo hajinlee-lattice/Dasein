@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
@@ -468,9 +469,9 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
                     customerSpace.toString());
 
             log.debug("Get from " + url);
-            PlayLaunch playLauch = restTemplate.getForObject(url, PlayLaunch.class);
+            PlayLaunch playLaunch = restTemplate.getForObject(url, PlayLaunch.class);
 
-            return playLauch;
+            return playLaunch;
         } catch (Exception e) {
             throw new RuntimeException("getPlayLaunch: Remote call failure: " + e.getMessage(), e);
         }
@@ -484,5 +485,19 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         url += "?state=" + action.name();
 
         restTemplate.put(url, null);
+    }
+
+    public Play createOrUpdatePlay(CustomerSpace customerSpace, //
+            Play play) {
+        try {
+            String url = constructUrl("pls/internal/plays", customerSpace.toString());
+
+            log.debug("Create Play from " + url);
+            play = restTemplate.postForObject(url, play, Play.class);
+
+            return play;
+        } catch (Exception e) {
+            throw new RuntimeException("getPlayLaunch: Remote call failure: " + e.getMessage(), e);
+        }
     }
 }

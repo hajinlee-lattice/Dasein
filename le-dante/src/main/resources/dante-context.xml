@@ -11,6 +11,7 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.dante.controller.*"/>
     </context:component-scan>
 
+    <import resource="classpath:db-context.xml"/>
     <import resource="classpath:dantedb-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml"/>
@@ -20,7 +21,7 @@
         <property name="sessionFactory" ref="danteSessionFactory"/>
     </bean>
 
-    <bean id="danteAccountCacheDao" class="com.latticeengines.dante.dao.impl.DanteAccountDaoImpl">
+    <bean id="danteAccountDao" class="com.latticeengines.dante.dao.impl.DanteAccountDaoImpl">
         <property name="sessionFactory" ref="danteSessionFactory"/>
     </bean>
 </beans>

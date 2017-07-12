@@ -2,12 +2,14 @@ package com.latticeengines.dante.service.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
+import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
@@ -15,6 +17,7 @@ import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
+import com.latticeengines.domain.exposed.pls.TalkingPoint;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
 @Component("talkingPointService")
@@ -35,29 +38,31 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     @Autowired
     private DanteTalkingPointEntityMgr danteTalkingPointEntityMgr;
 
-    public String createOrUpdate(List<DanteTalkingPoint> dtps) {
+    @Autowired
+    private TalkingPointEntityMgr talkingPointEntityMgr;
+
+    public String createOrUpdate(List<TalkingPoint> tps) {
         try {
-            for (DanteTalkingPoint dtp : dtps) {
-                danteTalkingPointEntityMgr.createOrUpdate(dtp);
+            for (TalkingPoint tp : tps) {
+                talkingPointEntityMgr.createOrUpdate(tp);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new LedpException(LedpCode.LEDP_38002);
         }
-
         return "Success";
     }
 
-    public DanteTalkingPoint findByExternalID(String externalID) {
-        DanteTalkingPoint tp = danteTalkingPointEntityMgr.findByExternalID(externalID);
+    public TalkingPoint findByName(String name) {
+        TalkingPoint tp = talkingPointEntityMgr.findByField("name", name);
         if (tp != null)
             return tp;
         else
-            throw new LedpException(LedpCode.LEDP_38001, new String[] { externalID });
+            throw new LedpException(LedpCode.LEDP_38001, new String[] { name });
     }
 
-    public List<DanteTalkingPoint> findAllByPlayID(String playExternalID) {
-        return danteTalkingPointEntityMgr.findAllByPlayID(playExternalID);
+    public List<TalkingPoint> findAllByPlayId(Long playId) {
+        return talkingPointEntityMgr.findAllByPlayID(playId);
     }
 
     @Override
@@ -73,7 +78,19 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         }
     }
 
-    public void delete(DanteTalkingPoint dtp) {
-        danteTalkingPointEntityMgr.delete(dtp);
+    public void delete(TalkingPoint tp) {
+        talkingPointEntityMgr.delete(tp);
+    }
+
+    public void publish(Long playId) {
+        List<TalkingPoint> tps = findAllByPlayId(playId);
+        throw new NotImplementedException();
+        // for (TalkingPoint tp : tps) {
+        // danteTalkingPointEntityMgr.createOrUpdate(covertForDante(tp));
+        // }
+    }
+
+    private DanteTalkingPoint covertForDante(TalkingPoint tp) {
+        return null;
     }
 }

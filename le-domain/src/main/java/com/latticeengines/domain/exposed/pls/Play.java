@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -15,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -82,6 +84,9 @@ public class Play implements HasName, HasPid, HasTenantId {
     @JsonProperty("rating")
     @Transient
     private List<RatingObject> rating = new ArrayList<>();
+
+    @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true)
+    private Set<TalkingPoint> talkingPoints;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
@@ -169,13 +174,20 @@ public class Play implements HasName, HasPid, HasTenantId {
         this.callPrep = callPrep;
     }
 
-
     public List<RatingObject> getRating() {
         return rating;
     }
 
     public void setRating(List<RatingObject> rating) {
         this.rating = rating;
+    }
+
+    public Set<TalkingPoint> getTalkingPoints() {
+        return talkingPoints;
+    }
+
+    public void setTalkingPoints(Set<TalkingPoint> talkingPoints) {
+        this.talkingPoints = talkingPoints;
     }
 
     @JsonIgnore

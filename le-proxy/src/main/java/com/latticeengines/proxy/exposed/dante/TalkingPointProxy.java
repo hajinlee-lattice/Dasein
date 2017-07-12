@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
-import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.TalkingPoint;
 import com.latticeengines.network.exposed.dante.TalkingPointInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.security.exposed.serviceruntime.exception.PostResponseErrorHandler;
@@ -20,14 +20,14 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
         super("/dante/talkingpoints");
     }
 
-    public ResponseDocument<?> createOrUpdate(List<DanteTalkingPoint> talkingPoints) {
+    public ResponseDocument<?> createOrUpdate(List<TalkingPoint> talkingPoints) {
         String url = constructUrl("/");
         setErrorHandler(new PostResponseErrorHandler());
         return post("createOrUpdate", url, talkingPoints, ResponseDocument.class);
     }
 
-    public ResponseDocument<?> delete(String externalID) {
-        String url = constructUrl("/" + externalID);
+    public ResponseDocument<?> delete(String name) {
+        String url = constructUrl("/" + name);
 
         try {
             delete("delete", url);
@@ -40,9 +40,9 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
     }
 
     @SuppressWarnings("unchecked")
-    public ResponseDocument<List<DanteTalkingPoint>> findAllByPlayID(String playID) {
+    public ResponseDocument<List<TalkingPoint>> findAllByPlayID(Long playID) {
         String url = constructUrl("/play/" + playID);
-        return get("findAllByPlayID", url, ResponseDocument.class);
+        return get("findAllByPlayId", url, ResponseDocument.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -52,9 +52,15 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
     }
 
     @SuppressWarnings("unchecked")
-    public ResponseDocument<DanteTalkingPoint> findByExternalID(String externalID) {
-        String url = constructUrl("/" + externalID);
-        return get("findByExternalID", url, ResponseDocument.class);
+    public ResponseDocument<?> publish(Long playId) {
+        String url = constructUrl("/publish" + "?playId=" + playId);
+        return post("publish", url, null, ResponseDocument.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ResponseDocument<TalkingPoint> findByName(String name) {
+        String url = constructUrl("/" + name);
+        return get("findByName", url, ResponseDocument.class);
     }
 
 }
