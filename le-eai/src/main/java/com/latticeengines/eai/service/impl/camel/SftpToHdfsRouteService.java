@@ -2,6 +2,8 @@ package com.latticeengines.eai.service.impl.camel;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import javax.annotation.PostConstruct;
 
@@ -83,17 +85,23 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
         }
         deleteKnownHostsFile();
         createKnownHostsFile();
-        final String sftpUrl = String.format(
-                "sftp://%s:%d%s?" //
-                        + "noop=true&" //
-                        + "fileName=%s&" //
-                        + "username=%s&" //
-                        + "password=RAW(%s)&" //
-                        + "stepwise=false&" //
-                        + "localWorkDirectory=%s&" //
-                        + "knownHostsFile=%s",
-                config.getSftpHost(), config.getSftpPort(), sftpDir, config.getFileName(), config.getSftpUserName(),
-                CipherUtils.decrypt(config.getSftpPasswordEncrypted()), getTempDirectory(), KNOWN_HOSTS_FILE);
+        String sftpUrl;
+        try {
+            sftpUrl = String.format("sftp://%s:%d%s?", config.getSftpHost(), config.getSftpPort(), sftpDir)
+                    + URLEncoder.encode(String.format(
+                            "noop=true&" //
+                                    + "fileName=%s&" //
+                                    + "username=%s&" //
+                                    + "password=%s&" //
+                                    + "stepwise=false&" //
+                                    + "localWorkDirectory=%s&" //
+                                    + "knownHostsFile=%s",
+                            config.getFileName(), config.getSftpUserName(),
+                            CipherUtils.decrypt(config.getSftpPasswordEncrypted()), getTempDirectory(),
+                            KNOWN_HOSTS_FILE), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         switch (fsType) {
         case LOCAL:
             final String fileUrl = String.format("file:%s?tempFileName={file:name}.%s",
