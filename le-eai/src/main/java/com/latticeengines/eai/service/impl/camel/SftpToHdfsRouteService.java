@@ -102,6 +102,7 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+        log.info("SFTP URL: " + sftpUrl);
         switch (fsType) {
         case LOCAL:
             final String fileUrl = String.format("file:%s?tempFileName={file:name}.%s",
