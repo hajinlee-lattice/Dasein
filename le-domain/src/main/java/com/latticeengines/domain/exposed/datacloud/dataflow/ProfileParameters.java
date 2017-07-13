@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
 public class ProfileParameters extends TransformationFlowParameters {
     @JsonProperty("NumBucketEqualSized")
@@ -39,6 +41,12 @@ public class ProfileParameters extends TransformationFlowParameters {
 
     @JsonProperty("AttrsToRetain")
     private List<Attribute> attrsToRetain;
+
+    @JsonProperty("CodeBookMap")
+    private Map<String, BitCodeBook> codeBookMap; // encoded attr -> bitCodeBook
+
+    @JsonProperty("CodeBookLookup")
+    private Map<String, String> codeBookLookup; // decoded attr -> encoded attr
 
     public boolean isNumBucketEqualSized() {
         return numBucketEqualSized;
@@ -118,6 +126,22 @@ public class ProfileParameters extends TransformationFlowParameters {
 
     public void setAttrsToRetain(List<Attribute> attrsToRetain) {
         this.attrsToRetain = attrsToRetain;
+    }
+
+    public Map<String, BitCodeBook> getCodeBookMap() {
+        return codeBookMap;
+    }
+
+    public void setCodeBookMap(Map<String, BitCodeBook> codeBookMap) {
+        this.codeBookMap = codeBookMap;
+    }
+
+    public Map<String, String> getCodeBookLookup() {
+        return codeBookLookup;
+    }
+
+    public void setCodeBookLookup(Map<String, String> codeBookLookup) {
+        this.codeBookLookup = codeBookLookup;
     }
 
     public static class Attribute {

@@ -29,6 +29,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
+import com.latticeengines.datacloud.core.util.BitCodeBookUtils;
 import com.latticeengines.datacloud.dataflow.transformation.Profile;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
@@ -42,6 +43,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
@@ -51,11 +53,12 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     private static final Logger log = LoggerFactory.getLogger(SourceProfiler.class);
 
     public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILER;
-    private static final String IS_SEGMENT = "IsSegment";
+    private static final String IS_PROFILE = "IsProfile";
     private static final String DECODE_STRATEGY = "DecodeStrategy";
     private static final String ENCODED_COLUMN = "EncodedColumn";
     private static final String NUM_BITS = "NumBits";
     private static final String BKT_ALGO = "BktAlgo";
+    private static final String VALUE_DICT = "ValueDict";
 
     @Value("${datacloud.etl.profile.encode.bit:64}")
     private int encodeBits;
@@ -99,8 +102,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         List<ProfileParameters.Attribute> attrsToRetain = new ArrayList<>();
         List<ProfileParameters.Attribute> amAttrsToEnc = new ArrayList<>();
         List<ProfileParameters.Attribute> exAttrsToEnc = new ArrayList<>();
+        Map<String, BitCodeBook> codeBookMap = new HashMap<>();
+        Map<String, String> codeBookLookup = new HashMap<>();
         classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), config, idAttrs, numericAttrs,
-                attrsToRetain, amAttrsToEnc, exAttrsToEnc);
+                attrsToRetain, amAttrsToEnc, exAttrsToEnc, codeBookMap, codeBookLookup);
         if (CollectionUtils.isEmpty(idAttrs)) {
             log.warn("Cannot find ID field (LatticeAccountId, LatticeID).");
         }
@@ -117,12 +122,15 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         paras.setAttrsToRetain(attrsToRetain);
         paras.setAmAttrsToEnc(amAttrsToEnc);
         paras.setExAttrsToEnc(exAttrsToEnc);
+        paras.setCodeBookMap(codeBookMap);
+        paras.setCodeBookLookup(codeBookLookup);
     }
 
     @SuppressWarnings("unchecked")
     private void classifyAttrs(Source baseSrc, String baseVer, ProfileConfig config, List<String> idAttrs,
             List<ProfileParameters.Attribute> numericAttrs, List<ProfileParameters.Attribute> attrsToRetain,
-            List<ProfileParameters.Attribute> amAttrsToEnc, List<ProfileParameters.Attribute> exAttrsToEnc) {
+            List<ProfileParameters.Attribute> amAttrsToEnc, List<ProfileParameters.Attribute> exAttrsToEnc,
+            Map<String, BitCodeBook> codeBookMap, Map<String, String> codeBookLookup) {
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(null, config.getStage(),
                 config.getTransformer());
         Map<String, SourceAttribute> amAttrConf = new HashMap<>();
@@ -133,15 +141,21 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             String avroGlob = TransformerUtils.avroPath(baseSrc, baseVer, hdfsPathBuilder);
             schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlob);
         }
+
         log.info("Classifying attributes...");
         Set<String> numTypes = new HashSet<>(Arrays.asList(new String[] { "int", "long", "float", "double" }));
         Set<String> boolTypes = new HashSet<>(Arrays.asList(new String[] { "boolean" }));
-        Map<String, List<ProfileParameters.Attribute>> attrsToDecode = new HashMap<>();
         try {
-            // Attributes encoded in the account master which need to decode
+            // Attributes encoded in the profiled source which need to decode
+            Map<String, List<ProfileParameters.Attribute>> attrsToDecode = new HashMap<>(); // Encoded attr-> [decoded attrs]
+            Map<String, String> decodeStrs = new HashMap<>();
             for (SourceAttribute amAttr : amAttrConf.values()) {
                 JsonNode arg = om.readTree(amAttr.getArguments());
-                if (!arg.get(IS_SEGMENT).asBoolean() || !arg.hasNonNull(DECODE_STRATEGY)) {
+                if (!arg.hasNonNull(IS_PROFILE)) {
+                    throw new RuntimeException(
+                            String.format("Please provide IsProfile flag for attribute %s", amAttr.getAttribute()));
+                }
+                if (!arg.get(IS_PROFILE).asBoolean() || !arg.hasNonNull(DECODE_STRATEGY)) {
                     continue;
                 }
                 JsonNode decodeStrategy = arg.get(DECODE_STRATEGY);
@@ -149,12 +163,20 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 if (!attrsToDecode.containsKey(attrToDecode)) {
                     attrsToDecode.put(attrToDecode, new ArrayList<>());
                 }
-                int numBits = arg.get(NUM_BITS).asInt();
-                BucketAlgorithm bktAlgo = parseBucketAlgo(arg.get(BKT_ALGO).asText());
-                attrsToDecode.get(attrToDecode).add(new ProfileParameters.Attribute(amAttr.getAttribute(), numBits,
-                        decodeStrategy.toString(), bktAlgo));
+                Integer encodeBitUnit = arg.has(NUM_BITS) ? arg.get(NUM_BITS).asInt() : null;
+                if (!arg.hasNonNull(BKT_ALGO)) {
+                    throw new RuntimeException(
+                            String.format("Please provide BktAlgo for attribute %s", amAttr.getAttribute()));
+                }
+                BucketAlgorithm bktAlgo = parseBucketAlgo(arg.get(BKT_ALGO).asText(),
+                        decodeStrategy.hasNonNull(VALUE_DICT) ? decodeStrategy.get(VALUE_DICT).asText() : null);
+                attrsToDecode.get(attrToDecode).add(new ProfileParameters.Attribute(amAttr.getAttribute(),
+                        encodeBitUnit, decodeStrategy.toString(), bktAlgo));
+                decodeStrs.put(amAttr.getAttribute(), decodeStrategy.toString());
             }
-            // Attributes exist in the basesource
+            // Build BitCodeBook
+            BitCodeBookUtils.constructCodeBookMap(codeBookMap, codeBookLookup, decodeStrs);
+            // Attributes exist in the profiled source
             for (Field field : schema.getFields()) {
                 if (field.name().equals(DataCloudConstants.LATTIC_ID)
                         || field.name().equals(DataCloudConstants.LATTICE_ACCOUNT_ID)) {
@@ -162,12 +184,12 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     idAttrs.add(field.name());
                     continue;
                 }
-                boolean isSeg = true; // from encoded AM attr or external field
-                if (amAttrConf.containsKey(field.name())) { // from AM attr
+                boolean isProfile = true;
+                if (amAttrConf.containsKey(field.name())) {
                     JsonNode arg = om.readTree(amAttrConf.get(field.name()).getArguments());
-                    isSeg = arg.get(IS_SEGMENT).asBoolean();
+                    isProfile = arg.get(IS_PROFILE).asBoolean();
                 }
-                if (!isSeg) { // If not for segment, exclude it from profiling
+                if (!isProfile) {
                     log.info(String.format("Discarded attr: %s", field.name()));
                     continue;
                 }
@@ -214,7 +236,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
     }
 
-    private BucketAlgorithm parseBucketAlgo(String algo) {
+    @SuppressWarnings("unchecked")
+    private BucketAlgorithm parseBucketAlgo(String algo, String valueDict) {
         if (StringUtils.isBlank(algo)) {
             return null;
         }
@@ -222,7 +245,13 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             return new BooleanBucket();
         }
         if (CategoricalBucket.class.getSimpleName().equalsIgnoreCase(algo)) {
-            return new CategoricalBucket();
+            if (StringUtils.isBlank(valueDict)) {
+                throw new RuntimeException("Value dict is missing for categorical bucket");
+            }
+            CategoricalBucket bucket = new CategoricalBucket();
+            String[] valueDictArr = valueDict.split("\\|\\|");
+            bucket.setCategories(new ArrayList<String>(Arrays.asList(valueDictArr)));
+            return bucket;
         }
         if (IntervalBucket.class.getSimpleName().equalsIgnoreCase(algo)) {
             return new IntervalBucket();

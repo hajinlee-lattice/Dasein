@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
@@ -23,7 +25,10 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
 
     @Override
     public String getStage() {
-        return DataCloudConstants.PROFILE_STAGE;
+        if (StringUtils.isBlank(super.getStage())) {
+            super.setStage(DataCloudConstants.PROFILE_STAGE_SEGMENT);
+        }
+        return super.getStage();
     }
 
     @Override

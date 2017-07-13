@@ -212,9 +212,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                     case NUMERIC_INT:
                     case NUMERIC_UNSIGNED_INT:
                         Integer bitUnit = jsonNode.get("BitUnit").asInt();
-                        bitUnitMap.put(encodedColumn, bitUnit); // for all the
-                                                                // decodeStrategy
-                                                                // above
+                        bitUnitMap.put(encodedColumn, bitUnit);
                         break;
                     default:
                         break;

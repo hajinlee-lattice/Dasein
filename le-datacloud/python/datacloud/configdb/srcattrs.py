@@ -42,54 +42,64 @@ def register_amprofile(conn, version):
             SELECT NULL,
                    AMColumnID,
                    'AMProfile',
-                   'Profiling',
+                   '%s',
                    'SourceProfiler'
               FROM LDC_ManageDB.AccountMasterColumn
              WHERE DataCloudVersion = '%s'
-        """ % (version)
-        cursor.execute(sql)
+        """
+        cursor.execute(sql % ('SEGMENT', version))
+        conn.commit()
+        cursor.execute(sql % ('ENRICH', version))
         conn.commit()
 
         sql = """
             UPDATE LDC_ConfigDB.SourceAttribute lhs
             INNER JOIN LDC_ManageDB.AccountMasterColumn rhs
 			ON lhs.Attribute = rhs.AMColumnID AND rhs.DataCloudVersion = '%s'
-            SET lhs.Arguments = '{"IsSegment":false}'
-			WHERE rhs.Groups NOT LIKE '%%Segment%%'
+            SET lhs.Arguments = '{"IsProfile":false}'
+			WHERE rhs.Groups NOT LIKE '%%%s%%'
               AND lhs.Source = 'AMProfile'
-              AND lhs.Stage = 'Profiling'
+              AND lhs.Stage = '%s'
               AND lhs.Transformer = 'SourceProfiler';
-        """ % (version)
-        cursor.execute(sql)
+        """
+        cursor.execute(sql % (version, 'Segment', 'SEGMENT'))
+        conn.commit()
+        cursor.execute(sql % (version, 'Enrichment', 'ENRICH'))
         conn.commit()
 
         sql = """
 			UPDATE LDC_ConfigDB.SourceAttribute lhs
             INNER JOIN LDC_ManageDB.AccountMasterColumn rhs
 			ON lhs.Attribute = rhs.AMColumnID AND rhs.DataCloudVersion = '%s'
-            SET lhs.Arguments = CONCAT('{"IsSegment":true,"DecodeStrategy":',rhs.DecodeStrategy,',' ,
-				  CASE WHEN rhs.DecodeStrategy LIKE '%%BOOLEAN_YESNO%%' THEN '"NumBits":2,"BktAlgo":"BooleanBucket"}'
+            SET lhs.Arguments = CONCAT('{"IsProfile":true,"DecodeStrategy":',rhs.DecodeStrategy,
+				  CASE WHEN rhs.DecodeStrategy LIKE '%%BOOLEAN_YESNO%%' THEN ',"NumBits":2,"BktAlgo":"BooleanBucket"}'
+                       WHEN rhs.DecodeStrategy LIKE '%%ENUM_STRING%%' THEN ',"BktAlgo":"CategoricalBucket"}'
+                       WHEN rhs.DecodeStrategy LIKE '%%NUMERIC_UNSIGNED_INT%%' OR rhs.DecodeStrategy LIKE '%%NUMERIC_INT%%' THEN ',"BktAlgo":"IntervalBucket"}'
 				  ELSE '}' 
 			      END)
-			WHERE rhs.Groups LIKE '%%Segment%%' AND rhs.DecodeStrategy IS NOT NULL
+			WHERE rhs.Groups LIKE '%%%s%%' AND rhs.DecodeStrategy IS NOT NULL
               AND lhs.Source = 'AMProfile'
-              AND lhs.Stage = 'Profiling'
-              AND lhs.Transformer = 'SourceProfiler';;
-        """ % (version)
-        cursor.execute(sql)
+              AND lhs.Stage = '%s'
+              AND lhs.Transformer = 'SourceProfiler';
+        """
+        cursor.execute(sql % (version, 'Segment', 'SEGMENT'))
+        conn.commit()
+        cursor.execute(sql % (version, 'Enrichment', 'ENRICH'))
         conn.commit()
 
         sql = """
 			UPDATE LDC_ConfigDB.SourceAttribute lhs
             INNER JOIN LDC_ManageDB.AccountMasterColumn rhs
 			ON lhs.Attribute = rhs.AMColumnID AND rhs.DataCloudVersion = '%s'
-			SET lhs.Arguments = '{"IsSegment":true}'
-			WHERE rhs.Groups LIKE '%%Segment%%' AND lhs.Arguments IS NULL
+			SET lhs.Arguments = '{"IsProfile":true}'
+			WHERE rhs.Groups LIKE '%%%s%%' AND lhs.Arguments IS NULL
               AND lhs.Source = 'AMProfile'
-              AND lhs.Stage = 'Profiling'
+              AND lhs.Stage = '%s'
               AND lhs.Transformer = 'SourceProfiler';;
-        """ % (version)
-        cursor.execute(sql)
+        """
+        cursor.execute(sql % (version, 'Segment', 'SEGMENT'))
+        conn.commit()
+        cursor.execute(sql % (version, 'Enrichment', 'ENRICH'))
         conn.commit()
 
 
