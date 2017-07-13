@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
@@ -43,9 +42,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             entityTableMap = configuration.getSourceTables();
         }
         for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
-            Table sourceTable = entry.getValue();
-            renameTable(sourceTable);
-            exportData(sourceTable);
+            renameTable(entry);
+            exportData(entry.getValue());
         }
 
     }
@@ -57,7 +55,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
                 Table sourceTable = entry.getValue();
                 log.info("Drop source table " + sourceTable.getName());
-                metadataProxy.deleteTable(getConfiguration().getCustomerSpace().toString(), sourceTable.getName());
+                metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), sourceTable.getName());
             }
         }
     }
@@ -69,9 +67,10 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         waitForAppId(submission.getApplicationIds().get(0));
     }
 
-    private void renameTable(Table sourceTable) {
+    private void renameTable(Map.Entry<BusinessEntity, Table> entry) {
+        Table sourceTable = entry.getValue();
         String oldName = sourceTable.getName();
-        String goodName = AvroUtils.getAvroFriendlyString(sourceTable.getName());
+        String goodName = String.join("_", configuration.getCustomerSpace().getTenantId(), entry.getKey().name());
         if (!goodName.equalsIgnoreCase(oldName)) {
             log.info("Renaming table " + sourceTable.getName() + " to " + goodName);
             metadataProxy.updateTable(configuration.getCustomerSpace().toString(), goodName, sourceTable);
