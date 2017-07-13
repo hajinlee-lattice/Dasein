@@ -30,7 +30,6 @@ import cascading.operation.Function;
 @Component(BEAN_NAME)
 public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters> {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(BucketEncode.class);
 
     public static final String BEAN_NAME = "bucketEncode";

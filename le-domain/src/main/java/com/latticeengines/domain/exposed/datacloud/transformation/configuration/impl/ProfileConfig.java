@@ -6,6 +6,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
 public class ProfileConfig extends TblDrivenTransformerConfig {
+    public ProfileConfig() {
+
+    }
+
+    public ProfileConfig(String stage) {
+        super.setStage(stage);
+    }
+
     @JsonProperty("NumBucketEqualSized")
     private boolean numBucketEqualSized;// true: bucket size is roughly equal
                                         // false: decide bucket upon distribution

@@ -24,6 +24,12 @@ public class BitDecodeStrategy implements Serializable {
     @JsonProperty("BitInterpretation")
     private String bitInterpretation;
 
+    @JsonProperty("BitUnit")
+    private Integer bitUnit;
+
+    @JsonProperty("ValueDict")
+    private String valueDict;
+
     public String getEncodedColumn() {
         return encodedColumn;
     }
@@ -46,6 +52,22 @@ public class BitDecodeStrategy implements Serializable {
 
     public void setBitInterpretation(String bitInterpretation) {
         this.bitInterpretation = bitInterpretation;
+    }
+
+    public Integer getBitUnit() {
+        return bitUnit;
+    }
+
+    public void setBitUnit(Integer bitUnit) {
+        this.bitUnit = bitUnit;
+    }
+
+    public String getValueDict() {
+        return valueDict;
+    }
+
+    public void setValueDict(String valueDict) {
+        this.valueDict = valueDict;
     }
 
     @JsonIgnore

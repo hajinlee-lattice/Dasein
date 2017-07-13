@@ -53,12 +53,12 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     private static final Logger log = LoggerFactory.getLogger(SourceProfiler.class);
 
     public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILER;
-    private static final String IS_PROFILE = "IsProfile";
-    private static final String DECODE_STRATEGY = "DecodeStrategy";
-    private static final String ENCODED_COLUMN = "EncodedColumn";
-    private static final String NUM_BITS = "NumBits";
-    private static final String BKT_ALGO = "BktAlgo";
-    private static final String VALUE_DICT = "ValueDict";
+    public static final String IS_PROFILE = "IsProfile";
+    public static final String DECODE_STRATEGY = "DecodeStrategy";
+    public static final String ENCODED_COLUMN = "EncodedColumn";
+    public static final String NUM_BITS = "NumBits";
+    public static final String BKT_ALGO = "BktAlgo";
+    public static final String VALUE_DICT = "ValueDict";
 
     @Value("${datacloud.etl.profile.encode.bit:64}")
     private int encodeBits;
