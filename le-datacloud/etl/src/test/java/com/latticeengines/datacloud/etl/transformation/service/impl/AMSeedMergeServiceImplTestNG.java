@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterSeedMerged;
 import com.latticeengines.datacloud.core.source.impl.DnBCacheSeed;
@@ -393,7 +392,7 @@ public class AMSeedMergeServiceImplTestNG
         Set<Long> ids = new HashSet<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            log.info(JsonUtils.serialize(record));
+            log.info(record.toString());
             Long latticeId = (Long) record.get("LatticeID");
             ids.add(latticeId);
 

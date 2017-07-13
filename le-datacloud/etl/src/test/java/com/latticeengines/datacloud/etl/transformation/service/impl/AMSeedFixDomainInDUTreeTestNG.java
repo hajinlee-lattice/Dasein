@@ -177,7 +177,7 @@ public class AMSeedFixDomainInDUTreeTestNG extends
         Assert.assertEquals(rowNum, 14);
         for (Object[] data : expectedData) {
             GenericRecord record = recordMap.get((Long) data[0]);
-            log.info(JsonUtils.serialize(record));
+            log.info(record.toString());
             Assert.assertEquals(record.get("Domain") == null ? null : record.get("Domain").toString(),
                     (String) data[1]);
             Assert.assertEquals(record.get("DUNS") == null ? null : record.get("DUNS").toString(), (String) data[2]);

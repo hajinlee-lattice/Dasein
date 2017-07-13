@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.SeedDomainDunsCleanup;
@@ -186,7 +185,7 @@ public class SeedDomainDunsCleanupTestNG
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            log.info(JsonUtils.serialize(record));
+            log.info(record.toString());
             Object id = record.get("ID");
             if (id instanceof Utf8) {
                 id = id.toString();

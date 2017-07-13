@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.BomboraSurgeCleanFlow;
@@ -163,7 +162,7 @@ public class BomboraSurgeCleanServiceTestNG
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            log.info(JsonUtils.serialize(record));
+            log.info(record.toString());
             Integer id = (Integer) record.get("ID");
             Assert.assertTrue(loc.containsKey(id));
             List<NameLocation> nls = loc.get(id);

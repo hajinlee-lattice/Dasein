@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.SourceStandardizationFlow;
@@ -148,7 +147,7 @@ public class LocationStandardizationServiceTestNG
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            log.info(JsonUtils.serialize(record));
+            log.info(record.toString());
             Object[] expectedResult = expectedMap.get((Integer) record.get("ID"));
             Assert.assertTrue(equals(record.get("Name"), expectedResult[1]));
             Assert.assertTrue(equals(record.get("Country"), expectedResult[2]));

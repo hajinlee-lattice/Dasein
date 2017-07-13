@@ -29,10 +29,10 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.tuple.Triple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.python.google.common.base.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -505,7 +505,7 @@ public class ScoreCorrectnessService {
                 }
             }
             if (StringStandardizationUtils.objectIsNullOrEmptyString(idFieldValue)) {
-                log.warn("Skipping this record because missing ID field value " + JsonUtils.serialize(record));
+                log.warn("Skipping this record because missing ID field value " + record.toString());
                 continue;
             } else {
                 matchedRecords.put(String.valueOf(idFieldValue), record);
@@ -531,7 +531,7 @@ public class ScoreCorrectnessService {
                 Map<String, Object> record = new HashMap<>();
                 record.putAll(csvRecord.toMap());
                 if (Strings.isNullOrEmpty(idFieldValue)) {
-                    log.warn("Skipping this record because missing ID field value " + JsonUtils.serialize(record));
+                    log.warn("Skipping this record because missing ID field value " + record.toString());
                     continue;
                 } else {
                     records.put(idFieldValue, record);
