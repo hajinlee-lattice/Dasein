@@ -13,11 +13,12 @@ import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,6 +36,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMAttrEnrichConfig;
@@ -267,7 +270,6 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void verifyIntermediateResult(String source, Iterator<GenericRecord> records) {
         try {
             switch (source) {
@@ -331,7 +333,6 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         try {
@@ -381,8 +382,38 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                     if (bktAlgo instanceof Utf8) {
                         bktAlgo = bktAlgo.toString();
                     }
-                    //BooleanBucket algo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
-                    //Assert.assertNotNull(algo);
+                    Object srcAttr = record.get("SrcAttr");
+                    if (srcAttr instanceof Utf8) {
+                        srcAttr = srcAttr.toString();
+                    }
+                    switch (bitDecodeStrategy.getEncodedColumn()) {
+                    case "HGData_SupplierTechIndicators":
+                    case "BuiltWith_TechIndicators":
+                        BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
+                        Assert.assertNotNull(boolAlgo);
+                        break;
+                    case "BmbrSurge_Intent":
+                        CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo, CategoricalBucket.class);
+                        Assert.assertNotNull(catAlgo);
+                        Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
+                        Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
+                                "null,Very Low,Low,Medium,High,Very High");
+                        break;
+                    case "BmbrSurge_CompositeScore":
+                        if (bktAlgo == null) {
+                            continue;
+                        }
+                        IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
+                        Assert.assertNotNull(intAlgo);
+                        if (CollectionUtils.isNotEmpty(intAlgo.getBoundaries())) {
+                            log.info(String.format("Numeric bucket for %s: %s", (String) srcAttr,
+                                    String.join(",", intAlgo.generateLabelsInternal())));
+                        }
+                        break;
+                    default:
+                        throw new RuntimeException(String.format("Unrecognized encoded attribute %s",
+                                bitDecodeStrategy.getEncodedColumn()));
+                    }
                 }
             }
             Assert.assertEquals(0, expected.size());
