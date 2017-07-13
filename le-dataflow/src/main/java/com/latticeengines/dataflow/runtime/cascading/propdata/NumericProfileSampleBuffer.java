@@ -24,7 +24,6 @@ public class NumericProfileSampleBuffer extends BaseOperation implements Buffer 
     private Map<String, Class<?>> clsMap;
     private Map<String, List<String>> numAttrsToDecode;
     private Map<String, BitCodeBook> codeBookMap;
-    private Map<String, String> codeBookLookup;
 
     private Map<String, Object> elems;
     private Map<String, Integer> seqs;
@@ -32,14 +31,12 @@ public class NumericProfileSampleBuffer extends BaseOperation implements Buffer 
     private Map<String, Integer> namePositionMap;
 
     public NumericProfileSampleBuffer(Fields fieldDeclaration, List<String> numAttrs, Map<String, Class<?>> clsMap,
-            Map<String, List<String>> numAttrsToDecode, Map<String, BitCodeBook> codeBookMap,
-            Map<String, String> codeBookLookup) {
+            Map<String, List<String>> numAttrsToDecode, Map<String, BitCodeBook> codeBookMap) {
         super(fieldDeclaration);
         this.numAttrs = numAttrs;
         this.clsMap = clsMap;
         this.numAttrsToDecode = numAttrsToDecode;
         this.codeBookMap = codeBookMap;
-        this.codeBookLookup = codeBookLookup;
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 

@@ -48,14 +48,19 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
     public Node construct(ProfileParameters para) {
         this.config = para;
         Node src = addSource(para.getBaseTables().get(0));
+
+        // Numeric profiling
         List<String> numAttrs = new ArrayList<>();
         Map<String, List<String>> numAttrsToDecode = new HashMap<>();// encoded attr -> {decoded attrs}
-        parseNumAttrs(numAttrs, numAttrsToDecode);
-        Node numProfile = profileNumAttrs(src, numAttrs, numAttrsToDecode);
+        Map<String, String> decStrs = new HashMap<>(); // decode attr -> decode strategy str
+        parseNumAttrs(numAttrs, numAttrsToDecode, decStrs);
+        Node numProfile = profileNumAttrs(src, numAttrs, numAttrsToDecode, decStrs);
+
         return numProfile;
     }
 
-    private void parseNumAttrs(List<String> numAttrs, Map<String, List<String>> numAttrsToDecode) {
+    private void parseNumAttrs(List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
+            Map<String, String> decStrs) {
         Set<String> encAttrs = new HashSet<>();
         for (ProfileParameters.Attribute attr : config.getNumericAttrs()) {
             if (config.getCodeBookLookup().containsKey(attr.getAttr())) {
@@ -64,14 +69,15 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
                 }
                 numAttrsToDecode.get(config.getCodeBookLookup().get(attr.getAttr())).add(attr.getAttr());
                 encAttrs.add(config.getCodeBookLookup().get(attr.getAttr()));
+                decStrs.put(attr.getAttr(), attr.getDecodeStrategy());
             } else {
                 numAttrs.add(attr.getAttr());
             }
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    private Node profileNumAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode) {
+    private Node profileNumAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
+            Map<String, String> decStrs) {
         List<String> retainAttrs = new ArrayList<>();
         retainAttrs.addAll(numAttrs);
         retainAttrs.addAll(numAttrsToDecode.keySet());
@@ -91,7 +97,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
                 new Fields(KVDepivotStrategy.KEY_ATTR, KVDepivotStrategy.valueAttr(Integer.class),
                         KVDepivotStrategy.valueAttr(Long.class), KVDepivotStrategy.valueAttr(Float.class),
                         KVDepivotStrategy.valueAttr(Double.class)),
-                numAttrs, clsMap, numAttrsToDecode, config.getCodeBookMap(), config.getCodeBookLookup());
+                numAttrs, clsMap, numAttrsToDecode, config.getCodeBookMap());
         num = num.groupByAndBuffer(new FieldList(DUMMY_GROUP), agg, fms);
         // Profiling
         fms = getFinalMetadata();
@@ -100,7 +106,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
                         DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
                         DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
                         DataCloudConstants.PROFILE_ATTR_BKTALGO),
-                KVDepivotStrategy.KEY_ATTR, clsMap, config.isNumBucketEqualSized(), config.getBucketNum(),
+                KVDepivotStrategy.KEY_ATTR, clsMap, decStrs, config.isNumBucketEqualSized(), config.getBucketNum(),
                 config.getMinBucketSize(), false);
         num = num.groupByAndBuffer(new FieldList(KVDepivotStrategy.KEY_ATTR), new FieldList(num.getFieldNames()), buf,
                 fms);

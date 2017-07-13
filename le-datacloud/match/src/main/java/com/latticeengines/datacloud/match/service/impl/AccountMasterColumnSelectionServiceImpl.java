@@ -59,7 +59,6 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         return MatchUtils.isValidForAccountMasterBasedMatch(version);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ColumnSelection parsePredefinedColumnSelection(Predefined predefined, String dataCloudVersion) {
         if (Predefined.supportedSelections.contains(predefined)) {
@@ -92,7 +91,6 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         return "2.0";
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Map<String, Pair<BitCodeBook, List<String>>> getDecodeParameters(ColumnSelection columnSelection,
             String dataCloudVersion) {
@@ -134,7 +132,6 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         return toReturn;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Map<String, List<String>> getEncodedColumnMapping(ColumnSelection columnSelection, String dataCloudVersion) {
 

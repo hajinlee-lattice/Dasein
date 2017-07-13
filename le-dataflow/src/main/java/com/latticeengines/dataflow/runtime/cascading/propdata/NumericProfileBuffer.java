@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,17 +40,19 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
     private int minBucketSize;
     private String keyAttr;
     private Map<String, Class<?>> classes;
+    private Map<String, String> decStrs;
     private boolean sorted;
     private Map<String, Integer> namePositionMap;
     private double[] dVals;
     private double[] dValsRounded;
     private ObjectMapper om;
 
-    public NumericProfileBuffer(Fields fieldDecl, String keyAttr, Map<String, Class<?>> classes, boolean equalSized,
-            int buckets, int minBucketSize, boolean sorted) {
+    public NumericProfileBuffer(Fields fieldDecl, String keyAttr, Map<String, Class<?>> classes,
+            Map<String, String> decStrs, boolean equalSized, int buckets, int minBucketSize, boolean sorted) {
         super(fieldDecl);
         this.keyAttr = keyAttr;
         this.classes = classes;
+        this.decStrs = decStrs;
         this.equalSized = equalSized;
         this.buckets = buckets;
         this.minBucketSize = minBucketSize;
@@ -111,7 +113,8 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
                 bufferCall.getGroup().getObject(keyAttr));
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_SRCATTR),
                 bufferCall.getGroup().getObject(keyAttr));
-        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT),
+                decStrs.get(bufferCall.getGroup().getString(keyAttr)));
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ENCATTR), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
@@ -129,7 +132,8 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
                 bufferCall.getGroup().getObject(keyAttr));
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_SRCATTR),
                 bufferCall.getGroup().getObject(keyAttr));
-        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT),
+                decStrs.get(bufferCall.getGroup().getString(keyAttr)));
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ENCATTR), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
