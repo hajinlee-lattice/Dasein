@@ -276,6 +276,8 @@ public class AttributePageProcessor {
         attr.setDisplayName(column.getDisplayName());
         attr.setFieldName(column.getColumnId());
         attr.setFieldNameInTarget(column.getColumnName());
+        attr.setColumnId(column.getColumnId());
+        attr.setJavaClass(column.getJavaClass());
         attr.setFieldType(column.getDataType());
         attr.setFieldJavaType(column.getJavaClass());
         attr.setFundamentalType(column.getFundamentalType());
@@ -283,10 +285,9 @@ public class AttributePageProcessor {
         attr.setDescription(column.getDescription());
         attr.setIsSelected(selectedAttributeNames.contains(column.getColumnId()));
         attr.setIsPremium(column.isPremium());
-        attr.setCategory(column.getCategory().toString());
+        attr.setCategory(column.getCategory().getName());
         attr.setSubcategory(column.getSubcategory() == null ? null : column.getSubcategory());
         attr.setIsInternal(Boolean.TRUE.equals(column.isCanInternalEnrich()));
-
         return attr;
     }
 

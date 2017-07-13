@@ -26,6 +26,12 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
     @JsonProperty("FieldJavaType")
     private String fieldJavaType;
 
+    @JsonProperty("ColumnId")
+    private String columnId;
+
+    @JsonProperty("JavaClass")
+    private String javaClass;
+
     @JsonProperty("CustomerColumnName")
     private String customerColumnName;
 
@@ -50,7 +56,7 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
     @JsonProperty("IsInternal")
     private Boolean isInternal;
 
-    @JsonProperty("FundamentalType")
+    @JsonIgnore
     private FundamentalType fundamentalType;
 
     @JsonProperty("AttributeFlagsMap")
@@ -163,10 +169,12 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
         this.isInternal = isInternal;
     }
 
+    @JsonIgnore
     public FundamentalType getFundamentalType() {
         return fundamentalType;
     }
 
+    @JsonIgnore
     public void setFundamentalType(FundamentalType fundamentalType) {
         this.fundamentalType = fundamentalType;
     }
@@ -179,12 +187,42 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
         this.attributeFlagsMap = attributeFlagsMap;
     }
 
+    public void setColumnId(String columnId) {
+        this.columnId = columnId;
+    }
+
+    public String getJavaClass() {
+        return javaClass;
+    }
+
+    public void setJavaClass(String javaClass) {
+        this.javaClass = javaClass;
+    }
+
     public int getImportanceOrdering() {
         return importanceOrdering;
     }
 
     public void setImportanceOrdering(int importanceOrdering) {
         this.importanceOrdering = importanceOrdering;
+    }
+
+    @JsonProperty("FundamentalType")
+    private String getFundamentalTypeAsString() {
+        if (fundamentalType == null) {
+            return null;
+        } else {
+            return fundamentalType.getName();
+        }
+    }
+
+    @JsonProperty("FundamentalType")
+    private void setFundamentalTypeByString(String fundamentalType) {
+        if (fundamentalType != null) {
+            setFundamentalType(FundamentalType.fromName(fundamentalType));
+        } else {
+            setFundamentalType(null);
+        }
     }
 
     @Override

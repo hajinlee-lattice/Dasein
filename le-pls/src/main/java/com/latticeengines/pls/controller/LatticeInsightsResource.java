@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
@@ -36,11 +36,15 @@ import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFactQuery;
+import com.latticeengines.domain.exposed.datacloud.statistics.AMAttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
 import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -62,8 +66,6 @@ public class LatticeInsightsResource {
     public static final String SEGMENTS_PATH = "/segments";
 
     public static final String AM_STATS_PATH = "/stats";
-
-    private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired
     private SessionService sessionService;
@@ -130,25 +132,22 @@ public class LatticeInsightsResource {
     @ApiOperation(value = "Get list of attributes with selection flag", response = List.class)
     public List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request, //
             @ApiParam(value = "Get attributes with name containing specified " //
-                    + "text for attributeDisplayNameFilter", required = false) //
+                    + "text for attributeDisplayNameFilter") //
             @RequestParam(value = "attributeDisplayNameFilter", required = false) //
             String attributeDisplayNameFilter, //
-            @ApiParam(value = "Get attributes " //
-                    + "with specified category", required = false) //
+            @ApiParam(value = "Get attributes with specified category") //
             @RequestParam(value = "category", required = false) //
             String category, //
-            @ApiParam(value = "Get attributes " //
-                    + "with specified subcategory", required = false) //
+            @ApiParam(value = "Get attributes with specified subcategory") //
             @RequestParam(value = "subcategory", required = false) //
             String subcategory, //
-            @ApiParam(value = "Should get only selected attribute", //
-                    required = false) //
+            @ApiParam(value = "Should get only selected attribute") //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes, //
-            @ApiParam(value = "Offset for pagination of matching attributes", required = false) //
+            @ApiParam(value = "Offset for pagination of matching attributes") //
             @RequestParam(value = "offset", required = false) //
             Integer offset, //
-            @ApiParam(value = "Maximum number of matching attributes in page", required = false) //
+            @ApiParam(value = "Maximum number of matching attributes in page") //
             @RequestParam(value = "max", required = false) //
             Integer max) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
@@ -277,27 +276,7 @@ public class LatticeInsightsResource {
     // ------------END for Insights-------------------//
 
     // ------------START for statistics---------------------//
-    @RequestMapping(value = AM_STATS_PATH + "/cube", //
-            method = RequestMethod.POST, //
-            headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
-    public AccountMasterCube loadAMStatisticsCubeByPost(HttpServletRequest request, //
-            HttpServletResponse response, //
-            @ApiParam(value = "Should load enrichment attribute metadata") //
-            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
-            Boolean loadEnrichmentMetadata, //
-            @RequestBody(required = false) AccountMasterFactQuery query) {
-        AccountMasterCube cube = enrichmentService.getCube(query);
-
-        if (loadEnrichmentMetadata) {
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, null, null, null,
-                    null, null);
-            cube.setEnrichmentAttributes(enrichmentAttributes);
-        }
-        return cube;
-    }
-
+    @Deprecated
     @RequestMapping(value = AM_STATS_PATH + "/cube", //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
@@ -318,19 +297,34 @@ public class LatticeInsightsResource {
         return cube;
     }
 
+    @RequestMapping(value = AM_STATS_PATH + "/cube2", //
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
+    public StatsCube getAMStatsCube(HttpServletRequest request, //
+            @ApiParam(value = "Should load enrichment attribute metadata") //
+            @RequestParam(value = "q", required = false) String query) {
+        AccountMasterCube cube = loadAMStatisticsCube(request, false, query);
+        return toStatsCube(cube);
+    }
+
     @RequestMapping(value = AM_STATS_PATH + "/topn", //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get top N attributes per subcategory for a given category")
-    public TopNAttributes getTopNAttributes(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata") //
-            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
-            Boolean loadEnrichmentMetadata, //
-            @ApiParam(value = "category", required = true) //
-            @RequestParam(value = "category") String categoryName, //
+    @ApiOperation(value = "Get top N attributes for all category")
+    public TopNTree getTopTree(HttpServletRequest request, //
             @ApiParam(value = "max", defaultValue = "5") //
             @RequestParam(value = "max", required = false, defaultValue = "5") Integer max) {
+        Map<String, TopNAttributes> map = getTopNAttributes(request, max);
+        return toTopNTree(map);
+    }
+
+    private TopNAttributes getTopNAttributes(HttpServletRequest request, //
+            Boolean loadEnrichmentMetadata, //
+            String categoryName, //
+            Integer max) {
         Category category;
         try {
             category = Category.fromName(categoryName);
@@ -371,6 +365,7 @@ public class LatticeInsightsResource {
         return topNAttr;
     }
 
+    @Deprecated
     @RequestMapping(value = AM_STATS_PATH + "/topn/all", //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
@@ -392,4 +387,53 @@ public class LatticeInsightsResource {
 
         return allTopNAttributes;
     }
+
+    private Map<String, TopNAttributes> getTopNAttributes(HttpServletRequest request, int max) {
+        List<String> categories = getInsightsCategories(request);
+        Map<String, TopNAttributes> allTopNAttributes = new HashMap<>();
+        for (String categoryName : categories) {
+            TopNAttributes topNAttrs = getTopNAttributes(request, false, categoryName, max);
+            allTopNAttributes.put(categoryName, topNAttrs);
+        }
+        return allTopNAttributes;
+    }
+
+    private static TopNTree toTopNTree(Map<String, TopNAttributes> topNAttributesMap) {
+        TopNTree topNTree = new TopNTree();
+        Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
+        for (Map.Entry<String, TopNAttributes> entry : topNAttributesMap.entrySet()) {
+            catTrees.put(Category.fromName(entry.getKey()), toCatTopNTree(entry.getValue()));
+        }
+        topNTree.setCategories(catTrees);
+        return topNTree;
+    }
+
+    private static CategoryTopNTree toCatTopNTree(TopNAttributes topNAttributes) {
+        CategoryTopNTree topNTree = new CategoryTopNTree();
+        Map<String, List<com.latticeengines.domain.exposed.metadata.statistics.TopAttribute>> subCatTrees = new HashMap<>();
+        for (Map.Entry<String, List<TopAttribute>> entry : topNAttributes.getTopAttributes().entrySet()) {
+            List<com.latticeengines.domain.exposed.metadata.statistics.TopAttribute> attrs = entry.getValue().stream() //
+                    .map(LatticeInsightsResource::toMetadataTopAttr).collect(Collectors.toList());
+            subCatTrees.put(entry.getKey(), attrs);
+        }
+        topNTree.setSubcategories(subCatTrees);
+        return topNTree;
+    }
+
+    private static com.latticeengines.domain.exposed.metadata.statistics.TopAttribute toMetadataTopAttr(
+            TopAttribute topAttribute) {
+        return new com.latticeengines.domain.exposed.metadata.statistics.TopAttribute(topAttribute.getAttribute(),
+                topAttribute.getNonNullCount());
+    }
+
+    private static StatsCube toStatsCube(AccountMasterCube amCube) {
+        StatsCube statsCube = new StatsCube();
+        Map<String, AttributeStats> attrStats = new HashMap<>();
+        for (Map.Entry<String, AMAttributeStats> entry : amCube.getStatistics().entrySet()) {
+            attrStats.put(entry.getKey(), entry.getValue().getRowBasedStatistics());
+        }
+        statsCube.setStatistics(attrStats);
+        return statsCube;
+    }
+
 }

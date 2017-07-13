@@ -6,11 +6,13 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -29,8 +31,11 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
+import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
+import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -203,6 +208,53 @@ public class StatsCubeUtils {
             }
         }
         return map;
+    }
+
+    public static StatsCube toStatsCube(Statistics statistics) {
+        StatsCube cube = new StatsCube();
+        Map<String, AttributeStats> stats = new HashMap<>();
+        for (CategoryStatistics catStats: statistics.getCategories().values()) {
+            for (SubcategoryStatistics subCatStats: catStats.getSubcategories().values()) {
+                for (Map.Entry<AttributeLookup, AttributeStats> entry: subCatStats.getAttributes().entrySet()) {
+                    stats.put(entry.getKey().getAttribute(), entry.getValue());
+                }
+            }
+        }
+        cube.setStatistics(stats);
+        return cube;
+    }
+
+    public static TopNTree toTopNTree(Statistics statistics, int limit) {
+        TopNTree topNTree = new TopNTree();
+        Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
+        for (Map.Entry<Category, CategoryStatistics> entry: statistics.getCategories().entrySet()) {
+            catTrees.put(entry.getKey(), toCatTopTree(entry.getValue(), limit));
+        }
+        topNTree.setCategories(catTrees);
+        return topNTree;
+    }
+
+
+    private static CategoryTopNTree toCatTopTree(CategoryStatistics catStats, int limit) {
+        CategoryTopNTree topNTree = new CategoryTopNTree();
+        Map<String, List<TopAttribute>> subCatTrees = new HashMap<>();
+        for (Map.Entry<String, SubcategoryStatistics> entry: catStats.getSubcategories().entrySet()) {
+            subCatTrees.put(entry.getKey(), toSubcatTopTree(entry.getValue(), limit));
+        }
+        topNTree.setSubcategories(subCatTrees);
+        return topNTree;
+    }
+
+    private static List<TopAttribute> toSubcatTopTree(SubcategoryStatistics catStats, int limit) {
+        return catStats.getAttributes().entrySet().stream() //
+                .sorted(Comparator.comparing(entry -> entry.getValue().getNonNullCount())) //
+                .limit(limit) //
+                .map(StatsCubeUtils::toTopAttr) //
+                .collect(Collectors.toList());
+    }
+
+    private static TopAttribute toTopAttr(Map.Entry<AttributeLookup, AttributeStats> entry) {
+        return new TopAttribute(entry.getKey().getAttribute(), entry.getValue().getNonNullCount());
     }
 
 }

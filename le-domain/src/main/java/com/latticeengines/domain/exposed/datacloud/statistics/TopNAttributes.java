@@ -33,7 +33,7 @@ public class TopNAttributes {
             topAttributes = new HashMap<>();
         }
         if (!topAttributes.containsKey(subCategory)) {
-            topAttributes.put(subCategory, new ArrayList<TopAttribute>());
+            topAttributes.put(subCategory, new ArrayList<>());
         }
         topAttributes.get(subCategory).add(attribute);
     }

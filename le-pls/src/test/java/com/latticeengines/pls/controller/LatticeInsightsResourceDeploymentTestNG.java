@@ -52,8 +52,8 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testStatsCube() throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+    @Test(groups = "deployment")
+    public void testStatsCube() throws IOException {
 
         String url = getRestAPIHostPort() + "/pls/latticeinsights/stats/cube?q=";
 

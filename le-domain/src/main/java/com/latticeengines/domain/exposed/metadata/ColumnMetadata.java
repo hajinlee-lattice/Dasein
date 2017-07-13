@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -42,6 +43,8 @@ public class ColumnMetadata implements HasAttributeCustomizations {
     private String discretizationStrategy;
     @JsonProperty("MatchDestination")
     private String matchDestination;
+    @JsonProperty("Entity")
+    private BusinessEntity entity;
 
     private StatisticalType statisticalType;
     private FundamentalType fundamentalType;
@@ -175,6 +178,14 @@ public class ColumnMetadata implements HasAttributeCustomizations {
 
     public void setMatchDestination(String matchDestination) {
         this.matchDestination = matchDestination;
+    }
+
+    public BusinessEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(BusinessEntity entity) {
+        this.entity = entity;
     }
 
     @JsonIgnore

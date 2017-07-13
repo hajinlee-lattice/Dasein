@@ -19,7 +19,7 @@ public class AttributeStats {
     public AttributeStats(AttributeStats stats) {
         // used for deep copy during stats calculation
         this();
-        this.nonNullCount = new Long(stats.nonNullCount);
+        this.nonNullCount = stats.nonNullCount;
         if (stats.buckets != null) {
             this.buckets = new Buckets(stats.buckets);
         }
