@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.query.evaluator.QueryProcessor;
@@ -36,13 +35,6 @@ public class QueryEvaluator {
     public DataPage run(AttributeRepository repository, Query query) {
         SQLQuery<?> sqlquery = evaluate(repository, query);
         List<Map<String, Object>> data = new ArrayList<>();
-        final Map<String, String> attrNames = new HashMap<>();
-        query.getLookups().forEach(l -> {
-            if (l instanceof AttributeLookup) {
-                String attrName = ((AttributeLookup) l).getAttribute();
-                attrNames.put(attrName.toLowerCase(), attrName);
-            }
-        });
 
         try (ResultSet results = sqlquery.getResults()) {
             ResultSetMetaData metadata = results.getMetaData();
@@ -51,8 +43,6 @@ public class QueryEvaluator {
                 for (int i = 1; i <= metadata.getColumnCount(); ++i) {
                     String columnName = metadata.getColumnName(i);
                     Object value = results.getObject(columnName);
-                    String attrName = attrNames.get(columnName);
-                    columnName = (attrName == null) ? columnName : attrName;
                     row.put(columnName, value);
                 }
                 data.add(row);
