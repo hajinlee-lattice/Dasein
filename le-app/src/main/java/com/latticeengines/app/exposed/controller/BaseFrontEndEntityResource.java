@@ -18,10 +18,10 @@ public abstract class BaseFrontEndEntityResource {
     @Autowired
     protected EntityProxy entityProxy;
 
-    protected abstract QueryDecorator getQueryDecorator();
+    protected abstract QueryDecorator getQueryDecorator(boolean addSelects);
 
     public long getCount(BusinessEntity businessEntity, FrontEndQuery frontEndQuery) {
-        Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator());
+        Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(false));
         query.addLookup(new EntityLookup(businessEntity));
         return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), query);
     }
@@ -29,13 +29,13 @@ public abstract class BaseFrontEndEntityResource {
     public long getCountForRestriction(BusinessEntity businessEntity, FrontEndRestriction restriction) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setRestriction(restriction);
-        Query query = QueryTranslator.translate(frontEndQuery);
+        Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(false));
         query.addLookup(new EntityLookup(businessEntity));
         return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), query);
     }
 
     public DataPage getData(FrontEndQuery frontEndQuery) {
-        Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator());
+        Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(true));
         return entityProxy.getData(MultiTenantContext.getCustomerSpace().toString(), query);
     }
 

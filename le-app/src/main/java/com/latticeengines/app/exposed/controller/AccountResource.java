@@ -43,7 +43,7 @@ public class AccountResource extends BaseFrontEndEntityResource {
     }
 
     @Override
-    public QueryDecorator getQueryDecorator() {
+    public QueryDecorator getQueryDecorator(boolean addSelects) {
         return new QueryDecorator() {
 
             @Override
@@ -69,6 +69,11 @@ public class AccountResource extends BaseFrontEndEntityResource {
             @Override
             public String[] getFreeTextSearchAttrs() {
                 return new String[] { "LDC_Domain", "LDC_Name" };
+            }
+
+            @Override
+            public boolean addSelects() {
+                return addSelects;
             }
         };
     }

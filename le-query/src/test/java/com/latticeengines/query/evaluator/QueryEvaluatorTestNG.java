@@ -106,6 +106,21 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testNullRestriction() {
+        Restriction restriction = Restriction.builder() //
+                .let(BusinessEntity.Account, "CompanyName").isNull() //
+                .build();
+        Query query = Query.builder().where(restriction).build();
+        queryEvaluator.evaluate(attrRepo, query); //
+
+        restriction = Restriction.builder() //
+                .let(BusinessEntity.Account, "CompanyName").isNotNull() //
+                .build();
+        query = Query.builder().where(restriction).build();
+        queryEvaluator.evaluate(attrRepo, query); //
+    }
+
+    @Test(groups = "functional")
     public void testFreeText() {
         // freetext
         Query query = Query.builder() //

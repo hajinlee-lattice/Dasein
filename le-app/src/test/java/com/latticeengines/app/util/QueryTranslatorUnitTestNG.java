@@ -27,13 +27,13 @@ public class QueryTranslatorUnitTestNG {
     public void testTranslate() {
         FrontEndQuery query = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        frontEndRestriction.setAll(Collections.singletonList(new BucketRestriction(new AttributeLookup(
-                BusinessEntity.Account, "Some_Bucketed_Value"), Bucket.nullBkt())));
-        frontEndRestriction.setAny(Collections.singletonList(new BucketRestriction(new AttributeLookup(
-                BusinessEntity.Account, "Some_Other_Bucketed_Value"), Bucket.nullBkt())));
+        frontEndRestriction.setAll(Collections.singletonList(new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "Some_Bucketed_Value"), Bucket.nullBkt())));
+        frontEndRestriction.setAny(Collections.singletonList(new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "Some_Other_Bucketed_Value"), Bucket.nullBkt())));
         query.setRestriction(frontEndRestriction);
 
-        Query result = QueryTranslator.translate(query);
+        Query result = QueryTranslator.translate(query, new AccountResource().getQueryDecorator(false));
         assertTrue(result.getRestriction() instanceof LogicalRestriction);
         LogicalRestriction parent = (LogicalRestriction) result.getRestriction();
         assertEquals(parent.getRestrictions().size(), 2);
@@ -53,14 +53,15 @@ public class QueryTranslatorUnitTestNG {
         FrontEndQuery query = new FrontEndQuery();
         query.setFreeFormTextSearch("intel");
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        frontEndRestriction.setAll(Collections.singletonList(new BucketRestriction(new AttributeLookup(
-                BusinessEntity.Account, "Some_Bucketed_Value"), Bucket.nullBkt())));
-        frontEndRestriction.setAny(Collections.singletonList(new BucketRestriction(new AttributeLookup(
-                BusinessEntity.Account, "Some_Other_Bucketed_Value"), Bucket.nullBkt())));
+        frontEndRestriction.setAll(Collections.singletonList(new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "Some_Bucketed_Value"), Bucket.nullBkt())));
+        frontEndRestriction.setAny(Collections.singletonList(new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "Some_Other_Bucketed_Value"), Bucket.nullBkt())));
         query.setRestriction(frontEndRestriction);
 
-        Query result = QueryTranslator.translate(query, new AccountResource().getQueryDecorator());
+        Query result = QueryTranslator.translate(query, new AccountResource().getQueryDecorator(true));
         assertTrue(result.getLookups().size() > 0);
         assertTrue(result.getFreeFormTextSearchAttributes().size() > 0);
     }
+
 }

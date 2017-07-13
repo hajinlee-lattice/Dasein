@@ -20,8 +20,6 @@ public class RestrictionBuilder {
     private LogicalOperator logicalOperator;
     private List<Restriction> children;
 
-    private String bktLbl;
-
     public RestrictionBuilder let(BusinessEntity entity, String attrName) {
         if (restriction != null) {
             throw new IllegalArgumentException("Cannot chain a lookup here.");
@@ -114,6 +112,13 @@ public class RestrictionBuilder {
 
     public RestrictionBuilder isNull() {
         operator = ComparisonType.IS_NULL;
+        negate = false;
+        completeConcrete();
+        return this;
+    }
+
+    public RestrictionBuilder isNotNull() {
+        operator = ComparisonType.IS_NOT_NULL;
         negate = false;
         completeConcrete();
         return this;

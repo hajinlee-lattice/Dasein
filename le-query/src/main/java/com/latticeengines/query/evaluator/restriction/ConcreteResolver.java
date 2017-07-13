@@ -42,10 +42,16 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         LookupResolver lhsResolver = lookupFactory.getLookupResolver(lhs.getClass());
         List<ComparableExpression<String>> lhsPaths = lhsResolver.resolveForCompare(lhs);
         ComparableExpression<String> lhsPath = lhsPaths.get(0);
-        LookupResolver rhsResolver = lookupFactory.getLookupResolver(rhs.getClass());
-        List<ComparableExpression<String>> rhsPaths = rhsResolver.resolveForCompare(rhs);
 
-        switch (restriction.getRelation()) {
+        if (restriction.getRelation().equals(ComparisonType.IS_NULL)) {
+            return lhsPath.isNull();
+        } else if (restriction.getRelation().equals(ComparisonType.IS_NOT_NULL)) {
+            return lhsPath.isNotNull();
+        } else {
+            LookupResolver rhsResolver = lookupFactory.getLookupResolver(rhs.getClass());
+            List<ComparableExpression<String>> rhsPaths = rhsResolver.resolveForCompare(rhs);
+
+            switch (restriction.getRelation()) {
             case EQUAL:
                 return lhsPath.eq(rhsPaths.get(0));
             case GREATER_OR_EQUAL:
@@ -64,13 +70,15 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 }
             default:
                 throw new LedpException(LedpCode.LEDP_37006, new String[] { restriction.getRelation().toString() });
+            }
         }
     }
 
     private boolean isBucket(ConcreteRestriction restriction) {
         Lookup lhs = restriction.getLhs();
         Lookup rhs = restriction.getRhs();
-        if ((lhs instanceof AttributeLookup) && !(rhs instanceof AttributeLookup)) {
+
+        if ((rhs != null) && (lhs instanceof AttributeLookup) && !(rhs instanceof AttributeLookup)) {
             AttributeLookup attrLookup = (AttributeLookup) lhs;
             ColumnMetadata cm = findAttributeMetadata(attrLookup);
             if (cm.getBitOffset() != null) {
@@ -83,7 +91,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                             throw new UnsupportedOperationException("Not support negate on bucketed attribute.");
                         }
                         if (!ComparisonType.EQUAL.equals(restriction.getRelation())) {
-                            throw new UnsupportedOperationException("Only support ComparisonType.EQUAL on bucketed attribute.");
+                            throw new UnsupportedOperationException(
+                                    "Only support ComparisonType.EQUAL on bucketed attribute.");
                         }
                         return true;
                     } else {

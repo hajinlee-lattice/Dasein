@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.query;
 
 public enum ComparisonType {
     IS_NULL, //
+    IS_NOT_NULL, //
     EQUAL, //
     LESS_THAN, //
     LESS_OR_EQUAL, //

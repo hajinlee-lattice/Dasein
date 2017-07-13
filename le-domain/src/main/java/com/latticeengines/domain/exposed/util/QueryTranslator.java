@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,10 +25,6 @@ public class QueryTranslator {
     public static final int MAX_ROWS = 250;
     private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
-    public static Query translate(FrontEndQuery frontEndQuery) {
-        return translate(frontEndQuery, null);
-    }
-
     public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
         Restriction restriction = translateFrontEndRestriction(frontEndQuery.getRestriction());
         if (frontEndQuery.getPageFilter() == null) {
@@ -46,8 +43,10 @@ public class QueryTranslator {
                 .page(frontEndQuery.getPageFilter());
 
         if (decorator != null) {
-            queryBuilder.select(BusinessEntity.LatticeAccount, decorator.getLDCLookups());
-            queryBuilder.select(decorator.getLookupEntity(), decorator.getEntityLookups());
+            if (decorator.addSelects()) {
+                queryBuilder.select(BusinessEntity.LatticeAccount, decorator.getLDCLookups());
+                queryBuilder.select(decorator.getLookupEntity(), decorator.getEntityLookups());
+            }
             queryBuilder.freeTextAttributes(decorator.getFreeTextSearchEntity(), decorator.getFreeTextSearchAttrs());
         }
 
@@ -58,15 +57,27 @@ public class QueryTranslator {
         if (frontEndRestriction == null) {
             return null;
         }
+
+        List<Restriction> restrictions = new ArrayList<>();
+
         List<Restriction> allRestrictions = frontEndRestriction.getAll().stream() //
                 .map(BucketRestriction::convert).collect(Collectors.toList());
         Restriction and = Restriction.builder().and(allRestrictions).build();
+        restrictions.add(and);
 
         List<Restriction> anyRestrictions = frontEndRestriction.getAny().stream() //
                 .map(BucketRestriction::convert).collect(Collectors.toList());
         Restriction or = Restriction.builder().or(anyRestrictions).build();
+        restrictions.add(or);
 
-        return Restriction.builder().and(and, or).build();
+        if (frontEndRestriction.restrictNullSalesforceId()) {
+            restrictions.add(Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID").isNull().build());
+        } else if (frontEndRestriction.restrictNotNullSalesforceId()) {
+            restrictions
+                    .add(Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID").isNotNull().build());
+        }
+
+        return Restriction.builder().and(restrictions).build();
     }
 
     private static Sort translateFrontEndSort(FrontEndSort frontEndSort) {

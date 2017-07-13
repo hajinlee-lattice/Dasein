@@ -23,6 +23,14 @@ public class FrontEndRestriction {
     @ApiModelProperty("These selections will become a big AND group.")
     private List<BucketRestriction> all = new ArrayList<>();
 
+    @JsonProperty("restrict_without_sfdcid")
+    @ApiModelProperty("Restrict to accounts without Salesforce id.")
+    private boolean restrictNullSalesforceId = false;
+
+    @JsonProperty("restrict_with_sfdcid")
+    @ApiModelProperty("Restrict to accounts with Salesforce id.")
+    private boolean restrictNotNullSalesforceId = false;
+
     public List<BucketRestriction> getAny() {
         return any;
     }
@@ -37,6 +45,22 @@ public class FrontEndRestriction {
 
     public void setAll(List<BucketRestriction> all) {
         this.all = all;
+    }
+
+    public boolean restrictNullSalesforceId() {
+        return restrictNullSalesforceId;
+    }
+
+    public void setRestrictNullSalesforceId(boolean restrictNullSalesforceId) {
+        this.restrictNullSalesforceId = restrictNullSalesforceId;
+    }
+
+    public boolean restrictNotNullSalesforceId() {
+        return restrictNotNullSalesforceId;
+    }
+
+    public void setRestrictNotNullSalesforceId(boolean restrictNotNullSalesforceId) {
+        this.restrictNotNullSalesforceId = restrictNotNullSalesforceId;
     }
 
 }
