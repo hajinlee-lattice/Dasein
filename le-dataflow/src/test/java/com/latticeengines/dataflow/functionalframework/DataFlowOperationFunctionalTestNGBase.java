@@ -11,12 +11,12 @@ import java.util.Properties;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -29,12 +29,13 @@ import com.latticeengines.dataflow.exposed.builder.common.DataFlowProperty;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunctionalTestNGBase {
     
-    private static final Log log = LogFactory.getLog(DataFlowOperationFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFlowOperationFunctionalTestNGBase.class);
 
     public final String TARGET_PATH = "/tmp/DataFlowOperationTestOutput";
     public final String INPUT_PATH = "/tmp/DataFlowOperationTestInput";
@@ -73,7 +74,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         FileSystem fs = FileSystem.get(configuration);
         doCopy(fs, entries);
 
-        Logger.getLogger("com.latticeengines.domain.exposed.util.AttributeUtils").setLevel(Level.WARN);
+        LogManager.getLogger(AttributeUtils.class).setLevel(Level.WARN);
     }
 
     @AfterMethod(groups = "functional")

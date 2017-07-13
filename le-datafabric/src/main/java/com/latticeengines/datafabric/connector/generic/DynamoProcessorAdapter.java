@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.kafka.common.TopicPartition;
 
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest
 
 public class DynamoProcessorAdapter extends AbstractProcessorAdapter {
 
-    private final Log log = LogFactory.getLog(DynamoProcessorAdapter.class);
+    private final Logger log = LoggerFactory.getLogger(DynamoProcessorAdapter.class);
 
     private GenericSinkConnectorConfig connectorConfig;
     private FabricDataStore dataStore;

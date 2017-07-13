@@ -5,14 +5,14 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroReflectionUtils;
 
 public final class FabricEntityFactory {
 
-    private static final Log log = LogFactory.getLog(FabricEntityFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(FabricEntityFactory.class);
 
     public static <T> Schema getFabricSchema(Class<T> clz, String recordType) {
         try {

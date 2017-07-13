@@ -6,14 +6,14 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.kafka.common.TopicPartition;
 
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 public abstract class AbstractProcessorAdapter implements ProcessorAdapter {
-    private final Log log = LogFactory.getLog(AbstractProcessorAdapter.class);
+    private final Logger log = LoggerFactory.getLogger(AbstractProcessorAdapter.class);
 
     private GenericSinkConnectorConfig connectorConfig;
 

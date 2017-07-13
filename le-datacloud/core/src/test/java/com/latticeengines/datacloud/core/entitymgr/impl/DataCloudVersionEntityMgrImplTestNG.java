@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -18,7 +18,7 @@ import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTe
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 
 public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctionalTestNGBase {
-    private static final Log log = LogFactory.getLog(DataCloudVersionEntityMgrImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DataCloudVersionEntityMgrImplTestNG.class);
 
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;

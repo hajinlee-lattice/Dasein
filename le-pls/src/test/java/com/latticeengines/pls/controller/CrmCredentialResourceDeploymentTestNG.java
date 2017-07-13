@@ -1,7 +1,7 @@
 package com.latticeengines.pls.controller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -16,7 +16,7 @@ public class CrmCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBa
 
     private CustomerSpace customerSpace;
 
-    private static final Log log = LogFactory.getLog(CrmCredentialResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(CrmCredentialResourceDeploymentTestNG.class);
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {

@@ -8,8 +8,8 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
@@ -40,7 +40,7 @@ import com.latticeengines.workflow.functionalframework.WorkflowWithFailingListen
 
 public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
-    private static final Log log = LogFactory.getLog(WorkflowServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowServiceImplTestNG.class);
     @Autowired
     private WorkflowService workflowService;
 

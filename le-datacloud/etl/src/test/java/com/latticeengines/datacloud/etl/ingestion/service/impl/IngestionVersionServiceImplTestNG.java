@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -16,7 +16,7 @@ import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTest
 import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
 
 public class IngestionVersionServiceImplTestNG extends DataCloudEtlFunctionalTestNGBase {
-    private static final Log log = LogFactory.getLog(IngestionVersionServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionVersionServiceImplTestNG.class);
 
     @Autowired
     private IngestionVersionService ingestionVersionService;

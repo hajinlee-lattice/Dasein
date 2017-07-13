@@ -6,8 +6,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
 //@PreAuthorize("hasRole('Edit_PLS_Configurations')")
 public class VdbMetadataResource {
 
-    private static final Log log = LogFactory.getLog(VdbMetadataResource.class);
+    private static final Logger log = LoggerFactory.getLogger(VdbMetadataResource.class);
 
     @Autowired
     private SessionService sessionService;

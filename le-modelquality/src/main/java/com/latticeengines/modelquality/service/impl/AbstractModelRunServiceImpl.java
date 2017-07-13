@@ -3,8 +3,8 @@ package com.latticeengines.modelquality.service.impl;
 import java.util.Arrays;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
@@ -30,7 +30,7 @@ import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterce
 
 public abstract class AbstractModelRunServiceImpl implements ModelRunService {
 
-    private static final Log log = LogFactory.getLog(AbstractModelRunServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractModelRunServiceImpl.class);
 
     @Autowired
     private ModelRunEntityMgr modelRunEntityMgr;

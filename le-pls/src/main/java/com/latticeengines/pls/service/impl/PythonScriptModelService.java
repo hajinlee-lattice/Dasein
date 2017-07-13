@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ import com.latticeengines.pls.util.MetadataUtils;
 @Component("pythonScriptModelService")
 public class PythonScriptModelService extends ModelServiceBase {
 
-    private static final Log log = LogFactory.getLog(PythonScriptModelService.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonScriptModelService.class);
 
     @Autowired
     private SourceFileService sourceFileService;
@@ -118,7 +118,7 @@ public class PythonScriptModelService extends ModelServiceBase {
             copyHdfsData(sourceTenantId, targetTenantId, eventTableName, cpTrainingTable.getName(),
                     cpEventTable.getName(), modelSummary);
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_18111,
                     new String[] { modelSummary.getName(), sourceTenantId, targetTenantId });
         }

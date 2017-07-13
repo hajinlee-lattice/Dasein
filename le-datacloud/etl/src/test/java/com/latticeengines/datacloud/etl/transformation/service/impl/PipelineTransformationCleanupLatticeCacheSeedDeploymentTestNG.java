@@ -11,8 +11,8 @@ import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -41,15 +41,15 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
-public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG extends
-        TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG
+        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
     private static final String VERSION = "2017-01-26_19-05-51_UTC";
 
     private static final String LATTICE_CACHE_SEED_CLEANED = "LatticeCacheSeed";
 
-    private static final Log log = LogFactory
-            .getLog(PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG.class);
 
     @Autowired
     private PipelineSource source;
@@ -62,7 +62,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
 
     @Autowired
     private LatticeCacheSeed baseLatticeCacheSource;
-    
+
     @Autowired
     private DomainValidation domainValidationSource;
 
@@ -120,7 +120,7 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         step.setTransformer("sourceSeedFileMergeTransformer");
         step.setConfiguration(getSeedFileMergeConfig());
         steps.add(step);
-        
+
         int stepSource = 0;
         step = new TransformationStepConfig();
         List<Integer> inputSteps = new ArrayList<>();
@@ -128,7 +128,8 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         step.setInputSteps(inputSteps);
         step.setBaseSources(Arrays.asList("DomainValidation"));
         step.setTransformer("standardizationTransformer");
-        step.setConfiguration("{\"IsValidDomainField\":\"IsValidDomain\",\"ValidDomainCheckField\":\"Domain\",\"Sequence\":[\"VALID_DOMAIN\"]}");
+        step.setConfiguration(
+                "{\"IsValidDomainField\":\"IsValidDomain\",\"ValidDomainCheckField\":\"Domain\",\"Sequence\":[\"VALID_DOMAIN\"]}");
         steps.add(step);
 
         step = new TransformationStepConfig();
@@ -136,10 +137,10 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         inputSteps.add(stepSource++);
         step.setInputSteps(inputSteps);
         step.setTransformer("standardizationTransformer");
-        step.setConfiguration("{\"FilterExpression\":\"IsValidDomain == null || IsValidDomain == true\",\"FilterFields\":[\"IsValidDomain\"],\"Sequence\":[\"FILTER\"]}");
+        step.setConfiguration(
+                "{\"FilterExpression\":\"IsValidDomain == null || IsValidDomain == true\",\"FilterFields\":[\"IsValidDomain\"],\"Sequence\":[\"FILTER\"]}");
         steps.add(step);
 
-        
         step = new TransformationStepConfig();
         // step.setBaseSources(Arrays.asList("LatticeCacheSeed"));
         inputSteps = new ArrayList<>();
@@ -164,8 +165,10 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         step.setInputSteps(inputSteps);
         // step.setTargetSource(LATTICE_CACHE_SEED_CLEANED);
         step.setTransformer("sourceDedupeWithDenseFieldsTransformer");
-        // step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
-        step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"], \"SortFields\":[\"__Source_Priority__\"]}");
+        // step.setConfiguration("{\"DedupeFields\": [\"Domain\", \"DUNS\"],
+        // \"DenseFields\": [\"City\", \"State\", \"Country\"]}");
+        step.setConfiguration(
+                "{\"DedupeFields\": [\"Domain\", \"DUNS\"], \"DenseFields\": [\"City\", \"State\", \"Country\"], \"SortFields\":[\"__Source_Priority__\"]}");
         steps.add(step);
 
         step = new TransformationStepConfig();
@@ -205,8 +208,8 @@ public class PipelineTransformationCleanupLatticeCacheSeedDeploymentTestNG exten
         config.setRightMatchField("DUNS_NUMBER");
         config.setEnrichingFields(Arrays.asList("BUSINESS_NAME", "STREET_ADDRESS", "CITY_NAME", "STATE_PROVINCE_NAME",
                 "COUNTRY_NAME", "LE_INDUSTRY", "LE_REVENUE_RANGE", "LE_EMPLOYEE_RANGE"));
-        config.setEnrichedFields(Arrays.asList("Name", "Street", "City", "State", "Country", "Industry",
-                "RevenueRange", "EmployeeRange"));
+        config.setEnrichedFields(Arrays.asList("Name", "Street", "City", "State", "Country", "Industry", "RevenueRange",
+                "EmployeeRange"));
         config.setGroupFields(Arrays.asList("DUNS", "Domain"));
 
         config.setKeepInternalColumns(true);

@@ -3,8 +3,8 @@ package com.latticeengines.metadata.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
 public class AdminResource extends InternalResourceBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(AdminResource.class);
+    private static final Logger log = LoggerFactory.getLogger(AdminResource.class);
 
     @Autowired
     private MetadataProvisioningService metadataProvisioningService;

@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 
 public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(DnBAuthenticationServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBAuthenticationServiceImplTestNG.class);
 
     @Autowired
     private DnBAuthenticationService dnBAuthenticationService;

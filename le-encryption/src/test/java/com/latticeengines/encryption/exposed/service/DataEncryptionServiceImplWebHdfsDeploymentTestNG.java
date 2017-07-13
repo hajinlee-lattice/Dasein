@@ -10,8 +10,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,7 +31,7 @@ import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBe
 
 public class DataEncryptionServiceImplWebHdfsDeploymentTestNG extends EncryptionTestNGBase {
 
-    private static final Log log = LogFactory.getLog(DataEncryptionServiceImplWebHdfsDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DataEncryptionServiceImplWebHdfsDeploymentTestNG.class);
     private static final String RESOURCE_BASE = "com/latticeengines/encryption/exposed/service";
     private static final String FILE_NAME = "test.txt";
 

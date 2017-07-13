@@ -10,8 +10,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -31,7 +31,7 @@ import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 
 public class MatchMonitorServiceImpl implements MatchMonitorService {
-    private static final Log log = LogFactory.getLog(MatchMonitorServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchMonitorServiceImpl.class);
 
     @Autowired
     private DnBCacheService dnbCacheService;

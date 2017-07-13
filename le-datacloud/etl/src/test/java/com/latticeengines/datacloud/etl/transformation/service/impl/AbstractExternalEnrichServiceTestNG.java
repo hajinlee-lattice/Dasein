@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.Assert;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.ExternalEnrich
 public class AbstractExternalEnrichServiceTestNG extends DataCloudEtlFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(AbstractExternalEnrichServiceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractExternalEnrichServiceTestNG.class);
 
     private static final String ROOT_DIR = "/tmp/AbstractExternalEnrichServiceTestNG";
     private static final String INPUT_AVRO_PATH = ROOT_DIR + "/input/input.avro";

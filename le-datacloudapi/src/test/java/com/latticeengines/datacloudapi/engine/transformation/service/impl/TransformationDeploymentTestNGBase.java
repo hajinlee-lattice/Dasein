@@ -11,8 +11,8 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -32,7 +32,7 @@ public abstract class TransformationDeploymentTestNGBase<T extends Transformatio
         extends PropDataEngineDeploymentTestNGBase {
 
     private static final int MAX_LOOPS = 200;
-    private static final Log log = LogFactory.getLog(TransformationDeploymentTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(TransformationDeploymentTestNGBase.class);
 
     @Autowired
     TransformationProgressEntityMgr progressEntityMgr;

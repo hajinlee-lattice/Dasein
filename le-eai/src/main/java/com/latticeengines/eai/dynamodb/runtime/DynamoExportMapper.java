@@ -10,8 +10,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -33,7 +33,7 @@ import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
 
 public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandler {
 
-    private static final Log log = LogFactory.getLog(DynamoExportMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(DynamoExportMapper.class);
     private static final int BUFFER_SIZE = 25;
 
     private String recordType;

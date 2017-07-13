@@ -3,8 +3,8 @@ package com.latticeengines.serviceflows.workflow.importdata;
 import java.util.Arrays;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,7 @@ import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProx
 @Component("importData")
 public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ImportData.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportData.class);
 
     @Autowired
     private MetadataProxy metadataProxy;

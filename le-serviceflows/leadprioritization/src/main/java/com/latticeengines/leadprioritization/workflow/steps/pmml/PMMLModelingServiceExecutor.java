@@ -12,8 +12,8 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -29,7 +29,7 @@ import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
 public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
 
-    private static final Log log = LogFactory.getLog(PMMLModelingServiceExecutor.class);
+    private static final Logger log = LoggerFactory.getLogger(PMMLModelingServiceExecutor.class);
 
     public PMMLModelingServiceExecutor(Builder builder) {
         super(builder);

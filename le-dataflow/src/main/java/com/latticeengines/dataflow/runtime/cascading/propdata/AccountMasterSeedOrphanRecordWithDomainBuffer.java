@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -17,7 +17,7 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings({ "rawtypes", "unused" })
 public class AccountMasterSeedOrphanRecordWithDomainBuffer extends BaseOperation implements Buffer {
-    private static final Log log = LogFactory.getLog(AccountMasterSeedOrphanRecordWithDomainBuffer.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountMasterSeedOrphanRecordWithDomainBuffer.class);
 
     private static final long serialVersionUID = 4217950767704131475L;
 

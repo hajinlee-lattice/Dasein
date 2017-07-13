@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ import com.latticeengines.workflow.exposed.dao.KeyValueDao;
 @Component("modelSummaryEntityMgr")
 public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
 
-    private static final Log log = LogFactory.getLog(ModelSummaryEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryEntityMgrImpl.class);
 
     @Autowired
     private KeyValueDao keyValueDao;

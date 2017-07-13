@@ -11,8 +11,8 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.zookeeper.ZooDefs;
@@ -64,7 +64,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
             .parse("WFAPITests.WFAPITests.WFAPITests");
     protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = 1000L * 60 * 90;
 
-    private static final Log log = LogFactory.getLog(WorkflowApiFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowApiFunctionalTestNGBase.class);
 
     @Value("${common.test.microservice.url}")
     protected String microServiceHostPort;

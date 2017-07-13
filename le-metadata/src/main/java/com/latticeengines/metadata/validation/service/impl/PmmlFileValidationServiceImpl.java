@@ -56,7 +56,7 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
         } catch (LedpException le) {
             throw new RuntimeException(le);
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_10008);
         }
     }

@@ -2,8 +2,8 @@ package com.latticeengines.scoring.orchestration.service.impl;
 
 import java.sql.Timestamp;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
@@ -21,7 +21,7 @@ import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBas
 public class ScoringServiceValidationAspectTestNG extends ScoringFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(ScoringServiceValidationAspectTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringServiceValidationAspectTestNG.class);
 
     private static final String customer = "Nutanix";
 

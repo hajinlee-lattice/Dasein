@@ -3,8 +3,8 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.io.Text;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 
 public class PythonProfilingMapper extends PythonMapperBase {
 
-    private static final Log log = LogFactory.getLog(PythonProfilingMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonProfilingMapper.class);
 
     @Override
     public void setupClassifier(Context context, Classifier classifier) throws IOException, InterruptedException {

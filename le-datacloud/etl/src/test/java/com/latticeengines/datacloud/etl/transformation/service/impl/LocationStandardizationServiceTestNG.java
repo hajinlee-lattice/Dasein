@@ -8,13 +8,14 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.SourceStandardizationFlow;
@@ -27,7 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class LocationStandardizationServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(LocationStandardizationServiceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(LocationStandardizationServiceTestNG.class);
 
     GeneralSource source = new GeneralSource("LocationStandard");
 
@@ -147,7 +148,7 @@ public class LocationStandardizationServiceTestNG
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            log.info(record);
+            log.info(JsonUtils.serialize(record));
             Object[] expectedResult = expectedMap.get((Integer) record.get("ID"));
             Assert.assertTrue(equals(record.get("Name"), expectedResult[1]));
             Assert.assertTrue(equals(record.get("Country"), expectedResult[2]));

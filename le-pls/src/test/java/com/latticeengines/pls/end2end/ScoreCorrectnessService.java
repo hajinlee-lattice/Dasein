@@ -29,8 +29,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.python.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +62,7 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 @Component
 public class ScoreCorrectnessService {
 
-    private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoreCorrectnessService.class);
     private static final int TIMEOUT_IN_MIN = 60;
     private static final int THREADPOOL_SIZE = 15;
     private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 1;

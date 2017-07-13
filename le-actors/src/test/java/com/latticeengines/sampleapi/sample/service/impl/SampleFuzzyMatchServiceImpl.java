@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ import scala.concurrent.duration.FiniteDuration;
 
 @Component
 public class SampleFuzzyMatchServiceImpl implements SampleFuzzyMatchService {
-    private static final Log log = LogFactory.getLog(SampleFuzzyMatchServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SampleFuzzyMatchServiceImpl.class);
 
     private static final int MAX_ALLOWED_RECORD_COUNT = 200;
 

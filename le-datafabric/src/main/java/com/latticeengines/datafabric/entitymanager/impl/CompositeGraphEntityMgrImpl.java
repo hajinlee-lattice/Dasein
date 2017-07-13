@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.datafabric.CompositeGraphEntity;
 
 public class CompositeGraphEntityMgrImpl implements CompositeGraphEntityMgr {
 
-    private static final Log log = LogFactory.getLog(CompositeGraphEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(CompositeGraphEntityMgrImpl.class);
 
     private final int FIND = 0;
     private final int DELETE = 1;

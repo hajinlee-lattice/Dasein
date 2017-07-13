@@ -1,7 +1,7 @@
 package com.latticeengines.modelquality.controller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public class AccountMasterModelRunResourceByDomainDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
 
-    private static Log log = LogFactory.getLog(AccountMasterModelRunResourceByDomainDeploymentTestNG.class);
+    private static Logger log = LoggerFactory.getLogger(AccountMasterModelRunResourceByDomainDeploymentTestNG.class);
 
     @Override
     @BeforeClass(groups = "deployment")

@@ -1,7 +1,7 @@
 package com.latticeengines.yarn.functionalframework;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -27,7 +27,7 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 @ContextConfiguration(locations = { "classpath:test-yarn-context.xml" })
 public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    private static final Log log = LogFactory.getLog(YarnFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(YarnFunctionalTestNGBase.class);
 
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 25;
 

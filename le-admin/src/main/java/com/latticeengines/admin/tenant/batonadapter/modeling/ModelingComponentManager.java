@@ -3,8 +3,8 @@ package com.latticeengines.admin.tenant.batonadapter.modeling;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +15,7 @@ import java.io.IOException;
 @Component
 public class ModelingComponentManager {
 
-    private static final Log log = LogFactory.getLog(ModelingComponentManager.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelingComponentManager.class);
 
     private static final String HDFS_POD_PATH = "/Pods/%s/Contracts/%s";
 

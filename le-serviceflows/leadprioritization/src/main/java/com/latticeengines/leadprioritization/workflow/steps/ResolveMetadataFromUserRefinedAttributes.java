@@ -3,8 +3,8 @@ package com.latticeengines.leadprioritization.workflow.steps;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Component("resolveMetadataFromUserRefinedAttributes")
 public class ResolveMetadataFromUserRefinedAttributes extends BaseWorkflowStep<ResolveMetadataFromUserRefinedAttributesConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ResolveMetadataFromUserRefinedAttributes.class);
+    private static final Logger log = LoggerFactory.getLogger(ResolveMetadataFromUserRefinedAttributes.class);
 
     @Autowired
     private MetadataProxy metadataProxy;

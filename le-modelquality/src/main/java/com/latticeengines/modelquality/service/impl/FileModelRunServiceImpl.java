@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
 
     private static final String FILE_KEY = "file";
 
-    private static final Log log = LogFactory.getLog(FileModelRunServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(FileModelRunServiceImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;

@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 @Component("softwareLibraryService")
 public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, InitializingBean {
-    private static final Log log = LogFactory.getLog(SoftwareLibraryServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SoftwareLibraryServiceImpl.class);
 
     private static final String SWLIB_DISABLED = "LE_SWLIB_DISABLED";
 
@@ -160,7 +160,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         } catch (FileNotFoundException e) {
             log.warn(e.getMessage());
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         return packages;
     }

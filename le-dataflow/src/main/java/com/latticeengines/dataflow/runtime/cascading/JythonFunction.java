@@ -3,8 +3,8 @@ package com.latticeengines.dataflow.runtime.cascading;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.jython.JythonEngine;
 
@@ -19,7 +19,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class JythonFunction extends BaseOperation implements Function {
 
-    private static final Log log = LogFactory.getLog(JythonFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(JythonFunction.class);
     private static final long serialVersionUID = 7015322136073224137L;
 
     private static JythonEngine engine;

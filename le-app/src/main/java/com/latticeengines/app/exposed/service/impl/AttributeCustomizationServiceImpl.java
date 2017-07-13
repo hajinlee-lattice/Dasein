@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.Closure;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -35,7 +36,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("attributeCustomizationService")
 public class AttributeCustomizationServiceImpl implements AttributeCustomizationService {
-    private static final Logger log = Logger.getLogger(AttributeCustomizationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AttributeCustomizationServiceImpl.class);
 
     @Autowired
     private AttributeCustomizationPropertyEntityMgr attributeCustomizationPropertyEntityMgr;

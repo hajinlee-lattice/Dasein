@@ -22,8 +22,8 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.crypto.key.KeyProvider;
 import org.apache.hadoop.crypto.key.KeyProviderFactory;
@@ -43,7 +43,7 @@ import org.springframework.util.StreamUtils;
 public class HdfsUtils {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(HdfsUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(HdfsUtils.class);
     private static final int EOF = -1;
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 

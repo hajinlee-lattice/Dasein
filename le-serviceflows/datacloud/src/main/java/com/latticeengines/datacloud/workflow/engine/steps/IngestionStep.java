@@ -16,8 +16,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -66,7 +66,7 @@ import com.latticeengines.yarn.exposed.service.JobService;
 @Component("ingestionStep")
 @Scope("prototype")
 public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> {
-    private static final Log log = LogFactory.getLog(IngestionStep.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionStep.class);
 
     private IngestionProgress progress;
 

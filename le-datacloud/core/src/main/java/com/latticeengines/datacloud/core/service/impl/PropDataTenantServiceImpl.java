@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.core.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import com.latticeengines.security.exposed.service.UserService;
 @Component("propDataTenantService")
 public class PropDataTenantServiceImpl implements PropDataTenantService {
 
-    private static final Log log = LogFactory.getLog(PropDataTenantServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PropDataTenantServiceImpl.class);
 
     @Autowired
     private TenantService tenantService;

@@ -13,7 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -30,7 +31,7 @@ import com.latticeengines.security.exposed.Constants;
 
 public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
 
-    private static final Logger log = Logger.getLogger(TableResourceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(TableResourceTestNG.class);
 
     @Override
     @BeforeClass(groups = "functional")

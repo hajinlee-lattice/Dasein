@@ -10,8 +10,8 @@ import javax.annotation.PostConstruct;
 
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -28,7 +28,7 @@ import com.latticeengines.proxy.exposed.RestApiClient;
 public class DanteComponent extends LatticeComponent {
     public static final String componentName = "Dante";
 
-    private static final Log LOGGER = LogFactory.getLog(DanteComponent.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DanteComponent.class);
 
     @Value("${admin.dante.dryrun}")
     private boolean dryrun;

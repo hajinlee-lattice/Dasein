@@ -1,8 +1,8 @@
 package com.latticeengines.datafabric.service.datastore.impl;
 
 import org.apache.avro.Schema;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 @Component("hdfsDataServiceProvider")
 public class HDFSDataServiceProvider implements FabricDataServiceProvider {
 
-    private static final Log log = LogFactory.getLog(FabricDataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(FabricDataServiceImpl.class);
 
     private Configuration config;
 

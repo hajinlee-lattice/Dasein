@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -18,7 +18,7 @@ import cascading.tuple.Fields;
 
 @Component("sourceDedupeFlow")
 public class SourceDedupeFlow extends ConfigurableFlowBase<SourceDedupeTransformerConfig> {
-    private static final Log log = LogFactory.getLog(SourceDedupeFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(SourceDedupeFlow.class);
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {

@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.collection.service.impl;
 
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.datacloud.collection.service.RefreshJobExecutor;
 import com.latticeengines.datacloud.collection.service.RefreshService;
@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 
 public class RefreshExecutor implements RefreshJobExecutor {
 
-    private Log log = LogFactory.getLog(this.getClass());
+    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final RefreshService refreshService;
     private static final int MAX_RETRY = 50;
@@ -61,12 +61,12 @@ public class RefreshExecutor implements RefreshJobExecutor {
                     return;
                 }
             } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
             } finally {
                 try {
                     Thread.sleep(1800 * 1000L);
                 } catch (InterruptedException e) {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

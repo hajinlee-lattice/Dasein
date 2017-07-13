@@ -3,8 +3,8 @@ package com.latticeengines.pls.end2end;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 @Component
 public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final Log log  = LogFactory.getLog(AnalyzeScoresFromPreGeneratedModelDeploymentTestNG.class);
+    private static final Logger log  = LoggerFactory.getLogger(AnalyzeScoresFromPreGeneratedModelDeploymentTestNG.class);
 
     private static final String TENANT_ID = "LETest1477531073625.LETest1477531073625.Production";
     private static final String MODEL_ID = "ms__5368bf16-b745-4d91-9ffd-b913fa458015-SelfServ";

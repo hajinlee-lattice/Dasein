@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigException;
@@ -24,7 +24,7 @@ import io.confluent.connect.avro.AvroData;
 
 public class KafkaSinkTask extends SinkTask {
 
-    private static final Log log = LogFactory.getLog(KafkaSinkTask.class);
+    private static final Logger log = LoggerFactory.getLogger(KafkaSinkTask.class);
     private AvroData avroData;
     private FabricMessageService messageService;
     private FabricMessageProducer producer;

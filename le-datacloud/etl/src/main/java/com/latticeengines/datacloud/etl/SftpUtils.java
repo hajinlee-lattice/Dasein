@@ -7,8 +7,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 
 public class SftpUtils {
 
-    private static Log log = LogFactory.getLog(SftpUtils.class);
+    private static Logger log = LoggerFactory.getLogger(SftpUtils.class);
 
     public interface SftpFilenameFilter {
         boolean accept(String filename);

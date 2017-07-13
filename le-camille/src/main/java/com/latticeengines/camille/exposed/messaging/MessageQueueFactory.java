@@ -3,8 +3,8 @@ package com.latticeengines.camille.exposed.messaging;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 
 public class MessageQueueFactory {
 
-    private Log log = LogFactory.getLog(MessageQueueFactory.class);
+    private Logger log = LoggerFactory.getLogger(MessageQueueFactory.class);
 
     public static MessageQueueFactory instance() {
         if (instance == null) {

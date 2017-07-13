@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.testng.annotations.BeforeClass;
@@ -34,7 +34,7 @@ import com.latticeengines.perf.job.configuration.OnBoardConfiguration;
 import com.latticeengines.perf.job.runnable.impl.Profile;
 
 public class PerfLoadTestNGBase {
-    protected static final Log log = LogFactory.getLog(PerfLoadTestNGBase.class);
+    protected static final Logger log = LoggerFactory.getLogger(PerfLoadTestNGBase.class);
 
     protected Properties prop;
 
@@ -77,7 +77,7 @@ public class PerfLoadTestNGBase {
         try {
             fs = FileSystem.get(yarnConfiguration);
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         modelDef = produceModelDef(0);
     }
@@ -99,14 +99,14 @@ public class PerfLoadTestNGBase {
             prop.load(IOUtils.toInputStream(props));
         } catch (FileNotFoundException e) {
             log.error("property file '" + propertyPath + "' not found in the classpath");
-            log.error(e);
+            log.error(e.getMessage(), e);
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         } finally {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
         return prop;

@@ -20,14 +20,14 @@ package com.dataartisans.flink.cascading.runtime.stats;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.client.program.ClusterClient;
 
 public class AccumulatorCache {
 
-	private static final Log LOG = LogFactory.getLog(AccumulatorCache.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AccumulatorCache.class);
 
 	private JobID jobID;
 

@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 
 public class EncodedAttributeHandler {
-    private static final Log log = LogFactory.getLog(EncodedAttributeHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(EncodedAttributeHandler.class);
 
     public void handleEncodedAttribute(Map<String, Map<String, Long[]>> binaryCodedBuckets, Object obj,
             String fieldName, String encodedNoKey, String encodedYesKey, Map<String, Map<String, Long>> nAttributeBucketIds) {

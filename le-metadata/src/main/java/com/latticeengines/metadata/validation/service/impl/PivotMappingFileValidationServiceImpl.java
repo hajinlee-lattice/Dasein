@@ -51,7 +51,7 @@ public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
                 }
             }
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_10008);
         }
     }

@@ -18,8 +18,8 @@ import com.latticeengines.domain.exposed.dataloader.DataReadyResult;
 import com.latticeengines.domain.exposed.dataloader.GetDataTablesResult;
 import com.latticeengines.domain.exposed.dataloader.LaunchIdQuery;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 
@@ -69,7 +69,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     @VisibleForTesting
     static final String DEFAULT_SEGMENT = "LATTICE_DEFAULT_SEGMENT";
 
-    private static final Log log = LogFactory.getLog(DataLoaderServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DataLoaderServiceImpl.class);
 
     private static final String DL_REST_SERVICE = "/DLRestService";
     private static final String GET_SPEC_DETAILS = "/GetSpecDetails";

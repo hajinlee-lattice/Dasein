@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.InputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ import com.latticeengines.eai.service.impl.s3.HdfsToS3ExportService;
 @Component("hdfsToS3RouteTestNG")
 public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(HdfsToS3RouteTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(HdfsToS3RouteTestNG.class);
 
     private static final String HDFS_DIR = "/tmp/hdfs2s3";
     private static final String S3_PREFIX = "hdfs2s3";

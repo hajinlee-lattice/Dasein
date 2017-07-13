@@ -1,7 +1,7 @@
 package com.latticeengines.actors.visitor.sample.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -19,7 +19,7 @@ import akka.actor.ActorRef;
 @Component("sampleFuzzyMatchAnchorActor")
 @Scope("prototype")
 public class SampleFuzzyMatchAnchorActor extends VisitorActorTemplate {
-    private static final Log log = LogFactory.getLog(SampleFuzzyMatchAnchorActor.class);
+    private static final Logger log = LoggerFactory.getLogger(SampleFuzzyMatchAnchorActor.class);
 
     @Autowired
     @Qualifier("sampleMatchGuideBook")

@@ -1,7 +1,7 @@
 package com.latticeengines.datafabric.functionalframework;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -14,7 +14,7 @@ import com.latticeengines.datafabric.service.message.FabricMessageService;
 @ContextConfiguration(locations = { "classpath:test-datafabric-context.xml" })
 public abstract class DataFabricFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    protected static final Log log = LogFactory.getLog(DataFabricFunctionalTestNGBase.class);
+    protected static final Logger log = LoggerFactory.getLogger(DataFabricFunctionalTestNGBase.class);
 
     @Autowired
     protected FabricMessageService messageService;

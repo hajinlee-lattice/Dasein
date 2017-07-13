@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AMStatsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -32,7 +32,7 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
 public class AMStatsReportFunction extends BaseOperation implements Function {
-    private static final Log log = LogFactory.getLog(AMStatsReportFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(AMStatsReportFunction.class);
     private static final long serialVersionUID = -2621164226184745299L;
 
     private static final int MaxColSize = 4096;

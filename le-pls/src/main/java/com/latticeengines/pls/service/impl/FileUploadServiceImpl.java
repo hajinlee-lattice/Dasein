@@ -3,8 +3,8 @@ package com.latticeengines.pls.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -33,7 +33,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("fileUploadService")
 public class FileUploadServiceImpl implements FileUploadService {
 
-    private static final Log log = LogFactory.getLog(FileUploadServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(FileUploadServiceImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;

@@ -5,8 +5,8 @@ import java.util.Random;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ import com.latticeengines.security.util.GASessionCacheHolder;
 @Component("sessionService")
 public class SessionServiceImpl implements SessionService {
 
-    private static final Log LOGGER = LogFactory.getLog(SessionServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionServiceImpl.class);
     private static final Integer MAX_RETRY = 3;
     private static final Long RETRY_INTERVAL_MSEC = 200L;
     private static Random random = new Random(System.currentTimeMillis());

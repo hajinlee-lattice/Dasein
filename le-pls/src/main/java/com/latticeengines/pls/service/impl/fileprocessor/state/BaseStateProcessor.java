@@ -3,15 +3,15 @@ package com.latticeengines.pls.service.impl.fileprocessor.state;
 import java.io.File;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.pls.service.impl.fileprocessor.FileProcessingState;
 import com.latticeengines.pls.service.impl.fileprocessor.StateProcessor;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class BaseStateProcessor implements StateProcessor {
-    private static final Log log = LogFactory.getLog(BaseStateProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseStateProcessor.class);
     
     protected FileDeleter fileDeleter = new FileDeleter();
     
@@ -40,7 +40,7 @@ public class BaseStateProcessor implements StateProcessor {
         try {
             proxy = (WorkflowProxy) props.get("restApiProxy");
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         return proxy;
     }

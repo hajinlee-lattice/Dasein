@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 @Component("dellEbiFlowService")
 public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
-    private static final Log log = LogFactory.getLog(DailyFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(DailyFlow.class);
     static final int FAIL_TRIES = 3;
     @Resource(name = "localFileFlowService")
     private FileFlowService localFileFlowService;

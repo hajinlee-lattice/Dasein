@@ -11,8 +11,8 @@ import java.util.TimeZone;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -22,7 +22,7 @@ import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 public class HDFSDataStoreImpl implements FabricDataStore {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(HDFSDataStoreImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HDFSDataStoreImpl.class);
 
     public static final String DATE_FORMAT_STRING = "yyyy-MM-dd_z";
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);

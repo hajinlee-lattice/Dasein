@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("modelMetadataService")
 public class ModelMetadataServiceImpl implements ModelMetadataService {
 
-    private static final Log log = LogFactory.getLog(ModelMetadataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelMetadataServiceImpl.class);
 
     @Autowired
     private MetadataProxy metadataProxy;

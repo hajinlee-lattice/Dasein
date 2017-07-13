@@ -2,15 +2,15 @@ package com.latticeengines.dataflow.exposed.builder.strategy.impl;
 
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.tuple.TupleEntry;
 
 public class AddTimestampStrategy extends AddFieldStrategyBase {
     private static final long serialVersionUID = -2625708547865490421L;
 
-    private static final Log log = LogFactory.getLog(AddTimestampStrategy.class);
+    private static final Logger log = LoggerFactory.getLogger(AddTimestampStrategy.class);
 
     public static int UNIFORM = 0; // all records have the same timestamp
     public static int SEQUENTIAL = 1; // each record has a slightly different

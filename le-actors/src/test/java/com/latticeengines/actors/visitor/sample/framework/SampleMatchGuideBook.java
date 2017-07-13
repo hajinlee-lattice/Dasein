@@ -8,8 +8,8 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,7 @@ import akka.actor.ActorRef;
 @Component("sampleMatchGuideBook")
 public class SampleMatchGuideBook extends GuideBook {
 
-    private static final Log log = LogFactory.getLog(SampleMatchGuideBook.class);
+    private static final Logger log = LoggerFactory.getLogger(SampleMatchGuideBook.class);
 
     private ActorRef fuzzyMatchAnchor;
 

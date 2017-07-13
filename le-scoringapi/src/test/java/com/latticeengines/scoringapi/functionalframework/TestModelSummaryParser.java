@@ -9,8 +9,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 
 public class TestModelSummaryParser {
 
-	private static final Log log = LogFactory.getLog(TestModelSummaryParser.class);
+	private static final Logger log = LoggerFactory.getLogger(TestModelSummaryParser.class);
 
 	public static final String NAME = "Name";
 

@@ -9,8 +9,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Component("updateStatsObjects")
 public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfiguration> {
 
-    private static final Log log = LogFactory.getLog(UpdateStatsObjects.class);
+    private static final Logger log = LoggerFactory.getLogger(UpdateStatsObjects.class);
 
     @Autowired
     private MetadataProxy metadataProxy;

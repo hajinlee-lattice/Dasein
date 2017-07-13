@@ -2,8 +2,8 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 @Component("playService")
 public class PlayServiceImpl implements PlayService {
 
-    private static Log log = LogFactory.getLog(PlayServiceImpl.class);
+    private static Logger log = LoggerFactory.getLogger(PlayServiceImpl.class);
 
     @Autowired
     private PlayEntityMgr playEntityMgr;

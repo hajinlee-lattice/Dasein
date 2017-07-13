@@ -1,7 +1,7 @@
 package com.latticeengines.apps.core.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("workflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {
 
-    private static final Log log = LogFactory.getLog(WorkflowJobService.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowJobService.class);
 
     @Autowired
     private WorkflowProxy workflowProxy;

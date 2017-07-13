@@ -2,15 +2,15 @@ package com.latticeengines.testframework.rest;
 
 import javax.servlet.http.HttpServlet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 public class StandaloneHttpServer {
 
-    private static final Log log = LogFactory.getLog(StandaloneHttpServer.class);
+    private static final Logger log = LoggerFactory.getLogger(StandaloneHttpServer.class);
     private Server server;
     private Context root;
 

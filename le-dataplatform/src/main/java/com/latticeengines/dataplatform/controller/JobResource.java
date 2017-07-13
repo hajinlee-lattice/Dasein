@@ -1,7 +1,7 @@
 package com.latticeengines.dataplatform.controller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 public class JobResource implements JobInterface {
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(JobResource.class);
+    private static final Logger log = LoggerFactory.getLogger(JobResource.class);
 
     @Autowired
     private JobService jobService;

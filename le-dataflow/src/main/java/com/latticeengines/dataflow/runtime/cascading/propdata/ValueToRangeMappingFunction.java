@@ -3,8 +3,8 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -18,7 +18,7 @@ import cascading.tuple.TupleEntry;
 public class ValueToRangeMappingFunction extends BaseOperation implements Function {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(ValueToRangeMappingFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(ValueToRangeMappingFunction.class);
 
     private static final long serialVersionUID = 1998532440252494334L;
 

@@ -2,8 +2,8 @@ package com.latticeengines.actors.visitor.sample.impl;
 
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.visitor.sample.SampleDataSourceLookupRequest;
@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 
 @Component("sampleDynamoDBLookupService")
 public class SampleDynamoDBLookupServiceImpl extends SampleDataSourceLookupServiceBase {
-    private static final Log log = LogFactory.getLog(SampleDynamoDBLookupServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SampleDynamoDBLookupServiceImpl.class);
 
     protected String lookupFromService(String lookupRequestId, SampleDataSourceLookupRequest request) {
         String result = null;

@@ -12,8 +12,8 @@ import java.util.concurrent.Future;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +59,7 @@ import com.latticeengines.security.exposed.service.UserService;
 public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     private final static String tenantName = "Global Test Tenant" + System.currentTimeMillis();
-    private final static Log log = LogFactory.getLog(LPIEndToEndDeploymentTestNG.class);
+    private final static Logger log = LoggerFactory.getLogger(LPIEndToEndDeploymentTestNG.class);
     private static String tenantId = "EndToEnd";
     private static String contractId = "";
 

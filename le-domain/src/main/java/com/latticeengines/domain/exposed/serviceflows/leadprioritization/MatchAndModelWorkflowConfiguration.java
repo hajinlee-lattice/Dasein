@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
-    private static final Log log = LogFactory.getLog(MatchAndModelWorkflowConfiguration.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchAndModelWorkflowConfiguration.class);
 
     public static class Builder {
         private MatchAndModelWorkflowConfiguration configuration = new MatchAndModelWorkflowConfiguration();

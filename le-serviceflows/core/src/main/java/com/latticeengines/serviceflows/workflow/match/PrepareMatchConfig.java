@@ -9,8 +9,8 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Component("preMatchStep")
 public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(PrepareMatchConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(PrepareMatchConfig.class);
     private static final Map<MatchKey, String> MATCH_KEYS_TO_DISPLAY_NAMES = new HashMap<>();
 
     static {

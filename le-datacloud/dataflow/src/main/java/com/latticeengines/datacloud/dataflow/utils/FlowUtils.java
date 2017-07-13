@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -20,7 +20,7 @@ import cascading.operation.Function;
 
 public class FlowUtils {
 
-    private static Log log = LogFactory.getLog(FlowUtils.class);
+    private static Logger log = LoggerFactory.getLogger(FlowUtils.class);
     private static Pattern varcharPattern = Pattern.compile("(?<=VARCHAR\\().*?(?=\\))");
 
     @SuppressWarnings("rawtypes")

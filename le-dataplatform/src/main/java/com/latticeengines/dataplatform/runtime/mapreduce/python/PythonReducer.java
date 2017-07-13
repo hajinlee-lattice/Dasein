@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class PythonReducer extends Reducer<Text, Text, NullWritable, NullWritable> {
-    private static final Log log = LogFactory.getLog(PythonReducer.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonReducer.class);
 
     private Configuration config;
 

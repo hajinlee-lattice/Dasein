@@ -13,8 +13,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ import com.latticeengines.scoringapi.transform.RecordTransformer;
 
 @Component("scoreRequestProcessor")
 public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implements ScoreRequestProcessor {
-    private static final Log log = LogFactory.getLog(ScoreRequestProcessorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoreRequestProcessorImpl.class);
 
     @Autowired
     private ModelRetriever modelRetriever;

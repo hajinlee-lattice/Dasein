@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -31,7 +31,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(DataFlowFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFlowFunctionalTestNGBase.class);
 
     public void doCopy(FileSystem fs, List<AbstractMap.SimpleEntry<String, String>> copyEntries) throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();

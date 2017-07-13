@@ -3,8 +3,8 @@ package com.latticeengines.dataplatform.runtime.tasklet;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class PythonTasklet implements Tasklet {
 
-    private static final Log log = LogFactory.getLog(PythonTasklet.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonTasklet.class);
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {

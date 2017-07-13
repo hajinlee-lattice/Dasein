@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
@@ -38,7 +38,7 @@ import org.springframework.yarn.batch.support.YarnBatchProperties.JobProperties;
 @Component
 public class YarnJobLauncher implements ApplicationEventPublisherAware {
 
-    private static final Log log = LogFactory.getLog(YarnJobLauncher.class);
+    private static final Logger log = LoggerFactory.getLogger(YarnJobLauncher.class);
 
     private JobParametersConverter converter = new DefaultJobParametersConverter();
 

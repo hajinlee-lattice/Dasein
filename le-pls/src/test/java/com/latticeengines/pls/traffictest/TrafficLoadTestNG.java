@@ -20,8 +20,8 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.net.ntp.TimeStamp;
 import org.apache.hadoop.conf.Configuration;
 import org.json.simple.JSONObject;
@@ -58,7 +58,7 @@ import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
 public class TrafficLoadTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
-    private static Log log = LogFactory.getLog(TrafficLoadTestNG.class);
+    private static Logger log = LoggerFactory.getLogger(TrafficLoadTestNG.class);
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;

@@ -7,8 +7,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class PythonScriptModelCopyServiceImplTestNG extends PlsFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(PythonScriptModelCopyServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonScriptModelCopyServiceImplTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -69,7 +69,7 @@ public class PythonScriptModelCopyServiceImplTestNG extends PlsFunctionalTestNGB
         try {
             tearDown();
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         tenantEntityMgr.create(modelCopySourceTenant);
         tenantEntityMgr.create(modelCopyTargetTenant);

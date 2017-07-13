@@ -14,8 +14,8 @@ import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -47,7 +47,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     private static final double EPS = 1e-6;
     private static final String modelID = "2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json";
 
-    private static final Log log = LogFactory.getLog(ScoringComparisonAgainstProdForSingleModelTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringComparisonAgainstProdForSingleModelTestNG.class);
 
     @Autowired
     private ScoringStepYarnProcessor scoringStepYarnProcessor;

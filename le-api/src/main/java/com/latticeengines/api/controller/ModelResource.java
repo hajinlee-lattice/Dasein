@@ -2,8 +2,8 @@ package com.latticeengines.api.controller;
 
 import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +30,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "models", description = "REST resource for machine learning models")
 @RestController
 public class ModelResource {
-    private static final Log log = LogFactory.getLog(ModelResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelResource.class);
 
     @Autowired
     private ModelingService modelingService;

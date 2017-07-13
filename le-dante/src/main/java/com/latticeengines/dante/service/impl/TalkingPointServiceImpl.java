@@ -3,7 +3,8 @@ package com.latticeengines.dante.service.impl;
 import java.util.List;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
 @Component("talkingPointService")
 public class TalkingPointServiceImpl implements TalkingPointService {
-    private static final Logger log = Logger.getLogger(TalkingPointServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TalkingPointServiceImpl.class);
 
     @Value("${common.dante.url}")
     private String danteUrl; // TODO: correct for envs

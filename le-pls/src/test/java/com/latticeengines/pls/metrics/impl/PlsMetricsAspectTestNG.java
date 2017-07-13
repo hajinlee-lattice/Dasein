@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
 
-    private Log origLog;
+    private Logger origLog;
     private ModelSummaryEntityMgr origSummaryEntityMgr;
 
     @BeforeClass(groups = "functional")
@@ -54,7 +54,7 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void logMetrics() throws Exception {
-        Log newLog = mock(Log.class);
+        Logger newLog = mock(Logger.class);
         PlsMetricsAspectImpl.log = newLog;
 
         String testUser = TestFrameworkUtils.SUPER_ADMIN_USERNAME;

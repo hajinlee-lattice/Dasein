@@ -19,8 +19,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Table(name = "WORKFLOW_JOB")
 public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
-    private static final Log log = LogFactory.getLog(WorkflowJob.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowJob.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

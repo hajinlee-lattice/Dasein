@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ import jcifs.smb.SmbFile;
 @Component("smbFileFlowService")
 public class SmbFileFlowServiceImpl extends BaseFileFlowService {
 
-    static final Log log = LogFactory.getLog(SmbFileFlowServiceImpl.class);
+    static final Logger log = LoggerFactory.getLogger(SmbFileFlowServiceImpl.class);
 
     @Value("${dellebi.smbaccount}")
     private String smbAccount;

@@ -16,8 +16,10 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.WebServiceException;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableSet;
@@ -35,7 +37,9 @@ import com.marketo.mktows.SuccessDescribeMObject;
 @Component("marketoSoapService")
 public class MarketoSoapServiceImpl implements MarketoSoapService {
 
-    private static final Log log = LogFactory.getLog(MarketoSoapServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MarketoSoapServiceImpl.class);
+    private static final Marker fatal = MarkerFactory.getMarker("FATAL");
+
     @SuppressWarnings("unused")
     private static final ImmutableSet<String> EXCLUDED_DATATYPES = ImmutableSet.of("datetime", "float", "formula", "percent",
             "textarea", "currency", "date", "reference");
@@ -113,9 +117,9 @@ public class MarketoSoapServiceImpl implements MarketoSoapService {
         } catch (NoClassDefFoundError|ExceptionInInitializerError e) {
             throw new LedpException(LedpCode.LEDP_21036, new String[] { userId, encryptionKey });
         } catch (InvalidKeyException e) {
-            log.fatal("InvalidKeyException", e);
+            log.error(fatal, "InvalidKeyException", e);
         } catch (NoSuchAlgorithmException e) {
-            log.fatal("NoSuchAlgorithmException", e);
+            log.error(fatal, "NoSuchAlgorithmException", e);
         }
 
         return result;

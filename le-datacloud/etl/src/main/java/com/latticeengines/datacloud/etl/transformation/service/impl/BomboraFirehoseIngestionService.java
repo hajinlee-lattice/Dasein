@@ -6,8 +6,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformationService<BomboraFirehoseConfiguration>
         implements TransformationService<BomboraFirehoseConfiguration> {
 
-    private static final Log log = LogFactory.getLog(BomboraFirehoseIngestionService.class);
+    private static final Logger log = LoggerFactory.getLogger(BomboraFirehoseIngestionService.class);
 
     private static final String DATA_FLOW_BEAN_NAME = "bomboraUntarAndConvertToAvroFlow";
     private static final String SCHEMA = "schema";
@@ -48,7 +48,7 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     }
 
     @Override
-    Log getLogger() {
+    Logger getLogger() {
         return log;
     }
 

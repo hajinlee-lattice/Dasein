@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,7 +31,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class NumericProfileBuffer extends BaseOperation implements Buffer {
 
-    private static final Log log = LogFactory.getLog(NumericProfileBuffer.class);
+    private static final Logger log = LoggerFactory.getLogger(NumericProfileBuffer.class);
 
     private static final long serialVersionUID = -4591759360012525636L;
 

@@ -2,15 +2,15 @@ package com.latticeengines.domain.exposed.modeling.factory;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public class ModelFactory {
 
-    private static final Log log = LogFactory.getLog(ModelFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelFactory.class);
 
     public static final String MODEL_CONFIG = "modelConfig";
 

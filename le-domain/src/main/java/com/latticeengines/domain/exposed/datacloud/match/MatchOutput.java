@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchOutput {
 
-    private static Log log = LogFactory.getLog(MatchOutput.class);
+    private static Logger log = LoggerFactory.getLogger(MatchOutput.class);
 
     private List<String> inputFields;
     private Map<MatchKey, List<String>> keyMap;

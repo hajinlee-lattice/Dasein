@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -36,7 +36,7 @@ public class LatticeIdRefreshFlow
     private final static String UPDATED = "UPDATED";
     private final static String ENTITY = "ENTITY_";
 
-    private static final Log log = LogFactory.getLog(LatticeIdRefreshFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(LatticeIdRefreshFlow.class);
 
     @Override
     public Node construct(LatticeIdRefreshFlowParameter parameters) {

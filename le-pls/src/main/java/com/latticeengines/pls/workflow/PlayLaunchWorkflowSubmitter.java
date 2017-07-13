@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -14,7 +15,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 @Component("playLaunchWorkflowSubmitter")
 public class PlayLaunchWorkflowSubmitter extends WorkflowSubmitter {
     @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(PlayLaunchWorkflowSubmitter.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayLaunchWorkflowSubmitter.class);
 
     public ApplicationId submit(PlayLaunch playLaunch) {
         Map<String, String> inputProperties = new HashMap<>();

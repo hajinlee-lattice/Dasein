@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.core.util;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 import com.latticeengines.domain.exposed.datacloud.manage.Progress;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -12,11 +12,11 @@ final public class LoggingUtils {
         return DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss.SSS");
     }
 
-    public static void logInfo(Log log, TransformationProgress progress, String message) {
+    public static void logInfo(Logger log, TransformationProgress progress, String message) {
         log.info(progressLogPrefix(progress) + message);
     }
 
-    public static void logError(Log log, TransformationProgress progress, String message, Exception e) {
+    public static void logError(Logger log, TransformationProgress progress, String message, Exception e) {
         if (e == null) {
             log.error(progressLogPrefix(progress) + message);
         } else {
@@ -24,11 +24,11 @@ final public class LoggingUtils {
         }
     }
 
-    public static <P extends Progress> void logInfo(Log log, P progress, String message) {
+    public static <P extends Progress> void logInfo(Logger log, P progress, String message) {
         log.info(progressLogPrefix(progress) + message);
     }
 
-    public static <P extends Progress> void logError(Log log, P progress, String message, Exception e) {
+    public static <P extends Progress> void logError(Logger log, P progress, String message, Exception e) {
         if (e == null) {
             log.error(progressLogPrefix(progress) + message);
         } else {
@@ -36,11 +36,11 @@ final public class LoggingUtils {
         }
     }
 
-    public static <P extends Progress> void logInfoWithDuration(Log log, P progress, String message, long startTime) {
+    public static <P extends Progress> void logInfoWithDuration(Logger log, P progress, String message, long startTime) {
         log.info(progressLogPrefix(progress) + message + " Duration=" + LoggingUtils.durationSince(startTime));
     }
 
-    public static void logInfoWithDuration(Log log, TransformationProgress progress, String message, long startTime) {
+    public static void logInfoWithDuration(Logger log, TransformationProgress progress, String message, long startTime) {
         log.info(progressLogPrefix(progress) + message + " Duration=" + LoggingUtils.durationSince(startTime));
     }
 

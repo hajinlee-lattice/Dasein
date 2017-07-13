@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +50,7 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Data')")
 public class ScoringFileUploadResource {
 
-    private static final Log log = LogFactory.getLog(ScoringFileUploadResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringFileUploadResource.class);
 
     @Autowired
     private FileUploadService fileUploadService;
@@ -110,7 +110,7 @@ public class ScoringFileUploadResource {
                 try {
                     stream.reset();
                 } catch (IOException e) {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                     throw new LedpException(LedpCode.LEDP_00002, e);
                 }
                 sourceFile = fileUploadService.uploadFile(

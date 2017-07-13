@@ -2,7 +2,8 @@ package com.latticeengines.dante.entitymgr.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -18,7 +19,7 @@ import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 public class DanteTalkingPointEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteTalkingPoint>
         implements DanteTalkingPointEntityMgr {
 
-    private static final Logger log = Logger.getLogger(DanteTalkingPointEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DanteTalkingPointEntityMgrImpl.class);
 
     @Autowired
     private DanteTalkingPointDao danteTalkingPointDao;

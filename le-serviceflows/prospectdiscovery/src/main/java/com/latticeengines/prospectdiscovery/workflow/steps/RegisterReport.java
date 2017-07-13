@@ -1,5 +1,14 @@
 package com.latticeengines.prospectdiscovery.workflow.steps;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.client.RestTemplate;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -9,16 +18,9 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Logger;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class RegisterReport {
-    private static final Logger log = Logger.getLogger(RegisterReport.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterReport.class);
 
     private Configuration yarnConfiguration = new Configuration();
     private TargetMarketStepConfiguration configuration;

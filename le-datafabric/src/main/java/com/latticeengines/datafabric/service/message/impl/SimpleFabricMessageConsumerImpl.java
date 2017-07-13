@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
@@ -29,7 +29,7 @@ import kafka.utils.VerifiableProperties;
 
 public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
 
-    private static final Log log = LogFactory.getLog(SimpleFabricMessageConsumerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SimpleFabricMessageConsumerImpl.class);
 
     private String groupId;
 

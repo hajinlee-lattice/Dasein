@@ -3,8 +3,8 @@ package com.latticeengines.matchapi.service.impl;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -29,7 +29,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 @Component("bulkMatchServiceWithDerivedColumnCache")
 public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchService {
 
-    private static Log log = LogFactory.getLog(BulkMatchServiceWithDerivedColumnCacheImpl.class);
+    private static Logger log = LoggerFactory.getLogger(BulkMatchServiceWithDerivedColumnCacheImpl.class);
 
     @Autowired
     protected MatchCommandService matchCommandService;

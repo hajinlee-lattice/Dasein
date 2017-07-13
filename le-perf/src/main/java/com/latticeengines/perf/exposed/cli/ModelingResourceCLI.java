@@ -11,8 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.perf.cli.setup.CommandLineSetup;
 import com.latticeengines.perf.cli.setup.factory.CommandLineSetupFactory;
@@ -24,7 +24,7 @@ public class ModelingResourceCLI {
 
     private static CommandLine cl;
     private static ExecutorService executor;
-    private static final Log log = LogFactory.getLog(ModelingResourceCLI.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelingResourceCLI.class);
 
     public static void main(String[] args) throws Exception {
         if (args.length > 0)
@@ -38,7 +38,7 @@ public class ModelingResourceCLI {
                         executeJob(command);
                     }
                 } catch (IOException e) {
-                    log.error(e.getCause());
+                    log.error(e.getMessage(), e);
                 }
             }
         }

@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.util;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.query.frontend.QueryDecorator;
 
 public class QueryTranslator {
-    private static final Log log = LogFactory.getLog(QueryTranslator.class);
+    private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
 
     public static final int MAX_ROWS = 250;
     private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);

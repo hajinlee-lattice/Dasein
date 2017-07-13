@@ -10,8 +10,8 @@ import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
@@ -20,7 +20,7 @@ import com.latticeengines.db.exposed.schemagen.postprocess.SQLServerPostProcesso
 
 public class SchemaGenerator {
 
-    private static final Log log = LogFactory.getLog(SchemaGenerator.class);
+    private static final Logger log = LoggerFactory.getLogger(SchemaGenerator.class);
 
     private Configuration cfg;
     private String schemaName = "";

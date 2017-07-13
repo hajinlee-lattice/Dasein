@@ -6,11 +6,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,7 +29,8 @@ import com.newrelic.api.agent.Trace;
 
 public class ScoringManagerCallable implements Callable<Boolean> {
 
-    private static final Log log = LogFactory.getLog(ScoringManagerCallable.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringManagerCallable.class);
+    private static final Marker fatal = MarkerFactory.getMarker("FATAL");
 
     private AsyncTaskExecutor scoringProcessorExecutor;
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
@@ -71,7 +74,7 @@ public class ScoringManagerCallable implements Callable<Boolean> {
                 Long pid = future.get(waitTime, TimeUnit.SECONDS);
                 log.info("PId: " + pid);
             } catch (Exception e) {
-                log.fatal(e.getMessage(), e);
+                log.error(fatal, e.getMessage(), e);
             }
         }
         cleanTables();

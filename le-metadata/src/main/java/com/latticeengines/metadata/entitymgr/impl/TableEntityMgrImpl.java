@@ -6,7 +6,8 @@ import java.util.UUID;
 
 import org.apache.commons.collections.Closure;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("tableEntityMgr")
 public class TableEntityMgrImpl implements TableEntityMgr {
 
-    private static final Logger log = Logger.getLogger(TableEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TableEntityMgrImpl.class);
 
     @Value("${metadata.hive.enabled:false}")
     private boolean hiveEnabled;

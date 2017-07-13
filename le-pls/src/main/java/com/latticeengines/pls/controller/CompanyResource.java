@@ -3,8 +3,8 @@ package com.latticeengines.pls.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 // @PreAuthorize("hasRole('View_PLS_Data')")
 public class CompanyResource {
 
-    private static final Log log = LogFactory.getLog(CompanyResource.class);
+    private static final Logger log = LoggerFactory.getLogger(CompanyResource.class);
 
     @Autowired
     private CompanyEntityMgr companyEntityMgr;

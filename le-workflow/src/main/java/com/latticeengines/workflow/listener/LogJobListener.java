@@ -2,8 +2,8 @@ package com.latticeengines.workflow.listener;
 
 import java.util.Map.Entry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -11,7 +11,7 @@ import org.springframework.batch.core.StepExecution;
 
 public class LogJobListener extends LEJobListener {
 
-    private static final Log log = LogFactory.getLog(LogJobListener.class);
+    private static final Logger log = LoggerFactory.getLogger(LogJobListener.class);
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {

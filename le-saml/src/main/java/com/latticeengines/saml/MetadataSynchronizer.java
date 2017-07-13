@@ -10,12 +10,13 @@ import java.util.TimerTask;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.log4j.Logger;
 import org.opensaml.saml2.metadata.Endpoint;
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.xml.parse.ParserPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
@@ -29,7 +30,7 @@ import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 import com.latticeengines.saml.util.SAMLUtils;
 
 public class MetadataSynchronizer {
-    private static Logger log = Logger.getLogger(MetadataSynchronizer.class);
+    private static Logger log = LoggerFactory.getLogger(MetadataSynchronizer.class);
 
     @Autowired
     private MetadataManager metadataManager;

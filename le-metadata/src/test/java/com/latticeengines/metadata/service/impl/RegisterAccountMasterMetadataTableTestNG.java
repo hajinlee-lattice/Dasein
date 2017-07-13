@@ -7,8 +7,8 @@ import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component
 public class RegisterAccountMasterMetadataTableTestNG extends MetadataFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(RegisterAccountMasterMetadataTableTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(RegisterAccountMasterMetadataTableTestNG.class);
 
     @Autowired
     private MetadataService mdService;

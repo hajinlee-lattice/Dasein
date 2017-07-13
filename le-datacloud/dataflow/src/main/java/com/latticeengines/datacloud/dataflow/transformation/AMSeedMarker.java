@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -26,7 +26,7 @@ import cascading.tuple.Fields;
 @Component(AMSeedMarker.DATAFLOW_BEAN_NAME)
 public class AMSeedMarker extends AccountMasterBase<AMSeedMarkerConfig> {
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(AMSeedMarker.class);
+    private static final Logger log = LoggerFactory.getLogger(AMSeedMarker.class);
 
     public static final String DATAFLOW_BEAN_NAME = "AMSeedMarker";
     public static final String TRANSFORMER_NAME = "AMSeedMarkerTransformer";

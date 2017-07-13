@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modelquality.Sampling;
@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public class SamplingFactory extends ModelFactory {
 
-    private static final Log log = LogFactory.getLog(SamplingFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(SamplingFactory.class);
 
     public static final String MODEL_SAMPLING_SEED_KEY = "model.sampling.seed";
     public static final String MODEL_SAMPLING_RATE_KEY = "model.sampling.rate";

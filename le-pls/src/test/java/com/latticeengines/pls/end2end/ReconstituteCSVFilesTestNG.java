@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
@@ -52,7 +53,7 @@ public class ReconstituteCSVFilesTestNG extends PlsFunctionalTestNGBase {
         public Table table;
     }
 
-    private static final Logger log = Logger.getLogger(ReconstituteCSVFilesTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ReconstituteCSVFilesTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;

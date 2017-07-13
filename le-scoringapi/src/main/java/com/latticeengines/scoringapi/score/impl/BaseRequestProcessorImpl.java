@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import com.latticeengines.scoringapi.match.Matcher;
 
 public class BaseRequestProcessorImpl {
 
-    private static final Log log = LogFactory.getLog(BaseRequestProcessorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseRequestProcessorImpl.class);
 
     @Autowired
     protected HttpStopWatch httpStopWatch;

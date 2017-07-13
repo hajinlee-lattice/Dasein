@@ -3,8 +3,8 @@ package com.latticeengines.perf.job.runnable;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.perf.rest.client.LedpRestClient;
 
@@ -12,7 +12,7 @@ public abstract class ModelingResourceJob<T, E> implements Callable<E> {
 
     protected String restEndpointHost;
     protected LedpRestClient rc;
-    protected static final Log log = LogFactory.getLog(ModelingResourceJob.class);
+    protected static final Logger log = LoggerFactory.getLogger(ModelingResourceJob.class);
     protected T config;
 
     public void setConfiguration(String restEndpointHost, T config) throws Exception {

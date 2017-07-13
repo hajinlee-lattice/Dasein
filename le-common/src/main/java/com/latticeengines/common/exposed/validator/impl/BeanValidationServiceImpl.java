@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
@@ -20,7 +20,7 @@ import com.latticeengines.common.exposed.validator.AnnotationValidator;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 
 public class BeanValidationServiceImpl implements BeanValidationService {
-    private static final Log log = LogFactory.getLog(BeanValidationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BeanValidationServiceImpl.class);
 
     private static final String ANNOTATION_VALIDATOR = "AnnotationValidator";
     private static final String ANNOTATION_VALIDATOR_CLASS_PATH = "com.latticeengines.common.exposed.validator.impl.%s";

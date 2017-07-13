@@ -15,8 +15,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class StatsCubeUtils {
 
-    private static final Log log = LogFactory.getLog(StatsCubeUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(StatsCubeUtils.class);
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
         final AtomicLong maxCount = new AtomicLong(0L);

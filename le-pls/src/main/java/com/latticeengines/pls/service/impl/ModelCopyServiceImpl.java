@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class ModelCopyServiceImpl implements ModelCopyService {
 
     @SuppressWarnings("unused")
-    private static Logger log = Logger.getLogger(ModelCopyServiceImpl.class);
+    private static Logger log = LoggerFactory.getLogger(ModelCopyServiceImpl.class);
 
     @Autowired
     private ModelSummaryService modelSummaryService;

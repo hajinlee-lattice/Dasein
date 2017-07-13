@@ -1,7 +1,7 @@
 package com.latticeengines.workflowapi.steps.dlorchestration;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -9,7 +9,7 @@ import com.latticeengines.workflow.exposed.build.AbstractStep;
 @Component("modelLoadData")
 public class ModelLoadData extends AbstractStep<ModelLoadDataConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ModelLoadData.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelLoadData.class);
 
     @Override
     public void execute() {

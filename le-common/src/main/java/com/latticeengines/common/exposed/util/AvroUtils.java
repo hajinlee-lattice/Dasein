@@ -44,8 +44,8 @@ import org.apache.avro.mapred.FsInput;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -63,7 +63,7 @@ public class AvroUtils {
 
     private static final String SQLSERVER_TYPE_INT = "int";
     private static final String SQLSERVER_TYPE_LONG = "long";
-    private static Log log = LogFactory.getLog(AvroUtils.class);
+    private static Logger log = LoggerFactory.getLogger(AvroUtils.class);
 
     public static FileReader<GenericRecord> getAvroFileReader(Configuration config, Path path) {
         SeekableInput input;

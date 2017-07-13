@@ -2,7 +2,8 @@ package com.latticeengines.saml.controller;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("identityproviders")
 @PreAuthorize("hasRole('Edit_PLS_Data')")
 public class IdentityProviderResource {
-    private static final Logger log = Logger.getLogger(IdentityProviderResource.class);
+    private static final Logger log = LoggerFactory.getLogger(IdentityProviderResource.class);
 
     @Autowired
     private IdentityProviderService identityProviderService;

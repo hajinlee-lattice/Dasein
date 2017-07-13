@@ -14,12 +14,12 @@ import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileBackedOrderedList<T extends Comparable> implements Iterable<T> {
 
-    private static final Log log = LogFactory.getLog(FileBackedOrderedList.class);
+    private static final Logger log = LoggerFactory.getLogger(FileBackedOrderedList.class);
     private static final int NUM_FORKS = 10;
 
     private final long bufferSize;

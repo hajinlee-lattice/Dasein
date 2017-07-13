@@ -8,8 +8,8 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -30,7 +30,7 @@ import com.latticeengines.eai.service.impl.ImportStrategy;
 
 @Component
 public abstract class MarketoImportStrategyBase extends ImportStrategy {
-    private static final Log log = LogFactory.getLog(MarketoImportStrategyBase.class);
+    private static final Logger log = LoggerFactory.getLogger(MarketoImportStrategyBase.class);
 
     @Autowired
     private AvroTypeConverter marketoToAvroTypeConverter;

@@ -1,1 +1,0 @@
-SpecLatticeFunction(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Cat"), LatticeFunctionExpressionConstant("PLS SFDC Template:", DataTypeVarChar(18)), LatticeFunctionExpressionConstant("1.4.1", DataTypeVarChar(5))), DataTypeUnknown, SpecFunctionTypeMetric, SpecFunctionSourceTypeCalculation, SpecDefaultValueNull, SpecDescription(""))

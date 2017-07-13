@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 @Component("domainCountryBasedMicroEngineActor")
 @Scope("prototype")
 public class DomainCountryBasedMicroEngineActor extends LookupMicroEngineActorTemplate {
-    private static final Log log = LogFactory.getLog(DomainCountryBasedMicroEngineActor.class);
+    private static final Logger log = LoggerFactory.getLogger(DomainCountryBasedMicroEngineActor.class);
 
     @PostConstruct
     public void postConstruct() {

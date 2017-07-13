@@ -18,7 +18,8 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -45,7 +46,7 @@ import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
-    private static Logger log = Logger.getLogger(MetadataResolverTestNG.class);
+    private static Logger log = LoggerFactory.getLogger(MetadataResolverTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;

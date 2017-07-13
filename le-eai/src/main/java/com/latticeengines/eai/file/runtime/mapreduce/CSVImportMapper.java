@@ -30,8 +30,6 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -39,6 +37,8 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.output.MapFileOutputFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.number.NumberFormatter;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -56,7 +56,7 @@ import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 
 public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, NullWritable> {
 
-    private static final Log LOG = LogFactory.getLog(CSVImportMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CSVImportMapper.class);
 
     private static final String ERROR_FILE = "error.csv";
 
@@ -143,7 +143,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             handleError(context, lineNum);
                         }
                     } catch (Exception e) {
-                        LOG.warn(e);
+                        LOG.warn(e.getMessage(), e);
                         rowError = true;
                         errorMap.put(String.valueOf(lineNum),
                                 String.format(
@@ -200,7 +200,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     csvFieldValue = String.valueOf(csvRecord.get(attr.getDisplayName()));
                 } catch (Exception e) { // This catch is for the row error
                     rowError = true;
-                    LOG.warn(e);
+                    LOG.warn(e.getMessage(), e);
                 }
                 List<InputValidator> validators = attr.getValidators();
                 try {
@@ -213,7 +213,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                     avroRecord.put(attr.getName(), avroFieldValue);
                 } catch (Exception e) {
-                    LOG.warn(e);
+                    LOG.warn(e.getMessage(), e);
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
             } else {

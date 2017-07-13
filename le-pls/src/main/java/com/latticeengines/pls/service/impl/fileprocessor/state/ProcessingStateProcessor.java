@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -23,7 +23,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class ProcessingStateProcessor extends BaseStateProcessor {
 
-    private static final Log log = LogFactory.getLog(ProcessingStateProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(ProcessingStateProcessor.class);
 
     @Override
     public void processDir(File baseDir, FileProcessingState state, FileProcessingState priorState, Properties properties) {

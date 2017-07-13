@@ -8,8 +8,8 @@ import java.util.Properties;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.RedshiftPublishStepConfiguration;
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Component("redshiftPublishStep")
 public class RedshiftPublishStep extends RunDataFlow<RedshiftPublishStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(RedshiftPublishStep.class);
+    private static final Logger log = LoggerFactory.getLogger(RedshiftPublishStep.class);
 
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;

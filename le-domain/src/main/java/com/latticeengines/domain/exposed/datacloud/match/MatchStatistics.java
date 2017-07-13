@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.datacloud.match;
 import java.util.List;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
@@ -19,7 +19,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricField;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchStatistics {
 
-    private static Log log = LogFactory.getLog(MatchStatistics.class);
+    private static Logger log = LoggerFactory.getLogger(MatchStatistics.class);
 
     private Integer rowsRequested;
     private Integer rowsMatched;

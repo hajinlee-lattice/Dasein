@@ -3,13 +3,13 @@ package com.latticeengines.dataplatform.infrastructure;
 import static org.testng.Assert.assertTrue;
 
 import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTestNGBase {
 
-    protected static final Log log = LogFactory.getLog(NameNodeHAInfrastructureTestNG.class);
+    protected static final Logger log = LoggerFactory.getLogger(NameNodeHAInfrastructureTestNG.class);
 
     private String ACTIVE = "active";
 

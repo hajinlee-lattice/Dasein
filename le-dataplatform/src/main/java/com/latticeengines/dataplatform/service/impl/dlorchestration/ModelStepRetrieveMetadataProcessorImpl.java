@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -31,7 +31,7 @@ import com.latticeengines.remote.exposed.service.MetadataValidationService;
 public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcessor {
     public static final String ERROR_MESSAGE_NULL = "\"ErrorMessage\":null";
 
-    private static final Log log = LogFactory.getLog(ModelStepRetrieveMetadataProcessorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelStepRetrieveMetadataProcessorImpl.class);
 
     private static final String METADATA_DIAGNOSTIC_FILE = "metadata-diagnostics.json";
     private static final String METADATA_FILE = "metadata.avsc";

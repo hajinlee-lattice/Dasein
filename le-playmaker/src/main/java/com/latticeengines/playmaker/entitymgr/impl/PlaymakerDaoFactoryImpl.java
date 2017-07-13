@@ -7,8 +7,8 @@ import java.util.TreeMap;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
 @Component("daoFactory")
 public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
 
-    private static final Log log = LogFactory.getLog(PlaymakerDaoFactoryImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PlaymakerDaoFactoryImpl.class);
 
     @Autowired
     private JdbcTemplateFactoryImpl templateFactory;

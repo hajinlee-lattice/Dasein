@@ -2,7 +2,7 @@ package com.latticeengines.datacloud.collection.entitymgr.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -16,7 +16,7 @@ public abstract class AbstractProgressEntityMgr<P extends Progress> implements P
 
     protected abstract ProgressDao<P> getProgressDao();
 
-    protected abstract Log getLog();
+    protected abstract Logger getLog();
 
     private static final int MAX_RETRIES = 3;
 

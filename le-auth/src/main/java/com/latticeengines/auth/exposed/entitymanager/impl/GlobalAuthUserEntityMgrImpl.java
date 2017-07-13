@@ -3,23 +3,23 @@ package com.latticeengines.auth.exposed.entitymanager.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.auth.exposed.dao.GlobalAuthUserDao;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.auth.exposed.dao.GlobalAuthUserDao;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 
 @Component("globalAuthUserEntityMgr")
 public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUser> implements GlobalAuthUserEntityMgr {
 
-    private static final Logger log = Logger.getLogger(GlobalAuthUserEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalAuthUserEntityMgrImpl.class);
 
     @Autowired
     private GlobalAuthUserDao gaUserDao;

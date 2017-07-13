@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 
@@ -34,7 +34,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
     private static final String LOOKUP_ID_DELIM = "|";
 
-    private static final Log log = LogFactory.getLog(InternalResourceRestApiProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(InternalResourceRestApiProxy.class);
 
     private static final String INSIGHTS_PATH = "/insights";
 

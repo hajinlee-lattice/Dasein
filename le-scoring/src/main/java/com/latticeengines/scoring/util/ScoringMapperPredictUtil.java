@@ -23,8 +23,8 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
@@ -48,7 +48,7 @@ import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 
 public class ScoringMapperPredictUtil {
 
-    private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
 
     public static void evaluate(MapContext<AvroKey<Record>, NullWritable, NullWritable, NullWritable> context,
             Set<String> uuidSet) throws IOException, InterruptedException {

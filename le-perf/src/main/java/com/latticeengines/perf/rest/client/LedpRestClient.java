@@ -9,8 +9,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.RetryCallback;
@@ -35,7 +35,7 @@ public class LedpRestClient {
 
     private RestTemplate rt = HttpClientUtils.newRestTemplate();
     private RetryTemplate rtt = new RetryTemplate();
-    private static final Log log = LogFactory.getLog(LedpRestClient.class);
+    private static final Logger log = LoggerFactory.getLogger(LedpRestClient.class);
     private String restEndpointHost;
 
     public LedpRestClient() {
@@ -59,7 +59,7 @@ public class LedpRestClient {
     public List<String> loadData(final LoadConfiguration config) throws Exception {
         AppSubmission submission = retryRequest(restEndpointHost + "/rest/load", config);
         List<String> applicationIds = submission.getApplicationIds();
-        log.info(applicationIds);
+        log.info(String.join(", ", applicationIds));
         return applicationIds;
     }
 
@@ -67,7 +67,7 @@ public class LedpRestClient {
         AppSubmission submission = rt.postForObject(restEndpointHost + "/rest/createSamples", config,
                 AppSubmission.class, new Object[] {});
         List<String> applicationIds = submission.getApplicationIds();
-        log.info(applicationIds);
+        log.info(String.join(", ", applicationIds));
         return applicationIds;
     }
 
@@ -75,7 +75,7 @@ public class LedpRestClient {
         AppSubmission submission = rt.postForObject(restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         List<String> applicationIds = submission.getApplicationIds();
-        log.info(applicationIds);
+        log.info(String.join(", ", applicationIds));
         return applicationIds;
     }
 
@@ -83,7 +83,7 @@ public class LedpRestClient {
         AppSubmission submission = rt.postForObject(restEndpointHost + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         List<String> applicationIds = submission.getApplicationIds();
-        log.info(applicationIds);
+        log.info(String.join(", ", applicationIds));
         return applicationIds;
     }
 

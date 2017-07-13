@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,7 @@ import com.latticeengines.encryption.exposed.service.KeyManagementService;
 @Component("dataEncryptionService")
 public class DataEncryptionServiceImpl implements DataEncryptionService {
 
-    private static final Logger log = Logger.getLogger(DataEncryptionServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DataEncryptionServiceImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;

@@ -9,13 +9,13 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 public class MailSender {
 
-    private static final Log log = LogFactory.getLog(MailSender.class);
+    private static final Logger log = LoggerFactory.getLogger(MailSender.class);
 
     @Value("${dellebi.mailhost}")
     private String mailHost;

@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.dataflow.refresh;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -18,7 +18,7 @@ import cascading.tuple.Fields;
 
 @Component("characterizationFlow")
 public class CharacterizationFlow extends TypesafeDataFlowBuilder<CharacterizationParameters> {
-    private static final Log log = LogFactory.getLog(CharacterizationFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(CharacterizationFlow.class);
 
     @Override
     public Node construct(CharacterizationParameters parameters) {

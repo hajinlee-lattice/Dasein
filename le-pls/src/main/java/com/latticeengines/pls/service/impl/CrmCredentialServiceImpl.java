@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import com.latticeengines.remote.exposed.service.DataLoaderService;
 @Component("crmService")
 public class CrmCredentialServiceImpl implements CrmCredentialService {
 
-    private static final Log log = LogFactory.getLog(CrmCredentialServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(CrmCredentialServiceImpl.class);
 
     @Autowired
     TenantConfigServiceImpl tenantConfigService;

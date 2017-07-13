@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 public class OrbCacheSeedSecondaryDomainCleanupFlow
         extends ConfigurableFlowBase<OrbCacheSeedSecondaryDomainCleanupTransformerConfig> {
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(OrbCacheSeedSecondaryDomainCleanupFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(OrbCacheSeedSecondaryDomainCleanupFlow.class);
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {

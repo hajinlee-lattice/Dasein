@@ -16,8 +16,8 @@ import org.apache.avro.Schema.Field;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -48,7 +48,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component(TRANSFORMER_NAME)
 public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, ProfileParameters> {
-    private static final Log log = LogFactory.getLog(SourceProfiler.class);
+    private static final Logger log = LoggerFactory.getLogger(SourceProfiler.class);
 
     public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILER;
     private static final String IS_SEGMENT = "IsSegment";

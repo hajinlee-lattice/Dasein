@@ -4,7 +4,7 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.datacloud.collection.service.BulkArchiveService;
@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 public abstract class AbstractBulkArchiveService extends SourceRefreshServiceBase<ArchiveProgress>
         implements BulkArchiveService {
 
-    private Log log;
+    private Logger log;
     private ArchiveProgressEntityMgr entityMgr;
     private BulkSource source;
 

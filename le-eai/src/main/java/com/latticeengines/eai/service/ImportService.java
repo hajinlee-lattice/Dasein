@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.ProducerTemplate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public abstract class ImportService {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(ImportService.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportService.class);
 
     private static Map<SourceType, ImportService> services = new HashMap<>();
 

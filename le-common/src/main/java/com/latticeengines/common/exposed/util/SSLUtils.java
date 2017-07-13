@@ -9,13 +9,13 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 
 public class SSLUtils {
 
-    private static final Log log = LogFactory.getLog(SSLUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(SSLUtils.class);
     private static ThreadLocal<Boolean> sslOff = new ThreadLocal<>();
 
     public static final SSLConnectionSocketFactory SSL_BLIND_SOCKET_FACTORY = newSslBlindSocketFactory();

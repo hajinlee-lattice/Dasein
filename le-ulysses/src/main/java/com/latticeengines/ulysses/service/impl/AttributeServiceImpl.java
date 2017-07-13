@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
@@ -19,7 +20,7 @@ import com.latticeengines.ulysses.service.AttributeService;
 @Component("attributeService")
 public class AttributeServiceImpl implements AttributeService {
 
-    private static final Logger log = Logger.getLogger(AttributeServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AttributeServiceImpl.class);
 
     @Override
     public List<PrimaryField> getPrimaryFields() {

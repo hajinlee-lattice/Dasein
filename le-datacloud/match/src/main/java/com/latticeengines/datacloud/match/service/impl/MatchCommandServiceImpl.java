@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 @Component("matchCommandService")
 public class MatchCommandServiceImpl implements MatchCommandService {
 
-    private static Log log = LogFactory.getLog(MatchCommandServiceImpl.class);
+    private static Logger log = LoggerFactory.getLogger(MatchCommandServiceImpl.class);
     private static final Integer MAX_RETRIES = 2;
 
     @Autowired

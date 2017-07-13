@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
@@ -25,7 +25,7 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 public class DefaultYarnClientCustomization extends YarnClientCustomization {
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultYarnClientCustomization.class);
 
     protected VersionManager versionManager;
 

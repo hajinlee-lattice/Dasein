@@ -5,10 +5,13 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
@@ -23,7 +26,7 @@ public class ModuleResourceTestNG extends MetadataFunctionalTestNGBase {
     private static final String RESOURCE_BASE = "com/latticeengines/artifact/validation";
 
     @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(ArtifactResourceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ArtifactResourceTestNG.class);
 
     @BeforeClass(groups = "functional")
     public void setup() {

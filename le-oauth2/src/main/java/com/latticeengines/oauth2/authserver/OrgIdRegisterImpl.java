@@ -2,8 +2,8 @@ package com.latticeengines.oauth2.authserver;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 @Component
 public class OrgIdRegisterImpl implements OrgIdRegister {
 
-    private static final Log log = LogFactory.getLog(OrgIdRegisterImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(OrgIdRegisterImpl.class);
 
     @Override
     public void registerOrgId(String tenantId) {

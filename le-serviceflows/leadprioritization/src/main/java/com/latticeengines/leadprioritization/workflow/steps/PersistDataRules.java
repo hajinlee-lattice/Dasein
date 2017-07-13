@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfig
 @Component("persistDataRules")
 public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(PersistDataRules.class);
+    private static final Logger log = LoggerFactory.getLogger(PersistDataRules.class);
 
     @Autowired
     private MetadataProxy metadataProxy;

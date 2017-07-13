@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(DnBBulkLookupServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBBulkLookupServiceImplTestNG.class);
 
     @Autowired
     private DnBBulkLookupDispatcher dnBBulkLookupDispatcher;

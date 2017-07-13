@@ -3,8 +3,8 @@ package com.latticeengines.pls.controller;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class DanteTalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
-    // private static final Log log =
-    // LogFactory.getLog(DanteTalkingPointsDeploymentTestNG.class);
+    // private static final Logger log =
+    // LoggerFactory.getLogger(DanteTalkingPointsDeploymentTestNG.class);
     // private String tenantId;
     //
     // @BeforeClass(groups = { "deployment" })

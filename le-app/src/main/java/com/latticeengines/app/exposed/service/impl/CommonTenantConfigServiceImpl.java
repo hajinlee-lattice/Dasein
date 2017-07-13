@@ -3,8 +3,8 @@ package com.latticeengines.app.exposed.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("appTenantConfigService")
 public class CommonTenantConfigServiceImpl implements CommonTenantConfigService {
     public static final String ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE = "/EnrichAttributesMaxNumber";
-    private static final Log log = LogFactory.getLog(CommonTenantConfigServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(CommonTenantConfigServiceImpl.class);
     public static final String PLS = "PLS";
     private static final BatonService batonService = new BatonServiceImpl();
 

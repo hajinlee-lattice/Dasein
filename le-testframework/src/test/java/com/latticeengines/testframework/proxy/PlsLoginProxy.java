@@ -1,8 +1,8 @@
 package com.latticeengines.testframework.proxy;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
@@ -13,7 +13,7 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 @Component("globalAuthLoginProxy")
 public class PlsLoginProxy extends BaseRestApiProxy {
 
-    private static final Log log = LogFactory.getLog(AdminLoginProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(AdminLoginProxy.class);
 
     public PlsLoginProxy() {
         super(PropertyUtils.getProperty("common.test.pls.url"), "pls");

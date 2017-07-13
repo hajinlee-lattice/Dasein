@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.core.entitymgr.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 @Component("dataCloudVersionEntityMgr")
 public class DataCloudVersionEntityMgrImpl implements DataCloudVersionEntityMgr {
 
-    private static final Log log = LogFactory.getLog(DataCloudVersionEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DataCloudVersionEntityMgrImpl.class);
 
     @Autowired
     private DataCloudVersionDao dataCloudVersionDao;

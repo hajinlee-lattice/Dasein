@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -21,7 +21,7 @@ import cascading.tuple.TupleEntry;
 public class DomainCleanupByDuBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = 1L;
-    private static final Log log = LogFactory.getLog(DomainCleanupByDuBuffer.class);
+    private static final Logger log = LoggerFactory.getLogger(DomainCleanupByDuBuffer.class);
     public static final String DU_PRIMARY_DOMAIN = "DUPrimaryDomain";
 
     private String duField;

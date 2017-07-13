@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
@@ -25,7 +25,7 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 public abstract class SingleContainerClientCustomization extends DefaultYarnClientCustomization {
 
-    private static final Log log = LogFactory.getLog(SingleContainerClientCustomization.class);
+    private static final Logger log = LoggerFactory.getLogger(SingleContainerClientCustomization.class);
 
     public SingleContainerClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //

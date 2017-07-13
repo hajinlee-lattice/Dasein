@@ -28,8 +28,8 @@ import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
 import com.amazonaws.services.dynamodbv2.document.AttributeUpdate;
@@ -56,7 +56,7 @@ import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
 
 public class DynamoDataStoreImpl implements FabricDataStore {
 
-    private static final Log log = LogFactory.getLog(DynamoDataStoreImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DynamoDataStoreImpl.class);
 
     private static final String ERRORMESSAGE = "If you see NoSuchMethodError on jackson json, it might be because to the table name or key attributes are wrong.";
 

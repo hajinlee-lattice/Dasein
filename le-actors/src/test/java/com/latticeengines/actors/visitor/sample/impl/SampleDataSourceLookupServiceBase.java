@@ -1,7 +1,7 @@
 package com.latticeengines.actors.visitor.sample.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.actors.exposed.traveler.Response;
@@ -10,7 +10,7 @@ import com.latticeengines.actors.visitor.sample.SampleDataSourceLookupService;
 import com.latticeengines.actors.visitor.sample.framework.SampleMatchActorSystem;
 
 public abstract class SampleDataSourceLookupServiceBase implements SampleDataSourceLookupService {
-    private static final Log log = LogFactory.getLog(SampleDataSourceLookupServiceBase.class);
+    private static final Logger log = LoggerFactory.getLogger(SampleDataSourceLookupServiceBase.class);
 
     @Autowired
     private SampleMatchActorSystem actorSystem;

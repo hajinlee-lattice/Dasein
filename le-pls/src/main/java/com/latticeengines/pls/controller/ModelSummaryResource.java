@@ -6,7 +6,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,7 +49,7 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Models')")
 public class ModelSummaryResource {
 
-    private static final Logger log = Logger.getLogger(ModelSummaryResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryResource.class);
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;

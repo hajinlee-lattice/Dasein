@@ -1,8 +1,8 @@
 package com.latticeengines.eai.routes.vdb.strategy;
 
 import org.apache.camel.ProducerTemplate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -14,7 +14,7 @@ import com.latticeengines.eai.service.impl.ImportStrategy;
 public class VdbTableImportStrategyBase extends ImportStrategy {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(VdbTableImportStrategyBase.class);
+    private static final Logger log = LoggerFactory.getLogger(VdbTableImportStrategyBase.class);
 
     public VdbTableImportStrategyBase() {
         super("Vdb.Table");

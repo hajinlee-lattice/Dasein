@@ -9,8 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
@@ -26,7 +26,7 @@ import com.latticeengines.monitor.exposed.alerts.service.JiraService;
 @Component("jiraService")
 public class JiraServiceImpl implements JiraService {
 
-    private final static Log log = LogFactory.getLog(JiraServiceImpl.class.getName());
+    private final static Logger log = LoggerFactory.getLogger(JiraServiceImpl.class.getName());
 
     private static List<BasicNameValuePair> headers = new ArrayList<BasicNameValuePair>();
     static {

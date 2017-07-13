@@ -23,8 +23,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +52,7 @@ import com.newrelic.api.agent.Trace;
 @Component("sqlServerHelper")
 public class SqlServerHelper implements DbHelper {
 
-    private static final Log log = LogFactory.getLog(SqlServerHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(SqlServerHelper.class);
     private LoadingCache<String, Set<String>> tableColumnsCache;
     private static final Integer MAX_RETRIES = 2;
 

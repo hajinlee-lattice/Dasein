@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.SetUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -22,7 +22,7 @@ import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDep
 
 public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ScoringResourceWarningsDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringResourceWarningsDeploymentTestNG.class);
 
     @Test(groups = "deployment", enabled = true)
     public void missingColumn() throws IOException {

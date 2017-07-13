@@ -3,7 +3,8 @@ package com.latticeengines.pls.controller;
 import java.io.InputStream;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +30,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/metadatauploads")
 public class MetadataFileUploadResource {
 
-    private static final Logger log = Logger.getLogger(MetadataFileUploadResource.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataFileUploadResource.class);
 
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
@@ -65,7 +66,7 @@ public class MetadataFileUploadResource {
             if (e instanceof LedpException) {
                 throw (LedpException) e;
             }
-            log.error(e);
+            log.error(e.getMessage(), e);
             return ResponseDocument.failedResponse(e);
         }
     }

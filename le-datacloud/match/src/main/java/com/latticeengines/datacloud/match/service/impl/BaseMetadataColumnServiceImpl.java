@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
 
-    private static final Log log = LogFactory.getLog(BaseMetadataColumnServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseMetadataColumnServiceImpl.class);
 
     @PostConstruct
     private void postConstruct() {

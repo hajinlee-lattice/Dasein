@@ -2,8 +2,8 @@ package com.latticeengines.monitor.exposed.metrics.impl;
 
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
@@ -14,7 +14,7 @@ import com.latticeengines.monitor.exposed.metrics.MetricsAspect;
 @Aspect
 public class BaseMetricsAspectImpl implements MetricsAspect {
 
-    public static Log log = LogFactory.getLog(BaseMetricsAspectImpl.class);
+    public static Logger log = LoggerFactory.getLogger(BaseMetricsAspectImpl.class);
 
     ThreadLocal<String> tracker = new ThreadLocal<>();
 

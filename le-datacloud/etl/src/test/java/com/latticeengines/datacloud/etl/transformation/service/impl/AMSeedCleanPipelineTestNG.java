@@ -13,8 +13,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -41,7 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class AMSeedCleanPipelineTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(AMSeedCleanPipelineTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AMSeedCleanPipelineTestNG.class);
 
     private static final String LATTICEID = "LatticeID";
 
@@ -378,7 +378,7 @@ public class AMSeedCleanPipelineTestNG
         while (records.hasNext()) {
             GenericRecord record = records.next();
             Long latticeId = (Long) record.get(LATTICEID);
-            log.info(latticeId);
+            log.info(String.valueOf(latticeId));
             distinctIds.add(latticeId);
 
             Map<String, Object> data = latticeIdToData.get(latticeId);

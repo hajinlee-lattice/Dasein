@@ -20,8 +20,8 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 @Component("hdfsToS3ExportService")
 public class HdfsToS3ExportService {
 
-    private static final Log log = LogFactory.getLog(HdfsToS3ExportService.class);
+    private static final Logger log = LoggerFactory.getLogger(HdfsToS3ExportService.class);
 
     private static final Long MIN_SPLIT_SIZE = 10L * 1024L * 1024L; // 10 MB
     private static final String LOCAL_CACHE = "tmp/camel";

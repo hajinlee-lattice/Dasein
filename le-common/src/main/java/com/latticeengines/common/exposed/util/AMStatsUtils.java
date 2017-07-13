@@ -11,13 +11,13 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AMStatsUtils {
-    private static final Log log = LogFactory.getLog(AMStatsUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(AMStatsUtils.class);
 
     private static final ObjectMapper om = new ObjectMapper();
 

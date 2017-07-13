@@ -3,8 +3,8 @@ package com.latticeengines.dataflow.runtime.cascading;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.transform.exposed.RealTimeTransform;
@@ -20,7 +20,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class TransformFunction extends BaseOperation implements Function {
 
-    private static final Log log = LogFactory.getLog(TransformFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(TransformFunction.class);
 
     private static final long serialVersionUID = -511307280951632248L;
 

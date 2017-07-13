@@ -1,11 +1,12 @@
 package com.latticeengines.workflow.listener;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 
 public abstract class LEJobListener implements JobExecutionListener {
-    private static final Logger log = Logger.getLogger(LEJobListener.class);
+    private static final Logger log = LoggerFactory.getLogger(LEJobListener.class);
 
     public abstract void beforeJobExecution(JobExecution jobExecution);
 

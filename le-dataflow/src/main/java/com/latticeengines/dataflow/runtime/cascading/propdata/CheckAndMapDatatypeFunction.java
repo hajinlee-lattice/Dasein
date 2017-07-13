@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.avro.Schema.Type;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -18,7 +18,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class CheckAndMapDatatypeFunction extends BaseOperation implements Function {
 
-    private static final Log log = LogFactory.getLog(CheckAndMapDatatypeFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(CheckAndMapDatatypeFunction.class);
 
     private static final long serialVersionUID = -2745833989198218174L;
     private String fieldName;

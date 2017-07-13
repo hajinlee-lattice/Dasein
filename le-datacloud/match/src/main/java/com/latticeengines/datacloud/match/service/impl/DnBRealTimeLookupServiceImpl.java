@@ -1,8 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("dnbRealTimeLookupService")
 public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMatchContext>
         implements DnBRealTimeLookupService {
-    private static final Log log = LogFactory.getLog(DnBRealTimeLookupServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBRealTimeLookupServiceImpl.class);
 
     @Autowired
     private DnBAuthenticationServiceImpl dnBAuthenticationService;

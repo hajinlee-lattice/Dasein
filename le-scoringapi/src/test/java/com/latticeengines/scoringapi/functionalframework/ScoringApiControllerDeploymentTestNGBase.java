@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +62,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected static final String SOURCE_INTERPRETATION = "SalesforceLead";
     public static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
     protected static final String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
-    private static final Log log = LogFactory.getLog(ScoringApiControllerDeploymentTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringApiControllerDeploymentTestNGBase.class);
 
     private static final String CLIENT_ID_LP = "lp";
     private static final String DUMMY_APP_ID = "DUMMY_APP";

@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +24,7 @@ import org.testng.annotations.Test;
 @ContextConfiguration(locations = { "classpath:test-redshiftdb-context.xml" })
 public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
 
-    private static final Log log = LogFactory.getLog(RedshiftLoadTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(RedshiftLoadTestNG.class);
 
     @Autowired
     @Qualifier(value = "redshiftJdbcTemplate")
@@ -52,7 +52,7 @@ public class RedshiftLoadTestNG extends AbstractTestNGSpringContextTests {
                 }
             }
         } catch (IOException ex) {
-            log.error(ex);
+            log.error(ex.getMessage(), ex);
         }
     }
 

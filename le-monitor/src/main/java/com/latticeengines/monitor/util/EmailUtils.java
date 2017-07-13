@@ -14,15 +14,15 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 
 public final class EmailUtils {
-    private static final Log log = LogFactory.getLog(EmailUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(EmailUtils.class);
 
     private EmailUtils() {
     }

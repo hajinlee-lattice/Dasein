@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -33,8 +33,7 @@ public class AMSeedFixDomainInDUTreeTestNG extends
 
     private static final String ACCOUNT_MASTER_SEED_CLEANED = "AccountMasterSeedCleaned";
 
-    private static final Log log = LogFactory
-            .getLog(AMSeedFixDomainInDUTreeTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AMSeedFixDomainInDUTreeTestNG.class);
 
     @Autowired
     PipelineSource source;
@@ -178,7 +177,7 @@ public class AMSeedFixDomainInDUTreeTestNG extends
         Assert.assertEquals(rowNum, 14);
         for (Object[] data : expectedData) {
             GenericRecord record = recordMap.get((Long) data[0]);
-            log.info(record);
+            log.info(JsonUtils.serialize(record));
             Assert.assertEquals(record.get("Domain") == null ? null : record.get("Domain").toString(),
                     (String) data[1]);
             Assert.assertEquals(record.get("DUNS") == null ? null : record.get("DUNS").toString(), (String) data[2]);

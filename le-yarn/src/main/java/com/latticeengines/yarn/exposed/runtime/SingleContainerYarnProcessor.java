@@ -2,8 +2,8 @@ package com.latticeengines.yarn.exposed.runtime;
 
 import java.lang.reflect.ParameterizedType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.batch.core.ExitStatus;
@@ -33,7 +33,7 @@ import com.latticeengines.yarn.exposed.runtime.progress.LedpProgressReporter;
 
 public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T, String>, StepExecutionListener {
 
-    private static final Log log = LogFactory.getLog(SingleContainerYarnProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(SingleContainerYarnProcessor.class);
 
     protected ApplicationId appId;
     private LineMapper<T> lineMapper = new SingleContainerLineMapper();

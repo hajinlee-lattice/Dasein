@@ -9,13 +9,14 @@ import java.util.Map;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.SeedDomainDunsCleanup;
@@ -28,7 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class SeedDomainDunsCleanupTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(SeedDomainDunsCleanupTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(SeedDomainDunsCleanupTestNG.class);
 
     GeneralSource source = new GeneralSource("SeedCleaned");
     GeneralSource seed = new GeneralSource("Seed");
@@ -185,7 +186,7 @@ public class SeedDomainDunsCleanupTestNG
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            log.info(record);
+            log.info(JsonUtils.serialize(record));
             Object id = record.get("ID");
             if (id instanceof Utf8) {
                 id = id.toString();

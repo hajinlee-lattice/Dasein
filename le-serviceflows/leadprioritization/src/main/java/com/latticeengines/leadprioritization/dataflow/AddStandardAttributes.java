@@ -2,8 +2,8 @@ package com.latticeengines.leadprioritization.dataflow;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 @Component("addStandardAttributes")
 public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAttributesParameters> {
 
-    private static final Log log = LogFactory.getLog(AddStandardAttributes.class);
+    private static final Logger log = LoggerFactory.getLogger(AddStandardAttributes.class);
 
     @Override
     public Node construct(AddStandardAttributesParameters parameters) {

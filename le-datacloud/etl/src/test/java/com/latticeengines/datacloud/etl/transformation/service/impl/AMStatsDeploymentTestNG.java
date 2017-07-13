@@ -13,8 +13,8 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 public class AMStatsDeploymentTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     private static final String DATA_CLOUD_VERSION = "2.0.2";
 
-    private static final Log log = LogFactory.getLog(AMStatsDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AMStatsDeploymentTestNG.class);
 
     @Autowired
     PipelineSource source;

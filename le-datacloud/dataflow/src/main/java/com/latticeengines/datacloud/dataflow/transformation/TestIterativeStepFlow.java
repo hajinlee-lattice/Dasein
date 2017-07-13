@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 
 @Component("testIterativeStepFlow")
 public class TestIterativeStepFlow extends ConfigurableFlowBase<TestIterativeStepConfig> {
-    private static final Log log = LogFactory.getLog(TestIterativeStepFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(TestIterativeStepFlow.class);
 
     @Override
     public String getDataFlowBeanName() {

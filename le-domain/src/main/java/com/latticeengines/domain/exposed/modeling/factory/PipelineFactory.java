@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.Pipeline;
@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public class PipelineFactory extends ModelFactory {
 
-    private static final Log log = LogFactory.getLog(PipelineFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(PipelineFactory.class);
 
     public static final String PIPELINE_NAME_KEY = "pipeline.name";
 

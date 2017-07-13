@@ -3,8 +3,8 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertTrue;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.testng.annotations.Test;
 
@@ -12,7 +12,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 @Component
 public class SystemStatusDeploymentTest extends PlsDeploymentTestNGBase {
-    private static final Log log = LogFactory.getLog(SystemStatusDeploymentTest.class);
+    private static final Logger log = LoggerFactory.getLogger(SystemStatusDeploymentTest.class);
 
     private static final String SYSTEMSTATUS_URL = "/pls/health/systemstatus";
 

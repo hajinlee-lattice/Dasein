@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 public class PivotV2UnitTestNG {
 
-    private static final Log log = LogFactory.getLog(PivotV2UnitTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PivotV2UnitTestNG.class);
 
     @Test(groups = "unit")
     public void transformSimple() throws Exception {

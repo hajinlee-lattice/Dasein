@@ -3,8 +3,8 @@ package com.latticeengines.serviceflows.workflow.export;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Component("exportData")
 public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ExportData.class);
+    private static final Logger log = LoggerFactory.getLogger(ExportData.class);
 
     @Autowired
     private MetadataProxy metadataProxy;

@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.message.BasicNameValuePair;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -48,7 +48,7 @@ import com.latticeengines.monitor.metric.service.MetricWriter;
 @Component("influxDbMetricWriter")
 public class InfluxDbMetricWriter implements MetricWriter {
 
-    private static final Log log = LogFactory.getLog(InfluxDbMetricWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(InfluxDbMetricWriter.class);
     private static final String DB_CACHE_KEY = "InfluxDB";
     private static final String METRIC_ADVERTISE_NAME = "METRIC_ADVERTISE_NAME";
     private LoadingCache<String, InfluxDB> dbConnectionCache;

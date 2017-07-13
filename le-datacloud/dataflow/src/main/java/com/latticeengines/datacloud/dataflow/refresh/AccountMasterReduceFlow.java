@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.dataflow.refresh;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterReduceP
 
 @Component("accountMasterReduceFlow")
 public class AccountMasterReduceFlow extends TypesafeDataFlowBuilder<AccountMasterReduceParameters> {
-    private static final Log log = LogFactory.getLog(AccountMasterReduceFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountMasterReduceFlow.class);
 
     @Override
     public Node construct(AccountMasterReduceParameters parameters) {

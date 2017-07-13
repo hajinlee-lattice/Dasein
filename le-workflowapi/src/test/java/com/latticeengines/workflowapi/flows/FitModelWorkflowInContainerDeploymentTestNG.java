@@ -1,7 +1,7 @@
 package com.latticeengines.workflowapi.flows;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.FitModel
 public class FitModelWorkflowInContainerDeploymentTestNG extends FitModelWorkflowTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(FitModelWorkflowInContainerDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(FitModelWorkflowInContainerDeploymentTestNG.class);
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {

@@ -2,8 +2,8 @@ package com.latticeengines.datacloudapi.engine.transformation.service.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -24,7 +24,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @SuppressWarnings("rawtypes")
 public class TransformationExecutorImpl implements TransformationExecutor {
-    private static final Log log = LogFactory.getLog(TransformationExecutor.class);
+    private static final Logger log = LoggerFactory.getLogger(TransformationExecutor.class);
     private static final int MAX_RETRY = 3;
 
     private String jobSubmitter;
@@ -63,7 +63,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
                     return progress;
                 }
             } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 throw e;
             }
         }
@@ -90,7 +90,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
                     return progress;
                 }
             } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 throw e;
             }
         }

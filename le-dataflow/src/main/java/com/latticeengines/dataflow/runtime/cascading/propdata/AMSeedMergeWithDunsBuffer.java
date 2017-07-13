@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -20,7 +20,7 @@ import cascading.tuple.TupleEntry;
 public class AMSeedMergeWithDunsBuffer extends BaseOperation implements Buffer {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(AMSeedMergeWithDunsBuffer.class);
+    private static final Logger log = LoggerFactory.getLogger(AMSeedMergeWithDunsBuffer.class);
 
     private static final long serialVersionUID = -5435451652686146347L;
 

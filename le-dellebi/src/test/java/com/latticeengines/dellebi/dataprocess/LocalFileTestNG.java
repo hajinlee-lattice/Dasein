@@ -1,7 +1,7 @@
 package com.latticeengines.dellebi.dataprocess;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 public class LocalFileTestNG extends DellEbiTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(LocalFileTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(LocalFileTestNG.class);
 
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;

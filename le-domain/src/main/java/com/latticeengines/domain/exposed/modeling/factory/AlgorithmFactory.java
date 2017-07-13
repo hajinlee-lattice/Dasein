@@ -6,8 +6,8 @@ import java.util.Properties;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
 public class AlgorithmFactory extends ModelFactory {
 
-    private static final Log log = LogFactory.getLog(AlgorithmFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(AlgorithmFactory.class);
 
     public static final String ALGORITHM_NAME_RF = "RF";
     public static final String ALGORITHM_NAME_LR = "LR";

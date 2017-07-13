@@ -6,8 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ import com.latticeengines.proxy.exposed.datacloudapi.OrchestrationProxy;
 
 @Component
 public class OrchestrationResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
-    private static final Log log = LogFactory.getLog(OrchestrationResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(OrchestrationResourceDeploymentTestNG.class);
 
     public final String POD_ID = this.getClass().getSimpleName();
     

@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +25,7 @@ import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 
 @Component
 public class ScoreArtifactCache {
-    private static final Log log = LogFactory.getLog(ScoreArtifactCache.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoreArtifactCache.class);
 
     @Value("${scoringapi.scoreartifact.cache.maxsize}")
     private int scoreArtifactCacheMaxSize;

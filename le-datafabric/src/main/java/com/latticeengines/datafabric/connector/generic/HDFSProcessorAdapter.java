@@ -7,8 +7,8 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.kafka.common.TopicPartition;
@@ -21,7 +21,7 @@ import com.latticeengines.datafabric.service.datastore.impl.HDFSDataServiceProvi
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 public class HDFSProcessorAdapter extends AbstractProcessorAdapter {
-    private final Log log = LogFactory.getLog(HDFSProcessorAdapter.class);
+    private final Logger log = LoggerFactory.getLogger(HDFSProcessorAdapter.class);
 
     private GenericSinkConnectorConfig connectorConfig;
 

@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,7 +26,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 @Component("metadataProvisioningService")
 public class MetadataProvisioningServiceImpl implements MetadataProvisioningService {
 
-    private static final Log log = LogFactory.getLog(MetadataProvisioningServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataProvisioningServiceImpl.class);
 
     @Autowired
     private TenantService tenantService;

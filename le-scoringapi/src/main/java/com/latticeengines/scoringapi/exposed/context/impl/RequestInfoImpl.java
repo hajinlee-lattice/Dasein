@@ -3,8 +3,8 @@ package com.latticeengines.scoringapi.exposed.context.impl;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -18,7 +18,7 @@ import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 @Component("requestInfo")
 public class RequestInfoImpl implements RequestInfo {
 
-    private static final Log log = LogFactory.getLog(RequestInfoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestInfoImpl.class);
     private static final String CONTEXT_KEY = "com.latticeengines.scoringapi.requestinfo";
 
     @Autowired

@@ -13,8 +13,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 @Component("domainToNameEnrichService")
 public class DomainToNameEnrichServiceImpl extends AbstractExternalEnrichService implements ExternalEnrichService {
 
-    private static final Log log = LogFactory.getLog(DomainToNameEnrichServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DomainToNameEnrichServiceImpl.class);
 
     protected Set<MatchKey> requiredInputKeys() {
         return Collections.singleton(MatchKey.Domain);

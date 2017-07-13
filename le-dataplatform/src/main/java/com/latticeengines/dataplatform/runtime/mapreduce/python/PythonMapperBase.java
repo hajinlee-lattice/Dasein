@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -20,7 +20,7 @@ import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 
 public abstract class PythonMapperBase extends Mapper<LongWritable, Text, Text, Text> {
 
-    private static final Log log = LogFactory.getLog(PythonMapperBase.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonMapperBase.class);
     private Configuration config;
     private Classifier classifier;
     private String hdfsOutputDir;

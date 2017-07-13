@@ -2,8 +2,8 @@ package com.latticeengines.admin.entitymgr.impl;
 
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("adminTenantEntityMgr")
 public class TenantEntityMgrImpl implements TenantEntityMgr {
-    private static final Log LOGGER = LogFactory.getLog(TenantEntityMgrImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TenantEntityMgrImpl.class);
 
     private final BatonService batonService = new BatonServiceImpl();
 
@@ -66,7 +66,7 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
                     serviceName));
             return new SerializableDocumentDirectory(dir);
         } catch (Exception e) {
-            LOGGER.error(e);
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
     }

@@ -6,8 +6,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -34,7 +34,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Component("orchestrationStep")
 @Scope("prototype")
 public class OrchestrationStep extends BaseWorkflowStep<OrchestrationStepConfig> {
-    private static final Log log = LogFactory.getLog(OrchestrationStep.class);
+    private static final Logger log = LoggerFactory.getLogger(OrchestrationStep.class);
 
     private Orchestration orch;
 

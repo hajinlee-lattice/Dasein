@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Iterative
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class IterativeStepTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(MiniAMDomainDunsTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MiniAMDomainDunsTestNG.class);
     GeneralSource source = new GeneralSource("DummyDataSet");
     GeneralSource baseSource = new GeneralSource("dataSet2");
 

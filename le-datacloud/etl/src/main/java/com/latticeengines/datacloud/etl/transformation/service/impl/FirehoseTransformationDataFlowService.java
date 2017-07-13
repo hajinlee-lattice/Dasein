@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("firehoseTransformationDataFlowService")
 public class FirehoseTransformationDataFlowService extends AbstractTransformationDataFlowService {
 
-    private static final Log log = LogFactory.getLog(FirehoseTransformationDataFlowService.class);
+    private static final Logger log = LoggerFactory.getLogger(FirehoseTransformationDataFlowService.class);
 
     private static final String AVRO_DIR_FOR_CONVERSION = "AVRO_DIR_FOR_CONVERSION";
     private static final String UNCOMPRESSED_FILE = "UNCOMPRESSED-";

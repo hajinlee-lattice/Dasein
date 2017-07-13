@@ -8,8 +8,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,7 +44,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/segments")
 public class SegmentResource {
 
-    private static final Log log = LogFactory.getLog(SegmentResource.class);
+    private static final Logger log = LoggerFactory.getLogger(SegmentResource.class);
 
     @Autowired
     private SessionService sessionService;

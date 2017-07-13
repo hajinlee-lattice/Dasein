@@ -3,8 +3,8 @@ package com.latticeengines.api.functionalframework;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 @ContextConfiguration(locations = { "classpath:test-api-context.xml" })
 public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ApiFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(ApiFunctionalTestNGBase.class);
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected RestTemplate ignoreErrorRestTemplate = HttpClientUtils.newRestTemplate();

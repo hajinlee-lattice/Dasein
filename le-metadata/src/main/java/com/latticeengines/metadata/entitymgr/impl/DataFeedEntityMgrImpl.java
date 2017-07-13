@@ -6,7 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -36,7 +37,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("datafeedEntityMgr")
 public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implements DataFeedEntityMgr {
 
-    private static final Logger log = Logger.getLogger(DataFeedEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFeedEntityMgrImpl.class);
 
     @Autowired
     private DataFeedDao datafeedDao;

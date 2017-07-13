@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.workflow.engine.steps;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -37,7 +37,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Scope("prototype")
 public class Publish extends BaseWorkflowStep<PublishConfiguration> {
 
-    public static final Log log = LogFactory.getLog(Publish.class);
+    public static final Logger log = LoggerFactory.getLogger(Publish.class);
 
     private static final Integer HANGING_THRESHOLD_HOURS = 24;
 
@@ -179,7 +179,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
                     }
                 }
             } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 errors++;
                 if (errors >= MAX_ERRORS) {
                     throw new RuntimeException("Exceeded maximum error allowance.", e);

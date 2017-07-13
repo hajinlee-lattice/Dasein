@@ -3,9 +3,9 @@ package com.latticeengines.pls.entitymanager.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
@@ -26,8 +26,7 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 public class ModelSummaryDownloaderEntityMgrImpl implements
         ModelSummaryDownloaderEntityMgr {
 
-    private static final Log log = LogFactory
-            .getLog(ModelSummaryDownloaderEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryDownloaderEntityMgrImpl.class);
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
@@ -82,7 +81,7 @@ public class ModelSummaryDownloaderEntityMgrImpl implements
         log.debug("ModelDownloader is ready to pick up models.");
         timeStampContainer.setTimeStamp();
         if (log.isDebugEnabled()) {
-            log.debug(timeStampContainer.getTimeStamp().getSeconds());
+            log.debug(String.valueOf(timeStampContainer.getTimeStamp().getSeconds()));
         }
         SimpleAsyncTaskExecutor simpleTaskExecutor = new SimpleAsyncTaskExecutor();
         simpleTaskExecutor.setConcurrencyLimit(concurrencyLimit);

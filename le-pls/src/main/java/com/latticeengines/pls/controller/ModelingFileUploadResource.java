@@ -5,8 +5,9 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +43,7 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Data')")
 public class ModelingFileUploadResource {
 
-    private static final Logger log = Logger.getLogger(ModelingFileUploadResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelingFileUploadResource.class);
 
     @Autowired
     private FileUploadService fileUploadService;

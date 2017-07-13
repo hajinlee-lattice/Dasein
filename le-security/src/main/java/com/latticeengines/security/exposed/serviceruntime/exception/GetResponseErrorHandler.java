@@ -4,7 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
@@ -18,7 +19,7 @@ import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 
 public class GetResponseErrorHandler implements ResponseErrorHandler {
 
-    private static final Logger log = Logger.getLogger(GetResponseErrorHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(GetResponseErrorHandler.class);
 
     public GetResponseErrorHandler() {
     }

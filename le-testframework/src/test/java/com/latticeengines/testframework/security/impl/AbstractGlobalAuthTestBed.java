@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -36,7 +36,7 @@ import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
 public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
-    private static Log log = LogFactory.getLog(AbstractGlobalAuthTestBed.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractGlobalAuthTestBed.class);
 
     private static final String customerBase = "/user/s-analytics/customers";
 
@@ -176,7 +176,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
                 try {
                     logout(userDoc);
                 } catch (Exception e) {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

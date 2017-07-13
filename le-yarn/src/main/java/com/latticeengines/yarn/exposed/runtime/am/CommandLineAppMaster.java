@@ -7,8 +7,8 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.Container;
@@ -33,7 +33,7 @@ import com.latticeengines.yarn.exposed.service.YarnService;
 
 public class CommandLineAppMaster extends StaticEventingAppmaster implements ContainerLauncherInterceptor {
 
-    private final static Log log = LogFactory.getLog(CommandLineAppMaster.class);
+    private final static Logger log = LoggerFactory.getLogger(CommandLineAppMaster.class);
 
     @Autowired
     private YarnService yarnService;
@@ -140,7 +140,7 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
                 Thread.sleep(5000L);
                 log.info("Container " + containerId + " preempted. Reallocating.");
             } catch (InterruptedException e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
 
             getAllocator().allocateContainers(1);

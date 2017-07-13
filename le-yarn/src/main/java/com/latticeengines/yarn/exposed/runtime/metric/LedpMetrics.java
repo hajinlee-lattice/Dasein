@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.metrics2.MetricsCollector;
 import org.apache.hadoop.metrics2.MetricsInfo;
 import org.apache.hadoop.metrics2.MetricsSource;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Metrics(context="ledpjob")
 public class LedpMetrics implements MetricsSource {
-    private static final Log log = LogFactory.getLog(LedpMetrics.class);
+    private static final Logger log = LoggerFactory.getLogger(LedpMetrics.class);
     
     @Metric("Container wait time") MutableGaugeLong containerWaitTime;
     @Metric("Application wait time") MutableGaugeLong applicationWaitTime;

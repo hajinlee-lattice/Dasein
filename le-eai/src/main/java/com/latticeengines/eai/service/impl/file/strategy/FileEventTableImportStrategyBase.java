@@ -11,8 +11,8 @@ import java.util.Properties;
 import org.apache.avro.Schema.Type;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
@@ -44,7 +44,7 @@ import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 @Component("fileEventTableImportStrategyBase")
 public class FileEventTableImportStrategyBase extends ImportStrategy {
 
-    private static final Log log = LogFactory.getLog(FileEventTableImportStrategyBase.class);
+    private static final Logger log = LoggerFactory.getLogger(FileEventTableImportStrategyBase.class);
 
     @Autowired
     private EaiYarnService eaiYarnService;

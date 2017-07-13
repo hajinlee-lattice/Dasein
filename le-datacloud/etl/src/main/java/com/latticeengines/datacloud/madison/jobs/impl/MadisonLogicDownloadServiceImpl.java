@@ -1,8 +1,8 @@
 package com.latticeengines.datacloud.madison.jobs.impl;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -16,7 +16,7 @@ import com.latticeengines.datacloud.madison.service.PropDataMadisonService;
 @Component("madisonLogicDownloadService")
 public class MadisonLogicDownloadServiceImpl extends QuartzJobBean implements com.latticeengines.datacloud.madison.jobs.MadisonLogicJobService {
 
-    private static final Log log = LogFactory.getLog(MadisonLogicDownloadServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MadisonLogicDownloadServiceImpl.class);
 
     private PropDataMadisonService propDataMadisonService;
     private boolean propdataJobsEnabled = false;

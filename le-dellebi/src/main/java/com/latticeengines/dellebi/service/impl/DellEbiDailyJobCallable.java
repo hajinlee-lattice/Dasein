@@ -3,8 +3,8 @@ package com.latticeengines.dellebi.service.impl;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.flowdef.DailyFlow;
@@ -15,7 +15,7 @@ import com.newrelic.api.agent.Trace;
 
 public class DellEbiDailyJobCallable implements Callable<Boolean> {
 
-    private static final Log log = LogFactory.getLog(DellEbiDailyJobCallable.class);
+    private static final Logger log = LoggerFactory.getLogger(DellEbiDailyJobCallable.class);
     private final String quartzJob;
 
     private DailyFlow dailyFlow;

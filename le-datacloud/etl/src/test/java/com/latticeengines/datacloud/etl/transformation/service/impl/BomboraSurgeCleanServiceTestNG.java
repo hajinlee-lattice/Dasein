@@ -9,13 +9,14 @@ import java.util.Map;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.BomboraSurgeCleanFlow;
@@ -29,7 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class BomboraSurgeCleanServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(BomboraSurgeCleanServiceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(BomboraSurgeCleanServiceTestNG.class);
 
     GeneralSource source = new GeneralSource("BomboraSurge");
     GeneralSource bomboraSurgeRaw = new GeneralSource("BomboraSurgeRaw");
@@ -162,7 +163,7 @@ public class BomboraSurgeCleanServiceTestNG
         int rowNum = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            log.info(record);
+            log.info(JsonUtils.serialize(record));
             Integer id = (Integer) record.get("ID");
             Assert.assertTrue(loc.containsKey(id));
             List<NameLocation> nls = loc.get(id);

@@ -3,6 +3,8 @@ package com.latticeengines.perf.job.runnable.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
@@ -14,7 +16,7 @@ public class Profile extends ModelingResourceJob<DataProfileConfiguration, List<
 
     public List<String> profile() throws Exception {
         List<String> applicationIds = rc.profile(config);
-        log.info(applicationIds);
+        log.info(StringUtils.join(", ", applicationIds));
         return applicationIds;
     }
 

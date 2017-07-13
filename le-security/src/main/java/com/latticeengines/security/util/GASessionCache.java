@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
@@ -21,7 +21,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementSer
 
 public class GASessionCache {
 
-    private static Log log = LogFactory.getLog(GASessionCache.class);
+    private static Logger log = LoggerFactory.getLogger(GASessionCache.class);
     private static final Integer MAX_RETRY = 3;
     private static Long retryIntervalMsec = 200L;
     private static Random random = new Random(System.currentTimeMillis());

@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ import com.latticeengines.datacloud.core.source.impl.BuiltWithMostRecent;
 @Component("builtWithRefreshService")
 public class BuiltWithRefreshService extends AbstractMostRecentService implements RefreshService {
 
-    Log log = LogFactory.getLog(this.getClass());
+    Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     ArchiveProgressEntityMgr archiveProgressEntityMgr;
@@ -42,7 +42,7 @@ public class BuiltWithRefreshService extends AbstractMostRecentService implement
     }
 
     @Override
-    Log getLogger() {
+    Logger getLogger() {
         return log;
     }
 }

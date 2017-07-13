@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ import com.latticeengines.aws.dynamo.DynamoService;
 @Component("dynamoService")
 public class DynamoServiceImpl implements DynamoService {
 
-    private static final Log log = LogFactory.getLog(DynamoServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DynamoServiceImpl.class);
 
     private AmazonDynamoDBClient client;
     private AmazonDynamoDBClient remoteClient;

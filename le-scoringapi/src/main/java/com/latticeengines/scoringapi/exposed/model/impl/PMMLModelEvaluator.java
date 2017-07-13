@@ -5,8 +5,8 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.dmg.pmml.DataField;
 import org.dmg.pmml.DataType;
 import org.dmg.pmml.FieldName;
@@ -24,7 +24,7 @@ import com.latticeengines.scoringapi.exposed.model.impl.pmmlresult.PMMLResultHan
 
 public class PMMLModelEvaluator extends DefaultModelEvaluator {
     
-    private static final Log log = LogFactory.getLog(PMMLModelEvaluator.class);
+    private static final Logger log = LoggerFactory.getLogger(PMMLModelEvaluator.class);
 
     public PMMLModelEvaluator(InputStream is) {
         super(is);

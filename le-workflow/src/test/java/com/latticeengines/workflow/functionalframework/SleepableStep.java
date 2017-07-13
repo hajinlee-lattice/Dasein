@@ -1,7 +1,7 @@
 package com.latticeengines.workflow.functionalframework;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -10,7 +10,7 @@ import com.latticeengines.workflow.exposed.build.AbstractStep;
 @Component("sleepableStep")
 public class SleepableStep extends AbstractStep<BaseStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(SleepableStep.class);
+    private static final Logger log = LoggerFactory.getLogger(SleepableStep.class);
 
     private long sleepTime = 0L;
 

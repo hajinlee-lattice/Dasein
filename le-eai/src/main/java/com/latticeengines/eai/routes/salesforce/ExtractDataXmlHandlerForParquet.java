@@ -13,8 +13,8 @@ import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.spi.TypeConverterRegistry;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.Path;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -28,7 +28,7 @@ import parquet.avro.AvroParquetWriter;
 import parquet.hadoop.metadata.CompressionCodecName;
 
 public class ExtractDataXmlHandlerForParquet extends DefaultHandler {
-    private static final Log log = LogFactory.getLog(ExtractDataXmlHandlerForParquet.class);
+    private static final Logger log = LoggerFactory.getLogger(ExtractDataXmlHandlerForParquet.class);
 
     private ValueConverter valueConverter;
     private Map<String, Attribute> tableAttributeMap;

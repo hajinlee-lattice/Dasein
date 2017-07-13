@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
@@ -28,7 +28,7 @@ import com.latticeengines.security.exposed.Constants;
 
 public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
 
-    private static final Log log = LogFactory.getLog(AdminFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(AdminFunctionalTestNGBase.class);
     private static boolean ZKIsClean = false;
 
     @Value("${admin.test.functional.api}")

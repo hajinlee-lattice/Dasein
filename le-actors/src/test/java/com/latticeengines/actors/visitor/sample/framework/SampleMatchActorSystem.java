@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentMap;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ import akka.actor.ActorSystem;
 @Component("sampleMatchActorSystem")
 public class SampleMatchActorSystem {
 
-    private static final Log log = LogFactory.getLog(SampleMatchActorSystem.class);
+    private static final Logger log = LoggerFactory.getLogger(SampleMatchActorSystem.class);
 
     public static final int ACTOR_CARDINALITY = 5;
 

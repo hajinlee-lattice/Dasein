@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
@@ -18,7 +18,7 @@ public abstract class ColumnToValueToDoubleLookup implements RealTimeTransform {
     
     private static final long serialVersionUID = 3553344738920319099L;
 
-    protected static final Log log = LogFactory.getLog(Assignconversionrate.class);
+    protected static final Logger log = LoggerFactory.getLogger(Assignconversionrate.class);
     
     protected Map<String, Map<String, Double>> columnToValueToDoubleMap = new HashMap<>();
 

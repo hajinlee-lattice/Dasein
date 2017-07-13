@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase {
-    private static final Log log = LogFactory.getLog(DnBCacheServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBCacheServiceImplTestNG.class);
 
     @Autowired
     private DnBCacheService dnbCacheService;

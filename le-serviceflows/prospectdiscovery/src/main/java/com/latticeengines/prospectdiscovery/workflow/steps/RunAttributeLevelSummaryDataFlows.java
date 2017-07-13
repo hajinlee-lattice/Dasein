@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowsConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateAttributeLevelSummaryParameters;
@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow
 public class RunAttributeLevelSummaryDataFlows extends
         CreateSummaryWorkflow<RunAttributeLevelSummaryDataFlowsConfiguration> {
 
-    private static final Log log = LogFactory.getLog(RunAttributeLevelSummaryDataFlows.class);
+    private static final Logger log = LoggerFactory.getLogger(RunAttributeLevelSummaryDataFlows.class);
 
     @Override
     public void execute() {

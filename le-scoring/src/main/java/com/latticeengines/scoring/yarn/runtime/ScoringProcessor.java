@@ -30,10 +30,12 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +73,8 @@ import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
         implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
 
-    private static final Log log = LogFactory.getLog(ScoringProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringProcessor.class);
+    private static final Marker fatal = MarkerFactory.getMarker("FATAL");
 
     public static final String RECORD_RULE = "manual";
     public static final String RECORD_SOURCE = "file";
@@ -551,7 +554,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             try {
                 future.get(threadPoolTimeoutMin, TimeUnit.MINUTES);
             } catch (Exception e) {
-                log.fatal(e.getMessage(), e);
+                log.error(fatal, e.getMessage(), e);
                 throw e;
             }
         }

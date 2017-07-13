@@ -11,8 +11,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -70,7 +70,7 @@ public class ComponentOrchestrator {
     private static final long WAIT_INTERVAL = 1000L;
     private static final int NUM_RETRIES = (int) (TIMEOUT / WAIT_INTERVAL);
 
-    private static final Log log = LogFactory.getLog(ComponentOrchestrator.class);
+    private static final Logger log = LoggerFactory.getLogger(ComponentOrchestrator.class);
 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
             "");

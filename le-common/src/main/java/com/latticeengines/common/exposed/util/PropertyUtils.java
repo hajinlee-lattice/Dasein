@@ -6,13 +6,14 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 
 public class PropertyUtils extends PropertyPlaceholderConfigurer {
-    private static Logger log = Logger.getLogger(PropertyUtils.class);
+    private static Logger log = LoggerFactory.getLogger(PropertyUtils.class);
 
     private static Map<String, String> propertiesMap;
 

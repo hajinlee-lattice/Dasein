@@ -3,8 +3,8 @@ package com.latticeengines.serviceflows.workflow.core;
 import static com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase.POST_PROCESSING;
 import static com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase.PRE_PROCESSING;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C extends WorkflowConfiguration>
         extends BaseWorkflowStep<T> {
 
-    private static Log log = LogFactory.getLog(BaseWrapperStep.class);
+    private static Logger log = LoggerFactory.getLogger(BaseWrapperStep.class);
     private C workflowConf;
 
     @Override

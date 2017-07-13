@@ -4,8 +4,8 @@ import java.lang.reflect.Method;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -17,7 +17,7 @@ import org.springframework.context.ApplicationContextAware;
 @Aspect
 public class RateLimiterAspect implements ApplicationContextAware {
 
-    public static Log log = LogFactory.getLog(RateLimiterAspect.class);
+    public static Logger log = LoggerFactory.getLogger(RateLimiterAspect.class);
 
     private ApplicationContext applicationContext;
 

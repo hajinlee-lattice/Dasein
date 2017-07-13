@@ -1,7 +1,7 @@
 package com.latticeengines.admin.tenant.batonadapter.modeling;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
@@ -13,7 +13,7 @@ import com.latticeengines.encryption.exposed.service.DataEncryptionService;
 
 @Component
 public class ModelingInstaller extends LatticeComponentInstaller {
-    private static final Log log = LogFactory.getLog(ModelingInstaller.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelingInstaller.class);
 
     private DataEncryptionService dataEncryptionService;
 

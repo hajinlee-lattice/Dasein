@@ -3,14 +3,14 @@ package com.latticeengines.matchapi.service.impl;
 
 import java.util.concurrent.Callable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandCleaner;
 
 public class MatchCommandCleanerCallable implements Callable<Boolean> {
 
-    private static final Log log = LogFactory.getLog(MatchCommandCleanerCallable.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchCommandCleanerCallable.class);
 
     private MatchCommandCleaner matchCommandCleaner;
 

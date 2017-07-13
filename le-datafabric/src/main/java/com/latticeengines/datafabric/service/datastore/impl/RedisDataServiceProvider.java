@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.avro.Schema;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 @Component("redisDataService")
 public class RedisDataServiceProvider implements FabricDataServiceProvider {
 
-    private static final Log log = LogFactory.getLog(FabricDataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(FabricDataServiceImpl.class);
 
     @Value("${datafabric.dataService.redis.servers:localhost}")
     private String redisServers;

@@ -2,7 +2,8 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,7 +22,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> implements SourceFileEntityMgr {
 
     @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(SourceFileEntityMgr.class);
+    private static final Logger log = LoggerFactory.getLogger(SourceFileEntityMgr.class);
 
     @Autowired
     private SourceFileDao sourceFileDao;

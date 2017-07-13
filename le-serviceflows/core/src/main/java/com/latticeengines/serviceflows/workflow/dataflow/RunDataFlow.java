@@ -7,8 +7,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Predicate;
@@ -26,7 +26,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkflowStep<T> {
 
-    private static final Log log = LogFactory.getLog(RunDataFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(RunDataFlow.class);
 
     @Autowired
     private DataFlowApiProxy dataFlowApiProxy;

@@ -1,7 +1,7 @@
 package com.latticeengines.cdl.workflow.listeners;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import com.latticeengines.workflow.listener.LEJobListener;
 @Component("datafeedExecutionListener")
 public class DataFeedExecutionListener extends LEJobListener {
 
-    private static final Log log = LogFactory.getLog(DataFeedExecutionListener.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFeedExecutionListener.class);
 
     @Autowired
     private DataFeedProxy dataFeedProxy;

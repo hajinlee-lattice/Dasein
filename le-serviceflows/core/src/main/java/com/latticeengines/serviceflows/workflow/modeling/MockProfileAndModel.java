@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -23,7 +23,7 @@ import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 @Component("mockProfileAndModel")
 public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(MockProfileAndModel.class);
+    private static final Logger log = LoggerFactory.getLogger(MockProfileAndModel.class);
     private static final String MODEL_HDFS_BASEDIR = "/user/s-analytics/customers/%s/models/RunMatchWithLEUniverse_123_DerivedColumns/";
     private static final String MODEL_SOURCEDIR = "/tmp/PDEndToEndTest/models/";
 

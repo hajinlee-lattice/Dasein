@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     private final static String testAdminUsername = "pls-installer-tester@lattice-engines.com";
     private final static String testAdminPassword = Base64Utils.encodeBase64WithDefaultTrim(testAdminUsername);
 
-    private final static Log log = LogFactory.getLog(PLSComponentDeploymentTestNG.class);
+    private final static Logger log = LoggerFactory.getLogger(PLSComponentDeploymentTestNG.class);
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -125,7 +125,7 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
             magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
             magicRestTemplate.delete(getPlsHostPort() + String.format("/pls/admin/tenants/%s", tenantId));
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
 

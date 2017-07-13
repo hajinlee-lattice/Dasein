@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
@@ -49,7 +49,7 @@ public class ExportJobBase extends JobBase {
         SEQUENCE_FILE, AVRO_DATA_FILE, HCATALOG_MANAGED_FILE, UNKNOWN
     }
 
-    public static final Log LOG = LogFactory.getLog(ExportJobBase.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(ExportJobBase.class.getName());
 
     /** What SqoopRecord class to use to read a record for export. */
     public static final String SQOOP_EXPORT_TABLE_CLASS_KEY = "sqoop.mapreduce.export.table.class";

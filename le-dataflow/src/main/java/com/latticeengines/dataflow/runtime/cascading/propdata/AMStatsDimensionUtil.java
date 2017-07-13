@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import org.apache.avro.util.Utf8;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ import cascading.tuple.Tuple;
 public class AMStatsDimensionUtil implements Serializable {
 
     private static final long serialVersionUID = -4077418684968437466L;
-    private static final Log log = LogFactory.getLog(AMStatsDimensionUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(AMStatsDimensionUtil.class);
     private static final ObjectMapper OM = new ObjectMapper();
 
     private AttrStatsDetailsMergeTool dedupMergeUtil = //

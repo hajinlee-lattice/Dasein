@@ -5,8 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 @Aspect
 public class MatchStepAspect {
 
-    public static Log log = LogFactory.getLog(MatchStepAspect.class);
+    public static Logger log = LoggerFactory.getLogger(MatchStepAspect.class);
 
     private ThreadLocal<String> tracker = new ThreadLocal<>();
     private ConcurrentMap<String, Long> logThreshold = new ConcurrentHashMap<>();

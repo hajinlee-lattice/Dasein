@@ -4,15 +4,15 @@ import java.util.Map;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class SetPropertiesFromImportContextProcessor implements Processor {
 
-    private final static Log log = LogFactory.getLog(SetPropertiesFromImportContextProcessor.class);
+    private final static Logger log = LoggerFactory.getLogger(SetPropertiesFromImportContextProcessor.class);
 
     @Override
     public void process(Exchange exchange) throws Exception {

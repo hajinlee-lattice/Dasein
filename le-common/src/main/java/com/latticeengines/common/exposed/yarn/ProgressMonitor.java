@@ -11,14 +11,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.util.Progressable;
 import org.springframework.yarn.am.allocate.ContainerAllocator;
 
 public class ProgressMonitor {
 
-    private final static Log log = LogFactory.getLog(ProgressMonitor.class);
+    private final static Logger log = LoggerFactory.getLogger(ProgressMonitor.class);
 
     private static final int MAX_ATTEMPTS = 5;
 

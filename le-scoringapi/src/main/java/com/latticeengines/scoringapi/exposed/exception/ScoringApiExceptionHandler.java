@@ -6,8 +6,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
@@ -37,7 +37,7 @@ import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ScoringApiExceptionHandler {
 
-    private static final Log log = LogFactory.getLog(ScoringApiExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringApiExceptionHandler.class);
     private static final String SPLUNK_URL = "http://splunk.lattice.local:8000/en-US/app/search/search?q=search%20index%3Dscoringapi%20%22";
 
     @Autowired

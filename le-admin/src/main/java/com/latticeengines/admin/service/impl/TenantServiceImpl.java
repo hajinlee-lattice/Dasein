@@ -14,8 +14,9 @@ import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -60,7 +61,7 @@ import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestI
 
 @Component("adminTenantService")
 public class TenantServiceImpl implements TenantService {
-    private static final Log log = LogFactory.getLog(TenantServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TenantServiceImpl.class);
     private static final String spaceConfigNode = LatticeComponent.spaceConfigNode;
     private static final String danteFeatureFlag = "Dante";
 
@@ -182,7 +183,7 @@ public class TenantServiceImpl implements TenantService {
         ProductAndExternalAdminInfo prodAndExternalEmail = new ProductAndExternalAdminInfo();
         List<LatticeProduct> selectedProducts = spaceConfig.getProducts();
         List<String> externalEmailList = null;
-        log.info(selectedProducts);
+        log.info(StringUtils.join(", ", selectedProducts));
         for (SerializableDocumentDirectory configDirectory : configDirectories) {
             if (configDirectory.getRootPath().equals("/PLS")) {
                 Collection<Node> nodes = configDirectory.getNodes();

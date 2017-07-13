@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,7 +29,7 @@ import com.latticeengines.security.exposed.AccessLevel;
  */
 public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
-    private static final Log LOGGER = LogFactory.getLog(LeadPrioritizationEndToEndDeploymentTestNG.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LeadPrioritizationEndToEndDeploymentTestNG.class);
 
     @Value("${common.test.microservice.url}")
     private String modelingServiceHostPort;

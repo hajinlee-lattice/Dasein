@@ -18,9 +18,9 @@ import javax.annotation.PreDestroy;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,7 +54,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
-    private static Log log = LogFactory.getLog(BaseCacheLoaderService.class);
+    private static Logger log = LoggerFactory.getLogger(BaseCacheLoaderService.class);
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
@@ -178,7 +178,7 @@ public abstract class BaseCacheLoaderService<E> implements CacheLoaderService<E>
             log.info("Many records, sleep for seconds");
             Thread.sleep(100L);
         } catch (Exception ex) {
-            log.warn(ex);
+            log.warn(ex.getMessage(), ex);
         }
     }
 

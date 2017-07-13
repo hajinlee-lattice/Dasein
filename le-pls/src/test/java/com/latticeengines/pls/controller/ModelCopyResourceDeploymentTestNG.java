@@ -12,8 +12,8 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
@@ -50,7 +50,7 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ModelCopyResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelCopyResourceDeploymentTestNG.class);
     private static final String ORIGINAL_MODELID = "ms__20a331e9-f18b-4358-8023-e44a36cb17d1-testWork";
 
     @Autowired

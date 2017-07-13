@@ -2,8 +2,8 @@ package com.latticeengines.modelquality.dao.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ public class DataSetDaoImpl extends BaseDaoImpl<DataSet> implements DataSetDao {
         return DataSet.class;
     }
 
-    private static final Log log = LogFactory.getLog(FileModelRunServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(FileModelRunServiceImpl.class);
 
     @Override
     public DataSet findByTenantAndTrainingSet(String tenantID, String trainingSetFilePath) {

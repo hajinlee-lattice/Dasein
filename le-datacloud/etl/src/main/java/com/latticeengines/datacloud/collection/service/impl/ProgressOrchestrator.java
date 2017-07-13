@@ -10,8 +10,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -47,7 +49,8 @@ public class ProgressOrchestrator {
     @Value("${propdata.job.schedule.dryrun:true}")
     private Boolean dryrun;
 
-    private Log log = LogFactory.getLog(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(ProgressOrchestrator.class);
+    private static final Marker fatal = MarkerFactory.getMarker("FATAL");
     private Map<DataImportedFromDB, ArchiveService> archiveServiceMap = new HashMap<>();
     private Map<DerivedSource, RefreshService> refreshServiceMap = new HashMap<>();
     private static final int jobExpirationHours = 48; // expire after 48 hour
@@ -154,7 +157,7 @@ public class ProgressOrchestrator {
                 Date expireDate = new Date(System.currentTimeMillis() - jobExpirationMilliSeconds);
                 Date lastUpdated = runningProgress.getLatestStatusUpdate();
                 if (lastUpdated.before(expireDate)) {
-                    log.fatal(String.format("This progress has been hanging for more than %d hours: %s",
+                    log.error(fatal, String.format("This progress has been hanging for more than %d hours: %s",
                             jobExpirationHours, runningProgress));
                     runningProgress.setNumRetries(99);
                     service.updateStatusToFailed(runningProgress, "Timeout", null);

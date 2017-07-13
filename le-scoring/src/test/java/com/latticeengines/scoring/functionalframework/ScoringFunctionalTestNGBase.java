@@ -2,8 +2,8 @@ package com.latticeengines.scoring.functionalframework;
 
 import static org.testng.Assert.assertEquals;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 @ContextConfiguration(locations = { "classpath:test-scoring-context.xml" })
 public class ScoringFunctionalTestNGBase extends YarnFunctionalTestNGBase {
 
-    protected static final Log log = LogFactory.getLog(ScoringFunctionalTestNGBase.class);
+    protected static final Logger log = LoggerFactory.getLogger(ScoringFunctionalTestNGBase.class);
 
     @Autowired
     private ScoringOrderedEntityMgrListForDbClean scoringOrderedEntityMgrListForDbClean;

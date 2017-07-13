@@ -11,8 +11,8 @@ import java.util.Scanner;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -40,7 +40,7 @@ import cascading.tuple.Fields;
 @Component(SourceStandardizationFlow.DATAFLOW_BEAN_NAME)
 public class SourceStandardizationFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, StandardizationFlowParameter> {
-    private static final Log log = LogFactory.getLog(SourceStandardizationFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(SourceStandardizationFlow.class);
 
     @Override
     public Class<? extends TransformationConfiguration> getTransConfClass() {

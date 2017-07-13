@@ -7,8 +7,8 @@ import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
@@ -43,7 +43,7 @@ import com.latticeengines.yarn.exposed.service.impl.YarnClientCustomizationServi
 
 public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBase {
 
-    protected static final Log log = LogFactory.getLog(YarnMiniClusterFunctionalTestNGBase.class);
+    protected static final Logger log = LoggerFactory.getLogger(YarnMiniClusterFunctionalTestNGBase.class);
 
     @Autowired
     protected JobService jobService;

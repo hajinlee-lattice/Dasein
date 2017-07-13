@@ -12,8 +12,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.proxy.exposed.RestApiClient;
 
 public abstract class BaseDnBLookupServiceImpl<T> {
-    private static final Log log = LogFactory.getLog(BaseDnBLookupServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseDnBLookupServiceImpl.class);
 
     @Autowired
     private DnBAuthenticationServiceImpl dnBAuthenticationService;
@@ -113,7 +113,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
             XPath xpath = XPathFactory.newInstance().newXPath();
             result = (String) xpath.evaluate(path, document, XPathConstants.STRING);
         } catch (ParserConfigurationException | IOException | XPathExpressionException | SAXException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
 
         return result;

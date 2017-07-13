@@ -1,12 +1,14 @@
 package com.latticeengines.common.exposed.version;
 
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jcabi.manifests.Manifests;
 
 public class VersionManager {
 
-    private static final Logger log = Logger.getLogger(VersionManager.class);
+    private static final Logger log = LoggerFactory.getLogger(VersionManager.class);
 
     private String currentVersion;
 

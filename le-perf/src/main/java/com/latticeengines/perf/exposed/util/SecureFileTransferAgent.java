@@ -2,18 +2,18 @@ package com.latticeengines.perf.exposed.util;
 
 import java.io.File;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemOptions;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.Selectors;
 import org.apache.commons.vfs.impl.StandardFileSystemManager;
 import org.apache.commons.vfs.provider.sftp.SftpFileSystemConfigBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SecureFileTransferAgent {
 
-    private final static Log log = LogFactory.getLog(SecureFileTransferAgent.class);
+    private final static Logger log = LoggerFactory.getLogger(SecureFileTransferAgent.class);
 
     private String serverAddress;
 
@@ -77,7 +77,7 @@ public class SecureFileTransferAgent {
                 break;
             }
         } catch (Exception ex) {
-            log.error(ex);
+            log.error(ex.getMessage(), ex);
             return false;
         } finally {
             manager.close();

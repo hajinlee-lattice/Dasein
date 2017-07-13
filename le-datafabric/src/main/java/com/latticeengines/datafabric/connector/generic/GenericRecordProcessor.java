@@ -9,8 +9,8 @@ import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.kafka.common.TopicPartition;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest
 
 public class GenericRecordProcessor {
 
-    private static final Log log = LogFactory.getLog(GenericRecordProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(GenericRecordProcessor.class);
 
     private GenericSinkConnectorConfig connectorConfig;
     private GenericFabricEntityManager<GenericFabricRecord> entityManager;

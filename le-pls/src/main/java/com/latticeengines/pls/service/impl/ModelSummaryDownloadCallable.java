@@ -11,8 +11,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 
@@ -27,7 +27,7 @@ import com.newrelic.api.agent.Trace;
 
 public class ModelSummaryDownloadCallable implements Callable<Boolean> {
 
-    private static final Log log = LogFactory.getLog(ModelSummaryDownloadCallable.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryDownloadCallable.class);
 
     private TenantEntityMgr tenantEntityMgr;
     private String modelServiceHdfsBaseDir;
@@ -77,7 +77,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
         timeStampContainer.setTimeStamp();
 
         if (log.isDebugEnabled()) {
-            log.debug(timeStampContainer.getTimeStamp().getSeconds());
+            log.debug(String.valueOf(timeStampContainer.getTimeStamp().getSeconds()));
         }
 
         if (!incremental) {
@@ -127,7 +127,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
                 try {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                     return false;
                 }
             }
@@ -160,7 +160,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             try {
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 return false;
             }
         }

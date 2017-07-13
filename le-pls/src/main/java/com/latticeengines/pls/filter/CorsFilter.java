@@ -7,14 +7,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
 
 public class CorsFilter extends OncePerRequestFilter {
-    private static final Log log = LogFactory.getLog(CorsFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(CorsFilter.class);
 
     private static boolean allowCors = false;
     private static boolean initialized = false;

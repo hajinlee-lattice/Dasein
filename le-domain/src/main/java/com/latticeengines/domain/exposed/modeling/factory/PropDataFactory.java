@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.modeling.factory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 
 public class PropDataFactory {
 
-    private static final Log log = LogFactory.getLog(PropDataFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(PropDataFactory.class);
 
     public static final String PROPDATA_NAME_KEY = "propdata.name";
 

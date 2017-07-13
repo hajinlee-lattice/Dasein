@@ -2,8 +2,8 @@ package com.latticeengines.monitor.metric.service.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +19,7 @@ import com.latticeengines.monitor.exposed.metric.stats.Inspection;
 @Component("statsService")
 public class StatsServiceImpl implements StatsService {
 
-    private static final Log log = LogFactory.getLog(StatsServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(StatsServiceImpl.class);
 
     @Autowired
     private MetricService metricService;

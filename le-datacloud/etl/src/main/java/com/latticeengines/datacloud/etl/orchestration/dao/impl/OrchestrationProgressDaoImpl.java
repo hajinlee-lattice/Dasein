@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<OrchestrationProgress>
         implements OrchestrationProgressDao {
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(OrchestrationProgressDaoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(OrchestrationProgressDaoImpl.class);
 
     @Override
     protected Class<OrchestrationProgress> getEntityClass() {

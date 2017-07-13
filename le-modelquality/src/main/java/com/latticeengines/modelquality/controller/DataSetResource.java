@@ -2,8 +2,8 @@ package com.latticeengines.modelquality.controller;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +28,7 @@ import io.swagger.annotations.ApiOperation;
 public class DataSetResource implements ModelQualityDataSetInterface, CrudInterface<DataSet> {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(DataSetResource.class);
+    private static final Logger log = LoggerFactory.getLogger(DataSetResource.class);
 
     @Autowired
     private DataSetEntityMgr dataSetEntityMgr;

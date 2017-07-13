@@ -18,8 +18,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
@@ -31,7 +31,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Job implements HasPid, HasId<String> {
 
-    private static final Log log = LogFactory.getLog(Job.class);
+    private static final Logger log = LoggerFactory.getLogger(Job.class);
     protected Long pid;
     protected String id;
     protected String client;

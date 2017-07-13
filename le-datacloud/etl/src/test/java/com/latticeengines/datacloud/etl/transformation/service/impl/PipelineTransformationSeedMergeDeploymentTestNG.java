@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -37,7 +37,7 @@ public class PipelineTransformationSeedMergeDeploymentTestNG extends
 
     private static final String LATTICE_CACHE_SEED_MERGED = "LatticeCacheSeedMerged";
 
-    private static final Log log = LogFactory.getLog(PipelineTransformationSeedMergeDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PipelineTransformationSeedMergeDeploymentTestNG.class);
 
     @Autowired
     private PipelineSource source;

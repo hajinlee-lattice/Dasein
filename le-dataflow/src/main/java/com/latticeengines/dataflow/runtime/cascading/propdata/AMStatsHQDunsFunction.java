@@ -4,8 +4,8 @@ import static com.latticeengines.dataflow.runtime.cascading.propdata.AMStatsHQDu
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -19,7 +19,7 @@ import cascading.tuple.TupleEntry;
 public class AMStatsHQDunsFunction extends BaseOperation<Map> //
         implements Function<Map> {
     private static final long serialVersionUID = -4039806083023012431L;
-    private static final Log log = LogFactory.getLog(AMStatsHQDunsFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(AMStatsHQDunsFunction.class);
 
     private String subIndicatorField;
     private String statusCodeField;

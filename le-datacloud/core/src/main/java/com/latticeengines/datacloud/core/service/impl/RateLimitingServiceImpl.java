@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 @Component("rateLimitingService")
 public class RateLimitingServiceImpl implements RateLimitingService {
 
-    private static final Log log = LogFactory.getLog(RateLimitingServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RateLimitingServiceImpl.class);
     private static final String DNB_BULK_REQUEST_REGULATOR = "DnBBulkRequest";
     private static final String DNB_BULK_STATUS_REGULATOR = "DnBBulkStatus";
 

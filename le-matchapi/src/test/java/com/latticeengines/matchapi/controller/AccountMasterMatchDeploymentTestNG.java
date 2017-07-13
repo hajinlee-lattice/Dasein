@@ -10,7 +10,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.python.jline.internal.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -43,9 +42,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import parquet.org.slf4j.Logger;
+import parquet.org.slf4j.LoggerFactory;
 
 @Component
 public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
+
+    private static final Logger logger = LoggerFactory.getLogger(AccountMasterMatchDeploymentTestNG.class);
 
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
@@ -118,7 +121,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         Schema schemaFile = AvroUtils.getSchema(yarnConfiguration, new Path(outputFiles.get(0)));
         List<Field> fields = schemaFile.getFields();
         for (Field field : fields) {
-            Log.info(String.format("Field: %s", field.name()));
+            logger.info(String.format("Field: %s", field.name()));
         }
         Assert.assertTrue(fields.size() >= 10);
 

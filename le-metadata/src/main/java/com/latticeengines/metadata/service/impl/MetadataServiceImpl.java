@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.Closure;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +31,7 @@ import com.latticeengines.metadata.service.MetadataService;
 @Component("mdService")
 public class MetadataServiceImpl implements MetadataService {
 
-    private static final Logger log = Logger.getLogger(MetadataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataServiceImpl.class);
 
     @Autowired
     private TableEntityMgr tableEntityMgr;

@@ -131,7 +131,6 @@
         <commons.cli.version>1.4</commons.cli.version>
         <commons.codec.version>1.10</commons.codec.version>
         <commons.collections.version>3.2.1</commons.collections.version> <!-- should be migrated to commons collections4 -->
-        <commons.logging.version>1.2</commons.logging.version> <!-- last update was in 2014, we should migrate away -->
         <commons.net.version>3.6</commons.net.version>
         <commons.vfs.version>1.0</commons.vfs.version> <!-- should be migrated to commons vfs2 -->
         <commons.csv.version>1.4</commons.csv.version>
@@ -983,12 +982,6 @@
         </dependency>
 
         <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>${commons.logging.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
             <version>${commons.net.version}</version>
@@ -1051,6 +1044,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
 

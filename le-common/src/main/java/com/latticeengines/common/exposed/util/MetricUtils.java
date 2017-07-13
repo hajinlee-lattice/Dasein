@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.metric.Dimension;
@@ -28,7 +28,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 
 public class MetricUtils {
 
-    private static final Log log = LogFactory.getLog(MetricUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(MetricUtils.class);
     public static final String TAG_ENVIRONMENT = "Environment";
     public static final String TAG_HOST = "Host";
     public static final String TAG_STACK = "Stack";

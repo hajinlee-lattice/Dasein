@@ -11,8 +11,8 @@ import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class AMLookupRebuildPipelineTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(AMLookupRebuildPipelineTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AMLookupRebuildPipelineTestNG.class);
 
     private static final String LATTICEID = "LatticeID";
     private static final String KEY = "Key";

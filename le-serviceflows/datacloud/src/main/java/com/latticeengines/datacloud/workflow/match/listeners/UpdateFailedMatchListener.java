@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -30,7 +30,7 @@ import com.latticeengines.workflow.listener.LEJobListener;
 @Component("updateFailedMatchListener")
 public class UpdateFailedMatchListener extends LEJobListener {
 
-    private static final Log log = LogFactory.getLog(UpdateFailedMatchListener.class);
+    private static final Logger log = LoggerFactory.getLogger(UpdateFailedMatchListener.class);
 
     @Autowired
     private MatchCommandService matchCommandService;

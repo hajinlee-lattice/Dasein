@@ -12,8 +12,8 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.MRAppMaster;
@@ -39,7 +39,7 @@ import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 @Component("sqoopJobService")
 public class SqoopJobServiceImpl implements SqoopJobService {
 
-    private static final Log log = LogFactory.getLog(SqoopJobServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SqoopJobServiceImpl.class);
 
     private static final int MAX_SQOOP_RETRY = 3;
 
@@ -200,7 +200,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
                 cmds.add("--connection-param-file");
                 cmds.add(propsFile.getCanonicalPath());
             } catch (IOException e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
             String hdfsClassPath = importer.getProperties().getProperty("yarn.mr.hdfs.class.path");
 
@@ -217,7 +217,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
                     try {
                         DistributedCache.addCacheFile(new URI(hdfsResource), yarnConfiguration);
                     } catch (URISyntaxException e) {
-                        log.error(e);
+                        log.error(e.getMessage(), e);
                     }
                 }
             }
@@ -294,7 +294,7 @@ public class SqoopJobServiceImpl implements SqoopJobService {
             try {
                 DistributedCache.addCacheFile(new URI(jarFilePath), yarnConfiguration);
             } catch (URISyntaxException e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 throw new LedpException(LedpCode.LEDP_00002);
             }
         }

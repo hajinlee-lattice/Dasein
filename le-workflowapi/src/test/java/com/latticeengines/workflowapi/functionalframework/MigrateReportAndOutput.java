@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.item.ExecutionContext;
@@ -28,7 +28,7 @@ import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 public class MigrateReportAndOutput extends WorkflowTestNGBase {
 
-    private static final Log log = LogFactory.getLog(MigrateReportAndOutput.class);
+    private static final Logger log = LoggerFactory.getLogger(MigrateReportAndOutput.class);
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
@@ -51,14 +51,14 @@ public class MigrateReportAndOutput extends WorkflowTestNGBase {
                 log.info("No workflowId, so skipping: " + job.getPid());
                 continue;
             }
-            log.info(job.getPid());
+            log.info(String.valueOf(job.getPid()));
 
             try {
                 JobExecution jobExecution = jobExplorer.getJobExecution(workflowId);
                 getReports(jobExecution, job);
                 getOutputs(jobExecution, job);
             } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
             workflowJobEntityMgr.update(job);
         }

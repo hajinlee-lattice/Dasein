@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.match.actors.visitor;
 
 import java.util.Collections;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -22,7 +22,7 @@ import akka.actor.ActorRef;
 
 public abstract class MicroEngineActorTemplate<T extends DataSourceWrapperActorTemplate> extends VisitorActorTemplate {
 
-    private static final Log log = LogFactory.getLog(MicroEngineActorTemplate.class);
+    private static final Logger log = LoggerFactory.getLogger(MicroEngineActorTemplate.class);
 
     protected abstract Class<T> getDataSourceActorClz();
 

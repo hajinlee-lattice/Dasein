@@ -19,8 +19,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 
 @Component("ingestionVersionService")
 public class IngestionVersionServiceImpl implements IngestionVersionService, DataCloudEngineService {
-    private static Log log = LogFactory.getLog(IngestionVersionServiceImpl.class);
+    private static Logger log = LoggerFactory.getLogger(IngestionVersionServiceImpl.class);
 
     @Autowired
     protected Configuration yarnConfiguration;

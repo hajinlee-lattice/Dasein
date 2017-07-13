@@ -24,8 +24,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -85,7 +85,7 @@ import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
 
-    private static final Log log = LogFactory.getLog(ModelingServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelingServiceImpl.class);
 
     private static final String DIAGNOSTIC_FILE = "diagnostics.json";
 

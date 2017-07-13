@@ -22,7 +22,8 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -35,7 +36,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 
 public class ValidateFileHeaderUtils {
 
-    private static final Logger log = Logger.getLogger(ValidateFileHeaderUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(ValidateFileHeaderUtils.class);
 
     public static final int BIT_PER_BYTE = 1024;
     public static final int BYTE_NUM = 500;
@@ -64,7 +65,7 @@ public class ValidateFileHeaderUtils {
         } catch (IllegalArgumentException e) {
             throw new LedpException(LedpCode.LEDP_18109, new String[] { e.getMessage() });
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
     }
@@ -107,7 +108,7 @@ public class ValidateFileHeaderUtils {
 
             return columnFields;
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
     }

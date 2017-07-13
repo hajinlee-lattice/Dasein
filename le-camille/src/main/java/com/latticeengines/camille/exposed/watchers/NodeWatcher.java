@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.apache.zookeeper.ZooDefs;
@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 public class NodeWatcher {
 
     private static final ConcurrentMap<String, NodeCache> watchers = new ConcurrentHashMap<>();
-    private static Log log = LogFactory.getLog(NodeWatcher.class);
+    private static Logger log = LoggerFactory.getLogger(NodeWatcher.class);
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> watchers.values().forEach(cache -> {

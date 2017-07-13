@@ -7,20 +7,15 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import kafka.admin.AdminUtils;
-import kafka.admin.RackAwareMode;
-import kafka.utils.ZKStringSerializer$;
-import kafka.utils.ZkUtils;
-
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
 import org.I0Itec.zkclient.exception.ZkInterruptedException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.ZooDefs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -39,13 +34,18 @@ import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
+import kafka.admin.AdminUtils;
+import kafka.admin.RackAwareMode;
+import kafka.utils.ZKStringSerializer$;
+import kafka.utils.ZkUtils;
+
 @Component("messageService")
 public class FabricMessageServiceImpl implements FabricMessageService {
 
     @Value("${datafabric.message.pod:FabricConnectors}")
     private String pod;
 
-    private static final Log log = LogFactory.getLog(FabricMessageServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(FabricMessageServiceImpl.class);
 
     @Value("${datafabric.message.brokers}")
     private String brokers;
@@ -218,8 +218,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
             result = true;
 
         } catch (Exception ex) {
-            log.error("Failed to create topic " + derivedTopic);
-            log.error(ex);
+            log.error("Failed to create topic " + derivedTopic, ex);
         } finally {
             if (zkClient != null) {
                 try {
@@ -253,8 +252,7 @@ public class FabricMessageServiceImpl implements FabricMessageService {
             }
             result = true;
         } catch (Exception ex) {
-            log.error("Failed to delete topic " + derivedTopic);
-            log.error(ex);
+            log.error("Failed to delete topic " + derivedTopic, ex);
         } finally {
             if (zkClient != null) {
                 try {

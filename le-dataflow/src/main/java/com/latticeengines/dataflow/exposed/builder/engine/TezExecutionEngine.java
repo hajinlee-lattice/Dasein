@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 
@@ -20,7 +20,7 @@ import cascading.flow.tez.Hadoop2TezFlowConnector;
 
 public class TezExecutionEngine extends ExecutionEngine {
 
-    private static final Log log  = LogFactory.getLog(TezExecutionEngine.class);
+    private static final Logger log  = LoggerFactory.getLogger(TezExecutionEngine.class);
 
     public TezExecutionEngine() {
         setName("TEZ");

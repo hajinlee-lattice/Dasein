@@ -26,8 +26,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
@@ -47,7 +47,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, SorterParameters> {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(SourceSorter.class);
+    private static final Logger log = LoggerFactory.getLogger(SourceSorter.class);
 
     public static final String TRANSFORMER_NAME = TRANSFORMER_SORTER;
     private static final String SORTED_PARTITION = "_DC_Sorted_Partition_";

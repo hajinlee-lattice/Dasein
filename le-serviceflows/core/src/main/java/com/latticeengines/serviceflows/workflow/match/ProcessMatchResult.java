@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Component("processMatchResult")
 public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ProcessMatchResult.class);
+    private static final Logger log = LoggerFactory.getLogger(ProcessMatchResult.class);
 
     @Autowired
     private MetadataProxy metadataProxy;

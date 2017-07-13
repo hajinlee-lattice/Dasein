@@ -9,8 +9,8 @@ import java.util.UUID;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -32,7 +32,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Scope("prototype")
 public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInputConfiguration> {
 
-    private static Log log = LogFactory.getLog(PrepareBulkMatchInput.class);
+    private static Logger log = LoggerFactory.getLogger(PrepareBulkMatchInput.class);
     private Schema schema;
 
     @Autowired

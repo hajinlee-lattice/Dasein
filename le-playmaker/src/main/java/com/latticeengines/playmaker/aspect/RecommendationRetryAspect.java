@@ -3,8 +3,8 @@ package com.latticeengines.playmaker.aspect;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -19,7 +19,7 @@ import com.latticeengines.playmaker.entitymgr.impl.JdbcTemplateFactoryImpl;
 @Aspect
 public class RecommendationRetryAspect {
 
-    public static Log log = LogFactory.getLog(RecommendationRetryAspect.class);
+    public static Logger log = LoggerFactory.getLogger(RecommendationRetryAspect.class);
 
     @Autowired
     private JdbcTemplateFactoryImpl templateFactory;

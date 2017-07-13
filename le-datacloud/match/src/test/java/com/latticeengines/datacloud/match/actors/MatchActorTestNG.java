@@ -3,10 +3,10 @@ package com.latticeengines.datacloud.match.actors;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -35,7 +35,7 @@ import scala.concurrent.duration.FiniteDuration;
 @Component
 public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(MatchActorTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchActorTestNG.class);
 
     private static final String COUNTRY_CODE = "US";
     private static final String STATE = "CALIFORNIA";

@@ -62,7 +62,7 @@ public final class LoggerAdapter {
             private Map<String, Logger> loggerMap = new HashMap<String, Logger>();
 
             @Override
-            public Logger getLogger(String name) {
+            public LoggerFactory.getLogger(String name) {
                 Logger logger;
                 synchronized (loggerMap) {
                     if ((logger = loggerMap.get(name)) == null) {

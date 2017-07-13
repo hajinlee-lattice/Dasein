@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +31,7 @@ import cascading.tuple.TupleEntryCollector;
 @SuppressWarnings("rawtypes")
 public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Buffer {
 
-    private static final Log log = LogFactory.getLog(AMStatsDedupAggRollupWithHQDuns.class);
+    private static final Logger log = LoggerFactory.getLogger(AMStatsDedupAggRollupWithHQDuns.class);
 
     private static final long serialVersionUID = 4217950767704131475L;
     private static final int MAX_DEPTH = 5;

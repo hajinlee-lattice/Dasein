@@ -15,8 +15,8 @@ import org.apache.avro.Schema.Type;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -40,7 +40,7 @@ import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
 public class SqoopJobServiceImplTestNG extends SqoopFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(SqoopJobServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(SqoopJobServiceImplTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;

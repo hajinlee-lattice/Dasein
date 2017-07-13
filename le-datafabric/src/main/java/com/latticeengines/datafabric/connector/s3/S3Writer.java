@@ -3,8 +3,8 @@ package com.latticeengines.datafabric.connector.s3;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.kafka.common.TopicPartition;
 
 import com.amazonaws.auth.AWSCredentials;
@@ -18,7 +18,7 @@ import com.amazonaws.services.s3.transfer.Upload;
 
 class S3Writer {
 
-    private static final Log log = LogFactory.getLog(S3Writer.class);
+    private static final Logger log = LoggerFactory.getLogger(S3Writer.class);
     private final String bucket;
     private final String prefix;
     private final AmazonS3 client;

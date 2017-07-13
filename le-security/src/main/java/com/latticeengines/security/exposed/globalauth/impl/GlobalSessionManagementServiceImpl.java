@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ public class GlobalSessionManagementServiceImpl
         extends GlobalAuthenticationServiceBaseImpl
         implements GlobalSessionManagementService {
 
-    private static final Log LOGGER = LogFactory.getLog(GlobalSessionManagementServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionManagementServiceImpl.class);
 
     public static final int TicketInactivityTimeoutInMinute = 1440;
 

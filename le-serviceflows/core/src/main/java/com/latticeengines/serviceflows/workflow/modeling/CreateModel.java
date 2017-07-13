@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -20,7 +20,7 @@ import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 @Component("createModel")
 public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(CreateModel.class);
+    private static final Logger log = LoggerFactory.getLogger(CreateModel.class);
 
     private InternalResourceRestApiProxy proxy = null;
 

@@ -11,8 +11,8 @@ import java.util.Properties;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.CharacterizationSource;
@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 @Component("characterizationDataFlowService")
 public class CharacterizationDataFlowService extends AbstractTransformationDataFlowService {
 
-    private static final Log log = LogFactory.getLog(CharacterizationDataFlowService.class);
+    private static final Logger log = LoggerFactory.getLogger(CharacterizationDataFlowService.class);
 
     public void executeDataProcessing(Source source, String workflowDir, String sourceVersion, String uid,
                                       String dataFlowBean, TransformationConfiguration transformationConfiguration) {

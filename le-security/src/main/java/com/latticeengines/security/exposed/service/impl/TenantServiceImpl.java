@@ -3,8 +3,8 @@ package com.latticeengines.security.exposed.service.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ import com.latticeengines.security.exposed.service.UserService;
 
 @Component("tenantService")
 public class TenantServiceImpl implements TenantService {
-    private static final Log log = LogFactory.getLog(TenantServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TenantServiceImpl.class);
 
     @Autowired
     public GlobalTenantManagementService globalTenantManagementService;
@@ -72,7 +72,7 @@ public class TenantServiceImpl implements TenantService {
             if (!e.getMessage().contains("null entity")) {
                 throw e;
             } else {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
         try {

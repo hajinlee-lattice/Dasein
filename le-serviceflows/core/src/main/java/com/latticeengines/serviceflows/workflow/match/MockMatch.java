@@ -7,8 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Component("mockMatch")
 public class MockMatch extends BaseWorkflowStep<MatchStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(MockMatch.class);
+    private static final Logger log = LoggerFactory.getLogger(MockMatch.class);
     private static final String DUPLICATE_TABLE_STRING_FORMAT = "IF OBJECT_ID('%s', 'U') IS NULL"
             + " BEGIN Select * into %s from %s END";
     private static final String SOURCE_TABLE_NAME = "PDEndToEnd_DerivedColumns";

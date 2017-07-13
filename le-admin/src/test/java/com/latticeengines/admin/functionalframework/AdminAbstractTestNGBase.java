@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpRequest;
@@ -62,7 +62,7 @@ import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestI
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
 public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContextTests {
 
-    private static final Log log = LogFactory.getLog(AdminAbstractTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(AdminAbstractTestNGBase.class);
 
     protected static final String ADTesterUsername = "testuser1";
     protected static final String ADTesterPassword = "Lattice1";

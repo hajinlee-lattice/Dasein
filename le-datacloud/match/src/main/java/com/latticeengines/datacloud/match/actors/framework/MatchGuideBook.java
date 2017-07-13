@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 @Component("matchGuideBook")
 public class MatchGuideBook extends GuideBook {
 
-    private static final Log log = LogFactory.getLog(MatchGuideBook.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchGuideBook.class);
     private static final String MICROENGINE_ACTOR = "MicroEngineActor";
     public static final String DEFAULT_GRAPH = null;
 

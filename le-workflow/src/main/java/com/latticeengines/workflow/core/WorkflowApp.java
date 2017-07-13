@@ -1,8 +1,8 @@
 package com.latticeengines.workflow.core;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -12,7 +12,7 @@ import com.latticeengines.workflow.exposed.service.WorkflowService;
 // TODO bernard turn this into a real CLI
 public class WorkflowApp {
 
-    private static final Log log = LogFactory.getLog(WorkflowApp.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowApp.class);
 
     public static void main(String[] args) {
         String[] springConfig = { "workflow-context.xml", "common-properties-context.xml" };

@@ -10,8 +10,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,7 +44,7 @@ import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
 public abstract class BaseScoring extends CommonBase {
 
-    private static final Log log = LogFactory.getLog(BaseScoring.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseScoring.class);
 
     private static final String SOURCE = "Source";
 
@@ -91,7 +91,7 @@ public abstract class BaseScoring extends CommonBase {
 
     protected List<Model> getActiveModels(HttpServletRequest request, ModelType type, CustomerSpace customerSpace) {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
-            log.info(type);
+            log.info(type.toString());
             List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
             log.info(JsonUtils.serialize(models));
             return models;

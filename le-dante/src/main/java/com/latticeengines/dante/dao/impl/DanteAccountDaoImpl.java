@@ -2,9 +2,10 @@ package com.latticeengines.dante.dao.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dante.dao.DanteAccountDao;
@@ -14,7 +15,7 @@ import com.latticeengines.domain.exposed.dante.DanteAccount;
 @Component("danteAccountDao")
 public class DanteAccountDaoImpl extends BaseDanteDaoImpl<DanteAccount> implements DanteAccountDao {
 
-    private static final Logger log = Logger.getLogger(DanteAccountDaoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DanteAccountDaoImpl.class);
 
     @Override
     protected Class<DanteAccount> getEntityClass() {

@@ -1,13 +1,13 @@
 package com.latticeengines.scheduler.exposed;
 
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LedpQueueAssigner {
 
     public static final String PRIORITY = "Priority";
-    public static final Log log = LogFactory.getLog(LedpQueueAssigner.class);
+    public static final Logger log = LoggerFactory.getLogger(LedpQueueAssigner.class);
 
     private static final String RTSBULKSCORING_QUEUE_NAME = "RTSBulkScoring";
     private static final String SCORING_QUEUE_NAME = "Scoring";

@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -20,7 +20,7 @@ import com.latticeengines.scoring.util.ModelAndRecordInfo.ModelInfo;
 
 public class ScoringMapperValidateUtil {
 
-    private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
 
     static public enum MetadataPurpose {
         FEATURE(3), TARGET(4);

@@ -12,8 +12,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 @Component("bulkMatchProcessorExecutor")
 public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
 
-    private static final Log log = LogFactory.getLog(BulkMatchProcessorExecutorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BulkMatchProcessorExecutorImpl.class);
 
     @Override
     public void execute(ProcessorContext processorContext) {

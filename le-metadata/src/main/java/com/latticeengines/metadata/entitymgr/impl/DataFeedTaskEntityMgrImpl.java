@@ -5,7 +5,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -20,8 +21,8 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.DataFeedTaskDao;
@@ -35,7 +36,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("datafeedTaskEntityMgr")
 public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> implements DataFeedTaskEntityMgr {
 
-    private static final Logger log = Logger.getLogger(DataFeedTaskEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFeedTaskEntityMgrImpl.class);
 
     @Autowired
     private DataFeedTaskDao datafeedTaskDao;

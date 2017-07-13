@@ -3,8 +3,8 @@ package org.springframework.yarn.fs;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -16,7 +16,7 @@ import org.springframework.yarn.client.CommandYarnClient;
 
 public class CustomYarnClient extends CommandYarnClient {
 
-    private final static Log log = LogFactory.getLog(CommandYarnClient.class);
+    private final static Logger log = LoggerFactory.getLogger(CommandYarnClient.class);
 
     private ClientRmTemplate clientRmTemplate;
 

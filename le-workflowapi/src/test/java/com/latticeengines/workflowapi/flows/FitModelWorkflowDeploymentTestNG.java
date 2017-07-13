@@ -2,8 +2,8 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertEquals;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 public class FitModelWorkflowDeploymentTestNG extends FitModelWorkflowTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(FitModelWorkflowDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(FitModelWorkflowDeploymentTestNG.class);
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {

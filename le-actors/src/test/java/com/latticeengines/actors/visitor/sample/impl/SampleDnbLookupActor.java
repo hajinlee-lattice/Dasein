@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -21,7 +21,7 @@ import com.latticeengines.actors.visitor.sample.SampleDataSourceWrapperActorTemp
 @Component("sampleDnbLookupActor")
 @Scope("prototype")
 public class SampleDnbLookupActor extends SampleDataSourceWrapperActorTemplate {
-    private static final Log log = LogFactory.getLog(SampleDnbLookupActor.class);
+    private static final Logger log = LoggerFactory.getLogger(SampleDnbLookupActor.class);
 
     @Autowired
     @Qualifier("sampleDnBLookupService")

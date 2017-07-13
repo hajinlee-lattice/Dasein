@@ -4,8 +4,8 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.zookeeper.ZooDefs;
@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 
 public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ModelStepYarnProcessorImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelStepYarnProcessorImplTestNG.class);
 
     private static final int NUM_ALGORITHMS = 1; // No LR; only RF for now.
 

@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.spring.SpringCamelContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.DataContainer;
 
 public class ExtractDataXmlHandler extends DefaultHandler {
-    private static final Log log = LogFactory.getLog(ExtractDataXmlHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ExtractDataXmlHandler.class);
 
     private Map<String, Attribute> tableAttributeMap;
     private String currentQname;

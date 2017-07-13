@@ -3,8 +3,8 @@ package com.latticeengines.metadata.validation.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
@@ -13,7 +13,7 @@ import com.latticeengines.metadata.service.ArtifactValidationService;
 @Component
 public abstract class ArtifactValidation implements ArtifactValidationService {
 
-    protected static final Log log = LogFactory.getLog(ArtifactValidation.class);
+    protected static final Logger log = LoggerFactory.getLogger(ArtifactValidation.class);
 
     private static Map<ArtifactType, ArtifactValidationService> registry = new HashMap<>();
 

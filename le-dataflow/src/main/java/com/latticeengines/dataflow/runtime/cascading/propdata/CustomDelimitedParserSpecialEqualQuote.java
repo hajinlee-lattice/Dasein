@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.scheme.util.DelimitedParser;
 import cascading.scheme.util.FieldTypeResolver;
 
 public class CustomDelimitedParserSpecialEqualQuote extends DelimitedParser {
-    private static final Log log = LogFactory.getLog(CustomDelimitedParserSpecialEqualQuote.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomDelimitedParserSpecialEqualQuote.class);
 
     private static final long serialVersionUID = -1832800305799711109L;
     private static final String COMMA = ",";

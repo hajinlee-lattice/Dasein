@@ -10,8 +10,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -60,7 +61,7 @@ import com.latticeengines.security.exposed.service.UserService;
 public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     private final static String tenantName = "Global Test Tenant" + System.currentTimeMillis();
-    private final static Log log = LogFactory.getLog(LP2EndToEndDeploymentTestNG.class);
+    private final static Logger log = LoggerFactory.getLogger(LP2EndToEndDeploymentTestNG.class);
     private static String tenantId = "EndToEnd";
     private static String contractId = "";
 
@@ -378,6 +379,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertNotNull(userDoc);
     }
 
+    @SuppressWarnings("unchecked")
     private void verifyVisiDBDLTenantExists() throws IOException {
         if (vdbdlSkipped)
             return;
@@ -385,7 +387,8 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         visiDBDLComponentDeploymentTestNG.verifyTenant(tenantId, dlUrl);
         // verify permstore and datastore
         String url = String.format("%s/admin/internal/datastore/", getRestHostPort());
-        log.info(magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class));
+        List<String> stringList = magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class);
+        log.info(StringUtils.join(", ", stringList));
         Assert.assertEquals(magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class).size(),
                 3);
     }

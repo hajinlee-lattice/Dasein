@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -28,7 +28,7 @@ public class BucketedFilter extends AbstractDataflowTransformer<BucketedFilterCo
 
     public static final String TRANSFORMER_NAME = TRANSFORMER_BUCKETED_FILTER;
 
-    private static final Log log = LogFactory.getLog(BucketedFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(BucketedFilter.class);
 
     @Override
     public String getName() {

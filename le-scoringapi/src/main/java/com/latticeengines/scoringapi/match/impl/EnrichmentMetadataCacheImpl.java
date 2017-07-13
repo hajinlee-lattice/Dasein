@@ -8,8 +8,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ import com.latticeengines.scoringapi.match.EnrichmentMetadataCache;
 
 @Component
 public class EnrichmentMetadataCacheImpl implements EnrichmentMetadataCache {
-    private static final Log log = LogFactory.getLog(EnrichmentMetadataCacheImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EnrichmentMetadataCacheImpl.class);
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;

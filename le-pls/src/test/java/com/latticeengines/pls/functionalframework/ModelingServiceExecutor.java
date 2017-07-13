@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,7 +35,7 @@ import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseE
 
 public class ModelingServiceExecutor {
 
-    private static final Log log = LogFactory.getLog(ModelingServiceExecutor.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelingServiceExecutor.class);
 
     private Builder builder;
 

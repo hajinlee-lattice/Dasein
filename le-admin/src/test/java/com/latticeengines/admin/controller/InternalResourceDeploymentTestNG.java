@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -53,7 +53,7 @@ public class InternalResourceDeploymentTestNG extends AdminDeploymentTestNGBase{
 
     private String email = "lpl@lattice-engines.com";
 
-    private static final Log log = LogFactory.getLog(InternalResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(InternalResourceDeploymentTestNG.class);
     /**
      * In setup, orchestrateForInstall a full tenant.
      **/

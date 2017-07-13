@@ -2,8 +2,8 @@ package com.latticeengines.leadprioritization.workflow.steps;
 
 import java.util.Random;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Component("playLaunchInitStep")
 public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(PlayLaunchInitStep.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStep.class);
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;

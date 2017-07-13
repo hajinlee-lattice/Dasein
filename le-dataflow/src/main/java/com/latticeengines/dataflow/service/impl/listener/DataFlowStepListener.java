@@ -1,7 +1,7 @@
 package com.latticeengines.dataflow.service.impl.listener;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepListener;
@@ -10,7 +10,7 @@ import cascading.flow.planner.DataFlowStepJob;
 
 @SuppressWarnings("rawtypes")
 public class DataFlowStepListener implements FlowStepListener {
-    private static final Log log = LogFactory.getLog(DataFlowStepListener.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFlowStepListener.class);
 
     @Override
     public void onStepStarting(FlowStep flowStep) {

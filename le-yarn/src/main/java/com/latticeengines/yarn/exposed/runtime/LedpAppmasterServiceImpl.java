@@ -9,7 +9,7 @@ public class LedpAppmasterServiceImpl extends LedpAppmasterService {
 
     @Override
     public void handleException(Exception e) {
-        log.error(e);
+        log.error(e.getMessage(), e);
         this.e = e;
     }
 

@@ -12,8 +12,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 @Component("modelSummaryParser")
 public class ModelSummaryParser {
 
-    private static final Log log = LogFactory.getLog(ModelSummaryParser.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryParser.class);
 
     public static final String NAME = "Name";
 

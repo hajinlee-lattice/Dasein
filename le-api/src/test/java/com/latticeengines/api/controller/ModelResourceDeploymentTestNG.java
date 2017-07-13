@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 public class ModelResourceDeploymentTestNG extends BaseModelResourceDeploymentTestNG {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(ModelResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelResourceDeploymentTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;

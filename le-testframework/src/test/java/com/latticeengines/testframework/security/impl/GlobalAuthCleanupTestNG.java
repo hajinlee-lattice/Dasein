@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.http.message.BasicNameValuePair;
@@ -51,7 +51,7 @@ import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
 @ContextConfiguration(locations = { "classpath:test-testframework-cleanup-context.xml" })
 public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
-    private static final Log log = LogFactory.getLog(GlobalAuthCleanupTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalAuthCleanupTestNG.class);
     private static final Long cleanupThreshold = TimeUnit.DAYS.toMillis(7);
     private static final String customerBase = "/user/s-analytics/customers";
 

@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.workflow.engine.steps;
 
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -28,7 +28,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Scope("prototype")
 public class TransformationStep extends BaseWorkflowStep<PrepareTransformationStepInputConfiguration>
         implements ApplicationContextAware {
-    private static Log log = LogFactory.getLog(TransformationStep.class);
+    private static Logger log = LoggerFactory.getLogger(TransformationStep.class);
 
     private ApplicationContext applicationContext;
 

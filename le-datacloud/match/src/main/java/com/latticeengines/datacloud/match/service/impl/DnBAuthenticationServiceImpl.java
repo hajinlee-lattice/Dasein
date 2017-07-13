@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +29,7 @@ import com.latticeengines.proxy.exposed.RestApiClient;
 
 @Component("dnbAuthenticationService")
 public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
-    private static final Log log = LogFactory.getLog(DnBAuthenticationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBAuthenticationServiceImpl.class);
 
     @Value("${datacloud.dnb.transactionalmatch.api.key}")
     private String realtimeKey;
@@ -114,7 +114,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         try {
             token = tokenCache.get(type);
         } catch (ExecutionException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_25027);
         }
         if (StringUtils.isEmpty(token)) {
@@ -136,7 +136,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             String response = obtainAuthorizationReponseBody(type);
             token = retrieveTokenFromResponseBody(response);
         } catch (ParseException | IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
 
         return token;

@@ -2,8 +2,8 @@ package com.latticeengines.serviceflows.workflow.core;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,7 +24,7 @@ import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
 public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
-    private static final Log log = LogFactory.getLog(InternalResourceRestApiProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(InternalResourceRestApiProxy.class);
 
     private String internalResourceHostPort;
 

@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ import com.latticeengines.security.exposed.service.UserService;
 @Component
 public class PLSComponentManager {
 
-    private static final Log LOGGER = LogFactory.getLog(PLSComponentManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PLSComponentManager.class);
 
     private static final String DEFAUTL_PASSWORD = "admin";
 

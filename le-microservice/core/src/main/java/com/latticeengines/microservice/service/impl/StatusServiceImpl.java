@@ -10,8 +10,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -20,6 +18,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ import com.latticeengines.microservice.service.StatusService;
 @Component("statusService")
 public class StatusServiceImpl implements StatusService {
 
-    private static final Log log = LogFactory.getLog(StatusServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(StatusServiceImpl.class);
 
     @Value("${microservice.modules}")
     protected String microservicesStr;

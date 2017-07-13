@@ -2,8 +2,8 @@ package com.latticeengines.scoringapi.transform;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import com.latticeengines.common.exposed.jython.JythonEngine;
 @Component("jythonEngineRetriever")
 public class JythonEngineRetriever implements InitializingBean {
 
-    private static final Log log = LogFactory.getLog(JythonEngineRetriever.class);
+    private static final Logger log = LoggerFactory.getLogger(JythonEngineRetriever.class);
 
     @Value("${scoringapi.jythonengine.cache.maxsize}")
     private int jythonEngineCacheMaxSize;

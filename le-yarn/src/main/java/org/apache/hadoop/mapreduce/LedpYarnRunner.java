@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.ClientCache;
@@ -21,7 +21,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 
 @SuppressWarnings("deprecation")
 public class LedpYarnRunner extends YARNRunner {
-    private static final Log log = LogFactory.getLog(LedpYarnRunner.class);
+    private static final Logger log = LoggerFactory.getLogger(LedpYarnRunner.class);
 
     public LedpYarnRunner(Configuration conf) {
         super(conf);

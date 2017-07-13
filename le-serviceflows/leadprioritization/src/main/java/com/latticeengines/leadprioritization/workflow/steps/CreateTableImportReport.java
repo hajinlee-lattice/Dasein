@@ -1,7 +1,8 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
 import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,14 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 
 @Component("createEventTableReport")
 public class CreateTableImportReport extends BaseReportStep<BaseReportStepConfiguration> {
-    private static final Logger log = Logger.getLogger(CreateTableImportReport.class);
+    private static final Logger log = LoggerFactory.getLogger(CreateTableImportReport.class);
 
     @Autowired
     private JobProxy jobProxy;

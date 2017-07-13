@@ -3,8 +3,8 @@ package com.latticeengines.eai.service.impl.marketo;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
@@ -18,7 +18,7 @@ import com.latticeengines.eai.service.impl.marketo.strategy.MarketoImportStrateg
 
 @Component("marketoImportService")
 public class MarketoImportServiceImpl extends ImportService {
-    private static final Log log = LogFactory.getLog(MarketoImportServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MarketoImportServiceImpl.class);
 
     public MarketoImportServiceImpl() {
         super(SourceType.MARKETO);

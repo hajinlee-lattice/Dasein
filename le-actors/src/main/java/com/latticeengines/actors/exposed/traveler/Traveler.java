@@ -11,15 +11,15 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.actors.VisitingHistory;
 
 public abstract class Traveler {
 
-    private static final Log log = LogFactory.getLog(Traveler.class);
+    private static final Logger log = LoggerFactory.getLogger(Traveler.class);
 
     private final String rootOperationUid;
     private final String travelerId;

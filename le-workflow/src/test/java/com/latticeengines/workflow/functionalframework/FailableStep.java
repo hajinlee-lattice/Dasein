@@ -1,7 +1,7 @@
 package com.latticeengines.workflow.functionalframework;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -12,7 +12,7 @@ import com.latticeengines.workflow.exposed.build.AbstractStep;
 @Component("failableStep")
 public class FailableStep extends AbstractStep<BaseStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(FailableStep.class);
+    private static final Logger log = LoggerFactory.getLogger(FailableStep.class);
 
     private boolean fail = true;
     private boolean useRuntimeException = false;

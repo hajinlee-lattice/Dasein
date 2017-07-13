@@ -4,8 +4,8 @@ import java.net.URI;
 import java.util.Date;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -25,7 +25,7 @@ import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 
 public class CustomQuartzJob extends QuartzJobBean {
 
-    private static final Log log = LogFactory.getLog(CustomQuartzJob.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomQuartzJob.class);
 
     public static final String DESTURL = "DestUrl";
     public static final String SECONDARYDESTURL = "SecondaryDestUrl";

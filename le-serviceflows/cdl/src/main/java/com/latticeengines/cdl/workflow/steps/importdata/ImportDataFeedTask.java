@@ -3,8 +3,8 @@ package com.latticeengines.cdl.workflow.steps.importdata;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Component("importDataFeed")
 public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ImportDataFeedTask.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportDataFeedTask.class);
 
     @Autowired
     private EaiProxy eaiProxy;

@@ -5,8 +5,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
 import org.apache.zookeeper.ZooDefs;
 
@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 public class LockManager {
 
     private static final ConcurrentMap<String, InterProcessReadWriteLock> locks = new ConcurrentHashMap<>();
-    private static Log log = LogFactory.getLog(LockManager.class);
+    private static Logger log = LoggerFactory.getLogger(LockManager.class);
     private static final ConcurrentSkipListSet<String> privateLocks = new ConcurrentSkipListSet<>();
 
     public static void registerDivisionPrivateLock(String lockName) {

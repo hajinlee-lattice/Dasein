@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.datacloud;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public enum MatchCommandStatus {
 
@@ -19,7 +19,7 @@ public enum MatchCommandStatus {
     ABORTED("ABORTED"),
     FAILED("FAILED");
 
-    private static final Log log = LogFactory.getLog(MatchCommandStatus.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchCommandStatus.class);
     private final String status;
     private static Map<String, MatchCommandStatus> statusMap;
 

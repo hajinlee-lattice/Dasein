@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -18,7 +18,7 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 
 public class DataSourceUtils {
 
-    private static final Log log = LogFactory.getLog(DataSourceUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(DataSourceUtils.class);
 
     private static ConcurrentMap<String, JdbcTemplate> jdbcTemplateMap = new ConcurrentHashMap<>();
 

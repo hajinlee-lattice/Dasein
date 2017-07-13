@@ -1,8 +1,8 @@
 package com.latticeengines.serviceflows.workflow.modeling;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -14,7 +14,7 @@ import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 @Component("sample")
 public class Sample extends BaseModelStep<ModelStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(Sample.class);
+    private static final Logger log = LoggerFactory.getLogger(Sample.class);
 
     @Override
     public void execute() {

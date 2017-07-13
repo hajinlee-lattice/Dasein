@@ -14,8 +14,8 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +62,7 @@ import com.latticeengines.pls.service.impl.ModelSummaryParser;
 public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(ModelSummaryResourceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryResourceTestNG.class);
     private String tenantId;
 
     private String modelId;

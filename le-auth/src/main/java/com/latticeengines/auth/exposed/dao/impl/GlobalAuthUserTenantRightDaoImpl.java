@@ -6,8 +6,8 @@ import java.util.List;
 import javax.persistence.Table;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -21,7 +21,7 @@ import com.latticeengines.auth.exposed.dao.GlobalAuthUserTenantRightDao;
 public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUserTenantRight>
         implements GlobalAuthUserTenantRightDao {
 
-    private static final Log log = LogFactory.getLog(GlobalAuthUserTenantRightDaoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalAuthUserTenantRightDaoImpl.class);
 
     @SuppressWarnings("rawtypes")
     @Override

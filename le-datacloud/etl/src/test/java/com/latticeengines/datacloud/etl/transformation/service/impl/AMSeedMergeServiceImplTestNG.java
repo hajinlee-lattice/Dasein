@@ -8,14 +8,15 @@ import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterSeedMerged;
 import com.latticeengines.datacloud.core.source.impl.DnBCacheSeed;
@@ -32,7 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 public class AMSeedMergeServiceImplTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
-    private static final Log log = LogFactory.getLog(AMSeedMergeServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AMSeedMergeServiceImplTestNG.class);
 
     @Autowired
     AccountMasterSeedMerged source;
@@ -392,7 +393,7 @@ public class AMSeedMergeServiceImplTestNG
         Set<Long> ids = new HashSet<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            log.info(record);
+            log.info(JsonUtils.serialize(record));
             Long latticeId = (Long) record.get("LatticeID");
             ids.add(latticeId);
 

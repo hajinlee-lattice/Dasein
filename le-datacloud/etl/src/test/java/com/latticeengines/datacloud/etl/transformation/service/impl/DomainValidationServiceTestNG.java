@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class DomainValidationServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(DomainValidationServiceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DomainValidationServiceTestNG.class);
 
     @Autowired
     DomainValidation source;

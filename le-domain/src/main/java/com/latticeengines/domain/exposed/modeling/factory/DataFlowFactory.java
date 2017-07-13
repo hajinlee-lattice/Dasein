@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.modeling.factory;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 public class DataFlowFactory {
 
-    private static final Log log = LogFactory.getLog(DataFlowFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFlowFactory.class);
 
     public static final String DATAFLOW_NAME_KEY = "dataflow.name";
     public static final String DATAFLOW_MATCH_KEY = "dataflow.match";

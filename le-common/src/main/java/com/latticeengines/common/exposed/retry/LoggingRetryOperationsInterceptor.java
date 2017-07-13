@@ -2,7 +2,8 @@ package com.latticeengines.common.exposed.retry;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
@@ -11,7 +12,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.Assert;
 
 public class LoggingRetryOperationsInterceptor implements MethodInterceptor {
-    private static final Logger log = Logger.getLogger(LoggingRetryOperationsInterceptor.class);
+    private static final Logger log = LoggerFactory.getLogger(LoggingRetryOperationsInterceptor.class);
 
     private RetryOperations retryOperations = new RetryTemplate();
 

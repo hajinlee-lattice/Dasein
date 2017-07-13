@@ -2,8 +2,8 @@ package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
 import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider.DLFolder;
@@ -21,7 +21,7 @@ import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 public class VisiDBDLInstaller extends LatticeComponentInstaller {
 
-    private static final Log log = LogFactory.getLog(VisiDBDLInstaller.class);
+    private static final Logger log = LoggerFactory.getLogger(VisiDBDLInstaller.class);
 
     private TenantService tenantService;
 

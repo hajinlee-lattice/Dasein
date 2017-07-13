@@ -1,15 +1,15 @@
 package com.latticeengines.common.exposed.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 public class PhoneNumberUtils {
-    private static final Log log = LogFactory.getLog(PhoneNumberUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(PhoneNumberUtils.class);
     public static String getStandardPhoneNumber(String phoneNumber, String countryCode) {
         phoneNumber = LocationStringStandardizationUtils.getStandardString(phoneNumber);
         if (StringUtils.isEmpty(countryCode)) {

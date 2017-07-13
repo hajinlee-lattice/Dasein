@@ -8,8 +8,8 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -52,7 +52,7 @@ import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 @Component("scoringStepYarnProcessor")
 public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
-    private static final Log log = LogFactory.getLog(ScoringStepYarnProcessorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringStepYarnProcessorImpl.class);
 
     @Autowired
     private SqoopProxy sqoopProxy;

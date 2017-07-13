@@ -9,8 +9,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -39,7 +39,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("ingestionService")
 public class IngestionServiceImpl implements IngestionService {
-    private static Log log = LogFactory.getLog(IngestionServiceImpl.class);
+    private static Logger log = LoggerFactory.getLogger(IngestionServiceImpl.class);
 
     @Autowired
     IngestionEntityMgr ingestionEntityMgr;

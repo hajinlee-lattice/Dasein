@@ -1,18 +1,19 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.DedupEventTableConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("dedupEventTableDataFlow")
 public class DedupEventTable extends RunDataFlow<DedupEventTableConfiguration> {
 
-    private static final Logger log = Logger.getLogger(DedupEventTable.class);
+    private static final Logger log = LoggerFactory.getLogger(DedupEventTable.class);
 
     @Override
     public void skipStep() {

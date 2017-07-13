@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 public abstract class TblDrivenFlowBase<T extends TblDrivenTransformerConfig, E extends TblDrivenFuncConfig>
        extends ConfigurableFlowBase<T> {
 
-    private static final Log log = LogFactory.getLog(TblDrivenFlowBase.class);
+    private static final Logger log = LoggerFactory.getLogger(TblDrivenFlowBase.class);
 
     @Autowired
     SourceAttributeEntityMgr attrMgr;

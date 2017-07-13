@@ -13,15 +13,15 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("importVdbTable")
 public class ImportVdbTable extends BaseWorkflowStep<ImportVdbTableStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ImportVdbTable.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportVdbTable.class);
 
     @Autowired
     private EaiProxy eaiProxy;

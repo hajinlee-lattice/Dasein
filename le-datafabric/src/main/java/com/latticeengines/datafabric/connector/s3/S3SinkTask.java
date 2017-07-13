@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.ConfigException;
@@ -21,7 +21,7 @@ import io.confluent.connect.avro.AvroData;
 
 public class S3SinkTask extends SinkTask {
 
-    private static final Log log = LogFactory.getLog(S3SinkTask.class);
+    private static final Logger log = LoggerFactory.getLogger(S3SinkTask.class);
 
     private AvroData avroData;
     private S3Writer s3;

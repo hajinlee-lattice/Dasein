@@ -8,8 +8,8 @@ import org.apache.camel.component.salesforce.SalesforceHttpClient;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
@@ -40,7 +40,7 @@ import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportConfiguration>
         implements ItemProcessor<ImportConfiguration, String>, ApplicationContextAware {
 
-    private static final Log log = LogFactory.getLog(ImportTableProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportTableProcessor.class);
 
     private ApplicationContext applicationContext;
 

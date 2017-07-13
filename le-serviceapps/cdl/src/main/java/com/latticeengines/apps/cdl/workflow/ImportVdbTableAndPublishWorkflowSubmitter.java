@@ -1,7 +1,8 @@
 package com.latticeengines.apps.cdl.workflow;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeeingines.apps.core.workflow.WorkflowSubmitter;
@@ -14,7 +15,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportV
 
 @Component
 public class ImportVdbTableAndPublishWorkflowSubmitter extends WorkflowSubmitter {
-    private static final Logger log = Logger.getLogger(ImportVdbTableAndPublishWorkflowSubmitter.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportVdbTableAndPublishWorkflowSubmitter.class);
 
     public ApplicationId submit(VdbLoadTableConfig loadConfig) {
         String customSpace = CustomerSpace.parse(loadConfig.getTenantId()).toString();

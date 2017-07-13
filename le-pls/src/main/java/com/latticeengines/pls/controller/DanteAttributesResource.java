@@ -2,8 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Plays')")
 public class DanteAttributesResource {
 
-    private static final Log log = LogFactory.getLog(DanteAttributesResource.class);
+    private static final Logger log = LoggerFactory.getLogger(DanteAttributesResource.class);
 
     @Autowired
     DanteAttributesProxy danteAttributesProxy;

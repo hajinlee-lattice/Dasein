@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -40,7 +40,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 @Component("publicationService")
 public class PublicationServiceImpl implements PublicationService {
 
-    private static final Log log = LogFactory.getLog(PublicationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PublicationServiceImpl.class);
 
     private static final Long NEW_JOB_TIMEOUT = TimeUnit.MINUTES.toMillis(10);
     private static final Long RUNNING_JOB_TIMEOUT = TimeUnit.HOURS.toMillis(48);

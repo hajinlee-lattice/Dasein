@@ -3,8 +3,8 @@ package com.latticeengines.dataflow.runtime.cascading.leadprioritization;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
@@ -20,7 +20,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings({ "rawtypes", "serial" })
 public class AddRatingColumnFunction extends BaseOperation implements Function {
 
-    private static final Log log = LogFactory.getLog(AddRatingColumnFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(AddRatingColumnFunction.class);
 
     private String scoreFieldName;
     private List<BucketMetadata> bucketMetadata = new ArrayList<>();

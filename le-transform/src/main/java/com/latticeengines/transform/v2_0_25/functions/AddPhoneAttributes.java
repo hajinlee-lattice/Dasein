@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
@@ -20,7 +20,7 @@ public class AddPhoneAttributes implements RealTimeTransform {
 
     private static final long serialVersionUID = 1043623053362231011L;
 
-    private static final Log log = LogFactory.getLog(AddPhoneAttributes.class);
+    private static final Logger log = LoggerFactory.getLogger(AddPhoneAttributes.class);
 
     private static final Map<String, TransformFunctionBase> attributeFunctions = new HashMap<>();
 

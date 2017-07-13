@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -32,7 +32,7 @@ import com.latticeengines.quartzclient.service.QuartzJobService;
 @Component("quartzJobService")
 public class QuartzJobServiceImpl implements QuartzJobService {
 
-    private static final Log log = LogFactory.getLog(QuartzJobServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(QuartzJobServiceImpl.class);
 
     private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 

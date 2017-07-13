@@ -42,8 +42,8 @@ public class DnBSicCategory extends Substring {
         metadata.setCategory(Category.FIRMOGRAPHICS);
         metadata.setFundamentalType(FundamentalType.ALPHA);
         metadata.setStatisticalType(StatisticalType.NOMINAL);
-        metadata.setDescription("SIC Category. There are 99 categories");
-        metadata.setDisplayName("SIC Category");
+        metadata.setDescription("SIC Logger. There are 99 categories");
+        metadata.setDisplayName("SIC Logger");
         metadata.setTags(Tag.EXTERNAL_TRANSFORM);
         return metadata;
     }

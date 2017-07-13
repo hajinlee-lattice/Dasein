@@ -9,8 +9,8 @@ import java.util.Set;
 import org.apache.avro.Schema.Type;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBul
 public class CascadingBulkMatchDataflow extends TypesafeDataFlowBuilder<CascadingBulkMatchDataflowParameters> {
     private static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
 
-    private static final Log log = LogFactory.getLog(CascadingBulkMatchDataflow.class);
+    private static final Logger log = LoggerFactory.getLogger(CascadingBulkMatchDataflow.class);
 
     public static final String MATCH_ID_KEY = "__MATCH_ID__";
     public static final String PARSED_DOMAIN = "__PARSED_DOMAIN__";

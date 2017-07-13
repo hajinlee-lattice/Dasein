@@ -1,7 +1,7 @@
 package com.latticeengines.eai.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import com.latticeengines.eai.service.ExportService;
 @Component("eaiService")
 public class EaiServiceImpl implements EaiService {
 
-    private static final Log log = LogFactory.getLog(EaiServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EaiServiceImpl.class);
 
     @Autowired
     private DataExtractionService dataExtractionService;

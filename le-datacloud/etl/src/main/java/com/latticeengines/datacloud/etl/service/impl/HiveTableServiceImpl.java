@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.etl.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import com.latticeengines.metadata.hive.HiveTableDao;
 @Component("hiveTableService")
 public class HiveTableServiceImpl implements HiveTableService {
 
-    private static final Log log = LogFactory.getLog(HiveTableServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HiveTableServiceImpl.class);
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;

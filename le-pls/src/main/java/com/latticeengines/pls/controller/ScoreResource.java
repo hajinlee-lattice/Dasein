@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Data')")
 public class ScoreResource {
 
-    private static final Logger log = Logger.getLogger(ScoreResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoreResource.class);
 
     @Autowired
     private ScoringJobService scoringJobService;

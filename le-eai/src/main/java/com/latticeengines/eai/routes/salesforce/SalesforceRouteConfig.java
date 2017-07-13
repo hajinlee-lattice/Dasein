@@ -1,8 +1,8 @@
 package com.latticeengines.eai.routes.salesforce;
 
 import org.apache.camel.spring.SpringRouteBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class SalesforceRouteConfig extends SpringRouteBuilder {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(SalesforceRouteConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(SalesforceRouteConfig.class);
 
     @Value("${eai.max.redeliveries}")
     private int maximumRedeliveries;

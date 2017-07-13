@@ -2,8 +2,8 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -18,7 +18,7 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 @Component
 public class ColumnMetadataResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ColumnMetadataResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ColumnMetadataResourceDeploymentTestNG.class);
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;

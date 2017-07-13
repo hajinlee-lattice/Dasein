@@ -140,7 +140,7 @@ public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
         VdbMetadataField fieldUpdated;
         VdbMetadataField field = (VdbMetadataField)originalFields.get(0).clone();
 
-        // All values for Category
+        // All values for Logger
         for (String category : categories) {
             field.setCategory(category);
             vdbMetadataService.UpdateField(tenant, field);

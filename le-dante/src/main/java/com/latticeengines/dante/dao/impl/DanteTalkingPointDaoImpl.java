@@ -2,9 +2,10 @@ package com.latticeengines.dante.dao.impl;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dante.dao.DanteTalkingPointDao;
@@ -14,7 +15,7 @@ import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 @Component("danteTalkingPointDao")
 public class DanteTalkingPointDaoImpl extends BaseDanteDaoImpl<DanteTalkingPoint> implements DanteTalkingPointDao {
 
-    private static final Logger log = Logger.getLogger(DanteTalkingPointDaoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DanteTalkingPointDaoImpl.class);
 
     @Override
     protected Class<DanteTalkingPoint> getEntityClass() {

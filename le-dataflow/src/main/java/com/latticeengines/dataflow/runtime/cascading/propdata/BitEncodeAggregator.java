@@ -10,8 +10,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
@@ -30,7 +30,7 @@ public class BitEncodeAggregator extends BaseAggregator<BitEncodeAggregator.Cont
     }
 
     private static final long serialVersionUID = -8024820880116725433L;
-    private static final Log log = LogFactory.getLog(BitEncodeAggregator.class);
+    private static final Logger log = LoggerFactory.getLogger(BitEncodeAggregator.class);
 
     private final BitCodeBook codeBook;
     private final String encodedField;

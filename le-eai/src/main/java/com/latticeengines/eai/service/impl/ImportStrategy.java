@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.ProducerTemplate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class ImportStrategy {
 
-    private Log log = LogFactory.getLog(ImportStrategy.class);
+    private Logger log = LoggerFactory.getLogger(ImportStrategy.class);
 
     private static Map<String, ImportStrategy> strategies = new HashMap<>();
 
@@ -50,7 +50,9 @@ public abstract class ImportStrategy {
             }
         }
         if (missedAttrNames.size() > 0) {
-            log.warn(new LedpException(LedpCode.LEDP_17003, new String[] { missedAttrNames.toString(), table }));
+            LedpException exception = new LedpException(LedpCode.LEDP_17003,
+                    new String[] { missedAttrNames.toString(), table });
+            log.warn(exception.getMessage(), exception);
         }
     }
 

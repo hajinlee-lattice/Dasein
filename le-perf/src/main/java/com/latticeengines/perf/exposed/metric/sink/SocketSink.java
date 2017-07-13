@@ -1,8 +1,8 @@
 package com.latticeengines.perf.exposed.metric.sink;
 
 import org.apache.commons.configuration.SubsetConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.metrics2.AbstractMetric;
 import org.apache.hadoop.metrics2.MetricsException;
 import org.apache.hadoop.metrics2.MetricsRecord;
@@ -10,7 +10,7 @@ import org.apache.hadoop.metrics2.MetricsSink;
 import org.apache.hadoop.metrics2.MetricsTag;
 
 public class SocketSink implements MetricsSink {
-    private static final Log log = LogFactory.getLog(SocketSink.class);
+    private static final Logger log = LoggerFactory.getLogger(SocketSink.class);
     private static final String SERVER_KEY = "server";
 
     private SinkServerClient client = null;

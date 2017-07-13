@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.camille.locks.RateLimitingStatus;
 public class RateLimitedResourceManager {
 
     private static final String LOCK_NAME_PREFIX = "Resource_";
-    private static final Log log = LogFactory.getLog(RateLimitedResourceManager.class);
+    private static final Logger log = LoggerFactory.getLogger(RateLimitedResourceManager.class);
 
     private static final ConcurrentMap<String, RateLimitDefinition> definitions = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, RateLimitingStatus> localStatusStore = new ConcurrentHashMap<>();

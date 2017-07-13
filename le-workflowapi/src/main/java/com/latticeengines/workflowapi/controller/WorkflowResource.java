@@ -3,8 +3,8 @@ package com.latticeengines.workflowapi.controller;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/workflows")
 public class WorkflowResource implements WorkflowInterface {
 
-    private static final Log log = LogFactory.getLog(WorkflowResource.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowResource.class);
 
     @Autowired
     private WorkflowContainerService workflowContainerService;

@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.connect.data.Struct;
@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 
 public class GenericSinkTask extends SinkTask {
 
-    private static final Log log = LogFactory.getLog(GenericSinkTask.class);
+    private static final Logger log = LoggerFactory.getLogger(GenericSinkTask.class);
     private AvroData avroData;
 
     private GenericSinkConnectorConfig connectorConfig;

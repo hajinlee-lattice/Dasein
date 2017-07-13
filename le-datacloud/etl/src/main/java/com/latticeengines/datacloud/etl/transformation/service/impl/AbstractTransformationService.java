@@ -9,11 +9,10 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
@@ -41,7 +40,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public abstract class AbstractTransformationService<T extends TransformationConfiguration>
         implements TransformationService<T> {
 
-    private static Logger LOG = LogManager.getLogger(AbstractTransformationService.class);
+    private static Logger LOG = LoggerFactory.getLogger(AbstractTransformationService.class);
 
     private static final String SUCCESS_FLAG = "_SUCCESS";
     private static final String TRANSFORMATION_CONF = "_CONF";
@@ -75,7 +74,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     @Autowired
     private MetadataProxy metadataProxy;
 
-    abstract Log getLogger();
+    abstract Logger getLogger();
 
     abstract Date checkTransformationConfigurationValidity(T transformationConfiguration);
 

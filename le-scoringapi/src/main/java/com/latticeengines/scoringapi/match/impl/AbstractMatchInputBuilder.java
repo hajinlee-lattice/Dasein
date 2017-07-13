@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -35,7 +35,7 @@ import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
 
-    private Log log = LogFactory.getLog(AbstractMatchInputBuilder.class);
+    private Logger log = LoggerFactory.getLogger(AbstractMatchInputBuilder.class);
 
     @Override
     public MatchInput buildMatchInput(CustomerSpace space, //

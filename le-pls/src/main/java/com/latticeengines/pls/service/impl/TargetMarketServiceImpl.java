@@ -4,8 +4,8 @@ import java.rmi.server.UID;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class TargetMarketServiceImpl implements TargetMarketService {
 
     @SuppressWarnings("unused")
-    private Log log = LogFactory.getLog(TargetMarketService.class);
+    private Logger log = LoggerFactory.getLogger(TargetMarketService.class);
 
     @Autowired
     private TargetMarketEntityMgr targetMarketEntityMgr;

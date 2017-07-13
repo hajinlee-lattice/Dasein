@@ -6,8 +6,8 @@ import java.util.Comparator;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ import jcifs.smb.SmbFile;
 @Component("smbFilesMBean")
 public class SmbFilesMBean {
 
-    static final Log log = LogFactory.getLog(SmbFilesMBean.class);
+    static final Logger log = LoggerFactory.getLogger(SmbFilesMBean.class);
 
     private static final int TIMESTAMP_LENGTH = 6;
 

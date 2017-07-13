@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -27,7 +27,7 @@ public class AttrGroupCountBuffer extends BaseOperation implements Buffer {
     private static final char Delimiter = '|';
 
     private static final long serialVersionUID = -570985038993978462L;
-    private static final Log log = LogFactory.getLog(AttrGroupCountBuffer.class);
+    private static final Logger log = LoggerFactory.getLogger(AttrGroupCountBuffer.class);
 
 
     protected Map<String, Integer> namePositionMap;

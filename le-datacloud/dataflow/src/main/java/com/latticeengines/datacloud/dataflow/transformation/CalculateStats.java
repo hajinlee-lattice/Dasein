@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -60,7 +60,7 @@ import cascading.tuple.Fields;
 public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(CalculateStats.class);
+    private static final Logger log = LoggerFactory.getLogger(CalculateStats.class);
 
     public static final String BEAN_NAME = "calculateStats";
     public static final String TRANSFORMER_NAME = TRANSFORMER_STATS_CALCULATOR;

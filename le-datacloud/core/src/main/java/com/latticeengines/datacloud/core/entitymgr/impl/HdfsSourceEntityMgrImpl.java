@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,7 +44,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     private static final String HDFS_PATH_SEPARATOR = "/";
 
-    private static final Log log = LogFactory.getLog(HdfsSourceEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HdfsSourceEntityMgrImpl.class);
 
     @Autowired
     HdfsPathBuilder hdfsPathBuilder;

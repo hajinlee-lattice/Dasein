@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.madison.entitymanager.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.MadisonLogicDailyProgress;
 public class PropDataMadisonEntityMgrImpl implements com.latticeengines.datacloud.madison.entitymanager.PropDataMadisonEntityMgr {
 
     @SuppressWarnings("unused")
-    private final Log log = LogFactory.getLog(this.getClass());
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private com.latticeengines.datacloud.madison.dao.MadisonLogicDailyProgressDao dailyProgressDao;

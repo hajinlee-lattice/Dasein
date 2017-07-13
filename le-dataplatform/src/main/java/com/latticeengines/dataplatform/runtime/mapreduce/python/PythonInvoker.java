@@ -2,8 +2,8 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -13,7 +13,7 @@ import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 
 public class PythonInvoker {
 
-    private static final Log log = LogFactory.getLog(PythonMRUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonMRUtils.class);
     private Classifier classifier;
     private String runtimeConfigFile;
 

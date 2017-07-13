@@ -6,8 +6,8 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(NutanixDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(NutanixDeploymentTestNG.class);
 
     @Autowired
     private Configuration yarnConfiguration;

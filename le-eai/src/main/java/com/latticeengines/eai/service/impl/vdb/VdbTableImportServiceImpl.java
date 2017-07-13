@@ -13,8 +13,8 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,7 @@ import com.latticeengines.remote.exposed.service.DataLoaderService;
 @Component("vdbTableImportService")
 public class VdbTableImportServiceImpl extends ImportService {
 
-    private static final Log log = LogFactory.getLog(VdbTableImportServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(VdbTableImportServiceImpl.class);
 
     public VdbTableImportServiceImpl() {
         super(SourceType.VISIDB);

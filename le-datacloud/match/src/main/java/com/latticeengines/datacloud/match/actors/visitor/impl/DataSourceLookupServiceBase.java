@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.actors.exposed.traveler.Response;
@@ -19,7 +19,7 @@ import com.latticeengines.datacloud.match.actors.visitor.DataSourceWrapperActorT
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 
 public abstract class DataSourceLookupServiceBase implements DataSourceLookupService {
-    private static final Log log = LogFactory.getLog(DataSourceLookupServiceBase.class);
+    private static final Logger log = LoggerFactory.getLogger(DataSourceLookupServiceBase.class);
 
     @Autowired
     private MatchActorSystem actorSystem;

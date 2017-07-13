@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.ModelNotesOrigin;
@@ -17,7 +17,7 @@ import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProx
 @Component("createNote")
 public class CreateNote extends BaseModelStep<ModelStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(CreateNote.class);
+    private static final Logger log = LoggerFactory.getLogger(CreateNote.class);
 
     private InternalResourceRestApiProxy proxy = null;
     @Override

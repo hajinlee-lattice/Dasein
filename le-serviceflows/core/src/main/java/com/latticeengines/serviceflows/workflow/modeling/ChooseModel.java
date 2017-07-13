@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ChooseModelStepConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +29,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
     public static final long MINIMUM_POSITIVE_EVENTS = 300;
     public static final double MINIMUM_ROC = 0.7;
 
-    private static final Log log = LogFactory.getLog(ChooseModel.class);
+    private static final Logger log = LoggerFactory.getLogger(ChooseModel.class);
 
     private InternalResourceRestApiProxy proxy = null;
 

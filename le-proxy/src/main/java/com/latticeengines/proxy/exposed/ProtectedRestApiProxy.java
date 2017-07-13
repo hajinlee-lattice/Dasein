@@ -1,13 +1,13 @@
 package com.latticeengines.proxy.exposed;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 
 public abstract class ProtectedRestApiProxy extends BaseRestApiProxy {
 
-    private static final Log log = LogFactory.getLog(ProtectedRestApiProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(ProtectedRestApiProxy.class);
 
     protected ProtectedRestApiProxy(String hostport, String rootpath, Object... urlVariables) {
         super(hostport, rootpath, urlVariables);

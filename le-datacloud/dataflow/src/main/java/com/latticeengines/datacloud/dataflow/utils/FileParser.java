@@ -13,15 +13,15 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
 public class FileParser {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(FileParser.class);
+    private static final Logger log = LoggerFactory.getLogger(FileParser.class);
 
     private static final String[] BOMBORA_METRO_CODES_HEADER = { "﻿New Metro Name", "Country" };
 

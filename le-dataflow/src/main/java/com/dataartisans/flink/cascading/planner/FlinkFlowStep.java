@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.flink.api.common.Plan;
 import org.apache.flink.api.common.operators.Order;
 import org.apache.flink.api.common.operators.base.JoinOperatorBase.JoinHint;
@@ -110,7 +110,7 @@ public class FlinkFlowStep extends BaseFlowStep<Configuration> {
 	 */
 	private static final long serialVersionUID = -3818670513764855657L;
 
-	private static final Log LOG = LogFactory.getLog(FlinkFlowStep.class);
+	private static final Logger LOG = LoggerFactory.getLogger(FlinkFlowStep.class);
 
 	private ExecutionEnvironment env;
 	private List<String> classPath;

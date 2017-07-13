@@ -7,8 +7,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -19,7 +19,7 @@ import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 
 public class LockManagerUnitTestNG {
 
-    private static final Log log = LogFactory.getLog(LockManagerUnitTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(LockManagerUnitTestNG.class);
 
     @BeforeClass(groups = "unit")
     public void setUp() throws Exception {

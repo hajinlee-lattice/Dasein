@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.Schema;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public class MatchInputValidator {
-    private static Log log = LogFactory.getLog(MatchInputValidator.class);
+    private static Logger log = LoggerFactory.getLogger(MatchInputValidator.class);
 
     public static void validateRealTimeInput(MatchInput input, int maxRealTimeInput) {
         Map<MatchKey, List<String>> keyMap = commonValidation(input);

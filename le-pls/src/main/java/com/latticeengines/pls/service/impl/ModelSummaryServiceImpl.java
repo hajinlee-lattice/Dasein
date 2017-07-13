@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +40,7 @@ import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 @Component("modelSummaryService")
 public class ModelSummaryServiceImpl implements ModelSummaryService {
 
-    public static final Log log = LogFactory.getLog(ModelSummaryServiceImpl.class);
+    public static final Logger log = LoggerFactory.getLogger(ModelSummaryServiceImpl.class);
     public static final String PREDICTORS = "Predictors";
     public static final String ELEMENTS = "Elements";
     public static final String VALUES = "Values";

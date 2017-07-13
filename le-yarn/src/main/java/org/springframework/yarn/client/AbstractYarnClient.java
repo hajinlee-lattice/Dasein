@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -57,7 +57,7 @@ import org.springframework.yarn.support.compat.ResourceCompat;
  */
 public abstract class AbstractYarnClient implements YarnClient, InitializingBean {
 
-    private final static Log log = LogFactory.getLog(AbstractYarnClient.class);
+    private final static Logger log = LoggerFactory.getLogger(AbstractYarnClient.class);
 
     /** Template communicating for resource manager */
     private ClientRmOperations clientRmOperations;

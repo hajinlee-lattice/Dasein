@@ -6,12 +6,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DateTimeUtils {
 
-    private static Log log = LogFactory.getLog(DateTimeUtils.class);
+    private static Logger log = LoggerFactory.getLogger(DateTimeUtils.class);
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
     private static final String DATE_TZ_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final String DATE_T_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";

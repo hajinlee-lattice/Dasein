@@ -5,9 +5,9 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.MDC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -21,7 +21,7 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
     public static final String REQUEST_ID = "Request-Id";
     private static final String URI_KEY = "com.latticeengines.uri";
 
-    private static final Log log = LogFactory.getLog(RequestLogInterceptor.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestLogInterceptor.class);
 
     @Autowired
     private HttpStopWatch httpStopWatch;

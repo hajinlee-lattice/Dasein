@@ -7,17 +7,17 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordExportCounter;
 
 public abstract class AvroExportMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
-    private static final Log log = LogFactory.getLog(AvroExportMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(AvroExportMapper.class);
 
     private Schema schema;
 
@@ -46,7 +46,7 @@ public abstract class AvroExportMapper extends Mapper<AvroKey<Record>, NullWrita
         config = context.getConfiguration();
         schema = AvroJob.getInputKeySchema(config);
         avroRowHandler = initialize(context, schema);
-        log.info(schema);
+        log.info(schema.toString());
     }
 
     @Override

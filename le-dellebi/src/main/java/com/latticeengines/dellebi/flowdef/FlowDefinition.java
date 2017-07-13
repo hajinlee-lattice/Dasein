@@ -1,7 +1,7 @@
 package com.latticeengines.dellebi.flowdef;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ public class FlowDefinition {
     @Autowired
     private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
 
-    private static final Log log = LogFactory.getLog(FlowDefinition.class);
+    private static final Logger log = LoggerFactory.getLogger(FlowDefinition.class);
 
     @SuppressWarnings("rawtypes")
     public FlowDef populateFlowDefByType(String type) {

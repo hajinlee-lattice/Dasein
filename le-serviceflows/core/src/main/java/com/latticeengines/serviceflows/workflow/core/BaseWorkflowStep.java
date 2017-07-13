@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 
 public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
 
-    protected static final Log log = LogFactory.getLog(BaseWorkflowStep.class);
+    protected static final Logger log = LoggerFactory.getLogger(BaseWorkflowStep.class);
 
     protected static final String PREMATCH_EVENT_TABLE = "PREMATCH_EVENT_TABLE";
     protected static final String EVENT_TABLE = "EVENT_TABLE";

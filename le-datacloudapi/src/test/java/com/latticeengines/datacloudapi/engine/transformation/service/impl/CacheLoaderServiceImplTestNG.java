@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 @Component
 public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBase {
 
-    private static final Log log = LogFactory.getLog(CacheLoaderServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(CacheLoaderServiceImplTestNG.class);
 
     private static final String podId = "CacheLoaderServiceImplTestNG";
     private static final String avroDir = "/tmp/CacheLoaderServiceImplTestNG";

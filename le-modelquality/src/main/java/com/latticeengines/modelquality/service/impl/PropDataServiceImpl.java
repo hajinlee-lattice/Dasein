@@ -3,8 +3,8 @@ package com.latticeengines.modelquality.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ public class PropDataServiceImpl extends BaseServiceImpl implements PropDataServ
     @VisibleForTesting
     private ColumnMetadataProxy columnMetadataProxy;
 
-    private static final Log log = LogFactory.getLog(PropDataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PropDataServiceImpl.class);
 
     @Override
     public PropData createLatestProductionPropData() {

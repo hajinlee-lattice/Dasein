@@ -3,8 +3,8 @@ package com.latticeengines.sqoop.service.impl;
 import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.ConnFactory;
 import org.apache.sqoop.orm.AvroSchemaGenerator;
@@ -25,7 +25,7 @@ import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
 @Component("sqoopMetadataService")
 public class SqoopMetadataServiceImpl implements SqoopMetadataService {
 
-    private static final Log log = LogFactory.getLog(SqoopMetadataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SqoopMetadataServiceImpl.class);
 
     @Autowired
     private DbMetadataService dbMetadataService;

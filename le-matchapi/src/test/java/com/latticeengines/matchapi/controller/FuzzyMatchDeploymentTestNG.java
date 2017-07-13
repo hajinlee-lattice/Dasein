@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.apache.log4j.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -45,7 +45,7 @@ import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 @Component
 public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
-    private static final Log log = LogFactory.getLog(FuzzyMatchDeploymentTestNG.class);;
+    private static final Logger log = LoggerFactory.getLogger(FuzzyMatchDeploymentTestNG.class);;
 
     private static final String invalidDomain = "abcdefghijklmn.com";
     private static final String podId = "FuzzyMatchDeploymentTestNG";

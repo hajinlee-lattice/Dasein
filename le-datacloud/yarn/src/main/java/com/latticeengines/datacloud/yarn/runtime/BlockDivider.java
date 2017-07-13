@@ -6,15 +6,15 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 
 class BlockDivider {
 
-    private static Log log = LogFactory.getLog(BlockDivider.class);
+    private static Logger log = LoggerFactory.getLogger(BlockDivider.class);
     private String avroPath;
     private List<String> fields;
     private List<Schema.Type> fieldTypes;

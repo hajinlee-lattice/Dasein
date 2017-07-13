@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.Range;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -21,7 +21,7 @@ public class BomboraSurgeIntentFunction extends BaseOperation implements Functio
     private static final long serialVersionUID = 7488201881918114688L;
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(BomboraSurgeIntentFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(BomboraSurgeIntentFunction.class);
 
     private Map<String, Integer> namePositionMap;
     private Map<String, Map<Range<Integer>, String>> intentMap;

@@ -12,8 +12,8 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -27,7 +27,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final Log log = LogFactory.getLog(CompanyProfileResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(CompanyProfileResourceDeploymentTestNG.class);
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -87,7 +87,7 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
         try {
             HttpClientUtils.newRestTemplate().postForObject(url, request, CompanyProfile.class);
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             assertTrue(e.getMessage().contains("401"));
             thrown = true;
         }

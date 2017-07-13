@@ -13,15 +13,15 @@ import java.util.Map;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.net.util.Base64;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 
 public class ModelExtractor {
-    private static final Log log = LogFactory.getLog(ModelExtractor.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelExtractor.class);
 
     public void extractModelArtifacts(String modelFilePath, String targetDir) {
         extractModelArtifacts(modelFilePath, targetDir, (dir, name) -> true);

@@ -9,8 +9,8 @@ import java.util.StringTokenizer;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -52,7 +52,7 @@ import com.latticeengines.quartzclient.entitymanager.JobSourceEntityMgr;
 @Component("schedulerEntityMgr")
 public class SchedulerEntityMgrImpl implements SchedulerEntityMgr {
 
-    private static final Log log = LogFactory.getLog(SchedulerEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SchedulerEntityMgrImpl.class);
 
     private static final String JOB_TYPE = "jobType";
     private static final String TRIGGER_SUFFIX = "_trigger";

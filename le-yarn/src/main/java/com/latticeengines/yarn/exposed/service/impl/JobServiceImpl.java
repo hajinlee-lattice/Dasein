@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
@@ -49,7 +49,7 @@ import com.latticeengines.yarn.exposed.service.YarnClientCustomizationService;
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
 
-    protected static final Log log = LogFactory.getLog(JobServiceImpl.class);
+    protected static final Logger log = LoggerFactory.getLogger(JobServiceImpl.class);
     protected static final int MAX_TRIES = 60;
     protected static final long APP_WAIT_TIME = 1000L;
 

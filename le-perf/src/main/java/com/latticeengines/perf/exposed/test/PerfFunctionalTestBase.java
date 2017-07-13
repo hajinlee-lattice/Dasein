@@ -7,15 +7,15 @@ import java.util.concurrent.ThreadFactory;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.perf.exposed.metric.sink.SinkCollectionServer;
 import com.latticeengines.perf.exposed.metric.sink.SocketSink;
 
 public class PerfFunctionalTestBase {
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(PerfFunctionalTestBase.class);
+    private static final Logger log = LoggerFactory.getLogger(PerfFunctionalTestBase.class);
 
     private SinkCollectionServer collectionServer = null;
     private ExecutorService exec = null;

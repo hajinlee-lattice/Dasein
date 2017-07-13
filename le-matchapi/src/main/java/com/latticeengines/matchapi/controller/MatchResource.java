@@ -3,8 +3,8 @@ package com.latticeengines.matchapi.controller;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +34,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/matches")
 public class MatchResource {
-    private static final Log log = LogFactory.getLog(MatchResource.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchResource.class);
 
     @Autowired
     private RealTimeMatchService realTimeMatchService;

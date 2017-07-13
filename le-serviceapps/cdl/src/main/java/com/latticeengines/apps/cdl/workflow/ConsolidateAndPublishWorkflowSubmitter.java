@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 @Component
 public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
-    private static final Logger log = Logger.getLogger(ConsolidateAndPublishWorkflowSubmitter.class);
+    private static final Logger log = LoggerFactory.getLogger(ConsolidateAndPublishWorkflowSubmitter.class);
 
     @Autowired
     private DataFeedProxy dataFeedProxy;

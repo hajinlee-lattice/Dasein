@@ -8,8 +8,8 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(DnBRealTimeLookupServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBRealTimeLookupServiceImplTestNG.class);
 
     @Autowired
     private DnBRealTimeLookupService dnBRealTimeLookupService;
@@ -92,9 +92,9 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
                 log.info(i + " message:" + result.getDnbCode().getMessage() + " DUNS:" + result.getDuns());
                 Assert.assertEquals(result.getDnbCode(), DnBReturnCode.OK);
             } catch (InterruptedException e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
             } catch (ExecutionException e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }

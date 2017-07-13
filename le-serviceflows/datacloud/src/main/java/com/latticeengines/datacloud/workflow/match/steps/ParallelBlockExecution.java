@@ -13,8 +13,8 @@ import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -47,7 +47,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 @Scope("prototype")
 public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecutionConfiguration> {
 
-    private static Log log = LogFactory.getLog(ParallelBlockExecution.class);
+    private static Logger log = LoggerFactory.getLogger(ParallelBlockExecution.class);
     private static final int MAX_ERRORS = 100;
     private static final Long MATCH_TIMEOUT = TimeUnit.DAYS.toMillis(3);
     private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.json";

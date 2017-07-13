@@ -14,8 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.util.Progressable;
@@ -24,7 +24,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 public class FeatureImportanceAggregator implements FileAggregator {
-    private static final Log log = LogFactory.getLog(FeatureImportanceAggregator.class);
+    private static final Logger log = LoggerFactory.getLogger(FeatureImportanceAggregator.class);
 
     @Override
     public void aggregate(List<String> localPaths, Configuration config, Progressable progressable) throws Exception {

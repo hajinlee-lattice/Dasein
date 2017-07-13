@@ -1,7 +1,7 @@
 package com.latticeengines.eai.yarn.runtime;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,7 +14,7 @@ import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 public class EaiProcessor extends SingleContainerYarnProcessor<EaiJobConfiguration>
         implements ItemProcessor<EaiJobConfiguration, String> {
 
-    private static final Log log = LogFactory.getLog(EaiProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(EaiProcessor.class);
 
     @Autowired
     private ImportProcessor importProcessor;

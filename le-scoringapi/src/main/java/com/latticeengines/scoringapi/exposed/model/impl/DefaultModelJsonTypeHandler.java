@@ -10,8 +10,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -50,7 +50,7 @@ import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 
 @Component
 public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
-    private static final Log log = LogFactory.getLog(DefaultModelJsonTypeHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultModelJsonTypeHandler.class);
 
     @Autowired
     protected Configuration yarnConfiguration;

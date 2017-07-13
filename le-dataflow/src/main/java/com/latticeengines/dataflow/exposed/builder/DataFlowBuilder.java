@@ -13,8 +13,8 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 public abstract class DataFlowBuilder {
-    private static final Log log = LogFactory.getLog(DataFlowBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFlowBuilder.class);
 
     private boolean local;
     private boolean checkpoint;

@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.dataflow.transformation.stats.report;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.dataflow.transformation.AMStatsFlowBase;
@@ -19,7 +19,7 @@ import cascading.tuple.Fields;
 @Component("amStatsReportFlow")
 public class AMStatsReportFlow extends AMStatsFlowBase {
 
-    private static Log log = LogFactory.getLog(AMStatsReportFlow.class);
+    private static Logger log = LoggerFactory.getLogger(AMStatsReportFlow.class);
 
     @Override
     public Node construct(AccountMasterStatsParameters parameters) {

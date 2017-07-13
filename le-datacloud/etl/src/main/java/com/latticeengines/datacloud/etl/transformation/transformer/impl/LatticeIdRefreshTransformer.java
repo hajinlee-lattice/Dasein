@@ -11,8 +11,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 public class LatticeIdRefreshTransformer
         extends AbstractDataflowTransformer<LatticeIdRefreshConfig, LatticeIdRefreshFlowParameter> {
 
-    private static final Log log = LogFactory.getLog(LatticeIdRefreshTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(LatticeIdRefreshTransformer.class);
 
     @Autowired
     private LatticeIdStrategyEntityMgr latticeIdStrategyEntityMgr;

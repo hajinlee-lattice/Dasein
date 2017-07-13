@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.operation.AssertionLevel;
 import cascading.operation.assertion.AssertSizeEquals;
@@ -17,7 +17,7 @@ import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubGeneralFunc
 
 public class PipeFactory {
 
-    private static final Log log = LogFactory.getLog(PipeFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(PipeFactory.class);
 
     public static Pipe getPipe(String pipeName, String fields, String exportedFields) {
 

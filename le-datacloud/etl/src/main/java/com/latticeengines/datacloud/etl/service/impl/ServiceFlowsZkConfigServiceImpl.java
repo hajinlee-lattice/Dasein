@@ -5,8 +5,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 @Component("serviceFlowsZkConfigService")
 public class ServiceFlowsZkConfigServiceImpl implements ServiceFlowsZkConfigService {
 
-    private static final Log log = LogFactory.getLog(ServiceFlowsZkConfigServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ServiceFlowsZkConfigServiceImpl.class);
 
     private Camille camille;
     private String podId;

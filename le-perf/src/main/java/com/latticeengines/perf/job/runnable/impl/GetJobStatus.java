@@ -2,6 +2,7 @@ package com.latticeengines.perf.job.runnable.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -59,7 +60,7 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
 
         });
         if (files.size() == numOfAvros) {
-            log.info(files);
+            log.info(StringUtils.join(", ", files));
             return true;
         }
         return false;

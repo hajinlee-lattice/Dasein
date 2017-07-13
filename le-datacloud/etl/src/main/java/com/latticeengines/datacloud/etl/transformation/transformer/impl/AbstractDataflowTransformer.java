@@ -11,8 +11,8 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,7 +38,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P extends TransformationFlowParameters>
         extends AbstractTransformer<T> {
 
-    private static final Log log = LogFactory.getLog(AbstractDataflowTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractDataflowTransformer.class);
     private static final ObjectMapper OM = new ObjectMapper();
 
     @Autowired

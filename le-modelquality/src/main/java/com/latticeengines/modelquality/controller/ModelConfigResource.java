@@ -2,8 +2,8 @@ package com.latticeengines.modelquality.controller;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +25,7 @@ public class ModelConfigResource {
     @Autowired
     private ModelConfigEntityMgr modelConfigEntityMgr;
 
-    private static final Log log = LogFactory.getLog(ModelConfigResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelConfigResource.class);
 
     @RequestMapping(value = "/modelconfigs", method = RequestMethod.GET)
     @ResponseBody

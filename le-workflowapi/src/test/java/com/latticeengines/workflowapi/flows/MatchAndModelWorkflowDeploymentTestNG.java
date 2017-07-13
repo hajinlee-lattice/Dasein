@@ -12,8 +12,8 @@ import java.util.Random;
 
 import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
@@ -50,7 +50,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(MatchAndModelWorkflowDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchAndModelWorkflowDeploymentTestNG.class);
 
     protected static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";
 

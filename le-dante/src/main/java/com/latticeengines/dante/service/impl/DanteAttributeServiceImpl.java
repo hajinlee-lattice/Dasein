@@ -6,7 +6,8 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
@@ -28,7 +29,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("danteAttributesService")
 public class DanteAttributeServiceImpl implements DanteAttributeService {
 
-    private static final Logger log = Logger.getLogger(DanteAttributeServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DanteAttributeServiceImpl.class);
     private final Path metadataDocumentPath = new Path("/MetadataDocument.json");
     private final String danteAccountKey = "DanteAccount";
     private final String recomendationAttributesFilePath = "com/latticeengines/dante/metadata/RecommendationAttributes.json";

@@ -5,8 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.admin.dynamicopts.impl.TemplateProvider;
 import com.latticeengines.admin.service.TenantService;
@@ -26,7 +26,7 @@ import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 public class VisiDBTemplateInstaller extends LatticeComponentInstaller {
 
-    private static final Log log = LogFactory.getLog(VisiDBTemplateInstaller.class);
+    private static final Logger log = LoggerFactory.getLogger(VisiDBTemplateInstaller.class);
 
     private TenantService tenantService;
 

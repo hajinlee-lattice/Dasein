@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 
 @Component("dnbCacheService")
 public class DnBCacheServiceImpl implements DnBCacheService {
-    private static final Log log = LogFactory.getLog(DnBCacheServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBCacheServiceImpl.class);
 
     @Value("${datacloud.dnb.cache.version}")
     private String cacheVersion;

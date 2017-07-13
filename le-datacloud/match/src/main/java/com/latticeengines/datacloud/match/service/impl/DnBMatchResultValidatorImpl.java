@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 @Component("dnbMatchResultValidatorImpl")
 public class DnBMatchResultValidatorImpl implements DnBMatchResultValidator {
 
-    private static final Log log = LogFactory.getLog(DnBMatchResultValidatorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBMatchResultValidatorImpl.class);
 
     @Value("${datacloud.dnb.matchcriteria:default}")
     private String matchCriteriaJson;

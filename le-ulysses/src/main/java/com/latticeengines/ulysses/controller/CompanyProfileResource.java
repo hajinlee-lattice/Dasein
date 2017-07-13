@@ -1,6 +1,7 @@
 package com.latticeengines.ulysses.controller;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/companyprofiles/")
 public class CompanyProfileResource {
 
-    private static final Logger log = Logger.getLogger(CompanyProfileResource.class);
+    private static final Logger log = LoggerFactory.getLogger(CompanyProfileResource.class);
 
     @Autowired
     private CompanyProfileService companyProfileService;

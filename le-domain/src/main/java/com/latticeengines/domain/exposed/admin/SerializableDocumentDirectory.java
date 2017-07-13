@@ -12,8 +12,8 @@ import java.util.Queue;
 import java.util.Stack;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SerializableDocumentDirectory implements Iterable<SerializableDocumentDirectory.Node> {
-    private static final Log LOGGER = LogFactory.getLog(SerializableDocumentDirectory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerializableDocumentDirectory.class);
 
     private String rootPath;
     private Collection<Node> nodes;

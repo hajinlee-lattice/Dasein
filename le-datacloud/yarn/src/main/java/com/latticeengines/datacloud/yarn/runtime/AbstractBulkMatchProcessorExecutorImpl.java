@@ -14,8 +14,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,7 +44,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 @Component("bulkMatchProcessorExecutor")
 public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatchProcessorExecutor {
 
-    private static final Log log = LogFactory.getLog(AbstractBulkMatchProcessorExecutorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractBulkMatchProcessorExecutorImpl.class);
 
     private static final String INTEGER = Integer.class.getSimpleName();
     private static final String LONG = Long.class.getSimpleName();

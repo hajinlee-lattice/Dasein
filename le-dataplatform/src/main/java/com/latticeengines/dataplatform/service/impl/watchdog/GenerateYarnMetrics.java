@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
@@ -43,7 +43,7 @@ import com.latticeengines.yarn.exposed.service.impl.JobNameServiceImpl;
 @Component("generateYarnMetrics")
 public class GenerateYarnMetrics extends WatchdogPlugin {
 
-    private static final Log log = LogFactory.getLog(GenerateYarnMetrics.class);
+    private static final Logger log = LoggerFactory.getLogger(GenerateYarnMetrics.class);
 
     private static Set<String> workflowJobNames = Sets.newHashSet( //
             "bulkMatchWorkflow", //

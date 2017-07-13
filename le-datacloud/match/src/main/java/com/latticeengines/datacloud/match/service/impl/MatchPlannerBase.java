@@ -10,8 +10,8 @@ import java.util.Set;
 
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -38,7 +38,7 @@ import com.newrelic.api.agent.Trace;
 
 public abstract class MatchPlannerBase implements MatchPlanner {
 
-    private static Log log = LogFactory.getLog(MatchPlannerBase.class);
+    private static Logger log = LoggerFactory.getLogger(MatchPlannerBase.class);
 
     @Autowired
     private PublicDomainService publicDomainService;
@@ -306,7 +306,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
                 nameLocationSet.add(nameLocation);
             }
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             record.setFailed(true);
             record.addErrorMessages("Error when cleanup name and location fields: " + e.getMessage());
         }

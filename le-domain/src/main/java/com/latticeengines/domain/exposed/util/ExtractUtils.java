@@ -5,14 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class ExtractUtils {
-    private static final Logger log = Logger.getLogger(ExtractUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(ExtractUtils.class);
 
     /**
      * For cases in which we want to assert that there is a single extract path

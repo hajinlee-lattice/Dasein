@@ -7,8 +7,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 @Component("locationBasedMicroEngineActor")
 @Scope("prototype")
 public class LocationToDunsMicroEngineActor extends MicroEngineActorTemplate<DnbLookupActor> {
-    private static final Log log = LogFactory.getLog(LocationToDunsMicroEngineActor.class);
+    private static final Logger log = LoggerFactory.getLogger(LocationToDunsMicroEngineActor.class);
 
     private static final String HIT_WHITE_CACHE = "Retrieved a DUNS from white cache using Id=%s. Did not go to remote DnB API.";
     private static final String HIT_BLACK_CACHE = "Fast failed by black cache with Id=%s. Did not go to remote DnB API.";

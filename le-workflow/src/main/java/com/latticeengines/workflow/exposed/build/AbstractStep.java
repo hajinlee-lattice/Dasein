@@ -8,8 +8,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 @StepScope
 public abstract class AbstractStep<T> extends AbstractNameAwareBean {
 
-    private static final Log log = LogFactory.getLog(AbstractStep.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractStep.class);
 
     protected ExecutionContext executionContext;
     protected T configuration;

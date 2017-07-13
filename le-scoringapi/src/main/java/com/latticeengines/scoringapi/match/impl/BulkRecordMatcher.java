@@ -10,8 +10,8 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 @Component
 public class BulkRecordMatcher extends AbstractMatcher {
-    private static final Log log = LogFactory.getLog(BulkRecordMatcher.class);
+    private static final Logger log = LoggerFactory.getLogger(BulkRecordMatcher.class);
 
     private static final String RTS_MATCH_ONLY = "RTS_MATCH_ONLY";
     private static final String AM_ENRICH_ONLY = "AM_ENRICH_ONLY";

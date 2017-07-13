@@ -13,8 +13,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 
@@ -53,7 +53,7 @@ import com.latticeengines.testframework.security.GlobalAuthTestBed;
 @SuppressWarnings("deprecation")
 public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
-    private static final Log log = LogFactory.getLog(GlobalAuthDeploymentTestBed.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalAuthDeploymentTestBed.class);
     private static final String testTenantRegJson = "{product}-tenant-registration-{env}.json";
     private static final String sfdcTopology = CRMTopology.SFDC.getName();
     private static final List<String> testCustomerSpaces = new ArrayList<>();
@@ -325,7 +325,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 try {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

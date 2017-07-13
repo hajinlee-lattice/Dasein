@@ -3,8 +3,8 @@ package com.latticeengines.scoring.orchestration.service.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
@@ -25,7 +25,7 @@ public class ScoringCommandLogServiceImpl implements ScoringCommandLogService {
 
     public static final String SCORINGCOMMAND_ID_LOG_PREFIX = "LeadInputQueue_ID";
     public static final String SCORINGCOMMAND_CUSTOMER_ID_LOG_PREFIX = "LEDeployment_ID";
-    private static final Log log = LogFactory.getLog(ScoringCommandLogServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringCommandLogServiceImpl.class);
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecond();

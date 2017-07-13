@@ -1,7 +1,7 @@
 package com.latticeengines.workflow.exposed.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 
@@ -19,7 +19,7 @@ public class WorkflowUtils {
      * WorkflowJob.
      */
 
-    private static final Log log = LogFactory.getLog(WorkflowUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowUtils.class);
 
     public static void updateJobFromYarn(Job job, WorkflowJob workflowJob, JobProxy jobProxy,
             WorkflowJobEntityMgr workflowJobEntityMgr) {

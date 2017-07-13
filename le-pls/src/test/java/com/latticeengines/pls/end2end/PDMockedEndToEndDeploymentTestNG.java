@@ -6,8 +6,8 @@ import static org.testng.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -25,7 +25,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class PDMockedEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
-    private static final Log log = LogFactory.getLog(PDMockedEndToEndDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PDMockedEndToEndDeploymentTestNG.class);
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
 
     @Value("${pls.test.sfdc.user.name}")

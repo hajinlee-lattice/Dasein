@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -27,7 +27,7 @@ import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseE
 
 public abstract class BaseRestApiProxy {
 
-    private static final Log log = LogFactory.getLog(BaseRestApiProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseRestApiProxy.class);
     private RestTemplate restTemplate;
     private String hostport;
     private String rootpath;

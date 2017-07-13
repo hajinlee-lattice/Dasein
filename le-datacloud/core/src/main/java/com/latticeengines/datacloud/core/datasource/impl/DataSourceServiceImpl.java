@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
 @Component
 public class DataSourceServiceImpl implements DataSourceService {
 
-    private static final Log log  = LogFactory.getLog(DataSourceServiceImpl.class);
+    private static final Logger log  = LoggerFactory.getLogger(DataSourceServiceImpl.class);
     private final AtomicInteger roundRobinPos = new AtomicInteger(0);
 
     @Autowired

@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ import com.latticeengines.testframework.security.GlobalAuthTestBed;
 @Component("globalAuthFunctionalTestBed")
 public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
-    private static Log log = LogFactory.getLog(GlobalAuthFunctionalTestBed.class);
+    private static Logger log = LoggerFactory.getLogger(GlobalAuthFunctionalTestBed.class);
 
     @Autowired
     private UserService userService;

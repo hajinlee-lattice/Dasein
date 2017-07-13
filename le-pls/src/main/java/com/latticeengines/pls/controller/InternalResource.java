@@ -18,10 +18,10 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.zookeeper.ZooDefs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -115,7 +115,7 @@ import io.swagger.annotations.ApiParam;
 public class InternalResource extends InternalResourceBase {
 
     protected static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
-    private static final Log log = LogFactory.getLog(InternalResource.class);
+    private static final Logger log = LoggerFactory.getLogger(InternalResource.class);
     private static final String passwordTester = "pls-password-tester@test.lattice-engines.ext";
     private static final String passwordTesterPwd = "Lattice123";
     private static final String adminTester = "pls-super-admin-tester@test.lattice-engines.com";
@@ -1153,7 +1153,7 @@ public class InternalResource extends InternalResourceBase {
                     Thread.sleep(5000L);
                     totTime += 5000L;
                 } catch (InterruptedException e) {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

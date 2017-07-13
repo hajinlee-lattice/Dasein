@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 
@@ -20,7 +20,7 @@ public class AMSeedPriDomAggregator
         extends BaseAggregator<AMSeedPriDomAggregator.Context>
         implements Aggregator<AMSeedPriDomAggregator.Context> {
 
-    private static final Log log = LogFactory.getLog(AMSeedPriDomAggregator.class);
+    private static final Logger log = LoggerFactory.getLogger(AMSeedPriDomAggregator.class);
 
     private static final long serialVersionUID = 6298800516602499546L;
 

@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import com.latticeengines.pls.util.ModelingHdfsUtils;
 @Component("pmmlModelService")
 public class PmmlModelService extends ModelServiceBase {
 
-    private static final Log log = LogFactory.getLog(PmmlModelService.class);
+    private static final Logger log = LoggerFactory.getLogger(PmmlModelService.class);
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingBaseDir;
@@ -109,7 +109,7 @@ public class PmmlModelService extends ModelServiceBase {
 
             copyHdfsData(sourceTenantId, targetTenantId, eventTableName, "", cpEventTable, modelSummary);
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_18111,
                     new String[] { modelSummary.getName(), sourceTenantId, targetTenantId });
         }

@@ -11,8 +11,8 @@ import java.util.Map;
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.Source;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.Evaluator;
@@ -36,7 +36,7 @@ import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 
 public class DefaultModelEvaluator implements ModelEvaluator {
-    private static final Log log = LogFactory.getLog(ModelEvaluator.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelEvaluator.class);
 
     protected final PMMLManager manager;
 

@@ -13,8 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 
@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class KeyValue implements HasTenantId, HasPid {
 
-    private static final Log log = LogFactory.getLog(KeyValue.class);
+    private static final Logger log = LoggerFactory.getLogger(KeyValue.class);
 
     private Long pid;
     private Long tenantId;

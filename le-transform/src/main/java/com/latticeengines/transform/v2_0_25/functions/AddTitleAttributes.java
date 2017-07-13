@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
@@ -20,7 +20,7 @@ public class AddTitleAttributes implements RealTimeTransform {
 
     private static final long serialVersionUID = 507637584133936112L;
 
-    private static final Log log = LogFactory.getLog(AddTitleAttributes.class);
+    private static final Logger log = LoggerFactory.getLogger(AddTitleAttributes.class);
 
     protected int maxTitleLen;
     protected List<String> missingValues = new ArrayList<>();

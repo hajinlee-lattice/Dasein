@@ -6,8 +6,8 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.HttpServerErrorException;
 import org.testng.annotations.BeforeClass;
@@ -28,7 +28,7 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
     private static final String RESOURCE_BASE = "com/latticeengines/artifact/validation";
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(ArtifactResourceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ArtifactResourceTestNG.class);
 
     @Override
     @BeforeClass(groups = "functional")

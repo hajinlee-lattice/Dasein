@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -18,7 +18,7 @@ import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
 public class GlobalAuthCleanupTestListener implements ITestListener {
 
-    private static final Log log = LogFactory.getLog(GlobalAuthCleanupTestListener.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalAuthCleanupTestListener.class);
 
     private AtomicBoolean testFailed = new AtomicBoolean(false);
 
@@ -89,7 +89,7 @@ public class GlobalAuthCleanupTestListener implements ITestListener {
                     try {
                         return (GlobalAuthTestBed) field.get(result.getInstance());
                     } catch (IllegalAccessException e) {
-                        log.error(e);
+                        log.error(e.getMessage(), e);
                         return null;
                     }
                 }

@@ -10,8 +10,8 @@ import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.connect.sink.SinkRecord;
 
@@ -21,7 +21,7 @@ import io.confluent.connect.avro.AvroData;
 
 class AvroTopicPartitionBuffer {
 
-    private static final Log log = LogFactory.getLog(AvroTopicPartitionBuffer.class);
+    private static final Logger log = LoggerFactory.getLogger(AvroTopicPartitionBuffer.class);
 
     private final TopicPartition tp;
     private Schema schema;

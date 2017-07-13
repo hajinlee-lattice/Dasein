@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.security.UserGroupInformation;
@@ -53,7 +53,7 @@ import org.springframework.yarn.rpc.YarnRpcCallback;
  */
 public class AppmasterRmTemplate extends YarnRpcAccessor<ApplicationMasterProtocol> implements AppmasterRmOperations {
 
-    private static final Log log = LogFactory.getLog(AppmasterRmTemplate.class);
+    private static final Logger log = LoggerFactory.getLogger(AppmasterRmTemplate.class);
 
     private AMRMClient<ContainerRequest> amRMClient;
 

@@ -6,7 +6,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +19,7 @@ import com.latticeengines.saml.util.SAMLUtils;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 
 public class SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-    public static final Logger log = Logger.getLogger(SuccessHandler.class);
+    public static final Logger log = LoggerFactory.getLogger(SuccessHandler.class);
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;

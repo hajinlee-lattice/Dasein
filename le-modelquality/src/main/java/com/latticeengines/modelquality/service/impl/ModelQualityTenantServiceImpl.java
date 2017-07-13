@@ -2,8 +2,8 @@ package com.latticeengines.modelquality.service.impl;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ import com.latticeengines.security.exposed.service.UserService;
 @Component("modelQualityTenantService")
 public class ModelQualityTenantServiceImpl implements ModelQualityTenantService {
 
-    private static final Log log = LogFactory.getLog(ModelQualityTenantServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelQualityTenantServiceImpl.class);
 
     @Autowired
     private TenantService tenantService;

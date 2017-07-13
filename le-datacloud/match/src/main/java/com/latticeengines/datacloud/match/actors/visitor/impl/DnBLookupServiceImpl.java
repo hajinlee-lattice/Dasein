@@ -20,8 +20,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +55,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("dnBLookupService")
 public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements DnBLookupService {
-    private static final Log log = LogFactory.getLog(DnBLookupServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBLookupServiceImpl.class);
 
     @Value("${datacould.dnb.realtime.timeout.minute}")
     private long realtimeTimeoutMinute;
@@ -257,7 +257,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             try {
                 context = dnbFuture.get(dnbApiCallMaxWait, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 throw new RuntimeException(e);
             }
 
@@ -685,7 +685,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 try {
                     returnedContext = dnbRealTimeLookupService.realtimeEntityLookup(context);
                 } catch (Exception ex) {
-                    log.error(ex);
+                    log.error(ex.getMessage(), ex);
                 }
                 return returnedContext;
             }

@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class RangeConsolidationServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(RangeConsolidationServiceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(RangeConsolidationServiceTestNG.class);
 
     GeneralSource source = new GeneralSource("ConsolidateRange");
 

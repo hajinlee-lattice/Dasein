@@ -1,7 +1,7 @@
 package com.latticeengines.remote.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 @Component("crmCredentialZKService")
 public class CrmCredentialZKServiceImpl implements CrmCredentialZKService {
 
-    private static final Log log = LogFactory.getLog(CrmCredentialZKServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(CrmCredentialZKServiceImpl.class);
 
     @Override
     public void writeToZooKeeper(String crmType, String tenantId, Boolean isProduction, CrmCredential crmCredential,

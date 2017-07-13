@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -47,7 +47,7 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
     private static final String profileSummaryQuery = "Profile_SummaryCounts";
     private static final String enrichmentSummaryQuery = "Profile_SummaryCounts";
 
-    private static final Log log = LogFactory.getLog(TenantDeploymentManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TenantDeploymentManagerImpl.class);
     private static Map<String, LaunchJobsResult> importSfdcDataJobs = new HashMap<String, LaunchJobsResult>();
     private static Map<String, LaunchJobsResult> enrichDataJobs = new HashMap<String, LaunchJobsResult>();
 

@@ -10,8 +10,8 @@ import java.util.UUID;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.TransformerUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -56,7 +56,7 @@ import com.latticeengines.workflow.exposed.user.WorkflowUser;
 
 @Component("workflowService")
 public class WorkflowServiceImpl implements WorkflowService {
-    private static final Log log = LogFactory.getLog(WorkflowServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
     private String timelineServiceUrl;

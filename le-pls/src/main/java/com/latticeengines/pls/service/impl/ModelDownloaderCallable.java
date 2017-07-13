@@ -11,8 +11,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.hdfs.BlockMissingException;
@@ -31,10 +31,13 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.newrelic.api.agent.Trace;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
-    private static final Log log = LogFactory.getLog(ModelDownloaderCallable.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelDownloaderCallable.class);
+    private static final Marker fatal = MarkerFactory.getMarker("FATAL");
 
     private Tenant tenant;
     private String modelServiceHdfsBaseDir;
@@ -167,18 +170,18 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                         "Creating model summary with id %s appId %s from file %s. Duration: %d milliseconds.", //
                         summary.getId(), summary.getApplicationId(), file, totalTime));
             } catch (BlockMissingException e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 // delete the bad model summary file
                 HdfsUtils.rmdir(yarnConfiguration, file);
             } catch (IOException e) {
                 // Will trigger PagerDuty alert
-                log.fatal(e);
+                log.error(fatal, "Failed to download model summary", e);
             } catch (ConstraintViolationException e) {
                 log.info(String.format(
                         "Cannot create model summary with Id %s, constraint violation. Hdfs file: %s, TenantId: %s",
                         constraintViolationId, file, tenant.getId()));
             } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
 

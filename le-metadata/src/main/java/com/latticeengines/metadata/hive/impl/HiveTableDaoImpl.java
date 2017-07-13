@@ -1,7 +1,8 @@
 package com.latticeengines.metadata.hive.impl;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,7 +18,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("hiveTableDao")
 public class HiveTableDaoImpl implements HiveTableDao {
 
-    private Logger log = Logger.getLogger(HiveTableDaoImpl.class);
+    private Logger log = LoggerFactory.getLogger(HiveTableDaoImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;

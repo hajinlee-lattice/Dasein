@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AccountMasterSourceParameters {
 
-    private static final Log log = LogFactory.getLog(AccountMasterSourceParameters.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountMasterSourceParameters.class);
 
     public static final int DomainBased = 1;
     public static final int DunsBased = 2;

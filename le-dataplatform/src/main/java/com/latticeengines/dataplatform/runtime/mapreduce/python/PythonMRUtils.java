@@ -9,8 +9,8 @@ import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -24,7 +24,7 @@ import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 public class PythonMRUtils {
     public static final String METADATA_JSON_PATH = "./metadata.json";
 
-    private static final Log log = LogFactory.getLog(PythonMRUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonMRUtils.class);
 
     public static String setupArchiveFilePath(Classifier classifier, String version) {
         List<String> paths = new ArrayList<String>();

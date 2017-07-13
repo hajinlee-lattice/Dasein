@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
+import org.apache.commons.lang3.StringUtils;
 
 public class SubmitModel extends ModelingResourceJob<Model, List<String>> {
 
@@ -18,7 +19,7 @@ public class SubmitModel extends ModelingResourceJob<Model, List<String>> {
         config.setFeaturesList(featureList);
 
         List<String> applicationIds = rc.submitModel(config);
-        log.info(applicationIds);
+        log.info(StringUtils.join(", ", applicationIds));
         return applicationIds;
     }
 

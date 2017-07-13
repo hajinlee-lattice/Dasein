@@ -7,8 +7,8 @@ import java.sql.SQLException;
 import org.apache.avro.file.DataFileConstants;
 import org.apache.avro.mapred.AvroJob;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
@@ -44,7 +44,7 @@ public class ImportJobBase extends JobBase {
 
     private ImportJobContext context;
 
-    public static final Log LOG = LogFactory.getLog(ImportJobBase.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(ImportJobBase.class.getName());
 
     /**
      * Controls how java.math.BigDecimal values should be converted to Strings

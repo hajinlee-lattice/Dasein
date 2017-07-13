@@ -7,7 +7,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("modelReplaceService")
 public class ModelReplaceServiceImpl implements ModelReplaceService {
 
-    private static Logger log = Logger.getLogger(ModelReplaceServiceImpl.class);
+    private static Logger log = LoggerFactory.getLogger(ModelReplaceServiceImpl.class);
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -59,7 +60,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
 
             processHdfsData(sourceTenantId, targetTenantId, sourceModelSummary, targetModelSummary);
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
         return true;

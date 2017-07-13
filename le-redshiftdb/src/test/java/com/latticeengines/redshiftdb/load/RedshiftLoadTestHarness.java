@@ -13,15 +13,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class RedshiftLoadTestHarness {
 
     private int loadLevel = 1;
     private JdbcTemplate redshiftJdbcTemplate;
-    private static final Log log = LogFactory.getLog(RedshiftLoadTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(RedshiftLoadTestNG.class);
     List<AbstractLoadTest> testers = new ArrayList<>();
 
     public RedshiftLoadTestHarness(int load, int stmtsPerTester, Set<LoadTestStatementType> possibleStmtTypes,
@@ -67,10 +67,8 @@ public class RedshiftLoadTestHarness {
                 result.get();
             }
             executor.shutdown();
-        } catch (InterruptedException e) {
-            log.error(e);
-        } catch (ExecutionException e) {
-            log.error(e);
+        } catch (InterruptedException|ExecutionException e) {
+            log.error(e.getMessage(), e);
         }
 
         return getMetrics().toString();

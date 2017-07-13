@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -39,7 +40,7 @@ import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
 public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
     public final String POD_ID = this.getClass().getSimpleName();
 
-    private static Log log = LogFactory.getLog(IngestionResourceDeploymentTestNG.class);
+    private static Logger log = LoggerFactory.getLogger(IngestionResourceDeploymentTestNG.class);
 
     @Autowired
     private IngestionEntityMgr ingestionEntityMgr;
@@ -155,13 +156,13 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         Assert.assertEquals(progresses.size(), expectedProgresses);
         Long startTime = System.currentTimeMillis();
         EngineProgress engineProgress = ingestionVersionService.findProgressAtVersion(name, version);
-        log.info(engineProgress);
+        log.info(JsonUtils.serialize(engineProgress));
         while (engineProgress.getStatus() != ProgressStatus.FINISHED
                 && engineProgress.getStatus() != ProgressStatus.FAILED
                 && System.currentTimeMillis() - startTime <= timeout) {
             ingestionProxy.scan(POD_ID);
             engineProgress = ingestionVersionService.findProgressAtVersion(name, version);
-            log.info(engineProgress);
+            log.info(JsonUtils.serialize(engineProgress));
             try {
                 Thread.sleep(60000L);
             } catch (InterruptedException e) {

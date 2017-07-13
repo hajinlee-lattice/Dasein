@@ -3,8 +3,8 @@ package com.latticeengines.dellebi.mbean;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
@@ -19,7 +19,7 @@ import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 
 public class SmbFilesMBeanTestNG extends DellEbiTestNGBase {
-    static final Log log = LogFactory.getLog(SmbFilesMBeanTestNG.class);
+    static final Logger log = LoggerFactory.getLogger(SmbFilesMBeanTestNG.class);
 
     @Autowired
     private SmbFilesMBean smbFilesMBean;
@@ -76,7 +76,7 @@ public class SmbFilesMBeanTestNG extends DellEbiTestNGBase {
             }
 
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         smbFiles = smbFilesList.toArray(new SmbFile[smbFilesList.size()]);
         smbFilesMBean.sortSmbFiles(smbFiles);

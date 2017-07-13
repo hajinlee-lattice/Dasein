@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 
 @Component("matchCommandCleaner")
 public class MatchCommandCleanerImpl implements MatchCommandCleaner {
-    private static final Log log = LogFactory.getLog(MatchCommandCleanerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchCommandCleanerImpl.class);
 
     @Value("${datacloud.match.retention.days:7}")
     private int retentionDays;
@@ -53,7 +53,7 @@ public class MatchCommandCleanerImpl implements MatchCommandCleaner {
         try {
             HdfsUtils.rmdir(yarnConfiguration, path);
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
 }

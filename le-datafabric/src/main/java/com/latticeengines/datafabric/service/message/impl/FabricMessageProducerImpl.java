@@ -4,8 +4,8 @@ import java.util.Properties;
 import java.util.concurrent.Future;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest
 
 public class FabricMessageProducerImpl implements FabricMessageProducer {
 
-    private static final Log log = LogFactory.getLog(FabricMessageProducerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(FabricMessageProducerImpl.class);
 
     private String producerName;
 

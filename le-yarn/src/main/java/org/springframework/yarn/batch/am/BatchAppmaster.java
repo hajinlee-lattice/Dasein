@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -50,7 +50,7 @@ import com.latticeengines.yarn.exposed.service.YarnService;
 
 public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmaster {
 
-    private static final Log log = LogFactory.getLog(BatchAppmaster.class);
+    private static final Logger log = LoggerFactory.getLogger(BatchAppmaster.class);
 
     @Autowired(required = false)
     private final Collection<PartitionHandler> partitionHandlers = Collections.emptySet();

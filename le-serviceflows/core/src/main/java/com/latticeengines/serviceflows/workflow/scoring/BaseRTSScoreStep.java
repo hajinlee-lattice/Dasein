@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -35,7 +35,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> extends BaseWorkflowStep<T> {
 
-    private static final Log log = LogFactory.getLog(BaseRTSScoreStep.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseRTSScoreStep.class);
 
     @Autowired
     private ScoringProxy scoringProxy;
@@ -139,7 +139,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
                 scoringConfig.setImportErrorPath(importErrorPath);
             }
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_00002);
         }
 

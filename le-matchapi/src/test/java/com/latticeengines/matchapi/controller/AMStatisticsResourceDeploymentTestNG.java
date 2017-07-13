@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -25,7 +25,7 @@ public class AMStatisticsResourceDeploymentTestNG extends MatchapiDeploymentTest
 
     private static final String LE_INDUSTRY = "LE_INDUSTRY";
     private static final String LDC_COUNTRY = "LDC_Country";
-    private static final Log log = LogFactory.getLog(AMStatisticsResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AMStatisticsResourceDeploymentTestNG.class);
     private int enrichmentOnlyCubeFieldsCount = 0;
 
     @Test(groups = { "deployment" }, enabled = true)

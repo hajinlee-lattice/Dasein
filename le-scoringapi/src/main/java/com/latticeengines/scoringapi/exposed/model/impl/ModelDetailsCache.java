@@ -4,8 +4,8 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 
 @Component
 public class ModelDetailsCache {
-    private static final Log log = LogFactory.getLog(ModelDetailsCache.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelDetailsCache.class);
 
     @Value("${scoringapi.modeldetailsandfields.cache.maxsize}")
     private int modelDetailsAndFieldsCacheMaxSize;

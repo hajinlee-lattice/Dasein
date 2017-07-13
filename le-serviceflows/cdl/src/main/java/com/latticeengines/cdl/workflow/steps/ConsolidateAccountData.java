@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateAccou
 @Component("consolidateAccountData")
 public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccountDataStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ConsolidateAccountData.class);
+    private static final Logger log = LoggerFactory.getLogger(ConsolidateAccountData.class);
 
     private String srcIdField;
     private Map<MatchKey, List<String>> keyMap = null;

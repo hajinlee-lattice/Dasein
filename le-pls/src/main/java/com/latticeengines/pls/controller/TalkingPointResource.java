@@ -2,8 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,7 +34,7 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Plays')")
 public class TalkingPointResource {
 
-    private static final Log log = LogFactory.getLog(TalkingPointResource.class);
+    private static final Logger log = LoggerFactory.getLogger(TalkingPointResource.class);
 
     @Autowired
     TalkingPointProxy talkingPointProxy;

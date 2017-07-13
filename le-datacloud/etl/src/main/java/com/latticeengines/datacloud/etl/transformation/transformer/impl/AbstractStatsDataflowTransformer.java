@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,7 +31,7 @@ import com.latticeengines.proxy.exposed.matchapi.DimensionAttributeProxy;
 
 public abstract class AbstractStatsDataflowTransformer
         extends AbstractDataflowTransformer<AccountMasterStatisticsConfig, AccountMasterStatsParameters> {
-    private static final Log log = LogFactory.getLog(AbstractStatsDataflowTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractStatsDataflowTransformer.class);
 
     @Autowired
     protected DimensionAttributeProxy dimensionAttributeProxy;

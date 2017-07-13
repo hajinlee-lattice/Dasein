@@ -12,8 +12,8 @@ import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -30,7 +30,7 @@ import com.newrelic.api.agent.Trace;
 public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         implements ColumnMetadataService {
 
-    private static final Log log = LogFactory.getLog(BaseColumnMetadataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseColumnMetadataServiceImpl.class);
 
     private WatcherCache<ImmutablePair<String, Predefined>, List<ColumnMetadata>> predefinedMetaDataCache;
 

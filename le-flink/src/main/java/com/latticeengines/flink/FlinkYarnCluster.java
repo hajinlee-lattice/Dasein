@@ -15,8 +15,8 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.client.program.ContextEnvironment;
 import org.apache.flink.configuration.Configuration;
@@ -32,7 +32,7 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 
 public class FlinkYarnCluster {
 
-    private static final Log log = LogFactory.getLog(FlinkYarnCluster.class);
+    private static final Logger log = LoggerFactory.getLogger(FlinkYarnCluster.class);
 
     private static YarnClusterClient yarnCluster;
     private static ContextEnvironment executionEnvironment;

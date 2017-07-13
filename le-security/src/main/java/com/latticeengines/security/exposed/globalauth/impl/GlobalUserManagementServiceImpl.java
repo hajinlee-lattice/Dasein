@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 public class GlobalUserManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
         GlobalUserManagementService {
 
-    private static final Log log = LogFactory.getLog(GlobalUserManagementServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalUserManagementServiceImpl.class);
 
     @Value("${monitor.emailsettings.from}")
     private String EMAIL_FROM;

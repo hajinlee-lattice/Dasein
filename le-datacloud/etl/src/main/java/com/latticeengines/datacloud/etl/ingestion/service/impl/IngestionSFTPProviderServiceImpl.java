@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 
 @Component("ingestionSFTPProviderService")
 public class IngestionSFTPProviderServiceImpl implements IngestionProviderService {
-    private static Log log = LogFactory.getLog(IngestionSFTPProviderServiceImpl.class);
+    private static Logger log = LoggerFactory.getLogger(IngestionSFTPProviderServiceImpl.class);
 
     @Autowired
     private IngestionVersionService ingestionVersionService;

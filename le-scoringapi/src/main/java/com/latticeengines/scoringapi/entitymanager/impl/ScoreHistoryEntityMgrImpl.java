@@ -9,8 +9,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ import com.latticeengines.scoringapi.entitymanager.ScoreHistoryEntityMgr;
 @Component("scoreHistoryEntityMgr")
 public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
 
-    private static final Log log = LogFactory.getLog(ScoreHistoryEntityMgrImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoreHistoryEntityMgrImpl.class);
 
     private static final String FABRIC_SCORE_HISTORY = "FabricScoreHistory";
 

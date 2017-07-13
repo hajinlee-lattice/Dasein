@@ -31,8 +31,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -60,7 +60,7 @@ import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 
 public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
-    private static final Log log = LogFactory.getLog(MatchCorrectnessDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchCorrectnessDeploymentTestNG.class);
     private static final Integer REALTIME_THREADS = 32;
     private static final String AVRO_DIR = "/tmp/MatchCorrectnessDeploymentTestNG";
     private static final String HDFS_POD = "MatchCorrectnessDeploymentTestNG";
@@ -224,7 +224,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
     private class RealtimeMatchCallable implements Callable<Boolean> {
 
-        private Log log = LogFactory.getLog(RealtimeMatchCallable.class);
+        private Logger log = LoggerFactory.getLogger(RealtimeMatchCallable.class);
         private final List<List<Object>> data = new ArrayList<>();
         private ConcurrentLinkedDeque<Map<String, Object>> result = new ConcurrentLinkedDeque<>();
         private final String dataCloudVersion;
@@ -258,7 +258,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
                 realtimeResult.addAll(result);
                 log.info("Loaded real time match result.");
             } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 return false;
             }
             return true;
@@ -296,7 +296,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
         private class SingleRun implements Callable<MatchOutput> {
 
-            private Log log = LogFactory.getLog(SingleRun.class);
+            private Logger log = LoggerFactory.getLogger(SingleRun.class);
             private MatchInput matchInput;
 
             SingleRun(MatchInput matchInput) {
@@ -308,7 +308,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
                 try {
                     return matchProxy.matchRealTime(matchInput);
                 } catch (Exception e) {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                     throw new RuntimeException(e);
                 }
             }
@@ -318,7 +318,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
     private class BulkMatchCallable implements Callable<Boolean> {
 
-        private Log log = LogFactory.getLog(BulkMatchCallable.class);
+        private Logger log = LoggerFactory.getLogger(BulkMatchCallable.class);
         private final List<List<Object>> data = new ArrayList<>();
         private final String dataCloudVersion;
 
@@ -340,7 +340,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
                 bulkResult.addAll(readResult(matchCommand));
                 log.info("Loaded bulk match result.");
             } catch (Exception e) {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 return false;
             }
             return true;

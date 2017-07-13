@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 
 public class BomboraDomainServiceImplTestNG
         extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {
-    private static final Log log = LogFactory.getLog(BomboraDomainServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(BomboraDomainServiceImplTestNG.class);
 
     private static final String ID = "ID";
     private static final String DOMAIN = "Domain";
@@ -86,7 +86,7 @@ public class BomboraDomainServiceImplTestNG
             Long timestamp = (Long) record.get(TIMESTAMP);
             if (id != null) {
                 ids.add(id);
-                log.info(id);
+                log.info(String.valueOf(id));
             }
             Assert.assertTrue(
                     (domain.equals("null") && timestamp == null) || (domain.equals("google.com") && timestamp != null)

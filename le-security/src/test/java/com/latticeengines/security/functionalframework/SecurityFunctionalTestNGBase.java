@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +59,7 @@ import com.latticeengines.security.exposed.service.SessionService;
 @ContextConfiguration(locations = { "classpath:test-security-context.xml" })
 public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    private static final Log log = LogFactory.getLog(SecurityFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(SecurityFunctionalTestNGBase.class);
 
     public static final String adminUsername = "bnguyen@lattice-engines.com";
     public static final String adminPassword = "tahoe";

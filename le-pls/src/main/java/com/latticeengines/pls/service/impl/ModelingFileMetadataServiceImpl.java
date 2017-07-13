@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,7 +44,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("modelingFileMetadataService")
 public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataService {
-    private static final Log log = LogFactory.getLog(ModelingFileMetadataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelingFileMetadataServiceImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -125,7 +125,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         try {
             stream.reset();
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         SchemaRepository repository = SchemaRepository.instance();
@@ -153,7 +153,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         try {
             stream.reset();
         } catch (IOException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);

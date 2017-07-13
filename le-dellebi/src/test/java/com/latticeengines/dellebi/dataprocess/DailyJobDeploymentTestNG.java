@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -31,7 +31,7 @@ import jcifs.smb.SmbFile;
 
 public class DailyJobDeploymentTestNG extends DellEbiTestNGBase {
 
-    static final Log log = LogFactory.getLog(DailyJobDeploymentTestNG.class);
+    static final Logger log = LoggerFactory.getLogger(DailyJobDeploymentTestNG.class);
 
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;

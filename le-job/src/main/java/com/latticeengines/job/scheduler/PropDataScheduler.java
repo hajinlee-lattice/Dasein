@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
@@ -35,7 +35,7 @@ import com.latticeengines.datacloud.etl.service.ServiceFlowsZkConfigService;
 public class PropDataScheduler {
 
     private Scheduler scheduler;
-    private Log log = LogFactory.getLog(PropDataScheduler.class);
+    private Logger log = LoggerFactory.getLogger(PropDataScheduler.class);
 
     @Value("${propdata.job.schedule.dryrun:true}")
     private Boolean dryrun;

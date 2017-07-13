@@ -2,8 +2,8 @@ package com.latticeengines.job.scheduler;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -14,7 +14,7 @@ import com.latticeengines.datacloud.etl.service.ServiceFlowsZkConfigService;
 
 public class RefreshScheduler extends QuartzJobBean {
 
-    private static final Log log = LogFactory.getLog(RefreshScheduler.class);
+    private static final Logger log = LoggerFactory.getLogger(RefreshScheduler.class);
 
     private RefreshService service;
     private ServiceFlowsZkConfigService serviceFlowsZkConfigService;

@@ -2,8 +2,8 @@ package com.latticeengines.actors.visitor.sample.impl;
 
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.visitor.sample.SampleDataSourceLookupRequest;
@@ -11,7 +11,7 @@ import com.latticeengines.actors.visitor.sample.SampleMatchKeyTuple;
 
 @Component("sampleDnBLookupService")
 public class SampleDnBLookupServiceImpl extends SampleDataSourceLookupServiceBase {
-    private static final Log log = LogFactory.getLog(SampleDnBLookupServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SampleDnBLookupServiceImpl.class);
 
     @Override
     protected String lookupFromService(String lookupRequestId, SampleDataSourceLookupRequest request) {

@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ import com.latticeengines.scoringapi.score.impl.BaseRequestProcessorImpl;
 @Component("enrichRequestProcessor")
 public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl implements EnrichRequestProcessor {
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(EnrichRequestProcessorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EnrichRequestProcessorImpl.class);
 
     @Override
     public EnrichResponse process(CustomerSpace space, EnrichRequest request, String requestId) {

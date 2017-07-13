@@ -3,8 +3,8 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 import java.util.List;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class ModelCommandLogServiceImpl implements ModelCommandLogService {
 
     public static final String MODELCOMMAND_ID_LOG_PREFIX = "ModelCommandId";
-    private static final Log log = LogFactory.getLog(ModelCommandLogServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelCommandLogServiceImpl.class);
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecond();

@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
@@ -28,7 +28,7 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBaseDeprecated {
-    private static final Log log = LogFactory.getLog(SetupTestInfrastructureTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(SetupTestInfrastructureTestNG.class);
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;

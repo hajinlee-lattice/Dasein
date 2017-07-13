@@ -64,8 +64,8 @@ public class StdVisidbDsTitleLevelCategorical implements RealTimeTransform {
         metadata.setCategory(Category.LEAD_INFORMATION);
         metadata.setFundamentalType(FundamentalType.ALPHA);
         metadata.setStatisticalType(StatisticalType.NOMINAL);
-        metadata.setDescription("Title Category");
-        metadata.setDisplayName("Title Category");
+        metadata.setDescription("Title Logger");
+        metadata.setDisplayName("Title Logger");
         metadata.setTags(Tag.INTERNAL_TRANSFORM);
         return metadata;
     }

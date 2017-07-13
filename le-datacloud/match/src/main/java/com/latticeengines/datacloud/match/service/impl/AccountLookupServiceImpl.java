@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 @Component("accountLookupService")
 public class AccountLookupServiceImpl implements AccountLookupService {
 
-	private  static final Log log = LogFactory.getLog(AccountLookupServiceImpl.class);
+	private  static final Logger log = LoggerFactory.getLogger(AccountLookupServiceImpl.class);
 
     private Map<String, AccountLookupEntryMgr> lookupMgrs;
     private Map<String, LatticeAccountMgr> accountMgrs;

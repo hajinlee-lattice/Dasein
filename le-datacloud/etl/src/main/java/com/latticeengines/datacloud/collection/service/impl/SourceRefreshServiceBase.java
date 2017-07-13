@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -49,7 +49,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     abstract ProgressEntityMgr<P> getProgressEntityMgr();
 
-    abstract Log getLogger();
+    abstract Logger getLogger();
 
     abstract Source getSource();
 

@@ -15,8 +15,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.db.HasAuditingFields;
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class ModelConfig implements HasPid, HasName, HasAuditingFields {
 
-    private static final Log log = LogFactory.getLog(ModelConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelConfig.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

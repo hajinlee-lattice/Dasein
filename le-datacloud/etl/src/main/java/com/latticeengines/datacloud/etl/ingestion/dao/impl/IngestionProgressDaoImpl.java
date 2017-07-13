@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 @Component("ingestionProgressDao")
 public class IngestionProgressDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl<IngestionProgress> implements
         IngestionProgressDao {
-    private static final Log log = LogFactory.getLog(IngestionProgressDaoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionProgressDaoImpl.class);
 
     @Override
     protected Class<IngestionProgress> getEntityClass() {

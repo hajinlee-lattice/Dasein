@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ import com.latticeengines.datacloud.core.source.impl.Alexa;
 @Component("alexaArchiveService")
 public class AlexaArchiveService extends AbstractCollectionArchiveService implements CollectedArchiveService {
 
-    Log log = LogFactory.getLog(this.getClass());
+    Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;
@@ -37,7 +37,7 @@ public class AlexaArchiveService extends AbstractCollectionArchiveService implem
     }
 
     @Override
-    Log getLogger() {
+    Logger getLogger() {
         return log;
     }
 }

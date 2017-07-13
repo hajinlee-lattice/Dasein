@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 @Component("hgDataRefreshService")
 public class HGDataRefreshService extends AbstractRefreshService implements RefreshService {
 
-    Log log = LogFactory.getLog(this.getClass());
+    Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     ArchiveProgressEntityMgr archiveProgressEntityMgr;
@@ -38,7 +38,7 @@ public class HGDataRefreshService extends AbstractRefreshService implements Refr
     RefreshProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
 
     @Override
-    Log getLogger() { return log; }
+    Logger getLogger() { return log; }
 
     @Override
     protected void executeDataFlow(RefreshProgress progress) {

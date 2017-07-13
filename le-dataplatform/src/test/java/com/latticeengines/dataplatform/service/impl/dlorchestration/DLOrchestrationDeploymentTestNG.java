@@ -7,9 +7,9 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,7 +64,7 @@ public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContext
 
     private static final String TEMP_EVENTTABLE = "DLOrchestrationDeploymentTestNG_eventtable";
 
-    private static final Log log = LogFactory.getLog(DLOrchestrationDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DLOrchestrationDeploymentTestNG.class);
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -104,7 +104,7 @@ public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContext
         // Set test flag to disable validation
         ModelCommandId commandId = ModelingServiceTestUtils.createModelCommandId();
         modelCommandIdEntityMgr.create(commandId);
-        log.info(commandId.getPid());
+        log.info(String.valueOf(commandId.getPid()));
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParametersFeatureSelection(
                 commandId.getPid(), TEMP_EVENTTABLE, false, false);
         modelCommandEntityMgr.create(command);

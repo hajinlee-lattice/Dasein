@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.etl.transformation.transformer;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Iterative
 
 public class IterativeStep extends TransformStep {
 
-    private static final Log log = LogFactory.getLog(IterativeStep.class);
+    private static final Logger log = LoggerFactory.getLogger(IterativeStep.class);
     private static final ObjectMapper OM = new ObjectMapper();
 
     public static final Integer MAX_ITERATION = 10;

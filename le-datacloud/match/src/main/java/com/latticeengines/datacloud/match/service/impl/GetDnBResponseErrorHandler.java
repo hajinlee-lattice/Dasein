@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.HttpClientErrorException;
@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class GetDnBResponseErrorHandler implements ResponseErrorHandler {
-    private static final Log log = LogFactory.getLog(GetDnBResponseErrorHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(GetDnBResponseErrorHandler.class);
 
     public GetDnBResponseErrorHandler() {
 

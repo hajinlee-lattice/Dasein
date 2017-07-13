@@ -1,14 +1,14 @@
 package com.latticeengines.metadata.provisioning;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.baton.exposed.camille.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 public class MetadataInstaller extends LatticeComponentInstaller {
-    private static final Log log = LogFactory.getLog(MetadataInstaller.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataInstaller.class);
 
     private MetadataComponentManager componentManager;
 
@@ -20,7 +20,7 @@ public class MetadataInstaller extends LatticeComponentInstaller {
             componentManager.provisionImportTables(space, configDir);
             return configDir;
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
             throw e;
         }
     }

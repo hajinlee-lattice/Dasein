@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -53,7 +53,7 @@ public class ModelingServiceExecutor {
     // TODO externalize this as a step configuration property
     private static final int MAX_SECONDS_WAIT_FOR_MODELING = 60 * 60 * 24;
 
-    private static final Log log = LogFactory.getLog(ModelingServiceExecutor.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelingServiceExecutor.class);
 
     protected Builder builder;
 

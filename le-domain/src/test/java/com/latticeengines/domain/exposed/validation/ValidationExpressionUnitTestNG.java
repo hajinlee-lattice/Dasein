@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -13,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ValidationExpressionUnitTestNG {
 
-    private static final Logger log = Logger.getLogger(ValidationExpressionUnitTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ValidationExpressionUnitTestNG.class);
     
     private static final ObjectMapper OM = new ObjectMapper();
 

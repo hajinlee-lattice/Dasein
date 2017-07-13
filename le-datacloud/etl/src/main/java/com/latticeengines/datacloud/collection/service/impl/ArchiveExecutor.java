@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.collection.service.impl;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.datacloud.collection.service.ArchiveService;
 import com.latticeengines.datacloud.collection.service.CollectedArchiveService;
@@ -18,7 +18,7 @@ public class ArchiveExecutor implements RefreshJobExecutor {
     private final String jobSubmitter;
 
     private final ArchiveService archiveService;
-    private static final Log log = LogFactory.getLog(ArchiveExecutor.class);
+    private static final Logger log = LoggerFactory.getLogger(ArchiveExecutor.class);
 
     public ArchiveExecutor(ArchiveService archiveService) {
         this.archiveService = archiveService;

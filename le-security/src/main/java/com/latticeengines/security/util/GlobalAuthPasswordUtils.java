@@ -6,12 +6,12 @@ import java.security.SecureRandom;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GlobalAuthPasswordUtils {
 
-    private static Log log = LogFactory.getLog(GlobalAuthPasswordUtils.class);
+    private static Logger log = LoggerFactory.getLogger(GlobalAuthPasswordUtils.class);
 
     private static final byte[] SALT = "Bard4Everyone!".getBytes();
 

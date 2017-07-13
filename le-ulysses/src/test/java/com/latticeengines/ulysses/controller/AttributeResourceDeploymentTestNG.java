@@ -4,7 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -18,7 +19,7 @@ import com.latticeengines.ulysses.testframework.UlyssesDeploymentTestNGBase;
 
 public class AttributeResourceDeploymentTestNG extends UlyssesDeploymentTestNGBase {
 
-    private static final Logger log = Logger.getLogger(AttributeResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AttributeResourceDeploymentTestNG.class);
 
     private String getAttributeResourceUrl() {
         return ulyssesHostPort + "/ulysses/attributes";

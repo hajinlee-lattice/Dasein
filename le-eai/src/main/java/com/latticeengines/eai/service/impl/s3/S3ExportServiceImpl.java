@@ -1,8 +1,8 @@
 package com.latticeengines.eai.service.impl.s3;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import com.latticeengines.eai.service.ExportService;
 @Component("s3ExportService")
 public class S3ExportServiceImpl extends ExportService {
 
-    private static final Log log = LogFactory.getLog(S3ExportServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(S3ExportServiceImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;

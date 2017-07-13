@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ import com.latticeengines.remote.exposed.service.MetadataValidationService;
 
 @Component("metadataValidationService")
 public class MetadataValidationServiceImpl implements MetadataValidationService {
-    private static final Log log = LogFactory.getLog(MetadataValidationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataValidationServiceImpl.class);
 
     @Autowired
     private BeanValidationServiceImpl beanValidationServiceImpl;

@@ -8,8 +8,8 @@ import java.util.Set;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,7 +50,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ResolveStagin
 })
 public class DataFlowParameters {
 
-    private static final Log log = LogFactory.getLog(DataFlowParameters.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFlowParameters.class);
 
     @JsonProperty("no_flink")
     public boolean noFlink = false;

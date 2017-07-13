@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(HdfsToRedshiftServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(HdfsToRedshiftServiceImplTestNG.class);
 
     private static final String HDFS_DIR = "/tmp/hdfs2sf";
     private static final String FILENAME = "compressed.avro";

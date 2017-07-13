@@ -9,8 +9,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher;
 
 public class WatcherCache<K, V> {
 
-    private static Log log = LogFactory.getLog(WatcherCache.class);
+    private static Logger log = LoggerFactory.getLogger(WatcherCache.class);
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
     private static final Random random = new Random(System.currentTimeMillis());
 

@@ -13,13 +13,13 @@ import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -36,7 +36,7 @@ import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
 public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler {
 
-    private static final Log log = LogFactory.getLog(CSVExportMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(CSVExportMapper.class);
 
     private static final String OUTPUT_FILE = "output.csv";
 
@@ -112,7 +112,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
 
     @Override
     public void endRecord(Record record) throws IOException {
-        log.info(record);
+        log.info(record.toString());
         csvFilePrinter.println();
     }
 

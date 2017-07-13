@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -20,7 +20,7 @@ import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ModelRetrieverDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelRetrieverDeploymentTestNG.class);
 
     @Autowired
     private ModelRetrieverImpl modelRetriever;

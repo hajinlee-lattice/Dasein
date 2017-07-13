@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation;
 
-import org.apache.commons.logging.Log;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
@@ -20,7 +20,7 @@ public class ProgressHelper {
         return progressEntityManager.findEarliestFailureUnderMaxRetry(source, version);
     }
 
-    public boolean checkProgressStatus(TransformationProgress progress, Log logger) {
+    public boolean checkProgressStatus(TransformationProgress progress, Logger logger) {
         if (progress != null && (ProgressStatus.NEW.equals(progress.getStatus())
                 || ProgressStatus.FAILED.equals(progress.getStatus()))) {
             return true;
@@ -29,7 +29,7 @@ public class ProgressHelper {
         return false;
     }
 
-    public void logIfRetrying(TransformationProgress progress, Log logger) {
+    public void logIfRetrying(TransformationProgress progress, Logger logger) {
         if (progress.getStatus().equals(ProgressStatus.FAILED)) {
             int numRetries = progress.getNumRetries() + 1;
             progress.setNumRetries(numRetries);
@@ -39,14 +39,14 @@ public class ProgressHelper {
     }
 
     public void updateStatusToFailed(TransformationProgressEntityMgr progressEntityManager,
-            TransformationProgress progress, String errorMsg, Exception e, Log logger) {
+            TransformationProgress progress, String errorMsg, Exception e, Logger logger) {
         LoggingUtils.logError(logger, progress, errorMsg, e);
         progress.setErrorMessage(errorMsg);
         progressEntityManager.updateStatus(progress, ProgressStatus.FAILED);
     }
 
     public TransformationProgress finishProgress(TransformationProgressEntityMgr progressEntityManager,
-            TransformationProgress progress, Log logger) {
+            TransformationProgress progress, Logger logger) {
         progress.setNumRetries(0);
         LoggingUtils.logInfo(logger, progress, "Transformed.");
         return progressEntityManager.updateStatus(progress, ProgressStatus.FINISHED);

@@ -20,8 +20,8 @@ import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -43,7 +43,7 @@ import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 
 public class ScoringMapperTransformUtil {
 
-    private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(EventDataScoringMapper.class);
 
     public static Map<String, JsonNode> processLocalizedFiles(URI[] uris) throws IOException {
         // key: uuid, value: model contents

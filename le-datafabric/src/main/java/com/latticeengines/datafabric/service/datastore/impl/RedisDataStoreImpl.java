@@ -22,8 +22,8 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.io.JsonEncoder;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 import com.latticeengines.datafabric.util.RedisUtil;
@@ -35,7 +35,7 @@ import redis.clients.util.Pool;
 @SuppressWarnings("deprecation")
 public class RedisDataStoreImpl implements FabricDataStore {
 
-    private static final Log log = LogFactory.getLog(RedisDataStoreImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RedisDataStoreImpl.class);
 
     private Pool<Jedis> jedisPool;
 

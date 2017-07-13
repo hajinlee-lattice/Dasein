@@ -6,10 +6,10 @@ import java.util.UUID;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.testng.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
 
 import com.latticeengines.actors.visitor.sample.framework.SampleMatchActorSystem;
 import com.latticeengines.actors.visitor.sample.impl.SampleDnbLookupActor;

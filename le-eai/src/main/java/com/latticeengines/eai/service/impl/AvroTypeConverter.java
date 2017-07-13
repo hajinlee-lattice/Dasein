@@ -1,8 +1,8 @@
 package com.latticeengines.eai.service.impl;
 
 import org.apache.avro.Schema.Type;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -12,7 +12,7 @@ import com.latticeengines.eai.service.ValueConverter;
 
 public abstract class AvroTypeConverter {
 
-    private static final Log log = LogFactory.getLog(AvroTypeConverter.class);
+    private static final Logger log = LoggerFactory.getLogger(AvroTypeConverter.class);
 
     public Type convertTypeToAvro(String type) {
 

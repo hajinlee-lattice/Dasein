@@ -11,8 +11,8 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +39,7 @@ import scala.concurrent.Future;
 @Component("fuzzyMatchHelper")
 public class FuzzyMatchHelper implements DbHelper {
 
-    private static final Log log = LogFactory.getLog(FuzzyMatchHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(FuzzyMatchHelper.class);
 
     @Autowired
     private AccountLookupService accountLookupService;

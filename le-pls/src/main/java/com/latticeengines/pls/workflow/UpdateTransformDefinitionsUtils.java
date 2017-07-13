@@ -2,8 +2,8 @@ package com.latticeengines.pls.workflow;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -17,7 +17,7 @@ import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class UpdateTransformDefinitionsUtils {
 
-    private static final Log log = LogFactory.getLog(UpdateTransformDefinitionsUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(UpdateTransformDefinitionsUtils.class);
 
     static List<TransformDefinition> getTransformDefinitions(String schemaInterpretationStr, TransformationGroup transformationGroup) {
         log.info(String.format("Current model's schema is %s.", schemaInterpretationStr));

@@ -6,8 +6,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +37,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component
 public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
 
-    private static final Logger log = Logger.getLogger(ScoreWorkflowSubmitter.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoreWorkflowSubmitter.class);
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;

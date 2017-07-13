@@ -7,8 +7,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class DataFlowUtils {
-    private static final Log log = LogFactory.getLog(DataFlowUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFlowUtils.class);
 
     public static Node extractDomain(Node last, String columnName) {
 

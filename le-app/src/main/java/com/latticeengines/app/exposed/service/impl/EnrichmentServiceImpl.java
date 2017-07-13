@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +35,7 @@ import com.latticeengines.proxy.exposed.matchapi.AMStatsProxy;
 @Component("enrichmentService")
 public class EnrichmentServiceImpl implements EnrichmentService {
 
-    private static final Log log = LogFactory.getLog(EnrichmentServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EnrichmentServiceImpl.class);
     private static final String DUMMY_KEY = "TopNAttrTree";
 
     private WatcherCache<String, TopNAttributeTree> topAttrsCache;

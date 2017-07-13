@@ -4,8 +4,8 @@ import org.apache.camel.component.salesforce.SalesforceComponent;
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 @Component("eaiCredentialValidationService")
 public class EaiCredentialValidationServiceImpl implements EaiCredentialValidationService {
 
-    private Log log = LogFactory.getLog(EaiCredentialValidationServiceImpl.class);
+    private Logger log = LoggerFactory.getLogger(EaiCredentialValidationServiceImpl.class);
 
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;

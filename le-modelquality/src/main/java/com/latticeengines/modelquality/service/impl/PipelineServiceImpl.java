@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ import com.latticeengines.modelquality.service.PipelineService;
 public class PipelineServiceImpl extends BaseServiceImpl implements PipelineService {
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(PipelineServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PipelineServiceImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;

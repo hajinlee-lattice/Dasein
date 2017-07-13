@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -25,7 +25,7 @@ import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
 public abstract class BaseModelStep<T extends ModelStepConfiguration> extends BaseWorkflowStep<T> {
 
-    private static final Log log = LogFactory.getLog(BaseModelStep.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseModelStep.class);
 
     @Autowired
     protected MetadataProxy metadataProxy;

@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 
 public class ModelMetadataServiceImplUnitTestNG {
 
-    private static final Log log = LogFactory.getLog(ModelMetadataServiceImplUnitTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelMetadataServiceImplUnitTestNG.class);
 
     private ModelMetadataServiceImpl modelMetadataService = new ModelMetadataServiceImpl();
 
@@ -152,7 +152,7 @@ public class ModelMetadataServiceImplUnitTestNG {
         try {
             attD.setRTSArguments(mapper.writeValueAsString(argsD));
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         attributes.add(attD);
 
@@ -170,7 +170,7 @@ public class ModelMetadataServiceImplUnitTestNG {
         try {
             attE.setRTSArguments(mapper.writeValueAsString(argsE));
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         attributes.add(attE);
 
@@ -188,7 +188,7 @@ public class ModelMetadataServiceImplUnitTestNG {
         try {
             attF.setRTSArguments(mapper.writeValueAsString(argsF));
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         attributes.add(attF);
 
@@ -207,7 +207,7 @@ public class ModelMetadataServiceImplUnitTestNG {
         try {
             attG.setRTSArguments(mapper.writeValueAsString(argsG));
         } catch (Exception e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         attributes.add(attG);
 

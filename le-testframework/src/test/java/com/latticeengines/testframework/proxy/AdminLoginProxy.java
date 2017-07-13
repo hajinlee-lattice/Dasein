@@ -1,8 +1,8 @@
 package com.latticeengines.testframework.proxy;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,7 +13,7 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 @Component("adminLoginProxy")
 public class AdminLoginProxy extends BaseRestApiProxy {
 
-    private static final Log log = LogFactory.getLog(AdminLoginProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(AdminLoginProxy.class);
 
     public AdminLoginProxy() {
         super(PropertyUtils.getProperty("common.test.admin.url"), "admin");

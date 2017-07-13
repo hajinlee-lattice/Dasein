@@ -2,8 +2,8 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 @Component("validationReportTransformer")
 public class ValidationReportTransformer extends AbstractDataflowTransformer<ValidationReportTransformerConfig, SourceValidationFlowParameters> {
 
-    private static final Log log = LogFactory.getLog(AbstractTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractTransformer.class);
 
     private static String transfomerName = "validationReportTransformer";
 

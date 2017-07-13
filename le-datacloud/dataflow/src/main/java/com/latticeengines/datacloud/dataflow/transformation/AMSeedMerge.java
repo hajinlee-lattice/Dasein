@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,7 +35,7 @@ public class AMSeedMerge extends ConfigurableFlowBase<TransformerConfig> {
     public static final String TRANSFORMER_NAME = "AMSeedMergeTransformer";
 
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(AMSeedMerge.class);
+    private static final Logger log = LoggerFactory.getLogger(AMSeedMerge.class);
 
     private Map<String, SeedMergeFieldMapping> amsColumns = new HashMap<>();
     // dnb columns -> ams columns

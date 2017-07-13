@@ -8,8 +8,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -25,7 +25,7 @@ import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 
 @ControllerAdvice
 public class LedpPlaymakerExceptionHandler {
-    private static final Log log = LogFactory.getLog(LedpPlaymakerExceptionHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LedpPlaymakerExceptionHandler.class);
 
     @Autowired
     private OAuthUserEntityMgr oAuthUserEntityMgr;

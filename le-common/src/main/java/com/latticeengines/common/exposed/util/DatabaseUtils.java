@@ -1,12 +1,13 @@
 package com.latticeengines.common.exposed.util;
 
 import org.apache.commons.collections.Closure;
-import org.apache.log4j.Logger;
 import org.hibernate.exception.LockAcquisitionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DatabaseUtils {
 
-    private static Logger log = Logger.getLogger(DatabaseUtils.class);
+    private static Logger log = LoggerFactory.getLogger(DatabaseUtils.class);
 
     public static void retry(String operationName, Closure action) {
         retry(operationName, 10, action);

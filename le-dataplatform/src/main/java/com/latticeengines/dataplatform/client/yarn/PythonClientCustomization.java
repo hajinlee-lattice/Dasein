@@ -9,8 +9,8 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +34,7 @@ import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 @Component("pythonClientCustomization")
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
-    private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
+    private static final Logger log = LoggerFactory.getLogger(PythonClientCustomization.class);
 
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;

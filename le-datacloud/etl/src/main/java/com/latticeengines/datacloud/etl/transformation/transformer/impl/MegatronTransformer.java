@@ -11,8 +11,8 @@ import java.util.Random;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 @Component("megatron")
 class Megatron extends AbstractTransformer<MegatronConfig> {
 
-    private static final Log log = LogFactory.getLog(Megatron.class);
+    private static final Logger log = LoggerFactory.getLogger(Megatron.class);
 
     @Autowired
     protected Configuration yarnConfiguration;

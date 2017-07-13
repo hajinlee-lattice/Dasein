@@ -8,8 +8,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ import com.latticeengines.metadata.service.MetadataService;
 @Component("tableResourceHelper")
 public class TableResourceHelper {
 
-    private static final Log log = LogFactory.getLog(TableResourceHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(TableResourceHelper.class);
 
     @Autowired
     private MetadataService mdService;

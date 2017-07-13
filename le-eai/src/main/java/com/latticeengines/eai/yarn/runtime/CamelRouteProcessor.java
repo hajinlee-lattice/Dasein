@@ -5,8 +5,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<CamelRoute
         implements ItemProcessor<CamelRouteConfiguration, String> {
 
     private static final Long timeout = TimeUnit.HOURS.toMillis(48);
-    private static final Log log = LogFactory.getLog(CamelRouteProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(CamelRouteProcessor.class);
 
     @Autowired
     private SftpToHdfsRouteService sftpToHdfsRouteService;
@@ -73,7 +73,7 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<CamelRoute
                 try {
                     Thread.sleep(5000L);
                 } catch (InterruptedException e) {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                     // ignore
                 }
             }

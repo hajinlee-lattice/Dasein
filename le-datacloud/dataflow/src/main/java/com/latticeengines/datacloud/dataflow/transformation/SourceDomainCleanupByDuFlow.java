@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -21,7 +21,7 @@ import cascading.tuple.Fields;
 @Component("sourceDomainCleanupByDuFlow")
 public class SourceDomainCleanupByDuFlow extends ConfigurableFlowBase<SourceDomainCleanupByDuTransformerConfig> {
     @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(SourceDomainCleanupByDuFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(SourceDomainCleanupByDuFlow.class);
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {

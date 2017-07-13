@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 @Component("eaiMetadataService")
 public class EaiMetadataServiceImpl implements EaiMetadataService {
 
-    private static final Log log = LogFactory.getLog(EaiMetadataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EaiMetadataServiceImpl.class);
 
     @Autowired
     private TenantService tenantService;

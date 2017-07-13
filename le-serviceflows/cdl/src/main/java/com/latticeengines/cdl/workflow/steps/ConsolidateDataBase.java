@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -28,7 +28,7 @@ import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfiguration>
         extends BaseTransformWrapperStep<T> {
 
-    protected static final Log log = LogFactory.getLog(ConsolidateDataBase.class);
+    protected static final Logger log = LoggerFactory.getLogger(ConsolidateDataBase.class);
 
     protected CustomerSpace customerSpace = null;
 

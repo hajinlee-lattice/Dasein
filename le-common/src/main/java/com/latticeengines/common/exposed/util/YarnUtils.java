@@ -3,8 +3,8 @@ package com.latticeengines.common.exposed.util;
 import java.io.IOException;
 import java.util.EnumSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -17,7 +17,7 @@ import com.google.common.base.Strings;
 
 public class YarnUtils {
 
-    private static Log log = LogFactory.getLog(YarnUtils.class);
+    private static Logger log = LoggerFactory.getLogger(YarnUtils.class);
 
     public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
             FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);

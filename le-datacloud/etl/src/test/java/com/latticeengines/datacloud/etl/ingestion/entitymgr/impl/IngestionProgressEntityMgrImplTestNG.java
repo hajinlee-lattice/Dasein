@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 @Component
 public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctionalTestNGBase {
 
-    private static Log log = LogFactory.getLog(IngestionProgressEntityMgrImplTestNG.class);
+    private static Logger log = LoggerFactory.getLogger(IngestionProgressEntityMgrImplTestNG.class);
 
     private static final String INGESTION_NAME = IngestionNames.BOMBORA_FIREHOSE;
     private static final String HDFS_POD = "FunctionalBomboraFireHose";

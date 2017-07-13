@@ -1,7 +1,7 @@
 package com.latticeengines.leadprioritization.workflow.listeners;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import com.latticeengines.workflow.listener.LEJobListener;
 @Component("sendEmailAfterModelCompletionListener")
 public class SendEmailAfterModelCompletionListener extends LEJobListener {
 
-    private static final Log log = LogFactory.getLog(SendEmailAfterModelCompletionListener.class);
+    private static final Logger log = LoggerFactory.getLogger(SendEmailAfterModelCompletionListener.class);
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;

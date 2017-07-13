@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.camel.ProducerTemplate;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
@@ -33,7 +33,7 @@ import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 @Component("csvFileExportStrategyBase")
 public class CSVFileExportStrategyBase extends ExportStrategy {
 
-    private static final Log log = LogFactory.getLog(CSVFileExportStrategyBase.class);
+    private static final Logger log = LoggerFactory.getLogger(CSVFileExportStrategyBase.class);
 
     @Autowired
     private EaiYarnService eaiYarnService;

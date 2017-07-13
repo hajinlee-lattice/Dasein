@@ -13,8 +13,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -33,7 +33,7 @@ import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 
 public class OAuth2Utils {
 
-    private static final Log log = LogFactory.getLog(OAuth2Utils.class);
+    private static final Logger log = LoggerFactory.getLogger(OAuth2Utils.class);
     private static final String APP_ID = "app_id";
 
     public static String extractHeaderToken(HttpServletRequest request) {

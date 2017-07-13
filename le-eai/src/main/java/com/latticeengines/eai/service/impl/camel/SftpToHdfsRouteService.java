@@ -10,8 +10,8 @@ import javax.annotation.PostConstruct;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -37,7 +37,7 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
     private static final String OPEN_SUFFIX = SftpToHdfsRouteConfiguration.OPEN_SUFFIX;
     private static final String CAMEL_TEMP_FILE_SUFFIX = "inprogress";
     private static final String KNOWN_HOSTS_FILE = "./known_hosts";
-    private static final Log log = LogFactory.getLog(SftpToHdfsRouteService.class);
+    private static final Logger log = LoggerFactory.getLogger(SftpToHdfsRouteService.class);
 
     @Autowired
     private Configuration yarnConfiguration;

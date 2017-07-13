@@ -5,8 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.apache.hadoop.mapred.FileSplit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.flow.hadoop.HadoopFlowProcess;
@@ -23,7 +23,7 @@ public class ScrubGeneralFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -3364175814238773294L;
 
-    private static final Log log = LogFactory.getLog(ScrubGeneralFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(ScrubGeneralFunction.class);
 
     public ScrubGeneralFunction(Fields fieldDeclaration) {
         super(2, fieldDeclaration);

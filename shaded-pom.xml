@@ -16,7 +16,6 @@
     </parent>
 
     <modules>
-        <module>le-swlib</module>
         <module>le-dataplatform</module>
         <module>le-scoring</module>
         <module>le-sqoop</module>
