@@ -117,7 +117,7 @@ public class LatticeInsightsResource {
 //        Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
 //        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
 //                : Category.fromName(category));
-//        return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
+//        return attributeService.getCounts(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
 //                onlySelectedAttributes, considerInternalAttributes);
 //    }
 //

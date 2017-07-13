@@ -1,6 +1,7 @@
 package com.latticeengines.app.exposed.controller.datacollection;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,8 +28,8 @@ public class CommonAttributeResource {
     @RequestMapping(value = "/count", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get number of attributes")
-    public long getAttributesCount() {
-        return dataLakeService.getAttributesCount();
+    public Map<String, Long> getAttributesCount() {
+        return dataLakeService.getCounts();
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
