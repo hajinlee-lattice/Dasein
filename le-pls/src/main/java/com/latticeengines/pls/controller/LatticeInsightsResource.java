@@ -192,7 +192,7 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get number of attributes with selection flag")
-    public Map<String, Long> getInsightsAttributesCount(HttpServletRequest request,
+    public Map<String, Long> getAttributesCount(HttpServletRequest request,
                                           @ApiParam(value = "Get attributes with name containing specified " //
                                                   + "text for attributeDisplayNameFilter") //
                                           @RequestParam(value = "attributeDisplayNameFilter", required = false) //
