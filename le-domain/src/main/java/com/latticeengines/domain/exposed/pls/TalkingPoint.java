@@ -51,7 +51,7 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "PLAY_ID", updatable = false, insertable = false)
+    @JoinColumn(name = "FK_PLAY_ID", updatable = false, insertable = false)
     private Play play;
 
     @JsonProperty("title")
