@@ -14,11 +14,16 @@ public class AccountProxy extends MicroserviceRestApiProxy implements AccountInt
     }
 
     @Override
+    public long getAccountsCount(String customerSpace, String start, DataRequest dataRequest) {
+        String url = constructUrl("/{customerSpace}/accounts/count?start={start}", customerSpace, start);
+        return post("get Count", url, dataRequest, Integer.class);
+    }
+
+    @Override
     public DataPage getAccounts(String customerSpace, String start, Integer offset, Integer pageSize,
             DataRequest dataRequest) {
-        String url = constructUrl(
-                "/{customerSpace}/accounts/data?start={start}&offset={offset}&pageSize={pagesize}", customerSpace,
-                start, offset, pageSize);
+        String url = constructUrl("/{customerSpace}/accounts/data?start={start}&offset={offset}&pageSize={pagesize}",
+                customerSpace, start, offset, pageSize);
         return post("get Data", url, dataRequest, DataPage.class);
     }
 }

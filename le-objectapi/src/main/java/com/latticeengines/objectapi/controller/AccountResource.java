@@ -44,6 +44,20 @@ public class AccountResource implements AccountInterface {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(AccountResource.class);
 
+    @RequestMapping(value = "/count", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the number of rows for the specified parameters")
+    @Override
+    public long getAccountsCount(String customerSpace, String start, DataRequest dataRequest) {
+        long count = -1;
+        Query query = accountQueryService.generateAccountQuery(start, dataRequest);
+        try (PerformanceTimer timer = new PerformanceTimer("fetch count")) {
+            count = queryEvaluator.evaluate(dataCollectionProxy.getDefaultAttributeRepository(customerSpace), query)
+                    .fetchCount();
+        }
+        return count;
+    }
+
     /*
      * Based on
      * https://confluence.lattice-engines.com/display/ENG/PlayMakerAPI+-+Datastore+proposal+for+Recommendation%
@@ -52,7 +66,7 @@ public class AccountResource implements AccountInterface {
      */
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Retrieve Account data for the specified parameters; by default returns AccountId, LatticeAccountId, SalesforceAccountID, LastModified ")
+    @ApiOperation(value = "Retrieve Account data for the specified parameters; by default returns AccountId, LatticeAccountId, SalesforceAccountID, LastModified")
     @Override
     public DataPage getAccounts(@PathVariable String customerSpace,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,

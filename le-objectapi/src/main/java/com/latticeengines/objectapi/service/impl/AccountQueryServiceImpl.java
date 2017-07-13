@@ -22,7 +22,7 @@ import com.latticeengines.objectapi.service.AccountQueryService;
 public class AccountQueryServiceImpl implements AccountQueryService {
 
     @Override
-    public Query generateAccountQuery(String start, Integer offset, Integer pageSize, DataRequest dataRequest) {
+    public Query generateAccountQuery(String start, DataRequest dataRequest) {
         List<Restriction> restrictions = new ArrayList<>();
         if (dataRequest == null) {
             dataRequest = new DataRequest();
@@ -54,7 +54,12 @@ public class AccountQueryServiceImpl implements AccountQueryService {
                 .select(BusinessEntity.Account, "AccountId", "LatticeAccountId", "SalesforceAccountID", "LastModified") //
                 .where(restriction) //
                 .orderBy(BusinessEntity.Account, "AccountId");
-        Query query = queryBuilder.build();
+        return queryBuilder.build();
+    }
+
+    @Override
+    public Query generateAccountQuery(String start, Integer offset, Integer pageSize, DataRequest dataRequest) {
+        Query query = generateAccountQuery(start, dataRequest);
 
         offset = (offset == null) ? 0 : offset;
         pageSize = (pageSize == null) ? QueryTranslator.MAX_ROWS : pageSize;

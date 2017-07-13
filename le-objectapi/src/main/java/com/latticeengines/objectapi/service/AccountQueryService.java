@@ -5,5 +5,7 @@ import com.latticeengines.domain.exposed.query.Query;
 
 public interface AccountQueryService {
 
+    Query generateAccountQuery(String start, DataRequest dataRequest);
+
     Query generateAccountQuery(String start, Integer offset, Integer pageSize, DataRequest dataRequest);
 }
