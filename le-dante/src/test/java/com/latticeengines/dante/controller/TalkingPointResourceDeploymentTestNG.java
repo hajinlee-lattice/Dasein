@@ -18,7 +18,7 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
 public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
-    private Play createDefaultPlay() {
+    private Play createDefaultPlayInDB() {
         Play play = new Play();
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME);
@@ -52,7 +52,7 @@ public class TalkingPointResourceDeploymentTestNG extends AbstractTestNGSpringCo
     @BeforeClass(groups = "deployment")
     public void setup() {
 
-        Play play = plsProxy.createOrUpdatePlay(null, createDefaultPlay());
+        Play play = createDefaultPlayInDB();
         // DanteTalkingPoint dtp =
         // danteTalkingPointEntityMgr.findByExternalID(externalID);
         // if (dtp != null)

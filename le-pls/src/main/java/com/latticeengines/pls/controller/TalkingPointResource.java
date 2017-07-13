@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.TalkingPoint;
+import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -44,30 +44,34 @@ public class TalkingPointResource {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<?> createOrUpdate(@RequestBody List<TalkingPoint> talkingPoints) {
-        return talkingPointProxy.createOrUpdate(talkingPoints);
+    public ResponseDocument<?> createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_38008);
+        }
+        return talkingPointProxy.createOrUpdate(talkingPoints, customerSpace.toString());
     }
 
     @RequestMapping(value = "/{externalID}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
-    public ResponseDocument<TalkingPoint> findByName(@PathVariable String name) {
+    public ResponseDocument<TalkingPointDTO> findByName(@PathVariable String name) {
         return talkingPointProxy.findByName(name);
     }
 
     @RequestMapping(value = "/play/{playId}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get all the Talking Points of the given play")
-    public ResponseDocument<List<TalkingPoint>> findAllByPlayId(@PathVariable Long playId) {
-        return talkingPointProxy.findAllByPlayID(playId);
+    public ResponseDocument<List<TalkingPointDTO>> findAllByPlayName(@PathVariable String playName) {
+        return talkingPointProxy.findAllByPlayName(playName);
     }
 
     @RequestMapping(value = "/publish", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "get a Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<?> publish(@RequestParam("playId") Long playId) {
-        return talkingPointProxy.publish(playId);
+    public ResponseDocument<?> publish(@RequestParam("playName") String playName) {
+        return talkingPointProxy.publish(playName);
     }
 
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)

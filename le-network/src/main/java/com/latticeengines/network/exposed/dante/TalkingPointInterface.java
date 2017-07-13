@@ -4,22 +4,22 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
-import com.latticeengines.domain.exposed.pls.TalkingPoint;
+import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 
 public interface TalkingPointInterface {
 
-    ResponseDocument<?> createOrUpdate(List<TalkingPoint> talkingPoints);
+    ResponseDocument<?> createOrUpdate(List<TalkingPointDTO> talkingPoints, String customerSpace);
 
-    ResponseDocument<?> delete(String externalID);
+    ResponseDocument<?> delete(String name);
 
-    ResponseDocument<List<TalkingPoint>> findAllByPlayID(Long playID);
+    ResponseDocument<List<TalkingPointDTO>> findAllByPlayName(String playName);
 
-    ResponseDocument<TalkingPoint> findByName(String name);
+    ResponseDocument<TalkingPointDTO> findByName(String name);
 
     ResponseDocument<DantePreviewResources> getPreviewResources(String customerSpace);
 
     // ResponseDocument<TalkingPointPreview> getTalkingPointPreview(String
     // PlayID);
 
-    ResponseDocument<?> publish(Long playId);
+    ResponseDocument<?> publish(String playName);
 }

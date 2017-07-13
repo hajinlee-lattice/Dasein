@@ -17,7 +17,6 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Type;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
@@ -42,16 +41,12 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     private Long pid;
 
     @JsonProperty("name")
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", nullable = false, unique = true)
     private String name;
 
-    @JsonProperty("play_id")
-    @Column(name = "PLAY_ID", nullable = false)
-    private Long playId;
-
-    @JsonIgnore
+    @JsonProperty("play")
     @ManyToOne
-    @JoinColumn(name = "FK_PLAY_ID", updatable = false, insertable = false)
+    @JoinColumn(name = "PLAY_ID", nullable = false)
     private Play play;
 
     @JsonProperty("title")
@@ -91,14 +86,6 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Long getPlayId() {
-        return playId;
-    }
-
-    public void setPlayId(Long playId) {
-        this.playId = playId;
     }
 
     public Play getPlay() {

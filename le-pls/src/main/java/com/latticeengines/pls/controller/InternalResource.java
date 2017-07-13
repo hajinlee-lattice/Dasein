@@ -72,6 +72,7 @@ import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -91,6 +92,7 @@ import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNotesService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.PlayLaunchService;
+import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -188,6 +190,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private PlayLaunchService playLaunchService;
+
+    @Autowired
+    private PlayService playService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -1287,5 +1292,14 @@ public class InternalResource extends InternalResourceBase {
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
         playLaunch.setLaunchState(state);
         return playLaunchService.update(playLaunch);
+    }
+
+    @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get play for a specific tenant based on playName")
+    public Play getPlay(@PathVariable String playName, CustomerSpace customerSpace) {
+        log.debug(String.format("Get play with %s playName.", playName));
+        manufactureSecurityContextForInternalAccess(customerSpace.getTenantId());
+        return playService.getPlayByName(playName);
     }
 }

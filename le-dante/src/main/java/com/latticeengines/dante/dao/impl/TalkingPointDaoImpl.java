@@ -22,12 +22,13 @@ public class TalkingPointDaoImpl extends BaseDaoImpl<TalkingPoint> implements Ta
     }
 
     @SuppressWarnings("unchecked")
-    public List<TalkingPoint> findAllByPlayID(Long playId) {
+    public List<TalkingPoint> findAllByPlayName(String playName) {
         Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format("select tp from %s tp " + "where tp.playId = :playId",
+        String queryStr = String.format("select tp from %s tp " + "where tp.play.name = :playName",
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setParameter("playId", playId);
+        query.setParameter("playName", playName);
         return (List<TalkingPoint>) query.list();
     }
+
 }

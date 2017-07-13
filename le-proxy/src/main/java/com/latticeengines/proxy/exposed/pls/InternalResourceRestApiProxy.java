@@ -487,17 +487,13 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         restTemplate.put(url, null);
     }
 
-    public Play createOrUpdatePlay(CustomerSpace customerSpace, //
-            Play play) {
+    public Play findPlayByName(CustomerSpace customerSpace, String playName) {
         try {
-            String url = constructUrl("pls/internal/plays", customerSpace.toString());
-
-            log.debug("Create Play from " + url);
-            play = restTemplate.postForObject(url, play, Play.class);
-
-            return play;
+            String url = constructUrl("pls/internal/play/" + playName, customerSpace.toString());
+            log.debug("Find Play from by name (" + playName + ")" + url);
+            return restTemplate.getForObject(url, Play.class);
         } catch (Exception e) {
-            throw new RuntimeException("getPlayLaunch: Remote call failure: " + e.getMessage(), e);
+            throw new RuntimeException("getPlay: Remote call failure: " + e.getMessage(), e);
         }
     }
 }

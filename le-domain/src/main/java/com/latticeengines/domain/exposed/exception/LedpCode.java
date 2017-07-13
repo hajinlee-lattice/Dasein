@@ -593,8 +593,8 @@ public enum LedpCode {
     LEDP_37014("Could not find the default data collection"), //
 
     // le-dante
-    LEDP_38001("Could not find Talking point with External_ID {0}"), //
-    LEDP_38002("Failed to create Talking points"), //
+    LEDP_38001("Could not find Talking point with name {0}"), //
+    LEDP_38002("Failed to create/update Talking points"), //
     LEDP_38003("Could not find accounts for Tenant {0}"), //
     LEDP_38004("Cannot return less than 1 account"), //
     LEDP_38005("Failed to find the MetadataDocument for the CustomerSpace {0}"), //
@@ -602,7 +602,10 @@ public enum LedpCode {
     LEDP_38007("Failed to populate account attributes"), //
     LEDP_38008("No tenant not found for the request"), //
     LEDP_38009("Invalid Customer space {0}"), //
-    LEDP_38010("Unable to compile talking point preview resources");
+    LEDP_38010("Unable to compile talking point preview resources"), //
+    LEDP_38011("PlayName should be same for all talking points"), //
+    LEDP_38012("Failed to find the play by name {0}"), //
+    LEDP_38013("Failed to retrieve the play");
 
     private String message;
 

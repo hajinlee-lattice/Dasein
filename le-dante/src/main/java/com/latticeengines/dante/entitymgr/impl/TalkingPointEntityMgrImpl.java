@@ -29,7 +29,12 @@ public class TalkingPointEntityMgrImpl extends BaseEntityMgrImpl<TalkingPoint> i
     }
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<TalkingPoint> findAllByPlayID(Long playId) {
-        return talkingPointDao.findAllByPlayID(playId);
+    public List<TalkingPoint> findAllByPlayName(String playName) {
+        return talkingPointDao.findAllByPlayName(playName);
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public TalkingPoint findByName(String name) {
+        return talkingPointDao.findByField("name", name);
     }
 }
