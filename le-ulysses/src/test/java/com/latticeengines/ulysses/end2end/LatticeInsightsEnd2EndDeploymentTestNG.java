@@ -37,7 +37,7 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void getCategories() throws IOException {
         Set<String> expectedCategoryStrSet = getExpectedCategorySet();
 
@@ -58,7 +58,7 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "deployment", dependsOnMethods = "getCategories", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "getCategories")
     public void getSubcategories() throws IOException {
         String url = getUlyssesRestAPIPort() + "/ulysses/latticeinsights/insights/subcategories?category="
                 + Category.TECHNOLOGY_PROFILE.toString();
@@ -89,14 +89,14 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
         return expectedCategorySet;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getSubcategories", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "getSubcategories")
     public void getAllAttributes() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getAttributes(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getAllAttributes", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "getAllAttributes")
     public void customizeAttributes() throws IOException {
         attributes = getAttributes(false);
         String fieldName = attributes.get(0).getFieldName();

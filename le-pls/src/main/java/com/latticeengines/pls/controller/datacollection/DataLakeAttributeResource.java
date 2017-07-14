@@ -1,7 +1,6 @@
-package com.latticeengines.app.exposed.controller.datacollection;
+package com.latticeengines.pls.controller.datacollection;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.pls.service.DataLakeService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 import io.swagger.annotations.Api;
@@ -20,7 +19,7 @@ import io.swagger.annotations.ApiParam;
 @Api(value = "metadata", description = "Common REST resource for attributes")
 @RestController
 @RequestMapping("/datacollection/attributes")
-public class CommonAttributeResource {
+public class DataLakeAttributeResource {
 
     @Autowired
     private DataLakeService dataLakeService;

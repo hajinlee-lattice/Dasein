@@ -3,7 +3,6 @@ package com.latticeengines.pls.workflow;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -12,19 +11,11 @@ import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportVdbTableAndPublishWorkflowConfiguration;
-import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Deprecated
 @Component
 public class ImportVdbTableAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     private static final Logger log = LoggerFactory.getLogger(ImportVdbTableAndPublishWorkflowSubmitter.class);
-
-    @Autowired
-    private EaiJobDetailProxy eaiJobDetailProxy;
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     public ApplicationId submit(VdbLoadTableConfig loadConfig) {
         String customSpace = CustomerSpace.parse(loadConfig.getTenantId()).toString();

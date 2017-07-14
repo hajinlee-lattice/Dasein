@@ -1,4 +1,4 @@
-package com.latticeengines.app.exposed.controller.datacollection;
+package com.latticeengines.pls.controller.datacollection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.pls.service.DataLakeService;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 
@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiParam;
 @Api(value = "statistics", description = "Statistics of entities in data collection")
 @RestController
 @RequestMapping("/datacollection/statistics")
-public class CommonStatisticsResource {
+public class DataLakeStatisticsResource {
 
     @Autowired
     private DataLakeService dataLakeService;

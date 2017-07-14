@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.app.exposed.controller.LatticeInsightsResource;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;

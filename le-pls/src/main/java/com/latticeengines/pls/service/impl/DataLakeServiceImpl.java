@@ -1,4 +1,4 @@
-package com.latticeengines.app.exposed.service.impl;
+package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
-import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.pls.service.DataLakeService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;

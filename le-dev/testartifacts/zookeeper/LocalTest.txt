@@ -61,23 +61,11 @@
               string_value = 'SFDC'
           /feature-flags.json
             AllowPivotFile = False
-            EnableDataProfilingV2 = False
-            EnableFuzzyMatch = False
             EnableInternalEnrichmentAttributes = False
-            EnableLatticeMarketoCredentialPage = False
-            EnablePocTransform = False
             EnableDataEncryption = True
-            EnableCampaignUI = False
-            Quota = True
-            TargetMarket = True
-            UseDnbRtsAndModeling = True
-            UseEloquaSettings = True
-            UseMarketoSettings = True
-            UseSalesforceSetting = True
-            ValidateCredsUsingEai = True
             LatticeInsights = True
-            BypassDnbCache = True
             EnableCdl = True
+            EnableTalkingPoints = True
           /properties.json
             description = u'A PD solution for LocalTest'
             displayName = u'LocalTest Tenant'

@@ -28,6 +28,8 @@ import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -430,6 +432,26 @@ public class BatonServiceImpl implements BatonService {
                 .buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId)
                 .append(new Path("/" + PathConstants.SPACECONFIGURATION_NODE));
         return loadDirectory(spaceConfig, spaceConfigPath);
+    }
+
+    public boolean hasProduct(CustomerSpace customerSpace, LatticeProduct product) {
+        String contractId = customerSpace.getContractId();
+        String tenantId = customerSpace.getTenantId();
+        Path productsPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID).append("SpaceConfiguration").append("Products");
+        try {
+            String data = CamilleEnvironment.getCamille().get(productsPath).getData();
+            List<String> productStrs = JsonUtils.convertList(JsonUtils.deserialize(data, List.class), String.class);
+            List<LatticeProduct> products = new ArrayList<>();
+            if (productStrs != null) {
+                for (String str : productStrs) {
+                    products.add(LatticeProduct.fromName(str));
+                }
+            }
+            return products.contains(product);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get products for customer " + tenantId, e);
+        }
     }
 
 }

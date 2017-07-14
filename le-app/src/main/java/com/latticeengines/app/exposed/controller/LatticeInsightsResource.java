@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.app.exposed.controller;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,8 +47,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.service.SessionService;
-import com.latticeengines.security.exposed.util.SecurityUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -58,7 +56,6 @@ import io.swagger.annotations.ApiParam;
 @Api(value = "latticeinsights", description = "REST resource for Lattice Insights")
 @RestController
 @RequestMapping(value = "/latticeinsights")
-@PreAuthorize("hasRole('Edit_PLS_Configurations')")
 public class LatticeInsightsResource {
 
     public static final String INSIGHTS_PATH = "/insights";
@@ -66,9 +63,6 @@ public class LatticeInsightsResource {
     public static final String SEGMENTS_PATH = "/segments";
 
     public static final String AM_STATS_PATH = "/stats";
-
-    @Autowired
-    private SessionService sessionService;
 
     @Autowired
     private AttributeService attributeService;
@@ -119,7 +113,7 @@ public class LatticeInsightsResource {
     public void saveInsightsAttributes(HttpServletRequest request, //
             @ApiParam(value = "Update lead enrichment selection", required = true) //
             @RequestBody LeadEnrichmentAttributesOperationMap attributes) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         attributeService.save(attributes, tenant, getInsightsPremiumAttributesLimitation(request),
                 considerInternalAttributes);
@@ -150,7 +144,7 @@ public class LatticeInsightsResource {
             @ApiParam(value = "Maximum number of matching attributes in page") //
             @RequestParam(value = "max", required = false) //
             Integer max) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
@@ -178,7 +172,7 @@ public class LatticeInsightsResource {
             @ApiParam(value = "Should get only selected attribute") //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
                 : Category.fromName(category));
@@ -194,7 +188,7 @@ public class LatticeInsightsResource {
             @ApiParam(value = "Should get only selected attribute") //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
         String dateString = dateFormat.format(new Date());
@@ -227,7 +221,7 @@ public class LatticeInsightsResource {
     @ResponseBody
     @ApiOperation(value = "Get premium attributes limitation")
     public Map<String, Integer> getInsightsPremiumAttributesLimitation(HttpServletRequest request) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Tenant tenant = MultiTenantContext.getTenant();
         return attributeService.getPremiumAttributesLimitation(tenant);
     }
 
@@ -237,7 +231,7 @@ public class LatticeInsightsResource {
     @ResponseBody
     @ApiOperation(value = "Get selected attributes count")
     public Integer getInsightsSelectedAttributeCount(HttpServletRequest request) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         return attributeService.getSelectedAttributeCount(tenant, considerInternalAttributes);
     }
@@ -248,7 +242,7 @@ public class LatticeInsightsResource {
     @ResponseBody
     @ApiOperation(value = "Get selected premium attributes count")
     public Integer getInsightsSelectedAttributePremiumCount(HttpServletRequest request) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         return attributeService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
     }
@@ -334,7 +328,7 @@ public class LatticeInsightsResource {
             }
         }
 
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
 
         TopNAttributes topNAttr = enrichmentService.getTopAttrs(category, max,
