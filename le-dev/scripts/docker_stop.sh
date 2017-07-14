@@ -9,6 +9,10 @@ if [ "${IMAGE}" = "tez-ui" ] || [ "${IMAGE}" = "mysql" ] || [ "${IMAGE}" = "zook
         -p 8000:8000 \
         latticeengines/${IMAGE}
 
+elif [ "${IMAGE}" = "kafka" ]; then
+
+    docker-compose -p kafka -f $WSHOME/le-dev/scripts/kafka-docker-compose.yml down
+
 else
 
     docker stop lattice_${IMAGE}
