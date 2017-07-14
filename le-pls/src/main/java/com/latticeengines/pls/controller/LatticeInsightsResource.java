@@ -191,8 +191,7 @@ public class LatticeInsightsResource {
     @ResponseBody
     @ApiOperation(value = "Download lead enrichment attributes")
     public void downloadEnrichmentCSV(HttpServletRequest request, HttpServletResponse response,
-            @ApiParam(value = "Should get only selected attribute", //
-                    required = false) //
+            @ApiParam(value = "Should get only selected attribute") //
             @RequestParam(value = "onlySelectedAttributes", required = false) //
             Boolean onlySelectedAttributes) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
