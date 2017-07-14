@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
 import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
+import com.latticeengines.dante.metadata.DanteTalkingPointValue;
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
@@ -121,15 +121,33 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         talkingPointEntityMgr.delete(tp);
     }
 
-    public void publish(String playName) {
-        List<TalkingPoint> tps = talkingPointEntityMgr.findAllByPlayName(playName);
-        throw new NotImplementedException();
-        // for (TalkingPoint tp : tps) {
-        // danteTalkingPointEntityMgr.createOrUpdate(covertForDante(tp));
-        // }
+    public void publish(String playName, String customerSpace) {
+        try {
+            log.info("Publishing Talkingpoints for play " + playName + " to Dante");
+            List<TalkingPoint> tps = talkingPointEntityMgr.findAllByPlayName(playName);
+            List<DanteTalkingPoint> toBeDeleted = danteTalkingPointEntityMgr.findAllByPlayID(playName);
+
+            for (DanteTalkingPoint dtp : toBeDeleted) {
+                danteTalkingPointEntityMgr.delete(dtp);
+            }
+
+            for (TalkingPoint tp : tps) {
+                danteTalkingPointEntityMgr
+                        .createOrUpdate(covertForDante(tp, CustomerSpace.parse(customerSpace).getTenantId()));
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_38014, e, new String[] { playName, customerSpace });
+        }
     }
 
-    private DanteTalkingPoint covertForDante(TalkingPoint tp) {
-        return null;
+    private DanteTalkingPoint covertForDante(TalkingPoint tp, String customerId) {
+        DanteTalkingPoint dtp = new DanteTalkingPoint();
+        dtp.setCreationDate(tp.getCreated());
+        dtp.setCustomerID(customerId);
+        dtp.setExternalID(tp.getName());
+        dtp.setLastModificationDate(tp.getUpdated());
+        dtp.setPlayExternalID(tp.getPlay().getName());
+        dtp.setValue(new DanteTalkingPointValue(tp).toString());
+        return dtp;
     }
 }

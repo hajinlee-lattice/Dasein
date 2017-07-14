@@ -88,6 +88,13 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(playTpsResponse);
         Assert.assertEquals(playTpsResponse.getResult().size(), 2);
 
+        ResponseDocument<?> publishResponse = restTemplate.postForObject( //
+                getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
+                null, ResponseDocument.class);
+
+        Assert.assertNotNull(publishResponse);
+        Assert.assertNull(publishResponse.getErrors());
+
         restTemplate.delete(getRestAPIHostPort() + "/pls/dante/talkingpoints/plsDeploymentTestTP1", //
                 ResponseDocument.class);
         restTemplate.delete(getRestAPIHostPort() + "/pls/dante/talkingpoints/plsDeploymentTestTP2", //
@@ -99,6 +106,13 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         Assert.assertNotNull(playTpsResponse);
         Assert.assertEquals(playTpsResponse.getResult().size(), 0);
+
+        publishResponse = restTemplate.postForObject( //
+                getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
+                null, ResponseDocument.class);
+
+        Assert.assertNotNull(publishResponse);
+        Assert.assertNull(publishResponse.getErrors());
 
         ResponseDocument<DantePreviewResources> previewResponse = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/previewresources", //

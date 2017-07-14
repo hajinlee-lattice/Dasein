@@ -21,5 +21,5 @@ public interface TalkingPointInterface {
     // ResponseDocument<TalkingPointPreview> getTalkingPointPreview(String
     // PlayID);
 
-    ResponseDocument<?> publish(String playName);
+    ResponseDocument<?> publish(String playName, String customerSpace);
 }

@@ -17,5 +17,5 @@ public interface TalkingPointService {
 
     DantePreviewResources getPreviewResources(String customerSpace);
 
-    void publish(String playName);
+    void publish(String playName, String customerSpace);
 }

@@ -52,8 +52,8 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
     }
 
     @SuppressWarnings("unchecked")
-    public ResponseDocument<?> publish(String playName) {
-        String url = constructUrl("/publish" + "?playName=" + playName);
+    public ResponseDocument<?> publish(String playName, String customerSpace) {
+        String url = constructUrl("/publish" + "?playName=" + playName + "&customerSpace=" + customerSpace);
         return post("publish", url, null, ResponseDocument.class);
     }
 

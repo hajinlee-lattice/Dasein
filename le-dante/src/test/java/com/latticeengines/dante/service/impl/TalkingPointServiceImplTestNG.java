@@ -1,17 +1,20 @@
 package com.latticeengines.dante.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
+import com.latticeengines.dante.service.TalkingPointService;
+
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
 public class TalkingPointServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
-    // @Autowired
-    // private TalkingPointService talkingPointService;
-    //
+    @Autowired
+    private TalkingPointService talkingPointService;
+
     // @Autowired
     // private DanteTalkingPointEntityMgr danteTalkingPointEntityMgr;
     //
@@ -67,5 +70,11 @@ public class TalkingPointServiceImplTestNG extends AbstractTestNGSpringContextTe
     //
     // dtp = danteTalkingPointEntityMgr.findByField("External_ID", externalID);
     // Assert.assertNull(dtp, "Failure Cause: Talking point was not deleted");
+    // }
+
+    // @Test(groups = "functional")
+    // public void testPublish() {
+    // talkingPointService.publish("play__01798207-a121-4e99-8ae3-eaba6b979c6e",
+    // "LETest1499999180448.LETest1499999180448.Production");
     // }
 }

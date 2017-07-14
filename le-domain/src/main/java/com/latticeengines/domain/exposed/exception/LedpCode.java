@@ -605,7 +605,8 @@ public enum LedpCode {
     LEDP_38010("Unable to compile talking point preview resources"), //
     LEDP_38011("PlayName should be same for all talking points"), //
     LEDP_38012("Failed to find the play by name {0}"), //
-    LEDP_38013("Failed to retrieve the play");
+    LEDP_38013("Failed to retrieve the play"), //
+    LEDP_38014("Failed to publish Talkingpoint for the play {0}, CustomerSpace {1}");
 
     private String message;
 

@@ -71,7 +71,11 @@ public class TalkingPointResource {
     @ApiOperation(value = "get a Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<?> publish(@RequestParam("playName") String playName) {
-        return talkingPointProxy.publish(playName);
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_38008);
+        }
+        return talkingPointProxy.publish(playName, customerSpace.toString());
     }
 
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)

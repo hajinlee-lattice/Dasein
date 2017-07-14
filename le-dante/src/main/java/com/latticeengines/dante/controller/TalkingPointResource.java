@@ -61,9 +61,10 @@ public class TalkingPointResource implements TalkingPointInterface {
     @RequestMapping(value = "/publish", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Publish given play's Talking Points to dante")
-    public ResponseDocument<?> publish(@RequestParam("playName") String playName) {
+    public ResponseDocument<?> publish(@RequestParam("playName") String playName,
+            @RequestParam("customerSpace") String customerSpace) {
         try {
-            talkingPointService.publish(playName);
+            talkingPointService.publish(playName, customerSpace);
             return SimpleBooleanResponse.successResponse();
         } catch (Exception e) {
             return ResponseDocument.failedResponse(e);
