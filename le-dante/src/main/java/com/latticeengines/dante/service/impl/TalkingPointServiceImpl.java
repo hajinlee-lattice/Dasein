@@ -68,8 +68,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
         Play play;
         try {
-            play = internalResourceRestApiProxy.findPlayByName(CustomerSpace.parse(customerSpace),
-                    tps.get(0).getPlayName());
+            play = internalResourceRestApiProxy.findPlayByName(tps.get(0).getPlayName(), customerSpace);
             if (play == null) {
                 throw new LedpException(LedpCode.LEDP_38012, new String[] { tps.get(0).getPlayName() });
             }

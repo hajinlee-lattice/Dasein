@@ -78,7 +78,7 @@ public class TalkingPointResource implements TalkingPointInterface {
         return ResponseDocument.successResponse(talkingPointService.getPreviewResources(customerSpace));
     }
 
-    @RequestMapping(value = "/{talkingPointExternalID}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete a Talking Point ")
     public ResponseDocument<?> delete(@PathVariable String talkingPointName) {

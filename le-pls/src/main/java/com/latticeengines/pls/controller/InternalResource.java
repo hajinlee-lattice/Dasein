@@ -1294,12 +1294,12 @@ public class InternalResource extends InternalResourceBase {
         return playLaunchService.update(playLaunch);
     }
 
-    @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/play/{playName}/customerspace/{customerSpace:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get play for a specific tenant based on playName")
-    public Play getPlay(@PathVariable String playName, CustomerSpace customerSpace) {
+    public Play getPlay(@PathVariable String playName, @PathVariable String customerSpace) {
+        manufactureSecurityContextForInternalAccess(customerSpace);
         log.debug(String.format("Get play with %s playName.", playName));
-        manufactureSecurityContextForInternalAccess(customerSpace.getTenantId());
         return playService.getPlayByName(playName);
     }
 }

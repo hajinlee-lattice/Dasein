@@ -448,10 +448,10 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             }
         }
         if (offset != null) {
-            url += "&" + "offset" + "=" + offset.intValue();
+            url += "&" + "offset" + "=" + offset;
         }
         if (max != null) {
-            url += "&" + "max" + "=" + max.intValue();
+            url += "&" + "max" + "=" + max;
         }
 
         if (considerInternalAttributes) {
@@ -469,9 +469,8 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
                     customerSpace.toString());
 
             log.debug("Get from " + url);
-            PlayLaunch playLaunch = restTemplate.getForObject(url, PlayLaunch.class);
 
-            return playLaunch;
+            return restTemplate.getForObject(url, PlayLaunch.class);
         } catch (Exception e) {
             throw new RuntimeException("getPlayLaunch: Remote call failure: " + e.getMessage(), e);
         }
@@ -487,10 +486,10 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         restTemplate.put(url, null);
     }
 
-    public Play findPlayByName(CustomerSpace customerSpace, String playName) {
+    public Play findPlayByName(String playName, String customerSpace) {
         try {
-            String url = constructUrl("pls/internal/play/" + playName, customerSpace.toString());
-            log.debug("Find Play from by name (" + playName + ")" + url);
+            String url = constructUrl("pls/internal/play/" + playName + "/customerspace/" + customerSpace);
+            log.debug("Find Play by name (" + playName + ")" + url);
             return restTemplate.getForObject(url, Play.class);
         } catch (Exception e) {
             throw new RuntimeException("getPlay: Remote call failure: " + e.getMessage(), e);

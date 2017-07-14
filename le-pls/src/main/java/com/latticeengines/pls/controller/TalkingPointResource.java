@@ -59,7 +59,7 @@ public class TalkingPointResource {
         return talkingPointProxy.findByName(name);
     }
 
-    @RequestMapping(value = "/play/{playId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get all the Talking Points of the given play")
     public ResponseDocument<List<TalkingPointDTO>> findAllByPlayName(@PathVariable String playName) {
