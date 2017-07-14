@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -370,7 +371,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
 
     private double formatDouble(double x, int digits) {
         double base = Math.pow(10, (double) digits);
-        return Math.round(x * base) / base;
+        return (BigDecimal.valueOf(Math.round(x * base)).divide(BigDecimal.valueOf(base))).doubleValue();
     }
 
     private double roundTo(double x, int sigDigits) {
@@ -397,7 +398,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         } else if (chSet2.contains(xStr.charAt(secondDigit))) {
             xStr = xStr.substring(0, secondDigit) + "5" + xStr.substring(secondDigit + 1);
         }
-        return Integer.valueOf(xStr).doubleValue();
+        return Double.valueOf(xStr);
     }
 
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
