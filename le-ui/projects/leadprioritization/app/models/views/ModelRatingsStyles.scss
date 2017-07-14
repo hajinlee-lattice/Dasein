@@ -191,6 +191,23 @@
 	border-right: #1c3d59 solid 1px;
 	position: absolute;
 	z-index: 5;
+	.value {
+		opacity: 0;
+		background: #fff;
+	    border: #333 solid 2px;
+	    border-radius: 50%;
+	    color: #333;
+	    font-size: 12px;
+	    margin-right: -12px;
+	    line-height: 1;
+	    padding: 2px;
+	    font-weight: bold;
+	    -webkit-transition: opacity 1s;
+    	transition: 		opacity 1s;
+	    &.is-moving {
+	    	opacity: 1;
+	    }
+	}
 	.handle {
 		position: absolute;
 		bottom: -5px;

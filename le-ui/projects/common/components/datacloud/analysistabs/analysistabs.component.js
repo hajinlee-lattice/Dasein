@@ -3,13 +3,13 @@ angular.module('common.datacloud.analysistabs', [
     ])
 .controller('AnalysisTabsController', function (
     $state, $stateParams, $scope, FeatureFlagService, BrowserStorageUtility,
-    ResourceUtility, DataCloudStore, QueryStore
+    ResourceUtility, MyDataStore, QueryStore
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
-        DataCloudStore: DataCloudStore,
+        MyDataStore: MyDataStore,
         stateParams: $stateParams,
         section: $stateParams.section,
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
