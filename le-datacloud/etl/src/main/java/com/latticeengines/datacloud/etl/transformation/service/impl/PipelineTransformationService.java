@@ -470,7 +470,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                 int iteration = (Integer) iterationContext.get(CTX_ITERATION);
                 log.info("Starting " + iteration + "-th iteration ...");
                 succeeded = transformer.transform(progress, workflowDir, step);
-                saveSourceVersionWithoutHive(progress, null, step.getTarget(), step.getTargetVersion(), workflowDir);
+                saveSourceVersionWithoutHive(progress, null, step.getTarget(), step.getTargetVersion(), workflowDir, step.getCount());
                 cleanupWorkflowDir(progress, workflowDir);
                 converged = updateIterationContext(step, iterationContext);
                 if (!converged) {

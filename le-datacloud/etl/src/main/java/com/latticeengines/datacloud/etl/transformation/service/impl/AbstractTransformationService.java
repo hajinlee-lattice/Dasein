@@ -270,7 +270,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     protected boolean saveSourceVersion(TransformationProgress progress, Schema schema, Source source, String version,
             String workflowDir) {
-        boolean success = saveSourceVersionWithoutHive(progress, schema, source, version, workflowDir);
+        boolean success = saveSourceVersionWithoutHive(progress, schema, source, version, workflowDir, null);
         if (success && !(source instanceof TableSource)) {
             try {
                 // register hive table
@@ -294,7 +294,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     }
 
     protected boolean saveSourceVersionWithoutHive(TransformationProgress progress, Schema schema, Source source,
-            String version, String workflowDir) {
+            String version, String workflowDir, Long count) {
         String avroWorkflowDir = finalWorkflowOuputDir(progress);
         // extract schema
         try {
@@ -327,7 +327,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
             if (source instanceof TableSource) {
                 // register table with metadata proxy
-                TableSource tableSource = hdfsSourceEntityMgr.materializeTableSource((TableSource) source);
+                TableSource tableSource = hdfsSourceEntityMgr.materializeTableSource((TableSource) source, count);
                 metadataProxy.updateTable(tableSource.getCustomerSpace().toString(), tableSource.getTable().getName(),
                         tableSource.getTable());
             } else {

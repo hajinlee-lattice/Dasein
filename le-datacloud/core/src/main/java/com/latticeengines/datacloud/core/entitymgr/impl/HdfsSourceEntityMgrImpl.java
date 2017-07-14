@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -279,7 +279,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
-    public TableSource materializeTableSource(TableSource tableSource) {
+    public TableSource materializeTableSource(TableSource tableSource, Long count) {
         boolean expandBucketed = tableSource.isExpandBucketedAttrs();
         String tableName = tableSource.getTable().getName();
         CustomerSpace customerSpace = tableSource.getCustomerSpace();
@@ -294,6 +294,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                     tableSource.getLastModifiedKey());
         }
         table.setName(tableName);
+        if (count != null) {
+            table.getExtracts().get(0).setProcessedRecords(count);
+        }
         return new TableSource(table, customerSpace);
     }
 
