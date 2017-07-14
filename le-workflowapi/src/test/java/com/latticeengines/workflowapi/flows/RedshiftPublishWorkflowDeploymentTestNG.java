@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RedshiftPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
@@ -45,6 +46,9 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
     @Autowired
     @Qualifier(value = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
@@ -99,6 +103,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
                 .append(tableName).append("a.avro").toString();
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFilePath, dest);
         Table table = MetadataConverter.getTable(yarnConfiguration, dest);
+        metadataProxy.createTable(DEMO_CUSTOMERSPACE.toString(), table.getName(), table);
         Map<BusinessEntity, Table> sourceTables = new HashMap<>();
         sourceTables.put(BusinessEntity.Account, table);
         HdfsToRedshiftConfiguration exportConfig = createExportBaseConfig();
@@ -115,6 +120,8 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
         waitForCompletion(workflowId);
         verify(table.getName(), 5);
         HdfsUtils.rmdir(yarnConfiguration, dest);
+        metadataProxy.deleteTable(DEMO_CUSTOMERSPACE.toString(),
+                String.join("_", DEMO_CUSTOMERSPACE.getTenantId(), BusinessEntity.Account.name()));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "initialLoad")
@@ -125,6 +132,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
                 .append(tableName).append("b.avro").toString();
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFilePath, dest);
         Table table = MetadataConverter.getTable(yarnConfiguration, dest);
+        metadataProxy.createTable(DEMO_CUSTOMERSPACE.toString(), table.getName(), table);
         Map<BusinessEntity, Table> sourceTables = new HashMap<>();
         sourceTables.put(BusinessEntity.Account, table);
 
