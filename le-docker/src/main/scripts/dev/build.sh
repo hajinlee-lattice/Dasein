@@ -21,13 +21,13 @@ build_docker() {
 #pushd le-dynamo
 #build_docker latticeengines/dynamo
 #popd
-
-pushd le-mysql
-build_docker latticeengines/mysql
-popd
-
-#pushd le-zookeeper
-#build_docker latticeengines/zookeeper
+#
+#pushd le-mysql
+#build_docker latticeengines/mysql
 #popd
+
+pushd le-zookeeper
+build_docker latticeengines/zookeeper
+popd
 
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null

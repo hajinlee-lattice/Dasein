@@ -32,7 +32,6 @@ if [ -z "${ADVERTISE_IP}" ]; then
 fi
 
 # on local we pass in host name, and here we resolve it to ip
-
 if ! valid_ip ${ADVERTISE_IP} ; then
     ADVERTISE_IP=$(dig +short ${ADVERTISE_IP})
 fi

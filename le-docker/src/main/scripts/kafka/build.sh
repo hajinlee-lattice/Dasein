@@ -17,20 +17,20 @@ pushd le-schema-registry
 build_docker latticeengines/schema-registry
 popd
 
-pushd le-kafka-rest
-build_docker latticeengines/kafka-rest
-popd
-
-pushd le-kafka-connect
-build_docker latticeengines/kafka-connect
-popd
-
-pushd le-kafka-haproxy
-build_docker latticeengines/kafka-haproxy
-popd
-
-pushd le-kafka-manager
-build_docker latticeengines/kafka-manager
-popd
+#pushd le-kafka-rest
+#build_docker latticeengines/kafka-rest
+#popd
+#
+#pushd le-kafka-connect
+#build_docker latticeengines/kafka-connect
+#popd
+#
+#pushd le-kafka-haproxy
+#build_docker latticeengines/kafka-haproxy
+#popd
+#
+#pushd le-kafka-manager
+#build_docker latticeengines/kafka-manager
+#popd
 
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null

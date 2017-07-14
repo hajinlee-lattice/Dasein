@@ -12,9 +12,9 @@ RUN wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2
 
 # confluent
 ADD confluent.repo /etc/yum.repos.d/confluent.repo
-RUN rpm --import http://packages.confluent.io/rpm/3.0/archive.key \
+RUN rpm --import http://packages.confluent.io/rpm/3.2/archive.key \
     && yum clean all \
-    && yum -y -v install confluent-platform-2.11 \
+    && yum -y -v install confluent-platform-oss-2.11\
     && mkdir -p /var/lib/zookeeper \
     && touch /var/lib/zookeeper/myid
 
@@ -26,6 +26,6 @@ ADD kafka-server-stop /usr/bin/kafka-server-stop
 ADD server.properties /etc/kafka/server.properties
 ADD start.sh /start.sh
 
-EXPOSE 9092 9199
+EXPOSE 9092
 
 CMD ["bash", "/start.sh"]
