@@ -118,10 +118,10 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
 
         WorkflowExecutionId workflowId = workflowService.start(config);
         waitForCompletion(workflowId);
-        verify(table.getName(), 5);
+        String newTableName = String.join("_", DEMO_CUSTOMERSPACE.getTenantId(), BusinessEntity.Account.name());
+        verify(newTableName, 5);
         HdfsUtils.rmdir(yarnConfiguration, dest);
-        metadataProxy.deleteTable(DEMO_CUSTOMERSPACE.toString(),
-                String.join("_", DEMO_CUSTOMERSPACE.getTenantId(), BusinessEntity.Account.name()));
+        metadataProxy.deleteTable(DEMO_CUSTOMERSPACE.toString(), newTableName);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "initialLoad")
@@ -145,7 +145,8 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
         RedshiftPublishWorkflowConfiguration config = builder.build();
         WorkflowExecutionId workflowId = workflowService.start(config);
         waitForCompletion(workflowId);
-        verify(table.getName(), 8);
+        String newTableName = String.join("_", DEMO_CUSTOMERSPACE.getTenantId(), BusinessEntity.Account.name());
+        verify(newTableName, 8);
         HdfsUtils.rmdir(yarnConfiguration, dest);
     }
 
