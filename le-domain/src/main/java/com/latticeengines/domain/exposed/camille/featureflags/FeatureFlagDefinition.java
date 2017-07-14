@@ -15,6 +15,7 @@ public class FeatureFlagDefinition {
     private boolean configurable;
     private boolean modifiableAfterProvisioning = true;
     private boolean defaultValue = false;
+    private boolean deprecated = false;
 
     @JsonProperty("DisplayName")
     public String getDisplayName() {
@@ -74,6 +75,14 @@ public class FeatureFlagDefinition {
     @JsonProperty("DefaultValue")
     public boolean getDefaultValue() {
         return this.defaultValue;
+    }
+
+    public boolean isDeprecated() {
+        return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+        this.deprecated = deprecated;
     }
 
     @Override

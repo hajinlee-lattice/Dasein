@@ -56,17 +56,21 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
         // generate warning if no definition
         FeatureFlagDefinition def = getDefinition(id);
         boolean defaultValue = def != null && def.getDefaultValue();
-        FeatureFlagValueMap flags = getFlags(space);
-        if (flags == null) {
-            log.warn(String.format(
-                    "No feature flag value file defined for customer space %s. Using default value of %s: %s", space,
-                    id, String.valueOf(defaultValue)));
-            return defaultValue;
-        }
-        if (!flags.containsKey(id)) {
+        if (def != null && def.isDeprecated()) {
             return defaultValue;
         } else {
-            return flags.get(id);
+            FeatureFlagValueMap flags = getFlags(space);
+            if (flags == null) {
+                log.warn(String.format(
+                        "No feature flag value file defined for customer space %s. Using default value of %s: %s", space,
+                        id, String.valueOf(defaultValue)));
+                return defaultValue;
+            }
+            if (!flags.containsKey(id)) {
+                return defaultValue;
+            } else {
+                return flags.get(id);
+            }
         }
     }
 

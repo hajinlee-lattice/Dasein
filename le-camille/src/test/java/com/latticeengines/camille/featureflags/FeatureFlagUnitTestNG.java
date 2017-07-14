@@ -57,6 +57,23 @@ public class FeatureFlagUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testDeprecatedFlag() throws Exception {
+        final String id1 = "TestFlag1";
+        Assert.assertFalse(FeatureFlagClient.isEnabled(CamilleTestEnvironment.getCustomerSpace(), id1));
+        FeatureFlagDefinition featureFlag1 = new FeatureFlagDefinition();
+        featureFlag1.setConfigurable(true);
+        FeatureFlagClient.setDefinition(id1, featureFlag1);
+        FeatureFlagClient.setEnabled(CamilleTestEnvironment.getCustomerSpace(), id1, true);
+        Assert.assertTrue(FeatureFlagClient.isEnabled(CamilleTestEnvironment.getCustomerSpace(), id1));
+
+        // deprecate the flag
+        featureFlag1.setDefaultValue(false);
+        featureFlag1.setDeprecated(true);
+        FeatureFlagClient.setDefinition(id1, featureFlag1);
+        Assert.assertFalse(FeatureFlagClient.isEnabled(CamilleTestEnvironment.getCustomerSpace(), id1));
+    }
+
+    @Test(groups = "unit")
     public void testFeatureFlagClientHandlesInvalidPath() throws Exception {
         final String id = "TestFlag";
         Assert.assertFalse(FeatureFlagClient.isEnabled(CustomerSpace.parse("foo"), id));

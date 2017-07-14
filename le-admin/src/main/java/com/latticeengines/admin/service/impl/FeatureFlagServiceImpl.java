@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("featureFlagService")
 public class FeatureFlagServiceImpl implements FeatureFlagService {
 
-    private Map<String, FeatureFlagDefinition> flagDefinitionMap = new HashMap<>();
+    private Map<LatticeFeatureFlag, FeatureFlagDefinition> flagDefinitionMap = new HashMap<>();
 
     @Override
     public void defineFlag(String id, FeatureFlagDefinition definition) {
@@ -140,7 +140,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         marketoCredentialFf.setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MATCH_DEBUG, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_TALKING_POINTS, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.PLAYMAKER_DATA_SOURCE, lpi);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
@@ -161,13 +160,18 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         featureFlagDef.setConfigurable(true);
         featureFlagDef.setModifiableAfterProvisioning(true);
         featureFlagDef.setDefaultValue(false);
-        flagDefinitionMap.put(featureFlag.getName(), featureFlagDef);
+        featureFlagDef.setDeprecated(featureFlag.isDeprecated());
+        flagDefinitionMap.put(featureFlag, featureFlagDef);
         return featureFlagDef;
     }
 
+    private void deprecate(LatticeFeatureFlag flag) {
+        flagDefinitionMap.get(flag).setDeprecated(true);
+    }
+
     private void registerAllFlags() {
-        for (Map.Entry<String, FeatureFlagDefinition> entry : flagDefinitionMap.entrySet()) {
-            FeatureFlagClient.setDefinition(entry.getKey(), entry.getValue());
+        for (Map.Entry<LatticeFeatureFlag, FeatureFlagDefinition> entry : flagDefinitionMap.entrySet()) {
+            FeatureFlagClient.setDefinition(entry.getKey().getName(), entry.getValue());
         }
     }
 
