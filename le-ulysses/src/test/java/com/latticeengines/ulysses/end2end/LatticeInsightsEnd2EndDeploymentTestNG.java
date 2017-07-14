@@ -37,7 +37,7 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getCategories() throws IOException {
         Set<String> expectedCategoryStrSet = getExpectedCategorySet();
 
@@ -58,7 +58,7 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "deployment", dependsOnMethods = "getCategories")
+    @Test(groups = "deployment", dependsOnMethods = "getCategories", enabled = false)
     public void getSubcategories() throws IOException {
         String url = getUlyssesRestAPIPort() + "/ulysses/latticeinsights/insights/subcategories?category="
                 + Category.TECHNOLOGY_PROFILE.toString();
@@ -89,14 +89,14 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
         return expectedCategorySet;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getSubcategories")
+    @Test(groups = "deployment", dependsOnMethods = "getSubcategories", enabled = false)
     public void getAllAttributes() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getAttributes(false);
         assertNotNull(combinedAttributeList);
         assertFalse(combinedAttributeList.isEmpty());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getAllAttributes")
+    @Test(groups = "deployment", dependsOnMethods = "getAllAttributes", enabled = false)
     public void customizeAttributes() throws IOException {
         attributes = getAttributes(false);
         String fieldName = attributes.get(0).getFieldName();
@@ -122,7 +122,7 @@ public class LatticeInsightsEnd2EndDeploymentTestNG extends UlyssesDeploymentTes
         getGlobalAuthRestTemplate().postForObject(url, propertyValue, Void.class);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "customizeAttributes")
+    @Test(groups = "deployment", dependsOnMethods = "customizeAttributes", enabled = false)
     public void retrieveCompanyProfile() {
         CompanyProfileRequest request = new CompanyProfileRequest();
         request.getRecord().put("Email", "someuser@google.com");

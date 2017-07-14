@@ -57,8 +57,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
 
         String url = getRestAPIHostPort() + "/pls/latticeinsights/stats/cube?q=";
 
-        AccountMasterCube cube = restTemplate.postForObject(url, new HashMap<String, String>(),
-                AccountMasterCube.class);
+        AccountMasterCube cube = restTemplate.getForObject(url, AccountMasterCube.class);
         assertTrue(cube != null);
         assertTrue(cube.getNonNullCount() != null);
         assertTrue(cube.getStatistics() != null);

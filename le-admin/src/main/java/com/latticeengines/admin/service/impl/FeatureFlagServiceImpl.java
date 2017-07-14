@@ -165,10 +165,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         return featureFlagDef;
     }
 
-    private void deprecate(LatticeFeatureFlag flag) {
-        flagDefinitionMap.get(flag).setDeprecated(true);
-    }
-
     private void registerAllFlags() {
         for (Map.Entry<LatticeFeatureFlag, FeatureFlagDefinition> entry : flagDefinitionMap.entrySet()) {
             FeatureFlagDefinition def = entry.getValue();
