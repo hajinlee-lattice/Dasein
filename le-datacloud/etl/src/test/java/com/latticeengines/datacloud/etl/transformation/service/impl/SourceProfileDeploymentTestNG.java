@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
+import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
@@ -198,17 +199,17 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
             { 13L, 100, 10L, 0F, null, true, null }, //
             { 14L, 10, 0L, null, 10D, false, null }, //
     };
-    private List<Pair<String, Class<?>>> customerSchema = new ArrayList<>();
 
     private void prepareCustomer() {
-        customerSchema.add(Pair.of("LatticeAccountId", Long.class)); // ID Retained
-        customerSchema.add(Pair.of("Customer1", Integer.class)); // Interval
-        customerSchema.add(Pair.of("Customer2", Long.class)); // Interval
-        customerSchema.add(Pair.of("Customer3", Float.class)); // Interval
-        customerSchema.add(Pair.of("Customer4", Double.class)); // Interval
-        customerSchema.add(Pair.of("Customer5", Boolean.class)); // Boolean
-        customerSchema.add(Pair.of("Customer6", Double.class)); // Interval (use distinct value as interval boundary)
-        uploadAndRegisterTableSource(customerSchema, customerData, customerTable.getSourceName());
+        List<Pair<String, Class<?>>> schema = new ArrayList<>();
+        schema.add(Pair.of("LatticeAccountId", Long.class)); // ID Retained
+        schema.add(Pair.of("Customer1", Integer.class)); // Interval
+        schema.add(Pair.of("Customer2", Long.class)); // Interval
+        schema.add(Pair.of("Customer3", Float.class)); // Interval
+        schema.add(Pair.of("Customer4", Double.class)); // Interval
+        schema.add(Pair.of("Customer5", Boolean.class)); // Boolean
+        schema.add(Pair.of("Customer6", Double.class)); // Interval (use distinct value as interval boundary)
+        uploadAndRegisterTableSource(schema, customerData, customerTable.getSourceName());
     }
 
     private Object[][] amData = new Object[][] { //
@@ -242,25 +243,25 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                     "AAAAAAAAAAAAALcAAAAAAAAAAAAAAAAAAAAAAL6vAAAAALwAAAAAAAAAAACvAAAAAAAAAKwArAC3s60AngAAAAAAmADGALC7AACmAAC2twAAAACzAK8AAAAAAAAAqZGosgAAAAAAAAC1ALezAAAAAAAAAAAAAK0AAAAAAAAAAAAAAAAAAAAAAMS5AAAAAJoAALEAAK0AqAAAAAAAAAC1AAAAAAAAAAAArwAAAAAAAAAAAAAAAAAAAAAAAAAAsLUArAAAAAAAAK60AKcAAAAAtwAApwAAoAAAAJ8AsQAAuQAAAACxAAAAsKkAAACetcQAnwCsAAAAAAAAAAAAAKgAALkAAAAAAKe2AAC3qACwwwAAAAAAt6UAAAAAAAAAALGsswCxAAAAAKyXuAAAugAAAADAALIAAAAAAAAAAAAAAACqrQAAAAAArwAArQAAALYArQAAAAAAAAAAAACmsgAAAAAAAAAAtbEAAK4AAAC5s6gAAAAAALMAAKG3ALsAALEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtQCxAAAAALGxAAAAAAC_AJ0AAAAAAKwAAAAAAAAArLoAAACzAAAAAACzAAAAowCeAAAAAKumpwAAowAAAAAAAAC3tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsgCpxLYApwAAAAAAALEAAAAAAAC-ALaxAAAAAAAAAAAAAJkAAAAAAAAAvACtAAAAAAAAAAAAAAAAsQAAALcAAAAAuQAArrYAAAAAAAAAAAAAAACxAAAAAAAAAAAAAAAAAAAAAAAAAACspwAAAAAAAAAAAAAAt50AAAAAAAAAAAAAAAAAAAAAAAAAAKChqwCps7YAALYAxwAAALAAAAC5AAC7AMC2AAAAAAAAAAAArgAAugAAAAAAAAAAAMgAAAAAAKsAAAAApAAArQAAAAAAAACvAAAAAKYAranGygAAAACtAAAAqQC_AADAuQAAAAC5AL8AAACmAAAAAAAAAAAAALUAAAAAAAAAAAAAAAAAAAAAAAAAswCsAAAAAAAAAAAAALIAAACszACvsqW4AKarwwAAAAAAAAAAAAAAAACtAAAAAAAAAAAAAK0AAAAArAAAAAAAuAAAALcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsQAAnwAAALEAsQAAAAAAAAAAAAAAAAAAtq0AALq3AAAAAL4AAAAAAAAAALAAAAAAAAChAKYAAAAAAL8AAAAAtgAApwCvALyww62zAACkAKsAAAAAtwAAAAAArQAAAAAAAACwAAAAAAC1tqUAAAAAAACwnQAAALW3AACxrgAAAKwAAAAAAAAAAAC1AAAAqAAAAAAAxMSiAK0AAAAAuZ8ArAAAAAAAAMS3paEAAAAAAAAAAAAAAAAArKMArQAAAAAAt6uhAAAAAAAAAAAAAAAAAAAAAAAAmwAAAAAAtwAAAKQAAAAAAKoAAL8AsAAAAKAAsQAAAKYAAAAAAAAAqQC2ALAAAKoAALAAAKcAAAAArqUAAAAAtwCvowAAAACnAKIAowAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAArQAAl54AAAAAALkAALgAAK4AAAAAAAAAAAAAAAAAAAAAAACbAAAAAAAAAAC1AAAAAAAAAACnAAAAAKcAxrYAAAAAAACWra8AAK0AAAAAAAAAAAC_AAAAAK-rAK8AAAAAAACpsAAAALUAAAAAAACfpKIAAAC2AAAAAAAAAACtAAAAAAAAAAAAAJ4AAAAAAK0AAAAAAAAArAAAAAAAAAAAAAAAAAAAAAAAAACtAKO_AACkwK8AAACvuQDGAAAAAAAAAJ-0AAAAAAAAsgAAAAAAAAAAAAAAAAAAAAAAAKYArQAAAAAAAAAAAAAAAACtrQAAAAAAAAAAAAAAqKEAALMAAAAAAAC3AAAAvAAAAAAAAAAAAACwAAAAAAAAAKgAAAAAmQAAyQAAAAAAAAAAAAAAALawAAAAAAAAAAAAAAAAnwAAAAAAAAAArQAAAK-nAAC4nbIAAAAAAAAAAAAAAMEAAAAAAMAAAAAAraurAAC3twC2ALoAAACtAAAAtACytgAAAAAAAAC7AAAAvgC1AAAAAAAAAAAAAAAAAACxAAAAAAAAAAAAv7gAAAAAAAAAAAAAAAAApqCmAAAAALcAAJ8AowC2ALYAAAAAAAAAAAAAAACbAKwAAKwArJGqrQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACzAK8AAAAAAAAAAAAAtKgAAAAAAAAAAAAAAK6tAAC7AAAAALMApACvAAC2AAChAAAAAAAArgCeAAAAAAAAAAAAAAAAAAAAAMUAAKwAALUAAAAAAAAAAAAAAAAAAAAAAAC8AAAAsQCs0LkAuAAArwAAALy2AAAAAAAAAAAAAACsswAAAAAAAACwALYAAACdAAAAAAAAAAAAAAAAAAAAAACvsrYAAACoAAAAAAAAAL0AAAAAAACvAAAAAJwAAAAAAACvALUAAAAAqwAAAAAAAAAAALmtAAAAAAC1AAAAAACxAAAAAACfAAAAAAAArAAAAAAAAAAAAACfAAC1AACtAAAAAMwAAMQAuQAAAKwAAKS2AL8AAAAAAAAAAAAAvQAAALezmAC2AAAAAK8AAACqAAAAALUAAAAAAAAAAAAAAAC-rwAAtaAAAAAAAAClAAAAAAAAtwAAsgAAAAAAAKwAAAAAAAAAra8AAAAAAACfAAAAAAAAAAAAAAAAAJ8AAAC8AAAAAAAAqQC0ALkAAAAAAAAAAAAAAAAAAAAAAJsAAAAAAAAAAAAArAAAAAAAALgAtbAAAACkAKG4AAAAAAAAAAAAAAAAAAAAsQAAAAAAngAAAAAAALcAogAAAAAAAJ4AtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAArQAAAACiAKEAAAAAtqwAtQCnwgAAAAAAAAAAAAAAAADaAKsAugAAAAAAAAAAAACxAAAAAAAAALEAALAAAAAAALcAAAAArwAAswAAAAAAAKoAAAAAAAAAAAAAAAAAAACxAAAAALKxALAAAAAAAACupJ6vAAAAAAAAAAAArQAAwgAAsrsAswAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALYAALmzALGxAAAAAAAAAACxAAAAAAAAAAAAAAAAtAAAAAAAAAAAAAAAyQAAAAAAAAAAAACZAACvAAAAAK8AAAClvwAAALMAAAAAALoAAACynwAAAAAAAAC4AAAAugAAAADNAAC1AAAAAAAAAAAAwACuugCwAACvAAC7AAAAAAAAAMcAAAAAuq6pAKsAta0AAAAAAACtAAAAAAAAAAAAAK8AtwCpnrcAAAC3AKGzvAAAAAC4AAAAALKtrAAAqQAAAACgvAAAALSlp60AqQAAAK8AAAAAAAAAAAAAAAAAALIAAAAAAAAAAAAAAAAAAAAAAKqRAAAAAAAAALUAAAAAAAAAAAAArAAAAAAAALGtAJ-vAAAAAAAAAAAAAAAAtQAAAAAAAAAAAAAAqrQAtK8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAtgAAlq4AAAAAAAAAtwAAtQAAAAAAAAAAAAAAAACaAAAAAACwoQ" }, //
 
     };
-    private List<Pair<String, Class<?>>> amSchema = new ArrayList<>();
 
     private void prepareAM() {
-        amSchema.add(Pair.of("LatticeID", Long.class)); // ID Retained
-        amSchema.add(Pair.of("AlexaAUPageViews", Integer.class)); // Interval
-        amSchema.add(Pair.of("AlexaAURank", Long.class)); // Interval
-        amSchema.add(Pair.of("AlexaAUUsers", Float.class)); // Interval
-        amSchema.add(Pair.of("AlexaCAPageViews", Double.class)); // Interval
-        amSchema.add(Pair.of("AlexaCategories", String.class)); // Retained
-        amSchema.add(Pair.of("AlexaCARank", Integer.class)); // Retained (Numeric without any value)
-        amSchema.add(Pair.of("AlexaCAUsers", Boolean.class)); // Boolean
-        amSchema.add(Pair.of("AlexaGBPageViews", Boolean.class)); // Boolean
-        amSchema.add(Pair.of("AlexaDomains", Boolean.class)); // Discarded
-        amSchema.add(Pair.of("HGData_SupplierTechIndicators", String.class)); // Boolean (need to decode)
-        amSchema.add(Pair.of("BuiltWith_TechIndicators", String.class)); // Boolean (need to decode)
-        amSchema.add(Pair.of("BmbrSurge_Intent", String.class)); // Categorical (need to decode)
-        amSchema.add(Pair.of("BmbrSurge_CompositeScore", String.class)); // Interval (need to decode)
+        List<Pair<String, Class<?>>> schema = new ArrayList<>();
+        schema.add(Pair.of("LatticeID", Long.class)); // ID Retained
+        schema.add(Pair.of("AlexaAUPageViews", Integer.class)); // Interval
+        schema.add(Pair.of("AlexaAURank", Long.class)); // Interval
+        schema.add(Pair.of("AlexaAUUsers", Float.class)); // Interval
+        schema.add(Pair.of("AlexaCAPageViews", Double.class)); // Interval
+        schema.add(Pair.of("AlexaRank", String.class)); // Retained
+        schema.add(Pair.of("AlexaCARank", Integer.class)); // Retained (Numeric without any value)
+        schema.add(Pair.of("AlexaCAUsers", Boolean.class)); // Boolean
+        schema.add(Pair.of("AlexaGBPageViews", Boolean.class)); // Boolean
+        schema.add(Pair.of("HPANumPages", Boolean.class)); // Discarded
+        schema.add(Pair.of("HGData_SupplierTechIndicators", String.class)); // Boolean (need to decode)
+        schema.add(Pair.of("BuiltWith_TechIndicators", String.class)); // Boolean (need to decode)
+        schema.add(Pair.of("BmbrSurge_Intent", String.class)); // Categorical (need to decode)
+        schema.add(Pair.of("BmbrSurge_CompositeScore", String.class)); // Interval (need to decode)
 
-        uploadBaseSourceData(am.getSourceName(), baseSourceVersion, amSchema, amData);
+        uploadBaseSourceData(am.getSourceName(), baseSourceVersion, schema, amData);
         try {
             extractSchema(am, baseSourceVersion,
                     hdfsPathBuilder.constructSnapshotDir(am.getSourceName(), baseSourceVersion).toString());
@@ -270,11 +271,44 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         }
     }
 
+    private Map<String, BucketAlgorithm> getExpectedBuckAlgoForFlatAttrs() {
+        Map<String, BucketAlgorithm> map = new HashMap<>();
+        map.put("LatticeAccountId", null);
+        IntervalBucket intBuck = new IntervalBucket();
+        map.put("Customer1", intBuck);
+        intBuck = new IntervalBucket();
+        map.put("Customer2", intBuck);
+        intBuck = new IntervalBucket();
+        map.put("Customer3", intBuck);
+        intBuck = new IntervalBucket();
+        map.put("Customer4", intBuck);
+        BooleanBucket boolBuck = new BooleanBucket();
+        map.put("Customer5", boolBuck);
+        intBuck = new IntervalBucket();
+        map.put("Customer6", intBuck);
+        intBuck = new IntervalBucket();
+        map.put("AlexaAUPageViews", intBuck);
+        intBuck = new IntervalBucket();
+        map.put("AlexaAURank", intBuck);
+        intBuck = new IntervalBucket();
+        map.put("AlexaAUUsers", intBuck);
+        intBuck = new IntervalBucket();
+        map.put("AlexaCAPageViews", intBuck);
+        map.put("AlexaRank", null);
+        map.put("AlexaCARank", null);
+        boolBuck = new BooleanBucket();
+        map.put("AlexaCAUsers", boolBuck);
+        boolBuck = new BooleanBucket();
+        map.put("AlexaGBPageViews", boolBuck);
+        return map;
+    }
+
     protected void verifyIntermediateResult(String source, Iterator<GenericRecord> records) {
         try {
             switch (source) {
             case SEGMENT_PROFILE:
                 log.info(String.format("Start to verify intermediate source %s", source));
+                Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
                 List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(null,
                         DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER);
                 String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators" };
@@ -302,6 +336,15 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                 while (records.hasNext()) {
                     GenericRecord record = records.next();
                     // log.info(record.toString());
+                    Object attr = record.get("AttrName");
+                    Assert.assertNotNull(attr);
+                    if (attr instanceof Utf8) {
+                        attr = attr.toString();
+                    }
+                    Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
+                    if (bktAlgo != null && bktAlgo instanceof Utf8) {
+                        bktAlgo = bktAlgo.toString();
+                    }
                     Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
                     if (decStr != null) { // Attributes need to decode
                         if (decStr instanceof Utf8) {
@@ -315,12 +358,18 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                         if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
                             expected.remove(bitDecodeStrategy.getEncodedColumn());
                         }
-                        Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
-                        if (bktAlgo instanceof Utf8) {
-                            bktAlgo = bktAlgo.toString();
-                        }
+                        Assert.assertNotNull(bktAlgo);
                         BooleanBucket algo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
                         Assert.assertNotNull(algo);
+                    } else { // Flat attributes
+                        Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
+                        if (flatAttrsBuckAlgo.get((String) attr) == null) {  // Retained attributes
+                            Assert.assertNull(bktAlgo);
+                        } else {
+                            log.info((String) attr + ": " + JsonUtils.serialize(JsonUtils.deserialize((String) bktAlgo,
+                                    flatAttrsBuckAlgo.get((String) attr).getClass())));
+                        }
+
                     }
                 }
                 Assert.assertEquals(0, expected.size());
@@ -337,13 +386,13 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         try {
             log.info("Start to verify records one by one.");
+            Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
             List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(null,
                     DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER);
             String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent",
                     "BmbrSurge_CompositeScore" };
             Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));
-            Map<String, Integer> expected = new HashMap<>(); // encAttr ->
-                                                             // decAttr count
+            Map<String, Integer> expected = new HashMap<>(); // encAttr -> decAttr count
             for (SourceAttribute srcAttr : srcAttrs) {
                 JsonNode arg = om.readTree(srcAttr.getArguments());
                 if (arg.get(SourceProfiler.IS_PROFILE).asBoolean() && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
@@ -366,6 +415,15 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                 GenericRecord record = records.next();
                 // log.info(record.toString());
                 Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
+                Object attr = record.get("AttrName");
+                Assert.assertNotNull(attr);
+                if (attr instanceof Utf8) {
+                    attr = attr.toString();
+                }
+                Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
+                if (bktAlgo != null && bktAlgo instanceof Utf8) {
+                    bktAlgo = bktAlgo.toString();
+                }
                 if (decStr != null) { // Attributes need to decode
                     if (decStr instanceof Utf8) {
                         decStr = decStr.toString();
@@ -378,21 +436,15 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                     if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
                         expected.remove(bitDecodeStrategy.getEncodedColumn());
                     }
-                    Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
-                    if (bktAlgo instanceof Utf8) {
-                        bktAlgo = bktAlgo.toString();
-                    }
-                    Object srcAttr = record.get("SrcAttr");
-                    if (srcAttr instanceof Utf8) {
-                        srcAttr = srcAttr.toString();
-                    }
                     switch (bitDecodeStrategy.getEncodedColumn()) {
                     case "HGData_SupplierTechIndicators":
                     case "BuiltWith_TechIndicators":
+                        Assert.assertNotNull(bktAlgo);
                         BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
                         Assert.assertNotNull(boolAlgo);
                         break;
                     case "BmbrSurge_Intent":
+                        Assert.assertNotNull(bktAlgo);
                         CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo, CategoricalBucket.class);
                         Assert.assertNotNull(catAlgo);
                         Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
@@ -405,14 +457,19 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                         }
                         IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
                         Assert.assertNotNull(intAlgo);
-                        if (CollectionUtils.isNotEmpty(intAlgo.getBoundaries())) {
-                            log.info(String.format("Numeric bucket for %s: %s", (String) srcAttr,
-                                    String.join(",", intAlgo.generateLabelsInternal())));
-                        }
+                        log.info((String) attr + ": " + JsonUtils.serialize(intAlgo));
                         break;
                     default:
                         throw new RuntimeException(String.format("Unrecognized encoded attribute %s",
                                 bitDecodeStrategy.getEncodedColumn()));
+                    }
+                } else { // FLat attributes
+                    Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
+                    if (flatAttrsBuckAlgo.get((String) attr) == null) {  // Retained attributes
+                        Assert.assertNull(bktAlgo);
+                    } else {
+                        log.info((String) attr + ": " + JsonUtils.serialize(JsonUtils.deserialize((String) bktAlgo,
+                                flatAttrsBuckAlgo.get((String) attr).getClass())));
                     }
                 }
             }

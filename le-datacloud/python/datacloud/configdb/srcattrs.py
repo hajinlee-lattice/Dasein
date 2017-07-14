@@ -56,7 +56,11 @@ def register_amprofile(conn, version):
             UPDATE LDC_ConfigDB.SourceAttribute lhs
             INNER JOIN LDC_ManageDB.AccountMasterColumn rhs
 			ON lhs.Attribute = rhs.AMColumnID AND rhs.DataCloudVersion = '%s'
-            SET lhs.Arguments = '{"IsProfile":false}'
+            SET lhs.Arguments = CONCAT('{"IsProfile":false',
+                                         CASE WHEN rhs.DecodeStrategy IS NOT NULL THEN CONCAT(',"DecodeStrategy":', rhs.DecodeStrategy)
+                                         ELSE ''
+                                         END,
+                                       '}')
 			WHERE rhs.Groups NOT LIKE '%%%s%%'
               AND lhs.Source = 'AMProfile'
               AND lhs.Stage = '%s'

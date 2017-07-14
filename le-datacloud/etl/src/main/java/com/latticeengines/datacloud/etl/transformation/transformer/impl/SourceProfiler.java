@@ -147,7 +147,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         Set<String> boolTypes = new HashSet<>(Arrays.asList(new String[] { "boolean" }));
         try {
             // Attributes encoded in the profiled source which need to decode
-            Map<String, List<ProfileParameters.Attribute>> attrsToDecode = new HashMap<>(); // Encoded attr-> [decoded attrs]
+            Map<String, List<ProfileParameters.Attribute>> encAttrMap = new HashMap<>(); // Encoded attr-> [decoded attrs] (Enabled in profiling)
+            Set<String> encAttrs = new HashSet<>(); // All encoded attrs (enabled/disabled in profiling)
             Map<String, String> decodeStrs = new HashMap<>();
             for (SourceAttribute amAttr : amAttrConf.values()) {
                 JsonNode arg = om.readTree(amAttr.getArguments());
@@ -155,23 +156,27 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     throw new RuntimeException(
                             String.format("Please provide IsProfile flag for attribute %s", amAttr.getAttribute()));
                 }
-                if (!arg.get(IS_PROFILE).asBoolean() || !arg.hasNonNull(DECODE_STRATEGY)) {
+                JsonNode decodeStrategy = arg.get(DECODE_STRATEGY);
+                if (decodeStrategy == null) {
                     continue;
                 }
-                JsonNode decodeStrategy = arg.get(DECODE_STRATEGY);
-                String attrToDecode = decodeStrategy.get(ENCODED_COLUMN).asText();
-                if (!attrsToDecode.containsKey(attrToDecode)) {
-                    attrsToDecode.put(attrToDecode, new ArrayList<>());
+                String encAttr = decodeStrategy.get(ENCODED_COLUMN).asText();
+                encAttrs.add(encAttr);
+                if (!arg.get(IS_PROFILE).asBoolean()) {
+                    continue;
                 }
-                Integer encodeBitUnit = arg.has(NUM_BITS) ? arg.get(NUM_BITS).asInt() : null;
+                if (!encAttrMap.containsKey(encAttr)) {
+                    encAttrMap.put(encAttr, new ArrayList<>());
+                }
+                Integer numBits = arg.has(NUM_BITS) ? arg.get(NUM_BITS).asInt() : null;
                 if (!arg.hasNonNull(BKT_ALGO)) {
                     throw new RuntimeException(
                             String.format("Please provide BktAlgo for attribute %s", amAttr.getAttribute()));
                 }
                 BucketAlgorithm bktAlgo = parseBucketAlgo(arg.get(BKT_ALGO).asText(),
                         decodeStrategy.hasNonNull(VALUE_DICT) ? decodeStrategy.get(VALUE_DICT).asText() : null);
-                attrsToDecode.get(attrToDecode).add(new ProfileParameters.Attribute(amAttr.getAttribute(),
-                        encodeBitUnit, decodeStrategy.toString(), bktAlgo));
+                encAttrMap.get(encAttr).add(new ProfileParameters.Attribute(amAttr.getAttribute(), numBits,
+                        decodeStrategy.toString(), bktAlgo));
                 decodeStrs.put(amAttr.getAttribute(), decodeStrategy.toString());
             }
             // Build BitCodeBook
@@ -193,8 +198,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     log.info(String.format("Discarded attr: %s", field.name()));
                     continue;
                 }
-                if (attrsToDecode.containsKey(field.name())) {
-                    for (ProfileParameters.Attribute attr : attrsToDecode.get(field.name())) {
+                if (encAttrMap.containsKey(field.name())) {
+                    for (ProfileParameters.Attribute attr : encAttrMap.get(field.name())) {
                         if (attr.getAlgo() instanceof BooleanBucket) {
                             log.info(String.format("%s attr %s (encoded)", attr.getAlgo().getClass().getSimpleName(),
                                     attr.getAttr()));
@@ -226,6 +231,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     } else {
                         exAttrsToEnc.add(new ProfileParameters.Attribute(field.name(), 2, null, algo));
                     }
+                    continue;
+                }
+                if (encAttrs.contains(field.name())) {
+                    log.info(String.format("Existing encoded attr: %s", field.name()));
                     continue;
                 }
                 log.info(String.format("Retained attr: %s (unencoded)", field.name()));
