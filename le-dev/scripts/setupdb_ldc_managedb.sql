@@ -183,7 +183,7 @@ WHERE `Version` = '2.0.0';
 UPDATE `DataCloudVersion`
 SET
   `AccountMasterHdfsVersion` = '2016-11-19_20-32-21_UTC',
-  `AccountLookupHdfsVersion` = '2016-11-19_05-33-46_UTC',
+  `AccountLookupHdfsVersion` = '2016-11-19_05-33-46_UTC'
 WHERE `Version` = '2.0.1';
 
 UPDATE `DataCloudVersion`
