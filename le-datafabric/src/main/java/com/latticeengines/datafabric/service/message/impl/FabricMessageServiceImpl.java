@@ -19,12 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
 import com.latticeengines.camille.exposed.locks.LockManager;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.service.message.DataUpdater;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
@@ -41,9 +37,6 @@ import kafka.utils.ZkUtils;
 
 @Component("messageService")
 public class FabricMessageServiceImpl implements FabricMessageService {
-
-    @Value("${datafabric.message.pod:FabricConnectors}")
-    private String pod;
 
     private static final Logger log = LoggerFactory.getLogger(FabricMessageServiceImpl.class);
 
@@ -68,8 +61,6 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     private Schema msgKeySchema;
     private Schema msgRequestSchema;
 
-    private Camille camille;
-
     public FabricMessageServiceImpl(String brokers, String zkConnect, String schemaUrl, String stack, String environment) {
         this.brokers = brokers;
         this.zkConnect = zkConnect;
@@ -80,22 +71,10 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         buildKeySchema();
     }
 
-    public FabricMessageServiceImpl(String pod, String stack, String zkConnect) {
+    public FabricMessageServiceImpl(String stack, String zkConnect) {
         this.zkConnect = zkConnect;
-        this.pod = pod;
         this.stack = stack;
         buildRequestSchema();
-        setupCamille(Mode.RUNTIME, pod, stack, zkConnect);
-    }
-
-    public void setupCamille(Mode mode, String pod, String stack, String zkConnect) {
-        try {
-            CamilleConfiguration config = new CamilleConfiguration(pod, zkConnect);
-            CamilleEnvironment.start(mode, config);
-            camille = CamilleEnvironment.getCamille();
-        } catch (Exception ex) {
-            log.error("Can not start Camille! error=" + ex.getMessage());
-        }
     }
 
     public FabricMessageServiceImpl() {
@@ -106,7 +85,6 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         log.info("Initialize message service with brokers " + brokers);
         buildKeySchema();
         buildRequestSchema();
-        setupCamille(Mode.RUNTIME, pod, stack, zkConnect);
     }
 
     @Override
@@ -122,18 +100,6 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     @Override
     public String getSchemaRegUrl() {
         return schemaRegUrl;
-    }
-
-    public Camille getCamille() {
-        return camille;
-    }
-
-    public void setPod(String pod) {
-        this.pod = pod;
-    }
-
-    public void setStack(String stack) {
-        this.stack = stack;
     }
 
     @Override
@@ -269,20 +235,20 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     @Override
     public boolean createZNode(String entityName, String data, boolean createNew) {
         boolean result = false;
-        Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
+        Path path = CamilleEnvironment.getFabricEntityPath(entityName);
         String lockName = entityName;
         try {
             LockManager.registerCrossDivisionLock(lockName);
             LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
-            if (createNew) {
+            if (createNew && CamilleEnvironment.getCamille().exists(path)) {
                 try {
-                    camille.delete(path);
+                    CamilleEnvironment.getCamille().delete(path);
                 } catch (Exception ex) {
                     log.warn("Can not delete znode, entityName=" + entityName + " reason=" + ex.getMessage());
                 }
             }
-            if (!camille.exists(path)) {
-                camille.create(path, new Document(data), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            if (!CamilleEnvironment.getCamille().exists(path)) {
+                CamilleEnvironment.getCamille().create(path, new Document(data), ZooDefs.Ids.OPEN_ACL_UNSAFE);
                 log.info("Created node, path " + path);
                 result = true;
             } else {
@@ -301,9 +267,9 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     @Override
     public String readData(String entityName) {
         try {
-            Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
-            camille.get(path);
-            Document document = camille.get(path);
+            Path path = CamilleEnvironment.getFabricEntityPath(entityName);
+            CamilleEnvironment.getCamille().get(path);
+            Document document = CamilleEnvironment.getCamille().get(path);
             if (document != null) {
                 return document.getData();
             }
@@ -316,8 +282,8 @@ public class FabricMessageServiceImpl implements FabricMessageService {
     @Override
     public boolean cleanup(String entityName) {
         try {
-            Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
-            camille.delete(path);
+            Path path = CamilleEnvironment.getFabricEntityPath(entityName);
+            CamilleEnvironment.getCamille().delete(path);
         } catch (Exception ex) {
             log.error("Failed to delete znode, entityName " + entityName, ex);
         }
@@ -336,10 +302,10 @@ public class FabricMessageServiceImpl implements FabricMessageService {
         try {
             LockManager.registerCrossDivisionLock(lockName);
             LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
-            Path path = PathBuilder.buildPodDivisionPath(pod, stack).append(entityName);
-            Document document = camille.get(path);
+            Path path = CamilleEnvironment.getFabricEntityPath(entityName);
+            Document document = CamilleEnvironment.getCamille().get(path);
             String newData = updater.update(document.getData());
-            camille.upsert(path, new Document(newData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            CamilleEnvironment.getCamille().upsert(path, new Document(newData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         } catch (Exception ex) {
             log.error("Failed to read data from node, entity name= " + entityName, ex);

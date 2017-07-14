@@ -17,6 +17,7 @@ public final class PathConstants {
     public static final String METADATA = "Metadata";
     public static final String LOCKS = "Locks";
     public static final String WATCHERS = "Watchers";
+    public static final String FABRIC_ENTITIES = "FabricEntities";
     public static final String DANTE = "Dante";
 
     public static final String DEFAULTCONFIG_NODE = "Default";

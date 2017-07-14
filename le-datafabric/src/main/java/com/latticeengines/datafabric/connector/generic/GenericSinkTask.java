@@ -1,25 +1,25 @@
 package com.latticeengines.datafabric.connector.generic;
 
-import io.confluent.connect.avro.AvroData;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.datafabric.entitymanager.impl.GenericFabricEntityManagerImpl;
 import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
+
+import io.confluent.connect.avro.AvroData;
 
 public class GenericSinkTask extends SinkTask {
 
@@ -43,11 +43,10 @@ public class GenericSinkTask extends SinkTask {
         try {
             connectorConfig = new GenericSinkConnectorConfig(props);
             avroData = connectorConfig.constructAvroData();
-            String pod = connectorConfig.getProperty(GenericSinkConnectorConfig.POD, String.class);
             String stack = connectorConfig.getProperty(GenericSinkConnectorConfig.STACK, String.class);
             String zkConnect = connectorConfig.getProperty(GenericSinkConnectorConfig.KAFKA_ZKCONNECT, String.class);
-            FabricMessageServiceImpl messageService = new FabricMessageServiceImpl(pod, stack, zkConnect);
-            entityManager = new GenericFabricEntityManagerImpl<GenericFabricRecord>();
+            FabricMessageServiceImpl messageService = new FabricMessageServiceImpl(stack, zkConnect);
+            entityManager = new GenericFabricEntityManagerImpl<>();
             entityManager.setMessageService(messageService);
 
         } catch (Exception e) {

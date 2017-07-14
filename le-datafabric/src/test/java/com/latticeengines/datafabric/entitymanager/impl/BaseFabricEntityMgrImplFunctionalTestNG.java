@@ -196,7 +196,9 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
             Assert.assertEquals(entityManager.findByKey(entity), null);
         }
         List<SampleEntity> results = entityManager.findByLatticeId(latticeId);
-        Assert.assertEquals(results.size(), 0);
+        if (results != null) {
+            Assert.assertEquals(results.size(), 0);
+        }
     }
 
     private void compareEntities(List<SampleEntity> sources, List<SampleEntity> dests) {

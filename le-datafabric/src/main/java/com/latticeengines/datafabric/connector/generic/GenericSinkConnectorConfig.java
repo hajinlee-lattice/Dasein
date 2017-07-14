@@ -22,17 +22,21 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
     static final WorkerProperty<String> STACK = new WorkerProperty<String>("datafabric.message.stack",
             "The stack name used in Zookeeper", "The stack used in Zookeeper").setDefaultValue("global");
     static final WorkerProperty<String> KAFKA_ZKCONNECT = new WorkerProperty<String>("kafka.zkConnect",
-            "The zookeeper servers for sink generic cluster", "Zookeeper servers").setDefaultValue("localhost:2181");
+            "The zookeeper servers for sink generic cluster", "Zookeeper servers").setDefaultValue("localhost:2181/kafka");
     static final WorkerProperty<String> REPOSITORIES = new WorkerProperty<String>("datafabric.connect.repositories",
             "Supported stores .e.g HDFS, REDIS, DYNAMO", "stores").setDefaultValue("HDFS;DYNAMO");
+
+    // camille
+    static final WorkerProperty<String> CAMILLE_ZK_CONNECTION = new WorkerProperty<String>("camille.zk.connectionString",
+            "The zk connection for camille", "ZK connection string for Camille").setDefaultValue("localhost:2181");
+    static final WorkerProperty<String> CAMILLE_ZK_POD_ID = new WorkerProperty<String>("camille.zk.pod.id",
+            "Cammille pod id", "pod id").setDefaultValue("Default");
 
     // HDFS
     static final WorkerProperty<String> HADOOP_CONF_DIR = new WorkerProperty<String>("hadoop.conf.dir",
             "The Hadoop configuration directory.", "Hadoop Configuration Directory").setDefaultValue("");
     static final WorkerProperty<String> HDFS_BASE_DIR = new WorkerProperty<String>("hdfs.base.dir",
             "HDFS base directory to save files.", "HDFS base Directory").setDefaultValue("/Pods/Default/Services/PropData/Sources");
-    static final WorkerProperty<String> POD = new WorkerProperty<String>("datafabric.message.pod",
-            "The pod name used in Zookeeper", "The pod used in Zookeeper").setDefaultValue("FabricConnectors");
 
     // DYNAMO
     static final WorkerProperty<String> ACCESS_KEY = new WorkerProperty<String>("aws.default.access.key",
@@ -43,10 +47,11 @@ public class GenericSinkConnectorConfig extends ConnectorConfiguration {
     static {
         initialize();
         addGroup(GENERIC_COMMON_GROUP);
-        addPropertyToGroup(POD, String.class, GENERIC_COMMON_GROUP);
         addPropertyToGroup(STACK, String.class, GENERIC_COMMON_GROUP);
         addPropertyToGroup(KAFKA_ZKCONNECT, String.class, GENERIC_COMMON_GROUP);
         addPropertyToGroup(REPOSITORIES, String.class, GENERIC_COMMON_GROUP);
+        addPropertyToGroup(CAMILLE_ZK_CONNECTION, String.class, GENERIC_COMMON_GROUP);
+        addPropertyToGroup(CAMILLE_ZK_POD_ID, String.class, GENERIC_COMMON_GROUP);
 
         addGroup(GENERIC_HDFS_GROUP);
         addPropertyToGroup(HADOOP_CONF_DIR, String.class, GENERIC_HDFS_GROUP);

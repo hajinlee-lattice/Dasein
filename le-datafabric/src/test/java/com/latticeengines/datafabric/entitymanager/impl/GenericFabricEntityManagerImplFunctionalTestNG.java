@@ -18,11 +18,10 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -30,8 +29,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -50,17 +47,11 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
 
     private static final Logger log = LoggerFactory.getLogger(GenericFabricEntityManagerImplFunctionalTestNG.class);
 
-    private static final String POD = "FabricConnectors";
-    private static final String STACK = "global";
     private static final String BASE_DIR = "/Pods/Default/Services/PropData/Sources";
-
     private static final String FILE_PATTERN = "Snapshot/*/*.avro";
 
     @Resource(name = "genericFabricEntityManager")
     private GenericFabricEntityManager<SampleEntity> entityManager;
-
-    @Value("${datafabric.message.zkConnect}")
-    private String zkConnect;
 
     @Autowired
     private FabricMessageService messageService;
@@ -75,11 +66,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
     @BeforeClass(groups = "functional")
     public void setUp() throws Exception {
         FabricMessageServiceImpl messageServiceImpl = (FabricMessageServiceImpl) messageService;
-        messageServiceImpl.setPod(POD);
-        messageServiceImpl.setStack(STACK);
-        messageServiceImpl.setupCamille(Mode.BOOTSTRAP, POD, STACK, zkConnect);
-        camille = messageServiceImpl.getCamille();
-
+        camille = CamilleEnvironment.getCamille();
         cleanHDFS();
     }
 
@@ -114,7 +101,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         Assert.assertEquals(node.getTotalCount(), 5);
         Assert.assertEquals(node.getName(), id);
 
-        Path path = PathBuilder.buildPodDivisionPath(POD, STACK).append(id);
+        Path path = CamilleEnvironment.getFabricEntityPath(id);
         Assert.assertTrue(camille.exists(path));
 
     }

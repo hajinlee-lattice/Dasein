@@ -9,9 +9,9 @@
 
     <properties>
         <component-name>datafabric</component-name>
-        <kafka.version>0.10.2.0</kafka.version>
+        <kafka.version>0.10.2.1-cp2</kafka.version>
         <kafka.scala.version>2.11</kafka.scala.version>
-        <confluent.version>3.2.0</confluent.version>
+        <confluent.version>3.2.2</confluent.version>
     </properties>
 
     <parent>
@@ -163,6 +163,17 @@
             <artifactId>le-hadoop</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.fasterxml.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.fasterxml.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -13,9 +13,10 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.kafka.clients.producer.RecordMetadata;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +46,9 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
     private volatile boolean disabled;
     private volatile long lastCheckTime;
 
+    @Value("${datafabric.generic.entity.kafka.replication}")
+    private int kafkaRep;
+
     public GenericFabricEntityManagerImpl() {
         super(new BaseFabricEntityMgrImpl.Builder().recordType(FABRIC_GENERIC_RECORD).topic(FABRIC_GENERIC_CONNECTOR)
                 .scope(ENVIRONMENT_PRIVATE).store(FABRIC_GENERIC_CONNECTOR).repository(FABRIC_GENERIC_CONNECTOR));
@@ -56,7 +60,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
 
     @PostConstruct
     public void initGeneric() {
-        boolean result = messageService.createTopic(FABRIC_GENERIC_CONNECTOR, ENVIRONMENT_PRIVATE, 100, 2);
+        boolean result = messageService.createTopic(FABRIC_GENERIC_CONNECTOR, ENVIRONMENT_PRIVATE, 100, kafkaRep);
         if (result) {
             log.info("Topic was created! topic=" + FABRIC_GENERIC_CONNECTOR);
         } else {

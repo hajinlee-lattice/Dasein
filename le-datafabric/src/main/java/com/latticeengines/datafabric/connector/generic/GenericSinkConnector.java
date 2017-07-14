@@ -14,6 +14,9 @@ import org.apache.kafka.connect.errors.RetriableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.camille.exposed.CamilleConfiguration;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+
 public class GenericSinkConnector extends Connector {
 
     @SuppressWarnings("unused")
@@ -36,6 +39,19 @@ public class GenericSinkConnector extends Connector {
         } catch (ConfigException e) {
             log.error("Generic Connector failed!", e);
             throw new RetriableException("Couldn't start GenericSinkConnector due to configuration error", e);
+        }
+        startCamille(config);
+    }
+
+    private void startCamille(GenericSinkConnectorConfig config) {
+        try {
+            CamilleConfiguration camilleConf = new CamilleConfiguration();
+            camilleConf.setConnectionString(
+                    config.getProperty(GenericSinkConnectorConfig.CAMILLE_ZK_CONNECTION, String.class));
+            camilleConf.setPodId(config.getProperty(GenericSinkConnectorConfig.CAMILLE_ZK_POD_ID, String.class));
+            CamilleEnvironment.start(CamilleEnvironment.Mode.RUNTIME, camilleConf);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot bootstrap camille environment.", e);
         }
     }
 

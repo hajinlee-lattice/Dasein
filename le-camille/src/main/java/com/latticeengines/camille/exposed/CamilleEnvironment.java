@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.lifecycle.PodLifecycleManager;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodProperties;
 
@@ -151,4 +153,11 @@ public class CamilleEnvironment {
     public static Camille getCamille() {
         return camille;
     }
+
+
+    // Paths
+    public static Path getFabricEntityPath(String entityName) {
+        return PathBuilder.buildFabricEntityPath(getPodId(), entityName);
+    }
+
 }

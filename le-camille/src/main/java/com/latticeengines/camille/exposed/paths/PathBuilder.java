@@ -80,6 +80,10 @@ public final class PathBuilder {
         return path;
     }
 
+    public static Path buildFabricEntityPath(String podId, String entityName) {
+        return buildPodPath(podId).append(PathConstants.FABRIC_ENTITIES).append(entityName);
+    }
+
     public static Path buildDataTableSchemaPath(String podId, CustomerSpace space) {
         return buildDataTableSchemaPath(podId, space, "");
     }
