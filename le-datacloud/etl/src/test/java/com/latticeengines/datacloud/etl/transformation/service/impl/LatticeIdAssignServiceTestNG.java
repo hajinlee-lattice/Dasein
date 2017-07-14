@@ -135,7 +135,7 @@ public class LatticeIdAssignServiceTestNG
 
     private void prepareAMId() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of("LatticeAccountId", Long.class));
+        columns.add(Pair.of("LatticeID", Long.class));
         columns.add(Pair.of("Domain", String.class));
         columns.add(Pair.of("DUNS", String.class));
         uploadBaseSourceData(amId.getSourceName(), baseSourceVersion, columns, amIdData);
@@ -154,7 +154,7 @@ public class LatticeIdAssignServiceTestNG
         Set<Long> ids = new HashSet<Long>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            Long id = (Long) record.get("LatticeAccountId");
+            Long id = (Long) record.get("LatticeID");
             Assert.assertNotNull(id);
             Assert.assertFalse(ids.contains(id));
             ids.add(id);
@@ -166,7 +166,7 @@ public class LatticeIdAssignServiceTestNG
             if (domain instanceof Utf8) {
                 domain = domain.toString();
             }
-            log.info(String.format("LatticeAccountId = %d, Domain = %s, DUNS = %s", id, domain, duns));
+            log.info(String.format("LatticeID = %d, Domain = %s, DUNS = %s", id, domain, duns));
             boolean flag = false;
             for (Object[] data : expectedData) {
                 if (id.longValue() == ((Long) data[0]).longValue() //

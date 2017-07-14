@@ -9,9 +9,9 @@ import java.util.Set;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.junit.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -223,7 +223,7 @@ public class LatticeIdRefreshServiceTestNG
         Set<Long> ids = new HashSet<Long>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            Long id = (Long) record.get("LatticeAccountId");
+            Long id = (Long) record.get("LatticeID");
             Long redirectFromId = (Long) record.get("RedirectFromId");
             Assert.assertFalse(ids.contains(redirectFromId));
             ids.add(redirectFromId);

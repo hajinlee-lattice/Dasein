@@ -1,2 +1,2 @@
 ﻿PID,Attrs,CheckObsolete,Entity,IdName,IdType,KeySet,MergeDup,Strategy
-1,Domain||DUNS,1,ACCOUNT,LatticeAccountId,LONG,DOMAIN_DUNS,0,AccountMasterSeedRebuild
+1,Domain||DUNS,1,ACCOUNT,LatticeID,LONG,DOMAIN_DUNS,0,AccountMasterSeedRebuild

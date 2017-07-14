@@ -38,7 +38,8 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             { null, "Chevron Corporation", "San Ramon", "California", null, "USA", null, "chevron.com", "Chevron Corporation", "California", "USA", ">10,000", ">10B" },
 
             // short location, accurate spelling
-            { null, "Alphabet", null, null, null, null, null, "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },
+            // DnB changed match behavior: Alphabet+USA no longer matches to Google headquarter
+            //{ null, "Alphabet", null, null, null, null, null, "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },    
             { null, "Google", null, null, null, null, null, "google.com", "Google Inc.", "California", "USA", ">10,000", ">10B" },
             { null, "Microsoft", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
 
@@ -64,7 +65,8 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             //{ null, "Microsoft Corp1", null, "WA", null, "USA", null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             //{ null, "Alphabet Inc1", null, "California", null, "US", null, "google.com", "Alphabet Inc.", "California", "USA", ">10,000", ">10B" },
 
-            { null, "Eversource Energy", "Springfield", "MA", "273608923", "US", "3368895000", "eversource.com", "Eversource Energy", "MASSACHUSETTS", "USA", "5001-10,000", "5B-10B" },
+            { null, "Eversource Energy", "Springfield", "MA", "273608923", "US", "3368895000", "eversource.com",
+                    "WESTERN MASSACHUSETTS ELECTRIC COMPANY", "MASSACHUSETTS", "USA", "5001-10,000", "5B-10B" },
             { null, "Queens College", "Queens", "NY", "11367-1597", "US", "7189975000", "queensknights.com", "Department of Media Studies", "New York", "USA", "11-50", "0-1M" },
             { null, "Edison47", "Port Orchard", "WA", "98367", "US", "3608746772", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
             // { null, "SS&C Advent", "San Francisco", "CA", "950142083", "US", "4089961010", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
