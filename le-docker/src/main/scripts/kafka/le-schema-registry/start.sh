@@ -40,6 +40,6 @@ echo "ADVERTISE_IP=${ADVERTISE_IP}"
 
 sed -i "s|{{ZK_HOSTS}}|$ZK_HOSTS|g" /etc/schema-registry/schema-registry.properties
 sed -i "s|{{ADVERTISE_IP}}|$ADVERTISE_IP|g" /etc/schema-registry/schema-registry.properties
-sed -i "s|{{ZK_NAMESPACE}}|${ZK_NAMESPACE:=schemaRegistry}|g" /etc/schema-registry/schema-registry.properties
+sed -i "s|{{ZK_NAMESPACE}}|${ZK_NAMESPACE:=schema_registry}|g" /etc/schema-registry/schema-registry.properties
 
 /usr/bin/schema-registry-start /etc/schema-registry/schema-registry.properties
