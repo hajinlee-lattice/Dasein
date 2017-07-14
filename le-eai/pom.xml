@@ -456,11 +456,6 @@
             <scope>test</scope>
             <classifier>tests</classifier>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlets</artifactId>
-            <version>9.3.14.v20161028</version>
-        </dependency>
     </dependencies>
 </project>
 
