@@ -67,12 +67,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             datum.add(entry.getValue());
         }
         data.add(datum);
-        Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(customerSpace,
+        boolean considerInternalAttributes = FeatureFlagClient.isEnabled(customerSpace,
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
-
-        considerInternalAttributes = considerInternalAttributes == null //
-        ? Boolean.FALSE //
-                : considerInternalAttributes;
 
         Tenant tenant = new Tenant(customerSpace.toString());
         matchInput.setTenant(tenant);

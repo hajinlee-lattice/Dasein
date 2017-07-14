@@ -267,9 +267,8 @@ public class LatticeInsightsResource {
 
     private Boolean shouldConsiderInternalAttributes(Tenant tenant) {
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
-        Boolean considerInternalAttributes = FeatureFlagClient.isEnabled(space,
+        return FeatureFlagClient.isEnabled(space,
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
-        return considerInternalAttributes;
     }
 
     // ------------END for Insights-------------------//

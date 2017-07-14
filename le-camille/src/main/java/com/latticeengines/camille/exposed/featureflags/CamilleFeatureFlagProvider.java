@@ -32,8 +32,8 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     public CamilleFeatureFlagProvider() {
         ensurePodDivisionExists();
 
-        definitionCache = ConfigurationCache.construct(new PodDivisionScope(), new Path("/"
-                + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE));
+        definitionCache = ConfigurationCache.construct(new PodDivisionScope(),
+                new Path("/" + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE));
         valueCache = ConfigurationMultiCache.construct();
     }
 
@@ -41,9 +41,8 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
         Camille c = CamilleEnvironment.getCamille();
         if (!StringUtils.isEmpty(CamilleEnvironment.getDivision())) {
             try {
-                c.upsert(
-                        PathBuilder.buildPodDivisionPath(CamilleEnvironment.getPodId(),
-                                CamilleEnvironment.getDivision()), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                c.upsert(PathBuilder.buildPodDivisionPath(CamilleEnvironment.getPodId(),
+                        CamilleEnvironment.getDivision()), ZooDefs.Ids.OPEN_ACL_UNSAFE);
             } catch (Exception e) {
                 log.error("Could not upsert pod division path", e);
             }
@@ -54,19 +53,21 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
 
     @Override
     public boolean isEnabled(CustomerSpace space, String id) {
+        // generate warning if no definition
+        FeatureFlagDefinition def = getDefinition(id);
+        boolean defaultValue = def != null && def.getDefaultValue();
         FeatureFlagValueMap flags = getFlags(space);
         if (flags == null) {
-            log.warn(String.format("No feature flag value file defined for customer space %s", space));
-            return false;
+            log.warn(String.format(
+                    "No feature flag value file defined for customer space %s. Using default value of %s: %s", space,
+                    id, String.valueOf(defaultValue)));
+            return defaultValue;
         }
         if (!flags.containsKey(id)) {
-            return false;
+            return defaultValue;
+        } else {
+            return flags.get(id);
         }
-
-        // generate warning if no definition
-        getDefinition(id);
-
-        return flags.get(id).booleanValue();
     }
 
     @Override
@@ -88,8 +89,8 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     public void setEnabled(final CustomerSpace space, final String id, final boolean enabled) {
         FeatureFlagDefinition featureFlag = getDefinition(id);
         if (featureFlag == null) {
-            throw new RuntimeException(String.format(
-                    "Feature flag %s cannot be toggled without a corresponding definition", id));
+            throw new RuntimeException(
+                    String.format("Feature flag %s cannot be toggled without a corresponding definition", id));
         }
 
         CustomerSpaceScope customerSpaceScope = new CustomerSpaceScope(space);
@@ -217,10 +218,6 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
         }
     }
 
-    /**
-     * TODO This is slow - in the future this should be cached and updated via a
-     * cache listener.
-     */
     @Override
     public FeatureFlagValueMap getFlags(CustomerSpace space) {
         FeatureFlagValueMap toReturn;
