@@ -171,7 +171,12 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
 
     private void registerAllFlags() {
         for (Map.Entry<LatticeFeatureFlag, FeatureFlagDefinition> entry : flagDefinitionMap.entrySet()) {
-            FeatureFlagClient.setDefinition(entry.getKey().getName(), entry.getValue());
+            FeatureFlagDefinition def = entry.getValue();
+            LatticeFeatureFlag flag = entry.getKey();
+            if (flag.isDeprecated()) {
+                def.setDefaultValue(true);
+            }
+            FeatureFlagClient.setDefinition(flag.getName(), def);
         }
     }
 
