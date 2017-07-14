@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public interface DataLakeService {
 
     List<ColumnMetadata> getAttributes(Integer start, Integer limit);
-    Map<String, Long> getCounts();
+    long getAttributesCount();
     TopNTree getTopNTree(int max);
     StatsCube getStatsCube();
 

@@ -28,8 +28,8 @@ public class CommonAttributeResource {
     @RequestMapping(value = "/count", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get number of attributes")
-    public Map<String, Long> getAttributesCount() {
-        return dataLakeService.getCounts();
+    public long getAttributesCount() {
+        return dataLakeService.getAttributesCount();
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")

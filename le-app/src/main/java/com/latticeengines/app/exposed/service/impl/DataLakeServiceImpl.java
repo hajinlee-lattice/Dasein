@@ -3,9 +3,7 @@ package com.latticeengines.app.exposed.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,19 +44,12 @@ public class DataLakeServiceImpl implements DataLakeService {
     private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
-    public Map<String, Long> getCounts() {
+    public long getAttributesCount() {
         List<ColumnMetadata> cms = new ArrayList<>();
         for (BusinessEntity entity : BusinessEntity.values()) {
             cms.addAll(getAttributesInEntity(entity));
         }
-        long attrCount = cms.size();
-        Map<String, Long> map = new HashMap<>();
-        map.put("Attributes", attrCount);
-        Statistics statistics = getStatistics();
-        for (Map.Entry<BusinessEntity, Long> entry: statistics.getCounts().entrySet()) {
-            map.put(entry.getKey().name(), entry.getValue());
-        }
-        return map;
+        return cms.size();
     }
 
     @Override

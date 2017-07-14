@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
@@ -185,34 +184,6 @@ public class LatticeInsightsResource {
                 : Category.fromName(category));
         return attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
                 onlySelectedAttributes, considerInternalAttributes);
-    }
-
-    @RequestMapping(value = INSIGHTS_PATH + "/count2", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get number of attributes with selection flag")
-    public Map<String, Long> getAttributesCount(HttpServletRequest request,
-                                          @ApiParam(value = "Get attributes with name containing specified " //
-                                                  + "text for attributeDisplayNameFilter") //
-                                          @RequestParam(value = "attributeDisplayNameFilter", required = false) //
-                                                  String attributeDisplayNameFilter, //
-                                          @ApiParam(value = "Get attributes with specified category") //
-                                          @RequestParam(value = "category", required = false) //
-                                                  String category, //
-                                          @ApiParam(value = "Get attributes with specified subcategory") //
-                                          @RequestParam(value = "subcategory", required = false) //
-                                                  String subcategory, //
-                                          @ApiParam(value = "Should get only selected attribute") //
-                                          @RequestParam(value = "onlySelectedAttributes", required = false) //
-                                                  Boolean onlySelectedAttributes) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-        Category categoryEnum = (StringStandardizationUtils.objectIsNullOrEmptyString(category) ? null
-                : Category.fromName(category));
-        long count = attributeService.getAttributesCount(tenant, attributeDisplayNameFilter, categoryEnum, subcategory,
-                onlySelectedAttributes, considerInternalAttributes);
-        return ImmutableMap.of("Attributes", count);
     }
 
     @RequestMapping(value = INSIGHTS_PATH

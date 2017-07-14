@@ -174,29 +174,45 @@ VALUES
 
 UPDATE `DataCloudVersion`
 SET
+  `AccountMasterHdfsVersion` = '2016-10-15_14-37-09_UTC',
+  `AccountLookupHdfsVersion` = '2016-10-10_17-40-35_UTC',
   `DynamoTableSignature`        = '20161015',
   `DynamoTableSignature_Lookup` = '20161015'
 WHERE `Version` = '2.0.0';
 
 UPDATE `DataCloudVersion`
 SET
+  `AccountMasterHdfsVersion` = '2016-11-19_20-32-21_UTC',
+  `AccountLookupHdfsVersion` = '2016-11-19_05-33-46_UTC',
+WHERE `Version` = '2.0.1';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2017-01-24_23-14-40_UTC',
+  `AccountLookupHdfsVersion` = '2017-01-04_04-49-12_UTC',
   `DynamoTableSignature` = '20170126'
 WHERE `Version` = '2.0.2';
 
 UPDATE `DataCloudVersion`
 SET
+  `AccountMasterHdfsVersion` = '2017-02-14_07-28-18_UTC',
+  `AccountLookupHdfsVersion` = '2017-02-14_17-20-41_UTC',
   `DynamoTableSignature`        = '20170301',
   `DynamoTableSignature_Lookup` = '20170604'
 WHERE `Version` = '2.0.3';
 
 UPDATE `DataCloudVersion`
 SET
+  `AccountMasterHdfsVersion` = '2017-05-18_12-54-37_UTC',
+  `AccountLookupHdfsVersion` = '2017-05-17_17-30-29_UTC',
   `DynamoTableSignature`        = '20170604',
   `DynamoTableSignature_Lookup` = '20170604'
 WHERE `Version` = '2.0.4';
 
 UPDATE `DataCloudVersion`
 SET
+  `AccountMasterHdfsVersion` = '2017-06-30_01-18-36_UTC',
+  `AccountLookupHdfsVersion` = '2017-06-03_00-14-03_UTC',
   `DynamoTableSignature`        = '20170629',
   `DynamoTableSignature_Lookup` = '20170629',
   `AMBucketedRedShiftTable`     = 'AccountMasterBucketed_2017_07_01_15_59_30_UTC',
