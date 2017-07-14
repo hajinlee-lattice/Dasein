@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
@@ -19,8 +20,9 @@ public class WorkflowApp {
 
         try (ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(springConfig)) {
             WorkflowService workflowService = (WorkflowService) context.getBean("workflowService");
-
-            WorkflowExecutionId workflowId = workflowService.start("dlOrchestrationWorkflow", null);
+            WorkflowConfiguration config = new WorkflowConfiguration();
+            config.setWorkflowName("dlOrchestrationWorkflow");
+            WorkflowExecutionId workflowId = workflowService.start(config);
             BatchStatus status = workflowService.waitForCompletion(workflowId).getStatus();
 
             log.info("Exit Status : " + status);

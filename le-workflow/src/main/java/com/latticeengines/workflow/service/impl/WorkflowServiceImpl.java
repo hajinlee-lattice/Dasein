@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.TransformerUtils;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -107,12 +107,12 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public long startWorkflowJob(String workflowName, WorkflowConfiguration workflowConfiguration) {
+    public long startWorkflowJob(WorkflowConfiguration workflowConfiguration) {
         Job workflow = null;
         try {
-            workflow = jobRegistry.getJob(workflowName);
+            workflow = jobRegistry.getJob(workflowConfiguration.getWorkflowName());
         } catch (NoSuchJobException e1) {
-            throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowName });
+            throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowConfiguration.getWorkflowName() });
         }
 
         JobParametersBuilder parmsBuilder = new JobParametersBuilder().addString(WORKFLOW_SERVICE_UUID,
@@ -142,7 +142,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             jobExecution = jobLauncher.run(workflow, parms);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException e) {
-            throw new LedpException(LedpCode.LEDP_28001, e, new String[] { workflowName });
+            throw new LedpException(LedpCode.LEDP_28001, e, new String[] { workflowConfiguration.getWorkflowName() });
         }
         return jobExecution.getId();
     }
@@ -175,8 +175,8 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowExecutionId start(String workflowName, WorkflowConfiguration workflowConfiguration) {
-        long jobExecutionId = startWorkflowJob(workflowName, workflowConfiguration);
+    public WorkflowExecutionId start(WorkflowConfiguration workflowConfiguration) {
+        long jobExecutionId = startWorkflowJob(workflowConfiguration);
         Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfiguration);
         String user = workflowConfiguration.getUserId();
         user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
@@ -191,9 +191,8 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowExecutionId start(String workflowName, WorkflowJob workflowJob,
-            WorkflowConfiguration workflowConfiguration) {
-        long jobExecutionId = startWorkflowJob(workflowName, workflowConfiguration);
+    public WorkflowExecutionId start(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob) {
+        long jobExecutionId = startWorkflowJob(workflowConfiguration);
         workflowJob.setWorkflowId(jobExecutionId);
         workflowJobEntityMgr.registerWorkflowId(workflowJob);
         return new WorkflowExecutionId(jobExecutionId);
@@ -233,6 +232,30 @@ public class WorkflowServiceImpl implements WorkflowService {
         }
 
         return new WorkflowExecutionId(jobExecutionId);
+    }
+
+    @Override
+    public WorkflowExecutionId relaunch(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob) {
+        JobExecution jobExecution = null;
+
+        try {
+            Job workflow = jobRegistry.getJob(workflowConfiguration.getWorkflowName());
+            JobParameters parameters = leJobExecutionRetriever
+                    .getJobExecution(workflowConfiguration.getWorkflowIdToRestart().getId()).getJobParameters();
+            jobExecution = jobLauncher.run(workflow, parameters);
+
+            workflowJob.setWorkflowId(jobExecution.getId());
+            workflowJobEntityMgr.registerWorkflowId(workflowJob);
+            log.info(String.format("Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
+                    workflowConfiguration.getWorkflowIdToRestart(), jobExecution.getId()));
+        } catch (JobInstanceAlreadyCompleteException | NoSuchJobException | JobRestartException
+                | JobParametersInvalidException | JobExecutionAlreadyRunningException e) {
+            throw new LedpException(LedpCode.LEDP_28002, e,
+                    new String[] { String.valueOf(workflowConfiguration.getWorkflowIdToRestart()),
+                            String.valueOf(workflowConfiguration.getWorkflowIdToRestart()) });
+        }
+
+        return new WorkflowExecutionId(jobExecution.getId());
     }
 
     @Override
@@ -313,7 +336,11 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     private String getWorkflowName(WorkflowExecutionId workflowId) {
-        return leJobExecutionRetriever.getJobExecution(workflowId.getId()).getJobInstance().getJobName();
+        return getWorkflowName(leJobExecutionRetriever.getJobExecution(workflowId.getId()));
+    }
+
+    private String getWorkflowName(JobExecution jobExecution) {
+        return jobExecution.getJobInstance().getJobName();
     }
 
     @Override

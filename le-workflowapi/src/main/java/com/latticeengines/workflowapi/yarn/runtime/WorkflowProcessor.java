@@ -1,9 +1,9 @@
 package com.latticeengines.workflowapi.yarn.runtime;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -77,12 +77,17 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         }
 
         try {
-
             if (workflowConfig.isRestart()) {
                 log.info("Restarting workflow " + workflowConfig.getWorkflowIdToRestart().getId());
-                workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart(), workflowJob);
+                if (workflowConfig.isSkipCompletedSteps()) {
+                    log.info("Restarting workflow from last failed step");
+                    workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart(), workflowJob);
+                } else {
+                    log.info("Restarting workflow from beginning");
+                    workflowId = workflowService.relaunch(workflowConfig, workflowJob);
+                }
             } else {
-                workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowJob, workflowConfig);
+                workflowId = workflowService.start(workflowConfig, workflowJob);
             }
 
             WorkflowStatus workflowStatus = workflowService.waitForCompletion(workflowId);

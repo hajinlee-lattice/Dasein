@@ -35,9 +35,9 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
         failableStep.setFail(true);
         WorkflowConfiguration configuration = new WorkflowConfiguration();
         CustomerSpace customerSpace = CustomerSpace.parse(WORKFLOW_TENANT);
-        configuration.setContainerConfiguration("completedStepAgainWorkflow", customerSpace,
-                "CompletedStepAgainWorkflow");
-        WorkflowExecutionId workflowId = workflowService.start(runCompletedStepAgainWorkflow.name(), configuration);
+        configuration.setContainerConfiguration(runCompletedStepAgainWorkflow.name(), customerSpace,
+                runCompletedStepAgainWorkflow.name());
+        WorkflowExecutionId workflowId = workflowService.start(configuration);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> stepNames = workflowService.getStepNames(workflowId);
         assertTrue(stepNames.contains(runAgainWhenCompleteStep.name()));

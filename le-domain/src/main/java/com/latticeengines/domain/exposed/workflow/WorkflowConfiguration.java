@@ -28,6 +28,9 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     private boolean restart;
 
     @JsonProperty
+    private boolean skipCompletedSteps;
+
+    @JsonProperty
     private WorkflowExecutionId workflowIdToRestart;
 
     @JsonProperty
@@ -75,6 +78,14 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     public void setRestart(boolean restart) {
         this.restart = restart;
+    }
+
+    public boolean isSkipCompletedSteps() {
+        return skipCompletedSteps;
+    }
+
+    public void setSkipCompletedSteps(boolean skipCompletedSteps) {
+        this.skipCompletedSteps = skipCompletedSteps;
     }
 
     public WorkflowExecutionId getWorkflowIdToRestart() {

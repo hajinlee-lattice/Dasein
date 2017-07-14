@@ -12,9 +12,9 @@ import java.util.Random;
 
 import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -168,7 +168,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
 
-        WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
+        WorkflowExecutionId workflowId = workflowService.start(configuration);
 
         waitForCompletion(workflowId);
     }

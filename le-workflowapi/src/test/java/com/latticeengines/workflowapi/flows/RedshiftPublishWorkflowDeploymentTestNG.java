@@ -111,7 +111,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
         builder.microServiceHostPort(microserviceHostPort);
         RedshiftPublishWorkflowConfiguration config = builder.build();
 
-        WorkflowExecutionId workflowId = workflowService.start(config.getWorkflowName(), config);
+        WorkflowExecutionId workflowId = workflowService.start(config);
         waitForCompletion(workflowId);
         verify(table.getName(), 5);
         HdfsUtils.rmdir(yarnConfiguration, dest);
@@ -135,7 +135,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiFunction
         builder.customer(DEMO_CUSTOMERSPACE);
         builder.microServiceHostPort(microserviceHostPort);
         RedshiftPublishWorkflowConfiguration config = builder.build();
-        WorkflowExecutionId workflowId = workflowService.start(config.getWorkflowName(), config);
+        WorkflowExecutionId workflowId = workflowService.start(config);
         waitForCompletion(workflowId);
         verify(table.getName(), 8);
         HdfsUtils.rmdir(yarnConfiguration, dest);

@@ -72,7 +72,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
             }
         }
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
-        WorkflowExecutionId workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
+        WorkflowExecutionId workflowId = workflowService.start(configuration);
 
         waitForCompletion(workflowId);
 

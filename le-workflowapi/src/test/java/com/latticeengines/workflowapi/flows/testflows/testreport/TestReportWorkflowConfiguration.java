@@ -21,7 +21,7 @@ public class TestReportWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            testWorkflow.setCustomerSpace(customerSpace);
+            testWorkflow.setContainerConfiguration("testReportWorkflow", customerSpace, "testReportWorkflow");
             registerReport.setCustomerSpace(customerSpace);
             return this;
         }

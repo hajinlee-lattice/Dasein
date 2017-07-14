@@ -17,7 +17,7 @@ public interface WorkflowService {
 
     List<String> getNames();
 
-    WorkflowExecutionId start(String workflowName, WorkflowConfiguration workflowConfiguration);
+    WorkflowExecutionId start(WorkflowConfiguration workflowConfiguration);
 
     WorkflowExecutionId restart(WorkflowExecutionId workflowId, WorkflowJob workflowJob);
 
@@ -39,7 +39,7 @@ public interface WorkflowService {
 
     List<Job> getJobs(List<WorkflowExecutionId> workflowIds, String type);
 
-    long startWorkflowJob(String workflowName, WorkflowConfiguration workflowConfiguration);
+    long startWorkflowJob(WorkflowConfiguration workflowConfiguration);
 
     Map<String, String> getInputs(Map<String, String> inputContext);
 
@@ -47,7 +47,8 @@ public interface WorkflowService {
 
     void registerJob(String name, ApplicationContext context);
 
-    WorkflowExecutionId start(String workflowName, WorkflowJob workflowJob,
-            WorkflowConfiguration workflowConfiguration);
+    WorkflowExecutionId start(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob);
+
+    WorkflowExecutionId relaunch(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob);
 
 }

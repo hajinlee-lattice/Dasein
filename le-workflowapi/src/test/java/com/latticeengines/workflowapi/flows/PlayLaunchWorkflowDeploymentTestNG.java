@@ -30,7 +30,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends PlayLaunchWorkflowTestNG
     public void testWorkflow() throws Exception {
         PlayLaunchWorkflowConfiguration configuration = generatePlayLaunchWorkflowConfiguration();
         workflowService.registerJob(configuration.getWorkflowName(), applicationContext);
-        workflowId = workflowService.start(configuration.getWorkflowName(), configuration);
+        workflowId = workflowService.start(configuration);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = {

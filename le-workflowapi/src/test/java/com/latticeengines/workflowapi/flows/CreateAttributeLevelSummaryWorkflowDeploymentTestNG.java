@@ -48,7 +48,7 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
     @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
         CreateAttributeLevelSummaryWorkflowConfiguration workflowConfig = generateWorkflowConfiguration();
-        WorkflowExecutionId workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         System.out.println("Workflow id = " + workflowId.getId());
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();

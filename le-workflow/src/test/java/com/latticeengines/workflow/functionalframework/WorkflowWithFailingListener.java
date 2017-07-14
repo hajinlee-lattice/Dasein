@@ -10,7 +10,7 @@ import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component
+@Component("workflowWithFailingListener")
 public class WorkflowWithFailingListener extends AbstractWorkflow<WorkflowConfiguration> {
 
     @Autowired

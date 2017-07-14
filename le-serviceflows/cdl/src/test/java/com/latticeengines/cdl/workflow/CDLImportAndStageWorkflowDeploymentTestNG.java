@@ -48,7 +48,7 @@ public class CDLImportAndStageWorkflowDeploymentTestNG extends CDLWorkflowDeploy
     public void testWorkflow() throws Exception {
         CDLImportWorkflowConfiguration config = generateConfiguration();
 
-        WorkflowExecutionId workflowId = workflowService.start(cdlImportWorkflow.name(), config);
+        WorkflowExecutionId workflowId = workflowService.start(config);
 
         System.out.println("Workflow id = " + workflowId.getId());
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
@@ -59,7 +59,7 @@ public class CDLImportAndStageWorkflowDeploymentTestNG extends CDLWorkflowDeploy
     public void testCreateStagingTablesWorkflow() throws Exception {
         CDLCreateStagingTablesWorkflowConfiguration config = generateCreateStagingTablesConfiguration();
 
-        WorkflowExecutionId workflowId = workflowService.start(cdlCreateStagingTablesWorkflow.name(), config);
+        WorkflowExecutionId workflowId = workflowService.start(config);
 
         System.out.println("Create staging tables workflow id = " + workflowId.getId());
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
