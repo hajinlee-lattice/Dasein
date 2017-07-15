@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,22 +25,21 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
-            List<Integer> playIds) {
+            List<String> idStrList) {
+        List<Integer> playIds = idStrListToIntList(idStrList);
+
         String sql = "SELECT * FROM (SELECT L.[PreLead_ID] AS ID, L.Account_ID AS AccountID, L.[LaunchRun_ID] AS LaunchID, "
                 + "PL.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, A.External_ID AS LEAccountExternalID, "
                 + "COALESCE(PL.[Description], L.[Description]) AS Description, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, "
-                + getLikelihood()
-                + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, "
+                + getLikelihood() + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, "
                 + "CASE WHEN L.[Expiration_Date] > '2030-03-15' THEN 1899763200 ELSE DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) END AS ExpirationDate, "
-                + getMonetaryValue()
-                + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
+                + getMonetaryValue() + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
                 + "(SELECT TOP 1  ISNULL(T.[Display_Name], '') + '|' + ISNULL(T.[Phone_Number], '') + '|' + ISNULL(T.[Email_Address], '') "
                 + " + '|' +  ISNULL(T.[Address_Street_1], '') + '|' + ISNULL(T.[City], '') + '|' + ISNULL(T.[State_Province], '') "
                 + " + '|' + ISNULL(T.[Country], '') + '|' + ISNULL(T.[Zip], '') + '|' + ISNULL(CONVERT(VARCHAR, T.[LEContact_ID]), '') "
-                + getSfdcContactID()
-                + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
+                + getSfdcContactID() + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
                 + "DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY L.[Last_Modification_Date], L.[PreLead_ID]) RowNum "
                 + getRecommendationFromWhereClause(syncDestination, playIds)
@@ -109,7 +109,9 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getRecommendationCount(long start, int syncDestination, List<Integer> playIds) {
+    public int getRecommendationCount(long start, int syncDestination, List<String> idStrList) {
+        List<Integer> playIds = idStrListToIntList(idStrList);
+
         String sql = "SELECT COUNT(*) " + getRecommendationFromWhereClause(syncDestination, playIds);
 
         MapSqlParameterSource source = new MapSqlParameterSource();
@@ -128,9 +130,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "ON L.Play_ID = PL.Play_ID AND PL.IsActive = 1 AND PL.IsVisible = 1 JOIN Priority P WITH (NOLOCK) "
                 + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C WITH (NOLOCK) "
                 + "ON P.Display_Text_Key = C.Key_Name AND C.Locale_ID = -1 JOIN Currency M WITH (NOLOCK) "
-                + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID "
-                + "WHERE L.Status = 2800 AND L.IsActive = 1 AND " + "L.Synchronization_Destination in ("
-                + getDestinationonValues(syncDestination) + ") " + "%s "
+                + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID " + "WHERE L.Status = 2800 AND L.IsActive = 1 AND "
+                + "L.Synchronization_Destination in (" + getDestinationonValues(syncDestination) + ") " + "%s "
                 + "AND DATEDIFF(s,'19700101 00:00:00:000',L.[Last_Modification_Date]) >= :start ";
 
         StringBuilder extraFilter = new StringBuilder();
@@ -252,11 +253,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum,
-            List<Integer> accountIds, String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
+    public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<String> idStrList,
+            String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
+        List<Integer> accountIds = idStrListToIntList(idStrList);
+
         String extensionColumns = getAccountExtensionColumns(columns);
-        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, "
-                + getSfdcAccountContactIds(hasSfdcContactId)
+        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, " + getSfdcAccountContactIds(hasSfdcContactId)
                 + "A.External_ID AS LEAccountExternalID, " + extensionColumns + " "
                 + "DATEDIFF(s,'19700101 00:00:00:000', " + getAccountExtensionLastModificationDate()
                 + ") AS LastModificationDate, " + "ROW_NUMBER() OVER ( ORDER BY "
@@ -264,9 +266,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + getAccountExtensionFromWhereClause(accountIds, filterBy)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
         MapSqlParameterSource source = new MapSqlParameterSource();
-        if (StringUtils.isNotEmpty(filterBy)
-                && (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals(
-                        "NORECOMMENDATIONS"))) {
+        if (StringUtils.isNotEmpty(filterBy) && (filterBy.toUpperCase().equals("RECOMMENDATIONS")
+                || filterBy.toUpperCase().equals("NORECOMMENDATIONS"))) {
             if (recStart == null) {
                 throw new RuntimeException("Missng recStart when filterBy is used.");
             }
@@ -338,12 +339,13 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public int getAccountExtensionCount(long start, List<Integer> accountIds, String filterBy, Long recStart) {
+    public int getAccountExtensionCount(long start, List<String> idStrList, String filterBy, Long recStart) {
+        List<Integer> accountIds = idStrListToIntList(idStrList);
+
         String sql = "SELECT COUNT(*) " + getAccountExtensionFromWhereClause(accountIds, filterBy);
         MapSqlParameterSource source = new MapSqlParameterSource();
-        if (StringUtils.isNotEmpty(filterBy)
-                && (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals(
-                        "NORECOMMENDATIONS"))) {
+        if (StringUtils.isNotEmpty(filterBy) && (filterBy.toUpperCase().equals("RECOMMENDATIONS")
+                || filterBy.toUpperCase().equals("NORECOMMENDATIONS"))) {
             if (recStart == null) {
                 throw new RuntimeException("Missng recStart when filterBy is used.");
             }
@@ -381,8 +383,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         String whereClause = null;
         if (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals("NORECOMMENDATIONS")) {
             whereClause = "WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) >= :recStart) "
-                    + " AND DATEDIFF(s,'19700101 00:00:00:000', "
-                    + getAccountExtensionLastModificationDate()
+                    + " AND DATEDIFF(s,'19700101 00:00:00:000', " + getAccountExtensionLastModificationDate()
                     + ") >= :start ";
             String oper = filterBy.equals("RECOMMENDATIONS") ? "IN" : "NOT IN";
             whereClause = String.format(whereClause, oper);
@@ -420,13 +421,13 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds, List<Integer> accountIds) {
+    public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds,
+            List<Integer> accountIds) {
         String sql = "SELECT * FROM (SELECT C.[LEContact_ID] AS ID, C.[External_ID] AS ExternalID, C.[Display_Name] AS Name, C.[Account_ID] AS AccountID, "
                 + "C.[Description] AS Description, C.[Title] AS Title, C.[Phone_Number] AS Phone,"
                 + "C.[Fax_Number] AS Fax, C.[Email_Address] AS Email,"
                 + "C.[Address_Street_1] AS Address, C.[Address_Street_2] AS Address2,"
-                + "C.[City] AS City, C.[State_Province] AS State,"
-                + "C.[Country] AS Country, C.[Zip] AS ZipCode,"
+                + "C.[City] AS City, C.[State_Province] AS State," + "C.[Country] AS Country, C.[Zip] AS ZipCode,"
                 + getSfdcContactIDFromLEContact()
                 + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY C.[Last_Modification_Date], C.[LEContact_ID] ) RowNum "
@@ -476,12 +477,13 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         } else {
             extraFilter.append("AND C.[Account_ID] IN (:accountIds) ");
         }
-        
+
         return String.format(whereClause, extraFilter.toString());
     }
 
     @Override
-    public List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum, List<Integer> contactIds) {
+    public List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum,
+            List<Integer> contactIds) {
         String extensionColumns = getContactExtensionColumns();
         String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, " + getSfdcContactIDFromLEContact() + extensionColumns
                 + " " + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
@@ -634,5 +636,19 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     private String getPlayGroupWhereClause() {
         return "FROM PlayGroup WHERE IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', PlayGroup.[Last_Modification_Date]) >= :start ";
+    }
+
+    private List<Integer> idStrListToIntList(List<String> idStrList) {
+        if (idStrList == null) {
+            return null;
+        }
+
+        List<Integer> ids = idStrList.stream()//
+                .map(idStr -> {
+                    Integer id = Integer.parseInt(idStr);
+                    return id;
+                })//
+                .collect(Collectors.toList());
+        return ids;
     }
 }

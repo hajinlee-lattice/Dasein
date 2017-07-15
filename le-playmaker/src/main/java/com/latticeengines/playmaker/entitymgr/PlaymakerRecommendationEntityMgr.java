@@ -15,22 +15,22 @@ public interface PlaymakerRecommendationEntityMgr {
     List<Map<String, Object>> getAccountExtensionSchema(String tenantName);
 
     Map<String, Object> getRecommendations(String tenantName, long start, int offset, int maximum, int syncDestination,
-            List<Integer> playIds);
+            List<String> playIds);
 
     Map<String, Object> getPlays(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds);
 
     Map<String, Object> getAccountExtensions(String tenantName, long start, int offset, int maximum,
-            List<Integer> accountIds, String filterBy, Long recStart, String columns, boolean hasSfdcContactId);
+            List<String> accountIds, String filterBy, Long recStart, String columns, boolean hasSfdcContactId);
 
     Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds);
 
     List<Map<String, Object>> getWorkflowTypes(String tenantName);
 
-    Map<String, Object> getRecommendationCount(String tenantName, long start, int syncDestination, List<Integer> playIds);
+    Map<String, Object> getRecommendationCount(String tenantName, long start, int syncDestination, List<String> playIds);
 
     Map<String, Object> getPlayCount(String tenantName, long start, List<Integer> playgroupIds);
 
-    Map<String, Object> getAccountextExsionCount(String tenantName, long start, List<Integer> accountIds,
+    Map<String, Object> getAccountextExsionCount(String tenantName, long start, List<String> accountIds,
             String filterBy, Long recStart);
 
     Map<String, Object> getPlayValueCount(String tenantName, long start, List<Integer> playgroupIds);

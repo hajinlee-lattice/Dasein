@@ -60,6 +60,7 @@
         <module>le-oauth2db</module>
         <module>le-scoringapi</module>
         <module>le-pls</module>
+        <module>le-playmaker</module>
         <module>le-playmakercore</module>
         <module>le-dellebi</module>
         <module>le-liaison</module>

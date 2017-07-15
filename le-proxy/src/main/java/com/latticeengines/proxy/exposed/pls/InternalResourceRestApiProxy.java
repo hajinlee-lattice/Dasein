@@ -461,6 +461,22 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         return url;
     }
 
+    public List<Play> getPlays(CustomerSpace customerSpace, //
+            int start, //
+            int offset, //
+            int maximum) {
+        try {
+            String url = constructUrl("pls/internal/plays/", customerSpace.toString());
+
+            log.debug("Get from " + url);
+            PlayLaunch playLaunch = restTemplate.getForObject(url, PlayLaunch.class);
+
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("getPlayLaunch: Remote call failure: " + e.getMessage(), e);
+        }
+    }
+
     public PlayLaunch getPlayLaunch(CustomerSpace customerSpace, //
             String playName, //
             String launchId) {

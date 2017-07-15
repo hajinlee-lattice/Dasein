@@ -3,12 +3,11 @@ package com.latticeengines.playmaker.controller;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.velocity.VelocityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
@@ -18,8 +17,8 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import com.latticeengines.playmaker.exception.ExceptionEncodingTranslator;
 
 @Configuration
-@EnableAutoConfiguration(exclude = { VelocityAutoConfiguration.class })
 @EnableResourceServer
+@EnableWebSecurity
 public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     private static final String PLAYMAKER_REST_RESOURCE_ID = "playmaker_api";
