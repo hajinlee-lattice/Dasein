@@ -165,22 +165,19 @@ public class CamilleFeatureFlagProvider implements FeatureFlagProvider {
     @Override
     public void remove(final String id) {
         SafeUpserter upserter = new SafeUpserter();
-        upserter.upsert(new PodScope(), new Path("/" + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE),
-                new Function<FeatureFlagDefinitionMap, FeatureFlagDefinitionMap>() {
-                    @Override
-                    public FeatureFlagDefinitionMap apply(FeatureFlagDefinitionMap existing) {
-                        FeatureFlagDefinitionMap toReturn = new FeatureFlagDefinitionMap();
+        upserter.upsert(new PodDivisionScope(), new Path("/" + PathConstants.FEATURE_FLAGS_DEFINITIONS_FILE),
+                existing -> {
+                    FeatureFlagDefinitionMap toReturn = new FeatureFlagDefinitionMap();
 
-                        if (existing != null) {
-                            toReturn.putAll(existing);
-                        }
-
-                        if (toReturn.containsKey(id)) {
-                            toReturn.remove(id);
-                        }
-
-                        return toReturn;
+                    if (existing != null) {
+                        toReturn.putAll(existing);
                     }
+
+                    if (toReturn.containsKey(id)) {
+                        toReturn.remove(id);
+                    }
+
+                    return toReturn;
                 }, FeatureFlagDefinitionMap.class);
         rebuildDefinitions();
     }

@@ -17,12 +17,12 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.modeling.ModelExtractor;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -112,6 +112,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Autowired
     private ModelFieldsCache modelFieldsCache;
 
+    @Autowired
+    private BatonService batonService;
+
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     private String localPathToPersist = null;
@@ -184,8 +187,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ModelSummary modelSummary = artifacts.getModelSummary();
         List<Predictor> predictors = modelSummary.getPredictors();
 
-        boolean fuzzyMatchEnabled = FeatureFlagClient.isEnabled(customerSpace,
-                LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName());
+        boolean fuzzyMatchEnabled = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_FUZZY_MATCH);
         String dataCloudVersion = modelSummary.getDataCloudVersion();
         log.info("fuzzyMatchEnabled = " + fuzzyMatchEnabled + ", and dataCloudVersion = " + dataCloudVersion
                 + " for model " + modelId);

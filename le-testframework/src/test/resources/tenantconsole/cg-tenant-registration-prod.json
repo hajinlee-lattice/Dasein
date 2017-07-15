@@ -1,12 +1,65 @@
 {
   "ConfigDirectories": [
     {
+      "RootPath": "/Eai",
+      "Nodes": [
+        {
+          "Node": "SalesforceEndpointConfig",
+          "Children": [
+            {
+              "Node": "HttpClient",
+              "Children": [
+                {
+                  "Node": "ConnectTimeout",
+                  "Data": "60000"
+                },
+                {
+                  "Node": "ImportTimeout",
+                  "Data": "3600000"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "RootPath": "/Modeling",
       "Nodes": [
         {
           "Node": "FeaturesThreshold",
           "Data": "-1"
         }
+      ]
+    },
+    {
+      "RootPath": "/PLS",
+      "Nodes": [
+        {
+          "Node": "EnrichAttributesMaxNumber",
+          "Data": "10"
+        },
+        {
+          "Node": "ExternalAdminEmails",
+          "Data": "[]"
+        },
+        {
+          "Node": "LatticeAdminEmails",
+          "Data": "[\"ysong@lattice-engines.com\"]"
+        },
+        {
+          "Node": "SuperAdminEmails",
+          "Data": "[\"bnguyen@lattice-engines.com\",\"bross@lattice-engines.com\"]"
+        },
+        {
+          "Node": "ThirdPartyUserEmails",
+          "Data": "[]"
+        }
+      ]
+    },
+    {
+      "RootPath": "/Metadata",
+      "Nodes": [
       ]
     }
   ],
@@ -15,11 +68,11 @@
       "displayName": "CG_${TENANT}",
       "description": "A CG solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{}"
+    "featureFlags": "{\"EnableDataEncryption\":true,\"EnableCdl\":true,\"EnableTalkingPoints\":true}"
   },
   "TenantInfo": {
     "properties": {
-      "displayName": "CG_${TENANT}",
+      "displayName": "${TENANT}_CG",
       "description": "A CG tenant under the contract ${TENANT}"
     }
   },
@@ -29,7 +82,9 @@
   "SpaceConfig": {
     "Product": "Customer Growth",
     "Products": [
-      "Customer Growth"
-    ]
+      "Lead Prioritization 3.0", "Customer Growth"
+    ],
+    "Topology": "${TOPOLOGY}",
+    "DL_Address": "http://bodcdevvint187.dev.lattice.local:8081"
   }
 }

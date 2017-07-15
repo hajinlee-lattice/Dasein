@@ -3,19 +3,18 @@ package com.latticeengines.app.exposed.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.CommonTenantConfigService;
 import com.latticeengines.app.exposed.util.ValidateEnrichAttributesUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -32,7 +31,9 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
     public static final String ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE = "/EnrichAttributesMaxNumber";
     private static final Logger log = LoggerFactory.getLogger(CommonTenantConfigServiceImpl.class);
     public static final String PLS = "PLS";
-    private static final BatonService batonService = new BatonServiceImpl();
+
+    @Autowired
+    private BatonService batonService;
 
     @Override
     public List<LatticeProduct> getProducts(String tenantId) {
@@ -59,7 +60,7 @@ public class CommonTenantConfigServiceImpl implements CommonTenantConfigService 
     public FeatureFlagValueMap getFeatureFlags(String tenantId) {
         try {
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-            return FeatureFlagClient.getFlags(customerSpace);
+            return batonService.getFeatureFlags(customerSpace);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18049, e, new String[] { tenantId });
         }

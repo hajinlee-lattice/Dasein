@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -43,6 +43,9 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Autowired
+    private BatonService batonService;
+
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     @Override
@@ -55,8 +58,8 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
 
         CustomerSpace customerSpace = scoringConfig.getCustomerSpace();
 
-        boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient.isEnabled(customerSpace,
-                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+        boolean enrichmentEnabledForInternalAttributes = batonService.isEnabled(customerSpace,
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
 
         List<String> internalAttributes = getSelectedInternalEnrichmentAttributes(customerSpace,
                 enrichmentEnabledForInternalAttributes);

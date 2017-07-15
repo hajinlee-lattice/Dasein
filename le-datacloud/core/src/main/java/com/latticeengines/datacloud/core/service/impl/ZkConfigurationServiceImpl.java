@@ -7,18 +7,19 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.zookeeper.ZooDefs;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.datacloud.core.datasource.DataSourceConnection;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
@@ -26,7 +27,6 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
 
 @Component("zkConfigurationService")
@@ -53,6 +53,9 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
 
     @Value("${datacloud.dnb.use.remote.global}")
     private String useRemoteDnBGlobal;
+
+    @Autowired
+    private BatonService batonService;
 
     @PostConstruct
     private void postConstruct() {
@@ -98,30 +101,11 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     }
 
     public boolean fuzzyMatchEnabled(CustomerSpace customerSpace) {
-        try {
-            FeatureFlagValueMap flags = FeatureFlagClient.getFlags(customerSpace);
-            return (flags.containsKey(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName()) && Boolean.TRUE.equals(flags
-                    .get(LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName())));
-        } catch (Exception e) {
-            log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName()
-                    + " feature flags for " + customerSpace, e);
-            return false;
-        }
+        return true;
     }
 
     public boolean bypassDnBCache(CustomerSpace customerSpace) {
-        try {
-            FeatureFlagValueMap flags = FeatureFlagClient.getFlags(customerSpace);
-            if (!flags.containsKey(LatticeFeatureFlag.BYPASS_DNB_CACHE.getName())) {
-                return false;
-            } else {
-                return Boolean.TRUE.equals(flags.get(LatticeFeatureFlag.BYPASS_DNB_CACHE.getName()));
-            }
-        } catch (Exception e) {
-            log.error("Error when retrieving " + LatticeFeatureFlag.BYPASS_DNB_CACHE.getName() + " feature flags for "
-                    + customerSpace, e);
-            return false;
-        }
+        return false;
     }
 
     private Path dbPoolPath(DataSourcePool pool) {
@@ -135,9 +119,7 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     @Override
     public boolean isMatchDebugEnabled(CustomerSpace customerSpace) {
         try {
-            FeatureFlagValueMap flags = FeatureFlagClient.getFlags(customerSpace);
-            return (flags.containsKey(LatticeFeatureFlag.ENABLE_MATCH_DEBUG.getName()) && Boolean.TRUE.equals(flags
-                    .get(LatticeFeatureFlag.ENABLE_MATCH_DEBUG.getName())));
+            return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_MATCH_DEBUG);
         } catch (Exception e) {
             log.error("Error when retrieving " + LatticeFeatureFlag.ENABLE_MATCH_DEBUG.getName()
                     + " feature flags for " + customerSpace, e);

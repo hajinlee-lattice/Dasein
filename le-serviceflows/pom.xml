@@ -73,6 +73,13 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-baton</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

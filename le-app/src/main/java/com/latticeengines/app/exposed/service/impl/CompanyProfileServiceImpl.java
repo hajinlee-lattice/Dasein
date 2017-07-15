@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,6 +46,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
 
+    @Autowired
+    private BatonService batonService;
+
     @Value("${ulysses.companyprofile.datacloud.version:}")
     private String dataCloudVersion;
 
@@ -67,8 +71,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             datum.add(entry.getValue());
         }
         data.add(datum);
-        boolean considerInternalAttributes = FeatureFlagClient.isEnabled(customerSpace,
-                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+        boolean considerInternalAttributes = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
 
         Tenant tenant = new Tenant(customerSpace.toString());
         matchInput.setTenant(tenant);

@@ -15,6 +15,8 @@
     <import resource="classpath:app-aspects-context.xml"/>
     <import resource="classpath:db-context.xml"/>
 
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
+
     <context:component-scan base-package="com.latticeengines.app"/>
 
 </beans>

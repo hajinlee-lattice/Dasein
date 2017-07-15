@@ -14,7 +14,7 @@
     <import resource="classpath:monitor-alerts-context.xml" />
     <import resource="classpath:monitor-metric-context.xml" />
     <import resource="classpath:camille-runtime-context.xml"/>
-    
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
     
     <context:annotation-config />
 

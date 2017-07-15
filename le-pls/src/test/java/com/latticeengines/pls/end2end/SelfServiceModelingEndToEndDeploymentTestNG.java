@@ -19,9 +19,9 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -267,7 +267,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(originalModelSummary.getTrainingTableName());
         assertFalse(originalModelSummary.getTrainingTableName().isEmpty());
         assertEquals(originalModelSummary.getModelSummaryConfiguration().getString(
-                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
+                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
         assertJobExistsWithModelIdAndModelName(originalModelSummary.getId());
         inspectOriginalModelSummaryPredictors(originalModelSummary);
         assertABCDBucketsCreated(originalModelSummary.getId());

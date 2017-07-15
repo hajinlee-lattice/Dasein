@@ -15,6 +15,10 @@ public class FeatureFlagClient {
         FeatureFlagClient.provider = provider;
     }
 
+    /**
+     * Use isEnabled in BatonService
+     */
+    @Deprecated
     public static boolean isEnabled(CustomerSpace space, String id) {
         initialize();
         return provider.isEnabled(space, id);
@@ -30,6 +34,10 @@ public class FeatureFlagClient {
         return provider.getDefinitions();
     }
 
+    /**
+     * Use getFeatureFlags in BatonService
+     */
+    @Deprecated
     public static FeatureFlagValueMap getFlags(CustomerSpace space) {
         initialize();
         return provider.getFlags(space);

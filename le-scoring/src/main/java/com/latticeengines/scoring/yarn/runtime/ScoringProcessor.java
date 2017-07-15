@@ -30,10 +30,10 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -99,6 +99,9 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @Autowired
     private InternalScoringApiProxy internalScoringApiProxy;
 
+    @Autowired
+    private BatonService batonService;
+
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
     private boolean useInternalId = false;
@@ -141,9 +144,9 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = null;
         Map<String, Boolean> leadEnrichmentInternalAttributeFlagMap = null;
         isEnableDebug = rtsBulkScoringConfig.isEnableDebug();
-        boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient.isEnabled(
+        boolean enrichmentEnabledForInternalAttributes = batonService.isEnabled(
                 rtsBulkScoringConfig.getCustomerSpace(),
-                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
 
         if (rtsBulkScoringConfig.isEnableLeadEnrichment()) {
             leadEnrichmentAttributeMap = new HashMap<>();

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.CommonTenantConfigService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
@@ -65,6 +66,9 @@ public class TenantConfigServiceImpl implements TenantConfigService {
 
     @Autowired
     private CommonTenantConfigService commonTenantConfigService;
+
+    @Autowired
+    private BatonService batonService;
 
     @PostConstruct
     private void definePlsFeatureFlags() {
@@ -128,7 +132,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     public FeatureFlagValueMap getFeatureFlags(String tenantId) {
         try {
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-            FeatureFlagValueMap tenantFlags = FeatureFlagClient.getFlags(customerSpace);
+            FeatureFlagValueMap tenantFlags = batonService.getFeatureFlags(customerSpace);
             tenantFlags = combineDefaultFeatureFlags(tenantFlags);
             tenantFlags = overwriteDataloaderFlags(tenantFlags, tenantId);
             tenantFlags = overwriteDeploymentWizardFlag(tenantFlags, tenantId);

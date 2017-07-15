@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.AttributeService;
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
@@ -47,6 +47,9 @@ public class ScoringApiConsoleResource {
     @Autowired
     private AttributeService attributeService;
 
+    @Autowired
+    private BatonService batonService;
+
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score a record including debug info such as probability via APIConsole")
     public DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, //
@@ -64,9 +67,8 @@ public class ScoringApiConsoleResource {
             Boolean skipDnBCache, //
             @RequestBody ScoreRequest scoreRequest) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
-        boolean enrichmentEnabledForInternalAttributes = FeatureFlagClient
-                .isEnabled(CustomerSpace.parse(tenant.getId()),
-                        LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+        boolean enrichmentEnabledForInternalAttributes = batonService
+                .isEnabled(CustomerSpace.parse(tenant.getId()), LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
 
         if (enforceFuzzyMatch == null) {
             enforceFuzzyMatch = true;

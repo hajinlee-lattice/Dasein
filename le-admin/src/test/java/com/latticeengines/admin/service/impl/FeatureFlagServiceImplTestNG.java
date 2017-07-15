@@ -50,17 +50,26 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 defaultFeatureFlagMap.size() >= LatticeFeatureFlag.values().length + PlsFeatureFlag.values().length,
                 "Should have at least LatticeFeatureFlags and PlsFeatureFlags");
 
-        Collection<LatticeFeatureFlag> expectedPdFlags = Arrays.asList(LatticeFeatureFlag.QUOTA,
-                LatticeFeatureFlag.TARGET_MARKET, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL);
-        Collection<LatticeFeatureFlag> expectedCgFlags = Collections
-                .singleton(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION);
+        Collection<LatticeFeatureFlag> expectedPdFlags = Arrays.asList( //
+                LatticeFeatureFlag.QUOTA, //
+                LatticeFeatureFlag.TARGET_MARKET, //
+                LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL);
+        Collection<LatticeFeatureFlag> expectedCgFlags = Arrays.asList(//
+                LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION, //
+                LatticeFeatureFlag.ENABLE_CDL, //
+                LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, //
+                LatticeFeatureFlag.ENABLE_TALKING_POINTS);
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
-        Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList(LatticeFeatureFlag.ALLOW_PIVOT_FILE, //
+        Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList( //
+                LatticeFeatureFlag.ALLOW_PIVOT_FILE, //
                 LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, //
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES, //
                 LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION, //
                 LatticeFeatureFlag.LATTICE_INSIGHTS, //
+                LatticeFeatureFlag.QUOTA, //
+                LatticeFeatureFlag.TARGET_MARKET, //
+                LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, //
                 LatticeFeatureFlag.ENABLE_CDL, //
                 LatticeFeatureFlag.BYPASS_DNB_CACHE, //
                 LatticeFeatureFlag.ENABLE_MATCH_DEBUG, //
@@ -114,7 +123,6 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testDefineFlag() {
-
         featureFlagService.defineFlag(FLAG_ID, definition);
         FeatureFlagDefinition newDefinition = featureFlagService.getDefinition(FLAG_ID);
         Assert.assertNotNull(newDefinition);

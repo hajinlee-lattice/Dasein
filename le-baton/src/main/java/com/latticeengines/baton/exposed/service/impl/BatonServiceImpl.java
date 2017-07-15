@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceBootstrapManager;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
+import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
@@ -29,6 +31,7 @@ import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -36,6 +39,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -452,6 +457,35 @@ public class BatonServiceImpl implements BatonService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to get products for customer " + tenantId, e);
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    public boolean isEnabled(CustomerSpace customerSpace, LatticeFeatureFlag flag) {
+        return canHaveFlag(customerSpace, flag) && FeatureFlagClient.isEnabled(customerSpace, flag.getName());
+    }
+
+    @SuppressWarnings("deprecation")
+    public FeatureFlagValueMap getFeatureFlags(CustomerSpace customerSpace) {
+        FeatureFlagValueMap valueMapInCamille = FeatureFlagClient.getFlags(customerSpace);
+        FeatureFlagValueMap valueMap = new FeatureFlagValueMap(valueMapInCamille);
+        Arrays.stream(LatticeFeatureFlag.values()).forEach(flag -> {
+            if (canHaveFlag(customerSpace, flag)) {
+                if (flag.isDeprecated() || !valueMapInCamille.containsKey(flag.getName())) {
+                    FeatureFlagDefinition definition = FeatureFlagClient.getDefinition(flag.getName());
+                    valueMap.put(flag.getName(), definition.getDefaultValue());
+                }
+            }
+        });
+        return valueMap;
+    }
+
+    private boolean canHaveFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag) {
+        FeatureFlagDefinition definition = FeatureFlagClient.getDefinition(flag.getName());
+        return hasAtLeastOneProduct(customerSpace, definition.getAvailableProducts());
+    }
+
+    private boolean hasAtLeastOneProduct(CustomerSpace customerSpace, Collection<LatticeProduct> products) {
+        return products.stream().anyMatch(product -> hasProduct(customerSpace, product));
     }
 
 }

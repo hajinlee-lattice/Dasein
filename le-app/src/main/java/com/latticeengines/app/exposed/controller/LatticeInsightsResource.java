@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -69,6 +69,9 @@ public class LatticeInsightsResource {
 
     @Autowired
     private EnrichmentService enrichmentService;
+
+    @Autowired
+    private BatonService batonService;
 
     // ------------START for Insights-------------------//
     @RequestMapping(value = INSIGHTS_PATH + "/categories", method = RequestMethod.GET, //
@@ -261,8 +264,7 @@ public class LatticeInsightsResource {
 
     private Boolean shouldConsiderInternalAttributes(Tenant tenant) {
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
-        return FeatureFlagClient.isEnabled(space,
-                LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES.getName());
+        return batonService.isEnabled(space, LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
     }
 
     // ------------END for Insights-------------------//

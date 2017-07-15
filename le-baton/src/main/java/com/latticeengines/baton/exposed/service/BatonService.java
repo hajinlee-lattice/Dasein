@@ -4,11 +4,15 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -49,4 +53,11 @@ public interface BatonService {
 
     boolean setupSpaceConfiguration(String contractId, String tenantId, String spaceId,
                                     SpaceConfiguration spaceConfig);
+
+    boolean isEnabled(CustomerSpace customerSpace, LatticeFeatureFlag flag);
+
+    boolean hasProduct(CustomerSpace customerSpace, LatticeProduct product);
+
+    FeatureFlagValueMap getFeatureFlags(CustomerSpace customerSpace);
+
 }

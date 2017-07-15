@@ -6,9 +6,10 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
@@ -22,6 +23,9 @@ public class AttributeServiceImpl implements AttributeService {
 
     private static final Logger log = LoggerFactory.getLogger(AttributeServiceImpl.class);
 
+    @Autowired
+    private BatonService batonService;
+
     @Override
     public List<PrimaryField> getPrimaryFields() {
         EnumSet<FieldInterpretation> primaryMatchingFields = FieldInterpretationCollections.PrimaryMatchingFields;
@@ -34,12 +38,10 @@ public class AttributeServiceImpl implements AttributeService {
 
     @Override
     public PrimaryFieldValidationExpression getPrimaryFieldValidationExpression(CustomerSpace customerSpace) {
-        boolean fuzzyMatchEnabled = FeatureFlagClient.isEnabled(customerSpace,
-                LatticeFeatureFlag.ENABLE_FUZZY_MATCH.getName());
+        boolean fuzzyMatchEnabled = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_FUZZY_MATCH);
         log.debug("Fuzzy Matching Enabled for client: " + fuzzyMatchEnabled);
         String expression = fuzzyMatchEnabled ? FieldInterpretationCollections.FUZZY_MATCH_VALIDATION_EXPRESSION
                 : FieldInterpretationCollections.NON_FUZZY_MATCH_VALIDATION_EXPRESSION;
-
         PrimaryFieldValidationExpression validationExp = new PrimaryFieldValidationExpression();
         validationExp.setExpression(expression);
         return validationExp;

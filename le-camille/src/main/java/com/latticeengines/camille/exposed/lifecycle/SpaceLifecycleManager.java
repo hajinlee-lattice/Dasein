@@ -163,7 +163,7 @@ public class SpaceLifecycleManager {
             Entry<String, JsonNode> featureFlagDefinition = featureFlagDefinitionIter.next();
             JsonNode productsForFeatureFlag = featureFlagDefinition.getValue().get("AvailableProducts");
             if (productsForFeatureFlag.isNull()) {
-                log.info(String.format("featureFlagDefinition %s does not have AvailableProducts",
+                log.warn(String.format("featureFlagDefinition %s does not have AvailableProducts",
                         featureFlagDefinition.getValue().get("DisplayName").asText()));
                 continue;
             }
