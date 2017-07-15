@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
+import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.network.exposed.dante.TalkingPointInterface;
@@ -43,6 +44,12 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
     public ResponseDocument<List<TalkingPointDTO>> findAllByPlayName(String playName) {
         String url = constructUrl("/play/" + playName);
         return get("findAllByPlayName", url, ResponseDocument.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ResponseDocument<TalkingPointPreview> getTalkingPointPreview(String playName, String customerSpace) {
+        String url = constructUrl("/preview" + "?playName=" + playName + "&customerSpace=" + customerSpace);
+        return get("getTalkingPointPreview", url, ResponseDocument.class);
     }
 
     @SuppressWarnings("unchecked")

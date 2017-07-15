@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
+import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
@@ -66,6 +67,32 @@ public class TalkingPointResource {
         return talkingPointProxy.findAllByPlayName(playName);
     }
 
+    @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "get the server url and oAuth token for Dante authentication via Oauth")
+    public ResponseDocument<DantePreviewResources> getPreviewResources() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_38008);
+        }
+        return talkingPointProxy.getPreviewResources(customerSpace.toString());
+    }
+
+    @RequestMapping(value = "/preview", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get Talking Point Preview Data for a given Play")
+    public ResponseDocument<TalkingPointPreview> preview(@RequestParam("playName") String playName) {
+        try {
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            if (customerSpace == null) {
+                throw new LedpException(LedpCode.LEDP_38008);
+            }
+            return talkingPointProxy.getTalkingPointPreview(playName, customerSpace.toString());
+        } catch (Exception e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
     @RequestMapping(value = "/publish", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "get a Talking Point ")
@@ -76,17 +103,6 @@ public class TalkingPointResource {
             throw new LedpException(LedpCode.LEDP_38008);
         }
         return talkingPointProxy.publish(playName, customerSpace.toString());
-    }
-
-    @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "get the server url and oAuth token for Dante authentication via Oauth")
-    public ResponseDocument<DantePreviewResources> getPreviewResources() {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
-            throw new LedpException(LedpCode.LEDP_38008);
-        }
-        return talkingPointProxy.getPreviewResources(customerSpace.toString());
     }
 
     @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)

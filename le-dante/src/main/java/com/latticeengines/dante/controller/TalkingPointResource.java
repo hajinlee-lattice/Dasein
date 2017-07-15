@@ -19,6 +19,7 @@ import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
+import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.network.exposed.dante.TalkingPointInterface;
 
@@ -58,6 +59,26 @@ public class TalkingPointResource implements TalkingPointInterface {
         return ResponseDocument.successResponse(talkingPointService.findAllByPlayName(playName));
     }
 
+    @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "get the server url and oAuth token to preview Dante Talking Point")
+    public ResponseDocument<DantePreviewResources> getPreviewResources(
+            @RequestParam("customerSpace") String customerSpace) {
+        return ResponseDocument.successResponse(talkingPointService.getPreviewResources(customerSpace));
+    }
+
+    @RequestMapping(value = "/preview", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get Talking Point Preview Data for a given Play")
+    public ResponseDocument<TalkingPointPreview> getTalkingPointPreview(@RequestParam("playName") String playName,
+            @RequestParam("customerSpace") String customerSpace) {
+        try {
+            return ResponseDocument.successResponse(talkingPointService.getPreview(playName, customerSpace));
+        } catch (Exception e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
     @RequestMapping(value = "/publish", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Publish given play's Talking Points to dante")
@@ -69,14 +90,6 @@ public class TalkingPointResource implements TalkingPointInterface {
         } catch (Exception e) {
             return ResponseDocument.failedResponse(e);
         }
-    }
-
-    @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "get the server url and oAuth token to preview Dante Talking Point")
-    public ResponseDocument<DantePreviewResources> getPreviewResources(
-            @RequestParam("customerSpace") String customerSpace) {
-        return ResponseDocument.successResponse(talkingPointService.getPreviewResources(customerSpace));
     }
 
     @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)

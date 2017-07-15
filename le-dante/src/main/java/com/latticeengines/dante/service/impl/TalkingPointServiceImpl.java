@@ -18,6 +18,7 @@ import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
+import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
@@ -58,9 +59,11 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
-    public String createOrUpdate(List<TalkingPointDTO> tps, String customerSpace) {
-        if (tps == null || tps.size() < 1)
-            log.info("No Talking points created or updated");
+    public void createOrUpdate(List<TalkingPointDTO> tps, String customerSpace) {
+        if (tps == null || tps.size() < 1) {
+            log.info("Attempted to update or creat empty set of talking points");
+            return;
+        }
 
         if (tps.stream().anyMatch(x -> !x.getPlayName().equals(tps.get(0).getPlayName()))) {
             throw new LedpException(LedpCode.LEDP_38011);
@@ -84,7 +87,6 @@ public class TalkingPointServiceImpl implements TalkingPointService {
             log.error(e.getMessage());
             throw new LedpException(LedpCode.LEDP_38002);
         }
-        return "Success";
     }
 
     public TalkingPointDTO findByName(String name) {
@@ -96,8 +98,12 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     public List<TalkingPointDTO> findAllByPlayName(String playName) {
-        return talkingPointEntityMgr.findAllByPlayName(playName).stream().map(TalkingPointDTO::new)
-                .collect(Collectors.toList());
+        try {
+            return talkingPointEntityMgr.findAllByPlayName(playName).stream().map(TalkingPointDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_38016, e, new String[] { playName });
+        }
     }
 
     @Override
@@ -133,14 +139,25 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
             for (TalkingPoint tp : tps) {
                 danteTalkingPointEntityMgr
-                        .createOrUpdate(covertForDante(tp, CustomerSpace.parse(customerSpace).getTenantId()));
+                        .createOrUpdate(convertForDante(tp, CustomerSpace.parse(customerSpace).getTenantId()));
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38014, e, new String[] { playName, customerSpace });
         }
     }
 
-    private DanteTalkingPoint covertForDante(TalkingPoint tp, String customerId) {
+    public TalkingPointPreview getPreview(String playName, String customerSpace) {
+        try {
+            List<DanteTalkingPoint> dtps = talkingPointEntityMgr.findAllByPlayName(playName).stream()
+                    .map(x -> convertForDante(x, CustomerSpace.parse(customerSpace).getTenantId()))
+                    .collect(Collectors.toList());
+            return new TalkingPointPreview(dtps);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_38015, e, new String[] { playName, customerSpace });
+        }
+    }
+
+    private DanteTalkingPoint convertForDante(TalkingPoint tp, String customerId) {
         DanteTalkingPoint dtp = new DanteTalkingPoint();
         dtp.setCreationDate(tp.getCreated());
         dtp.setCustomerID(customerId);
