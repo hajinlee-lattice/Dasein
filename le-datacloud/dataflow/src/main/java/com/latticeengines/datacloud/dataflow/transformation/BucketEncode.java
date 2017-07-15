@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,11 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
         newFields.forEach(fieldsToKeep::add);
         fieldsNeededForEncode.removeAll(fieldsToKeep);
         fieldsNeededForEncode.retainAll(encoded.getFieldNames());
-        return encoded.discard(new FieldList(fieldsNeededForEncode));
+        Node result = encoded.discard(new FieldList(fieldsNeededForEncode));
+
+        //TODO: remove accountmasterseed__hgdatapivoted__featurepivoted__builtwithtechindicators__bomborasurgepivoted__hpanewpivoted__hgdatatechindica
+        List<String> longFields = result.getFieldNames().stream().filter(f -> f.length() > 64).collect(Collectors.toList());
+        return result.discard(new FieldList(longFields));
     }
 
     private Node processEncodedFields(Node am, List<DCEncodedAttr> encAttrs) {
