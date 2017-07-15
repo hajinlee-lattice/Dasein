@@ -124,8 +124,8 @@ def register_am(conn):
                    InternalName,
                    CONCAT('{"target":null,"attribute":"', SourceColumn, '","Source":"', Source, '"}')
               FROM LDC_ConfigDB.AccountMaster_Attributes
-             WHERE ColumnGroup NOT IN ('BuiltWith_TechIndicators', 'HGData_SegmentTechIndicators', 'HGData_SupplierTechIndicators', 'BmbrSurge_BucketCode', 'BmbrSurge_CompositeScore', 'BmbrSurge_Intent')
-               AND InternalName NOT IN ('DUNS_NUMBER', 'LE_DOMAIN', 'BUSINESS_NAME', 'STREET_ADDRESS', 'CITY_NAME', 'STATE_PROVINCE_NAME', 'COUNTRY_NAME', 'POSTAL_CODE', 'LE_IS_PRIMARY_DOMAIN', 'LE_IS_PRIMARY_LOCATION', 'LE_NUMBER_OF_LOCATIONS', 'LE_COMPANY_PHONE', 'LE_REVENUE_RANGE', 'LE_EMPLOYEE_RANGE')
+             WHERE (ColumnGroup IS NULL OR ColumnGroup NOT IN ('BuiltWith_TechIndicators', 'HGData_SegmentTechIndicators', 'HGData_SupplierTechIndicators', 'BmbrSurge_BucketCode', 'BmbrSurge_CompositeScore', 'BmbrSurge_Intent'))
+               AND InternalName NOT IN ('DUNS_NUMBER', 'LE_DOMAIN', 'BUSINESS_NAME', 'STREET_ADDRESS', 'CITY_NAME', 'STATE_PROVINCE_NAME', 'COUNTRY_NAME', 'POSTAL_CODE', 'LE_IS_PRIMARY_DOMAIN', 'LE_IS_PRIMARY_LOCATION', 'LE_NUMBER_OF_LOCATIONS', 'LE_COMPANY_PHONE', 'LE_REVENUE_RANGE', 'LE_EMPLOYEE_RANGE', 'EMPLOYEES_TOTAL', 'CHIEF_EXECUTIVE_OFFICER_NAME')
                AND Source IS NOT NULL
         """
         cursor.execute(sql)
@@ -288,6 +288,18 @@ def register_am(conn):
                 'mapAttribute',
                 'DomainSource',
                 '{"target":null,"attribute":"DomainSource","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'EMPLOYEES_TOTAL',
+                '{"target":null,"attribute":"EMPLOYEES_TOTAL","Source":"AccountMasterSeed"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'mapAttribute',
+                'CHIEF_EXECUTIVE_OFFICER_NAME',
+                '{"target":null,"attribute":"CHIEF_EXECUTIVE_OFFICER_NAME","Source":"AccountMasterSeed"}'
             )
         """
         cursor.execute(sql)
