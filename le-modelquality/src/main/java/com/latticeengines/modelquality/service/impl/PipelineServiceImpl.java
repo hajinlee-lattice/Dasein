@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -101,8 +101,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
     }
 
     @Override
-    public String uploadPipelineStepFile(String stepName, InputStream inputStream, String[] names,
-            PipelineStepType type) {
+    public String uploadPipelineStepFile(String stepName, InputStream inputStream, String[] names, PipelineStepType type) {
 
         if (pipelineStepEntityMgr.findByName(stepName) != null) {
             throw new LedpException(LedpCode.LEDP_35002, new String[] { "Pipeline Step", stepName });
@@ -150,8 +149,8 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
                 }
             } else if (psof.pipelineStepDir != null) {
                 try {
-                    String pipelineStepMetadata = HdfsUtils.getHdfsFileContents(yarnConfiguration,
-                            psof.pipelineStepDir + "/metadata.json");
+                    String pipelineStepMetadata = HdfsUtils.getHdfsFileContents(yarnConfiguration, psof.pipelineStepDir
+                            + "/metadata.json");
 
                     step = JsonUtils.deserialize(pipelineStepMetadata, PipelineStep.class);
                     String[] pipelineStepPythonScripts = getPythonScripts(step.getName(), psof.pipelineStepDir);
@@ -170,6 +169,9 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
         // Now that steps have been validated and created, create the pipeline
         // and the associations
         pipelineEntityMgr.create(pipeline);
+        for (PipelineToPipelineSteps ptoPStep : pToPSteps) {
+            pipelineToPipelineStepsEntityMgr.create(ptoPStep);
+        }
 
         Pipeline p = pipelineEntityMgr.findByName(pipelineName);
         try {
@@ -180,12 +182,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
             throw new RuntimeException(e);
         }
 
-        for (PipelineToPipelineSteps ptoPStep: pToPSteps) {
-            ptoPStep.setPipeline(p);
-            pipelineToPipelineStepsEntityMgr.createOrUpdate(ptoPStep);
-        }
-
-        return pipelineEntityMgr.findByName(pipelineName);
+        return p;
     }
 
     private void setPipelineProperties(Pipeline pipeline, String pipelineJson) {
