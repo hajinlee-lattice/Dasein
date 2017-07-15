@@ -1,15 +1,20 @@
 package com.latticeengines.pls.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -36,15 +41,29 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 Play.class);
         name = createdPlay1.getName();
         assertPlay(createdPlay1);
+
+        List<TalkingPointDTO> tps = getTestTalkingPoints(name);
+        ResponseDocument<?> createTPResponse = restTemplate.postForObject( //
+                getRestAPIHostPort() + "/pls/dante/talkingpoints", //
+                tps, //
+                ResponseDocument.class);
+        Assert.assertNotNull(createTPResponse);
+        Assert.assertNull(createTPResponse.getErrors());
+
         Play createdPlay2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createDefaultPlay(),
                 Play.class);
         Assert.assertNotNull(createdPlay2);
+
         List<Play> playList = (List) restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), 2);
+
         Play retrievedPlay = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/" + name, Play.class);
         assertPlay(retrievedPlay);
+        Assert.assertEquals(retrievedPlay.getTalkingPoints().size(), 2);
 
+        String jsonValue = JsonUtils.serialize(retrievedPlay);
+        Assert.assertNotNull(jsonValue);
         this.play = createdPlay1;
     }
 
@@ -151,6 +170,28 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         play.setSegmentName(SEGMENT_NAME);
         play.setCreatedBy(CREATED_BY);
         return play;
+    }
+
+    private List<TalkingPointDTO> getTestTalkingPoints(String playName) {
+        List<TalkingPointDTO> tps = new ArrayList<>();
+        TalkingPointDTO tp = new TalkingPointDTO();
+        tp.setName("plsTP1" + UUID.randomUUID());
+        tp.setPlayName(playName);
+        tp.setOffset(1);
+        tp.setTitle("Test TP Title");
+        tp.setContent("PLS Deployment Test Talking Point no 1");
+        tps.add(tp);
+
+        TalkingPointDTO tp1 = new TalkingPointDTO();
+
+        tp1.setName("plsTP2" + UUID.randomUUID());
+        tp1.setPlayName(playName);
+        tp1.setOffset(2);
+        tp1.setTitle("Test TP2 Title");
+        tp1.setContent("PLS Deployment Test Talking Point no 2");
+        tps.add(tp1);
+
+        return tps;
     }
 
     private void assertPlay(Play play) {

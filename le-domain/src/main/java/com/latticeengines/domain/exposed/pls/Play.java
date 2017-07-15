@@ -27,9 +27,11 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -41,6 +43,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Table(name = "PLAY")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "pid")
 public class Play implements HasName, HasPid, HasTenantId {
 
     public static final String PLAY_NAME_PREFIX = "play";
