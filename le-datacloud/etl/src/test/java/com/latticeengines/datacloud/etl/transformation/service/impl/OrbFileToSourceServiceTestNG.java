@@ -122,8 +122,8 @@ public class OrbFileToSourceServiceTestNG
         log.info("Start to verify records one by one.");
         String[] expectedIds = new String[] { "13262799", "12221764", "51040422", "8129065", "11417478", "17145445",
                 "17149076", "12438907", "8825824", "117155600", "126441554", "117155602", "117155604", "133303900",
-                "136492131", "141925778", "142109806", "137396383", "118386803", "138412260", "109785854",
-                "116109312" };
+                "136492131", "141925778", "142109806", "137396383", "118386803", "138412260", "109785854", "116109312",
+                "113262801" };
         Set<String> expectedIdSet = new HashSet<>(Arrays.asList(expectedIds));
         int rowNum = 0;
         while (records.hasNext()) {
@@ -132,7 +132,7 @@ public class OrbFileToSourceServiceTestNG
             Assert.assertTrue(expectedIdSet.contains(orbNum));
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 22);
+        Assert.assertEquals(rowNum, 23);
     }
 
 }
