@@ -24,7 +24,7 @@ public class LatticeIdStrategyEntityMgrImplTestNG extends DataCloudEtlFunctional
         Assert.assertNotNull(strategy);
         Assert.assertEquals(strategy.getStrategy(), STRATEGY);
         Assert.assertEquals(strategy.getEntity(), LatticeIdStrategy.Entity.ACCOUNT);
-        Assert.assertEquals(strategy.getIdName(), "LatticeAccountId");
+        Assert.assertEquals(strategy.getIdName(), "LatticeID");
         Assert.assertEquals(strategy.getIdType(), IdType.LONG);
         Assert.assertEquals(strategy.getKeyMap().size(), 1);
 
