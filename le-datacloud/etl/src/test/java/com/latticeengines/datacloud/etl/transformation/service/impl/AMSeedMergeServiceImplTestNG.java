@@ -388,14 +388,10 @@ public class AMSeedMergeServiceImplTestNG
 
         };
         int rowNum = 0;
-        Set<String> set = new HashSet<>();
-        Set<Long> ids = new HashSet<>();
+        Set<String> domainDuns = new HashSet<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            Long latticeId = (Long) record.get("LatticeID");
-            ids.add(latticeId);
-
             String domain = String.valueOf(record.get(DOMAIN));
             String duns = String.valueOf(record.get(DUNS));
             String duDuns = String.valueOf(record.get(LE_PRIMARY_DUNS));
@@ -410,8 +406,8 @@ public class AMSeedMergeServiceImplTestNG
             String country = String.valueOf(record.get(COUNTRY));
             String leCountry = String.valueOf(record.get(LE_COUNTRY));
             String state = String.valueOf(record.get(STATE));
-            Assert.assertFalse(set.contains(domain + duns));    // To verify domain + duns is unique in AccountMasterSeed
-            set.add(domain + duns);
+            Assert.assertFalse(domainDuns.contains(domain + duns));
+            domainDuns.add(domain + duns);
             boolean flag = false;
             for (Object[] expectedResult : expectedResults) {
                 if (domain.equals(expectedResult[0]) && duns.equals(expectedResult[1])
@@ -432,7 +428,7 @@ public class AMSeedMergeServiceImplTestNG
             rowNum++;
         }
         Assert.assertEquals(rowNum, 32);
-        Assert.assertEquals(ids.size(), rowNum);
+        Assert.assertEquals(domainDuns.size(), rowNum);
     }
 
 }
