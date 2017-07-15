@@ -82,16 +82,16 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
     protected void uploadBaseAvro(Source baseSource, String baseSourceVersion) {
         InputStream baseAvroStream = ClassLoader
                 .getSystemResourceAsStream("sources/" + baseSource.getSourceName() + ".avro");
-        String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("part-0000.avro")
-                .toString();
+        String targetPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, baseSourceVersion)
+                .append("part-0000.avro").toString();
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
                 HdfsUtils.rmdir(yarnConfiguration, targetPath);
             }
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseAvroStream, targetPath);
             InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-            String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
-                    .toString();
+            String successPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, baseSourceVersion)
+                    .append("_SUCCESS").toString();
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.datacloud.core.source.impl.HGDataRaw;
 import com.latticeengines.datacloud.dataflow.transformation.HGDataCleanFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -29,7 +31,8 @@ public class HGDataCleanTestNG
     private static final Logger log = LoggerFactory.getLogger(HGDataCleanTestNG.class);
 
     GeneralSource source = new GeneralSource("HGDataClean");
-    GeneralSource baseSource = new GeneralSource("HGDataRaw");
+    @Autowired
+    HGDataRaw baseSource;
 
     ObjectMapper om = new ObjectMapper();
 
