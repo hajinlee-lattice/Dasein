@@ -102,8 +102,8 @@ public class DnBCacheServiceImpl implements DnBCacheService {
             cache.setPatched(context.getPatched());
         }
         getCacheMgr().create(cache);
-        log.info(String.format("Added Id = %s to %s cache. DnBCode = %s. OutOfBusiness = %s, DunsInAM = %s",
-                cache.getId(), cache.isWhiteCache() ? "white" : "black", context.getDnbCode().getMessage(),
+        log.info(String.format("Added Id=%s to %s cache. DnBCode=%s. OutOfBusiness=%s, DunsInAM=%s", cache.getId(),
+                cache.isWhiteCache() ? "white" : "black", context.getDnbCode(),
                 context.isOutOfBusinessString(), context.isDunsInAMString()));
         return cache;
     }
@@ -127,9 +127,8 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                 cache.setPatched(context.getPatched());
             }
             caches.add(cache);
-            log.info(String.format("Added Id = %s to %s cache. DnBCode = %s. OutOfBusiness = %s, DunsInAM = %s",
-                    cache.getId(),
-                    cache.isWhiteCache() ? "white" : "black", context.getDnbCode().getMessage(),
+            log.info(String.format("Added Id=%s to %s cache. DnBCode=%s. OutOfBusiness=%s, DunsInAM=%s", cache.getId(),
+                    cache.isWhiteCache() ? "white" : "black", context.getDnbCode(),
                     context.isOutOfBusinessString(), context.isDunsInAMString()));
         }
         getCacheMgr().batchCreate(caches);
@@ -224,7 +223,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         double factor = Math.random();
         if (factor <= expireFactor) {
             log.info(String.format(
-                    "Cache is expired: Id = %s, IsWhiteCache = %b, IsDunsInAM = %s, Cache Timestamp (in day): %d, Calculated expire factor: %f",
+                    "Cache is expired: Id=%s, IsWhiteCache=%b, IsDunsInAM=%s, Cache Timestamp (in day)=%d, Calculated expire factor=%f",
                     cache.getId(), cache.isWhiteCache(), cache.isDunsInAMString(), cache.getTimestamp().longValue(),
                     factor));
             removeCache(cache);

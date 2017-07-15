@@ -86,7 +86,7 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
                 for (Map.Entry<String, DnBBatchMatchContext> entry : batches.entrySet()) {
                     long mins = (System.currentTimeMillis() - entry.getValue().getTimestamp().getTime()) / 60 / 1000;
                     sb.append(String.format("%s:%s(%d mins, %d records)%s ", entry.getValue().getServiceBatchId(),
-                            entry.getValue().getDnbCode().getMessage(), mins, entry.getValue().getContexts().size(),
+                            entry.getValue().getDnbCode(), mins, entry.getValue().getContexts().size(),
                             StringUtils.isEmpty(entry.getValue().getRetryForServiceBatchId()) ? ""
                                     : " (retry for " + entry.getValue().getRetryForServiceBatchId() + ")"));
                 }

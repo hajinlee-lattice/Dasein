@@ -46,9 +46,8 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
         DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(context);
         log.info(String.format("Match duration: %d", res.getDuration()));
-        log.info(String.format(
-                "InputName = %s, DnBReturnCode = %s, ConfidenceCode = %d, MatchGrade = %s, OutOfBusiness = %b",
-                res.getInputNameLocation().getName(), res.getDnbCode().getMessage(), res.getConfidenceCode(),
+        log.info(String.format("InputName=%s, DnBReturnCode=%s, ConfidenceCode=%d, MatchGrade=%s, OutOfBusiness=%b",
+                res.getInputNameLocation().getName(), res.getDnbCode(), res.getConfidenceCode(),
                 res.getMatchGrade() != null ? res.getMatchGrade().getRawCode() : null, res.isOutOfBusiness()));
 
         Assert.assertEquals(res.getDnbCode(), dnbCode);
@@ -89,7 +88,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         for (int i = 0; i < THREAD_NUM; i++) {
             try {
                 DnBMatchContext result = cs.take().get();
-                log.info(i + " message:" + result.getDnbCode().getMessage() + " DUNS:" + result.getDuns());
+                log.info(i + " message:" + result.getDnbCode() + " DUNS:" + result.getDuns());
                 Assert.assertEquals(result.getDnbCode(), DnBReturnCode.OK);
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);

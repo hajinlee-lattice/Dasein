@@ -89,8 +89,8 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_ENTITY);
             context.setDuration(System.currentTimeMillis() - startTime);
             if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
-                log.info(String.format("DnB realtime entity matching request %s: Status = %s, Duration = %d",
-                        context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                log.info(String.format("DnB realtime entity matching request %s: Status=%s, Duration=%d",
+                        context.getLookupRequestId(), context.getDnbCode(), context.getDuration()));
                 break;
             }
             dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME);
@@ -105,8 +105,8 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_EMAIL);
             context.setDuration(System.currentTimeMillis() - startTime);
             if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN || i == retries - 1) {
-                log.info(String.format("DnB realtime email matching request %s: Status = %s, Duration = %d",
-                        context.getLookupRequestId(), context.getDnbCode().getMessage(), context.getDuration()));
+                log.info(String.format("DnB realtime email matching request %s: Status=%s, Duration=%d",
+                        context.getLookupRequestId(), context.getDnbCode(), context.getDuration()));
                 break;
             }
             dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME);

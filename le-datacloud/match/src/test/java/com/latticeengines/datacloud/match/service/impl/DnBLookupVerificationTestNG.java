@@ -105,8 +105,8 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
             DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(context);
             context.copyMatchResult(res);
             log.info(String.format(
-                    "Realtime match result for request %s: Status = %s, Duns = %s, ConfidenceCode = %d, MatchGrade = %s",
-                    context.getLookupRequestId(), res.getDnbCode() == null ? "null" : res.getDnbCode().getMessage(),
+                    "Realtime match result for request %s: Status=%s, Duns=%s, ConfidenceCode=%d, MatchGrade=%s",
+                    context.getLookupRequestId(), res.getDnbCode() == null ? "null" : res.getDnbCode(),
                     context.getDuns(), context.getConfidenceCode(),
                     context.getMatchGrade() == null ? "null" : context.getMatchGrade().getRawCode()));
         }
@@ -186,8 +186,8 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
         log.info(String.format("Duns: %s(realtime) %s(bulk)", contextFromRealtime.getDuns(),
                 contextFromBatch.getDuns()));
         log.info(String.format("DnBReturnCode: %s(realtime) %s(bulk)",
-                contextFromRealtime.getDnbCode() == null ? "null" : contextFromRealtime.getDnbCode().getMessage(),
-                contextFromBatch.getDnbCode() == null ? "null" : contextFromBatch.getDnbCode().getMessage()));
+                contextFromRealtime.getDnbCode() == null ? "null" : contextFromRealtime.getDnbCode(),
+                contextFromBatch.getDnbCode() == null ? "null" : contextFromBatch.getDnbCode()));
         log.info(String.format("ConfidenceCode: %s(realtime) %s(bulk)", contextFromRealtime.getConfidenceCode(),
                 contextFromBatch.getConfidenceCode()));
         log.info(String.format("MatchGrade: %s(realtime) %s(bulk)",

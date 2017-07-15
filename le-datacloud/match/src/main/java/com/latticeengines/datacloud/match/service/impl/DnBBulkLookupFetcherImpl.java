@@ -77,12 +77,12 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
             executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_FETCH);
             if (batchContext.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
                 if (batchContext.getDnbCode() == DnBReturnCode.OK) {
-                    log.info("Successfully fetched batch results from dnb. Size= " + batchContext.getContexts().size()
+                    log.info("Successfully fetched batch results from dnb. Size=" + batchContext.getContexts().size()
                             + " Timestamp=" + batchContext.getTimestamp() + " ServiceId="
                             + batchContext.getServiceBatchId());
                 } else {
                     log.error("Encountered issue in fetching batch results from dnb. DnBCode="
-                            + batchContext.getDnbCode().getMessage());
+                            + batchContext.getDnbCode());
                 }
                 return batchContext;
             }

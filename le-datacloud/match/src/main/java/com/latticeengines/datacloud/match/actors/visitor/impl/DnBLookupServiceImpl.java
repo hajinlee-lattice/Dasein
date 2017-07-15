@@ -217,9 +217,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
                         log.info(String.format(
-                                "Found DnB match context in white cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                        + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s, "
-                                        + "OutOfBusiness = %s, IsDunsInAM = %s, Duration = %d",
+                                "Found DnB match context in white cache: Name=%s, Country=%s, State=%s, City=%s, "
+                                        + "ZipCode=%s, PhoneNumber=%s, DUNS=%s, ConfidenceCode=%d, MatchGrade=%s, "
+                                        + "OutOfBusiness=%s, IsDunsInAM=%s, Duration=%d",
                                 context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
                                 context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                                 context.getInputNameLocation().getZipcode(),
@@ -237,8 +237,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 } else {
                     context.copyResultFromCache(cache);
                     log.info(String.format(
-                            "Found DnB match context in black cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                    + "ZipCode = %s, PhoneNumber = %s, Duration = %d",
+                            "Found DnB match context in black cache: Name=%s, Country=%s, State=%s, City=%s, "
+                                    + "ZipCode=%s, PhoneNumber=%s, Duration=%d",
                             context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
                             context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                             context.getInputNameLocation().getZipcode(),
@@ -327,9 +327,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                         dnbMatchResultValidator.validate(context);
                         if (context.getLogDnBBulkResult()) {
                             log.info(String.format(
-                                    "Found DnB match context in white cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                            + "ZipCode = %s, PhoneNumber = %s, DUNS = %s, ConfidenceCode = %d, MatchGrade = %s, "
-                                            + "OutOfBusiness = %s, IsDunsInAM = %s, Duration = %d",
+                                    "Found DnB match context in white cache: Name=%s, Country=%s, State=%s, City=%s, "
+                                            + "ZipCode=%s, PhoneNumber=%s, DUNS=%s, ConfidenceCode=%d, MatchGrade=%s, "
+                                            + "OutOfBusiness=%s, IsDunsInAM=%s, Duration=%d",
                                     context.getInputNameLocation().getName(),
                                     context.getInputNameLocation().getCountry(),
                                     context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
@@ -350,8 +350,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     context.copyResultFromCache(cache);
                     if (context.getLogDnBBulkResult()) {
                         log.info(String.format(
-                                "Found DnB match context in black cache: Name = %s, Country = %s, State = %s, City = %s, "
-                                        + "ZipCode = %s, PhoneNumber = %s, Duration = %d",
+                                "Found DnB match context in black cache: Name=%s, Country=%s, State=%s, City=%s, "
+                                        + "ZipCode=%s, PhoneNumber=%s, Duration=%d",
                                 context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
                                 context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                                 context.getInputNameLocation().getZipcode(),
@@ -608,7 +608,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         dnbMatchCommandService.dnbMatchCommandUpdate(batchContext);
         writeDnBMatchHistory(dnBMatchHistories);
         log.info(String.format(
-                "Finished processing DnB batch %s (StartTime: %s, FinishTime: %s, Size: %d, Duration: %d mins)",
+                "Finished processing DnB batch %s (StartTime=%s, FinishTime=%s, Size=%d, Duration=%d mins)",
                 batchContext.getServiceBatchId(), batchContext.getTimestamp(), finishTime,
                 batchContext.getContexts().size(),
                 (finishTime.getTime() - batchContext.getTimestamp().getTime()) / 60 / 1000));
