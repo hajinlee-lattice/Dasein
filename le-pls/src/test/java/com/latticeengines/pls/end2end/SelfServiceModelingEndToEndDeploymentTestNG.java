@@ -378,7 +378,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(copiedModelSummary.getTrainingTableName());
         assertFalse(copiedModelSummary.getTrainingTableName().isEmpty());
         assertEquals(originalModelSummary.getModelSummaryConfiguration().getString(
-                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
+                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
 
         inspectOriginalModelSummaryPredictors(copiedModelSummary);
         compareRtsScoreWithModeling(copiedModelSummary, 687, secondTenant.getId());
@@ -451,7 +451,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(clonedModelSummary.getSourceSchemaInterpretation(),
                 SchemaInterpretation.SalesforceLead.toString());
         assertEquals(clonedModelSummary.getModelSummaryConfiguration().getString(
-                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
+                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
         String foundFileTableName = clonedModelSummary.getTrainingTableName();
         assertNotNull(foundFileTableName);
 
@@ -504,7 +504,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(replacedModelSummary.getTrainingTableName());
         assertEquals(replacedModelSummary.getTrainingTableName(), clonedModelSummary.getTrainingTableName());
         assertEquals(replacedModelSummary.getModelSummaryConfiguration().getString(
-                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.STANDARD.getName());
+                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
 
         // Inspect some predictors
         inspectOriginalModelSummaryPredictors(replacedModelSummary);
