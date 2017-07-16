@@ -12,6 +12,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.util.BitCodecUtils;
+import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 
 public class BitCodeBook implements Serializable {
 
@@ -41,6 +42,25 @@ public class BitCodeBook implements Serializable {
     public BitCodeBook(Algorithm encodeAlgo, DecodeStrategy decodeStrategy) {
         this.decodeStrategy = decodeStrategy;
         this.encodeAlgo = encodeAlgo;
+    }
+
+    public BitCodeBook(BitDecodeStrategy bitDecodeStrategy) {
+        encodedColumn = bitDecodeStrategy.getEncodedColumn();
+        decodeStrategy = BitCodeBook.DecodeStrategy.valueOf(bitDecodeStrategy.getBitInterpretation());
+        switch (decodeStrategy) {
+        case ENUM_STRING:
+            String[] valueDictArr = bitDecodeStrategy.getValueDict().split("\\|\\|");
+            valueDictRev = new HashMap<>();
+            for (int i = 0; i < valueDictArr.length; i++) {
+                valueDictRev.put(Integer.toBinaryString(i + 1), valueDictArr[i]);
+            }
+        case NUMERIC_INT:
+        case NUMERIC_UNSIGNED_INT:
+            bitUnit = bitDecodeStrategy.getBitUnit();
+            break;
+        default:
+            break;
+        }
     }
 
     public void setBitsPosMap(Map<String, Integer> bitsPosMap) {

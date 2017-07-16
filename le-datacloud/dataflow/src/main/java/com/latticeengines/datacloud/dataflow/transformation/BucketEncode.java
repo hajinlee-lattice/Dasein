@@ -90,9 +90,12 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
                 if (decodeStrategy != null) {
                     String key = decodeStrategy.codeBookKey();
                     if (!map.containsKey(key)) {
+                        /*
                         BitCodeBook codeBook = new BitCodeBook(
                                 BitCodeBook.DecodeStrategy.valueOf(decodeStrategy.getBitInterpretation()));
                         codeBook.bindEncodedColumn(decodeStrategy.getEncodedColumn());
+                        */
+                        BitCodeBook codeBook = new BitCodeBook(decodeStrategy);
                         map.put(key, codeBook);
                     }
                     if (!posMap.containsKey(key)) {

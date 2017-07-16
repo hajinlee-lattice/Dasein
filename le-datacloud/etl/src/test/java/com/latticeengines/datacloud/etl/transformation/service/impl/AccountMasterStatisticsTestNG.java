@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.transformation.AMStatsHQDuns;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -61,7 +62,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             configuration.setName("AccountMasterStatistics");
             configuration.setVersion(targetVersion);
             // -----------
-            TransformationStepConfig profile = profile();
+            TransformationStepConfig profile = profile(DataCloudConstants.PROFILE_STAGE_ENRICH);
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig hqduns = hqduns();
             TransformationStepConfig calcStats = calcStats();
@@ -82,8 +83,8 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
     }
 
     @Override
-    protected TransformationStepConfig profile() {
-        TransformationStepConfig step = super.profile();
+    protected TransformationStepConfig profile(String stage) {
+        TransformationStepConfig step = super.profile(stage);
         step.setTargetSource("AccountMasterProfile");
         return step;
     }
@@ -112,7 +113,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         step.setInputSteps(Arrays.asList(0, 2));
         CalculateStatsConfig config = new CalculateStatsConfig();
         Map<String, List<String>> dims = new HashMap<>();
-        dims.put("LE_COUNTRY", null);
+        dims.put("LDC_Country", null);
         dims.put("LDC_PrimaryIndustry", null);
         dims.put("LE_REVENUE_RANGE", null);
         dims.put("LE_EMPLOYEE_RANGE", null);

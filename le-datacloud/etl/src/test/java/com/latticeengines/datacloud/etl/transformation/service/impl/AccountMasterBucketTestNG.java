@@ -28,6 +28,7 @@ import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceBucketer;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceSorter;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
@@ -72,7 +73,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
             configuration.setName("AccountMasterBucket");
             configuration.setVersion(targetVersion);
             // -----------
-            TransformationStepConfig profile = profile();
+            TransformationStepConfig profile = profile(DataCloudConstants.PROFILE_STAGE_SEGMENT);
             TransformationStepConfig sortProfile = sortProfile();
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig calcStats = calcStats();
@@ -115,12 +116,12 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         Assert.assertEquals(rowCount, 1000);
     }
 
-    protected TransformationStepConfig profile() {
+    protected TransformationStepConfig profile(String stage) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<String> baseSources = Collections.singletonList(accountMaster.getSourceName());
         step.setBaseSources(baseSources);
         step.setTransformer(SourceProfiler.TRANSFORMER_NAME);
-        step.setConfiguration(JsonUtils.serialize(new ProfileConfig()));
+        step.setConfiguration(JsonUtils.serialize(new ProfileConfig(stage)));
         return step;
     }
 

@@ -305,11 +305,45 @@ def register_am(conn):
         cursor.execute(sql)
         conn.commit()
 
+def register_amrefresh(conn):
+    _logger.info('Registering attributes for account master refresh')
+    with conn.cursor() as cursor:
+        sql = """
+            INSERT INTO LDC_ConfigDB.SourceAttribute (
+                Source,
+                Stage,
+                Transformer,
+                Attribute,
+                Arguments
+            ) VALUES (
+                'AccountMaster',
+                'MapStage',
+                'AMRefresh',
+                'BmbrSurge_BucketCode',
+                '{"Attribute":"BmbrSurge_BucketCode","Source":"BomboraSurgePivoted"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'AMRefresh',
+                'BmbrSurge_CompositeScore',
+                '{"Attribute":"BmbrSurge_CompositeScore","Source":"BomboraSurgePivoted"}'
+            ),(
+                'AccountMaster',
+                'MapStage',
+                'AMRefresh',
+                'BmbrSurge_Intent',
+                '{"Attribute":"BmbrSurge_Intent","Source":"BomboraSurgePivoted"}'
+            )
+        """
+        cursor.execute(sql)
+        conn.commit()
+
 
 def execute(version):
     conn = get_config_db()
     create_table(conn)
     register_amprofile(conn, version)
     register_am(conn)
+    register_amrefresh(conn)
     conn.close()
 
