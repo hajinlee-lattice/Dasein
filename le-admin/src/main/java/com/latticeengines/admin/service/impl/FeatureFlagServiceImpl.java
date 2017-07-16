@@ -107,10 +107,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
 
     @PostConstruct
     void defineDefaultFeatureFlags() {
-        // LPA flags
-        Collection<LatticeProduct> lp2 = Collections.singleton(LatticeProduct.LPA);
-        createDefaultFeatureFlag(LatticeFeatureFlag.DANTE, lp2).setDefaultValue(true);
-
         // PD flags
         Collection<LatticeProduct> pd = Collections.singleton(LatticeProduct.PD);
         createDefaultFeatureFlag(LatticeFeatureFlag.QUOTA, pd);
@@ -144,6 +140,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
                 Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG));
         enableDataEncryption.setModifiableAfterProvisioning(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.DANTE, Arrays.asList(LatticeProduct.LPA, LatticeProduct.CG)) //
+                .setDefaultValue(true);
 
         // register to feature flag client
         registerAllFlags();

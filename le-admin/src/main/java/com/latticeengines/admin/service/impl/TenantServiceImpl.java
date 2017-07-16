@@ -55,7 +55,6 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
-import com.latticeengines.encryption.exposed.service.KeyManagementService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
@@ -81,9 +80,6 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private DefaultConfigOverwriter overwriter;
-
-    @Autowired
-    private KeyManagementService keyManagementService;
 
     @Value("${common.pls.url}")
     private String plsEndHost;
@@ -131,7 +127,7 @@ public class TenantServiceImpl implements TenantService {
 
         boolean tenantCreationSuccess = tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo,
                 spaceInfo);
-
+        
         tenantCreationSuccess = tenantCreationSuccess && setupSpaceConfiguration(contractId, tenantId, spaceConfig);
 
         if (!tenantCreationSuccess) {
@@ -155,18 +151,12 @@ public class TenantServiceImpl implements TenantService {
         // change components in orchestrator based on selected product
         // retrieve mappings from Camille
         final Map<String, Map<String, String>> orchestratorProps = props;
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                orchestrator.orchestrateForInstall(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
-                        orchestratorProps, prodAndExternalAminInfo);
-            }
-        });
-
+        executorService.submit(() -> orchestrator.orchestrateForInstall(contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, orchestratorProps, prodAndExternalAminInfo));
         return true;
     }
 
-    protected void preinstall(SpaceConfiguration spaceConfig, List<SerializableDocumentDirectory> configDirectories) {
+    private void preinstall(SpaceConfiguration spaceConfig, List<SerializableDocumentDirectory> configDirectories) {
         // as a short term patch, waking up Dante's .NET App Pool is necessary
         // for it to pick up the bootstrap command.
         danteComponent.wakeUpAppPool();

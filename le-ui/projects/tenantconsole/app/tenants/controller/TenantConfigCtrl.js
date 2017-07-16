@@ -157,10 +157,17 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     };
     
     function getSelecetedFeatureFlags(selectedProducts) {
-        $scope.selectedFeatureFlags = [];
-        _.each(selectedProducts, function(selectedProduct){
-            $scope.selectedFeatureFlags = $scope.selectedFeatureFlags.concat(selectedProduct.featureFlags);
+        let featureFlags = [];
+        let flagNames = [];
+        selectedProducts.forEach(function(selectedProduct){
+            selectedProduct.featureFlags.forEach(function(flag) {
+                if (!flagNames.includes(flag['DisplayName'])) {
+                    featureFlags.push(flag);
+                    flagNames.push(flag['DisplayName']);
+                }
+            });
         });
+        $scope.selectedFeatureFlags = featureFlags;
     }
     
     function getSelectedComponents(selectedProducts, components) {
@@ -312,8 +319,10 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 console.warn("FeatureFlag: " + selectedFeatureFlag + " has not been defined.");
             } else {
                 var featureFlag = $scope.featureFlagDefinitions[selectedFeatureFlag];
-                featureFlag.Value = $scope.selectedFeatureFlagMap[selectedFeatureFlag];
-                $scope.selectedFeatureFlags.push(featureFlag);
+                if (!featureFlag.Deprecated) {
+                    featureFlag.Value = $scope.selectedFeatureFlagMap[selectedFeatureFlag];
+                    $scope.selectedFeatureFlags.push(featureFlag);
+                }
             }
         }
     }
@@ -498,9 +507,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             return;
         } else {
             _.each(featureFlagDefinitions, function(featureFlag){
-                // initilize its value
-                featureFlag.Value = featureFlag.DefaultValue;
-                if (featureFlag.AvailableProducts !== null) {
+                if (!featureFlag.Deprecated && featureFlag.AvailableProducts !== null) {
+                    // initialize its value
+                    featureFlag.Value = featureFlag.DefaultValue;
                     _.each(featureFlag.AvailableProducts, function(product){
                         _.each($scope.availableProducts, function(availableProduct){
                             if (availableProduct.name === product) {

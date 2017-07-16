@@ -9,70 +9,72 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FeatureFlagDefinition {
-    private String displayName;
-    private String documentation;
-    private Set<LatticeProduct> availableProducts;
-    private boolean configurable;
-    private boolean modifiableAfterProvisioning = true;
-    private boolean defaultValue = false;
-    private boolean deprecated = false;
 
     @JsonProperty("DisplayName")
+    private String displayName;
+
+    @JsonProperty("Documentation")
+    private String documentation;
+
+    @JsonProperty("AvailableProducts")
+    private Set<LatticeProduct> availableProducts;
+
+    @JsonProperty("Configurable")
+    private boolean configurable;
+
+    @JsonProperty("ModifiableAfterProvisioning")
+    private boolean modifiableAfterProvisioning = true;
+
+    @JsonProperty("DefaultValue")
+    private boolean defaultValue = false;
+
+    @JsonProperty("Deprecated")
+    private boolean deprecated = false;
+
     public String getDisplayName() {
         return this.displayName;
     }
 
-    @JsonProperty("DisplayName")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
-    @JsonProperty("Documentation")
     public String getDocumentation() {
         return this.documentation;
     }
 
-    @JsonProperty("Documentation")
     public void setDocumentation(String documentation) {
         this.documentation = documentation;
     }
 
-    @JsonProperty("AvailableProducts")
     public Set<LatticeProduct> getAvailableProducts() {
         return this.availableProducts;
     }
 
-    @JsonProperty("AvailableProducts")
     public void setAvailableProducts(Set<LatticeProduct> availableProducts) {
         this.availableProducts = availableProducts;
     }
 
-    @JsonProperty("Configurable")
     public boolean getConfigurable() {
         return this.configurable;
     }
 
-    @JsonProperty("Configurable")
     public void setConfigurable(boolean configurable) {
         this.configurable = configurable;
     }
 
-    @JsonProperty("ModifiableAfterProvisioning")
     public boolean isModifiableAfterProvisioning() {
         return modifiableAfterProvisioning;
     }
 
-    @JsonProperty("ModifiableAfterProvisioning")
     public void setModifiableAfterProvisioning(boolean modifiableAfterProvisioning) {
         this.modifiableAfterProvisioning = modifiableAfterProvisioning;
     }
 
-    @JsonProperty("DefaultValue")
     public void setDefaultValue(boolean defaultValue) {
         this.defaultValue = defaultValue;
     }
 
-    @JsonProperty("DefaultValue")
     public boolean getDefaultValue() {
         return this.defaultValue;
     }
