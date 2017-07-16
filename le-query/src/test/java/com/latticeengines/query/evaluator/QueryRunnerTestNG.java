@@ -12,7 +12,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.latticeengines.query.util.QueryUtils;
 
@@ -40,10 +39,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .find(BusinessEntity.Account) //
                 .where(restriction) //
                 .build();
-        try (PerformanceTimer timer = new PerformanceTimer("fetch count")) {
-            long count = queryEvaluator.evaluate(attrRepo, query).fetchCount();
-            Assert.assertEquals(count, 5);
-        }
+        long count = queryEvaluatorService.getCount(attrRepo, query);
+        Assert.assertEquals(count, 5);
     }
 
     @Test(groups = "functional")
@@ -55,10 +52,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Contact, "CompanyName", "LastName") //
                 .select(BusinessEntity.Account, "City", "State") //
                 .where(restriction).build();
-        List<Map<String, Object>> results;
-        try (PerformanceTimer timer = new PerformanceTimer("fetch data")) {
-            results = queryEvaluator.run(attrRepo, query).getData(); // count = 5, rowsize = 2 //
-        }
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), 25);
         for (Map<String, Object> row : results) {
             Assert.assertEquals(row.size(), 4);
@@ -78,10 +72,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, "CompanyName", "LastName") //
                 .select(BusinessEntity.LatticeAccount, "City", "State") //
                 .where(restriction).build();
-        List<Map<String, Object>> results;
-        try (PerformanceTimer timer = new PerformanceTimer("fetch data")) {
-            results = queryEvaluator.run(attrRepo, query).getData(); // count = 5, row size = 2 //
-        }
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
+        // count = 5, row size = 2 //
         Assert.assertEquals(results.size(), 25);
         for (Map<String, Object> row : results) {
             Assert.assertEquals(row.size(), 4);
@@ -98,29 +90,21 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .let(BusinessEntity.Account, "CompanyName").in("a", "z") //
                 .build();
         Query query1 = Query.builder().where(range1).build();
-        long count1 = Long.MAX_VALUE;
-        try (PerformanceTimer timer = new PerformanceTimer("fetch count")) {
-            count1 = queryEvaluator.evaluate(attrRepo, query1).fetchCount();
-            Assert.assertEquals(count1, 77058);
-        }
+        long count1 = queryEvaluatorService.getCount(attrRepo, query1);
+        Assert.assertEquals(count1, 77058);
 
         Restriction range2 = Restriction.builder() //
                 .let(BusinessEntity.LatticeAccount, "AlexaViewsPerUser").in(1.0, 3.5) //
                 .build();
         Query query2 = Query.builder().where(range2).build();
-        long count2 = Long.MAX_VALUE;
-        try (PerformanceTimer timer = new PerformanceTimer("fetch count")) {
-            count2 = queryEvaluator.evaluate(attrRepo, query2).fetchCount();
-            Assert.assertEquals(count2, 169976);
-        }
+        long count2 = queryEvaluatorService.getCount(attrRepo, query2);
+        Assert.assertEquals(count2, 169976);
 
         Restriction restriction = Restriction.builder().and(range1, range2).build();
         Query query = Query.builder().where(restriction).build();
-        try (PerformanceTimer timer = new PerformanceTimer("fetch count")) {
-            long count = queryEvaluator.evaluate(attrRepo, query).fetchCount();
-            Assert.assertEquals(count, 68827);
-            Assert.assertTrue(count <= count1 && count <= count2);
-        }
+        long count = queryEvaluatorService.getCount(attrRepo, query);
+        Assert.assertEquals(count, 68827);
+        Assert.assertTrue(count <= count1 && count <= count2);
     }
 
     @Test(groups = "functional")
@@ -132,10 +116,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .exists(BusinessEntity.Contact).that(range1) //
                 .build();
         Query query = Query.builder().where(restriction).build();
-        try (PerformanceTimer timer = new PerformanceTimer("fetch count")) {
-            long count = queryEvaluator.evaluate(attrRepo, query).fetchCount();
-            Assert.assertEquals(count, 77058);
-        }
+        long count = queryEvaluatorService.getCount(attrRepo, query);
+        Assert.assertEquals(count, 77058);
     }
 
     @Test(groups = "functional", enabled = false)
@@ -149,10 +131,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .build();
         Restriction restriction = Restriction.builder().or(lbl2, nullLbl).build();
         Query query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
-        try (PerformanceTimer timer = new PerformanceTimer("fetch data")) {
-            @SuppressWarnings("unused")
-            List<Map<String, Object>> results = queryEvaluator.run(attrRepo, query).getData();
-        }
+        @SuppressWarnings("unused")
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
     }
 
     @Test(groups = "functional")
@@ -174,9 +154,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         do {
             PageFilter pageFilter = new PageFilter(offset, pageSize);
             query.setPageFilter(pageFilter);
-            try (PerformanceTimer timer = new PerformanceTimer("fetch data")) {
-                results = queryEvaluator.run(attrRepo, query).getData();
-            }
+            results = queryEvaluatorService.getData(attrRepo, query).getData();
+
             for (Map<String, Object> result : results) {
                 String name = result.get("CompanyName").toString();
                 if (prevName != null) {
@@ -204,10 +183,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .where(nameIsCity) //
                 .build();
 
-        List<Map<String, Object>> results;
-        try (PerformanceTimer timer = new PerformanceTimer("fetch data")) {
-            results = queryEvaluator.run(attrRepo, query).getData();
-        }
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), 211);
         long count = results.stream().map(m -> m.get("City")).filter(v -> ((String) v).contains("AMBUR")).count();
         Assert.assertEquals(count, 4);

@@ -1,8 +1,5 @@
 package com.latticeengines.objectapi.controller;
 
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.network.exposed.objectapi.EntityInterface;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
+import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,10 +24,7 @@ import io.swagger.annotations.ApiOperation;
 public class EntityResource implements EntityInterface {
 
     @Autowired
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Autowired
-    protected QueryEvaluator queryEvaluator;
+    private QueryEvaluatorService queryEvaluatorService;
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(EntityResource.class);
@@ -42,12 +34,7 @@ public class EntityResource implements EntityInterface {
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public long getCount(@PathVariable String customerSpace, @RequestBody Query query) {
-        long count = -1;
-        try (PerformanceTimer timer = new PerformanceTimer("fetch count")) {
-            count = queryEvaluator.evaluate(dataCollectionProxy.getDefaultAttributeRepository(customerSpace), query)
-                    .fetchCount();
-        }
-        return count;
+        return queryEvaluatorService.getCount(customerSpace, query);
     }
 
     @Override
@@ -55,14 +42,7 @@ public class EntityResource implements EntityInterface {
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public DataPage getData(@PathVariable String customerSpace, @RequestBody Query query) {
-        DataPage dataPage = null;
-        try (PerformanceTimer timer = new PerformanceTimer("fetch data")) {
-            List<Map<String, Object>> results = queryEvaluator
-                    .run(dataCollectionProxy.getDefaultAttributeRepository(customerSpace), query).getData();
-            dataPage = new DataPage(results);
-        }
-
-        return dataPage;
+        return queryEvaluatorService.getData(customerSpace, query);
     }
 
 }

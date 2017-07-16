@@ -1,8 +1,5 @@
 package com.latticeengines.objectapi.controller;
 
-import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.network.exposed.objectapi.AccountInterface;
 import com.latticeengines.objectapi.service.AccountQueryService;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
+import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,10 +28,7 @@ import io.swagger.annotations.ApiParam;
 public class AccountResource implements AccountInterface {
 
     @Autowired
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Autowired
-    private QueryEvaluator queryEvaluator;
+    private QueryEvaluatorService queryEvaluatorService;
 
     @Autowired
     private AccountQueryService accountQueryService;
@@ -49,13 +41,8 @@ public class AccountResource implements AccountInterface {
     @ApiOperation(value = "Retrieve the number of rows for the specified parameters")
     @Override
     public long getAccountsCount(String customerSpace, String start, DataRequest dataRequest) {
-        long count = -1;
         Query query = accountQueryService.generateAccountQuery(start, dataRequest);
-        try (PerformanceTimer timer = new PerformanceTimer("fetch count")) {
-            count = queryEvaluator.evaluate(dataCollectionProxy.getDefaultAttributeRepository(customerSpace), query)
-                    .fetchCount();
-        }
-        return count;
+        return queryEvaluatorService.getCount(customerSpace, query);
     }
 
     /*
@@ -74,15 +61,7 @@ public class AccountResource implements AccountInterface {
             @ApiParam(value = "Number of records returned above offset (max is 250 records per request)", required = true) @RequestParam(value = "pageSize", required = true) Integer pageSize,
             @RequestBody DataRequest dataRequest) {
         Query query = accountQueryService.generateAccountQuery(start, offset, pageSize, dataRequest);
-
-        DataPage dataPage = null;
-        try (PerformanceTimer timer = new PerformanceTimer("fetch data")) {
-            List<Map<String, Object>> results = queryEvaluator
-                    .run(dataCollectionProxy.getDefaultAttributeRepository(customerSpace), query).getData();
-            dataPage = new DataPage(results);
-        }
-
-        return dataPage;
+        return queryEvaluatorService.getData(customerSpace, query);
     }
 
 }

@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
+import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.util.AttrRepoUtils;
 
 @DirtiesContext
@@ -18,6 +19,9 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     @Autowired
     protected QueryEvaluator queryEvaluator;
+
+    @Autowired
+    protected QueryEvaluatorService queryEvaluatorService;
 
     @Autowired
     private AttrRepoUtils attrRepoUtils;

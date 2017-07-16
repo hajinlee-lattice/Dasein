@@ -68,7 +68,7 @@ public class QueryProcessor {
         if (query.getSort() != null) {
             sqlQuery = addSort(sqlQuery, query.getSort(), resolverFactory);
         }
-        log.info(String.format("Generated query:\n%s", sqlQuery.getSQL().getSQL()));
+
         return sqlQuery;
     }
 
