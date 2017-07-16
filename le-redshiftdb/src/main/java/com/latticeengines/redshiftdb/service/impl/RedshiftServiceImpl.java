@@ -49,6 +49,7 @@ public class RedshiftServiceImpl implements RedshiftService {
                 + "CREDENTIALS 'aws_access_key_id=%s;aws_secret_access_key=%s'\n" //
                 + "FORMAT AVRO '%s' " //
                 + "EMPTYASNULL " //
+                + "TRUNCATECOLUMNS " //
                 + "COMPUPDATE ON " //
                 + "dateformat 'auto'";
         statement = String.format(statement, tableName, getS3Path(s3bucket, avroS3Prefix), awsAccessKey, awsSecretKey,
