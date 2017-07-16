@@ -10,6 +10,20 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         this.talkingPoints = talkingPoints;
     };
 
+    var expandValues = function(talkingPoints) {
+        for(var i in talkingPoints) {
+            talkingPoints[i].value = JSON.parse(talkingPoints[i].value);
+        }
+        return talkingPoints;
+    }
+
+    var stringifyValues = function(talkingPoints) {
+        for(var i in talkingPoints) {
+            talkingPoints[i].value = JSON.stringify(talkingPoints[i].value);
+        }
+        return talkingPoints;
+    }
+
     this.getTalkingPoints = function(play_name) {
         if(!play_name) {
             return this.talkingPoints;
@@ -31,7 +45,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         if(this.talkingPointsPreviewResources) {
             deferred.resolve(this.talkingPointsPreviewResources);
         } else {
-            CgTalkingPointService.getTalkingPointsPreviewResources(play_name).then(function(data){
+            CgTalkingPointService.getTalkingPointsPreviewResources().then(function(data){
                 this.talkingPointsPreviewResources = data;
                 deferred.resolve(data);
             });
@@ -39,9 +53,21 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     }
 
-    this.saveTalkingPoint = function(opts) {
+    this.saveTalkingPoints = function(opts) {
         var deferred = $q.defer();
-        CgTalkingPointService.saveTalkingPoint(opts).then(function(data){
+        CgTalkingPointService.saveTalkingPoints(opts).then(function(data){
+            this.talkingPoints = opts;
+            deferred.resolve(data);
+        });
+        return deferred.promise;
+    }
+
+    this.deleteTalkingPoint = function(name) {
+        console.log('delete', name);
+        var deferred = $q.defer();
+        CgTalkingPointService.deleteTalkingPoint(name).then(function(data){
+            console.log(data);
+            //this.talkingPoints = opts;
             deferred.resolve(data);
         });
         return deferred.promise;
@@ -101,11 +127,15 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
     this.generateTalkingPoint = function(opts) {
         // {
-        //   "creationDate": "2017-06-30T01:28:00.516Z",
-        //   "customerID": "LECleanx",
-        //   "externalID": "TestTP1",
-        //   "playExternalID": "TestPlay1",
-        //   "value": "{\"Content\": \"Financing that fits your Business. Provide a solution unique to your business needs.\", \"Offset\": 1, \"Title\": \"Reasons to Buy\"}"
+        //     "name": "string" // random id, doesn't matter what it is
+        //     "content": "string",
+        //     "created": "2017-07-14T06:57:07.910Z",
+        //     "name": "string",
+        //     "offset": 0,
+        //     "pid": 0,
+        //     "playname": 0, // play name (id)
+        //     "title": "string",
+        //     "updated": "2017-07-14T06:57:07.911Z" // ISO date
         // }
         var opts = opts || {};
         opts.timestamp = opts.timestamp;
@@ -113,15 +143,15 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         var talkingPoint = {},
             ISOdate = (opts.timestamp ? new Date(opts.timestamp).toISOString() : '');
 
-        talkingPoint.creationDate = opts.creationDate || ISOdate;
-        talkingPoint.customerID = opts.customerID; //tenant id and will be removed eventially
-        talkingPoint.externalID = opts.externalID || '123fakeStreet'; // this will be removed someday I assume since this is supposed to be an internal id made by backend
-        talkingPoint.playExternalID = opts.playExternalID; // play_name (which is the play id)
-        talkingPoint.value = JSON.stringify({
-            Offset: opts.Offset,
-            Title: opts.Title,
-            Content: opts.Content
-        })
+        talkingPoint.created = opts.creationDate || ISOdate;
+        //talkingPoint.customerID = opts.customerID; //tenant id and will be removed eventially
+        talkingPoint.name = opts.externalID || '123fakeStreet' + Math.random(); // this will be removed someday I assume since this is supposed to be an internal id made by backend
+        talkingPoint.playname = opts.playExternalID; // play_name (which is the play id)
+        talkingPoints.pid = opts.pid;
+        talkingPoint.offset = opts.Offset;
+        talkingPoint.title = opts.Title;
+        talkingPoint.content = opts.Content;
+
         return talkingPoint;
     }
 })
@@ -134,7 +164,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             method: 'GET',
             url: this.host + '/dante/talkingpoints/play/'  + play_name
         }).then(function(response){
-            deferred.resolve(response.data);
+            deferred.resolve(response.data.Result);
         });
         return deferred.promise;
     }
@@ -145,17 +175,28 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             method: 'GET',
             url: this.host + '/dante/talkingpoints/previewresources'
         }).then(function(response){
-            deferred.resolve(response.data);
+            deferred.resolve(response.data.Result);
         });
         return deferred.promise;
     }
 
-    this.saveTalkingPoint = function(opts) {
+    this.saveTalkingPoints = function(opts) {
         var deferred = $q.defer();
         $http({
             method: 'POST',
             url: this.host + '/dante/talkingpoints/',
             data: opts
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.deleteTalkingPoint = function(name) {
+        var deferred = $q.defer();
+        $http({
+            method: 'DELETE',
+            url: this.host + '/dante/talkingpoints/' + name,
         }).then(function(response){
             deferred.resolve(response.data);
         });

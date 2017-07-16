@@ -160,7 +160,6 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             var tag = isExternal ? "External" : "Internal";
 
             // DP-1883
-            console.log(predictor);
             if (predictor.Category === "Lead Information" || predictor.Category === "Marketing Activity" || predictor.Category === "Account Information") {
                 if (isExternal) {
                     return false;

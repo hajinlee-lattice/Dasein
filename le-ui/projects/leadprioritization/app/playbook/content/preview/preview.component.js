@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.preview', [])
 .controller('PlaybookWizardPreview', function(
-    $state, $stateParams, ResourceUtility, Play
+    $state, $stateParams, ResourceUtility, Play, TalkingPointPreviewResources
 ) {
     var vm = this;
 

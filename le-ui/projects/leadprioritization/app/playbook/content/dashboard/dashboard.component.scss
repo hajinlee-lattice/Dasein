@@ -99,5 +99,50 @@
                 }
             }
         }
+        .ratings-graph {
+            @include flex-container;
+            justify-content: center;
+            height: 200px;
+            & > ._rating {
+                @include flex-item(0 0 auto);
+                @include flex-container;
+                flex-direction: column;
+                justify-content: flex-end;
+                margin: 0 20px;
+                width: 70px;
+                div {
+                    @include flex-item(0 0 auto);
+                    text-align: center;
+                }
+                color: rgba(0,0,0,.5);
+                .rating-count {
+                    border-bottom: 10px solid rgba(0,0,0,.7);
+                }
+                .rating-bar {
+                    background-color: rgba(0,0,0,.5);
+                    margin-top: 5px;
+                }
+                &:nth-child(1) {
+                    color: #70bf4a;
+                    .rating-count {
+                        border-bottom: 10px solid #0f9e4d;
+                    }
+                    .rating-bar {
+                        background-color: #70bf4a;
+                        margin-top: 5px;
+                    }
+                }
+                &:nth-child(2) {
+                    color: #33bdb7;
+                    .rating-count {
+                        border-bottom: 10px solid #149188;
+                    }
+                    .rating-bar {
+                        background-color: #33bdb7;
+                        margin-top: 5px;
+                    }
+                }
+            }
+        }
     }
 }

@@ -21,16 +21,43 @@ angular.module('lp.playbook.dashboard', [
             });
 
             CgTalkingPointStore.getTalkingPoints(play_name).then(function(results){
-                vm.talkingPoints = results;
+                vm.talkingPoints = results || [];
             });
         }
 
     });
 
+    vm.makeRatingsGraph = function(ratings) {
+        ratings = [{
+            bucket: "A",
+            count: 1
+        },{
+            bucket: "B",
+            count: 2
+        },{
+            bucket: "C",
+            count: 5
+        },{
+            bucket: "D",
+            count: 4
+        }];
+
+        var total =  0;
+        for (var i in ratings) {
+            total += ratings[i].count;
+        }
+
+        return {
+            total: total,
+            ratings: ratings
+        }
+    };
+
     PlaybookWizardStore.clear();
     if(play_name) {
         PlaybookWizardStore.getPlay(play_name).then(function(play){
             vm.play = play;
+            vm.ratingsGraph = vm.makeRatingsGraph(vm.play.rating);
         });
     }
 

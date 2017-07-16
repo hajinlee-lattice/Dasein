@@ -1,57 +1,59 @@
 .talking-point-container {
-    display: flex;
-    flex-direction: row;
+    .talking-points-outer {
+        display: flex;
+        flex-direction: row;
 
-    &>div:first-child {
-        flex: 1 1 auto;
-        margin-left: 3px;
-    }
-    &>div:last-child {
-        flex: 0 1 auto;
-    }
-
-    .section-header {
-        button {
-            padding: 8px 8px;
+        &>div:first-child {
+            flex: 1 1 auto;
+            margin-left: 3px;
         }
-    }
+        &>div:last-child {
+            flex: 0 1 auto;
+        }
 
-    .tp-entry {
-        position: relative;
-        &:hover {
-            .tp-entry-sort {
-                opacity: 1;
+        .section-header {
+            button {
+                padding: 8px 8px;
             }
         }
-    }
 
-    .tp-entry-sort {
-        opacity: 0;
-        position: absolute;
-        left: 340px;
-        top: 8px;
-        div {
-            height: 1em;
-            opacity: 0.7;
+        .tp-entry {
+            position: relative;
             &:hover {
-                opacity: 1;
+                .tp-entry-sort {
+                    opacity: 1;
+                }
             }
-            i {
+        }
+
+        .tp-entry-sort {
+            opacity: 0;
+            position: absolute;
+            left: 340px;
+            top: 8px;
+            div {
+                height: 1em;
+                opacity: 0.7;
+                &:hover {
+                    opacity: 1;
+                }
+                i {
+                    cursor: pointer;
+                }
+            }
+        }
+
+        .add-tp-button {
+            margin: 0 2px;
+            margin-bottom: 5px;
+            button {
+                border-radius: 50%;
+                padding: 7px 11px;
+            }
+            span {
+                margin-left: 3px;
                 cursor: pointer;
             }
-        }
-    }
-
-    .add-tp-button {
-        margin: 0 2px;
-        margin-bottom: 5px;
-        button {
-            border-radius: 50%;
-            padding: 7px 11px;
-        }
-        span {
-            margin-left: 3px;
-            cursor: pointer;
         }
     }
 }

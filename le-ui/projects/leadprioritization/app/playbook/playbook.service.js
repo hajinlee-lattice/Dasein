@@ -96,8 +96,9 @@ angular.module('lp.playbook')
         }
     }
 
-    this.nextSaveInsight = function() {
-        CgTalkingPointStore.saveTalkingPoint(PlaybookWizardStore.savedTalkingPoints[0]);
+    this.nextSaveInsight = function(nextState) {
+        CgTalkingPointStore.saveTalkingPoints(PlaybookWizardStore.savedTalkingPoints);
+        $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
     }
 
     this.setTalkingPoints = function(talkingPoints) {

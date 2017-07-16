@@ -4,6 +4,7 @@ angular
     'lp.cg.talkingpoint',
     'lp.playbook.plays',
     'lp.playbook.dashboard',
+    'lp.playbook.dashboard.insights',
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.segment',
     'lp.playbook.wizard.rating',
@@ -46,18 +47,53 @@ angular
         .state('home.playbook.dashboard', {
             url: '/dashboard/:play_name',
             resolve: {
-                TalkingPoints: function(CgTalkingPointStore) {
-                    return CgTalkingPointStore.getTalkingPoints();
+                TalkingPoints: function(CgTalkingPointStore, $stateParams) {
+                    var play_name = $stateParams.play_name || '';
+                    return CgTalkingPointStore.getTalkingPoints(play_name);
                 },
                 TalkingPointAttributes: function (CgTalkingPointStore) {
                     return CgTalkingPointStore.getAttributes();
                 }
             },
             views: {
+                "navigation@": {
+                    controller: function($scope, $stateParams) {
+                        $scope.play_name = $stateParams.play_name || '';
+                    },
+                    templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
+                },
                 'main@': {
                     controller: 'PlaybookDashboard',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/dashboard/dashboard.component.html'
+                }
+            }
+        })
+        .state('home.playbook.dashboard.insights_dashboard', {
+            url: '/insights',
+            resolve: {
+                TalkingPoints: function(CgTalkingPointStore, $stateParams) {
+                    var play_name = $stateParams.play_name || '';
+                    return CgTalkingPointStore.getTalkingPoints(play_name);
+                },
+                TalkingPointAttributes: function (CgTalkingPointStore) {
+                    return CgTalkingPointStore.getAttributes();
+                },
+                TalkingPointPreviewResources: function(CgTalkingPointStore) {
+                    return CgTalkingPointStore.getTalkingPointsPreviewResources();
+                },
+                loadTinyMce: function($ocLazyLoad) {
+                    return $ocLazyLoad.load('lib/js/tinymce/tinymce.min.js');
+                },
+                loadUiTinyMce: function($ocLazyLoad) {
+                    return $ocLazyLoad.load('lib/js/tinymce/uitinymce.min.js');
+                }
+            },
+            views: {
+                'main@': {
+                    controller: 'PlaybookDashboardInsights',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/playbook/content/insights_dashboard/insights_dashboard.component.html'
                 }
             }
         })
@@ -188,11 +224,15 @@ angular
         .state('home.playbook.wizard.settings.segment.rating.targets.insights', {
             url: '/insights',
             resolve: {
-                TalkingPoints: function(CgTalkingPointStore) {
-                    return CgTalkingPointStore.getTalkingPoints();
+                TalkingPoints: function(CgTalkingPointStore, $stateParams) {
+                    var play_name = $stateParams.play_name || '';
+                    return CgTalkingPointStore.getTalkingPoints(play_name);
                 },
                 TalkingPointAttributes: function (CgTalkingPointStore) {
                     return CgTalkingPointStore.getAttributes();
+                },
+                TalkingPointPreviewResources: function(CgTalkingPointStore) {
+                    return CgTalkingPointStore.getTalkingPointsPreviewResources();
                 },
                 loadTinyMce: function($ocLazyLoad) {
                     return $ocLazyLoad.load('lib/js/tinymce/tinymce.min.js');
@@ -214,6 +254,9 @@ angular
             resolve: {
                 Play: function(PlaybookWizardStore) {
                     return PlaybookWizardStore.getCurrentPlay();
+                },
+                TalkingPointPreviewResources: function(CgTalkingPointStore) {
+                    return CgTalkingPointStore.getTalkingPointsPreviewResources();
                 }
             },
             views: {

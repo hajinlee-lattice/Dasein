@@ -62,7 +62,7 @@
                     <div class="dashboard-section-content-subsection talking-points">
                         <h4>{{vm.talkingPoints.length}} talking points have been created</h4>
                         <ul class="controls">
-                            <li>Edit</li>
+                            <li><a ui-sref="home.playbook.dashboard.insights_dashboard({play_name: vm.play.name})">Edit</a></li>
                         </ul>
                     </div>
 
@@ -82,7 +82,13 @@
                     <h2>Account ratings</h2>
                 </div>
                 <div class="dashboard-section-content">
-
+                    <ul class="ratings-graph" ng-if="vm.ratingsGraph">
+                        <li class="_rating" ng-repeat="rating in vm.ratingsGraph.ratings">
+                            <div class="rating-count" ng-show="rating.count">{{rating.count}}</div>
+                            <div class="rating-bar" style="height:{{rating.count/vm.ratingsGraph.total*100}}%;"></div>
+                            <div class="rating-label">{{rating.bucket}}</div>
+                        </li>
+                    </ul>
                 </div> 
             </div>
         </div>

@@ -1,5 +1,5 @@
 <div class="tp-preview container">
-    <div ng-show="vm.hasTalkingPoints">
+    <div ng-show="vm.talkingPoints">
         <label>Account:
             <select
                 class="form-control"
@@ -11,7 +11,7 @@
         </label>
         <iframe  id="tppreview_iframe" class="tppreview_iframe" ng-src="{{vm.sceIframeSrc}}"></iframe>
     </div>
-    <div ng-show="!vm.hasTalkingPoints">
+    <div ng-show="!vm.talkingPoints.length">
         <p>There are no talking points created</p>
     </div>
 </div>

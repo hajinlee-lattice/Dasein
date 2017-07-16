@@ -12,17 +12,22 @@ angular.module('lp.cg.talkingpoint.preview', [])
     };
 })
 .controller('cgTalkingPointPreviewCtrl', function ($scope, $stateParams, $sce, $element, CgTalkingPointStore) {
-    console.log($scope.play, $stateParams.play_name);
-    var talkingPoints = CgTalkingPointStore.getTalkingPoints();
     var iframe = null;
 
     var vm = this;
     angular.extend(vm, {
-        hasTalkingPoints: talkingPoints.length > 0,
+        talkingPoints: [],
         leadPreviewObject: null,
         accounts: null,
         selected: null,
         sceIframeSrc: null
+    });
+
+    CgTalkingPointStore.getTalkingPoints($stateParams.play_name).then(function(data){
+        vm.talkingPoints = data;
+        if (vm.talkingPoints.length) {
+            vm.init();
+        }
     });
 
     vm.init = function() {
@@ -31,17 +36,20 @@ angular.module('lp.cg.talkingpoint.preview', [])
 
         vm.leadPreviewObject = CgTalkingPointStore.generateLeadPreviewObject();
         CgTalkingPointStore.getAccounts().then(function(accounts) {
+            console.log('getAccounts then 1');
             vm.accounts = accounts;
 
             return CgTalkingPointStore.getDanteUrl();
         }).then(function(danteUrl) {
+            console.log('getAccounts then 2', danteUrl);
             vm.sceIframeSrc = $sce.trustAsResourceUrl(danteUrl);
         }).then(function() {
+            console.log('getAccounts then 3', vm.talkingPoints);
             vm.selected = vm.accounts[0];
             vm.leadPreviewObject.notionObject.SalesforceAccountID = vm.selected.id;
             vm.leadPreviewObject.notionObject.PlayDisplayName = $scope.play.display_name;
             vm.leadPreviewObject.notionObject.PlayDescription = $scope.play.description;
-            vm.leadPreviewObject.notionObject.TalkingPoints = talkingPoints;
+            vm.leadPreviewObject.notionObject.TalkingPoints = vm.talkingPoints;
         });
     };
 
@@ -66,7 +74,4 @@ angular.module('lp.cg.talkingpoint.preview', [])
         window.removeEventListener('message', handleLpiPreviewInit);
     });
 
-    if (vm.hasTalkingPoints) {
-        vm.init();
-    }
 });
