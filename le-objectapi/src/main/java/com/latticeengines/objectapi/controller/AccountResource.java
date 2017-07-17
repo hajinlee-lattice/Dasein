@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.controller;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class AccountResource implements AccountInterface {
     @ApiOperation(value = "Retrieve the number of rows for the specified parameters")
     @Override
     public long getAccountsCount(String customerSpace, String start, DataRequest dataRequest) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         Query query = accountQueryService.generateAccountQuery(start, dataRequest);
         return queryEvaluatorService.getCount(customerSpace, query);
     }
@@ -60,6 +62,7 @@ public class AccountResource implements AccountInterface {
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) Integer offset,
             @ApiParam(value = "Number of records returned above offset (max is 250 records per request)", required = true) @RequestParam(value = "pageSize", required = true) Integer pageSize,
             @RequestBody DataRequest dataRequest) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         Query query = accountQueryService.generateAccountQuery(start, offset, pageSize, dataRequest);
         return queryEvaluatorService.getData(customerSpace, query);
     }

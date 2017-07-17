@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.controller;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class EntityResource implements EntityInterface {
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public long getCount(@PathVariable String customerSpace, @RequestBody Query query) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return queryEvaluatorService.getCount(customerSpace, query);
     }
 
@@ -42,6 +44,7 @@ public class EntityResource implements EntityInterface {
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public DataPage getData(@PathVariable String customerSpace, @RequestBody Query query) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return queryEvaluatorService.getData(customerSpace, query);
     }
 
