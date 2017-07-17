@@ -1,0 +1,52 @@
+<section ng-controller="SidebarRootController" class="lp-sidebar-menu noselect-children" ng-click="handleSidebarToggle($event)">
+    <div class="logo-container">
+        <a href="#/" class="logo" style="float: none;padding: 0;">
+            <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
+        </a>
+    </div>
+    <ul class="menu model-view">
+        <li role="presentation">
+            <a ui-sref="home.playbook">
+                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}">
+                    <span class="ico ico-back no-svg"></span>
+                </span>
+                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}</span>
+            </a>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a ui-sref="home.playbook.dashboard({play_name: play_name})">
+                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}">
+                    <span class="ico ico-analysis ico-light-gray"></span>
+                </span>
+                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}</span>
+            </a>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a ui-sref="home.playbook.dashboard.targets({play_name: play_name})">
+                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS')}}">
+                    <span class="ico ico-alerts ico-light-gray"></span>
+                </span>
+                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS')}}</span>
+            </a>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a ui-sref="home.playbook.dashboard.insights_dashboard({play_name: play_name})">
+                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TALKINGPOINTS')}}">
+                    <span class="ico ico-scoring ico-light-gray"></span>
+                </span>
+                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TALKINGPOINTS')}}</span>
+            </a>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a ui-sref="home.playbook.dashboard.launch_history({play_name: play_name})">
+                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_LAUNCH_HISTORY')}}">
+                    <span class="ico ico-refine ico-light-gray"></span>
+                </span>
+                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_LAUNCH_HISTORY')}}</span>
+            </a>
+        </li>
+    </ul>
+    <button class="open-button open">
+        <span class="ico ico-arrow-open"></span>
+    </button>
+</section>

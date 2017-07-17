@@ -7,7 +7,8 @@ angular.module('lp.playbook.wizard.insights', [])
     angular.extend(vm, {
         previewResources: TalkingPointPreviewResources,
         attributes: TalkingPointAttributes,
-        talkingPoints: TalkingPoints
+        talkingPoints: TalkingPoints,
+        stateParams: $stateParams
     });
 
     vm.addTalkingPoint = function() {
@@ -24,11 +25,12 @@ angular.module('lp.playbook.wizard.insights', [])
     };
 
     vm.saveTalkingPoints = function() {
-        console.log(vm.talkingPoints);
         CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints);
     }
 
     vm.onDelete = function(pos) {
+        var remove_talkingpoint_name = vm.talkingPoints[pos].name;
+        CgTalkingPointStore.deleteTalkingPoint(remove_talkingpoint_name);
         vm.talkingPoints.splice(pos, 1);
         for (var i = pos; i < vm.talkingPoints.length; i++) {
             vm.talkingPoints[i].Offset--;
@@ -45,10 +47,9 @@ angular.module('lp.playbook.wizard.insights', [])
     };
 
     function validateTalkingPoints() {
-        console.log(vm.talkingPoints);
         var valid = false;
         for (var i = 0; i < vm.talkingPoints.length; i++) {
-            if (!vm.talkingPoints[i].content || !vm.talkingPoints[i].title) {
+            if (!vm.talkingPoints[i].Content || !vm.talkingPoints[i].Title) {
                 PlaybookWizardStore.setValidation('insights', false);
                 valid = false;
                 return false;
@@ -63,5 +64,4 @@ angular.module('lp.playbook.wizard.insights', [])
     };
 
     $scope.$watch(validateTalkingPoints);
-
 });

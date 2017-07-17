@@ -71,6 +71,9 @@ angular
         })
         .state('home.playbook.dashboard.insights_dashboard', {
             url: '/insights',
+            params: {
+                section: 'dashboard.insights'
+            },
             resolve: {
                 TalkingPoints: function(CgTalkingPointStore, $stateParams) {
                     var play_name = $stateParams.play_name || '';
@@ -91,9 +94,30 @@ angular
             },
             views: {
                 'main@': {
-                    controller: 'PlaybookDashboardInsights',
+                    controller: 'PlaybookWizardInsights',
                     controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/insights_dashboard/insights_dashboard.component.html'
+                    templateUrl: 'app/playbook/content/insights/insights.component.html'
+                    // controller: 'PlaybookDashboardInsights',
+                    // controllerAs: 'vm',
+                    // templateUrl: 'app/playbook/content/insights_dashboard/insights_dashboard.component.html'
+                }
+            }
+        })
+        .state('home.playbook.dashboard.segment_dashboard', {
+            url: '/segment',
+            params: {
+                section: 'dashboard.segment'
+            },
+            resolve: {
+                Segments: function(SegmentService) {
+                    return SegmentService.GetSegments();
+                }
+            },
+            views: {
+                'main@': {
+                    controller: 'PlaybookWizardSegment',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/playbook/content/segment/segment.component.html'
                 }
             }
         })
@@ -223,6 +247,9 @@ angular
         })
         .state('home.playbook.wizard.settings.segment.rating.targets.insights', {
             url: '/insights',
+            params: {
+                section: 'wizard.insights'
+            },
             resolve: {
                 TalkingPoints: function(CgTalkingPointStore, $stateParams) {
                     var play_name = $stateParams.play_name || '';
