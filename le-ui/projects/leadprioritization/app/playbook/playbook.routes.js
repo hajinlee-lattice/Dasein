@@ -4,7 +4,6 @@ angular
     'lp.cg.talkingpoint',
     'lp.playbook.plays',
     'lp.playbook.dashboard',
-    'lp.playbook.dashboard.insights',
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.segment',
     'lp.playbook.wizard.rating',
