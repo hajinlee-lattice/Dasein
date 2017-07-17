@@ -46,7 +46,7 @@ public class MatchInput implements Fact, Dimension {
     @JsonIgnore
     private Level logLevel;
 
-    @JsonProperty("LogLevel")
+    @JsonProperty("RootOperationUid")
     private String rootOperationUid;
 
     @JsonIgnore
