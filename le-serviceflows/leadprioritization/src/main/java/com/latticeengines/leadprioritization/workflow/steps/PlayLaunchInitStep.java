@@ -1,6 +1,11 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,14 +14,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("playLaunchInitStep")
@@ -34,6 +46,12 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     @Autowired
     private RecommendationService recommendationService;
+
+    @Autowired
+    private AccountProxy accountProxy;
+
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
 
     @Override
     public void execute() {
@@ -67,6 +85,15 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         // add processing logic
 
         // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
+        
+        /*
+        List<String> accountSchema = getSchema(TableRoleInCollection.BucketedAccount);
+        DataRequest dataRequest = new DataRequest();
+        dataRequest.setAttributes(accountSchema);
+        DataPage accountPage = accountProxy.getAccounts(tenant.toString(), DateTimeUtils.formatTZ(new Date()), 0, 2,
+                dataRequest);
+        List<Map<String, Object>> accountList = accountPage.getData();
+        */
 
         for (int i = 0; i < 3; i++) {
             Recommendation recommendation = createDummyRecommendation(tenant, playLauch, config);
@@ -95,5 +122,23 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         recommendation.setPriorityDisplayName("A");
 
         return recommendation;
+    }
+
+    private List<String> getSchema(TableRoleInCollection role) {
+        List<Attribute> schemaAttributes = getSchemaAttributes(role);
+
+        Stream<String> stream = schemaAttributes.stream() //
+                .map(Attribute::getColumnMetadata) //
+                .sorted(Comparator.comparing(ColumnMetadata::getColumnId)) //
+                .map(ColumnMetadata::getColumnId);
+
+        return stream.collect(Collectors.toList());
+    }
+
+    private List<Attribute> getSchemaAttributes(TableRoleInCollection role) {
+        String customerSpace = MultiTenantContext.getTenant().getId();
+        Table schemaTable = dataCollectionProxy.getTable(customerSpace, role);
+        List<Attribute> schemaAttributes = schemaTable.getAttributes();
+        return schemaAttributes;
     }
 }
