@@ -15,12 +15,14 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Resource;
+
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -35,7 +37,9 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
+import com.latticeengines.datacloud.match.service.impl.MatchPlannerBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -69,6 +73,9 @@ public class ProcessorContext {
     @Autowired
     private MatchProxy matchProxy;
 
+    @Resource(name = "bulkMatchPlanner")
+    private MatchPlanner matchPlanner;
+
     @Value("${datacloud.match.num.threads}")
     private Integer sqlThreadPool;
 
@@ -90,7 +97,7 @@ public class ProcessorContext {
 
     private Tenant tenant;
     private Predefined predefinedSelection;
-    private ColumnSelection customizedSelection;
+    private ColumnSelection columnSelection;
     private Map<MatchKey, List<String>> keyMap;
     private Integer blockSize;
     private String rootOperationUid, blockOperationUid;
@@ -139,14 +146,6 @@ public class ProcessorContext {
 
     public Tenant getTenant() {
         return tenant;
-    }
-
-    public Predefined getPredefinedSelection() {
-        return predefinedSelection;
-    }
-
-    public ColumnSelection getCustomizedSelection() {
-        return customizedSelection;
     }
 
     public Map<MatchKey, List<String>> getKeyMap() {
@@ -264,7 +263,7 @@ public class ProcessorContext {
     public MatchInput getOriginalInput() {
         return originalInput;
     }
-    
+
     public void setOriginalInput(MatchInput originalInput) {
         this.originalInput = originalInput;
     }
@@ -302,8 +301,13 @@ public class ProcessorContext {
 
         CustomerSpace space = jobConfiguration.getCustomerSpace();
         tenant = new Tenant(space.toString());
-        predefinedSelection = jobConfiguration.getMatchInput().getPredefinedSelection();
-        customizedSelection = jobConfiguration.getMatchInput().getCustomSelection();
+
+        if (jobConfiguration.getMatchInput().getUnionSelection() != null
+                || jobConfiguration.getMatchInput().getCustomSelection() != null) {
+            columnSelection = ((MatchPlannerBase) matchPlanner).parseColumnSelection(jobConfiguration.getMatchInput());
+        } else {
+            predefinedSelection = jobConfiguration.getMatchInput().getPredefinedSelection();
+        }
 
         decisionGraph = jobConfiguration.getMatchInput().getDecisionGraph();
         if (Boolean.TRUE.equals(jobConfiguration.getMatchInput().getFetchOnly())) {
@@ -364,14 +368,15 @@ public class ProcessorContext {
         log.info("Matching a block of " + blockSize + " rows with a group size of " + groupSize
                 + " and a thread pool of size " + numThreads);
         inputSchema = jobConfiguration.getInputAvroSchema();
-        outputSchema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"),
+        outputSchema = constructOutputSchema("DataCloudMatchOutput_" + blockOperationUid.replace("-", "_"),
                 jobConfiguration.getMatchInput().getDataCloudVersion());
 
         // sequence is very important in outputschema
         // am output attr -> dedupe -> debug
         // the same sequence will be used in writeDataToAvro
         log.info("Need to prepare for dedupe: " + originalInput.isPrepareForDedupe());
-        if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource()) && originalInput.isPrepareForDedupe()) {
+        if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource())
+                && originalInput.isPrepareForDedupe()) {
             outputSchema = appendDedupeHelpers(outputSchema);
         }
 
@@ -430,13 +435,14 @@ public class ProcessorContext {
     private Schema constructOutputSchema(String recordName, String dataCloudVersion) {
         Schema outputSchema;
         ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
-        if (predefinedSelection == null) {
-            List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(customizedSelection, dataCloudVersion);
+        if (columnSelection == null) {
+            outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
+        } else {
+            List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
             outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
                     dataCloudVersion);
-        } else {
-            outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
         }
+        log.info("Output schema has " + outputSchema.getFields().size() + " fields from data cloud.");
         if (inputSchema == null) {
             inputSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroPath);
             log.info("Using extracted input schema: \n"

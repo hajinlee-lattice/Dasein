@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.Resource;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
@@ -18,10 +20,12 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
+import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.datacloud.yarn.testframework.DataCloudYarnFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -31,6 +35,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
+import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -46,6 +52,9 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
     @Autowired
     private DataCloudVersionEntityMgr versionEntityMgr;
 
+    @Resource(name = "accountMasterColumnSelectionService")
+    private ColumnSelectionService columnSelectionService;
+
     @Value("${datacloud.match.latest.data.cloud.major.version}")
     private String latestMajorVersion;
 
@@ -57,7 +66,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testMatchBlockInYarnContainer() throws Exception {
         String fileName = "BulkMatchInput.avro";
         cleanupAvroDir(avroDir);
@@ -75,7 +84,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         verifyDedupeHelpers(jobConfiguration);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testRTSNoMatch() throws Exception {
         String fileName = "BulkMatchInput_NoMatch.avro";
         cleanupAvroDir(avroDir);
@@ -95,7 +104,15 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         String avroPath = avroDir + "/" + fileName;
 
         DataCloudJobConfiguration jobConfiguration = jobConfiguration(avroPath);
-        jobConfiguration.getMatchInput().setPredefinedSelection(Predefined.Enrichment);
+
+        UnionSelection unionSelection = new UnionSelection();
+        unionSelection.setPredefinedSelections(ImmutableMap.of(Predefined.ID, "1.0"));
+        ColumnSelection allColumns = columnSelectionService.parsePredefinedColumnSelection(Predefined.Enrichment,
+                versionEntityMgr.currentApprovedVersionAsString());
+        ColumnSelection customSelection = new ColumnSelection();
+        customSelection.setColumns(allColumns.getColumns().subList(0, 10));
+        unionSelection.setCustomSelection(customSelection);
+        jobConfiguration.getMatchInput().setUnionSelection(unionSelection);
 
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);

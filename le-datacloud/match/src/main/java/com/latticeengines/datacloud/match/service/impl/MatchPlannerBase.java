@@ -61,7 +61,6 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
-    @Trace
     public ColumnSelection parseColumnSelection(MatchInput input) {
         ColumnSelectionService columnSelectionService = beanDispatcher
                 .getColumnSelectionService(input.getDataCloudVersion());

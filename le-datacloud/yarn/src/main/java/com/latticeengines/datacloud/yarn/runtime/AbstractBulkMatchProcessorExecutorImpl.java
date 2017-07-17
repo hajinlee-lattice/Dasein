@@ -9,16 +9,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Resource;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -57,12 +58,10 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
-    @Qualifier("bulkMatchPlanner")
+    @Resource(name = "bulkMatchPlanner")
     protected MatchPlanner matchPlanner;
 
-    @Autowired
-    @Qualifier("bulkMatchExecutor")
+    @Resource(name = "bulkMatchExecutor")
     protected MatchExecutor matchExecutor;
 
     @Autowired
@@ -98,11 +97,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         // TODO: many of these copy overs can be eliminated
         matchInput.setRootOperationUid(processorContext.getRootOperationUid());
         matchInput.setTenant(processorContext.getTenant());
-        if (processorContext.getPredefinedSelection() == null) {
-            matchInput.setCustomSelection(processorContext.getCustomizedSelection());
-        } else {
-            matchInput.setPredefinedSelection(processorContext.getPredefinedSelection());
-        }
         matchInput.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
         matchInput.setFields(processorContext.getDivider().getFields());
         matchInput.setKeyMap(processorContext.getKeyMap());

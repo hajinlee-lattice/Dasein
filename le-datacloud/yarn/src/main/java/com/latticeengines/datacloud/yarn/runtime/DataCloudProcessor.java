@@ -21,7 +21,7 @@ import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 @Component("dataCloudProcessor")
 public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJobConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(DataCloudProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataCloudProcessor.class);
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -49,9 +49,11 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
 
             initialProcessorContext.initialize(this, jobConfiguration);
             if (initialProcessorContext.isUseRemoteDnB()) {
+                logger.info("Use async executor.");
                 bulkMatchProcessorAsyncExecutor.execute(initialProcessorContext);
                 bulkMatchProcessorAsyncExecutor.finalize(initialProcessorContext);
             } else {
+                logger.info("Use sync executor.");
                 bulkMatchProcessorExecutor.execute(initialProcessorContext);
                 bulkMatchProcessorExecutor.finalize(initialProcessorContext);
             }
@@ -64,7 +66,7 @@ public class DataCloudProcessor extends SingleContainerYarnProcessor<DataCloudJo
             try {
                 HdfsUtils.writeToFile(yarnConfiguration, errFile, ExceptionUtils.getStackTrace(e));
             } catch (Exception e1) {
-                log.error("Failed to write error to err file.", e1);
+                logger.error("Failed to write error to err file.", e1);
             }
             throw (e);
         }
