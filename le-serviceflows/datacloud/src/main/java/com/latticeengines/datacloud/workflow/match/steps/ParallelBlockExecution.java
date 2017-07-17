@@ -13,14 +13,14 @@ import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -308,12 +308,12 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private Boolean doRetry(String blockUid) {
-        boolean useRemoteDnB = false;
+        boolean useRemoteDnB;
         DataCloudJobConfiguration jobConfiguration = jobConfigurations.get(0);
         if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
             useRemoteDnB = jobConfiguration.getMatchInput().getUseRemoteDnB();
         } else {
-            useRemoteDnB = zkConfigurationService.fuzzyMatchEnabled(jobConfiguration.getCustomerSpace());
+            useRemoteDnB = true;
         }
         useRemoteDnB = useRemoteDnB
                 && MatchUtils.isValidForAccountMasterBasedMatch(jobConfiguration.getMatchInput().getDataCloudVersion());

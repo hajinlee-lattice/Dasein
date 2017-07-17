@@ -105,6 +105,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @PostConstruct
     void defineDefaultFeatureFlags() {
         // PD flags

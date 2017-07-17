@@ -85,7 +85,6 @@ public class FuzzyMatchHelper implements DbHelper {
             try {
                 updateDecisionGraph(context.getInput());
                 updateUseRemoteDnB(context.getInput());
-                updateBypassDnBCache(context.getInput());
                 if (isSync) {
                     fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput());
                 } else {
@@ -116,22 +115,7 @@ public class FuzzyMatchHelper implements DbHelper {
         if (useRemoteDnB != null) {
             return;
         }
-        if (matchInput.getTenant() != null) {
-            CustomerSpace customerSpace = CustomerSpace.parse(matchInput.getTenant().getId());
-            matchInput.setUseRemoteDnB(zkConfigurationService.fuzzyMatchEnabled(customerSpace));
-        } else {
-            matchInput.setUseRemoteDnB(false);
-        }
-    }
-
-    private void updateBypassDnBCache(MatchInput matchInput) {
-        if (matchInput.getTenant() != null) {
-            CustomerSpace customerSpace = CustomerSpace.parse(matchInput.getTenant().getId());
-            boolean bypassDnBCache = zkConfigurationService.bypassDnBCache(customerSpace);
-            if (bypassDnBCache) {
-                matchInput.setUseDnBCache(false);
-            }
-        }
+        matchInput.setUseRemoteDnB(true);
     }
 
     @Override

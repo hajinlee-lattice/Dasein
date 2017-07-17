@@ -100,14 +100,6 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         }
     }
 
-    public boolean fuzzyMatchEnabled(CustomerSpace customerSpace) {
-        return true;
-    }
-
-    public boolean bypassDnBCache(CustomerSpace customerSpace) {
-        return false;
-    }
-
     private Path dbPoolPath(DataSourcePool pool) {
         Path propDataPath = PathBuilder.buildServicePath(podId, PROPDATA_SERVICE);
         if (StringUtils.isNotEmpty(leStack)) {

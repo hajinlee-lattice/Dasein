@@ -316,7 +316,7 @@ public class ProcessorContext {
             if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
                 useRemoteDnB = jobConfiguration.getMatchInput().getUseRemoteDnB();
             } else {
-                useRemoteDnB = zkConfigurationService.fuzzyMatchEnabled(space);
+                useRemoteDnB = true;
             }
             useRemoteDnB = useRemoteDnB && MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion);
             useRemoteDnB = useRemoteDnB && zkConfigurationService.useRemoteDnBGlobal();

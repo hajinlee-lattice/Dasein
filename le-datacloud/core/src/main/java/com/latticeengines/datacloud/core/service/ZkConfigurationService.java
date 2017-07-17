@@ -10,10 +10,6 @@ public interface ZkConfigurationService {
 
     List<DataSourceConnection> getConnectionsInPool(DataSourcePool pool);
 
-    boolean fuzzyMatchEnabled(CustomerSpace customerSpace);
-
-    boolean bypassDnBCache(CustomerSpace customerSpace);
-
     boolean isMatchDebugEnabled(CustomerSpace customerSpace);
 
     boolean useRemoteDnBGlobal();
