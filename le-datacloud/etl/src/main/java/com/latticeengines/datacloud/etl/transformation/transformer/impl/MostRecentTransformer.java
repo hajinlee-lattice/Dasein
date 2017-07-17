@@ -40,6 +40,7 @@ public class MostRecentTransformer
         return MostRecentFlow.TRANSFORMER_NAME;
     }
 
+    @Override
     protected Map<String, Table> setupSourceTables(Map<Source, List<String>> baseSourceVersions) {
         Map<String, Table> sourceTables = new HashMap<>();
         for (Map.Entry<Source, List<String>> entry : baseSourceVersions.entrySet()) {
@@ -61,6 +62,7 @@ public class MostRecentTransformer
         return MostRecentConfig.class;
     }
 
+    @Override
     protected boolean addSource(Map<String, Table> sourceTables, Source source, List<String> versions) {
         String sourceName = source.getSourceName();
         Table sourceTable;
@@ -78,6 +80,7 @@ public class MostRecentTransformer
         return true;
     }
 
+    @Override
     protected void updateParameters(MostRecentParameters parameters, Source[] baseSource, Source target,
             MostRecentConfig config, List<String> baseVersions) {
         try {
