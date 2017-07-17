@@ -157,13 +157,13 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     };
     
     function getSelecetedFeatureFlags(selectedProducts) {
-        let featureFlags = [];
-        let flagNames = [];
+        var featureFlags = [];
+        var flagNames = [];
         selectedProducts.forEach(function(selectedProduct){
             selectedProduct.featureFlags.forEach(function(flag) {
-                if (!flagNames.includes(flag['DisplayName'])) {
+                if (!flagNames.includes(flag.DisplayName)) {
                     featureFlags.push(flag);
-                    flagNames.push(flag['DisplayName']);
+                    flagNames.push(flag.DisplayName);
                 }
             });
         });
