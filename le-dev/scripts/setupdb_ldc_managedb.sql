@@ -215,8 +215,8 @@ SET
   `AccountLookupHdfsVersion` = '2017-06-03_00-14-03_UTC',
   `DynamoTableSignature`        = '20170629',
   `DynamoTableSignature_Lookup` = '20170629',
-  `AMBucketedRedShiftTable`     = 'AccountMasterBucketed_2017_07_01_15_59_30_UTC',
-  `SegmentStatsVersion`         = '2017-07-14_00-32-30_UTC'
+  `AMBucketedRedShiftTable`     = 'AccountMasterBucketed_2017_07_16_22_05_11_UTC',
+  `SegmentStatsVersion`         = '2017-07-16_22-05-11_UTC'
 WHERE `Version` = '2.0.5';
 
 SET SQL_SAFE_UPDATES = 1;
