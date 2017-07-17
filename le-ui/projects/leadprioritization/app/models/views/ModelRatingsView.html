@@ -40,12 +40,10 @@
                         class="slider"
                         ng-attr-style="{{'height: '+ vm.dugoutHeight +'px; right: '+ bucket.right_bound_score +'%'}}"
                         ng-repeat="bucket in vm.workingBuckets"
-                        ng-click="$event.stopPropagation()"
-                        ng-mousedown="vm.eleMouseDown($event, bucket, $index)">
-                        <div 
-                            class="value" 
-                            ng-if="isMoving"
-                            ng-class="isMoving ? 'is-moving' : ''">{{vm.right}}</div>
+                        ng-mousedown="vm.eleMouseDown($event, bucket, $index); isMoving=!isMoving"
+                        ng-mouseup="isMoving=!isMoving">
+                        
+                        <div class="value" ng-if="isMoving">{{vm.right}}</div>
                         <div class="handle">&nbsp;</div>
                     </div>
                 </div><!-- End .sliders-container -->

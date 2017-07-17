@@ -192,7 +192,6 @@
 	position: absolute;
 	z-index: 5;
 	.value {
-		opacity: 0;
 		background: #fff;
 	    border: #333 solid 2px;
 	    border-radius: 50%;
@@ -204,9 +203,6 @@
 	    font-weight: bold;
 	    -webkit-transition: opacity 1s;
     	transition: 		opacity 1s;
-	    &.is-moving {
-	    	opacity: 1;
-	    }
 	}
 	.handle {
 		position: absolute;

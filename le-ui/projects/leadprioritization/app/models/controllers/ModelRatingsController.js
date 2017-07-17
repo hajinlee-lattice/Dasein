@@ -178,6 +178,8 @@ angular.module('lp.models.ratings', [
         
     }
 
+
+    
     vm.eleMouseDown = function(ev, bucket, index) {
         ev.preventDefault();
         ev.stopPropagation();
@@ -190,19 +192,16 @@ angular.module('lp.models.ratings', [
         vm.showRemoveBucketText = false;
         vm.startingPosition = ev.clientX;
         vm.updateContent = false;
-        vm.bucket.isMoving = true;
-
+        
         document.addEventListener('mousemove', eleMouseMove, false);
         document.addEventListener('mouseup', eleMouseUp, false);
 
     }
 
     function eleMouseMove(ev) {
-
         ev.preventDefault();
         ev.stopPropagation();
 
-        $scope.isMoving = true;
         vm.firstBucket = vm.workingBuckets[Object.keys(vm.workingBuckets)[0]];
         vm.relativeSliderChartPosition = (ev.clientX - vm.containerBox.left) / vm.containerBox.width;
 
@@ -254,7 +253,6 @@ angular.module('lp.models.ratings', [
             vm.chartNotUpdated = false;
         }
 
-        $scope.isMoving = false;
         vm.slider.style.opacity = 1;
         vm.canAddBucket = false;
 
