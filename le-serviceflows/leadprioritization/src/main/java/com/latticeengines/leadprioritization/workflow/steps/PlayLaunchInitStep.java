@@ -2,7 +2,6 @@ package com.latticeengines.leadprioritization.workflow.steps;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,6 +37,9 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
+
+    @Value("${playmaker.workflow.segment.pagesize:100}")
+    private int pageSize;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -85,20 +87,34 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         // add processing logic
 
         // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
-        
-        /*
-        List<String> accountSchema = getSchema(TableRoleInCollection.BucketedAccount);
-        DataRequest dataRequest = new DataRequest();
-        dataRequest.setAttributes(accountSchema);
-        DataPage accountPage = accountProxy.getAccounts(tenant.toString(), DateTimeUtils.formatTZ(new Date()), 0, 2,
-                dataRequest);
-        List<Map<String, Object>> accountList = accountPage.getData();
-        */
 
-        for (int i = 0; i < 3; i++) {
-            Recommendation recommendation = createDummyRecommendation(tenant, playLauch, config);
-            recommendationService.create(recommendation);
+        /*
+        Restriction segmentRestrictionQuery = playLauch.getPlay().getSegment().getRestriction();
+        int segmentAccountsCount = accountProxy.getSegmentAccountsCount(tenant.toString(), segmentRestrictionQuery);
+
+        if (segmentAccountsCount > 0) {
+            List<String> accountSchema = getSchema(TableRoleInCollection.BucketedAccount);
+            DataRequest dataRequest = new DataRequest();
+            dataRequest.setAttributes(accountSchema);
+
+            int numberOfLoops = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
+            int alreadyReadAccounts = 0;
+
+            for (int loopId = 0; loopId < numberOfLoops; loopId++) {
+                int expectedPageSize = Math.min(pageSize, segmentAccountsCount - alreadyReadAccounts);
+                DataPage accountPage = accountProxy.getSegmentAccounts(tenant.toString(), segmentRestrictionQuery,
+                        alreadyReadAccounts, expectedPageSize, dataRequest);
+                List<Map<String, Object>> accountList = accountPage.getData();
+                alreadyReadAccounts += accountList.size();
+        */
+                for (int i = 0; i < 3; i++) {
+                    Recommendation recommendation = createDummyRecommendation(tenant, playLauch, config);
+                    recommendationService.create(recommendation);
+                }
+        /*
+            }
         }
+        */
     }
 
     private Recommendation createDummyRecommendation(Tenant tenant, PlayLaunch playLauch,
