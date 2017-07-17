@@ -57,7 +57,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         progress = transformData(progress);
         finish(progress);
         confirmResultFile(progress);
-        // verifySort();
+        verifySort();
         verifyStats();
         verifyAvsc();
         cleanupProgressTables();
@@ -167,32 +167,28 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(2));
         step.setTransformer(SourceSorter.TRANSFORMER_NAME);
-        step.setConfiguration(sortStepConfiguration());
-        step.setTargetSource(getTargetSourceName());
-        return step;
-    }
-
-    private String sortStepConfiguration() {
         SorterConfig config = new SorterConfig();
         config.setPartitions(100);
         config.setSortingField(InterfaceName.LatticeAccountId.name());
-        return JsonUtils.serialize(config);
+        step.setConfiguration(JsonUtils.serialize(config));
+        step.setTargetSource(getTargetSourceName());
+        return step;
     }
 
     private void verifySort() throws IOException {
         String resultDir = getPathForResult();
         List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, resultDir + "/*.avro");
-        long maxInLastFile = Integer.MIN_VALUE;
+        long maxInLastFile = Long.MIN_VALUE;
         for (String file : files) {
-            long minInFile = Integer.MAX_VALUE;
-            long maxInFile = Integer.MIN_VALUE;
+            String fileName = file.substring(file.lastIndexOf("/") + 1);
+            long minInFile = Long.MAX_VALUE;
+            long maxInFile = Long.MIN_VALUE;
             List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, file);
             for (GenericRecord record : records) {
-                long id = (long) record.get("LatticeAccountId");
+                long id = (long) record.get(InterfaceName.LatticeAccountId.name());
                 minInFile = Math.min(id, minInFile);
                 maxInFile = Math.max(id, maxInFile);
             }
-            String fileName = file.substring(file.lastIndexOf("/") + 1);
             System.out.println(String.format("[%s] Min: %d -- Max: %d", fileName, minInFile, maxInFile));
             Assert.assertTrue(minInFile > maxInLastFile, String.format(
                     "Min in current file %d is not greater than the max in last file %d", minInFile, maxInLastFile));
