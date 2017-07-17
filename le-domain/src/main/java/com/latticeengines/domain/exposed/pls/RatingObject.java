@@ -8,13 +8,33 @@ public class RatingObject implements Serializable{
 
     private static final long serialVersionUID = -2370263562602858887L;
 
+    @JsonProperty("ratingName")
+    private String ratingName = "North American Premium Accounts";
+
+    @JsonProperty("description")
+    private String description = "";
 
     @JsonProperty("bucket")
     private String bucket = "A";
 
     @JsonProperty("count")
-    private int count = 0;
+    private int count = 100;
 
+    public String getRatingName() {
+        return ratingName;
+    }
+
+    public void setRatingName(String ratingName) {
+        this.ratingName = ratingName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getBucket() {
         return bucket;
