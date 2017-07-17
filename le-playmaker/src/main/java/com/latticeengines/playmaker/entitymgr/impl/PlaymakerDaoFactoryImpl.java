@@ -11,11 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.playmaker.dao.PlaymakerDBVersionDao;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.dao.impl.PlaymakerDBVersionDaoImpl;
@@ -36,15 +37,11 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
     @Autowired
     private BatonService batonService;
 
-    private Map<String, Class<? extends PlaymakerRecommendationDao>> versionDaoMap;
-
-    // TODO - remove it once integration with tenant feature flag is done
-    @Value("${playmaker.tenant.lpi:false}")
-    private boolean shouldUseLpiPlaymaker;
-
     @Autowired
     @Qualifier(value = "lpiPMRecommendationDaoAdapter")
     private PlaymakerRecommendationDao lpiPlaymakerRecommendationDao;
+
+    private Map<String, Class<? extends PlaymakerRecommendationDao>> versionDaoMap;
 
     @PostConstruct
     public void postConstruct() {
@@ -56,12 +53,9 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
 
     @Override
     public PlaymakerRecommendationDao getRecommendationDao(String tenantName) {
-        System.out.println("Value of shouldUseLpiPlaymaker = " + shouldUseLpiPlaymaker);
         if (isLpiBasedPlaymakerEnabledForTenant(tenantName)) {
-            System.out.println("Value of shouldUseLpiPlaymaker = " + shouldUseLpiPlaymaker);
             return lpiPlaymakerRecommendationDao;
         } else {
-            System.out.println("Value of shouldUseLpiPlaymaker = " + shouldUseLpiPlaymaker);
             PlaymakerRecommendationDao defaultDao = null;
             NamedParameterJdbcTemplate namedJdbcTemplate = templateFactory.getTemplate(tenantName);
             defaultDao = new PlaymakerRecommendationDaoImpl(namedJdbcTemplate);
@@ -81,8 +75,8 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
     }
 
     private boolean isLpiBasedPlaymakerEnabledForTenant(String tenantName) {
-        // TODO - integrate it with tenant feature flag
-        return shouldUseLpiPlaymaker;
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantName);
+        return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_TALKING_POINTS);
     }
 
     PlaymakerRecommendationDao findDao(NamedParameterJdbcTemplate namedJdbcTemplate, String normalizedVer,
