@@ -79,12 +79,14 @@ public class HdfsPathBuilder {
             }
         } else if (source instanceof DerivedSource) {
             if (!StringStandardizationUtils.objectIsNullOrEmptyString(version)) {
-                dir = constructSnapshotDir(source, version);
+                dir = constructSnapshotDir(source.getSourceName(), version);
             } else {
-                dir = constructSnapshotRootDir(source);
+                dir = constructSnapshotRootDir(source.getSourceName());
             }
+        } else if (source instanceof IngestionSource) {
+            dir = constructIngestionDir(((IngestionSource) source).getIngestionName(), version);
         } else {
-            dir = constructSourceDir(source);
+            dir = constructSourceDir(source.getSourceName());
             if (!StringStandardizationUtils.objectIsNullOrEmptyString(version)) {
                 dir = dir.append(version);
             }

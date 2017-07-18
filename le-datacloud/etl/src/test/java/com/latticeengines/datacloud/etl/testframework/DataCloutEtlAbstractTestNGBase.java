@@ -84,18 +84,9 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
                 .getSystemResourceAsStream("sources/" + baseSource.getSourceName() + ".avro");
         String targetPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, baseSourceVersion)
                 .append("part-0000.avro").toString();
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, targetPath);
-            }
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseAvroStream, targetPath);
-            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-            String successPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, baseSourceVersion)
-                    .append("_SUCCESS").toString();
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        String successPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, baseSourceVersion)
+                .append("_SUCCESS").toString();
+        uploadToHdfs(targetPath, successPath, baseAvroStream);
         hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
     }
 
@@ -103,32 +94,15 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         InputStream baseSourceStream = null;
         String targetPath = null;
         String successPath = null;
-        if (baseSource instanceof IngestionSource) {
-            baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile);
-            targetPath = hdfsPathBuilder
-                    .constructIngestionDir(((IngestionSource) baseSource).getIngestionName(), baseSourceVersion)
-                    .append("/" + baseSourceFile).toString();
-            successPath = hdfsPathBuilder
-                    .constructIngestionDir(((IngestionSource) baseSource).getIngestionName(), baseSourceVersion)
-                    .append("_SUCCESS").toString();
-        } else {
-            baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile + ".avro");
-            targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), baseSourceVersion).append("part-0000.avro")
-                    .toString();
-            successPath = hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), baseSourceVersion).append("_SUCCESS")
-                    .toString();
+        if (!(baseSource instanceof IngestionSource)) {
+            baseSourceFile += ".avro";
         }
-
-        try {
-            if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, targetPath);
-            }
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseSourceStream, targetPath);
-            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile);
+        targetPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, baseSourceVersion)
+                .append(baseSourceFile).toString();
+        successPath = hdfsPathBuilder.constructTransformationSourceDir(baseSource, baseSourceVersion).append("_SUCCESS")
+                .toString();
+        uploadToHdfs(targetPath, successPath, baseSourceStream);
         hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
     }
 
@@ -141,6 +115,11 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
                 .toString();
         successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
                 .toString();
+        uploadToHdfs(targetPath, successPath, baseSourceStream);
+        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
+    }
+
+    private void uploadToHdfs(String targetPath, String successPath, InputStream baseSourceStream) {
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
                 HdfsUtils.rmdir(yarnConfiguration, targetPath);
@@ -151,7 +130,6 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
     }
 
     protected void uploadBaseSourceData(String baseSource, String baseSourceVersion,
