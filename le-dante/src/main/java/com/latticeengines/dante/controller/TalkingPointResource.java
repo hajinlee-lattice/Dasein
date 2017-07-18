@@ -26,7 +26,7 @@ import com.latticeengines.network.exposed.dante.TalkingPointInterface;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "dante", description = "REST resource for Dante Talking Points CRUD operationsdas")
+@Api(value = "dante", description = "REST resource for Talking Points related operations")
 @RestController
 @RequestMapping("/talkingpoints")
 public class TalkingPointResource implements TalkingPointInterface {
@@ -38,7 +38,7 @@ public class TalkingPointResource implements TalkingPointInterface {
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "Create a Talking Point ")
+    @ApiOperation(value = "Create/Update a Talking Point. PID value of null or zero will create a TP.")
     public ResponseDocument<?> createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints,
             @RequestParam("customerSpace") String customerSpace) {
         talkingPointService.createOrUpdate(talkingPoints, customerSpace);
@@ -47,21 +47,21 @@ public class TalkingPointResource implements TalkingPointInterface {
 
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "get a Talking Point ")
+    @ApiOperation(value = "Get a Talking Point")
     public ResponseDocument<TalkingPointDTO> findByName(@PathVariable String name) {
         return ResponseDocument.successResponse(talkingPointService.findByName(name));
     }
 
     @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "find all Talking Points for the given play")
+    @ApiOperation(value = "Find all Talking Points defined for the given play")
     public ResponseDocument<List<TalkingPointDTO>> findAllByPlayName(@PathVariable String playName) {
         return ResponseDocument.successResponse(talkingPointService.findAllByPlayName(playName));
     }
 
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "get the server url and oAuth token to preview Dante Talking Point")
+    @ApiOperation(value = "Get the resources needed to preview a Dante Talking Point")
     public ResponseDocument<DantePreviewResources> getPreviewResources(
             @RequestParam("customerSpace") String customerSpace) {
         return ResponseDocument.successResponse(talkingPointService.getPreviewResources(customerSpace));

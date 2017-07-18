@@ -43,7 +43,7 @@ public class TalkingPointResource {
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "Create a Dante Talking Point ")
+    @ApiOperation(value = "Create a Talking Point")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<?> createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
@@ -55,21 +55,21 @@ public class TalkingPointResource {
 
     @RequestMapping(value = "/{externalID}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "get a Dante Talking Point ")
+    @ApiOperation(value = "Get a Talking Point")
     public ResponseDocument<TalkingPointDTO> findByName(@PathVariable String name) {
         return talkingPointProxy.findByName(name);
     }
 
     @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "get all the Talking Points of the given play")
+    @ApiOperation(value = "Find all Talking Points defined for the given play")
     public ResponseDocument<List<TalkingPointDTO>> findAllByPlayName(@PathVariable String playName) {
         return talkingPointProxy.findAllByPlayName(playName);
     }
 
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "get the server url and oAuth token for Dante authentication via Oauth")
+    @ApiOperation(value = "Get the resources needed to preview a Dante Talking Point")
     public ResponseDocument<DantePreviewResources> getPreviewResources() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
@@ -95,7 +95,7 @@ public class TalkingPointResource {
 
     @RequestMapping(value = "/publish", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "get a Talking Point ")
+    @ApiOperation(value = "Publish given play's Talking Points to dante")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public ResponseDocument<?> publish(@RequestParam("playName") String playName) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();

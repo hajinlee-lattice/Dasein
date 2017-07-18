@@ -24,14 +24,15 @@ ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD CREATED_BY varchar(255) DEFAULT "lattic
 
 ALTER TABLE `PLS_MultiTenant`.`OAUTH2_ACCESS_TOKEN` ADD LAST_MODIFIED_TIME BIGINT(20) DEFAULT 946656000000 NOT NULL;
 
-CREATE TABLE `TALKINGPOINT` (`PID` bigint not null auto_increment unique,
+create table `TALKINGPOINT` (
+  `PID` bigint not null auto_increment unique,
   `CONTENT` longtext not null,
   `CREATED` datetime not null,
-  `NAME` varchar(255) not null,
+  `NAME` varchar(255) not null unique,
   `OFFSET` integer not null,
-  `PLAY_ID` bigint not null,
   `TITLE` varchar(255) not null,
   `UPDATED` datetime not null,
+  `PLAY_ID` bigint not null,
   primary key (`PID`)) ENGINE=InnoDB;
 
 ALTER TABLE `TALKINGPOINT` add index FK85460B9AB11F603 (PLAY_ID), add constraint FK85460B9AB11F603 foreign key (PLAY_ID) references `PLAY` (`PID`);

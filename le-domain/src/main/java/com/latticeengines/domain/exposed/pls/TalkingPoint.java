@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.db.HasAuditingFields;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     public static final String TALKING_POINT_NAME_PREFIX = "TP";
-    public static final String TALKING_POINT_NAME_FORMAT = "%s__%s";
+    public static final String TALKING_POINT_NAME_FORMAT = "%s_%s";
 
     public TalkingPoint() {
         setName(generateNameStr());
@@ -85,7 +85,11 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     }
 
     public void setName(String name) {
-        this.name = name;
+        if (pid == null || pid < 1) {
+            this.name = generateNameStr();
+        } else {
+            this.name = name;
+        }
     }
 
     public Play getPlay() {
@@ -137,6 +141,6 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     }
 
     public String generateNameStr() {
-        return String.format(TALKING_POINT_NAME_PREFIX, TALKING_POINT_NAME_FORMAT, UUID.randomUUID().toString());
+        return String.format(TALKING_POINT_NAME_FORMAT, TALKING_POINT_NAME_PREFIX, UUID.randomUUID().toString());
     }
 }

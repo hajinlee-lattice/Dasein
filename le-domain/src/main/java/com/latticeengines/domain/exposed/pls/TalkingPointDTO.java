@@ -46,11 +46,11 @@ public class TalkingPointDTO {
 
     public TalkingPoint convertToTalkingPoint(Play play) {
         TalkingPoint tp = new TalkingPoint();
+        tp.setPid(getPid());
+        tp.setName(getName());
         tp.setContent(getContent());
         tp.setCreated(getCreated());
-        tp.setName(getName());
         tp.setOffset(getOffset());
-        tp.setPid(getPid());
         tp.setPlay(play);
         tp.setTitle(getTitle());
         tp.setUpdated(getUpdated());

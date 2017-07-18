@@ -91,6 +91,7 @@ public class Play implements HasName, HasPid, HasTenantId {
         rating.add(new RatingObject());
     }
 
+    @JsonProperty("talkingpoints")
     @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
     private Set<TalkingPoint> talkingPoints;
 

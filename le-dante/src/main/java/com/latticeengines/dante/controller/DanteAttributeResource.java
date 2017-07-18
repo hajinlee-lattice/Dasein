@@ -29,7 +29,7 @@ public class DanteAttributeResource implements DanteAttributesInterface {
 
     @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "get account attributes for this tenant")
+    @ApiOperation(value = "Get account attributes for this tenant")
     public ResponseDocument<Map<String, String>> getAccountAttributes(
             @RequestParam("customerSpace") String customerSpace) {
         return ResponseDocument.successResponse(danteAttributeService.getAccountAttributes(customerSpace));
@@ -37,7 +37,7 @@ public class DanteAttributeResource implements DanteAttributesInterface {
 
     @RequestMapping(value = "/recommendationattributes", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "get recommendation attributes")
+    @ApiOperation(value = "Get recommendation attributes")
     public ResponseDocument<Map<String, String>> getRecommendationAttributes(
             @RequestParam("customerSpace") String customerSpace) {
         return ResponseDocument.successResponse(danteAttributeService.getRecommendationAttributes(customerSpace));

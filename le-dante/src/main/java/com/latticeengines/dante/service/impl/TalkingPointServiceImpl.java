@@ -81,7 +81,10 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
         try {
             for (TalkingPointDTO tpdto : tps) {
-                talkingPointEntityMgr.createOrUpdate(tpdto.convertToTalkingPoint(play));
+                if (tpdto.getPid() != null && tpdto.getPid() == 0)
+                    tpdto.setPid(null);
+                TalkingPoint tp = tpdto.convertToTalkingPoint(play);
+                talkingPointEntityMgr.createOrUpdate(tp);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -120,11 +123,17 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     public void delete(String name) {
-        TalkingPoint tp = talkingPointEntityMgr.findByName(name);
-        if (tp == null) {
-            throw new LedpException(LedpCode.LEDP_38001, new String[] { name });
+        try {
+            TalkingPoint tp = talkingPointEntityMgr.findByName(name);
+            if (tp == null) {
+                throw new LedpException(LedpCode.LEDP_38001, new String[] { name });
+            }
+            talkingPointEntityMgr.delete(tp);
+        } catch (LedpException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_38017, e, new String[] { name });
         }
-        talkingPointEntityMgr.delete(tp);
     }
 
     public void publish(String playName, String customerSpace) {

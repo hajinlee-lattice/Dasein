@@ -31,7 +31,7 @@ public class DanteAccountResource implements DanteAccountInterface {
 
     @RequestMapping(value = "/{count}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "get Dante accounts")
+    @ApiOperation(value = "Get Dante accounts")
     public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count,
             @RequestParam("customerSpace") String customerSpace) {
         return ResponseDocument.successResponse(danteAccountService.getAccounts(count, customerSpace));
