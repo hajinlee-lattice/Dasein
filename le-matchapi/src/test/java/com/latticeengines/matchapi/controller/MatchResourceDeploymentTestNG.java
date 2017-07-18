@@ -344,7 +344,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
         Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
-        Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(99));
+        Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(100));
     }
 
     @Test(groups = "deployment", dataProvider = "allDataCloudVersions", enabled = true)
