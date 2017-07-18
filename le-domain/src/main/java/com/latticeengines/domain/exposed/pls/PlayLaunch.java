@@ -16,7 +16,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
@@ -28,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -94,9 +92,13 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @JsonIgnore
     private String tableName;
 
-    @Transient
-    @JsonProperty("table")
-    private Table table;
+    @Column(name = "CONTACTS_NUM")
+    @JsonProperty("contacts_num")
+    private Long contactsNum;
+
+    @Column(name = "ACCOUNTS_NUM")
+    @JsonProperty("accounts_num")
+    private Long accountsNum;
 
     @Override
     public Long getPid() {
@@ -197,5 +199,21 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @JsonIgnore
     public Long getTenantId() {
         return this.tenantId;
+    }
+
+    public Long getAccountsNum() {
+        return this.accountsNum;
+    }
+
+    public void setAccountsNum(Long accountsNum) {
+        this.accountsNum = accountsNum;
+    }
+
+    public Long getContactsNum() {
+        return this.contactsNum;
+    }
+
+    public void setContactsNum(Long contactsNum) {
+        this.contactsNum = contactsNum;
     }
 }

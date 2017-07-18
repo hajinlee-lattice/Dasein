@@ -18,6 +18,8 @@ public interface PlayLaunchService {
 
     List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> launchStates);
 
+    PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> launchStates);
+
     List<PlayLaunch> findByState(LaunchState state);
 
     PlayLaunch update(PlayLaunch existingPlayLaunch);

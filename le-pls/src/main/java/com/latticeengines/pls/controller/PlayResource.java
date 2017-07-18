@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayOverview;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
@@ -62,6 +63,21 @@ public class PlayResource {
         return play;
     }
 
+    @RequestMapping(value = "/playoverview", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all playoverviews for a tenant")
+    public List<PlayOverview> getPlayOverviews(HttpServletRequest request, HttpServletResponse response) {
+        return playService.getAllPlayOverviews();
+    }
+
+    @RequestMapping(value = "/playoverview/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get play for a specific tenant based on playName")
+    public PlayOverview getPlayOverview(@PathVariable String playName, HttpServletRequest request,
+            HttpServletResponse response) {
+        return playService.getPlayOverviewByName(playName);
+    }
+
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a play")
@@ -94,6 +110,13 @@ public class PlayResource {
     public PlayLaunch createPlayLaunch(@PathVariable("playName") String playName, //
             @RequestBody PlayLaunch playLaunch) {
         Play play = playService.getPlayByName(playName);
+        // ----------------------------------------------------------------------------------------------
+        // TODO in M14, we will use objectapi to get the number of contacts and
+        // accounts for a given play
+        // for now, just mock them
+        playLaunch.setAccountsNum(4000L);
+        playLaunch.setContactsNum(5000L);
+        // ----------------------------------------------------------------------------------------------
         playLaunch.setPlay(play);
         playLaunchService.create(playLaunch);
         String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();

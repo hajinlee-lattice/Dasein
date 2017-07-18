@@ -76,6 +76,12 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> states) {
+        return playLaunchDao.findLatestByPlayId(playId, states);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<PlayLaunch> findByState(LaunchState state) {
         return playLaunchDao.findByState(state);
     }
@@ -96,4 +102,5 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     private String generateLaunchId() {
         return String.format(PLAY_LAUNCH_NAME_FORMAT, PLAY_LAUNCH_NAME_PREFIX, UUID.randomUUID().toString());
     }
+
 }

@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -93,7 +92,7 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     @JsonProperty("talkingpoints")
     @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
-    private Set<TalkingPoint> talkingPoints;
+    private List<TalkingPoint> talkingPoints;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
@@ -189,11 +188,11 @@ public class Play implements HasName, HasPid, HasTenantId {
         this.rating = rating;
     }
 
-    public Set<TalkingPoint> getTalkingPoints() {
+    public List<TalkingPoint> getTalkingPoints() {
         return talkingPoints;
     }
 
-    public void setTalkingPoints(Set<TalkingPoint> talkingPoints) {
+    public void setTalkingPoints(List<TalkingPoint> talkingPoints) {
         this.talkingPoints = talkingPoints;
     }
 

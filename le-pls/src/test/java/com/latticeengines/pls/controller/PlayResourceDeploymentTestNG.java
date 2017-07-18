@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayOverview;
 import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
@@ -116,8 +117,23 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertPlayLaunch(retrievedLaunch);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "searchPlayLaunch" })
+    private void testGetPlayOverviews() {
+        PlayOverview retrievedPlayOverview = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/play/playoverview/" + name, PlayOverview.class);
+        Assert.assertNotNull(retrievedPlayOverview);
+        System.out.println("retrievedPlayOverview is " + retrievedPlayOverview);
+
+        List<PlayOverview> retrievedPlayOverviewList = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/play/playoverview", List.class);
+        Assert.assertNotNull(retrievedPlayOverviewList);
+        Assert.assertEquals(retrievedPlayOverviewList.size(), 2);
+
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetPlayOverviews" })
     private void deletePlayLaunch() {
         restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + name + "/launches/" + playLaunch.getLaunchId());
 

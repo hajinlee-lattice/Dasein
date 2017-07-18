@@ -15,6 +15,8 @@ public interface PlayLaunchDao extends BaseDao<PlayLaunch> {
 
     List<PlayLaunch> findByPlayId(Long playId, List<LaunchState> states);
 
+    PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> states);
+
     List<PlayLaunch> findByState(LaunchState state);
 
 }

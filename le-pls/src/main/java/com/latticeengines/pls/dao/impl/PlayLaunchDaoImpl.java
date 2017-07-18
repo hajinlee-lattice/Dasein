@@ -120,4 +120,13 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         query.setString("state", state.name());
         return query.list();
     }
+
+    @Override
+    public PlayLaunch findLatestByPlayId(Long playId, List<LaunchState> states) {
+        List<PlayLaunch> playLaunchList = findByPlayId(playId, states);
+        if (playLaunchList != null && playLaunchList.size() > 0) {
+            return playLaunchList.get(0);
+        }
+        return null;
+    }
 }
