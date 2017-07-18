@@ -65,9 +65,12 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
         upsertTable(configuration.getCustomerSpace().toString(), sortedTableName);
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
-        Map<BusinessEntity, Table> entityTableMap = new HashMap<>();
+        Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
+        if (entityTableMap == null) {
+            entityTableMap = new HashMap<>();
+            putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
+        }
         entityTableMap.put(BusinessEntity.Contact, sortedTable);
-        putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
     }
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {
