@@ -302,7 +302,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public List<String> getVersions(Source source) {
-        String snapshot = hdfsPathBuilder.constructSnapshotRootDir(source).toString();
+        String snapshot = hdfsPathBuilder.constructSnapshotRootDir(source.getSourceName()).toString();
         List<String> versions = new ArrayList<>();
         try {
             for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, snapshot)) {

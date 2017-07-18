@@ -11,9 +11,9 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -144,21 +144,10 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             // the order of base versions in the configuration
             P parameters = getParameters(progress, baseSources, baseTemplates, targetTemplate, configuration, confStr,
                     baseSourceVersions);
-            Map<Source, List<String>> baseSourceVersionMap = new HashMap<Source, List<String>>();
-            for (int i = 0; i < baseSources.length; i++) {
-                Source baseSource = baseSources[i];
-
-                List<String> versionList = baseSourceVersionMap.get(baseSource);
-                if (versionList == null) {
-                    versionList = new ArrayList<>();
-                    baseSourceVersionMap.put(baseSource, versionList);
-                }
-                versionList.add(baseSourceVersions.get(i));
-            }
             preDataFlowProcessing(step, workflowDir, parameters, configuration);
+            Map<Source, List<String>> baseSourceVersionMap = setupBaseSourceVersionMap(step, parameters, configuration);
             Map<String, Table> baseTables = setupSourceTables(baseSourceVersionMap);
             step.setBaseTables(baseTables);
-            //Table result = dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersionMap, getDataFlowBeanName(), parameters);
             Table result = dataFlowService.executeDataFlow(step, getDataFlowBeanName(), parameters, workflowDir);
             step.setCount(result.getCount());
             List<Schema> baseSchemas = getBaseSourceSchemas(step);
@@ -195,6 +184,20 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         }
     }
 
+    protected Map<Source, List<String>> setupBaseSourceVersionMap(TransformStep step, P parameters, T configuration) {
+        Map<Source, List<String>> baseSourceVersionMap = new HashMap<Source, List<String>>();
+        for (int i = 0; i < step.getBaseSources().length; i++) {
+            Source baseSource = step.getBaseSources()[i];
+            List<String> versionList = baseSourceVersionMap.get(baseSource);
+            if (versionList == null) {
+                versionList = new ArrayList<>();
+                baseSourceVersionMap.put(baseSource, versionList);
+            }
+            versionList.add(step.getBaseVersions().get(i));
+        }
+        return baseSourceVersionMap;
+    }
+
     protected Map<String, Table> setupSourceTables(Map<Source, List<String>> baseSourceVersions) {
         Map<String, Table> sourceTables = new HashMap<>();
         for (Map.Entry<Source, List<String>> entry : baseSourceVersions.entrySet()) {
@@ -206,7 +209,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return sourceTables;
     }
 
-    private boolean addSource(Map<String, Table> sourceTables, Source source, List<String> versions) {
+    protected boolean addSource(Map<String, Table> sourceTables, Source source, List<String> versions) {
         String sourceName = source.getSourceName();
         Table sourceTable;
         try {

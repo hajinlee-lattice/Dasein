@@ -1,0 +1,86 @@
+package com.latticeengines.datacloud.dataflow.transformation;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import com.latticeengines.dataflow.exposed.builder.Node;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.domain.exposed.datacloud.dataflow.DiffferParameters;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+
+import cascading.tuple.Fields;
+import edu.emory.mathcs.backport.java.util.Arrays;
+
+@Component(Diff.DATAFLOW_BEAN_NAME)
+public class Diff extends TransformationFlowBase<BasicTransformationConfiguration, DiffferParameters> {
+    public final static String DATAFLOW_BEAN_NAME = "DiffFlow";
+    public final static String TRANSFORMER_NAME = "SourceDifferTransformer";
+
+    public final static String CHECK_SUM = "_CHECKSUM_";
+    public final static String COMP = "_COMP_";
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Node construct(DiffferParameters parameters) {
+        Node src = parameters.getBaseTables().size() == 2 ? addSource(parameters.getBaseTables().get(0))
+                : addSource(getTableName(parameters.getBaseTables().get(0), parameters.getDiffVersion()));
+        Node srcCompared = parameters.getBaseTables().size() == 2 ? addSource(parameters.getBaseTables().get(1))
+                : addSource(getTableName(parameters.getBaseTables().get(0), parameters.getDiffVersionCompared()));
+        List<String> finalAttrs = new ArrayList<>();
+        finalAttrs.addAll(src.getFieldNames());
+        Set<String> excludeFields = parameters.getExcludeFields() == null ? null
+                : new HashSet(Arrays.asList(parameters.getExcludeFields()));
+        src = src.apply(new AddMD5Hash(new Fields(CHECK_SUM), excludeFields, 1000, true),
+                new FieldList(src.getFieldNames()),
+                new FieldMetadata(CHECK_SUM, String.class));
+        srcCompared = srcCompared.apply(new AddMD5Hash(new Fields(CHECK_SUM), excludeFields, 1000, true),
+                new FieldList(srcCompared.getFieldNames()), new FieldMetadata(CHECK_SUM, String.class));
+        srcCompared = renameCompared(srcCompared);
+        Node joined = src.join(new FieldList(parameters.getKeys()), srcCompared,
+                new FieldList(renameCompKeys(parameters.getKeys())), JoinType.LEFT);
+        joined = joined.filter(String.format("!%s.equals(%s)", CHECK_SUM, renameCompAttr(CHECK_SUM)),
+                new FieldList(CHECK_SUM, renameCompAttr(CHECK_SUM))).retain(new FieldList(finalAttrs));
+        return joined;
+    }
+
+    public static String getTableName(String source, String version) {
+        if (StringUtils.isEmpty(version)) {
+            return source;
+        }
+        return source + "_" + version;
+    }
+
+    private String renameCompAttr(String attr) {
+        return COMP + attr;
+    }
+
+    private String[] renameCompKeys(String[] keys) {
+        String[] newKeys = new String[keys.length];
+        for (int i = 0; i < keys.length; i++) {
+            newKeys[i] = renameCompAttr(keys[i]);
+        }
+        return newKeys;
+    }
+
+    private Node renameCompared(Node node) {
+        List<String> newAttrs = new ArrayList<>();
+        node.getFieldNames().forEach(attr -> newAttrs.add(renameCompAttr(attr)));
+        return node.rename(new FieldList(node.getFieldNames()), new FieldList(newAttrs));
+    }
+
+    @Override
+    protected Class<? extends TransformationConfiguration> getTransConfClass() {
+        return BasicTransformationConfiguration.class;
+    }
+
+
+}

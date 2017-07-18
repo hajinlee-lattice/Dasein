@@ -18,8 +18,6 @@ import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.flink.client.program.ContextEnvironment;
 import org.apache.flink.yarn.AbstractYarnClusterDescriptor;
 import org.apache.hadoop.conf.Configuration;
@@ -28,6 +26,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.hadoop.fs.HdfsResourceLoader;
 
 import com.google.common.collect.Lists;
@@ -855,7 +855,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         Pipe each = new Each(pm.getKey(), DataFlowUtils.convertToFields(fieldsToApply.getFields()),
-                new AddMD5Hash(new Fields(targetFieldName)), Fields.ALL);
+                new AddMD5Hash(new Fields(targetFieldName), null, null, false), Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         FieldMetadata pdHashFm = new FieldMetadata(Type.STRING, String.class, targetFieldName, null);
         pdHashFm.setPropertyValue("length", "32");
