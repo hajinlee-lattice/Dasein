@@ -316,7 +316,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             useRemoteDnB = true;
         }
         useRemoteDnB = useRemoteDnB
-                && MatchUtils.isValidForAccountMasterBasedMatch(jobConfiguration.getMatchInput().getDataCloudVersion());
+                && MatchUtils.isValidForAccountMasterBasedMatch(jobConfiguration.getMatchInput().getDataCloudVersion())
+                && zkConfigurationService.useRemoteDnBGlobal();
         if (useRemoteDnB) {
             return false;
         }
