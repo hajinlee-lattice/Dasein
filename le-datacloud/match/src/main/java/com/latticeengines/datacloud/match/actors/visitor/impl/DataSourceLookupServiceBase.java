@@ -86,8 +86,11 @@ public abstract class DataSourceLookupServiceBase implements DataSourceLookupSer
     protected void sendFailureResponse(DataSourceLookupRequest request, Exception ex) {
         Response response = new Response();
         response.setTravelerContext(request.getMatchTravelerContext());
-        log.error(String.format("Encountered issue at %s for request %s: %s",
+        log.error(String.format("Encountered issue at %s for request %s%s: %s",
                 DataSourceWrapperActorTemplate.class.getSimpleName(), request.getMatchTravelerContext().getTravelerId(),
+                request.getMatchTravelerContext().getMatchInput().getRootOperationUid() == null ? ""
+                                : " (RootOperationID="
+                                        + request.getMatchTravelerContext().getMatchInput().getRootOperationUid() + ")",
                 ex.getMessage()), ex);
         response.getTravelerContext().setTravelException(new TravelException(ex.getMessage(), ex));
         actorSystem.sendResponse(response, request.getMatchTravelerContext().getAnchorActorLocation());

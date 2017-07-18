@@ -72,6 +72,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         return callMatchInternal(matchRecords, matchInput);
     }
 
+    @MatchStep
     @Override
     public <T extends OutputRecord> void fetchIdResult(List<T> matchRecords, Level logLevel,
             List<Future<Object>> matchFutures) throws Exception {
@@ -202,6 +203,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         return logLevel;
     }
 
+    @MatchStep
     private <T extends OutputRecord> List<Future<Object>> callMatchInternal(List<T> matchRecords, MatchInput matchInput) {
 
         List<Future<Object>> matchFutures = new ArrayList<>();

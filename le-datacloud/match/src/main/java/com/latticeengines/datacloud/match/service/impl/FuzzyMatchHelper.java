@@ -19,12 +19,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
+import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -79,6 +79,7 @@ public class FuzzyMatchHelper implements DbHelper {
         return context;
     }
 
+    @MatchStep
     private void fetchInternal(MatchContext context, boolean isSync) {
         boolean fetchOnly = context.getInput().getFetchOnly();
         if (!fetchOnly) {
@@ -134,6 +135,7 @@ public class FuzzyMatchHelper implements DbHelper {
         }
     }
 
+    @MatchStep
     @Override
     public void fetchMatchResult(MatchContext context) {
         String dataCloudVersion = context.getInput().getDataCloudVersion();

@@ -89,8 +89,11 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_ENTITY);
             context.setDuration(System.currentTimeMillis() - startTime);
             if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN) {
-                log.info(String.format("DnB realtime entity matching request %s: Status=%s, Duration=%d",
-                        context.getLookupRequestId(), context.getDnbCode(), context.getDuration()));
+                log.info(String.format("DnB realtime entity matching request %s%s: Status=%s, Duration=%d",
+                        context.getLookupRequestId(),
+                        context.getRootOperationUid() == null ? ""
+                                : " (RootOperationID=" + context.getRootOperationUid() + ")",
+                        context.getDnbCode(), context.getDuration()));
                 break;
             }
             dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME);
@@ -105,8 +108,11 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             executeLookup(context, DnBKeyType.REALTIME, DnBAPIType.REALTIME_EMAIL);
             context.setDuration(System.currentTimeMillis() - startTime);
             if (context.getDnbCode() != DnBReturnCode.EXPIRED_TOKEN || i == retries - 1) {
-                log.info(String.format("DnB realtime email matching request %s: Status=%s, Duration=%d",
-                        context.getLookupRequestId(), context.getDnbCode(), context.getDuration()));
+                log.info(String.format("DnB realtime email matching request %s%s: Status=%s, Duration=%d",
+                        context.getLookupRequestId(),
+                        context.getRootOperationUid() == null ? ""
+                                : " (RootOperationID=" + context.getRootOperationUid() + ")",
+                        context.getDnbCode(), context.getDuration()));
                 break;
             }
             dnBAuthenticationService.refreshToken(DnBKeyType.REALTIME);
@@ -162,7 +168,9 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     protected void parseError(Exception ex, DnBMatchContext context) {
         if (ex instanceof HttpClientErrorException) {
             HttpClientErrorException httpEx = (HttpClientErrorException) ex;
-            log.error(String.format("HttpClientErrorException in DnB realtime request: HttpStatus %d %s",
+            log.error(String.format("HttpClientErrorException in DnB realtime request%s: HttpStatus %d %s",
+                    context.getRootOperationUid() == null ? ""
+                            : " (RootOperationID=" + context.getRootOperationUid() + ")",
                     ((HttpClientErrorException) ex).getStatusCode().value(),
                     ((HttpClientErrorException) ex).getStatusCode().name()));
             context.setDnbCode(parseDnBHttpError(httpEx));
@@ -171,7 +179,9 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             // If DnB cannot find duns for match input, HttpStatus.NOT_FOUND (LedpCode.LEDP_25038) is returned. 
             // Treat LedpCode.LEDP_25038 as normal response. Do not log
             if (ledpEx.getCode() != LedpCode.LEDP_25038) {
-                log.error(String.format("LedpException in DnB realtime request: %s %s",
+                log.error(String.format("LedpException in DnB realtime request%s: %s %s",
+                        context.getRootOperationUid() == null ? ""
+                                : " (RootOperationID=" + context.getRootOperationUid() + ")",
                         ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
             }
             switch (ledpEx.getCode()) {
@@ -192,8 +202,10 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
                 break;
             }
         } else {
-            log.error("Unhandled exception in DnB realtime request " + context.getLookupRequestId() + ": "
-                    + ex.getMessage(), ex);
+            log.error(String.format("Unhandled exception in DnB realtime request %s%s", context.getLookupRequestId(),
+                    context.getRootOperationUid() == null ? ""
+                            : " (RootOperationID=" + context.getRootOperationUid() + ")"),
+                    ex);
             context.setDnbCode(DnBReturnCode.UNKNOWN);
         }
 

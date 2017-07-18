@@ -206,6 +206,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
         MatchTraveler traveler = request.getMatchTravelerContext();
         context.setDataCloudVersion(traveler.getDataCloudVersion());
+        context.setRootOperationUid(traveler.getMatchInput().getRootOperationUid());
         if (!readyToReturn && traveler.getMatchInput().isUseDnBCache()) {
             Long startTime = System.currentTimeMillis();
             DnBCache cache = dnbCacheService.lookupCache(context);
@@ -217,9 +218,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                         context.copyResultFromCache(cache);
                         dnbMatchResultValidator.validate(context);
                         log.info(String.format(
-                                "Found DnB match context in white cache: Name=%s, Country=%s, State=%s, City=%s, "
+                                "Found DnB match context in white cache%s: Name=%s, Country=%s, State=%s, City=%s, "
                                         + "ZipCode=%s, PhoneNumber=%s, DUNS=%s, ConfidenceCode=%d, MatchGrade=%s, "
                                         + "OutOfBusiness=%s, IsDunsInAM=%s, Duration=%d",
+                                context.getRootOperationUid() == null ? ""
+                                        : " (RootOperationID=" + context.getRootOperationUid() + ")",
                                 context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
                                 context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                                 context.getInputNameLocation().getZipcode(),
@@ -237,8 +240,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 } else {
                     context.copyResultFromCache(cache);
                     log.info(String.format(
-                            "Found DnB match context in black cache: Name=%s, Country=%s, State=%s, City=%s, "
+                            "Found DnB match context in black cache%s: Name=%s, Country=%s, State=%s, City=%s, "
                                     + "ZipCode=%s, PhoneNumber=%s, Duration=%d",
+                            context.getRootOperationUid() == null ? ""
+                                    : " (RootOperationID=" + context.getRootOperationUid() + ")",
                             context.getInputNameLocation().getName(), context.getInputNameLocation().getCountry(),
                             context.getInputNameLocation().getState(), context.getInputNameLocation().getCity(),
                             context.getInputNameLocation().getZipcode(),
