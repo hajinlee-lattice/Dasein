@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "datafile", description = "REST resource for retrieving data files")
 @RestController
 @RequestMapping(value = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks")
-public class DataFeedTaskController {
+public class DataFeedTaskController extends InternalResourceBase {
 
     @Autowired
     private DataFeedTaskManagerService dataFeedTaskManagerService;
@@ -30,11 +32,12 @@ public class DataFeedTaskController {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
-    public Map<String, String> createDataFeedTaskDeprecated(@PathVariable String customerSpace,
+    public Map<String, String> createDataFeedTaskDeprecated(HttpServletRequest request, @PathVariable String customerSpace,
                                                             @RequestParam(value = "source") String source,
                                                             @RequestParam(value = "feedtype") String feedtype,
                                                             @RequestParam(value = "entity") String entity,
                                                             @RequestBody String metadata) {
+        checkHeader(request);
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return ImmutableMap.of("task_id",
                 dataFeedTaskManagerService.createDataFeedTask(customerSpace, feedtype, entity, source, metadata));
@@ -44,9 +47,11 @@ public class DataFeedTaskController {
             "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
-    public Map<String, String>  startImportJobDeprecated(@PathVariable String customerSpace,
+    public Map<String, String>  startImportJobDeprecated(HttpServletRequest request,
+                                                         @PathVariable String customerSpace,
                                                          @PathVariable String taskIdentifier,
                                                          @RequestBody String metadata) {
+        checkHeader(request);
         return ImmutableMap.of("application_id",
                 dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier, metadata));
     }
