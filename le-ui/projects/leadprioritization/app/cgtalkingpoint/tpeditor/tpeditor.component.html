@@ -1,7 +1,7 @@
 <div class="talking-point-editor" ng-class="{'expanded':vm.expanded}">
     <div class="row">
         <button ng-click="vm.expand()" class="button white-button expand-button" ng-class="{'rotate': vm.expanded}"><i class="fa fa-chevron-down"></i></button>
-        <input type="text" class="form-control" placeholder="Section Heading (required)" ng-model="tp.title" ng-class="{'required': !tp.value.Title}" />
+        <input type="text" class="form-control" placeholder="Section Heading (required)" ng-model="tp.title" ng-class="{'required': !tp.title}" />
         <div class="pull-right" ng-if="!vm.deleteClicked">
             <button class="button white-button delete-button" ng-click="vm.deleteClick($event,true)">&times;</button>
         </div>

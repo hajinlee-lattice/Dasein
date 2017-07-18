@@ -7,7 +7,8 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
     angular.extend(vm, {
         stored: PlaybookWizardStore.segment_form,
         SegmentsUtility: SegmentsUtility,
-        segments: Segments
+        segments: Segments,
+        stateParams: $stateParams
     });
 
     vm.init = function() {
@@ -39,6 +40,17 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
 
     vm.saveSegment = function(segment) {
         PlaybookWizardStore.setSegment(segment);
+    }
+
+    vm.savePlay = function() {
+        var segment = PlaybookWizardStore.getSavedSegment().name,
+            play_name = $stateParams.play_name,
+            play = PlaybookWizardStore.getCurrentPlay();
+
+        play.segment = segment;
+        PlaybookWizardStore.savePlay(play).then(function(result) {
+             $state.go('home.playbook.dashboard', {play_name: play.name});
+        });
     }
 
     vm.init();

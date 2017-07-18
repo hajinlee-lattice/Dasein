@@ -11,20 +11,23 @@ angular.module('lp.playbook.wizard.insights', [])
         stateParams: $stateParams
     });
 
+    var cachedTalkingPoints = angular.copy(TalkingPoints);
+
     vm.addTalkingPoint = function() {
         var talkingPoint = CgTalkingPointStore.generateTalkingPoint({
                 timestamp: new Date().getTime(), 
                 customerID: BrowserStorageUtility.getClientSession().Tenant.Identifier,
                 playExternalID: $stateParams.play_name,
-                Title: null, 
-                Content: null, 
-                Offset: vm.talkingPoints.length,
+                title: null, 
+                content: null, 
+                offset: vm.talkingPoints.length,
             });
         talkingPoint.IsNew = true;
         vm.talkingPoints.push(talkingPoint);
     };
 
     vm.saveTalkingPoints = function() {
+        // I was going to check to confirm there was a change first but offset always changes, so you can't compare ojects as it currently is so just always save
         CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints);
     }
 
@@ -42,14 +45,14 @@ angular.module('lp.playbook.wizard.insights', [])
         vm.talkingPoints[from] = vm.talkingPoints[to];
         vm.talkingPoints[to] = tmp;
         vm.talkingPoints.forEach(function(tp, i) {
-            tp.Offset = i;
+            tp.offset = i;
         });
     };
 
     function validateTalkingPoints() {
         var valid = false;
         for (var i = 0; i < vm.talkingPoints.length; i++) {
-            if (!vm.talkingPoints[i].Content || !vm.talkingPoints[i].Title) {
+            if (!vm.talkingPoints[i].content || !vm.talkingPoints[i].title) {
                 PlaybookWizardStore.setValidation('insights', false);
                 valid = false;
                 return false;

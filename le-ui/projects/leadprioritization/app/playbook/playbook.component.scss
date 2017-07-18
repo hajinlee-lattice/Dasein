@@ -8,7 +8,11 @@
 @import "./content/settings/settings.component.scss";
 @import "./content/targets/targets.component.scss";
 
+.playbook-content.container,
 section.playbook.container {
+    *[ng-click]:not(.ignore-ngclick) {
+        cursor: pointer;
+    }
     h2 {
         padding-left: 30px;
     }

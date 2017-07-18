@@ -1,10 +1,20 @@
 angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 .service('CgTalkingPointStore', function($q, CgTalkingPointService) {
+    var CgTalkingPointStore = this;
+
     this.danteUrl = null;
     this.accounts = null;
     this.attributes = null;
     this.talkingPoints = [];
     this.talkingPointsPreviewResources = null;
+
+    this.clear = function() {
+        this.danteUrl = null;
+        this.accounts = null;
+        this.attributes = null;
+        this.talkingPoints = [];
+        this.talkingPointsPreviewResources = null;
+    }
 
     this.setTalkingPoints = function(talkingPoints) {
         this.talkingPoints = talkingPoints;
@@ -33,7 +43,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             deferred.resolve(this.talkingPoints);
         } else {
             CgTalkingPointService.getTalkingPoints(play_name).then(function(data){
-                this.talkingPoints = data;
+                CgTalkingPointStore.setTalkingPoints(data);
                 deferred.resolve(data);
             });
         }
@@ -56,7 +66,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     this.saveTalkingPoints = function(opts) {
         var deferred = $q.defer();
         CgTalkingPointService.saveTalkingPoints(opts).then(function(data){
-            this.talkingPoints = opts;
+            CgTalkingPointStore.setTalkingPoints(opts);
             deferred.resolve(data);
         });
         return deferred.promise;
@@ -145,12 +155,12 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
         talkingPoint.created = opts.creationDate || ISOdate;
         //talkingPoint.customerID = opts.customerID; //tenant id and will be removed eventially
-        talkingPoint.name = opts.externalID || '123fakeStreet' + Math.random(); // this will be removed someday I assume since this is supposed to be an internal id made by backend
+        talkingPoint.name = opts.externalID || 'fakeId' + Math.round((Math.random()*10)*10000); // this will be removed someday I assume since this is supposed to be an internal id made by backend
         talkingPoint.playname = opts.playExternalID; // play_name (which is the play id)
         talkingPoints.pid = opts.pid;
-        talkingPoint.offset = opts.Offset;
-        talkingPoint.title = opts.Title;
-        talkingPoint.content = opts.Content;
+        talkingPoint.offset = opts.offset;
+        talkingPoint.title = opts.oitle;
+        talkingPoint.content = opts.content;
 
         return talkingPoint;
     }
@@ -182,6 +192,9 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
     this.saveTalkingPoints = function(opts) {
         var deferred = $q.defer();
+        // for(var i in opts) {
+        //     opts[i].created = new Date(opts[i].created).toISOString();
+        // }
         $http({
             method: 'POST',
             url: this.host + '/dante/talkingpoints/',

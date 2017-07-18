@@ -24,22 +24,28 @@ angular.module('lp.playbook.dashboard', [
                 vm.talkingPoints = results || [];
             });
         }
-
     });
+
+    vm.removeSegment = function(play) {
+        PlaybookWizardStore.removeSegment(play);
+    }
 
     vm.makeRatingsGraph = function(ratings) {
         ratings = [{
             bucket: "A",
-            count: 1
+            count: 105
         },{
             bucket: "B",
-            count: 2
+            count: 132
         },{
             bucket: "C",
-            count: 5
+            count: 244
         },{
             bucket: "D",
-            count: 4
+            count: 512
+        },{
+            bucket: "F",
+            count: 680
         }];
 
         var total =  0;

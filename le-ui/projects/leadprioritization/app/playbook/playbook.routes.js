@@ -68,7 +68,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.dashboard.insights_dashboard', {
+        .state('home.playbook.dashboard.insights', {
             url: '/insights',
             params: {
                 section: 'dashboard.insights'
@@ -102,7 +102,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.dashboard.segment_dashboard', {
+        .state('home.playbook.dashboard.segment', {
             url: '/segment',
             params: {
                 section: 'dashboard.segment'
@@ -117,6 +117,32 @@ angular
                     controller: 'PlaybookWizardSegment',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/segment/segment.component.html'
+                }
+            }
+        })
+        .state('home.playbook.dashboard.targets', {
+            url: '/targets',
+            resolve: {
+                LoadDemoData: function(QueryStore) {
+                    return QueryStore.loadData();
+                },
+                DefaultSelectedObject: function() {
+                    return 'accounts';
+                },
+                SelectedSegment: function($q, PlaybookWizardStore, QueryStore) {
+                    var deferred = $q.defer();
+                    var segment = PlaybookWizardStore.getSavedSegment();
+                    QueryStore.setupStore(segment).then(function() {
+                        deferred.resolve(segment);
+                    });
+                    return deferred.promise;
+                }
+            },
+            views: {
+                'main@': {
+                    controller: 'PlaybookWizardTargets',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/playbook/content/targets/targets.component.html'
                 }
             }
         })

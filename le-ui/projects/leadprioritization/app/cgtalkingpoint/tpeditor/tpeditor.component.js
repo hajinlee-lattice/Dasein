@@ -73,7 +73,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
         $document.off('click', handleDocumentClick);
     });
 
-    $scope.$watch('tp.Offset', function(a,b) {
+    $scope.$watch('tp.offset', function(a,b) {
         if (a !== b) {
             var wasExpanded = vm.expanded;
             vm.expanded = false;

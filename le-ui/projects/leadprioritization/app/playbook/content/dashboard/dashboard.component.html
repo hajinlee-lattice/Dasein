@@ -1,96 +1,102 @@
 <div  ng-if="!vm.play" class="loader vertical-center"></div>
 <section class="container playbook-dashboard" ng-if="vm.play">
     <div class="container-body">
-        <div class="dashboard-section play">
-            <div class="dashboard-section-container">
-                <div class="dashboard-section-header">
-                    <h2>{{ vm.play.display_name||'Play Name' }}</h2>
-                    Created by someone on <time>{{vm.play.timestamp-1000|date:'M/d/yyyy'}}</time>
-                </div>
-                <div class="dashboard-section-content">
-                    <p>
-                        {{vm.play.description}}
-                    </p>
-                    <div class="dashboard-section-content-subsection rating_">
-                        <h3>Rating</h3>
-                        <h4>Rating name 1</h4>
+        <div class="dashboard-column">
+            <div class="dashboard-section play">
+                <div class="dashboard-section-container">
+                    <div class="dashboard-section-header">
+                        <h2>{{ vm.play.display_name||'Play Name' }}</h2>
+                        Created by someone on <time>{{vm.play.timestamp-1000|date:'M/d/yyyy'}}</time>
                     </div>
-                    <div class="dashboard-section-content-subsection segment">
-                        <h3>Segment</h3>
-                        <h4>{{vm.play.segment}}</h4>
-                        <ul class="controls">
-                            <li><a ui-sref="home.playbook.dashboard.segment_dashboard({play_name: vm.play.name})">Change</a></li>
-                            <li>X</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <a ui-sref="home.playbook.wizard.settings({play_name: vm.play.name})">temp edit link</a><br />
-                        <a href="#" ng-click="showPlayData = !showPlayData">debugging: {{!showPlayData ? "show" : "hide"}} play data</a>
-                        <div ng-show="showPlayData">
-                            <pre>vm.play: {{vm.play|json}}</pre>
+                    <div class="dashboard-section-content">
+                        <p>
+                            {{vm.play.description}}
+                        </p>
+                        <div class="dashboard-section-content-subsection rating_">
+                            <h4>Rating</h4>
+                            <h5>Rating name 1</h5>
+                        </div>
+                        <div class="dashboard-section-content-subsection segment">
+                            <h4>Segment</h4>
+                            <h5>{{vm.play.segment}}</h5>
+                            <ul class="controls">
+                                <li ng-if="!vm.play.segment"><a ui-sref="home.playbook.dashboard.segment({play_name: vm.play.name})">Add</a></li>
+                                <li ng-if="vm.play.segment"><a ui-sref="home.playbook.dashboard.segment({play_name: vm.play.name})">Change</a></li>
+                                <li ng-if="vm.play.segment"><button class="button white-button" ng-click="vm.removeSegment(vm.play)">X</button></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <a ui-sref="home.playbook.wizard.settings({play_name: vm.play.name})">temp edit link</a><br />
+                            <a href="#" ng-click="showPlayData = !showPlayData">debugging: {{!showPlayData ? "show" : "hide"}} play data</a>
+                            <div ng-show="showPlayData">
+                                <pre>vm.play: {{vm.play|json}}</pre>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="dashboard-section launch-history">
-            <div class="dashboard-section-container">
-                <div class="dashboard-section-header">
-                    <h2>Last launch</h2>
-                </div>
-                <div class="dashboard-section-content">
-                    <div>
-                        <a href="#" ng-click="showLaunchData = !showLaunchData">debugging: {{!showLaunchData ? "show" : "hide"}} launches data</a>
-                        <div ng-show="showLaunchData">
-                            <pre>vm.launchHistory: {{vm.launchHistory|json}}</pre>
+            <div class="dashboard-section talking-points">
+                <div class="dashboard-section-container">
+                    <div class="dashboard-section-header">
+                        <h2>Insights</h2>
+                    </div>
+                    <div class="dashboard-section-content">
+                        <div class="dashboard-section-content-subsection talking-points">
+                            <h5>{{vm.talkingPoints.length||'No'}} talking points have been created</h5>
+                            <ul class="controls">
+                                <li ng-if="!vm.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create</a></li>
+                                <li ng-if="vm.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Edit</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <a href="#" ng-click="showTalkingPointsData = !showTalkingPointsData">debugging: {{!showTalkingPointsData ? "show" : "hide"}} talking points data</a>
+                            <div ng-show="showTalkingPointsData">
+                                <pre>vm.talkingPoints: {{vm.talkingPoints|json}}</pre>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="dashboard-section-footer">
-                    <span ng-if="vm.play.timestamp">Launched {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
+                    <div class="dashboard-section-footer">
+                        <span ng-if="vm.play.timestamp">Published {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
+                    </div>
                 </div>
             </div>
+
         </div>
-
-        <div class="dashboard-section talking-points">
-            <div class="dashboard-section-container">
-                <div class="dashboard-section-header">
-                    <h2>Insights</h2>
-                </div>
-                <div class="dashboard-section-content">
-                    <div class="dashboard-section-content-subsection talking-points">
-                        <h4>{{vm.talkingPoints.length}} talking points have been created</h4>
-                        <ul class="controls">
-                            <li><a ui-sref="home.playbook.dashboard.insights_dashboard({play_name: vm.play.name})">Edit</a></li>
-                        </ul>
+        <div class="dashboard-column">
+            <div class="dashboard-section launch-history">
+                <div class="dashboard-section-container">
+                    <div class="dashboard-section-header">
+                        <h2>Last launch</h2>
                     </div>
-
-                    <div>
-                        <a href="#" ng-click="showTalkingPointsData = !showTalkingPointsData">debugging: {{!showTalkingPointsData ? "show" : "hide"}} talking points data</a>
-                        <div ng-show="showTalkingPointsData">
-                            <pre>vm.talkingPoints: {{vm.talkingPoints|json}}</pre>
+                    <div class="dashboard-section-content">
+                        <div class="dashboard-section-content-subsection launches">
+                            <a href="#" ng-click="showLaunchData = !showLaunchData">debugging: {{!showLaunchData ? "show" : "hide"}} launches data</a>
+                            <div ng-show="showLaunchData">
+                                <pre>vm.launchHistory: {{vm.launchHistory|json}}</pre>
+                            </div>
+                        </div>
+                        <div class="dashboard-section-content-subsection ratings">
+                            <div class="dashboard-subsection-header">
+                                <h3>Account ratings</h3>
+                            </div>
+                            <ul class="ratings-graph" ng-if="vm.ratingsGraph">
+                                <li class="_rating" ng-repeat="rating in vm.ratingsGraph.ratings">
+                                    <div class="rating-count" ng-show="rating.count">{{rating.count}}</div>
+                                    <div class="rating-bar" style="height:{{rating.count/vm.ratingsGraph.total*100}}%;"></div>
+                                    <div class="rating-label">{{rating.bucket}}</div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
+                    <div class="dashboard-section-footer">
+                        <span ng-if="vm.play.timestamp">Created {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
+                        <button class="button blue-button">Launch</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="dashboard-section ratings">
-            <div class="dashboard-section-container">
-                <div class="dashboard-section-header">
-                    <h2>Account ratings</h2>
-                </div>
-                <div class="dashboard-section-content">
-                    <ul class="ratings-graph" ng-if="vm.ratingsGraph">
-                        <li class="_rating" ng-repeat="rating in vm.ratingsGraph.ratings">
-                            <div class="rating-count" ng-show="rating.count">{{rating.count}}</div>
-                            <div class="rating-bar" style="height:{{rating.count/vm.ratingsGraph.total*100}}%;"></div>
-                            <div class="rating-label">{{rating.bucket}}</div>
-                        </li>
-                    </ul>
-                </div> 
-            </div>
         </div>
     </div>
 </section>

@@ -30,6 +30,7 @@ angular.module('lp.playbook')
         this.rating_form = {
             rating_selection: ''
         }
+        CgTalkingPointStore.clear();
     }
 
     this.validation = {
@@ -213,6 +214,16 @@ angular.module('lp.playbook')
         var deferred = $q.defer();
         console.log(play);
         PlaybookWizardService.launchPlay(play).then(function(data){
+            deferred.resolve(data);
+            PlaybookWizardStore.setPlay(data);
+        });
+        return deferred.promise;
+    }
+
+    this.removeSegment = function(play) {
+        play.segment = '';
+        var deferred = $q.defer();
+        PlaybookWizardService.savePlay(play).then(function(data){
             deferred.resolve(data);
             PlaybookWizardStore.setPlay(data);
         });

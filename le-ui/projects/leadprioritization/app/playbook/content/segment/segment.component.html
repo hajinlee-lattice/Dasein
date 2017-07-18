@@ -1,4 +1,4 @@
-<div class="playbook-segment container">
+<div class="playbook-segment playbook-content container">
     <form name="segment_form">
     <div class="header">
         <h2>Segment
@@ -47,5 +47,6 @@
             </li>
         </ul>
     </div>
+    <button class="button blue-button" ng-if="vm.stateParams.section === 'dashboard.segment'" ng-click="vm.savePlay()">Save</button>
     </form>
 </div>
