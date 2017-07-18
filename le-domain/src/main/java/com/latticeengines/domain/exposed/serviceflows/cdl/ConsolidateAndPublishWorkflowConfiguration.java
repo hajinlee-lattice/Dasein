@@ -46,8 +46,13 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
-        public Builder idField(String idField) {
-            consolidateDataConfigurationBuilder.idField(idField);
+        public Builder accountIdField(String idField) {
+            consolidateDataConfigurationBuilder.accountIdField(idField);
+            return this;
+        }
+
+        public Builder contactIdField(String idField) {
+            consolidateDataConfigurationBuilder.contactIdField(idField);
             return this;
         }
 

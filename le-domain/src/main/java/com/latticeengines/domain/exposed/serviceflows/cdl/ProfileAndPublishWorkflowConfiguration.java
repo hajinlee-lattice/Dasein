@@ -5,6 +5,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SortContactStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.UpdateStatsObjectsConfiguration;
 
 public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -17,11 +18,13 @@ public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfi
         private ProfileAndPublishWorkflowConfiguration configuration = new ProfileAndPublishWorkflowConfiguration();
         private CalculateStatsStepConfiguration calculateStatsConfiguration = new CalculateStatsStepConfiguration();
         private UpdateStatsObjectsConfiguration updateStatsObjectsConfiguration = new UpdateStatsObjectsConfiguration();
+        private SortContactStepConfiguration sortContactConfiguration = new SortContactStepConfiguration();
         private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("profileAndPublishWorkflow", customerSpace, "profileAndPublishWorkflow");
             calculateStatsConfiguration.setCustomerSpace(customerSpace);
+            sortContactConfiguration.setCustomerSpace(customerSpace);
             updateStatsObjectsConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
             return this;
@@ -50,6 +53,7 @@ public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfi
         public ProfileAndPublishWorkflowConfiguration build() {
             configuration.add(calculateStatsConfiguration);
             configuration.add(updateStatsObjectsConfiguration);
+            configuration.add(sortContactConfiguration);
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             return configuration;
         }

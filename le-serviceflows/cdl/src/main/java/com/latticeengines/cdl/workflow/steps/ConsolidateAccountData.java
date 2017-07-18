@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateAccountDataStepConfiguration;
@@ -204,6 +205,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
     private String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
         return appendEngineConf(config, lightEngineConfig());
     }
 

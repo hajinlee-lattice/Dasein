@@ -4,6 +4,7 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     private String srcIdField;
+    private String masterIdField;
 
     public String getSrcIdField() {
         return srcIdField;
@@ -13,5 +14,11 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
         this.srcIdField = srcIdField;
     }
 
-    
+    public String getMasterIdField() {
+        return masterIdField;
+    }
+
+    public void setMasterIdField(String masterIdField) {
+        this.masterIdField = masterIdField;
+    }
 }

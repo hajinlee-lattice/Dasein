@@ -1,8 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
 
 public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 

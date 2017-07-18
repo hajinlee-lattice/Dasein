@@ -26,8 +26,13 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
-        public Builder idField(String idField) {
+        public Builder accountIdField(String idField) {
             consolidateAccountDataConfiguration.setIdField(idField);
+            return this;
+        }
+
+        public Builder contactIdField(String idField) {
+            consolidateContactDataConfiguration.setIdField(idField);
             return this;
         }
 

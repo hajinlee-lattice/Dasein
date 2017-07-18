@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 import cascading.operation.Function;
 import cascading.tuple.Fields;
@@ -31,7 +30,7 @@ public class ConsolidateDataFlow extends ConfigurableFlowBase<ConsolidateDataTra
         ConsolidateDataTransformerConfig config = getTransformerConfig(parameters);
 
         String srcId = config.getSrcIdField();
-        String masterId = TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name();
+        String masterId = config.getMasterIdField();
 
         List<Node> sources = new ArrayList<>();
         List<Table> sourceTables = new ArrayList<>();

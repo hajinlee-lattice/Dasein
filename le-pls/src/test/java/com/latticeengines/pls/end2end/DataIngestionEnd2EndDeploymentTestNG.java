@@ -143,6 +143,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "firstAssemble")
     public void verifyFirstImport() throws IOException {
         String customerSpace = CustomerSpace.parse(firstTenant.getId()).toString();
+
         Table bucketedAccountTable = dataCollectionProxy.getTable(customerSpace,
                 BusinessEntity.Account.getServingStore());
         Assert.assertNotNull(bucketedAccountTable);
@@ -156,6 +157,14 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         File statsJson = new File("stats.json");
         FileUtils.deleteQuietly(statsJson);
         FileUtils.write(statsJson, JsonUtils.pprint(statisticsContainer));
+
+        Table bucketedContactTable = dataCollectionProxy.getTable(customerSpace,
+                BusinessEntity.Contact.getServingStore());
+        Assert.assertNotNull(bucketedContactTable);
+        attributes = bucketedContactTable.getAttributes();
+        for (Attribute attribute : attributes) {
+            Assert.assertFalse(attribute.getName().contains(CEAttr), "Should not have encoded attr " + attribute.getName() + " in expanded table.");
+        }
     }
 
     @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifyFirstImport")
@@ -189,20 +198,33 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void mockAvroData() throws IOException {
+        mockAvroDataInternal("Account");
+        mockAvroDataInternal("Contact");
+
+    }
+
+    private void mockAvroDataInternal(String entity) throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(DL_TENANT_NAME);
+
+        // FIXME: use account data for fake contacts before we have real data.
+        // URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/pls/end2end/cdl/Extract_" + entity + "s_0.avro");
         URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/pls/end2end/cdl/Extract_Accounts_0.avro");
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
-                "Account");
+                entity);
         Table importTemplate;
         if (dataFeedTask == null) {
             Schema schema = AvroUtils.readSchemaFromLocalFile(dataUrl.getPath());
             importTemplate = MetadataConverter.getTable(schema, new ArrayList<>(), null, null, false);
             importTemplate.setTableType(TableType.IMPORTTABLE);
-            importTemplate.setName(SchemaInterpretation.Account.name());
+            if (entity.equals("Account")) {
+                importTemplate.setName(SchemaInterpretation.Account.name());
+            } else { 
+                importTemplate.setName(SchemaInterpretation.Contact.name());
+            }
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setImportTemplate(importTemplate);
             dataFeedTask.setStatus(DataFeedTask.Status.Active);
-            dataFeedTask.setEntity("Account");
+            dataFeedTask.setEntity(entity);
             dataFeedTask.setFeedType("Query");
             dataFeedTask.setSource("VisiDB");
             dataFeedTask.setActiveJob("Not specified");
@@ -215,7 +237,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
             importTemplate = dataFeedTask.getImportTemplate();
         }
 
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-" + entity + "/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.VISIDB.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
         String fileName = dataUrl.getPath().substring(dataUrl.getPath().lastIndexOf("/") + 1);
@@ -226,7 +248,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
         Extract e = createExtract(hdfsUri, 1000L);
 
-        dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", "Account");
+        dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", entity);
         dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(),
                 e);
     }

@@ -23,6 +23,9 @@ public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublis
     private CalculateStatsWrapper calculateStatsWrapper;
 
     @Autowired
+    private SortContactWrapper sortContactWrapper;
+
+    @Autowired
     private UpdateStatsObjects updateStatsObjects;
 
     @Autowired
@@ -42,6 +45,7 @@ public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublis
                 .next(startProfile) //
                 .next(calculateStatsWrapper)//
                 .next(updateStatsObjects) //
+                .next(sortContactWrapper)//
                 .next(redshiftPublishWorkflow) //
                 .listener(calculateStatsListener) //
                 .build();

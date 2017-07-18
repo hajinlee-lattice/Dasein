@@ -121,7 +121,10 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, initialDataFeedStatus.getName()) //
                         .build()) //
-                .idField(InterfaceName.LEAccountIDLong.name()) //
+                .accountIdField(InterfaceName.LEAccountIDLong.name()) //
+                // FIXME: using external ID fro contact id before we have real data
+                .contactIdField(InterfaceName.External_ID.name()) //
+                // .contactIdField(InterfaceName.LEContactIDLong.name()) //
                 .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder() //
                         .put(MatchKey.Domain, Collections.singletonList("URL")) //
                         .put(MatchKey.Name, Collections.singletonList("DisplayName")) //
