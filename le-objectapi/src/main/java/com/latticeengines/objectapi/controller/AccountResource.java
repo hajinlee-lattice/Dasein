@@ -1,6 +1,5 @@
 package com.latticeengines.objectapi.controller;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
 import com.latticeengines.domain.exposed.query.Query;
@@ -41,7 +41,9 @@ public class AccountResource implements AccountInterface {
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified parameters")
     @Override
-    public long getAccountsCount(String customerSpace, String start, DataRequest dataRequest) {
+    public long getAccountsCount(@PathVariable String customerSpace,
+            @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
+            @RequestBody DataRequest dataRequest) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         Query query = accountQueryService.generateAccountQuery(start, dataRequest);
         return queryEvaluatorService.getCount(customerSpace, query);

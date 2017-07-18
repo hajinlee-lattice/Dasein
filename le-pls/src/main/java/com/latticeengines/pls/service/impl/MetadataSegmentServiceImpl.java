@@ -60,7 +60,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private MetadataSegment translateForBackend(MetadataSegment segment) {
         try {
-            FrontEndRestriction frontEndRestriction = segment.getSimpleRestriction();
+            FrontEndRestriction frontEndRestriction = segment.getFrontEndRestriction();
             segment.setRestriction(QueryTranslator.translateFrontEndRestriction(frontEndRestriction));
         } catch (Exception e) {
             log.error("Encountered error translating frontend restriction for segment with name %s", e);
@@ -71,7 +71,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private MetadataSegment translateForFrontend(MetadataSegment segment) {
         try {
             Restriction restriction = segment.getRestriction();
-            segment.setSimpleRestriction(ReverseQueryTranslator.translateRestriction(restriction));
+            segment.setFrontEndRestriction(ReverseQueryTranslator.translateRestriction(restriction));
             segment.setRestriction(null);
         } catch (Exception e) {
             log.error("Encountered error translating backend restriction for segment with name %s", e);

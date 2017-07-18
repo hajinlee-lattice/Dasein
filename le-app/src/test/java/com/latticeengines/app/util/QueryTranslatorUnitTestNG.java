@@ -1,67 +1,143 @@
 package com.latticeengines.app.util;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertEquals;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.controller.AccountResource;
-import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.QueryTranslator;
-
-import edu.emory.mathcs.backport.java.util.Collections;
+import com.latticeengines.domain.exposed.util.ReverseQueryTranslator;
 
 public class QueryTranslatorUnitTestNG {
 
     @Test(groups = "unit")
-    @SuppressWarnings("unchecked")
     public void testTranslate() {
         FrontEndQuery query = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        frontEndRestriction.setAll(Collections.singletonList(new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "Some_Bucketed_Value"), Bucket.nullBkt())));
-        frontEndRestriction.setAny(Collections.singletonList(new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "Some_Other_Bucketed_Value"), Bucket.nullBkt())));
-        query.setRestriction(frontEndRestriction);
+        frontEndRestriction.setRestriction(createRestriction(Level.Simple));
+        query.setFrontEndRestriction(frontEndRestriction);
 
-        Query result = QueryTranslator.translate(query, new AccountResource().getQueryDecorator(false));
-        assertTrue(result.getRestriction() instanceof LogicalRestriction);
-        LogicalRestriction parent = (LogicalRestriction) result.getRestriction();
+        Query translated = QueryTranslator.translate(query, new AccountResource().getQueryDecorator(false));
+        assertTrue(translated.getRestriction() instanceof LogicalRestriction);
+        LogicalRestriction parent = (LogicalRestriction) translated.getRestriction();
         assertEquals(parent.getRestrictions().size(), 2);
         assertTrue(parent.getRestrictions().stream()
                 .anyMatch(r -> ((LogicalRestriction) r).getOperator().equals(LogicalOperator.AND)));
         assertTrue(parent.getRestrictions().stream()
                 .anyMatch(r -> ((LogicalRestriction) r).getOperator().equals(LogicalOperator.OR)));
 
-        String ser = JsonUtils.serialize(query);
-        FrontEndQuery deser = JsonUtils.deserialize(ser, FrontEndQuery.class);
-        assertEquals(ser, JsonUtils.serialize(deser));
+        validateTranslated(translated.getRestriction(), 4, 7);
+
+        FrontEndRestriction reverseTranslated = ReverseQueryTranslator
+                .translateRestriction(translated.getRestriction());
+        validateReverseTranslated(reverseTranslated.getRestriction(), 4, 7);
+
+        frontEndRestriction.setRestriction(createRestriction(Level.Advanced));
+        translated = QueryTranslator.translate(query, new AccountResource().getQueryDecorator(false));
+        validateTranslated(translated.getRestriction(), 5, 9);
+
+        reverseTranslated = ReverseQueryTranslator.translateRestriction(translated.getRestriction());
+        validateReverseTranslated(reverseTranslated.getRestriction(), 5, 9);
+    }
+
+    private void validateTranslated(Restriction restriction, int numConcrete, int numTotalRestrictions) {
+        BreadthFirstSearch search = new BreadthFirstSearch();
+        final MutableInt concreteCounter = new MutableInt(0);
+        final MutableInt totalCounter = new MutableInt(0);
+        search.run(restriction, (object, ctx) -> {
+            if (object instanceof Restriction) {
+                totalCounter.increment();
+            }
+            assertFalse(object instanceof BucketRestriction);
+            if (object instanceof ConcreteRestriction) {
+                concreteCounter.increment();
+            }
+        });
+        assertEquals(numConcrete, concreteCounter.intValue());
+        assertEquals(numTotalRestrictions, totalCounter.intValue());
+    }
+
+    private void validateReverseTranslated(Restriction restriction, int numBucket, int numTotalRestrictions) {
+        BreadthFirstSearch search = new BreadthFirstSearch();
+        final MutableInt bucketCounter = new MutableInt(0);
+        final MutableInt totalCounter = new MutableInt(0);
+
+        FrontEndRestriction reverseTranslated = ReverseQueryTranslator.translateRestriction(restriction);
+        search.run(reverseTranslated.getRestriction(), (object, ctx) -> {
+            if (object instanceof Restriction) {
+                totalCounter.increment();
+            }
+            assertFalse(object instanceof ConcreteRestriction);
+            if (object instanceof BucketRestriction) {
+                bucketCounter.increment();
+            }
+        });
+        assertEquals(numBucket, bucketCounter.intValue());
+        assertEquals(numTotalRestrictions, totalCounter.intValue());
     }
 
     @Test(groups = "unit")
-    @SuppressWarnings("unchecked")
     public void testTranslateWithDecorator() {
         FrontEndQuery query = new FrontEndQuery();
         query.setFreeFormTextSearch("intel");
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        frontEndRestriction.setAll(Collections.singletonList(new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "Some_Bucketed_Value"), Bucket.nullBkt())));
-        frontEndRestriction.setAny(Collections.singletonList(new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "Some_Other_Bucketed_Value"), Bucket.nullBkt())));
-        query.setRestriction(frontEndRestriction);
+        frontEndRestriction.setRestriction(createRestriction(Level.Simple));
+        query.setFrontEndRestriction(frontEndRestriction);
 
         Query result = QueryTranslator.translate(query, new AccountResource().getQueryDecorator(true));
         assertTrue(result.getLookups().size() > 0);
         assertTrue(result.getFreeFormTextSearchAttributes().size() > 0);
     }
 
+    static enum Level {
+        Simple, Advanced
+    }
+
+    private Restriction createRestriction(Level level) {
+        BucketRestriction a = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "A"),
+                Bucket.rangeBkt(2, 3));
+
+        BucketRestriction b = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "B"),
+                Bucket.rangeBkt(200, 300));
+
+        BucketRestriction c = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "C"),
+                Bucket.valueBkt("Yes"));
+
+        BucketRestriction d = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "D"),
+                Bucket.valueBkt("No"));
+
+        BucketRestriction e = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "E"),
+                Bucket.rangeBkt(10, 100));
+
+        if (level == Level.Simple) {
+            Restriction and = Restriction.builder().and(a, b).build();
+            Restriction or = Restriction.builder().or(c, d).build();
+            return Restriction.builder().and(and, or).build();
+        } else if (level == Level.Advanced) {
+            // AND1 (OR1 (AND2(OR2(A,B)), E), C)) D))
+            Restriction or2 = Restriction.builder().or(a, b).build();
+            Restriction and2 = Restriction.builder().and(or2, e).build();
+            Restriction or1 = Restriction.builder().or(and2, c).build();
+            Restriction and1 = Restriction.builder().and(or1, d).build();
+
+            return and1;
+        }
+
+        return null;
+    }
 }

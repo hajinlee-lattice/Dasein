@@ -6,13 +6,15 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.query.PageFilter;
 
+import io.swagger.annotations.ApiModelProperty;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class FrontEndQuery {
 
-    @JsonProperty("restriction")
-    private FrontEndRestriction restriction;
+    @JsonProperty("frontend_restriction")
+    private FrontEndRestriction frontEndRestriction;
 
     @JsonProperty("sort")
     private FrontEndSort sort;
@@ -23,12 +25,20 @@ public class FrontEndQuery {
     @JsonProperty("free_form_text_search")
     private String freeFormTextSearch;
 
-    public FrontEndRestriction getRestriction() {
-        return restriction;
+    @JsonProperty("restrict_without_sfdcid")
+    @ApiModelProperty("Restrict to accounts without Salesforce id.")
+    private boolean restrictNullSalesforceId = false;
+
+    @JsonProperty("restrict_with_sfdcid")
+    @ApiModelProperty("Restrict to accounts with Salesforce id.")
+    private boolean restrictNotNullSalesforceId = false;
+
+    public FrontEndRestriction getFrontEndRestriction() {
+        return frontEndRestriction;
     }
 
-    public void setRestriction(FrontEndRestriction restriction) {
-        this.restriction = restriction;
+    public void setFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
+        this.frontEndRestriction = frontEndRestriction;
     }
 
     public FrontEndSort getSort() {
@@ -54,4 +64,21 @@ public class FrontEndQuery {
     public void setFreeFormTextSearch(String freeFormTextSearch) {
         this.freeFormTextSearch = freeFormTextSearch;
     }
+
+    public boolean restrictNullSalesforceId() {
+        return restrictNullSalesforceId;
+    }
+
+    public void setRestrictNullSalesforceId(boolean restrictNullSalesforceId) {
+        this.restrictNullSalesforceId = restrictNullSalesforceId;
+    }
+
+    public boolean restrictNotNullSalesforceId() {
+        return restrictNotNullSalesforceId;
+    }
+
+    public void setRestrictNotNullSalesforceId(boolean restrictNotNullSalesforceId) {
+        this.restrictNotNullSalesforceId = restrictNotNullSalesforceId;
+    }
+
 }

@@ -70,10 +70,10 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
     @Type(type = "text")
     private String restrictionString;
 
-    @JsonProperty("simple_restriction")
+    @JsonProperty("frontend_restriction")
     @Transient
     @ApiModelProperty("Restriction for use in the front end")
-    private FrontEndRestriction simpleRestriction;
+    private FrontEndRestriction frontEndRestriction;
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
@@ -152,12 +152,12 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
         this.restrictionString = JsonUtils.serialize(restriction);
     }
 
-    public FrontEndRestriction getSimpleRestriction() {
-        return simpleRestriction;
+    public FrontEndRestriction getFrontEndRestriction() {
+        return frontEndRestriction;
     }
 
-    public void setSimpleRestriction(FrontEndRestriction simpleRestriction) {
-        this.simpleRestriction = simpleRestriction;
+    public void setFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
+        this.frontEndRestriction = frontEndRestriction;
     }
 
     public DataCollection getDataCollection() {
@@ -188,10 +188,12 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
         this.updated = updated;
     }
 
+    @Override
     public List<MetadataSegmentProperty> getProperties() {
         return properties;
     }
 
+    @Override
     protected void setProperties(List<MetadataSegmentProperty> properties) {
         this.properties = properties;
     }

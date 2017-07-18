@@ -1,14 +1,13 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
@@ -26,7 +25,17 @@ public class QueryTranslator {
     private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
     public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
-        Restriction restriction = translateFrontEndRestriction(frontEndQuery.getRestriction());
+        Restriction restriction = translateFrontEndRestriction(frontEndQuery.getFrontEndRestriction());
+        if (frontEndQuery.restrictNullSalesforceId()) {
+            Restriction sfidRestriction = Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID")
+                    .isNull().build();
+            restriction = Restriction.builder().and(restriction, sfidRestriction).build();
+        } else if (frontEndQuery.restrictNotNullSalesforceId()) {
+            Restriction sfidRestriction = Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID")
+                    .isNotNull().build();
+            restriction = Restriction.builder().and(restriction, sfidRestriction).build();
+        }
+
         if (frontEndQuery.getPageFilter() == null) {
             frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
         } else {
@@ -58,26 +67,19 @@ public class QueryTranslator {
             return null;
         }
 
-        List<Restriction> restrictions = new ArrayList<>();
+        Restriction restriction = frontEndRestriction.getRestriction();
+        BreadthFirstSearch search = new BreadthFirstSearch();
+        search.run(restriction, (object, ctx) -> {
+            if (object instanceof BucketRestriction) {
+                BucketRestriction bucket = (BucketRestriction) object;
+                ConcreteRestriction concrete = bucket.convert();
+                LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                parent.getRestrictions().remove(bucket);
+                parent.getRestrictions().add(concrete);
+            }
+        });
 
-        List<Restriction> allRestrictions = frontEndRestriction.getAll().stream() //
-                .map(BucketRestriction::convert).collect(Collectors.toList());
-        Restriction and = Restriction.builder().and(allRestrictions).build();
-        restrictions.add(and);
-
-        List<Restriction> anyRestrictions = frontEndRestriction.getAny().stream() //
-                .map(BucketRestriction::convert).collect(Collectors.toList());
-        Restriction or = Restriction.builder().or(anyRestrictions).build();
-        restrictions.add(or);
-
-        if (frontEndRestriction.restrictNullSalesforceId()) {
-            restrictions.add(Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID").isNull().build());
-        } else if (frontEndRestriction.restrictNotNullSalesforceId()) {
-            restrictions
-                    .add(Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID").isNotNull().build());
-        }
-
-        return Restriction.builder().and(restrictions).build();
+        return restriction;
     }
 
     private static Sort translateFrontEndSort(FrontEndSort frontEndSort) {

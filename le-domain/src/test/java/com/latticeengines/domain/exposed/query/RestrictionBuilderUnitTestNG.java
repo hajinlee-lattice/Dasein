@@ -47,7 +47,6 @@ public class RestrictionBuilderUnitTestNG {
                 .and(aAndB, cOrD)
                 .build();
         verify(finalAnd);
-
     }
 
     private void verify(Restriction restriction) {

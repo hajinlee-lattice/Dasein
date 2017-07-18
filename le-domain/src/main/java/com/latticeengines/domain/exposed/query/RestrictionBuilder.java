@@ -134,7 +134,7 @@ public class RestrictionBuilder {
 
     @SuppressWarnings("unchecked")
     public RestrictionBuilder and(Restriction... children) {
-        return and(Arrays.asList(children));
+        return and(new ArrayList<Restriction>(Arrays.asList(children)));
     }
 
     public RestrictionBuilder and(List<Restriction> children) {
@@ -154,7 +154,7 @@ public class RestrictionBuilder {
 
     @SuppressWarnings("unchecked")
     public RestrictionBuilder or(Restriction... children) {
-        return or(Arrays.asList(children));
+        return or(new ArrayList<Restriction>(Arrays.asList(children)));
     }
 
     public RestrictionBuilder or(List<Restriction> children) {
