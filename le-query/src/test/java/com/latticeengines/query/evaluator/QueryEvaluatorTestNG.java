@@ -125,8 +125,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         // freetext
         Query query = Query.builder() //
                 .select(BusinessEntity.Account, "CompanyName") //
-                .freeText("intel") //
-                .freeTextAttributes(BusinessEntity.LatticeAccount, "LDC_Domain", "LDC_Name") //
+                .freeText("intel", BusinessEntity.LatticeAccount, "LDC_Domain", "LDC_Name") //
                 .build();
         queryEvaluator.evaluate(attrRepo, query);
     }

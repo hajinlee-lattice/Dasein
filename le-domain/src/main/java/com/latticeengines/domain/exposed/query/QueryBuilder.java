@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.query;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.domain.exposed.query.Query.FreeFormTextSearchAttribute;
 
 public class QueryBuilder {
@@ -61,12 +63,11 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder freeText(String freeFormTextSearch) {
+    public QueryBuilder freeText(String freeFormTextSearch, BusinessEntity entity, String... attrs) {
         this.freeFormTextSearch = freeFormTextSearch;
-        return this;
-    }
-
-    public QueryBuilder freeTextAttributes(BusinessEntity entity, String... attrs) {
+        if (StringUtils.isNotBlank(freeFormTextSearch)) {
+            this.find(entity);
+        }
         for (String attr : attrs) {
             freeFormTextSearchAttributes.add(new FreeFormTextSearchAttribute(entity, attr));
         }

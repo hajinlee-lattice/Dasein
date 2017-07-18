@@ -47,7 +47,6 @@ public class QueryTranslator {
         }
 
         QueryBuilder queryBuilder = Query.builder().where(restriction) //
-                .freeText(frontEndQuery.getFreeFormTextSearch()) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
                 .page(frontEndQuery.getPageFilter());
 
@@ -56,7 +55,8 @@ public class QueryTranslator {
                 queryBuilder.select(BusinessEntity.LatticeAccount, decorator.getLDCLookups());
                 queryBuilder.select(decorator.getLookupEntity(), decorator.getEntityLookups());
             }
-            queryBuilder.freeTextAttributes(decorator.getFreeTextSearchEntity(), decorator.getFreeTextSearchAttrs());
+            queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
+                    decorator.getFreeTextSearchAttrs());
         }
 
         return queryBuilder.build();
@@ -68,6 +68,7 @@ public class QueryTranslator {
         }
 
         Restriction restriction = frontEndRestriction.getRestriction();
+
         BreadthFirstSearch search = new BreadthFirstSearch();
         search.run(restriction, (object, ctx) -> {
             if (object instanceof BucketRestriction) {

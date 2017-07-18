@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.app.exposed.controller.AccountResource;
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -140,4 +141,45 @@ public class QueryTranslatorUnitTestNG {
 
         return null;
     }
+
+    @Test(groups = "unit")
+    public void testGenerateSampleQueries() {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setFreeFormTextSearch("Boulder");
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        frontEndQuery.setFrontEndRestriction(frontEndRestriction);
+
+        BucketRestriction a = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307"),
+                Bucket.rangeBkt(0, 1));
+        BucketRestriction b = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A"),
+                Bucket.rangeBkt(10, 20));
+        BucketRestriction c = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCHECKOUT_16ED68E665"),
+                Bucket.rangeBkt(0, 5));
+        BucketRestriction d = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCHECKOUT_16ED68E665"),
+                Bucket.rangeBkt(5, 25));
+        BucketRestriction e = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307"),
+                Bucket.rangeBkt(1, 10));
+
+        Restriction and = Restriction.builder().and(a, b).build();
+        Restriction or = Restriction.builder().or(c, d).build();
+        Restriction restriction = Restriction.builder().and(and, or).build();
+        frontEndRestriction.setRestriction(restriction);
+
+        System.out.println(JsonUtils.serialize(frontEndRestriction));
+        System.out.println(JsonUtils.serialize(frontEndQuery));
+
+        // AND1 (OR1 (AND2(OR2(C,D)), E), A)) B))
+        Restriction or2 = Restriction.builder().or(c, d).build();
+        Restriction and2 = Restriction.builder().and(or2, e).build();
+        Restriction or1 = Restriction.builder().or(and2, a).build();
+        Restriction and1 = Restriction.builder().and(or1, b).build();
+        frontEndRestriction.setRestriction(and1);
+        System.out.println(JsonUtils.serialize(frontEndRestriction));
+    }
+
 }

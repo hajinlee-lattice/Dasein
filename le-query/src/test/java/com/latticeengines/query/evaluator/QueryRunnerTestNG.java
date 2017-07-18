@@ -189,12 +189,12 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count, 4);
 
         query = Query.builder().select(BusinessEntity.Account, "ID", "CompanyName", "City") //
+                .find(BusinessEntity.LatticeAccount) //
                 .where(nameIsCity) //
-                .freeText("AMBUR") //
-                .freeTextAttributes(BusinessEntity.Account, "City") //
+                .freeText("AMBUR", BusinessEntity.LatticeAccount, "City") //
                 .build();
 
-        results = queryEvaluator.run(attrRepo, query).getData();
+        results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), count);
     }
 }
