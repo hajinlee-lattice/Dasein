@@ -17,9 +17,9 @@
     <import resource="classpath:serviceflows-prospectdiscovery-workflow-context.xml"/>
     <import resource="classpath:serviceflows-leadprioritization-workflow-context.xml"/>
     <import resource="classpath:serviceflows-datacloud-workflow-context.xml"/>
-    <import resource="classpath:serviceflows-cdl-workflow-context.xml"/> 
+    <import resource="classpath:serviceflows-cdl-workflow-context.xml"/>
     <import resource="classpath:test-pmml-workflow-context.xml"/>
-    <import resource="classpath:redshiftdb-context.xml" />
+    <import resource="classpath:redshiftdb-context.xml"/>
     <import resource="classpath:playmakercore-context.xml"/>
     <import resource="classpath:testframework-context.xml"/>
 </beans>
