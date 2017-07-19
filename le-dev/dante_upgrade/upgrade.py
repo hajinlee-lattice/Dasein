@@ -50,7 +50,7 @@ def main():
         logger.info('Successfully bootstrapped [%s]' % args.tenant)
         import_dante_tree(args.tenant, dante)
     except Exception as e:
-        restore_contract(args.tenant, contract)
+        restore_contract(contract)
         raise e
 
 
@@ -85,7 +85,7 @@ def delete_contract(tenant):
     node = "%s/Contracts/%s" % (pod_path(), tenant)
     ZK.delete_recursive(node)
 
-def restore_contract(tenant, tree):
+def restore_contract(tree):
     logger.info('Restore contract configurations.')
     node = "%s/Contracts" % pod_path()
     return ZK.import_tree(tree, node)
@@ -130,7 +130,7 @@ def admin_login():
 
 def admin_create_tenant(tenant, body):
     url = admin_url('/tenants/%s?contractId=%s' % (tenant, tenant))
-    (resp, content) = HTTP.request(url, "POST", body=json.dumps(body),
+    (resp, content) = HTTP.request(url, "POST", body=body,
                                    headers={'Authorization': AD_TOKEN, 'Content-Type':'application/json',
                                             'Accept':'application/json'} )
     logger.info(resp)
