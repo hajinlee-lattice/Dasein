@@ -8,14 +8,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONObject;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.monitor.exposed.alerts.service.PagerDutyService;
 
 @Component("pagerDutyService")
@@ -27,6 +28,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
     private static final String MODULE_NAME = "PLS, Modeling Platform, Scoring";
 
     protected String serviceApiKey;
+    private static ObjectMapper om = new ObjectMapper();
 
     public PagerDutyServiceImpl() {
         this.serviceApiKey = PLS_MODELINGPLATFORM_SCORING_SERVICEAPI_KEY;
@@ -34,19 +36,18 @@ public class PagerDutyServiceImpl implements PagerDutyService {
 
     @Override
     public String triggerEvent(String description, String clientUrl, String dedupKey, BasicNameValuePair... details)
-            throws ClientProtocolException, IOException {
-
+            throws IOException {
         return this.triggerEvent(description, clientUrl, dedupKey, Arrays.asList(details));
     }
 
     @Override
     public String triggerEvent(String description, String clientUrl, String dedupKey, Iterable<? extends BasicNameValuePair> details)
-            throws ClientProtocolException, IOException {
+            throws IOException {
         // response should look like this -
         // {"status":"success","message":"Event processed","incident_key":”acdcfa307f3e47d1b42b37edcbf22ae7"}
+        String payload = getRequestPayload(description, clientUrl, dedupKey, details);
         return HttpClientWithOptionalRetryUtils.sendPostRequest(
-                "https://events.pagerduty.com/generic/2010-04-15/create_event.json", true, this.getHeaders(), this
-                        .getRequestPayload(description, clientUrl, dedupKey, details).toString());
+                "https://events.pagerduty.com/generic/2010-04-15/create_event.json", true, this.getHeaders(), payload);
     }
 
     @VisibleForTesting
@@ -55,7 +56,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
     }
 
     @VisibleForTesting
-    String getEvents() throws ClientProtocolException, IOException {
+    String getEvents() throws IOException {
         String response = HttpClientWithOptionalRetryUtils.sendGetRequest(
                 "https://lattice-engines.pagerduty.com/api/v1/alerts", true, this.getHeaders(), new BasicNameValuePair(
                         "since", "2014-09-15T15:28-05"), new BasicNameValuePair("until", "2014-10-15T15:30-05"));
@@ -63,9 +64,9 @@ public class PagerDutyServiceImpl implements PagerDutyService {
     }
 
     @SuppressWarnings("unchecked")
-    private JSONObject getRequestPayload(String description, String clientUrl, String incidentKey,
-            Iterable<? extends BasicNameValuePair> details) {
-        JSONObject payload = new JSONObject();
+    private String getRequestPayload(String description, String clientUrl, String incidentKey,
+                                       Iterable<? extends BasicNameValuePair> details) {
+        ObjectNode payload = om.createObjectNode();
 
         LinkedHashMap<String, String> detailsMap = new LinkedHashMap<>();
         payload.put("service_key", this.serviceApiKey);
@@ -83,9 +84,9 @@ public class PagerDutyServiceImpl implements PagerDutyService {
             BasicNameValuePair detail = iterator.next();
             detailsMap.put(detail.getName(), detail.getValue());
         }
-        payload.put("details", detailsMap);
+        payload.put("details", om.valueToTree(detailsMap));
 
-        return payload;
+        return JsonUtils.serialize(payload);
     }
 
     private List<BasicNameValuePair> getHeaders() {
