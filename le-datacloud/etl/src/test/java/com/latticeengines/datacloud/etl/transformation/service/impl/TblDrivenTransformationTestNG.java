@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.datacloud.dataflow.transformation.MapAttributeFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -31,10 +32,6 @@ public class TblDrivenTransformationTestNG
 
     private static final Logger log = LoggerFactory.getLogger(TblDrivenTransformationTestNG.class);
 
-    private static final String MAP_STAGE = "MapStage";
-    private static final String DERIVE_STAGE = "DeriveStage";
-    private static final String MAP_TRANSFORMER = "mapAttribute";
-    private static final String DERIVE_TRANSFORMER = "deriveAttribute";
     private static final String ATTRIBUTE = "Attribute";
     private static final String DERIVED_ATTRIBUTE = "DerivedAttribute";
 
@@ -53,7 +50,7 @@ public class TblDrivenTransformationTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "pipeline2", enabled = false)
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
 
         prepareSources();
@@ -142,7 +139,8 @@ public class TblDrivenTransformationTestNG
         func.setCalculation(DeriveAttributeConfig.SUM);
         try {
             String arguments = om.writeValueAsString(func);
-            createSourceAttribute(targetSourceName, DERIVE_STAGE, DERIVE_TRANSFORMER, DERIVED_ATTRIBUTE, arguments);
+            createSourceAttribute(targetSourceName, MapAttributeFlow.DERIVE_STAGE, MapAttributeFlow.DERIVE_TRANSFORMER,
+                    DERIVED_ATTRIBUTE, arguments);
         } catch (Exception e) {
             log.error("Failed to create derived fuction", e);
         }
@@ -155,7 +153,8 @@ public class TblDrivenTransformationTestNG
         func.setAttribute(origAttr);
         try {
             String arguments = om.writeValueAsString(func);
-            createSourceAttribute(targetSourceName, MAP_STAGE, MAP_TRANSFORMER, attribute, arguments);
+            createSourceAttribute(targetSourceName, MapAttributeFlow.MAP_STAGE, MapAttributeFlow.MAP_TRANSFORMER,
+                    attribute, arguments);
         } catch (Exception e) {
             log.error("Failed to create derived fuction", e);
         }
@@ -194,7 +193,7 @@ public class TblDrivenTransformationTestNG
             }
 
             step1.setBaseSources(baseSources);
-            step1.setTransformer(MAP_TRANSFORMER);
+            step1.setTransformer(MapAttributeFlow.MAP_TRANSFORMER);
             String confParamStr1 = getMapperConfig(baseSources);
             step1.setConfiguration(confParamStr1);
 
@@ -205,7 +204,7 @@ public class TblDrivenTransformationTestNG
             inputSteps.add(0);
         
             step2.setInputSteps(inputSteps);
-            step2.setTransformer(DERIVE_TRANSFORMER);
+            step2.setTransformer(MapAttributeFlow.DERIVE_TRANSFORMER);
             step2.setTargetSource(targetSourceName);
             String confParamStr2 = getDeriverConfig();
             step2.setConfiguration(confParamStr2);
@@ -227,7 +226,7 @@ public class TblDrivenTransformationTestNG
     private String getMapperConfig(List<String> templates) throws JsonProcessingException {
         MapAttributeConfig config = new MapAttributeConfig();
 
-        config.setStage(MAP_STAGE);
+        config.setStage(MapAttributeFlow.MAP_STAGE);
         config.setSource(targetSourceName);
         config.setTemplates(templates);
         config.setSeed(templates.get(0));
@@ -265,7 +264,7 @@ public class TblDrivenTransformationTestNG
 
         DeriveAttributeConfig config = new DeriveAttributeConfig();
 
-        config.setStage(DERIVE_STAGE);
+        config.setStage(MapAttributeFlow.DERIVE_STAGE);
         config.setSource(targetSourceName);
         List<String> templates = new ArrayList<String>();
         templates.add(targetSourceName);

@@ -317,22 +317,22 @@ def register_amrefresh(conn):
                 Arguments
             ) VALUES (
                 'AccountMaster',
-                'MapStage',
-                'AMRefresh',
+                'RefreshStage',
+                'mapAttribute',
                 'BmbrSurge_BucketCode',
-                '{"Attribute":"BmbrSurge_BucketCode","Source":"BomboraSurgePivoted"}'
+                '{"target":null,"attribute":"BmbrSurge_BucketCode","Source":"BomboraSurgePivoted"}'
             ),(
                 'AccountMaster',
-                'MapStage',
-                'AMRefresh',
+                'RefreshStage',
+                'mapAttribute',
                 'BmbrSurge_CompositeScore',
-                '{"Attribute":"BmbrSurge_CompositeScore","Source":"BomboraSurgePivoted"}'
+                '{"target":null,"attribute":"BmbrSurge_CompositeScore","Source":"BomboraSurgePivoted"}'
             ),(
                 'AccountMaster',
-                'MapStage',
-                'AMRefresh',
+                'RefreshStage',
+                'mapAttribute',
                 'BmbrSurge_Intent',
-                '{"Attribute":"BmbrSurge_Intent","Source":"BomboraSurgePivoted"}'
+                '{"target":null,"attribute":"BmbrSurge_Intent","Source":"BomboraSurgePivoted"}'
             )
         """
         cursor.execute(sql)

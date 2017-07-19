@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MapAttributeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TblDrivenFuncConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -26,6 +28,13 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
 
     private static final String JOIN_KEY_PREFIX = "LDC_AM_JOINKEY_";
     private static final String JOIN_KEY_SUFFIX = "_";
+
+    public static final String MAP_TRANSFORMER = "mapAttribute";
+    public static final String DERIVE_TRANSFORMER = "deriveAttribute";
+
+    public static final String MAP_STAGE = "MapStage";
+    public static final String DERIVE_STAGE = "DeriveStage";
+    public static final String REFRESH_STAGE = "RefreshStage";
   
     int joinKeyIdx = 0;
 
@@ -42,13 +51,23 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
             throw new RuntimeException("Invalid configuration");
         }
 
-        Map<String, List<MapAttributeConfig.MapFunc>> sourceAttributes = prepMapsPerSource(attributes);
+        Map<String, List<MapAttributeConfig.MapFunc>> sourceAttributeMap = prepMapsPerSource(attributes);
 
         String seedName = config.getSeed();
         log.info("Prepare seed " + seedName);
-        Node seed = prepareSource(sourceMap.get(seedName), sourceAttributes.get(seedName), null, null);
-        if (seed == null) {
-            throw new RuntimeException("Failed to prepare seed " + seedName);
+        Node seed = null;
+        if (config.getStage().equals(REFRESH_STAGE)) {
+            List<SourceAttribute> sourceAttributes = getAttributes(config);
+            seed = sourceMap.get(seedName);
+            if (seed == null) {
+                throw new RuntimeException("Failed to prepare seed " + seedName);
+            }
+            seed = discardExistingAttrs(seed, seedName, sourceAttributes, parameters.getTimestampField());
+        } else {
+            seed = prepareSource(sourceMap.get(seedName), sourceAttributeMap.get(seedName), null, null);
+            if (seed == null) {
+                throw new RuntimeException("Failed to prepare seed " + seedName);
+            }
         }
 
         List<MapAttributeConfig.JoinConfig> joinConfigs = config.getJoinConfigs();
@@ -67,9 +86,9 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
                  String sourceName = joinTarget.getSource();
                  Node source = sourceMap.get(sourceName);
                  if (source == null) {
-                     throw new RuntimeException("Failed to prepare sourcce " + seedName);
+                    throw new RuntimeException("Failed to prepare sourcce " + sourceName);
                  }
-                 source = prepareSource(source, sourceAttributes.get(sourceName), joinTarget.getKeys(), joinKeyMap);
+                source = prepareSource(source, sourceAttributeMap.get(sourceName), joinTarget.getKeys(), joinKeyMap);
                  sources.add(source);
              }
 
@@ -85,6 +104,22 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
         Node stamped = discarded.addTimestamp(parameters.getTimestampField());
 
         return stamped;
+    }
+
+    private Node discardExistingAttrs(Node node, String sourceName, List<SourceAttribute> srcAttrs, String timestampField) {
+        Set<String> existAttrs = new HashSet<>(node.getFieldNames());
+        List<String> discardAttrs = new ArrayList<>();
+        for (SourceAttribute srcAttr : srcAttrs) {
+            if (existAttrs.contains(srcAttr.getAttribute())) {
+                discardAttrs.add(srcAttr.getAttribute());
+            } else {
+                log.info(String.format("Attribute %s does not exist in source %s", srcAttr.getAttribute(), sourceName));
+            }
+        }
+        if (StringUtils.isNotBlank(timestampField) && existAttrs.contains(timestampField)) {
+            discardAttrs.add(timestampField);
+        }
+        return node.discard(new FieldList(discardAttrs));
     }
 
     private Node prepareSource(Node source, List<MapAttributeConfig.MapFunc> mapConfigs, List<String> joinKeys, Map<Node, String> joinKeyMap) {

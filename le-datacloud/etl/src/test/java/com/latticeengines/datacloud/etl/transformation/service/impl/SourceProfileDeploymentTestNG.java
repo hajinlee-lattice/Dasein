@@ -303,7 +303,8 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         return map;
     }
 
-    protected void verifyIntermediateResult(String source, Iterator<GenericRecord> records) {
+    @Override
+    protected void verifyIntermediateResult(String source, String version, Iterator<GenericRecord> records) {
         try {
             switch (source) {
             case SEGMENT_PROFILE:

@@ -183,7 +183,7 @@ public class SourceDifferTestNG extends TransformationServiceImplTestNGBase<Pipe
     }
 
     @Override
-    protected void verifyIntermediateResult(String source, Iterator<GenericRecord> records) {
+    protected void verifyIntermediateResult(String source, String version, Iterator<GenericRecord> records) {
         log.info("Start to verify records in source " + source);
         int count = 0;
         while (records.hasNext()) {

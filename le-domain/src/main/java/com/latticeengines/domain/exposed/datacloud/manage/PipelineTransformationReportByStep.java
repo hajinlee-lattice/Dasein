@@ -49,11 +49,11 @@ public class PipelineTransformationReportByStep implements HasPid {
     private String transformer;
 
     @JsonProperty("BaseSources")
-    @Column(name = "BaseSources")
+    @Column(name = "BaseSources", length = 1000)
     private String baseSources;
 
     @JsonProperty("BaseVersions")
-    @Column(name = "BaseVersions")
+    @Column(name = "BaseVersions", length = 1000)
     private String baseVersions;
 
     @Column(name = "Executed")

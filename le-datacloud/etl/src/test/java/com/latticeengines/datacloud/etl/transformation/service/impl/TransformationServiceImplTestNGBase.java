@@ -269,10 +269,10 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
         log.info(String.format("Checking result of intermediate source %s @%s: %s", source.getSourceName(), version,
                 path));
         Iterator<GenericRecord> records = getGenericRecords(path);
-        verifyIntermediateResult(source.getSourceName(), records);
+        verifyIntermediateResult(source.getSourceName(), version, records);
     }
 
-    protected void verifyIntermediateResult(String source, Iterator<GenericRecord> records) {
+    protected void verifyIntermediateResult(String source, String version, Iterator<GenericRecord> records) {
 
     }
 
