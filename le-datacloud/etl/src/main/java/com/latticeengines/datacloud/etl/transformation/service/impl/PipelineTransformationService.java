@@ -449,7 +449,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             } else {
                 boolean succeeded = transformer.transform(progress, workflowDir, step);
                 saveSourceVersion(progress, step.getTargetSchema(), step.getTarget(), step.getTargetVersion(),
-                        workflowDir);
+                        workflowDir, step.getCount());
                 cleanupWorkflowDir(progress, workflowDir);
                 return succeeded;
             }

@@ -66,9 +66,9 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
                 TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion));
         dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), batchStore);
         if (isBucketing()) {
-            Table diffTable = metadataProxy.getTable(customerSpace.toString(),
+            Table redshiftTable = metadataProxy.getTable(customerSpace.toString(),
                     TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion));
-            if (diffTable == null) {
+            if (redshiftTable == null) {
                 throw new RuntimeException("Diff table has not been created.");
             }
             Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
@@ -76,8 +76,16 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
             if (entityTableMap == null) {
                 entityTableMap = new HashMap<>();
             }
-            entityTableMap.put(entity, diffTable);
+            entityTableMap.put(entity, redshiftTable);
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
+
+            Map<BusinessEntity, Boolean> appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE,
+                    BusinessEntity.class, Boolean.class);
+            if (appendTableMap == null) {
+                appendTableMap = new HashMap<>();
+            }
+            appendTableMap.put(entity, true);
+            putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
         }
     }
 

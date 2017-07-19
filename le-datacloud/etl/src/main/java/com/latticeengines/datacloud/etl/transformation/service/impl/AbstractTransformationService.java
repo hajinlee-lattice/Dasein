@@ -265,12 +265,12 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     protected boolean saveSourceVersion(TransformationProgress progress, Source source, String version,
             String workflowDir) {
-        return saveSourceVersion(progress, null, source, version, workflowDir);
+        return saveSourceVersion(progress, null, source, version, workflowDir, null);
     }
 
     protected boolean saveSourceVersion(TransformationProgress progress, Schema schema, Source source, String version,
-            String workflowDir) {
-        boolean success = saveSourceVersionWithoutHive(progress, schema, source, version, workflowDir, null);
+            String workflowDir, Long count) {
+        boolean success = saveSourceVersionWithoutHive(progress, schema, source, version, workflowDir, count);
         if (success && !(source instanceof TableSource)) {
             try {
                 // register hive table

@@ -71,7 +71,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
                 }) //
                 .initKeys(new String[] { DUMMY_KEY }) //
                 .build();
-        topAttrsCache.scheduleInit(10, TimeUnit.MINUTES);
+        topAttrsCache.scheduleInit(13, TimeUnit.MINUTES);
     }
 
     @Override

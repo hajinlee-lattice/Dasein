@@ -2,10 +2,14 @@ package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Random;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +24,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
-
-import java.util.Random;
 
 @Component(TRANSFORMER_MATCH)
 public class BulkMatchTransformer extends AbstractMatchTransformer {
@@ -33,7 +36,7 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
     @Autowired
     protected Configuration yarnConfiguration;
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(BulkMatchTransformer.class);
 
     public String getName() {
         return TRANSFORMER_MATCH;
@@ -63,15 +66,16 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
         log.info(String.format("Waiting for match command %s to complete", rootUid));
 
         Random random = new Random(System.currentTimeMillis());
-
-        MatchStatus status = null;
+        Level level = LogManager.getLogger(BaseRestApiProxy.class).getLevel();
+        LogManager.getLogger(BaseRestApiProxy.class).setLevel(Level.ERROR);
+        MatchStatus status;
         do {
-            if (status == null || random.nextInt(100) > 95) {
-                matchCommand = matchProxy.bulkMatchStatus(rootUid);
-                status = matchCommand.getMatchStatus();
-                if (status == null) {
-                    throw new LedpException(LedpCode.LEDP_28024, new String[]{rootUid});
-                }
+            matchCommand = matchProxy.bulkMatchStatus(rootUid);
+            status = matchCommand.getMatchStatus();
+            if (status == null) {
+                throw new LedpException(LedpCode.LEDP_28024, new String[]{ rootUid });
+            }
+            if (status.isTerminal() || random.nextInt(100) > 95) {
                 String logMsg = "Match Status = " + status;
                 if (MatchStatus.MATCHING.equals(status)) {
                     Float progress = matchCommand.getProgress();
@@ -85,6 +89,7 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
                 // Ignore InterruptedException
             }
         } while (!status.isTerminal());
+        LogManager.getLogger(BaseRestApiProxy.class).setLevel(level);
 
         if (!MatchStatus.FINISHED.equals(status)) {
             IllegalStateException inner = new IllegalStateException("The terminal status of match is " + status

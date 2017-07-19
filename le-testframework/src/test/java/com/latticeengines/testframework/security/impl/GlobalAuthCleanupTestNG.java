@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -159,12 +159,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         String contractsPath = PathBuilder.buildContractsPath(podId).toString();
         try {
             List<FileStatus> fileStatuses = HdfsUtils.getFileStatusesForDir(yarnConfiguration, contractsPath,
-                    new HdfsUtils.HdfsFileFilter() {
-                        @Override
-                        public boolean accept(FileStatus file) {
-                            return file.isDirectory();
-                        }
-                    });
+                    FileStatus::isDirectory);
             for (FileStatus fileStatus : fileStatuses) {
                 if (TestFrameworkUtils.isTestTenant(fileStatus.getPath().getName())) {
                     Long modifiedTime = fileStatus.getModificationTime();

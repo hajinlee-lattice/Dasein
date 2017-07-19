@@ -271,34 +271,38 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
             return;
         }
         for (Tenant tenant : testTenants) {
-            String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
-            log.info("Clean up contract in HDFS: " + contractId);
-            String customerSpace = CustomerSpace.parse(contractId).toString();
-            String contractPath = PathBuilder.buildContractPath(podId, contractId).toString();
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
-                    HdfsUtils.rmdir(yarnConfiguration, contractPath);
+            if (excludedCleanupTenantIds.contains(tenant.getId())) {
+                log.info("Skip cleaning up HDFS for  " + tenant.getId());
+            } else {
+                String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
+                log.info("Clean up contract in HDFS: " + contractId);
+                String customerSpace = CustomerSpace.parse(contractId).toString();
+                String contractPath = PathBuilder.buildContractPath(podId, contractId).toString();
+                try {
+                    if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
+                        HdfsUtils.rmdir(yarnConfiguration, contractPath);
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to clean up " + contractPath);
                 }
-            } catch (Exception e) {
-                log.warn("Failed to clean up " + contractPath);
-            }
 
-            String customerPath = new Path(customerBase).append(customerSpace).toString();
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, customerPath)) {
-                    HdfsUtils.rmdir(yarnConfiguration, customerPath);
+                String customerPath = new Path(customerBase).append(customerSpace).toString();
+                try {
+                    if (HdfsUtils.fileExists(yarnConfiguration, customerPath)) {
+                        HdfsUtils.rmdir(yarnConfiguration, customerPath);
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to clean up " + customerPath);
                 }
-            } catch (Exception e) {
-                log.warn("Failed to clean up " + customerPath);
-            }
 
-            contractPath = new Path(customerBase).append(contractId).toString();
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
-                    HdfsUtils.rmdir(yarnConfiguration, contractPath);
+                contractPath = new Path(customerBase).append(contractId).toString();
+                try {
+                    if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
+                        HdfsUtils.rmdir(yarnConfiguration, contractPath);
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to clean up " + customerPath);
                 }
-            } catch (Exception e) {
-                log.warn("Failed to clean up " + customerPath);
             }
         }
     }

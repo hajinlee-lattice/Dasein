@@ -81,7 +81,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         synchronized (this) {
             if (!scheduled) {
                 enrichmentColumnsCache.scheduleInit(10, TimeUnit.MINUTES);
-                segmentColumnsCache.scheduleInit(11, TimeUnit.MINUTES);
+                segmentColumnsCache.scheduleInit(15, TimeUnit.MINUTES);
                 scheduled = true;
             }
         }

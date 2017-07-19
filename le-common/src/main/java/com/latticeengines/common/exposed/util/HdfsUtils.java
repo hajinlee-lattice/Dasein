@@ -22,8 +22,6 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.crypto.key.KeyProvider;
 import org.apache.hadoop.crypto.key.KeyProviderFactory;
@@ -36,6 +34,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.protocol.EncryptionZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StreamUtils;
@@ -363,8 +363,8 @@ public class HdfsUtils {
                 if (status.isDirectory()) {
                     if (folderFilter.accept(status)) {
                         filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), filter));
-                        filePaths.addAll(getFilesForDirRecursiveWithFilterOnDir(configuration, status.getPath()
-                                .toString(), filter, folderFilter));
+                        filePaths.addAll(getFilesForDirRecursiveWithFilterOnDir(configuration,
+                                status.getPath().toString(), filter, folderFilter));
                     }
                 }
             }
@@ -500,9 +500,30 @@ public class HdfsUtils {
     }
 
     public static boolean moveFile(Configuration configuration, String src, String dst) throws IOException {
+        EncryptionZone dstZone = getEncryptionZone(configuration, dst);
+        if (dstZone != null) {
+            EncryptionZone srcZone = getEncryptionZone(configuration, src);
+            if (srcZone == null || !keyEquals(srcZone, dstZone)) {
+                String dstKey = "Key = " + dstZone.getKeyName();
+                String srcKey = srcZone == null ? "No Key" : srcZone.getKeyName();
+                log.info(String.format(
+                        "Destination (%s) is encrypted differently than source (%s). Use copy and rm instead of mv.",
+                        dstKey, srcKey));
+                if (copyFiles(configuration, src, dst)) {
+                    rmdir(configuration, src);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             return fs.rename(new Path(src), new Path(dst));
         }
+    }
+
+    private static boolean keyEquals(EncryptionZone zone1, EncryptionZone zone2) {
+        return zone1.getKeyName().equals(zone2.getKeyName()) && zone1.getVersion().equals(zone2.getVersion());
     }
 
     public static boolean copyFiles(Configuration configuration, String src, String dst)
@@ -512,7 +533,8 @@ public class HdfsUtils {
         }
     }
 
-    public static final void copyGlobToDir(Configuration configuration, String sourceGlob, String targetDir) throws IOException {
+    public static final void copyGlobToDir(Configuration configuration, String sourceGlob, String targetDir)
+            throws IOException {
         for (String filePath : getFilesByGlob(configuration, sourceGlob)) {
             if (!isDirectory(configuration, targetDir)) {
                 mkdir(configuration, targetDir);
@@ -556,10 +578,14 @@ public class HdfsUtils {
         }
     }
 
-    public static EncryptionZone getEncryptionZone(Configuration configuration, String path) {
+    public static boolean isEncryptionZone(Configuration configuration, String path) {
+        return getEncryptionZone(configuration, path) != null;
+    }
+
+    private static EncryptionZone getEncryptionZone(Configuration configuration, String path) {
         List<EncryptionZone> zones = getEncryptionZones(configuration);
         for (EncryptionZone zone : zones) {
-            if (zone.getPath().equals(path)) {
+            if (path.startsWith(zone.getPath())) {
                 return zone;
             }
         }
@@ -632,19 +658,20 @@ public class HdfsUtils {
         return provider;
     }
 
-    public static final long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration, InputStream inputStream,
-            String hdfsPath, long totalRows) throws IOException {
+    public static final long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration,
+            InputStream inputStream, String hdfsPath, long totalRows) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
-                return copyLarge(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
-                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), outputStream, totalRows);
+                return copyLarge(
+                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                                ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                        outputStream, totalRows);
             }
         }
     }
 
-    private static long copyLarge(InputStream input, OutputStream output, long totalRows)
-            throws IOException {
-        byte [] buffer = new byte[DEFAULT_BUFFER_SIZE];
+    private static long copyLarge(InputStream input, OutputStream output, long totalRows) throws IOException {
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         boolean stop = false;
         int n = 0;
         long rows = 0;

@@ -54,9 +54,9 @@
             /DL_Address
               string_value = 'http://bodcdevvint187.dev.lattice.local:8081'
             /Product
-              string_value = 'Lead Prioritization 3.0'
+              string_value = 'Customer Growth'
             /Products
-              string_value = '["Lead Prioritization 3.0"]'
+              string_value = '["Customer Growth", "Lead Prioritization 3.0"]'
             /Topology
               string_value = 'SFDC'
           /feature-flags.json
@@ -67,7 +67,7 @@
             EnableCdl = True
             EnableTalkingPoints = True
           /properties.json
-            description = u'A PD solution for LocalTest'
+            description = u'A CG solution for LocalTest'
             displayName = u'LocalTest Tenant'
             sandboxSfdcOrgId = None
             sfdcOrgId = None
@@ -75,7 +75,7 @@
         string_value = 'Production'
       /properties.json
         created = 1475376396768
-        description = u'A PD tenant under the contract LocalTest'
+        description = u'A CG tenant under the contract LocalTest'
         displayName = u'LocalTest Tenant'
         lastModified = 1475376396768
   /properties.json

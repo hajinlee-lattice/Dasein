@@ -2,21 +2,21 @@ package com.latticeengines.pls.end2end;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -24,7 +24,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -32,20 +31,20 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -61,12 +60,6 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DataIngestionEnd2EndDeploymentTestNG.class);
-
-    private static final String DL_TENANT_NAME = "ManualELQ_2016_1215_1051";
-
-    private static final String DL_LOAD_GROUP = "TestDP_20170615";
-
-    private static final String DL_ENDPOINT = "http://10.41.1.187:8089";
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 
@@ -85,71 +78,73 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     @Autowired
     protected Configuration yarnConfiguration;
 
-    @Value("${common.test.env}")
-    private String testEnv;
-
-    private Tenant firstTenant;
+    private Tenant mainTenant;
 
     @BeforeClass(groups = { "deployment.cdl" })
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
-        Tenant tenant = testBed.addExtraTestTenant(CustomerSpace.parse(DL_TENANT_NAME).toString());
-        testBed.deleteTenant(testBed.getMainTestTenant());
-        testBed.setMainTestTenant(tenant);
-        testBed.switchToSuperAdmin();
-        firstTenant = testBed.getMainTestTenant();
-        Tenant retrieved = testBed.getMainTestTenant();
-        Assert.assertEquals(retrieved.getId(), CustomerSpace.parse(DL_TENANT_NAME).toString());
 
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(firstTenant));
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        mainTenant = testBed.getMainTestTenant();
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTenant));
 
         log.info("Test environment setup finished.");
         createDataFeed();
     }
 
-    @Test(groups = { "deployment.cdl" })
-    public void importData() throws Exception {
-        if (testEnv.equalsIgnoreCase("dev")) {
-            mockAvroData();
-            Thread.sleep(5000);
-            mockAvroData();
-        } else {
-            String launchId = startExecuteGroup();
-            long startMillis = System.currentTimeMillis();
-            waitLoadGroup(launchId, 1800);
-            long endMillis = System.currentTimeMillis();
-            checkExtractFolderExist(startMillis, endMillis);
-        }
-        dataFeedProxy.updateDataFeedStatus(firstTenant.getId(), Status.InitialLoaded.getName());
+    @Test(groups = "deployment.cdl")
+    public void testEndToEnd() throws Exception {
+        importData();
+        initialConsolidate();
+        firstProfile();
+
+        importSecondData();
+        secondConsolidate();
+        secondProfile();
+
+        querySegment();
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importData")
-    public void initialConsolidate() {
+    private void importData() throws Exception {
+        mockAvroData(0, 300);
+        Thread.sleep(2000);
+        mockAvroData(300, 300);
+        Thread.sleep(2000);
+        dataFeedProxy.updateDataFeedStatus(mainTenant.getId(), DataFeed.Status.InitialLoaded.getName());
+    }
+
+    private void initialConsolidate() {
         log.info("Start consolidating data ...");
-        ApplicationId appId = cdlProxy.consolidate(firstTenant.getId());
+        ApplicationId appId = cdlProxy.consolidate(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifyFirstConsolidate();
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "initialConsolidate")
-    public void firstAssemble() {
+    private void verifyFirstConsolidate() {
+        long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
+        Assert.assertEquals(numAccounts, 300);
+        long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
+        Assert.assertEquals(numContacts, 300);
+    }
+
+    private void firstProfile() throws IOException {
         log.info("Start profiling data collection ...");
-        ApplicationId appId = cdlProxy.profile(firstTenant.getId());
+        ApplicationId appId = cdlProxy.profile(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifyFirstProfile();
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "firstAssemble")
-    public void verifyFirstImport() throws IOException {
-        String customerSpace = CustomerSpace.parse(firstTenant.getId()).toString();
-
+    private void verifyFirstProfile() throws IOException {
+        String customerSpace = CustomerSpace.parse(mainTenant.getId()).toString();
         Table bucketedAccountTable = dataCollectionProxy.getTable(customerSpace,
                 BusinessEntity.Account.getServingStore());
         Assert.assertNotNull(bucketedAccountTable);
         List<Attribute> attributes = bucketedAccountTable.getAttributes();
         for (Attribute attribute : attributes) {
-            Assert.assertFalse(attribute.getName().contains(CEAttr), "Should not have encoded attr " + attribute.getName() + " in expanded table.");
+            Assert.assertFalse(attribute.getName().contains(CEAttr),
+                    "Should not have encoded attr " + attribute.getName() + " in expanded table.");
         }
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(customerSpace);
         Assert.assertNotNull(statisticsContainer);
@@ -163,68 +158,68 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertNotNull(bucketedContactTable);
         attributes = bucketedContactTable.getAttributes();
         for (Attribute attribute : attributes) {
-            Assert.assertFalse(attribute.getName().contains(CEAttr), "Should not have encoded attr " + attribute.getName() + " in expanded table.");
+            Assert.assertFalse(attribute.getName().contains(CEAttr),
+                    "Should not have encoded attr " + attribute.getName() + " in expanded table.");
         }
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifyFirstImport")
-    public void importSecondData() throws Exception {
+    private void importSecondData() throws Exception {
+        mockAvroData(600, 400);
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "importSecondData")
-    public void secondConsolidate() {
+    private void secondConsolidate() {
         log.info("Start second consolidating ...");
-        ApplicationId appId = cdlProxy.consolidate(firstTenant.getId());
+        ApplicationId appId = cdlProxy.consolidate(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifySecondConsolidate();
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondConsolidate")
-    public void secondProfile() {
+
+    private void verifySecondConsolidate() {
+        long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
+        Assert.assertEquals(numAccounts, 1000);
+        long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
+        Assert.assertEquals(numContacts, 1000);
+    }
+
+    private void secondProfile() {
         log.info("Start second profiling ...");
-        ApplicationId appId = cdlProxy.profile(firstTenant.getId());
+        ApplicationId appId = cdlProxy.profile(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "secondProfile")
-    public void verifySecondImport() {
-
+    private void verifySecondProfile() {
     }
 
-    @Test(groups = { "deployment.cdl" }, dependsOnMethods = "verifySecondImport")
-    public void querySegment() {
-
+    private void querySegment() {
     }
 
-    private void mockAvroData() throws IOException {
-        mockAvroDataInternal("Account");
-        mockAvroDataInternal("Contact");
-
+    private void mockAvroData(int offset, int limit) throws IOException {
+        mockAvroDataInternal(BusinessEntity.Account, offset, limit);
+        mockAvroDataInternal(BusinessEntity.Contact, offset, limit);
     }
 
-    private void mockAvroDataInternal(String entity) throws IOException {
-        CustomerSpace customerSpace = CustomerSpace.parse(DL_TENANT_NAME);
+    private void mockAvroDataInternal(BusinessEntity entity, int offset, int limit) throws IOException {
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTenant.getId());
 
-        // FIXME: use account data for fake contacts before we have real data.
-        // URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/pls/end2end/cdl/Extract_" + entity + "s_0.avro");
-        URL dataUrl = ClassLoader.getSystemResource("com/latticeengines/pls/end2end/cdl/Extract_Accounts_0.avro");
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
-                entity);
+                entity.name());
         Table importTemplate;
         if (dataFeedTask == null) {
-            Schema schema = AvroUtils.readSchemaFromLocalFile(dataUrl.getPath());
+            Schema schema = getSchema(entity);
             importTemplate = MetadataConverter.getTable(schema, new ArrayList<>(), null, null, false);
             importTemplate.setTableType(TableType.IMPORTTABLE);
-            if (entity.equals("Account")) {
+            if (BusinessEntity.Account.equals(entity)) {
                 importTemplate.setName(SchemaInterpretation.Account.name());
-            } else { 
+            } else {
                 importTemplate.setName(SchemaInterpretation.Contact.name());
             }
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setImportTemplate(importTemplate);
             dataFeedTask.setStatus(DataFeedTask.Status.Active);
-            dataFeedTask.setEntity(entity);
+            dataFeedTask.setEntity(entity.name());
             dataFeedTask.setFeedType("Query");
             dataFeedTask.setSource("VisiDB");
             dataFeedTask.setActiveJob("Not specified");
@@ -237,20 +232,70 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
             importTemplate = dataFeedTask.getImportTemplate();
         }
 
+        String targetPath = uploadMockDataWithModifiedSchema(entity, offset, limit);
+        String defaultFS = yarnConfiguration.get(FileSystem.FS_DEFAULT_NAME_KEY);
+        String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
+        Extract e = createExtract(hdfsUri, (long) limit);
+        dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", entity.name());
+        dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(),
+                e);
+    }
+
+    private Schema getSchema(BusinessEntity entity) {
+        Schema schema;
+        try {
+            InputStream schemaIs = Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream("com/latticeengines/pls/end2end/cdl/Account.avsc");
+            String schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
+            switch (entity) {
+            case Contact:
+                schemaStr = schemaStr.replace("\"External_ID\"", "\"" + InterfaceName.LEContactIDLong.name() + "\"");
+                schemaStr = schemaStr.replace("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
+                break;
+            case Account:
+            default:
+            }
+
+            schema = new Schema.Parser().parse(schemaStr);
+            switch (entity) {
+            case Contact:
+                boolean hasLEContactIDLong = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.LEContactIDLong.name().equals(n));
+                boolean hasAccountId = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
+                Assert.assertTrue(hasLEContactIDLong);
+                Assert.assertTrue(hasAccountId);
+                break;
+            case Account:
+                boolean hasLEAccountIDLong = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.LEAccountIDLong.name().equals(n));
+                Assert.assertTrue(hasLEAccountIDLong);
+                break;
+            default:
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to prepare avro schema for " + entity);
+        }
+        return schema;
+    }
+
+    private String uploadMockDataWithModifiedSchema(BusinessEntity entity, int offset, int limit) {
+        Schema schema = getSchema(entity);
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTenant.getId());
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-" + entity + "/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.VISIDB.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
-        String fileName = dataUrl.getPath().substring(dataUrl.getPath().lastIndexOf("/") + 1);
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, dataUrl.getPath(),
-                String.format("%s/%s", targetPath, fileName));
-
-        String defaultFS = yarnConfiguration.get(FileSystem.FS_DEFAULT_NAME_KEY);
-        String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
-        Extract e = createExtract(hdfsUri, 1000L);
-
-        dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", entity);
-        dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(),
-                e);
+        InputStream dataIs = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("com/latticeengines/pls/end2end/cdl/Account.avro");
+        try {
+            List<GenericRecord> records = AvroUtils.readFromInputStream(dataIs);
+            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro", records.subList(offset, offset + limit),
+                    true);
+            log.info("Uploaded " + limit + " records to " + targetPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload avro for " + entity);
+        }
+        return targetPath;
     }
 
     private Extract createExtract(String path, long processedRecords) {
@@ -268,85 +313,24 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         return e;
     }
 
-    private void checkExtractFolderExist(long startMillis, long endMillis) throws Exception {
-        CustomerSpace customerSpace = CustomerSpace.parse(DL_TENANT_NAME);
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
-                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
-                SourceType.VISIDB.getName());
-        assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, targetPath);
-        for (String file : files) {
-            String filename = file.substring(file.lastIndexOf("/") + 1);
-            Date folderTime = new SimpleDateFormat(COLLECTION_DATE_FORMAT).parse(filename);
-            if (folderTime.getTime() > startMillis && folderTime.getTime() < endMillis) {
-                return;
-            }
-            log.info("File name: " + filename);
-        }
-        assertTrue(false, "No data collection folder was created!");
-    }
-
-    private String startExecuteGroup() {
-        String url = DL_ENDPOINT + "/DLRestService/ExecuteGroup";
-        Map<String, String> body = new HashMap<>();
-        body.put("email", "LP");
-        body.put("tenantName", DL_TENANT_NAME);
-        body.put("groupName", DL_LOAD_GROUP);
-        body.put("state", "launch");
-        String response = magicRestTemplate.postForObject(url, body, String.class);
-        InstallResult result = JsonUtils.deserialize(response, InstallResult.class);
-        String launchId = null;
-        List<InstallResult.ValueResult> valueResults = result.getValueResult();
-        if (valueResults != null) {
-            for (InstallResult.ValueResult valueResult : valueResults) {
-                if ("launchId".equalsIgnoreCase(valueResult.getKey())) {
-                    launchId = valueResult.getValue();
-                    break;
-                }
-            }
-        }
-        return launchId;
-    }
-
-    private void waitLoadGroup(String launchId, int maxSeconds) {
-        String url = DL_ENDPOINT + "/DLRestService/GetLaunchStatus";
-        Map<String, String> body = new HashMap<>();
-        body.put("launchId", launchId);
-        int i = 0;
-        while (i < maxSeconds) {
-            String response = magicRestTemplate.postForObject(url, body, String.class);
-            InstallResult result = JsonUtils.deserialize(response, InstallResult.class);
-            List<InstallResult.ValueResult> valueResults = result.getValueResult();
-            if (valueResults != null) {
-                String running = "true";
-                for (InstallResult.ValueResult valueResult : valueResults) {
-                    if ("Running".equalsIgnoreCase(valueResult.getKey())) {
-                        running = valueResult.getValue();
-                        break;
-                    }
-                }
-                if (running.equalsIgnoreCase("false")) {
-                    break;
-                }
-            }
-            i++;
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
-    }
-
     private void createDataFeed() {
-        dataFeedProxy.getDataFeed(firstTenant.getId());
+        dataFeedProxy.getDataFeed(mainTenant.getId());
         Table importTable = new Table();
         importTable.setName("importTable");
         importTable.setDisplayName(importTable.getName());
-        importTable.setTenant(firstTenant);
+        importTable.setTenant(mainTenant);
         Table dataTable = new Table();
         dataTable.setName("dataTable");
         dataTable.setDisplayName(dataTable.getName());
-        dataTable.setTenant(firstTenant);
+        dataTable.setTenant(mainTenant);
+    }
+
+    private long countTableRole(TableRoleInCollection role) {
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTenant.getId());
+        Table table = dataCollectionProxy.getTable(customerSpace.toString(), role);
+        if (table == null) {
+            Assert.fail("Cannot find table in role " + role);
+        }
+        return table.getExtracts().get(0).getProcessedRecords();
     }
 }

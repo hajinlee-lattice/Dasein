@@ -42,7 +42,7 @@ public class DataEncryptionServiceImpl implements DataEncryptionService {
                     .construct(new CustomerSpaceScope(space));
             return controller.exists(new Path("/EncryptionKey"));
         } catch (Exception e) {
-            log.error(String.format("Error determining whether customer %s is encrypted: %s", space), e);
+            log.error(String.format("Error determining whether customer %s is encrypted.", space), e);
             return false;
         }
     }
@@ -68,7 +68,7 @@ public class DataEncryptionServiceImpl implements DataEncryptionService {
             ListIterator<String> iter = paths.listIterator();
             while (iter.hasNext()) {
                 String path = iter.next();
-                if (HdfsUtils.getEncryptionZone(yarnConfiguration, path) != null) {
+                if (HdfsUtils.isEncryptionZone(yarnConfiguration, path)) {
                     log.info(String.format("%s is already encrypted", path));
                     iter.remove();
                     continue;

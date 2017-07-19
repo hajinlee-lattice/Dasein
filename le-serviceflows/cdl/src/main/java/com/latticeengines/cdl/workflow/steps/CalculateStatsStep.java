@@ -97,6 +97,13 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         Map<BusinessEntity, Table> entityTableMap = new HashMap<>();
         entityTableMap.put(BusinessEntity.Account, sortedTable);
         putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
+        Map<BusinessEntity, Boolean> appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE,
+                BusinessEntity.class, Boolean.class);
+        if (appendTableMap == null) {
+            appendTableMap = new HashMap<>();
+        }
+        appendTableMap.put(BusinessEntity.Account, false);
+        putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
     }
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {

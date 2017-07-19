@@ -1,29 +1,6 @@
 {
   "ConfigDirectories": [
     {
-      "RootPath": "/Eai",
-      "Nodes": [
-        {
-          "Node": "SalesforceEndpointConfig",
-          "Children": [
-            {
-              "Node": "HttpClient",
-              "Children": [
-                {
-                  "Node": "ConnectTimeout",
-                  "Data": "60000"
-                },
-                {
-                  "Node": "ImportTimeout",
-                  "Data": "3600000"
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
       "RootPath": "/Modeling",
       "Nodes": [
         {
@@ -55,11 +32,6 @@
           "Node": "ThirdPartyUserEmails",
           "Data": "[]"
         }
-      ]
-    },
-    {
-      "RootPath": "/Metadata",
-      "Nodes": [
       ]
     }
   ],

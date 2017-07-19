@@ -20,7 +20,7 @@ public class CDLProxy extends MicroserviceRestApiProxy {
     @SuppressWarnings("unchecked")
     public ApplicationId consolidate(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/consolidate", shortenCustomerSpace(customerSpace));
-        ResponseDocument<String> responseDoc = post("kickoff consolidate", url, null, ResponseDocument.class);
+        ResponseDocument<String> responseDoc = post("consolidate", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }
@@ -31,7 +31,7 @@ public class CDLProxy extends MicroserviceRestApiProxy {
     @SuppressWarnings("unchecked")
     public ApplicationId profile(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/profile", shortenCustomerSpace(customerSpace));
-        ResponseDocument<String> responseDoc = post("kickoff finalize", url, null, ResponseDocument.class);
+        ResponseDocument<String> responseDoc = post("profile", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }
