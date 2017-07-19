@@ -40,10 +40,8 @@ def main():
     template = template.replace('{% TenantName %}', args.tenant)
     admin_create_tenant(args.tenant, template)
 
-    success = wait_bootstrap_ok(args.tenant)
-    if success:
-        logger.info('Successfully installed [%s]' % args.tenant)
-
+    wait_bootstrap_ok(args.tenant)
+    logger.info('Successfully bootstrapped [%s]' % args.tenant)
     import_dante_tree(args.tenant, dante)
     logger.info('Restore original Dante configurations.')
 
@@ -134,9 +132,11 @@ def wait_bootstrap_ok(tenant):
         state = admin_get_bootstrap_state(tenant)
         logger.info('Bootstrap state is %s after %.2f sec.' % (state, time.time() - t1))
         if state == BOOTSTRAP_OK:
-            return True
-        elif state == BOOTSTRAP_ERROR or time.time() - t1 > half_hour:
-            return False
+            return
+        elif state == BOOTSTRAP_ERROR:
+            raise Exception('Final bootstrap state is %s' % state)
+        elif time.time() - t1 > half_hour:
+            raise Exception('Did not finish bootstrap with in half hour.')
 
 
 def parseCliArgs():
