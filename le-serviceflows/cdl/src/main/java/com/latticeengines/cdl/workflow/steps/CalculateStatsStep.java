@@ -92,7 +92,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
         putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
-        upsertTables(configuration.getCustomerSpace().toString(), profileTableName, sortedTableName);
+        upsertTables(configuration.getCustomerSpace().toString(), profileTableName);
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
         Map<BusinessEntity, Table> entityTableMap = new HashMap<>();
         entityTableMap.put(BusinessEntity.Account, sortedTable);
@@ -267,7 +267,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         return keyMap;
     }
 
-    private void upsertTables(String customerSpace, String profileTableName, String sortedTableName) {
+    private void upsertTables(String customerSpace, String profileTableName) {
         Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
         if (profileTable == null) {
             throw new RuntimeException("Failed to find profile table in customer " + customerSpace);
@@ -276,16 +276,6 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         profileTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile);
         if (profileTable == null) {
             throw new IllegalStateException("Cannot find the upserted profile table in data collection.");
-        }
-
-        Table bktTable = metadataProxy.getTable(customerSpace, sortedTableName);
-        if (bktTable == null) {
-            throw new RuntimeException("Failed to find bucketed table in customer " + customerSpace);
-        }
-        dataCollectionProxy.upsertTable(customerSpace, sortedTableName, TableRoleInCollection.BucketedAccount);
-        bktTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.BucketedAccount);
-        if (bktTable == null) {
-            throw new IllegalStateException("Cannot find the upserted bucketed table in data collection.");
         }
     }
 

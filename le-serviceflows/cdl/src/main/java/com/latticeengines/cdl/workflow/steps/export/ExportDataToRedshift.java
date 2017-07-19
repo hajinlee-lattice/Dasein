@@ -74,7 +74,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             boolean append = Boolean.TRUE.equals(appendTableMap.get(entity));
             if (!append) {
                 Table sourceTable = entry.getValue();
-                log.info("Upsert " + entity.getBatchStore() + " table " + sourceTable.getName());
+                log.info("Upsert " + entity.getServingStore() + " table " + sourceTable.getName());
                 Table oldTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
                         entity.getServingStore());
                 dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), sourceTable.getName(),
@@ -97,7 +97,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private String renameTable(Map.Entry<BusinessEntity, Table> entry, boolean append) {
         Table sourceTable = entry.getValue();
         String oldName = sourceTable.getName();
-        String goodName = oldName;
+        String goodName = AvroUtils.getAvroFriendlyString(oldName);
         if (!append) {
             String prefix = String.join("_", configuration.getCustomerSpace().getTenantId(), entry.getKey().name());
             goodName = NamingUtils.timestamp(prefix);
