@@ -12,7 +12,7 @@ public enum TableRoleInCollection {
     Profile, //
 
     BucketedAccount, //
-    BucketedContact, //
+    SortedContact, //
     
     AccountMaster;
 
@@ -39,8 +39,8 @@ public enum TableRoleInCollection {
 
         ConsolidatedContact.primaryKey = InterfaceName.ContactId;
         ConsolidatedContact.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
-        BucketedContact.primaryKey = ConsolidatedContact.primaryKey;
-        BucketedContact.foreignKeys = ConsolidatedContact.foreignKeys;
+        SortedContact.primaryKey = ConsolidatedContact.primaryKey;
+        SortedContact.foreignKeys = ConsolidatedContact.foreignKeys;
 
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
     }
