@@ -32,7 +32,7 @@ public class SourceDifferTestNG extends TransformationServiceImplTestNGBase<Pipe
     private GeneralSource source0 = new GeneralSource("AMDiff0");
     private GeneralSource source1 = new GeneralSource("AMDiff1");
 
-    @Test(groups = "pipeline1")
+    @Test(groups = "functional")
     public void testTransformation() {
         prepareData();
         TransformationProgress progress = createNewProgress();
