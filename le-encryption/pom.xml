@@ -66,13 +66,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${le.testfwk.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <classifier>intf</classifier>

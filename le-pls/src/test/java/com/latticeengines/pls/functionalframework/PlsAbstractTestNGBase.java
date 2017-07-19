@@ -50,8 +50,8 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.testframework.security.GlobalAuthTestBed;
-import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })

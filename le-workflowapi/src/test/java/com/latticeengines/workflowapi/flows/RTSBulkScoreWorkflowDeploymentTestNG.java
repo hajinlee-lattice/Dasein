@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
+import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 import au.com.bytecode.opencsv.CSVReader;

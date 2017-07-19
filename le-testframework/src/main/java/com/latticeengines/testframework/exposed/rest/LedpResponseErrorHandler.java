@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.rest;
+package com.latticeengines.testframework.exposed.rest;
 
 import java.io.IOException;
 import java.io.InputStream;

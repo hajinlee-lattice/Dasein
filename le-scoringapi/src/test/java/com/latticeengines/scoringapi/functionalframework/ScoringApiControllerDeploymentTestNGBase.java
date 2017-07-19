@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -44,7 +44,7 @@ import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
-import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
+import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 
 public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunctionalTestNGBase {
 

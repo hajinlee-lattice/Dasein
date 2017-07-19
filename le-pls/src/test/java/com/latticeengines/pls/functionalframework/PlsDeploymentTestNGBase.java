@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
 public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
 

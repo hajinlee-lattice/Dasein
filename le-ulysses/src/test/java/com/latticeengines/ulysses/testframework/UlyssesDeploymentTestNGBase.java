@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
-import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
 public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(UlyssesDeploymentTestNGBase.class);

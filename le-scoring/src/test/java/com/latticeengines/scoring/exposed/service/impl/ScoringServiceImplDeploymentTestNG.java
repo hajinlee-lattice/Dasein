@@ -45,7 +45,7 @@ import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.util.ScoringTestUtils;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
-import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
+import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 
 public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGBase {
 

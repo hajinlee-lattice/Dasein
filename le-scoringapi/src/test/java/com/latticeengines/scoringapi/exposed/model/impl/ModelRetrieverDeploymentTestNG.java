@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiTestUtils;
-import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
+import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 
 public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 

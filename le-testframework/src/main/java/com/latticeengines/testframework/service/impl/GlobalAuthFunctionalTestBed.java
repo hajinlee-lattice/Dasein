@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.security.impl;
+package com.latticeengines.testframework.service.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,8 +24,8 @@ import com.latticeengines.security.exposed.RightsUtilities;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
-import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
 @Component("globalAuthFunctionalTestBed")
 public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed implements GlobalAuthTestBed {

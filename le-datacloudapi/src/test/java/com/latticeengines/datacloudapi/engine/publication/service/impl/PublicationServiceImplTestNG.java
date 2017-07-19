@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.PublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.testframework.rest.StandaloneHttpServer;
+import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
 public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 

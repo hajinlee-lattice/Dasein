@@ -5,5 +5,5 @@
 
     <import resource="classpath:test-serviceflows-dataflow-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
-    <import resource="classpath:test-testframework-testbed-context.xml"/>
+    <import resource="classpath:testframework-context.xml"/>
 </beans>

@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.security.impl;
+package com.latticeengines.testframework.service.impl;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -14,7 +14,8 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
-import com.latticeengines.testframework.security.GlobalAuthTestBed;
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
+
 
 public class GlobalAuthCleanupTestListener implements ITestListener {
 

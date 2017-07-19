@@ -14,7 +14,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDepreca
 import com.latticeengines.pls.functionalframework.PropDataLeadEnrichmentAttributeServlet;
 import com.latticeengines.pls.service.LeadEnrichmentService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.testframework.rest.StandaloneHttpServer;
+import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
 public class LeadEnrichmentServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 

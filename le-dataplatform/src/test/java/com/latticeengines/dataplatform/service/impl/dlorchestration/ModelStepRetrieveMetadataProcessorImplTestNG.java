@@ -32,7 +32,7 @@ import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.testframework.rest.StandaloneHttpServer;
+import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
 
 @SuppressWarnings("unused")

@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.encryption.functionalframework.EncryptionTestNGBase;
-import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
 public class DataEncryptionServiceImplWebHdfsDeploymentTestNG extends EncryptionTestNGBase {
 

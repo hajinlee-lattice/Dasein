@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.security;
+package com.latticeengines.testframework.exposed.service;
 
 import java.util.List;
 import java.util.Map;
@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
+import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 
 public interface GlobalAuthTestBed {
 

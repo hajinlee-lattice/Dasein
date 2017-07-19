@@ -63,24 +63,32 @@
                     <groupId>org.python</groupId>
                     <artifactId>jython-standalone</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.googlecode.json-simple</groupId>
+                    <artifactId>json-simple</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
                     <artifactId>servlet-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.googlecode.json-simple</groupId>
+                    <artifactId>json-simple</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
             <exclusions>
                 <exclusion>
@@ -91,16 +99,22 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
-            <classifier>tests</classifier>
+            <artifactId>le-network</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-network</artifactId>
-            <version>${le.network.version}</version>
-            <scope>runtime</scope>
+            <artifactId>le-monitor</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -48,7 +48,7 @@ import com.latticeengines.modelquality.service.ModelRunService;
 import com.latticeengines.modelquality.service.impl.PipelineStepType;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
-import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 

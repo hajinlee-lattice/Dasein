@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.domain.pls;
+package com.latticeengines.testframework.exposed.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

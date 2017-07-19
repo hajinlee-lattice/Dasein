@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.encryption.exposed.service.DataEncryptionService;
 import com.latticeengines.encryption.exposed.service.KeyManagementService;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.testframework.security.GlobalAuthTestBed;
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-encryption-context.xml" })

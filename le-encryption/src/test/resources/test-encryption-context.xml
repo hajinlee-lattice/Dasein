@@ -6,8 +6,7 @@
 
     <import resource="classpath:encryption-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
-    <import resource="classpath:test-testframework-context.xml"/>
-    <import resource="classpath:test-testframework-testbed-context.xml"/>
+    <import resource="classpath:testframework-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
 
 </beans>

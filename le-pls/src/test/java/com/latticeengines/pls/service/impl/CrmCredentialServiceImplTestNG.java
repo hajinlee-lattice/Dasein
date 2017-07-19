@@ -27,7 +27,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDepreca
 import com.latticeengines.pls.functionalframework.SourceCredentialValidationServlet;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.proxy.exposed.eai.ValidateCredentialProxy;
-import com.latticeengines.testframework.rest.StandaloneHttpServer;
+import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
 @SuppressWarnings("unused")
 public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {

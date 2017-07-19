@@ -44,7 +44,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.sqoop.exposed.service.SqoopMetadataService;
-import com.latticeengines.testframework.rest.StandaloneHttpServer;
+import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
 /**
  * This is an end-to-end test against a SQL Server database without having to go

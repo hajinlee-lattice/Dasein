@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.security.impl;
+package com.latticeengines.testframework.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -30,9 +30,9 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
+import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
-import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
-import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
 public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 

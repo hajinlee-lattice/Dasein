@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.proxy;
+package com.latticeengines.testframework.exposed.proxy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

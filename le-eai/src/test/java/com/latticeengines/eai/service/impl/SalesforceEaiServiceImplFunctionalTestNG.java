@@ -25,7 +25,7 @@ import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.functionalframework.MetadataServlet;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
-import com.latticeengines.testframework.rest.StandaloneHttpServer;
+import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
 public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestNGBase {
 

@@ -34,7 +34,7 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.saml.util.SAMLUtils;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.latticeengines.testframework.security.GlobalAuthTestBed;
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 
 public abstract class SamlTestBed {
     public static final String RESOURCE_BASE = "/com/latticeengines/saml/";

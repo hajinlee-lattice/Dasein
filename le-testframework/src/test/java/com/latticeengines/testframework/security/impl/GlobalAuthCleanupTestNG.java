@@ -45,7 +45,7 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
-import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
+import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-testframework-cleanup-context.xml" })

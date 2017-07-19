@@ -244,14 +244,7 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
             <version>${le.testframework.version}</version>
-            <classifier>tests</classifier>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-transform</artifactId>
-            <version>${le.transform.version}</version>
         </dependency>
 
         <dependency>

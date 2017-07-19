@@ -27,7 +27,7 @@ import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiTestUtils;
 import com.latticeengines.scoringapi.functionalframework.TestModelSummaryParser;
-import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
+import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 
 public class TestRegisterModels {
 

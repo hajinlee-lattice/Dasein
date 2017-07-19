@@ -167,13 +167,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
             <scope>runtime</scope>
@@ -183,13 +176,6 @@
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
             <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -211,19 +197,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-transform</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-swlib</artifactId>
-            <version>${le.swlib.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-scoringapi</artifactId>
-            <version>${le.scoringapi.version}</version>
-            <classifier>intf</classifier>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
@@ -276,19 +249,6 @@
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>${commons.fileupload.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${le.testfwk.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${le.testfwk.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -373,6 +333,42 @@
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson.fasterxml.version}</version>
         </dependency>
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testfwk.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-swlib</artifactId>
+            <version>${le.swlib.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scoringapi</artifactId>
+            <version>${le.scoringapi.version}</version>
+            <classifier>intf</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+
+
     </dependencies>
 
 </project>

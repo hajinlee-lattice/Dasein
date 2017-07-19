@@ -41,8 +41,8 @@ import com.latticeengines.metadata.hive.util.HiveUtils;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
-import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-metadata-context.xml", "classpath:metadata-aspects-context.xml" })

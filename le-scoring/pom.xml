@@ -309,37 +309,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
-            <classifier>intf</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.googlecode.json-simple</groupId>
-                    <artifactId>json-simple</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
-            <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.googlecode.json-simple</groupId>
-                    <artifactId>json-simple</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-quartzclient</artifactId>
             <version>${le.quartzclient.version}</version>
         </dependency>
@@ -358,25 +327,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scoringapi</artifactId>
             <version>${le.scoringapi.version}</version>
             <classifier>intf</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${le.testframework.version}</version>
-            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>

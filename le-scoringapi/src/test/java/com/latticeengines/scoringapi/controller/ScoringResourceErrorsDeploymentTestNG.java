@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
-import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
+import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 
 public class ScoringResourceErrorsDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 

@@ -25,8 +25,8 @@ import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
-import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
-import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBed;
+import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
+import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 

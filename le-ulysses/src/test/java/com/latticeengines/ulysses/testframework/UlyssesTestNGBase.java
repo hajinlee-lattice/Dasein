@@ -13,7 +13,7 @@ import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })

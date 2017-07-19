@@ -6,7 +6,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Listeners;
 
-import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })

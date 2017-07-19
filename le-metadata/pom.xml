@@ -212,19 +212,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${le.testfwk.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${le.testfwk.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-remote</artifactId>
             <version>${le.remote.version}</version>
             <scope>test</scope>

@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.security.impl;
+package com.latticeengines.testframework.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,10 +45,10 @@ import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
+import com.latticeengines.testframework.exposed.proxy.AdminInternalProxy;
+import com.latticeengines.testframework.exposed.proxy.AdminTenantProxy;
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
-import com.latticeengines.testframework.proxy.AdminInternalProxy;
-import com.latticeengines.testframework.proxy.AdminTenantProxy;
-import com.latticeengines.testframework.security.GlobalAuthTestBed;
 
 @SuppressWarnings("deprecation")
 public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed implements GlobalAuthTestBed {

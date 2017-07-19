@@ -29,8 +29,8 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.testframework.security.GlobalAuthTestBed;
-import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })

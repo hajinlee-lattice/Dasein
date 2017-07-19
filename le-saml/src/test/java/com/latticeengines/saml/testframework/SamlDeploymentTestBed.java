@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
-import com.latticeengines.testframework.security.GlobalAuthTestBed;
-import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
+import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
 @Component
 public class SamlDeploymentTestBed extends SamlTestBed {

@@ -11,8 +11,8 @@ import org.testng.annotations.Listeners;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
-import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
-import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBed;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })

@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.rest;
+package com.latticeengines.testframework.exposed.rest;
 
 import javax.servlet.http.HttpServlet;
 
