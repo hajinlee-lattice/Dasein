@@ -102,26 +102,26 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         secondConsolidate();
         secondProfile();
 
+        thirdConsolidate();
+
         querySegment();
     }
 
     private void importData() throws Exception {
         mockAvroData(0, 300);
         Thread.sleep(2000);
-        mockAvroData(300, 300);
+        mockAvroData(300, 200);
         Thread.sleep(2000);
+        mockAvroData(500, 200);
         dataFeedProxy.updateDataFeedStatus(mainTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
     private void initialConsolidate() {
-        log.info("Start consolidating data ...");
+        log.info("Start consolidating ...");
         ApplicationId appId = cdlProxy.consolidate(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
-        verifyFirstConsolidate();
-    }
 
-    private void verifyFirstConsolidate() {
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
         Assert.assertEquals(numAccounts, 300);
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
@@ -129,7 +129,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void firstProfile() throws IOException {
-        log.info("Start profiling data collection ...");
+        log.info("Start profiling ...");
         ApplicationId appId = cdlProxy.profile(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
@@ -164,7 +164,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void importSecondData() throws Exception {
-        mockAvroData(600, 400);
+        mockAvroData(700, 300);
     }
 
     private void secondConsolidate() {
@@ -172,15 +172,11 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         ApplicationId appId = cdlProxy.consolidate(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
-        verifySecondConsolidate();
-    }
 
-
-    private void verifySecondConsolidate() {
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
-        Assert.assertEquals(numAccounts, 1000);
+        Assert.assertEquals(numAccounts, 700);
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
-        Assert.assertEquals(numContacts, 1000);
+        Assert.assertEquals(numContacts, 700);
     }
 
     private void secondProfile() {
@@ -188,9 +184,29 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         ApplicationId appId = cdlProxy.profile(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifySecondProfile();
     }
 
     private void verifySecondProfile() {
+        String customerSpace = CustomerSpace.parse(mainTenant.getId()).toString();
+        Table bucketedAccountTable = dataCollectionProxy.getTable(customerSpace,
+                BusinessEntity.Account.getServingStore());
+        Assert.assertNotNull(bucketedAccountTable);
+        Table bucketedContactTable = dataCollectionProxy.getTable(customerSpace,
+                BusinessEntity.Contact.getServingStore());
+        Assert.assertNotNull(bucketedContactTable);
+    }
+
+    private void thirdConsolidate() {
+        log.info("Start third consolidating ...");
+        ApplicationId appId = cdlProxy.consolidate(mainTenant.getId());
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
+        Assert.assertEquals(numAccounts, 1000);
+        long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
+        Assert.assertEquals(numContacts, 1000);
     }
 
     private void querySegment() {
