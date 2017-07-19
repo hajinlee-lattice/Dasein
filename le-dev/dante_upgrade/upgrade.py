@@ -25,25 +25,33 @@ def main():
 
     admin_login()
 
-    dante = export_dante_tree(args.tenant)
     logger.info('Back up current Dante configurations.')
+    dante = export_dante_tree(args.tenant)
+
+    logger.info('Back up current full contract configurations.')
+    contract = export_contract_tree(args.tenant)
 
     state = admin_get_bootstrap_state(args.tenant)
     if state == BOOTSTRAP_OK or state == BOOTSTRAP_ERROR:
         raise Exception('Bootstrap State is already %s!' % state)
 
     logger.info('Current bootstrap state is %s' % state)
+    try:
+        logger.info('Recursively remove contract %s from ZK' % args.tenant)
+        delete_contract(args.tenant)
 
-    template = post_body_template()
-    template = template.replace('{% LatticeAdminEmails %}', pls_lattice_admins().replace('"', '\\\"'))
-    template = template.replace('{% SuperAdminEmails %}', pls_super_admins().replace('"', '\\\"'))
-    template = template.replace('{% TenantName %}', args.tenant)
-    admin_create_tenant(args.tenant, template)
+        template = post_body_template()
+        template = template.replace('{% LatticeAdminEmails %}', pls_lattice_admins().replace('"', '\\\"'))
+        template = template.replace('{% SuperAdminEmails %}', pls_super_admins().replace('"', '\\\"'))
+        template = template.replace('{% TenantName %}', args.tenant)
+        admin_create_tenant(args.tenant, template)
 
-    wait_bootstrap_ok(args.tenant)
-    logger.info('Successfully bootstrapped [%s]' % args.tenant)
-    import_dante_tree(args.tenant, dante)
-    logger.info('Restore original Dante configurations.')
+        wait_bootstrap_ok(args.tenant)
+        logger.info('Successfully bootstrapped [%s]' % args.tenant)
+        import_dante_tree(args.tenant, dante)
+    except Exception as e:
+        restore_contract(args.tenant, contract)
+        raise e
 
 
 def default_config_tree(service):
@@ -65,7 +73,21 @@ def export_dante_tree(tenant):
     return ZK.export_tree(node)
 
 def import_dante_tree(tenant, tree):
+    logger.info('Restore Dante configurations.')
     node = "%s/Contracts/%s/Tenants/%s/Spaces/Production/Services" % (pod_path(), tenant, tenant)
+    return ZK.import_tree(tree, node)
+
+def export_contract_tree(tenant):
+    node = "%s/Contracts/%s" % (pod_path(), tenant)
+    return ZK.export_tree(node)
+
+def delete_contract(tenant):
+    node = "%s/Contracts/%s" % (pod_path(), tenant)
+    ZK.delete_recursive(node)
+
+def restore_contract(tenant, tree):
+    logger.info('Restore contract configurations.')
+    node = "%s/Contracts" % pod_path()
     return ZK.import_tree(tree, node)
 
 def pod_path():
@@ -112,6 +134,9 @@ def admin_create_tenant(tenant, body):
                                    headers={'Authorization': AD_TOKEN, 'Content-Type':'application/json',
                                             'Accept':'application/json'} )
     logger.info(resp)
+    if resp['status'] != '200':
+        logger.error(content)
+        raise Exception('Error bootstrap tenant via tenant console.')
 
 def admin_get_tenant(tenant):
     url = admin_url('/tenants/%s?contractId=%s' % (tenant, tenant))
