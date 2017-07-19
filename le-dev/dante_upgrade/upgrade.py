@@ -45,7 +45,7 @@ def main():
         template = template.replace('{% SuperAdminEmails %}', pls_super_admins().replace('"', '\\\"'))
         template = template.replace('{% TenantName %}', args.tenant)
         admin_create_tenant(args.tenant, template)
-
+        fake_dante_status(template)
         wait_bootstrap_ok(args.tenant)
         logger.info('Successfully bootstrapped [%s]' % args.tenant)
         import_dante_tree(args.tenant, dante)
@@ -76,6 +76,11 @@ def import_dante_tree(tenant, tree):
     logger.info('Restore Dante configurations.')
     node = "%s/Contracts/%s/Tenants/%s/Spaces/Production/Services" % (pod_path(), tenant, tenant)
     return ZK.import_tree(tree, node)
+
+def fake_dante_status(tenant):
+    logger.info('Restore Dante configurations.')
+    node = "%s/Contracts/%s/Tenants/%s/Spaces/Production/Services/Dante/state.json" % (pod_path(), tenant, tenant)
+    return ZK.create_recursive(node, '{"state":"OK","desiredVersion":1,"installedVersion":1,"errorMessage":null}', zc.zk.OPEN_ACL_UNSAFE)
 
 def export_contract_tree(tenant):
     node = "%s/Contracts/%s" % (pod_path(), tenant)
