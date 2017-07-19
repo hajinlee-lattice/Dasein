@@ -22,7 +22,14 @@
                             <ul class="controls">
                                 <li ng-if="!vm.play.segment"><a ui-sref="home.playbook.dashboard.segment({play_name: vm.play.name})">Add</a></li>
                                 <li ng-if="vm.play.segment"><a ui-sref="home.playbook.dashboard.segment({play_name: vm.play.name})">Change</a></li>
-                                <li ng-if="vm.play.segment"><button class="button white-button" ng-click="vm.removeSegment(vm.play)">X</button></li>
+                                <li ng-if="vm.play.segment" ng-init="showRemoveSegmentModal = false">
+                                    <button class="button white-button" ng-click="showRemoveSegmentModal = !showRemoveSegmentModal">X</button>
+                                    <div class="confirmModal" ng-show="showRemoveSegmentModal">
+                                        Remove Segment?
+                                        <button class="button orange-button" ng-click="vm.removeSegment(vm.play); showRemoveSegmentModal = false">Remove</button>
+                                        <button class="button white-button" ng-click="showRemoveSegmentModal = false">Cancel</button>
+                                    </div>
+                                </li>
                             </ul>
                         </div>
                         <div>

@@ -19,26 +19,32 @@
 
         .tp-entry {
             position: relative;
-            &:hover {
-                .tp-entry-sort {
-                    opacity: 1;
-                }
-            }
         }
-
-        .tp-entry-sort {
-            opacity: 0;
+        .controls {
             position: absolute;
             left: 340px;
             top: 8px;
-            div {
-                height: 1em;
-                opacity: 0.7;
-                &:hover {
-                    opacity: 1;
+            @include flex-container;
+            & > li {
+                @include flex-item(0 1 auto);
+                margin: 0 10px;
+                &.tp-entry-sort {
+                    div {
+                        height: 1em;
+                        i {
+                            cursor: pointer;
+                            opacity: .5;
+                            &:hover {
+                                opacity: 1;
+                            }
+                        }
+                    }
                 }
-                i {
-                    cursor: pointer;
+                &.tp-created {
+                    time {
+                        font-weight: bold;
+                        font-size: .9em;
+                    }
                 }
             }
         }

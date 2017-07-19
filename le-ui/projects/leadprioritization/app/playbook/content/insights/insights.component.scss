@@ -1,5 +1,13 @@
 .playbook-insights {
-	h2 {
-	    background-image: url('/assets/images/ico-insights.png');
-	}
+    .header {
+        margin-bottom: 20px;
+        h2 {
+            background-image: url('/assets/images/ico-insights.png');
+        }
+        p {
+            em {
+                color: #d22128;
+            }
+        }
+    }
 }
