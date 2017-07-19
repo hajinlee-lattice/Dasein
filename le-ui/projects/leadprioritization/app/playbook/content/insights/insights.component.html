@@ -8,7 +8,7 @@
                     <em ng-if="vm.stateParams.section === 'dashboard.insights'">Keep in mind changes you make will overwrite changes made by other users.</em>
                 </p>
             </div>
-            <div ng-repeat="tp in vm.talkingPoints | orderBy:'Offset'" class="tp-entry">
+            <div ng-repeat="tp in vm.talkingPoints | orderBy:'offset'" class="tp-entry">
                 <cg-talking-point-editor
                     tp="tp"
                     on-delete="vm.onDelete($index)">
@@ -22,8 +22,8 @@
                             <i class="fa fa-arrow-down" ng-if="$index < vm.talkingPoints.length - 1" ng-click="vm.reorder($index, $index + 1)"></i>
                         </div>
                     </li>
-                    <li class="tp-created">
-                        <time>{{tp.created-1000|date:'M/d/yyyy h:mm a'}}</time>
+                    <li class="tp-created" ng-if="!tp.IsNew">
+                        <time>Created {{tp.created-1000|date:'M/d/yyyy h:mm a'}}</time>
                     </li>
                 </ul>
             </div>

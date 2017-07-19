@@ -16,7 +16,7 @@ angular.module('lp.playbook.dashboard', [
 
     $q.when($stateParams.play_name, function() {
         if(play_name) {
-            PlaybookWizardStore.getPlayLaunches(play_name).then(function(results){
+            PlaybookWizardStore.getPlayLaunches(play_name, 'Launched').then(function(results){
                 vm.launchHistory = results;
             });
 
@@ -28,6 +28,10 @@ angular.module('lp.playbook.dashboard', [
 
     vm.removeSegment = function(play) {
         PlaybookWizardStore.removeSegment(play);
+    }
+
+    vm.launchPlay = function(play_name) {
+        PlaybookWizardStore.nextLaunch();
     }
 
     vm.makeRatingsGraph = function(ratings) {

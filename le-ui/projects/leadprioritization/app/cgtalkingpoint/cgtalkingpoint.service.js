@@ -157,11 +157,11 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         var talkingPoint = {},
             ISOdate = (opts.timestamp ? new Date(opts.timestamp).toISOString() : '');
 
-        talkingPoint.created = opts.creationDate || ISOdate;
+        talkingPoint.created = opts.creationDate || opts.timestamp;
         //talkingPoint.customerID = opts.customerID; //tenant id and will be removed eventially
         talkingPoint.name = opts.externalID || 'fakeId' + Math.round((Math.random()*10)*10000); // this will be removed someday I assume since this is supposed to be an internal id made by backend
         talkingPoint.playname = opts.playExternalID; // play_name (which is the play id)
-        talkingPoints.pid = opts.pid;
+        talkingPoint.pid = opts.pid;
         talkingPoint.offset = opts.offset;
         talkingPoint.title = opts.oitle;
         talkingPoint.content = opts.content;

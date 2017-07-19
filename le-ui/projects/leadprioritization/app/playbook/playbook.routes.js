@@ -104,6 +104,9 @@ angular
         })
         .state('home.playbook.dashboard.insights.preview', {
             url: '/preview',
+            params: {
+                section: 'dashboard.insights.preview'
+            },
             resolve: {
                 Play: function(PlaybookWizardStore, $stateParams) {
                     return PlaybookWizardStore.getPlay($stateParams.play_name);
@@ -140,6 +143,9 @@ angular
         })
         .state('home.playbook.dashboard.targets', {
             url: '/targets',
+            params: {
+                section: 'dashboard.targets'
+            },
             resolve: {
                 LoadDemoData: function(QueryStore) {
                     return QueryStore.loadData();

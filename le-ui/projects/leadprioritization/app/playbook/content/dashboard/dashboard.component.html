@@ -6,7 +6,6 @@
                 <div class="dashboard-section-container">
                     <div class="dashboard-section-header">
                         <h2>{{ vm.play.display_name||'Play Name' }}</h2>
-                        Created by {{vm.play.createdBy}} on <time>{{vm.play.timestamp-1000|date:'M/d/yyyy'}}</time>
                     </div>
                     <div class="dashboard-section-content">
                         <p>
@@ -99,7 +98,7 @@
                     </div>
                     <div class="dashboard-section-footer">
                         <span ng-if="vm.play.timestamp">Created {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
-                        <button class="button blue-button">Launch</button>
+                        <button class="button blue-button" ng-click="vm.launchPlay()">Launch</button>
                     </div>
                 </div>
             </div>

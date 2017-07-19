@@ -43,7 +43,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
 
     if ($scope.tp.IsNew === true) {
         vm.expanded = true;
-        delete $scope.tp.IsNew;
+        //delete $scope.tp.IsNew;
     }
 
     vm.expand = function() {

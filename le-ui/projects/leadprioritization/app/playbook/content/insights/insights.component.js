@@ -15,7 +15,7 @@ angular.module('lp.playbook.wizard.insights', [])
 
     vm.addTalkingPoint = function() {
         var talkingPoint = CgTalkingPointStore.generateTalkingPoint({
-                timestamp: new Date().getTime(), 
+                timestamp: new Date().getTime(),
                 customerID: BrowserStorageUtility.getClientSession().Tenant.Identifier,
                 playExternalID: $stateParams.play_name,
                 title: null, 

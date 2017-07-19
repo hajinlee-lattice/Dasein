@@ -21,10 +21,11 @@
             position: relative;
         }
         .controls {
+            @include flex-container;
             position: absolute;
             left: 340px;
-            top: 8px;
-            @include flex-container;
+            top: 0;
+            bottom: 0;
             & > li {
                 @include flex-item(0 1 auto);
                 margin: 0 10px;
@@ -44,6 +45,10 @@
                     time {
                         font-weight: bold;
                         font-size: .9em;
+                        display: block;
+                        position: relative;
+                        top: 50%;
+                        transform: translateY(-50%);
                     }
                 }
             }

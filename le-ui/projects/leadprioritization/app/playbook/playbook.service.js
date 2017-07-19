@@ -1,5 +1,5 @@
 angular.module('lp.playbook')
-.service('PlaybookWizardStore', function($q, $state, PlaybookWizardService, CgTalkingPointStore){
+.service('PlaybookWizardStore', function($q, $state, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility){
     var PlaybookWizardStore = this;
 
     this.settings = this.settings || {};
@@ -187,6 +187,8 @@ angular.module('lp.playbook')
 
     this.savePlay = function(opts) {
         var deferred = $q.defer();
+        var ClientSession = BrowserStorageUtility.getClientSession();
+        opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
         PlaybookWizardService.savePlay(opts).then(function(data){
             deferred.resolve(data);
             PlaybookWizardStore.setPlay(data);
@@ -199,12 +201,12 @@ angular.module('lp.playbook')
         });
     }
 
-    this.getPlayLaunches = function(play_name) {
+    this.getPlayLaunches = function(play_name, launch_state) {
         var deferred = $q.defer();
         if(this.playLaunches) {
             return this.playLaunches;
         } else {
-            PlaybookWizardService.playLaunches(play_name).then(function(data){
+            PlaybookWizardService.playLaunches(play_name, launch_state).then(function(data){
                 deferred.resolve(data);
             });
             return deferred.promise;
@@ -212,10 +214,10 @@ angular.module('lp.playbook')
     }
     this.launchPlay = function(play) {
         var deferred = $q.defer();
-        console.log(play);
         PlaybookWizardService.launchPlay(play).then(function(data){
             deferred.resolve(data);
             PlaybookWizardStore.setPlay(data);
+            console.log('launched:',data);
         });
         return deferred.promise;
     }
@@ -320,11 +322,15 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    this.playLaunches = function(play_name) {
+    this.playLaunches = function(play_name, launch_state) {
         var deferred = $q.defer();
         $http({
             method: 'GET',
-            url: this.host + '/play/' + play_name + '/launches'
+            url: this.host + '/play/' + play_name + '/launches',
+            params: {
+                playName: play_name,
+                launchStates: launch_state || 'Launched'
+            }
         }).then(function(response){
             deferred.resolve(response.data);
         });
@@ -338,9 +344,8 @@ angular.module('lp.playbook')
             method: 'POST',
             url: this.host + '/play/' + play_name + '/launches',
             data: {
-                name: play.name,
-                description: play.description,
-                segment: play.segment
+                playName: play.name,
+                playLaunch: play
             }
         }).then(function(response){
             deferred.resolve(response.data);
