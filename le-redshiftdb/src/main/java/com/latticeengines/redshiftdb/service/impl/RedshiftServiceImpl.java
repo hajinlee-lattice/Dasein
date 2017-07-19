@@ -44,6 +44,7 @@ public class RedshiftServiceImpl implements RedshiftService {
 
     @Override
     public void loadTableFromAvroInS3(String tableName, String s3bucket, String avroS3Prefix, String jsonPathS3Prefix) {
+        log.info(String.format("Loading date into %s from S3 bucket %s/%s", tableName, s3bucket, avroS3Prefix));
         String statement = "COPY %s\n" //
                 + "FROM '%s'\n" //
                 + "CREDENTIALS 'aws_access_key_id=%s;aws_secret_access_key=%s'\n" //
@@ -97,6 +98,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     public void updateExistingRowsFromStagingTable(String stageTableName, String targetTableName,
             String... joinFields) {
         try {
+            log.info(String.format("Inserting %s using %s", targetTableName, stageTableName));
             StringBuffer sb = new StringBuffer();
             sb.append("BEGIN TRANSACTION;");
             sb.append(RedshiftUtils.updateExistingRowsFromStagingTableStatement(stageTableName, targetTableName,
@@ -111,6 +113,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void replaceTable(String stageTableName, String targetTableName) {
         try {
+            log.info(String.format("Replacing %s with %s", targetTableName, stageTableName));
             StringBuffer sb = new StringBuffer();
             sb.append("BEGIN TRANSACTION;");
             sb.append(RedshiftUtils.dropTableStatement(targetTableName));
