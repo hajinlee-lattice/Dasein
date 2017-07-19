@@ -310,7 +310,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
             case SEGMENT_PROFILE:
                 log.info(String.format("Start to verify intermediate source %s", source));
                 Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
-                List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(null,
+                List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
                         DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER);
                 String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators" };
                 Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));
@@ -388,7 +388,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         try {
             log.info("Start to verify records one by one.");
             Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
-            List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(null,
+            List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
                     DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER);
             String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent",
                     "BmbrSurge_CompositeScore" };
@@ -451,6 +451,9 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                         Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
                         Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
                                 "null,Very Low,Low,Medium,High,Very High");
+                        Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
+                        Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                        Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
                         break;
                     case "BmbrSurge_CompositeScore":
                         if (bktAlgo == null) {

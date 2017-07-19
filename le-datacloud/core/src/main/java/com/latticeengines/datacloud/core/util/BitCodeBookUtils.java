@@ -17,9 +17,12 @@ public class BitCodeBookUtils {
     private static Log log = LogFactory.getLog(BitCodeBookUtils.class);
 
     /**
-     * @param codeBookMap (empty map)
-     * @param codeBookLookup (empty map)
-     * @param decodeStrs (decodedAttr -> decodeStrategy)
+     * @param codeBookMap
+     *            (empty map)
+     * @param codeBookLookup
+     *            (empty map)
+     * @param decodeStrs
+     *            (decodedAttr -> decodeStrategyStr)
      */
     public static void constructCodeBookMap(Map<String, BitCodeBook> codeBookMap, Map<String, String> codeBookLookup,
             Map<String, String> decodeStrs) {

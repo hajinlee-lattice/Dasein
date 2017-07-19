@@ -76,7 +76,7 @@ def register_amprofile(conn, version):
             INNER JOIN LDC_ManageDB.AccountMasterColumn rhs
 			ON lhs.Attribute = rhs.AMColumnID AND rhs.DataCloudVersion = '%s'
             SET lhs.Arguments = CONCAT('{"IsProfile":true,"DecodeStrategy":',rhs.DecodeStrategy,
-				  CASE WHEN rhs.DecodeStrategy LIKE '%%BOOLEAN_YESNO%%' THEN ',"NumBits":2,"BktAlgo":"BooleanBucket"}'
+				  CASE WHEN rhs.DecodeStrategy LIKE '%%BOOLEAN_YESNO%%' THEN ',"BktAlgo":"BooleanBucket"}'
                        WHEN rhs.DecodeStrategy LIKE '%%ENUM_STRING%%' THEN ',"BktAlgo":"CategoricalBucket"}'
                        WHEN rhs.DecodeStrategy LIKE '%%NUMERIC_UNSIGNED_INT%%' OR rhs.DecodeStrategy LIKE '%%NUMERIC_INT%%' THEN ',"BktAlgo":"IntervalBucket"}'
 				  ELSE '}' 

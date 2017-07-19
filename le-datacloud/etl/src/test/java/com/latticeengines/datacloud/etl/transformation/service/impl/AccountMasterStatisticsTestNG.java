@@ -44,10 +44,12 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         // correctness is tested in the dataflow functional test
         log.info("Start to verify records one by one.");
-//        while (records.hasNext()) {
-//            GenericRecord record = records.next();
-//            System.out.println(record);
-//        }
+        /*
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            System.out.println(record);
+        }
+        */
     }
 
     @Override
