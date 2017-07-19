@@ -5,12 +5,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.annotation.MatchStep;
@@ -98,7 +98,10 @@ public class MatchStepAspect {
         for (Object arg : args) {
             if (arg instanceof MatchContext) {
                 MatchContext matchContext = (MatchContext) arg;
-                return matchContext.getOutput().getRootOperationUID();
+                if (matchContext.getInput() != null
+                        && StringUtils.isNotEmpty(matchContext.getInput().getRootOperationUid())) {
+                    return matchContext.getInput().getRootOperationUid();
+                }
             } else if (arg instanceof MatchOutput) {
                 MatchOutput output = (MatchOutput) arg;
                 if (StringUtils.isNotEmpty(output.getRootOperationUID())) {
