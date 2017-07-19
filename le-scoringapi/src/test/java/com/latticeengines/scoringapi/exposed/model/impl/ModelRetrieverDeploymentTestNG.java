@@ -27,8 +27,6 @@ public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeployme
 
     @Test(groups = "deployment", enabled = true)
     public void testRetrieveModelArtifacts() throws Exception {
-        tenant = setupTenantAndModelSummary(false);
-
         ScoringArtifacts artifacts = modelRetriever.getModelArtifacts(customerSpace, MODEL_ID);
         testArtifacts(artifacts);
         // Fetch the artifacts second time directly from the cache

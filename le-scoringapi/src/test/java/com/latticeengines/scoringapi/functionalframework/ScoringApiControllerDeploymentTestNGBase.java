@@ -12,16 +12,19 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -45,7 +48,10 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
+import com.latticeengines.testframework.security.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
 
+@Listeners({ GlobalAuthCleanupTestListener.class })
 public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunctionalTestNGBase {
 
     protected static final String TEST_MODEL_FOLDERNAME = "3MulesoftAllRows20160314_112802";
@@ -54,18 +60,19 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected static final String MODEL_NAME = TEST_MODEL_FOLDERNAME;
     protected static final String LOCAL_MODEL_PATH = "com/latticeengines/scoringapi/model/" + TEST_MODEL_FOLDERNAME
             + "/";
-    protected static final String TENANT_ID = "ScoringApiTestTenant.ScoringApiTestTenant.Production";
+    // protected static final String TENANT_ID =
+    // "ScoringApiTestTenant.ScoringApiTestTenant.Production";
     protected static final String APPLICATION_ID = "application_1457046993615_3821";
     protected static final String PARSED_APPLICATION_ID = "1457046993615_3821";
     protected static final String MODEL_VERSION = "8ba99b36-c222-4f93-ab8a-6dcc11ce45e9";
     protected static final String EVENT_TABLE = TEST_MODEL_FOLDERNAME;
     protected static final String SOURCE_INTERPRETATION = "SalesforceLead";
-    public static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
     protected static final String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
     private static final Logger log = LoggerFactory.getLogger(ScoringApiControllerDeploymentTestNGBase.class);
 
     private static final String CLIENT_ID_LP = "lp";
     private static final String DUMMY_APP_ID = "DUMMY_APP";
+    public CustomerSpace customerSpace;
 
     @Value("${common.test.scoringapi.url}")
     protected String apiHostPort;
@@ -81,6 +88,10 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
     @Autowired
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
+
+    @Autowired
+    @Qualifier(value = "deploymentTestBed")
+    protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     protected OAuthUserEntityMgr userEntityMgr;
 
@@ -106,9 +117,13 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     public void beforeClass() throws IOException {
         testModelSummaryParser = new TestModelSummaryParser();
 
+        plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
+        tenant = setupTenantAndModelSummary(true);
+        setupHdfsArtifacts(tenant);
+
         if (shouldInit()) {
             userEntityMgr = applicationContext.getBean(OAuthUserEntityMgr.class);
-            oAuthUser = getOAuthUser(TENANT_ID);
+            oAuthUser = getOAuthUser(tenant.getId());
 
             if (shouldUseAppId()) {
                 System.out.println("Requesting access token for appi id: " + getAppIdForOauth2());
@@ -123,10 +138,6 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
 
             System.out.println(accessToken.getValue());
         }
-
-        plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
-        tenant = setupTenantAndModelSummary(true);
-        setupHdfsArtifacts(tenant);
 
         if (shouldSelectAttributeBeforeTest()) {
             internalResourceRestApiProxy = new InternalResourceRestApiProxy(plsApiHostPort);
@@ -143,6 +154,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         if (userEntityMgr != null) {
             userEntityMgr.delete(oAuthUser.getUserId());
         }
+        deploymentTestBed.deleteTenant(tenant);
     }
 
     protected OAuthUser getOAuthUser(String userId) {
@@ -211,13 +223,10 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     }
 
     protected Tenant setupTenantAndModelSummary(boolean includeApplicationId) throws IOException {
-        String tenantId = TENANT_ID;
-        Tenant tenant = new Tenant();
-        tenant.setId(tenantId);
-        tenant.setName(tenantId);
-        plsRest.deleteTenant(customerSpace);
-        plsRest.createTenant(tenant);
 
+        Tenant tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.LPA3);
+        deploymentTestBed.switchToSuperAdmin();
+        customerSpace = CustomerSpace.parse(tenant.getId());
         ModelSummary modelSummary = ModelSummaryUtils.generateModelSummary(tenant, MODELSUMMARYJSON_LOCALPATH);
         if (includeApplicationId) {
             modelSummary.setApplicationId(APPLICATION_ID);
@@ -225,7 +234,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         modelSummary.setEventTableName(EVENT_TABLE);
         modelSummary.setId(MODEL_ID);
         modelSummary.setDisplayName(MODEL_NAME);
-        modelSummary.setLookupId(String.format("%s|%s|%s", TENANT_ID, EVENT_TABLE, MODEL_VERSION));
+        modelSummary.setLookupId(String.format("%s|%s|%s", tenant.getId(), EVENT_TABLE, MODEL_VERSION));
         modelSummary.setSourceSchemaInterpretation(SOURCE_INTERPRETATION);
         modelSummary.setStatus(ModelSummaryStatus.ACTIVE);
         modelSummary.setModelType("DUMMY_MODEL_TYPE");
@@ -260,7 +269,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         InputStream rfpmmlUrl = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream(LOCAL_MODEL_PATH + ModelJsonTypeHandler.PMML_FILENAME);
         InputStream dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(LOCAL_MODEL_PATH + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+                .getResourceAsStream(
+                        LOCAL_MODEL_PATH + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         InputStream scoreDerivationUrl = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream(LOCAL_MODEL_PATH + ModelJsonTypeHandler.SCORE_DERIVATION_FILENAME);
 
@@ -289,7 +299,8 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         eventTableDataComposition = JsonUtils.deserialize(eventTableDataCompositionContents, DataComposition.class);
 
         dataScienceDataCompositionUrl = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(LOCAL_MODEL_PATH + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
+                .getResourceAsStream(
+                        LOCAL_MODEL_PATH + "datascience-" + ModelJsonTypeHandler.DATA_COMPOSITION_FILENAME);
         String dataScienceDataCompositionContents = IOUtils.toString(dataScienceDataCompositionUrl,
                 Charset.defaultCharset());
         dataScienceDataComposition = JsonUtils.deserialize(dataScienceDataCompositionContents, DataComposition.class);

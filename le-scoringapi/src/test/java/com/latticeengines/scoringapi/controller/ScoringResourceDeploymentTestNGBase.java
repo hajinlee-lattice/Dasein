@@ -384,10 +384,8 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId, modelVersion);
                 modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
                         (plsRest != null ? plsRest : this.plsRest), (tenant != null ? tenant : this.tenant),
-                        modelConfiguration,
-                        (customerSpace != null ? customerSpace
-                                : ScoringApiControllerDeploymentTestNGBase.customerSpace),
-                        metadataProxy, getTestModelSummaryParser(), hdfsSubPathForModel);
+                        modelConfiguration, (customerSpace != null ? customerSpace : this.customerSpace), metadataProxy,
+                        getTestModelSummaryParser(), hdfsSubPathForModel);
             } else {
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, modelId, applicationId,
                         modelVersion);
@@ -532,7 +530,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
         cloneRecord.setModelAttributeValuesMap(new HashMap<String, Map<String, Object>>());
         for (Entry<String, Map<String, Object>> entry : record.getModelAttributeValuesMap().entrySet()) {
             cloneRecord.getModelAttributeValuesMap().put(entry.getKey(), new HashMap<String, Object>());
-            for(Entry<String, Object> attr : entry.getValue().entrySet()) {
+            for (Entry<String, Object> attr : entry.getValue().entrySet()) {
                 cloneRecord.getModelAttributeValuesMap().get(entry.getKey()).put(attr.getKey(), attr.getValue());
             }
         }

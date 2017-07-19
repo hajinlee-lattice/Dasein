@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -25,7 +24,6 @@ import com.latticeengines.scoringapi.controller.ScoringResourceDeploymentTestNG;
 import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
 import com.latticeengines.scoringapi.controller.TestModelConfiguration;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
-import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.scoringapi.match.Matcher;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
@@ -89,8 +87,8 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
         init();
         request = getBulkScoreRequest(MAX_RECORD_COUNT, modelList, false);
         List<Record> records = request.getRecords();
-        CustomerSpace space = ScoringApiControllerDeploymentTestNGBase.customerSpace;
-        scoreRequestProcessorImpl.fetchModelArtifacts(space, records, uniqueScoringArtifactsMap, uniqueFieldSchemasMap);
+        scoreRequestProcessorImpl.fetchModelArtifacts(customerSpace, records, uniqueScoringArtifactsMap,
+                uniqueFieldSchemasMap);
         Assert.assertEquals(MAX_RECORD_COUNT, records.size());
         Assert.assertEquals(modelList.size(), uniqueScoringArtifactsMap.size());
         Assert.assertEquals(modelList.size(), uniqueFieldSchemasMap.size());
@@ -242,7 +240,7 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGenerateScoreResponse" })
     public void testBulkMatchAndJoinEnrichOnly() {
-         Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
+        Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
                 .getMatcher(true).matchAndJoin(customerSpace, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
                         originalOrderModelSummaryList, false, false, false, true, true, UUID.randomUUID().toString(),
                         matchLogMap, matchErrorLogMap);

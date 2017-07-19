@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -24,7 +23,6 @@ import com.latticeengines.scoringapi.controller.ScoringResourceDeploymentTestNGB
 import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
 import com.latticeengines.scoringapi.controller.TestModelConfiguration;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
-import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
 public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
@@ -88,8 +86,8 @@ public class SimpleScoreRequestProcessorDeploymentTestNG extends ScoringResource
         init();
         request = getBulkScoreRequest(MAX_RECORD_COUNT, modelList, false);
         List<Record> records = request.getRecords();
-        CustomerSpace space = ScoringApiControllerDeploymentTestNGBase.customerSpace;
-        scoreRequestProcessorImpl.fetchModelArtifacts(space, records, uniqueScoringArtifactsMap, uniqueFieldSchemasMap);
+        scoreRequestProcessorImpl.fetchModelArtifacts(customerSpace, records, uniqueScoringArtifactsMap,
+                uniqueFieldSchemasMap);
         Assert.assertEquals(MAX_RECORD_COUNT, records.size());
         Assert.assertEquals(modelList.size(), uniqueScoringArtifactsMap.size());
         Assert.assertEquals(modelList.size(), uniqueFieldSchemasMap.size());
