@@ -56,7 +56,7 @@ angular
             },
             views: {
                 "navigation@": {
-                    controller: function($scope, $stateParams) {
+                    controller: function($scope, $stateParams, $state) {
                         $scope.play_name = $stateParams.play_name || '';
                     },
                     templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
@@ -99,6 +99,24 @@ angular
                     // controller: 'PlaybookDashboardInsights',
                     // controllerAs: 'vm',
                     // templateUrl: 'app/playbook/content/insights_dashboard/insights_dashboard.component.html'
+                }
+            }
+        })
+        .state('home.playbook.dashboard.insights.preview', {
+            url: '/preview',
+            resolve: {
+                Play: function(PlaybookWizardStore, $stateParams) {
+                    return PlaybookWizardStore.getPlay($stateParams.play_name);
+                },
+                TalkingPointPreviewResources: function(CgTalkingPointStore) {
+                    return CgTalkingPointStore.getTalkingPointsPreviewResources();
+                }
+            },
+            views: {
+                'main@': {
+                    controller: 'PlaybookWizardPreview',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/playbook/content/preview/preview.component.html'
                 }
             }
         })

@@ -85,15 +85,15 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
     this.getDanteUrl = function() {
         var deferred = $q.defer();
-
         if (this.danteUrl !== null) {
             deferred.resolve(this.danteUrl);
         } else {
-            var self = this;
-            CgTalkingPointService.getDanteUrl().then(function(response) {
-                self.danteUrl = response.data;
-                deferred.resolve(self.danteUrl);
+        this.getTalkingPointsPreviewResources().then(function(data){
+            CgTalkingPointService.getDanteUrl(data).then(function(response) {
+                CgTalkingPointStore.danteUrl = response.data;
+                deferred.resolve(response.data);
             });
+        });
         }
 
         return deferred.promise;
@@ -130,9 +130,13 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     };
 
-    this.generateLeadPreviewObject = function(play_name) {
-        var PLACEHOLDER =UNKNOWN_UNTIL_LAUNCHED = null;
-        return {"context":"lpipreview","notion":"lead","notionObject":{"ExpectedValue":UNKNOWN_UNTIL_LAUNCHED,"ExternalProbability":UNKNOWN_UNTIL_LAUNCHED,"LastLaunched":UNKNOWN_UNTIL_LAUNCHED,"Lift":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketDisplayName":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketOffset":UNKNOWN_UNTIL_LAUNCHED,"ModelID":null,"Percentile":UNKNOWN_UNTIL_LAUNCHED,"PlayDescription":PLACEHOLDER,"PlayDisplayName":PLACEHOLDER,"PlayID":PLACEHOLDER,"PlaySolutionType":null,"PlayTargetProductName":"D200-L","PlayType":"crosssell","Probability":UNKNOWN_UNTIL_LAUNCHED,"Rank":2,"Theme":"Sell Secure Star into Impravata owners","TalkingPoints":null}};
+    this.generateLeadPreviewObject = function(opts) {
+        //return {"context":"lpipreview","notion":"lead","notionObject":{"ExpectedValue":UNKNOWN_UNTIL_LAUNCHED,"ExternalProbability":UNKNOWN_UNTIL_LAUNCHED,"LastLaunched":UNKNOWN_UNTIL_LAUNCHED,"Lift":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketDisplayName":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketOffset":UNKNOWN_UNTIL_LAUNCHED,"ModelID":null,"Percentile":UNKNOWN_UNTIL_LAUNCHED,"PlayDescription":PLACEHOLDER,"PlayDisplayName":PLACEHOLDER,"PlayID":PLACEHOLDER,"PlaySolutionType":null,"PlayTargetProductName":"D200-L","PlayType":"crosssell","Probability":UNKNOWN_UNTIL_LAUNCHED,"Rank":2,"Theme":"Sell Secure Star into Impravata owners","TalkingPoints":null}};
+        var deferred = $q.defer();
+        CgTalkingPointService.getPreviewObject(opts).then(function(data){
+            deferred.resolve(data.Result);
+        });
+        return deferred.promise;
     };
 
     this.generateTalkingPoint = function(opts) {
@@ -214,14 +218,37 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             deferred.resolve(response.data);
         });
         return deferred.promise;
-    }
+    };
 
-    this.getDanteUrl = function() {
+    this.getDanteUrl = function(previewResources) {
         var deferred = $q.defer();
+        //ben::remove
+        var sessionid = '0827b80d-02a7-422b-a8b5-3e1dd84dea69',//previewResources.oAuthToken, //'00D80000000KvZo!AR0AQBWNZUrIO9q.DjIjFdXYW0USIN0SBQWCVvx0hw6naKZrc374OdQVP24EvFxZiWbf00dNdHjlPGFEScO4BMstUYEJlvka',
+            preview_url = previewResources.danteUrl, //'https://localhost:44300/index.aspx',
+            server_url = 'https://testapi.lattice-engines.com/tenants/oauthtotenant', //previewResources.serverUrl, //https://leinstallation.na6.visual.force.com/services/Soap/u/9.0/00D80000000KvZo&CustomSettings={%22hideNavigation%22:true,%22HideTabs%22:true,%22HideHeader%22:true}&LpiPreview=true'
+            custom_settings_json = {
+                hideNavigation: true,
+                HideTabs: true,
+                HideHeader: true
+            },
+            custom_settings = JSON.stringify(custom_settings_json).replace(/\"/g,'%22');
 
-        var sessionid = '00D80000000KvZo!AR0AQBWNZUrIO9q.DjIjFdXYW0USIN0SBQWCVvx0hw6naKZrc374OdQVP24EvFxZiWbf00dNdHjlPGFEScO4BMstUYEJlvka';
-        deferred.resolve({data:'https://localhost:44300/index.aspx?sessionid='+sessionid+'&serverurl=https://leinstallation.na6.visual.force.com/services/Soap/u/9.0/00D80000000KvZo&CustomSettings={%22hideNavigation%22:true,%22HideTabs%22:true,%22HideHeader%22:true}&LpiPreview=true'});
+        deferred.resolve({data:preview_url + '?sessionid=' + sessionid + '&serverurl=' + server_url + '&CustomSettings=' + custom_settings + '&LpiPreview=true'});
 
+        return deferred.promise;
+    };
+
+    this.getPreviewObject = function(opts) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/dante/talkingpoints/preview',
+            params: {
+                playName: opts.playName
+            }
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
         return deferred.promise;
     };
 

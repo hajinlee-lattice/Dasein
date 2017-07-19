@@ -34,22 +34,22 @@ angular.module('lp.cg.talkingpoint.preview', [])
         iframe = $element.find('#tppreview_iframe')[0];
         window.addEventListener('message', handleLpiPreviewInit);
 
-        vm.leadPreviewObject = CgTalkingPointStore.generateLeadPreviewObject();
-        CgTalkingPointStore.getAccounts().then(function(accounts) {
-            console.log('getAccounts then 1');
-            vm.accounts = accounts;
+        CgTalkingPointStore.generateLeadPreviewObject({playName: $stateParams.play_name}).then(function(leadPreviewObject){
+            console.log(leadPreviewObject);
+            vm.leadPreviewObject = leadPreviewObject;
+            CgTalkingPointStore.getAccounts().then(function(accounts) {
+                vm.accounts = accounts;
 
-            return CgTalkingPointStore.getDanteUrl();
-        }).then(function(danteUrl) {
-            console.log('getAccounts then 2', danteUrl);
-            vm.sceIframeSrc = $sce.trustAsResourceUrl(danteUrl);
-        }).then(function() {
-            console.log('getAccounts then 3', vm.talkingPoints);
-            vm.selected = vm.accounts[0];
-            vm.leadPreviewObject.notionObject.SalesforceAccountID = vm.selected.id;
-            vm.leadPreviewObject.notionObject.PlayDisplayName = $scope.play.display_name;
-            vm.leadPreviewObject.notionObject.PlayDescription = $scope.play.description;
-            vm.leadPreviewObject.notionObject.TalkingPoints = vm.talkingPoints;
+                return CgTalkingPointStore.getDanteUrl();
+            }).then(function(danteUrl) {
+                vm.sceIframeSrc = $sce.trustAsResourceUrl(danteUrl);
+            }).then(function() {
+                vm.selected = vm.accounts[0];
+                vm.leadPreviewObject.notionObject.SalesforceAccountID = '00136000008Kpn3AAC';//vm.selected.id; ben::remove
+                vm.leadPreviewObject.notionObject.PlayDisplayName = $scope.play.display_name;
+                vm.leadPreviewObject.notionObject.PlayDescription = $scope.play.description;
+                vm.leadPreviewObject.notionObject.TalkingPoints = vm.talkingPoints;
+            });
         });
     };
 

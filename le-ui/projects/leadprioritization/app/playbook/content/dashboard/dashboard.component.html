@@ -6,17 +6,17 @@
                 <div class="dashboard-section-container">
                     <div class="dashboard-section-header">
                         <h2>{{ vm.play.display_name||'Play Name' }}</h2>
-                        Created by someone on <time>{{vm.play.timestamp-1000|date:'M/d/yyyy'}}</time>
+                        Created by {{vm.play.createdBy}} on <time>{{vm.play.timestamp-1000|date:'M/d/yyyy'}}</time>
                     </div>
                     <div class="dashboard-section-content">
                         <p>
                             {{vm.play.description}}
                         </p>
-                        <div class="dashboard-section-content-subsection rating_">
+                        <div class="dashboard-section-content-subsection rating_ has-icon">
                             <h4>Rating</h4>
-                            <h5>Rating name 1</h5>
+                            <h5>{{vm.play.rating[0].ratingName}}</h5>
                         </div>
-                        <div class="dashboard-section-content-subsection segment">
+                        <div class="dashboard-section-content-subsection segment has-icon">
                             <h4>Segment</h4>
                             <h5>{{vm.play.segment}}</h5>
                             <ul class="controls">
@@ -42,7 +42,7 @@
                         <h2>Insights</h2>
                     </div>
                     <div class="dashboard-section-content">
-                        <div class="dashboard-section-content-subsection talking-points">
+                        <div class="dashboard-section-content-subsection talking-points has-icon">
                             <h5>{{vm.talkingPoints.length||'No'}} talking points have been created</h5>
                             <ul class="controls">
                                 <li ng-if="!vm.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create</a></li>

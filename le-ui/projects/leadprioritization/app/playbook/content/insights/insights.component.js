@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.insights', [])
 .controller('PlaybookWizardInsights', function(
-    $scope, $stateParams, PlaybookWizardStore, CgTalkingPointStore, TalkingPointPreviewResources, TalkingPointAttributes, TalkingPoints, BrowserStorageUtility
+    $scope, $state, $stateParams, PlaybookWizardStore, CgTalkingPointStore, TalkingPointPreviewResources, TalkingPointAttributes, TalkingPoints, BrowserStorageUtility
 ) {
     var vm = this;
 
@@ -28,7 +28,9 @@ angular.module('lp.playbook.wizard.insights', [])
 
     vm.saveTalkingPoints = function() {
         // I was going to check to confirm there was a change first but offset always changes, so you can't compare ojects as it currently is so just always save
-        CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints);
+        CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints).then(function(results){
+            $state.go('home.playbook.dashboard.insights.preview', {play_name: $stateParams.play_name});
+        });
     }
 
     vm.onDelete = function(pos) {
