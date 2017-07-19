@@ -1,5 +1,6 @@
 package com.latticeengines.eai.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -7,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -87,8 +88,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             }
 
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
-            ConnectorConfiguration connectorConfiguration = importService
-                    .generateConnectorConfiguration("", context);
+            ConnectorConfiguration connectorConfiguration = importService.generateConnectorConfiguration("", context);
             List<Table> metadata = importService.importMetadata(sourceImportConfig, context, connectorConfiguration);
             tableMetadata.addAll(metadata);
 
@@ -171,20 +171,22 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             List<String> identifiers = JsonUtils.convertList(identifiersRaw, String.class);
             List<EaiImportJobDetail> jobDetails = new ArrayList<>();
             for (String collectionIdentifier : identifiers) {
-                EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailService.getImportJobDetail(collectionIdentifier);
+                EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailService
+                        .getImportJobDetail(collectionIdentifier);
                 if (eaiImportJobDetail != null) {
                     switch (eaiImportJobDetail.getStatus()) {
-                        case SUBMITTED:
-                            throw new LedpException(LedpCode.LEDP_18136);
-                        case RUNNING:
-                            throw new LedpException(LedpCode.LEDP_18137, new String[]{eaiImportJobDetail.getLoadApplicationId()});
-                        case SUCCESS:
-                            eaiImportJobDetail.setStatus(ImportStatus.SUBMITTED);
-                            eaiImportJobDetail.setCollectionTimestamp(new Date());
-                            eaiImportJobDetail.setProcessedRecords(0);
-                            eaiImportJobDetail.setSourceType(importConfig.getSourceConfigurations().get(0).getSourceType());
-                            eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
-                            break;
+                    case SUBMITTED:
+                        throw new LedpException(LedpCode.LEDP_18136);
+                    case RUNNING:
+                        throw new LedpException(LedpCode.LEDP_18137,
+                                new String[] { eaiImportJobDetail.getLoadApplicationId() });
+                    case SUCCESS:
+                        eaiImportJobDetail.setStatus(ImportStatus.SUBMITTED);
+                        eaiImportJobDetail.setCollectionTimestamp(new Date());
+                        eaiImportJobDetail.setProcessedRecords(0);
+                        eaiImportJobDetail.setSourceType(importConfig.getSourceConfigurations().get(0).getSourceType());
+                        eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
+                        break;
                     }
                 } else {
                     eaiImportJobDetail = new EaiImportJobDetail();
@@ -208,14 +210,18 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         return PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), space).toString();
     }
 
-    public void cleanUpTargetPathData(ImportContext context) throws Exception {
+    public void cleanUpTargetPathData(ImportContext context) {
         @SuppressWarnings("unchecked")
         Map<String, String> targetPaths = context.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
 
         if (targetPaths != null) {
             for (Map.Entry<String, String> entry : targetPaths.entrySet()) {
                 log.info("Table is： " + entry.getKey() + " Path is: " + entry.getValue());
-                HdfsUtils.rmdir(yarnConfiguration, StringUtils.substringBeforeLast(entry.getValue(), "/"));
+                try {
+                    HdfsUtils.rmdir(yarnConfiguration, StringUtils.substringBeforeLast(entry.getValue(), "/"));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

@@ -6,9 +6,9 @@ import java.io.IOException;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,12 +17,13 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.impl.s3.HdfsToS3ExportService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
 @Component("hdfsToRedshiftService")
-public class HdfsToRedshiftService {
+public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(HdfsToRedshiftService.class);
 
@@ -37,6 +38,26 @@ public class HdfsToRedshiftService {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Override
+    public void invoke(HdfsToRedshiftConfiguration configuration) {
+        if (!configuration.isSkipS3Upload()) {
+            cleanupS3(configuration);
+            setProgress(0.1f);
+            uploadJsonPathSchema(configuration);
+            setProgress(0.2f);
+            uploadDataObjectToS3(configuration);
+            setProgress(0.6f);
+        }
+        setProgress(0.65f);
+        if (configuration.isAppend()) {
+            copyToRedshift(configuration);
+        } else {
+            createRedshiftTableIfNotExist(configuration);
+            updateExistingRows(configuration);
+        }
+        setProgress(0.95f);
+    }
 
     public void uploadDataObjectToS3(HdfsToRedshiftConfiguration configuration) {
 

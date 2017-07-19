@@ -1,4 +1,4 @@
-package com.latticeengines.eai.yarn.runtime;
+package com.latticeengines.eai.service.impl.salesforce;
 
 import java.util.List;
 
@@ -8,10 +8,9 @@ import org.apache.camel.component.salesforce.SalesforceHttpClient;
 import org.apache.camel.component.salesforce.SalesforceLoginConfig;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -28,22 +27,17 @@ import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.config.HttpClientConfig;
-import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.routes.salesforce.SalesforceRouteConfig;
+import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.EaiZKService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
-import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
-@Component("importTableProcessor")
-public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportConfiguration>
-        implements ItemProcessor<ImportConfiguration, String>, ApplicationContextAware {
+@Component("salesforceToHdfsService")
+public class SalesforceToHdfsService extends EaiRuntimeService<ImportConfiguration> implements ApplicationContextAware {
 
-    private static final Logger log = LoggerFactory.getLogger(ImportTableProcessor.class);
-
-    private ApplicationContext applicationContext;
-
+    private static final Logger log = LoggerFactory.getLogger(SalesforceToHdfsService.class);
     @Autowired
     private DataExtractionService dataExtractionService;
 
@@ -53,8 +47,8 @@ public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportCon
     @Autowired
     private SalesforceComponent salesforce;
 
-    @Autowired
-    private MarketoRouteConfig marketoRouteConfig;
+    // @Autowired
+    // private MarketoRouteConfig marketoRouteConfig;
 
     @Autowired
     private SalesforceRouteConfig salesforceRouteConfig;
@@ -68,11 +62,17 @@ public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportCon
     @Autowired
     private EaiZKService eaiZKService;
 
-    @Override
-    public String process(ImportConfiguration importConfig) throws Exception {
-        CamelContext camelContext = constructCamelContext(importConfig);
-        camelContext.start();
+    private ApplicationContext applicationContext;
 
+    @Override
+    public void invoke(ImportConfiguration importConfig) {
+        CamelContext camelContext = null;
+        try {
+            camelContext = constructCamelContext(importConfig);
+            camelContext.start();
+        } catch (Exception e) {
+            throw new RuntimeException("can't start camel context", e);
+        }
         int i = 1;
         setProgress(0.05f * i);
         log.info("Routes are:" + camelContext.getRoutes());
@@ -94,11 +94,15 @@ public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportCon
             eaiMetadataService.registerTables(tableMetadata, importContext);
             setProgress(0.95f);
         } catch (Exception e) {
-            Thread.sleep(20000);
-            dataExtractionService.cleanUpTargetPathData(importContext);
+            try {
+                Thread.sleep(20000);
+                dataExtractionService.cleanUpTargetPathData(importContext);
+            } catch (Exception e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        return null;
     }
 
     private CamelContext constructCamelContext(ImportConfiguration importConfig) throws Exception {
@@ -131,7 +135,7 @@ public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportCon
 
         CamelContext camelContext = new SpringCamelContext(applicationContext);
         camelContext.addRoutes(salesforceRouteConfig);
-        camelContext.addRoutes(marketoRouteConfig);
+        // camelContext.addRoutes(marketoRouteConfig);
         return camelContext;
     }
 
@@ -139,4 +143,5 @@ public class ImportTableProcessor extends SingleContainerYarnProcessor<ImportCon
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
 }

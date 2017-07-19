@@ -20,10 +20,10 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +31,7 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
+import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 
 /**
  * This one was suppose to be a new type of camel route service, but the camel
@@ -38,7 +39,7 @@ import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
  * a new ItemProcessor, this one is still invoked in CamelRouteProcessor
  */
 @Component("hdfsToS3ExportService")
-public class HdfsToS3ExportService {
+public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configuration> {
 
     private static final Logger log = LoggerFactory.getLogger(HdfsToS3ExportService.class);
 
@@ -50,6 +51,14 @@ public class HdfsToS3ExportService {
 
     @Autowired
     private S3Service s3Service;
+
+    @Override
+    public void invoke(HdfsToS3Configuration configuration) {
+        downloadToLocal(configuration);
+        setProgress(0.30f);
+        upload(configuration);
+        setProgress(0.99f);
+    }
 
     public void upload(HdfsToS3Configuration config) {
         String bucket = config.getS3Bucket();

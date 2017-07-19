@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.EaiImportJobDetailService;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 
@@ -22,8 +23,8 @@ import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
 public class ImportProcessor extends SingleContainerYarnProcessor<ImportConfiguration>
         implements ItemProcessor<ImportConfiguration, String> {
 
-    @Autowired
-    private ImportTableProcessor importTableProcessor;
+    // @Autowired
+    // private ImportTableProcessor importTableProcessor;
 
     @Autowired
     private ImportVdbTableProcessor importVdbTableProcessor;
@@ -31,6 +32,7 @@ public class ImportProcessor extends SingleContainerYarnProcessor<ImportConfigur
     @Autowired
     private EaiImportJobDetailService eaiImportJobDetailService;
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
         Optional<SourceImportConfiguration> sourceImportConfiguration = importConfig.getSourceConfigurations().stream()
@@ -40,9 +42,15 @@ public class ImportProcessor extends SingleContainerYarnProcessor<ImportConfigur
             String result = importVdbTableProcessor.process(importConfig);
             finalizeImportJob(importConfig);
             return result;
-        } else {
-            return importTableProcessor.process(importConfig);
         }
+        EaiRuntimeService eaiRuntimeService = EaiRuntimeService.getRunTimeService(importConfig.getClass());
+        eaiRuntimeService.setProgressReporter(progress -> {
+            setProgress((Float) progress);
+            return null;
+        });
+        eaiRuntimeService.invoke(importConfig);
+        return null;
+
     }
 
     public void finalizeImportJob(ImportConfiguration importConfig) {

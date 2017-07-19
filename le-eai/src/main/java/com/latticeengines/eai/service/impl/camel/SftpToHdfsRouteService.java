@@ -4,17 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.jcraft.jsch.Channel;
@@ -28,17 +30,18 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
+import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.CamelRouteService;
 
 @Component("sftpToHdfsRoutService")
-@Scope("prototype")
-public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRouteConfiguration> {
+public class SftpToHdfsRouteService extends EaiRuntimeService<SftpToHdfsRouteConfiguration>
+        implements CamelRouteService<SftpToHdfsRouteConfiguration> {
 
     private static final String OPEN_SUFFIX = SftpToHdfsRouteConfiguration.OPEN_SUFFIX;
     private static final String CAMEL_TEMP_FILE_SUFFIX = "inprogress";
     private static final String KNOWN_HOSTS_FILE = "./known_hosts";
     private static final Logger log = LoggerFactory.getLogger(SftpToHdfsRouteService.class);
-
+    private static final Long timeout = TimeUnit.HOURS.toMillis(48);
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -300,6 +303,60 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
 
     private void deleteKnownHostsFile() {
         FileUtils.deleteQuietly(new File(KNOWN_HOSTS_FILE));
+    }
+
+    @Override
+    public void invoke(SftpToHdfsRouteConfiguration camelRouteConfig) {
+        if (camelRouteConfig instanceof SftpToHdfsRouteConfiguration) {
+            CamelContext camelContext = new DefaultCamelContext();
+
+            RouteBuilder route = generateRoute(camelRouteConfig);
+            try {
+                camelContext.addRoutes(route);
+                camelContext.start();
+                waitForRouteToFinish(camelRouteConfig);
+                camelContext.stop();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        } else {
+            throw new UnsupportedOperationException(
+                    camelRouteConfig.getClass().getSimpleName() + " has not been implemented yet.");
+        }
+    }
+
+    private void waitForRouteToFinish(CamelRouteConfiguration camelRouteConfiguration) {
+        Long startTime = System.currentTimeMillis();
+        Integer errorTimes = 0;
+        while (System.currentTimeMillis() - startTime < timeout) {
+            try {
+                if (routeIsFinished(camelRouteConfiguration)) {
+                    setProgress(0.95f);
+                    return;
+                } else {
+                    String msg = "Waiting for the camel route to finish";
+                    Double progress = getProgress(camelRouteConfiguration);
+                    if (progress != null) {
+                        setProgress(progress.floatValue());
+                        msg += ": " + progress * 100 + "%";
+                    }
+                    log.info(msg);
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                if (++errorTimes >= 10) {
+                    throw new RuntimeException("Max error times exceeded: encountered " + errorTimes + " errors.", e);
+                }
+            } finally {
+                try {
+                    Thread.sleep(5000L);
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage(), e);
+                    // ignore
+                }
+            }
+        }
     }
 
 }
