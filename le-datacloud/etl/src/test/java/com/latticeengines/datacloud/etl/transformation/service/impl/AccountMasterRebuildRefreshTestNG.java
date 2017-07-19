@@ -65,7 +65,6 @@ public class AccountMasterRebuildRefreshTestNG
         cleanupProgressTables();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
         PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
