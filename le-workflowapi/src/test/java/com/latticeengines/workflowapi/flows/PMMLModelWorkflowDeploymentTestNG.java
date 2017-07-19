@@ -3,31 +3,43 @@ package com.latticeengines.workflowapi.flows;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.PMMLModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.scoringapi.score.impl.TestPMMLScoring;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
-public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBase {
+public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(PMMLModelWorkflowDeploymentTestNG.class);
@@ -41,25 +53,15 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
     @Autowired
     private TestPMMLScoring testPMMLScoring;
 
+    private String pmmlHdfsPath = null;
+    private String pivotValuesHdfsPath = null;
     protected String modelName;
-
     private String modelDisplayName;
-
     private int modelCount = 1;
-
-    @BeforeClass(groups = { "deployment" })
-    public void setup() throws Exception {
-        setupForPMMLModel();
-    }
-
-    @AfterClass(groups = "deployment")
-    public void cleanup() throws Exception {
-        cleanUpAfterPMMLModel();
-    }
 
     @Test(groups = "deployment", dataProvider = "pmmlFileNameProvider", enabled = true)
     public void testWorkflow(String pmmlFileName, String pivotValueFileName) throws Exception {
-        setupFiles(PMML_CUSTOMERSPACE, pmmlFileName, pivotValueFileName);
+        setupFiles(mainTestCustomerSpace, pmmlFileName, pivotValueFileName);
         PMMLModelWorkflowConfiguration configuration = generatePMMLModelWorkflowConfiguration();
         for (String key : configuration.getConfigRegistry().keySet()) {
             if (key.equals(CreatePMMLModelConfiguration.class.getCanonicalName())) {
@@ -88,12 +90,11 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
         scoreRecords();
     }
 
-    public void scoreRecords() throws IOException, InterruptedException {
-
-        Model model = testPMMLScoring.getModel(modelDisplayName, PMML_CUSTOMERSPACE, pmmlTenant);
+    private void scoreRecords() throws IOException, InterruptedException {
+        Model model = testPMMLScoring.getModel(modelDisplayName, mainTestCustomerSpace, mainTestTenant);
         System.out.println(modelDisplayName + ", " + model.getModelId());
         Assert.assertNotNull(model.getModelId());
-        testPMMLScoring.scoreRecords(model.getModelId(), PMML_CUSTOMERSPACE, pmmlTenant);
+        testPMMLScoring.scoreRecords(model.getModelId(), mainTestCustomerSpace, mainTestTenant);
     }
 
     @DataProvider(name = "pmmlFileNameProvider")
@@ -108,5 +109,48 @@ public class PMMLModelWorkflowDeploymentTestNG extends PMMLModelWorkflowTestNGBa
                 { "IRIS_MLP_Neural_Network.xml", "" }, //
                 { "nn.xml", "" } //
         };
+    }
+
+    private void setupFiles(CustomerSpace customerSpace, String pmmlFileName, String pivotFileName) throws Exception {
+        URL pmmlFile = ClassLoader
+                .getSystemResource("com/latticeengines/workflowapi/flows/leadprioritization/pmmlfiles/" + pmmlFileName);
+        Path pmmlFolderHdfsPath = PathBuilder.buildMetadataPathForArtifactType(CamilleEnvironment.getPodId(), //
+                customerSpace, "module1", ArtifactType.PMML);
+        pmmlHdfsPath = null;
+        pmmlHdfsPath = pmmlFolderHdfsPath.toString() + "/" + new File(pmmlFile.getFile()).getName();
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, pmmlFile.getPath(), pmmlHdfsPath);
+        pivotValuesHdfsPath = null;
+        if (StringUtils.isNotEmpty(pivotFileName)) {
+            URL pivotFile = ClassLoader.getSystemResource(
+                    "com/latticeengines/workflowapi/flows/leadprioritization/pivotfiles/" + pivotFileName);
+
+            Path pivotValuesFolderHdfsPath = PathBuilder.buildMetadataPathForArtifactType(CamilleEnvironment.getPodId(), //
+                    customerSpace, "module1", ArtifactType.PivotMapping);
+
+            pivotValuesHdfsPath = pivotValuesFolderHdfsPath.toString() + "/" + new File(pivotFile.getFile()).getName();
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, pivotFile.getPath(), pivotValuesHdfsPath);
+        }
+    }
+
+    private PMMLModelWorkflowConfiguration generatePMMLModelWorkflowConfiguration() {
+        Map<String, String> inputProperties = new HashMap<>();
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "pmmlModelWorkflow");
+
+        PMMLModelWorkflowConfiguration workflowConfig = new PMMLModelWorkflowConfiguration.Builder() //
+                .podId(CamilleEnvironment.getPodId()) //
+                .microServiceHostPort(microServiceHostPort) //
+                .customer(mainTestCustomerSpace) //
+                .workflow("pmmlModelWorkflow") //
+                .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
+                .modelName("PMMLModel-" + System.currentTimeMillis()) //
+                .pmmlArtifactPath(pmmlHdfsPath) //
+                .pivotArtifactPath(pivotValuesHdfsPath) //
+                .inputProperties(inputProperties) //
+                .internalResourceHostPort(internalResourceHostPort) //
+                .sourceSchemaInterpretation(SchemaInterpretation.SalesforceLead.name()) //
+                .displayName("PMML MODEL - " + new Path(pmmlHdfsPath).getSuffix()) //
+                .build();
+
+        return workflowConfig;
     }
 }

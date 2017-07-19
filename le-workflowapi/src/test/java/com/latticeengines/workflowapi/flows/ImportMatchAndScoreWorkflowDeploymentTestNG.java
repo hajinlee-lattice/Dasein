@@ -34,7 +34,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
+public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -54,7 +54,7 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupForWorkflow();
+        setup();
         setupTables();
         sourceFile = uploadScoreFile(RESOURCE_BASE + "/csvfiles/Account.csv", accountTable);
         setupModels();
@@ -63,7 +63,7 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
     @Override
     @Test(groups = "deployment", enabled = false)
     public void scoreAccount() throws Exception {
-        ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
+        ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
         score(summary.getId(), sourceFile.getName(), TransformationGroup.STANDARD);
     }

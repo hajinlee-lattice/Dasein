@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.FitModelWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
+@Deprecated
 public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase {
 
     protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace

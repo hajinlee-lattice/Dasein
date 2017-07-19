@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportA
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 
-public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
+public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
 
     @Autowired
     private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTABulkScoreWorkflowSubmitter;
@@ -22,7 +22,7 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupForWorkflow();
+        super.setup();
         sourceFile = uploadFile(RESOURCE_BASE + "/csvfiles/Account.csv", SchemaInterpretation.SalesforceAccount);
         setupModels();
     }
@@ -30,7 +30,7 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
     @Override
     @Test(groups = "deployment", enabled = false)
     public void scoreAccount() throws Exception {
-        ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
+        ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
         score(summary.getId(), sourceFile.getName());
     }

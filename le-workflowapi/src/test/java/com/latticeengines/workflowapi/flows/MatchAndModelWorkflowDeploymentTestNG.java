@@ -16,7 +16,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -79,14 +78,9 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupForWorkflow();
+        super.setup();
         setupTables();
         setupModels();
-    }
-
-    @AfterClass(groups = "deployment")
-    public void cleanup() throws Exception {
-        cleanUpAfterWorkflow();
     }
 
     private void setupTables() throws IOException {
@@ -112,15 +106,15 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
     protected void setupModels() throws IOException {
         URL url = getClass().getClassLoader().getResource(RESOURCE_BASE + "/models/AccountModel");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(),
-                "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString()
+                "/user/s-analytics/customers/" + mainTestCustomerSpace.toString()
                         + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/");
     }
 
     @Test(groups = "deployment", enabled = true)
     public void modelAccountData() throws Exception {
-        ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
+        ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
-        internalResourceProxy.createModelSummary(summary, DEMO_CUSTOMERSPACE);
+        internalResourceProxy.createModelSummary(summary, mainTestCustomerSpace);
 
         List<VdbMetadataField> metadata = modelMetadataService.getMetadata(summary.getId());
         for (VdbMetadataField field : metadata) {
@@ -137,7 +131,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         cloneAndRemodel(clone, modelMetadataService.getAttributesFromFields(clone.getAttributes(), metadata),
                 modelSummary);
 
-        summary = locateModelSummary("testWorkflowAccount_clone", DEMO_CUSTOMERSPACE);
+        summary = locateModelSummary("testWorkflowAccount_clone", mainTestCustomerSpace);
         assertNotNull(summary);
         metadata = modelMetadataService.getMetadata(summary.getId());
         for (VdbMetadataField field : metadata) {

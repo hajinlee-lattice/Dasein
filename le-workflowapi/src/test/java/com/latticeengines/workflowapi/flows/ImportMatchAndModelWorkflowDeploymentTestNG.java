@@ -6,8 +6,6 @@ import static org.testng.Assert.assertNotEquals;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,17 +25,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
     @Autowired
     private ModelNotesService modelNotesService;
 
-    @BeforeClass(groups = "deployment")
-    public void setup() throws Exception {
-        setupForWorkflow();
-    }
-
-    @AfterClass(groups = "deployment")
-    public void cleanup() throws Exception {
-        cleanUpAfterWorkflow();
-    }
-
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void modelSmallAccountData() throws Exception {
         SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/AccountSmallDataUpdated.csv",
                 SchemaInterpretation.SalesforceAccount);
@@ -53,7 +41,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         JsonNode percentiles = json.get("PercentileBuckets");
         assertNotEquals(percentiles.size(), 0);
 
-        ModelSummary modelSummary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
+        ModelSummary modelSummary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         List<ModelNotes> list = modelNotesService.getAllByModelSummaryId(modelSummary.getId());
         assertEquals(list.size(), 1);
         ModelNotes note = list.get(0);

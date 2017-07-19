@@ -5,30 +5,26 @@ import static org.testng.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
-    protected static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";
+public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
+    static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -37,16 +33,13 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
     private Configuration yarnConfiguration;
 
     @Autowired
-    private ModelSummaryParser modelSummaryParser;
-
-    @Autowired
     private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
 
     private Table accountTable;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupForWorkflow();
+        super.setup();
         setupTables();
         setupModels();
     }
@@ -63,55 +56,23 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(), parent);
     }
 
-    protected void setupModels() throws IOException {
+    void setupModels() throws IOException {
         URL url = getClass().getClassLoader().getResource(RESOURCE_BASE + "/models/AccountModel");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(),
-                "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString()
+                "/user/s-analytics/customers/" + mainTestCustomerSpace.toString()
                         + "/models/RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib/");
         URL eventtableDatacompositionUrl = getClass().getClassLoader().getResource(RESOURCE_BASE
                 + "/models/AccountModel/20a331e9-f18b-4358-8023-e44a36cb17dd/1459178858615_0234/enhancements/datacomposition.json");
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, eventtableDatacompositionUrl.getPath(),
-                "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString()
+                "/user/s-analytics/customers/" + mainTestCustomerSpace.toString()
                         + "/data/RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib-Event-Metadata/datacomposition.json");
     }
 
     @Test(groups = "deployment", enabled = false)
     public void scoreAccount() throws Exception {
-        ModelSummary summary = locateModelSummary("testWorkflowAccount", DEMO_CUSTOMERSPACE);
+        ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
         score(summary.getId(), accountTable.getName());
-    }
-
-    protected ModelSummary locateModelSummary(String name, CustomerSpace space) {
-        String startingHdfsPoint = "/user/s-analytics/customers/" + space;
-        HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
-
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-
-                String name = file.getPath().getName().toString();
-                return name.equals("modelsummary.json");
-            }
-
-        };
-
-        try {
-            List<String> files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
-            for (String file : files) {
-                String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
-                ModelSummary summary = modelSummaryParser.parse(file, contents);
-                if (name.equals(modelSummaryParser.parseOriginalName(summary.getName()))) {
-                    return summary;
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return null;
     }
 
     private void score(String modelId, String tableToScore) throws Exception {
@@ -120,14 +81,6 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
         WorkflowExecutionId workflowId = workflowService.start(configuration);
 
         waitForCompletion(workflowId);
-    }
-
-    public Table getAccountTable() {
-        return accountTable;
-    }
-
-    public void setAccountTable(Table accountTable) {
-        this.accountTable = accountTable;
     }
 
 }

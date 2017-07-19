@@ -9,7 +9,9 @@ import java.security.NoSuchAlgorithmException;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -17,6 +19,7 @@ import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
@@ -33,10 +36,32 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
     protected Tenant mainTestTenant;
     protected CustomerSpace mainTestCustomerSpace;
 
+    @Value("${dataplatform.hdfs.stack:}")
+    private String stackName;
+
     @PostConstruct
     public void postConstruct() {
         restTemplate = testBed.getRestTemplate();
         magicRestTemplate = testBed.getMagicRestTemplate();
+    }
+
+    @Override
+    @BeforeClass(groups = { "deployment" })
+    public void setup() throws Exception {
+        setupTestTenant();
+        if (softwareLibraryService != null) {
+            softwareLibraryService.setStackName(stackName);
+        }
+        restTemplate.setInterceptors(getAddMagicAuthHeaders());
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        setupYarnPlatform();
+    }
+
+    /**
+     * Child class can override this, if it needs different environment
+     */
+    protected void setupTestTenant() throws Exception {
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
     }
 
     protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product)

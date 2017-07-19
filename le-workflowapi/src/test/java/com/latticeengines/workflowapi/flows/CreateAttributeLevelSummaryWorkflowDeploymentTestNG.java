@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
+@Deprecated
 public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends WorkflowApiFunctionalTestNGBase {
 
     protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("DemoContract.DemoTenant.Production");

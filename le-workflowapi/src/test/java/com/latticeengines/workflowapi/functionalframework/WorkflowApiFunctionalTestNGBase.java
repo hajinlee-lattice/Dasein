@@ -113,7 +113,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     protected Tenant tenant;
 
     @BeforeClass(groups = { "functional", "deployment" })
-    public void setupRunEnvironment() throws Exception {
+    public void setup() throws Exception {
         if (softwareLibraryService != null) {
             softwareLibraryService.setStackName(stackName);
         }
@@ -121,9 +121,8 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
         restTemplate.setInterceptors(getAddMagicAuthHeaders());
 
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        setupYarnPlatform();
 
-        platformTestBase = new YarnFunctionalTestNGBase(yarnConfiguration);
-        platformTestBase.setYarnClient(defaultYarnClient);
         tenant = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());
         if (tenant != null) {
             tenantEntityMgr.delete(tenant);
@@ -141,6 +140,11 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
         // installServiceFlow("le-serviceflows-prospectdiscovery",
         // Initializer.class.getName());
+    }
+
+    protected void setupYarnPlatform() {
+        platformTestBase = new YarnFunctionalTestNGBase(yarnConfiguration);
+        platformTestBase.setYarnClient(defaultYarnClient);
     }
 
     protected AppSubmission submitWorkflow(WorkflowConfiguration configuration) {

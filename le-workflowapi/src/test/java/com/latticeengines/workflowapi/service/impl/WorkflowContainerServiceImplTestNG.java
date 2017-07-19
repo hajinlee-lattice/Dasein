@@ -9,8 +9,6 @@ import java.util.Date;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
@@ -64,20 +62,13 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowJobEntityMgr.create(workflowJob);
 
         JobProxy jobProxy = mock(JobProxy.class);
-        when(jobProxy.getJobStatus(any(String.class)))
-                .thenAnswer(new Answer<com.latticeengines.domain.exposed.dataplatform.JobStatus>() {
-
-                    @Override
-                    public com.latticeengines.domain.exposed.dataplatform.JobStatus answer(InvocationOnMock invocation)
-                            throws Throwable {
-                        com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus = new com.latticeengines.domain.exposed.dataplatform.JobStatus();
-                        jobStatus.setState(YarnApplicationState.FINISHED);
-                        jobStatus.setStatus(FinalApplicationStatus.FAILED);
-                        jobStatus.setStartTime(100000001L);
-                        return jobStatus;
-                    }
-
-                });
+        when(jobProxy.getJobStatus(any(String.class))).thenAnswer(invocation -> {
+            com.latticeengines.domain.exposed.dataplatform.JobStatus jobStatus = new com.latticeengines.domain.exposed.dataplatform.JobStatus();
+            jobStatus.setState(YarnApplicationState.FINISHED);
+            jobStatus.setStatus(FinalApplicationStatus.FAILED);
+            jobStatus.setStartTime(100000001L);
+            return jobStatus;
+        });
 
         ((WorkflowContainerServiceImpl) workflowContainerService).setJobProxy(jobProxy);
         Job job = workflowContainerService.getJobFromWorkflowJobAndYarn(workflowJob);
@@ -101,16 +92,9 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowJobEntityMgr.create(workflowJob);
 
         JobProxy jobProxy = mock(JobProxy.class);
-        when(jobProxy.getJobStatus(any(String.class)))
-                .thenAnswer(new Answer<com.latticeengines.domain.exposed.dataplatform.JobStatus>() {
-
-                    @Override
-                    public com.latticeengines.domain.exposed.dataplatform.JobStatus answer(InvocationOnMock invocation)
-                            throws Throwable {
-                        throw new RemoteLedpException(LedpCode.LEDP_00002);
-                    }
-
-                });
+        when(jobProxy.getJobStatus(any(String.class))).thenAnswer(invocation -> {
+            throw new RemoteLedpException(LedpCode.LEDP_00002);
+        });
 
         ((WorkflowContainerServiceImpl) workflowContainerService).setJobProxy(jobProxy);
         Job job = workflowContainerService.getJobFromWorkflowJobAndYarn(workflowJob);

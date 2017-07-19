@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,14 +40,11 @@ import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
-import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
+import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
-public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApiFunctionalTestNGBase {
+public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApiDeploymentTestNGBase {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ImportMatchAndModelWorkflowDeploymentTestNGBase.class);
-
-    protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace
-            .parse(ImportMatchAndModelWorkflowDeploymentTestNGBase.class.getSimpleName());
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -68,22 +64,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
     @Autowired
     private ImportMatchAndModelWorkflowSubmitter importMatchAndModelWorkflowSubmitter;
 
-    protected void setupForWorkflow() throws Exception {
-        Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
-        MultiTenantContext.setTenant(tenant);
-        assertNotNull(MultiTenantContext.getTenant());
-        setupUsers(DEMO_CUSTOMERSPACE);
-        setupCamille(DEMO_CUSTOMERSPACE);
-        setupHdfs(DEMO_CUSTOMERSPACE);
-    }
-
-    protected void cleanUpAfterWorkflow() throws Exception {
-        deleteTenantByRestCall(DEMO_CUSTOMERSPACE.toString());
-        cleanCamille(DEMO_CUSTOMERSPACE);
-        cleanHdfs(DEMO_CUSTOMERSPACE);
-    }
-
-    protected SourceFile uploadFile(String resourcePath, SchemaInterpretation schema) {
+    SourceFile uploadFile(String resourcePath, SchemaInterpretation schema) {
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             File file = resolver.getResource(resourcePath).getFile();
@@ -129,7 +110,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         waitForCompletion(workflowId);
     }
 
-    protected String getModelSummary(String name) {
+    String getModelSummary(String name) {
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
         String lookupId = null;
         for (ModelSummary summary : summaries) {
@@ -148,37 +129,24 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
         try {
             List<String> modelPaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, path,
-                    new HdfsUtils.HdfsFileFilter() {
-                        @Override
-                        public boolean accept(FileStatus file) {
-                            return file.getPath().getName().contains("_model.json");
-                        }
-                    });
+                    file -> file.getPath().getName().contains("_model.json"));
             assertEquals(modelPaths.size(), 1);
             String modelPath = modelPaths.get(0);
-            String jsonString = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelPath);
-
-            return jsonString;
+            return HdfsUtils.getHdfsFileContents(yarnConfiguration, modelPath);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected ModelSummary locateModelSummary(String name, CustomerSpace space) {
+    ModelSummary locateModelSummary(String name, CustomerSpace space) {
         String startingHdfsPoint = "/user/s-analytics/customers/" + space;
-        HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
-
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-
-                String name = file.getPath().getName().toString();
-                return name.equals("modelsummary.json");
+        HdfsUtils.HdfsFileFilter filter = file -> {
+            if (file == null) {
+                return false;
             }
-
+            String name1 = file.getPath().getName();
+            return name1.equals("modelsummary.json");
         };
 
         try {

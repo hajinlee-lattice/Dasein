@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.FitModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 
+@Deprecated
 public class FitModelWorkflowDeploymentTestNG extends FitModelWorkflowTestNGBase {
 
     @SuppressWarnings("unused")

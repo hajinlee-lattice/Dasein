@@ -1,7 +1,5 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -42,14 +40,13 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.RTSBulk
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
-public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNG {
+public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
 
     @Value("${common.test.pls.url}")
     private String plsApiHostPort;
@@ -77,12 +74,6 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private List<String> selectedAttributeNameList;
 
-    protected static String TENANT_ID;
-
-    protected Tenant tenant;
-
-    protected static CustomerSpace customerSpace;
-
     private String artifactTableDir;
     private String artifactBaseDir;
     private String enhancementsDir;
@@ -92,25 +83,22 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     @Override
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        TENANT_ID = this.getClass().getSimpleName() + String.valueOf(System.currentTimeMillis());
-        customerSpace = CustomerSpace.parse(TENANT_ID);
-        TEST_INPUT_DATA_DIR = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), customerSpace)
+        super.setup();
+        TEST_INPUT_DATA_DIR = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), mainTestCustomerSpace)
                 .toString();
-        SCORED_FILE_DIR = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId().toString(), customerSpace)
+        SCORED_FILE_DIR = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), mainTestCustomerSpace)
                 .toString() + "/Exports";
         System.out.println("SCORED_FILE_DIR is " + SCORED_FILE_DIR);
 
-        String testModelFolderName = TEST_MODEL_NAME_PREFIX;
-        String applicationId = "application_" + "1457046993615_3823";
+        String applicationId = "application_1457046993615_3823";
         String modelVersion = "157342cb-a8fb-4158-b62a-699441401e9a";
         String uuid = UUID.randomUUID().toString();
-        ScoringTestModelConfiguration modelConfiguration = new ScoringTestModelConfiguration(testModelFolderName,
+        ScoringTestModelConfiguration modelConfiguration = new ScoringTestModelConfiguration(TEST_MODEL_NAME_PREFIX,
                 applicationId, modelVersion, uuid);
-        tenant = setupTenant();
-        summary = createModel(tenant, modelConfiguration, customerSpace);
-        generateDefaultBucketMetadata(summary, customerSpace);
-        setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
-        saveAttributeSelection(customerSpace);
+        summary = createModel(mainTestTenant, modelConfiguration, mainTestCustomerSpace);
+        generateDefaultBucketMetadata(summary, mainTestCustomerSpace);
+        setupHdfsArtifacts(yarnConfiguration, mainTestTenant, modelConfiguration);
+        saveAttributeSelection(mainTestCustomerSpace);
     }
 
     private void generateDefaultBucketMetadata(ModelSummary summary, CustomerSpace customerSpace) {
@@ -136,7 +124,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         selectedAttributeMap.setDeselectedAttributes(deselectedAttributes);
         int premiumSelectCount = 2;
         int selectCount = 1;
-        selectedAttributeNameList = new ArrayList<String>();
+        selectedAttributeNameList = new ArrayList<>();
         for (LeadEnrichmentAttribute attr : enrichmentAttributeList) {
             if (attr.getIsPremium()) {
                 if (premiumSelectCount > 0) {
@@ -158,7 +146,6 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {
-        internalResourceProxy.deleteTenant(customerSpace);
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
         HdfsUtils.rmdir(yarnConfiguration, enhancementsDir);
@@ -166,7 +153,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         HdfsUtils.rmdir(yarnConfiguration, SCORED_FILE_DIR);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testScoreAccount() throws Exception {
         Assert.assertNotNull(summary);
         score(summary.getId(), summary.getTrainingTableName());
@@ -203,14 +190,6 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
                 tableToScore, tableToScore, true, false);
         WorkflowExecutionId workflowId = workflowService.start(configuration);
         waitForCompletion(workflowId);
-    }
-
-    private Tenant setupTenant() throws Exception {
-        Tenant returnTenant = setupTenant(customerSpace);
-        setupUsers(customerSpace);
-        MultiTenantContext.setTenant(returnTenant);
-        assertNotNull(MultiTenantContext.getTenant());
-        return returnTenant;
     }
 
     private ModelSummary createModel(Tenant tenant, ScoringTestModelConfiguration modelConfiguration,
@@ -321,7 +300,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         private String sourceInterpretation;
         private String modelSummaryJsonLocalpath;
 
-        public ScoringTestModelConfiguration(String testModelFolderName, String applicationId, String modelVersion,
+        ScoringTestModelConfiguration(String testModelFolderName, String applicationId, String modelVersion,
                 String uuid) {
             this.testModelFolderName = testModelFolderName;
             this.modelId = TestFrameworkUtils.MODEL_PREFIX + uuid + "_";
@@ -334,43 +313,43 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
             this.modelSummaryJsonLocalpath = localModelPath + Model.MODEL_JSON;
         }
 
-        public String getTestModelFolderName() {
+        String getTestModelFolderName() {
             return testModelFolderName;
         }
 
-        public String getModelId() {
+        String getModelId() {
             return modelId;
         }
 
-        public String getModelName() {
+        String getModelName() {
             return modelName;
         }
 
-        public String getLocalModelPath() {
+        String getLocalModelPath() {
             return localModelPath;
         }
 
-        public String getApplicationId() {
+        String getApplicationId() {
             return applicationId;
         }
 
-        public String getParsedApplicationId() {
+        String getParsedApplicationId() {
             return parsedApplicationId;
         }
 
-        public String getModelVersion() {
+        String getModelVersion() {
             return modelVersion;
         }
 
-        public String getEventTable() {
+        String getEventTable() {
             return eventTable;
         }
 
-        public String getSourceInterpretation() {
+        String getSourceInterpretation() {
             return sourceInterpretation;
         }
 
-        public String getModelSummaryJsonLocalpath() {
+        String getModelSummaryJsonLocalpath() {
             return modelSummaryJsonLocalpath;
         }
     }
@@ -385,7 +364,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     private static final int NUM_LEADS_BUCKET_3 = 25206;
     private static final int NUM_LEADS_BUCKET_4 = 25565;
 
-    public static List<BucketMetadata> generateDefaultBucketMetadataList() {
+    private static List<BucketMetadata> generateDefaultBucketMetadataList() {
         List<BucketMetadata> bucketMetadataList = new ArrayList<BucketMetadata>();
         BucketMetadata BUCKET_METADATA_A = new BucketMetadata();
         BucketMetadata BUCKET_METADATA_B = new BucketMetadata();

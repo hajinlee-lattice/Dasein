@@ -1,12 +1,12 @@
 package com.latticeengines.yarn.functionalframework;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.impl.pb.TestApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -110,7 +110,7 @@ public class YarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                     break done;
                 }
             }
-            Thread.sleep(1000);
+            Thread.sleep(5000);
         } while (System.currentTimeMillis() - start < waitTimeInMillis);
         return status;
     }

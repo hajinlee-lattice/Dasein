@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.nio.charset.Charset;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -36,8 +38,6 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
     @Autowired
     private JobRepository jobRepository;
 
-    private SetConfigurationForScoring setConfigurationForScoring;
-
     @Autowired
     private WorkflowService workflowService;
 
@@ -46,11 +46,13 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
 
     @Test(groups = "functional")
     public void test() throws Exception {
-        setConfigurationForScoring = new SetConfigurationForScoring();
+        SetConfigurationForScoring setConfigurationForScoring = new SetConfigurationForScoring();
         setConfigurationForScoring.setBeanName("setConfigurationForScoring");
         StepRunner runner = new StepRunner(jobLauncher, jobRepository);
-        String jsonStr = IOUtils.toString(ClassLoader
-                .getSystemResourceAsStream("com/latticeengines/workflowapi/flows/leadprioritization/workflow.conf"));
+        String jsonStr = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream(
+                        "com/latticeengines/workflowapi/flows/leadprioritization/workflow.conf"),
+                Charset.forName("UTF-8"));
         ImportMatchAndModelWorkflowConfiguration config = JsonUtils.deserialize(jsonStr,
                 ImportMatchAndModelWorkflowConfiguration.class);
         JobParameters params = workflowService.createJobParams(config);

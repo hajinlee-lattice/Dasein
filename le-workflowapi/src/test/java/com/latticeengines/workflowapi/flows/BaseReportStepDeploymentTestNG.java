@@ -15,9 +15,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.flows.testflows.testreport.TestReportWorkflowConfiguration;
-import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
+import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
-public class BaseReportStepDeploymentTestNG extends WorkflowApiFunctionalTestNGBase {
+public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGBase {
 
     @Autowired
     private WorkflowService workflowService;
@@ -50,7 +50,7 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiFunctionalTestNGB
                 .internalResourceHostPort(internalResourceHostPort) //
                 .microServiceHostPort(microServiceHostPort) //
                 .reportName("Test") //
-                .customer(WFAPITEST_CUSTOMERSPACE) //
+                .customer(mainTestCustomerSpace) //
                 .build();
     }
 }
