@@ -52,7 +52,7 @@ public class AccountMasterRebuildRefreshTestNG
     private Map<String[], Map<String, String[]>> keyMap;    // ams keys -> (source -> keys)
     private Map<String[], Map<String, String[]>> keyMapRefresh;    // am keys -> (source -> keys)
 
-    @Test(groups = "pipeline1")
+    @Test(groups = "functional")
     public void testTransformation() {
         prepareBaseSources();
         prepareKeyMap();
