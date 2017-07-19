@@ -16,8 +16,8 @@ public class ExportDataToRedshiftConfiguration extends MicroserviceStepConfigura
     @JsonProperty("source_tables_map")
     private Map<BusinessEntity, Table> entityTableMap;
 
-    @JsonProperty("drop_source_table")
-    private Boolean dropSourceTable;
+    @JsonProperty("target_table_name")
+    private String targetTableName;
 
     public HdfsToRedshiftConfiguration getHdfsToRedshiftConfiguration() {
         return hdfsToRedshiftConfiguration;
@@ -35,11 +35,11 @@ public class ExportDataToRedshiftConfiguration extends MicroserviceStepConfigura
         this.entityTableMap = entityTableMap;
     }
 
-    public Boolean getDropSourceTable() {
-        return dropSourceTable;
+    public String getTargetTableName() {
+        return targetTableName;
     }
 
-    public void setDropSourceTable(Boolean dropSourceTable) {
-        this.dropSourceTable = dropSourceTable;
+    public void setTargetTableName(String targetTableName) {
+        this.targetTableName = targetTableName;
     }
 }

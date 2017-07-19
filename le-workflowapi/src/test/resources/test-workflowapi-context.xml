@@ -21,4 +21,5 @@
     <import resource="classpath:test-pmml-workflow-context.xml"/>
     <import resource="classpath:redshiftdb-context.xml" />
     <import resource="classpath:playmakercore-context.xml"/>
+    <import resource="classpath:testframework-context.xml"/>
 </beans>

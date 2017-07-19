@@ -66,11 +66,6 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
-        public Builder dropConsolidatedTable(Boolean drop) {
-            redshiftPublishWorkflowConfigurationBuilder.dropSourceTable(drop);
-            return this;
-        }
-
         public Builder workflowContainerMem(int mb) {
             configuration.setContainerMemoryMB(mb);
             return this;

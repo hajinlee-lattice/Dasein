@@ -1,8 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,41 +47,37 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
 
     private Map<BusinessEntity, Table> entityTableMap;
 
-    private Map<BusinessEntity, Boolean> appendTableMap;
-
     private String customerSpace;
+    
+    private boolean createNew;
 
     @Override
     public void execute() {
         log.info("Inside ExportData execute()");
         customerSpace = configuration.getCustomerSpace().toString();
         entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
-        appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE, BusinessEntity.class, Boolean.class);
+        createNew = configuration.getHdfsToRedshiftConfiguration().isCreateNew();
         if (entityTableMap == null) {
             entityTableMap = configuration.getSourceTables();
         }
-        if (appendTableMap == null) {
-            appendTableMap = new HashMap<>();
-        }
         for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
-            boolean append = Boolean.TRUE.equals(appendTableMap.get(entry.getKey()));
-            String targetName = renameTable(entry, append);
-            log.info("Uploading to redshift table " + targetName + ", append=" + append);
-            exportData(entry.getValue(), targetName, entry.getKey().getServingStore(), append);
+            String targetName = renameTable(entry);
+            log.info("Uploading to redshift table " + targetName + ", createNew=" + createNew);
+            exportData(entry.getValue(), targetName, entry.getKey().getServingStore());
         }
     }
 
     @Override
     public void onExecutionCompleted() {
-        for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
-            BusinessEntity entity = entry.getKey();
-            boolean append = Boolean.TRUE.equals(appendTableMap.get(entity));
-            if (!append) {
+        if (createNew) {
+            for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
+                BusinessEntity entity = entry.getKey();
                 Table sourceTable = entry.getValue();
                 log.info("Upsert " + entity.getServingStore() + " table " + sourceTable.getName());
                 Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore());
                 dataCollectionProxy.upsertTable(customerSpace, sourceTable.getName(), entity.getServingStore());
                 if (oldTable != null) {
+                    //TODO: need to change after we have version
                     log.info("Removing old batch store from redshift " + oldTable.getName());
                     redshiftService.dropTable(AvroUtils.getAvroFriendlyString(oldTable.getName()));
                 }
@@ -89,45 +85,48 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         }
     }
 
-    private void exportData(Table sourceTable, String targetTableName, TableRoleInCollection tableRole,
-            boolean append) {
-        EaiJobConfiguration exportConfig = setupExportConfig(sourceTable, targetTableName, tableRole, append);
+    private void exportData(Table sourceTable, String targetTableName, TableRoleInCollection tableRole) {
+        EaiJobConfiguration exportConfig = setupExportConfig(sourceTable, targetTableName, tableRole);
         AppSubmission submission = eaiProxy.submitEaiJob(exportConfig);
         putStringValueInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0));
         waitForAppId(submission.getApplicationIds().get(0));
     }
 
-    private String renameTable(Map.Entry<BusinessEntity, Table> entry, boolean append) {
+    private String renameTable(Map.Entry<BusinessEntity, Table> entry) {
         BusinessEntity entity = entry.getKey();
         Table sourceTable = entry.getValue();
-        String prefix = String.join("_", CustomerSpace.parse(customerSpace).getTenantId(), entity.name());
-        String goodName = NamingUtils.timestamp(prefix);
-        if (append) {
+        String goodName;
+        if (StringUtils.isNotBlank(configuration.getTargetTableName())) {
+            log.info("Enforce target table name to be " + configuration.getTargetTableName());
+            goodName = configuration.getTargetTableName();
+        } else {
+            String prefix = String.join("_", CustomerSpace.parse(customerSpace).getTenantId(), entity.name());
+            goodName = NamingUtils.timestamp(prefix);
+            log.info("Generated a new target table name: " + goodName);
+        }
+        if (!createNew) { // upserting
             Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore());
             if (oldTable == null) {
                 log.warn("Table for " + entity.getServingStore() + " does not exists. Switch to not append.");
-                appendTableMap.put(entity, false);
-                append = false;
+                createNew = true; // it is essentially creating new
             } else {
                 goodName = oldTable.getName();
             }
         }
-        if (!append) {
+        if (createNew) {
             log.info("Renaming table " + sourceTable.getName() + " to " + goodName);
             metadataProxy.updateTable(customerSpace, goodName, sourceTable);
             sourceTable.setName(goodName);
         }
-        // TODO: FIX: in append case, the extract in Table is not complete.
         return goodName;
     }
 
     private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,
-            TableRoleInCollection tableRole, boolean append) {
+            TableRoleInCollection tableRole) {
         HdfsToRedshiftConfiguration exportConfig = configuration.getHdfsToRedshiftConfiguration();
         exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
         exportConfig.setExportTargetPath(sourceTable.getName());
         exportConfig.setNoSplit(true);
-        exportConfig.setAppend(append);
         exportConfig.setExportDestination(ExportDestination.REDSHIFT);
         RedshiftTableConfiguration redshiftTableConfig = exportConfig.getRedshiftTableConfiguration();
         redshiftTableConfig.setDistStyle(RedshiftTableConfiguration.DistStyle.Key);

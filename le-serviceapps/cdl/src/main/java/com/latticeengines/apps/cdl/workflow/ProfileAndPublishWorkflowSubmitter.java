@@ -104,8 +104,8 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         HdfsToRedshiftConfiguration exportConfig = new HdfsToRedshiftConfiguration();
         exportConfig.setExportFormat(ExportFormat.AVRO);
         exportConfig.setCleanupS3(true);
-        exportConfig.setAppend(true);
         exportConfig.setCreateNew(true);
+        exportConfig.setAppend(true);
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
         redshiftTableConfig.setDistStyle(DistStyle.Key);
         redshiftTableConfig.setDistKey(TableRoleInCollection.BucketedAccount.getPrimaryKey().name());

@@ -232,7 +232,6 @@
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>

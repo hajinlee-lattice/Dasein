@@ -131,7 +131,6 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .put(MatchKey.Country, Collections.singletonList(InterfaceName.Country.name())) //
                         .put(MatchKey.Zipcode, Collections.singletonList("Zip")) //
                         .build()) //
-                .dropConsolidatedTable(true) //
                 .workflowContainerMem(workflowMemMb) //
                 .build();
     }
@@ -140,6 +139,8 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         HdfsToRedshiftConfiguration exportConfig = new HdfsToRedshiftConfiguration();
         exportConfig.setExportFormat(ExportFormat.AVRO);
         exportConfig.setCleanupS3(true);
+        exportConfig.setCreateNew(false);
+        exportConfig.setAppend(false);
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
         redshiftTableConfig.setDistStyle(DistStyle.Key);
         redshiftTableConfig.setDistKey(TableRoleInCollection.BucketedAccount.getPrimaryKey().name());

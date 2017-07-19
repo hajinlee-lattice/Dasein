@@ -40,8 +40,9 @@ public class RedshiftPublishWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
-        public Builder dropSourceTable(Boolean drop) {
-            exportDataToRedshiftConfiguration.setDropSourceTable(drop);
+        // mainly for test
+        public Builder enforceTargetTableName(String targetTableName) {
+            exportDataToRedshiftConfiguration.setTargetTableName(targetTableName);
             return this;
         }
 
