@@ -189,9 +189,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count, 4);
 
         query = Query.builder().select(BusinessEntity.Account, "ID", "CompanyName", "City") //
-                .find(BusinessEntity.LatticeAccount) //
                 .where(nameIsCity) //
-                .freeText("AMBUR", BusinessEntity.LatticeAccount, "City") //
+                .freeText("AMBUR", BusinessEntity.Account, "City") //
                 .build();
 
         results = queryEvaluatorService.getData(attrRepo, query).getData();
