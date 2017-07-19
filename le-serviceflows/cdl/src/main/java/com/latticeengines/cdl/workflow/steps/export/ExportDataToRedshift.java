@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -48,9 +49,12 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
 
     private Map<BusinessEntity, Boolean> appendTableMap;
 
+    private String customerSpace;
+
     @Override
     public void execute() {
         log.info("Inside ExportData execute()");
+        customerSpace = configuration.getCustomerSpace().toString();
         entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
         appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE, BusinessEntity.class, Boolean.class);
         if (entityTableMap == null) {
@@ -75,10 +79,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             if (!append) {
                 Table sourceTable = entry.getValue();
                 log.info("Upsert " + entity.getServingStore() + " table " + sourceTable.getName());
-                Table oldTable = dataCollectionProxy.getTable(configuration.getCustomerSpace().toString(),
-                        entity.getServingStore());
-                dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), sourceTable.getName(),
-                        entity.getServingStore());
+                Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore());
+                dataCollectionProxy.upsertTable(customerSpace, sourceTable.getName(), entity.getServingStore());
                 if (oldTable != null) {
                     log.info("Removing old batch store from redshift " + oldTable.getName());
                     redshiftService.dropTable(AvroUtils.getAvroFriendlyString(oldTable.getName()));
@@ -87,7 +89,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         }
     }
 
-    private void exportData(Table sourceTable, String targetTableName, TableRoleInCollection tableRole, boolean append) {
+    private void exportData(Table sourceTable, String targetTableName, TableRoleInCollection tableRole,
+            boolean append) {
         EaiJobConfiguration exportConfig = setupExportConfig(sourceTable, targetTableName, tableRole, append);
         AppSubmission submission = eaiProxy.submitEaiJob(exportConfig);
         putStringValueInContext(EXPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0));
@@ -95,18 +98,26 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     }
 
     private String renameTable(Map.Entry<BusinessEntity, Table> entry, boolean append) {
+        BusinessEntity entity = entry.getKey();
         Table sourceTable = entry.getValue();
-        String oldName = sourceTable.getName();
-        String goodName = AvroUtils.getAvroFriendlyString(oldName);
-        if (!append) {
-            String prefix = String.join("_", configuration.getCustomerSpace().getTenantId(), entry.getKey().name());
-            goodName = NamingUtils.timestamp(prefix);
+        String prefix = String.join("_", CustomerSpace.parse(customerSpace).getTenantId(), entity.name());
+        String goodName = NamingUtils.timestamp(prefix);
+        if (append) {
+            Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore());
+            if (oldTable == null) {
+                log.warn("Table for " + entity.getServingStore() + " does not exists. Switch to not append.");
+                appendTableMap.put(entity, false);
+                append = false;
+            } else {
+                goodName = oldTable.getName();
+            }
         }
-        if (!goodName.equalsIgnoreCase(oldName)) {
+        if (!append) {
             log.info("Renaming table " + sourceTable.getName() + " to " + goodName);
-            metadataProxy.updateTable(configuration.getCustomerSpace().toString(), goodName, sourceTable);
+            metadataProxy.updateTable(customerSpace, goodName, sourceTable);
             sourceTable.setName(goodName);
         }
+        // TODO: FIX: in append case, the extract in Table is not complete.
         return goodName;
     }
 
@@ -125,7 +136,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         redshiftTableConfig.setSortKeys(tableRole.getForeignKeysAsStringList());
         redshiftTableConfig.setTableName(targetTableName);
         redshiftTableConfig.setJsonPathPrefix(
-                String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, sourceTable.getName()));
+                String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
         return exportConfig;
     }
 

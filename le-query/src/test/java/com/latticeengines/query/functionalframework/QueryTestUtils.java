@@ -2,7 +2,7 @@ package com.latticeengines.query.functionalframework;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMaster;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedContact;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ public class QueryTestUtils {
         Map<AttributeLookup, ColumnMetadata> attrMap = getAttrMap();
         Map<TableRoleInCollection, String> tableNameMap = new HashMap<>();
         tableNameMap.put(BucketedAccount, "querytest_table");
-        tableNameMap.put(BucketedContact, "querytest_table_dup");
+        tableNameMap.put(SortedContact, "querytest_table_dup");
         tableNameMap.put(AccountMaster, "querytest_table_dup");
         return new AttributeRepository(customerSpace, collectionName, attrMap, tableNameMap);
     }

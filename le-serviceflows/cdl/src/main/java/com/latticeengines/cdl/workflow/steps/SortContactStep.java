@@ -34,8 +34,8 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
 
     private static final Logger log = LoggerFactory.getLogger(SortContactStep.class);
 
-    private static final String SORTED_TABLE_PREFIX = TableRoleInCollection.BucketedContact.name();
-    private static final List<String> masterTableSortKeys = TableRoleInCollection.BucketedContact
+    private static final String SORTED_TABLE_PREFIX = TableRoleInCollection.SortedContact.name();
+    private static final List<String> masterTableSortKeys = TableRoleInCollection.SortedContact
             .getForeignKeysAsStringList();
 
     @Autowired
@@ -63,14 +63,21 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
     @Override
     protected void onPostTransformationCompleted() {
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
-        upsertTable(configuration.getCustomerSpace().toString(), sortedTableName);
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
-        Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
+        Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
+                BusinessEntity.class, Table.class);
         if (entityTableMap == null) {
             entityTableMap = new HashMap<>();
-            putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
         }
         entityTableMap.put(BusinessEntity.Contact, sortedTable);
+        putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
+        Map<BusinessEntity, Boolean> appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE,
+                BusinessEntity.class, Boolean.class);
+        if (appendTableMap == null) {
+            appendTableMap = new HashMap<>();
+        }
+        appendTableMap.put(BusinessEntity.Contact, false);
+        putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
     }
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {
@@ -117,22 +124,9 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
         conf.setCompressResult(true);
         conf.setSortingField(masterTableSortKeys.get(0)); // TODO: only support
                                                           // single sort key now
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
+        String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
-    }
-
-    private void upsertTable(String customerSpace, String sortedTableName) {
-
-        Table bktTable = metadataProxy.getTable(customerSpace, sortedTableName);
-        if (bktTable == null) {
-            throw new RuntimeException("Failed to find bucketed table in customer " + customerSpace);
-        }
-        dataCollectionProxy.upsertTable(customerSpace, sortedTableName, TableRoleInCollection.BucketedContact);
-        bktTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.BucketedContact);
-        if (bktTable == null) {
-            throw new IllegalStateException("Cannot find the upserted bucketed table in data collection.");
-        }
     }
 
 }

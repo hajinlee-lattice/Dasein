@@ -61,7 +61,7 @@ public class LpiPMAccountExtensionDaoImpl implements LpiPMAccountExtensionDao {
 
     @Override
     public List<Map<String, Object>> getContactExtensionSchema() {
-        return getSchema(TableRoleInCollection.BucketedContact);
+        return getSchema(TableRoleInCollection.SortedContact);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class LpiPMAccountExtensionDaoImpl implements LpiPMAccountExtensionDao {
 
     @Override
     public int getContactExtensionColumnCount() {
-        List<Attribute> schemaAttributes = getSchemaAttributes(TableRoleInCollection.BucketedContact);
+        List<Attribute> schemaAttributes = getSchemaAttributes(TableRoleInCollection.SortedContact);
         return schemaAttributes.size();
     }
 
