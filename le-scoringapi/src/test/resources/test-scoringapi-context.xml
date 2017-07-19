@@ -14,7 +14,7 @@
     <import resource="classpath:oauth2db-persistence-context.xml" />
     <import resource="classpath:oauth2db-context.xml" />
     <import resource="classpath:monitor-metric-context.xml" />
-    <import resource="classpath:test-testframework-testbed-context.xml"/>
+    <import resource="classpath:testframework-context.xml"/>
 
     <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
     <context:component-scan base-package="com.latticeengines.scoringapi.enrich" />
