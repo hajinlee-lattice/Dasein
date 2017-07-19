@@ -43,7 +43,7 @@ public class DnBFileToSourceServiceTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
         baseSource.setIngestionName(IngestionNames.DNB_CASHESEED);
         uploadBaseSourceFile(baseSource, "LE_SEED_OUTPUT_2017_01_052.OUT.gz", baseSourceVersion);

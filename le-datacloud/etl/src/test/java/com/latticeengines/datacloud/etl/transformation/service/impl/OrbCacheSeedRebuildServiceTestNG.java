@@ -50,7 +50,7 @@ public class OrbCacheSeedRebuildServiceTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "pipeline2", enabled = true)
+    @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
         uploadBaseSourceFile(baseSourceOrbCompanyRaw, "OrbCompanyRaw", baseSourceVersion);
         uploadBaseSourceFile(baseSourceOrbDomainRaw, "OrbDomainRaw", baseSourceVersion);

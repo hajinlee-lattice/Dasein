@@ -41,7 +41,7 @@ public class MiniAMDomainDunsTestNG extends TransformationServiceImplTestNGBase<
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "pipeline2", enabled = true)
+    @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
         prepareGoldenDataSetSeed();
         prepareAMDataSetSeed();

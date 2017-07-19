@@ -36,7 +36,7 @@ public class FeaturePivotServiceImplTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "pipeline2", enabled = true)
+    @Test(groups = "functional", enabled = true)
     public void testTransformation() {
         uploadBaseAvro(baseSource, baseSourceVersion);
         TransformationProgress progress = createNewProgress();

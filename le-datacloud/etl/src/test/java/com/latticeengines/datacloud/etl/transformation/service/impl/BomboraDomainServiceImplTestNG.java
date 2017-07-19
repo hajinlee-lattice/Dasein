@@ -35,7 +35,7 @@ public class BomboraDomainServiceImplTestNG
     @Autowired
     private BomboraDomainService bomboraDomainService;
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         uploadBaseAvro(baseSource, baseSourceVersion);
         uploadBaseAvro(source, baseSourceVersion);

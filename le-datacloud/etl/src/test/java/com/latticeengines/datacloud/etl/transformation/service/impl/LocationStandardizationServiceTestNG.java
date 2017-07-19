@@ -35,7 +35,7 @@ public class LocationStandardizationServiceTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         prepareLocations();
         TransformationProgress progress = createNewProgress();

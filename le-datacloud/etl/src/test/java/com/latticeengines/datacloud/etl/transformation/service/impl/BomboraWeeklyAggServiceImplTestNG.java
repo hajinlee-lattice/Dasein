@@ -49,7 +49,7 @@ public class BomboraWeeklyAggServiceImplTestNG
     @Autowired
     private BomboraWeeklyAggService bomboraWeeklyAggService;
 
-    @Test(groups = "functional")
+    @Test(groups = "pipeline2")
     public void testTransformation() {
         uploadBaseAvro(baseSource, "2016-10-08_00-00-00_UTC", true);
         uploadBaseAvro(baseSource, "2016-10-07_00-00-00_UTC", false);

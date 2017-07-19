@@ -35,7 +35,7 @@ public class SourceSorterTestNG extends PipelineTransformationTestNGBase {
     @Autowired
     private AccountMaster accountMaster;
 
-    @Test(groups = "pipeline2")
+    @Test(groups = "functional")
     public void testTransformation() throws Exception {
         prepareAM();
         TransformationProgress progress = createNewProgress();

@@ -56,7 +56,7 @@ public class HGDataTechIndicatorsTestNG
     @Autowired
     private SourceColumnEntityMgr sourceColumnEntityMgr;
 
-    @Test(groups = "pipeline2")
+    @Test(groups = "functional")
     public void testTransformation() {
         readBitPositions();
 

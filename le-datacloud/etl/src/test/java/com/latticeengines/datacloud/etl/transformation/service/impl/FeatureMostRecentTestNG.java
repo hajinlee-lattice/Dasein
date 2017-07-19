@@ -51,7 +51,7 @@ public class FeatureMostRecentTestNG
     String baseSourceVersion1 = "2015-11-28_09-44-52_UTC";
     String baseSourceVersion2 = "2015-12-29_10-34-24_UTC";
 
-    @Test(groups = "pipeline2", enabled = true)
+    @Test(groups = "functional", enabled = true)
     public void testTransformation() {
         uploadBaseSourceFile(source.getBaseSources()[0], "Feature_" + baseSourceVersion1, baseSourceVersion1);
         uploadBaseSourceFile(source.getBaseSources()[0], "Feature_" + baseSourceVersion2, baseSourceVersion2);

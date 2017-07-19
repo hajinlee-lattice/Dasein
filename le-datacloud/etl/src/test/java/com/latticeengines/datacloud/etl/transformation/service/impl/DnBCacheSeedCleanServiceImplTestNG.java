@@ -54,7 +54,7 @@ public class DnBCacheSeedCleanServiceImplTestNG
     private static final String NUMBER_OF_FAMILY_MEMBERS = "NUMBER_OF_FAMILY_MEMBERS";
     private static final String LE_PRIMARY_INDUSTRY = "LE_PRIMARY_INDUSTRY";
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
         uploadBaseAvro(baseSource, baseSourceVersion);
         TransformationProgress progress = createNewProgress();

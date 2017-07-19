@@ -36,7 +36,7 @@ public class HGDataCleanTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "pipeline2")
+    @Test(groups = "pipeline1")
     public void testTransformation() {
         uploadBaseAvro(baseSource, baseSourceVersion);
         TransformationProgress progress = createNewProgress();

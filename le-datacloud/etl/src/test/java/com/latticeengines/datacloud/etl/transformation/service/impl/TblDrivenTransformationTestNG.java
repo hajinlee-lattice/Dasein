@@ -50,7 +50,7 @@ public class TblDrivenTransformationTestNG
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "pipeline2", enabled = false)
+    @Test(groups = "pipeline1", enabled = false)
     public void testTransformation() {
 
         prepareSources();
