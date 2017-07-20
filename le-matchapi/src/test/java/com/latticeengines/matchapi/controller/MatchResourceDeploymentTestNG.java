@@ -3,10 +3,12 @@ package com.latticeengines.matchapi.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 
 import org.apache.avro.Schema;
@@ -399,29 +401,29 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     @DataProvider(name = "allDataCloudVersions", parallel = true)
     public Object[][] allDataCloudVersions() {
         List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
-        Set<String> latestVersions = new HashSet<>();
-        Map<String, String> secondLatestVersion = new HashMap<>();
+        Map<String, PriorityQueue<String>> latestVersions = new HashMap<>();
         for (DataCloudVersion version : versions) {
             if (!DataCloudVersion.Status.APPROVED.equals(version.getStatus())) {
                 continue;
             }
             String vString = version.getVersion();
             if (vString.compareTo("90") > 0) {
-                latestVersions.add(vString);
+                continue;
             }
             String latestCompatible = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(version.getMajorVersion())
                     .getVersion();
-            latestVersions.add(latestCompatible);
-            if (!vString.equals(latestCompatible)) {
-                boolean isSecondLatest = !secondLatestVersion.containsKey(latestCompatible)
-                        || vString.compareTo(secondLatestVersion.get(latestCompatible)) > 0;
-                if (isSecondLatest) {
-                    secondLatestVersion.put(latestCompatible, vString);
-                }
+            if (!latestVersions.containsKey(latestCompatible)) {
+                latestVersions.put(latestCompatible, new PriorityQueue<>(Collections.reverseOrder()));
             }
+            latestVersions.get(latestCompatible).offer(version.getVersion());
         }
-        List<String> allVersions = new ArrayList<>(latestVersions);
-        allVersions.addAll(secondLatestVersion.values());
+        List<String> allVersions = new ArrayList<>();
+        latestVersions.forEach((k, v) -> {
+            allVersions.add(v.poll());
+            if (!v.isEmpty()) {
+                allVersions.add(v.poll());
+            }
+        });
         Object[][] objs = new Object[allVersions.size() + 1][1];
         objs[0] = new Object[] { "1.0.0" };
         int i = 1;
