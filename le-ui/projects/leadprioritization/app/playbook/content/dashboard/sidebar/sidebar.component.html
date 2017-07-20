@@ -13,7 +13,7 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}</span>
             </a>
         </li>
-        <li role="presentation" ui-sref-active-eq="active">
+        <li role="presentation" ui-sref-active-eq="active" ng-disabled="menuDisabled || dashboardDisabled">
             <a ui-sref="home.playbook.dashboard({play_name: play_name})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}">
                     <span class="ico ico-analysis ico-light-gray"></span>
@@ -21,7 +21,7 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}</span>
             </a>
         </li>
-        <li role="presentation" ui-sref-active="active">
+        <li role="presentation" ui-sref-active="active" ng-disabled="menuDisabled || targetsDisabled">
             <a ui-sref="home.playbook.dashboard.targets({play_name: play_name})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS')}}">
                     <span class="ico ico-alerts ico-light-gray"></span>
@@ -29,7 +29,7 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS')}}</span>
             </a>
         </li>
-        <li role="presentation" ui-sref-active="active">
+        <li role="presentation" ui-sref-active="active" ng-disabled="menuDisabled || talkingPointsDisabled">
             <a ui-sref="home.playbook.dashboard.insights({play_name: play_name})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TALKINGPOINTS')}}">
                     <span class="ico ico-scoring ico-light-gray"></span>
@@ -37,7 +37,7 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TALKINGPOINTS')}}</span>
             </a>
         </li>
-        <li role="presentation" ui-sref-active="active">
+        <li role="presentation" ui-sref-active="active" ng-disabled="menuDisabled || launchHistoryDisabled">
             <a ui-sref="home.playbook.dashboard.launch_history({play_name: play_name})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_LAUNCH_HISTORY')}}">
                     <span class="ico ico-refine ico-light-gray"></span>

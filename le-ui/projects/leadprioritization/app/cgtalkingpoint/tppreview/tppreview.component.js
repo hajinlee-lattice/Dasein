@@ -35,7 +35,6 @@ angular.module('lp.cg.talkingpoint.preview', [])
         window.addEventListener('message', handleLpiPreviewInit);
 
         CgTalkingPointStore.generateLeadPreviewObject({playName: $stateParams.play_name}).then(function(leadPreviewObject){
-            console.log(leadPreviewObject);
             vm.leadPreviewObject = leadPreviewObject;
             CgTalkingPointStore.getAccounts().then(function(accounts) {
                 vm.accounts = accounts;

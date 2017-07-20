@@ -30,6 +30,7 @@ $slide-transition: 200ms;
     white-space: nowrap;
 }
 */
+
 #inner-wrap {
     @include flex-container;
     min-height: 100vh;
@@ -145,6 +146,10 @@ nav.primary-nav {
         //overflow: auto;
         //overflow-x: hidden;
         width: 70px;
+    }
+    *[disabled] {
+        pointer-events: none;
+        opacity: .5;
     }
     .lp-sidebar-menu, .pd-sidebar-menu {
         background: #222831;

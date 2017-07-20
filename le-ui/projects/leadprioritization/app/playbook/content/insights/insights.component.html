@@ -37,5 +37,5 @@
             <cg-tp-attribute-pane opts="vm.attributes"></cg-tp-attribute-pane>
         </div>
     </div>
-    <button class="preview button blue-button" ng-if="vm.stateParams.section === 'dashboard.insights'" ng-click="vm.saveTalkingPoints()">Preview</button>
+    <button ng-disabled="!vm.valid" class="preview button blue-button" ng-if="vm.stateParams.section === 'dashboard.insights'" ng-click="vm.saveTalkingPoints()">Preview</button>
 </div>

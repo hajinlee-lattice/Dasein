@@ -2,7 +2,7 @@ angular.module('lp.playbook.plays', [
     'mainApp.playbook.content.playList.deletePlayModal'
 ])
 .controller('PlayListController', function ($scope, $timeout, $element, $state, 
-$stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
+$stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayModal) {
 
     var vm = this;
     angular.extend(vm, {
@@ -34,6 +34,7 @@ $stateParams, PlayList, PlaybookWizardService, DeletePlayModal) {
     });
 
     vm.init = function($q) {
+        PlaybookWizardStore.clear();
         angular.forEach(PlayList, function(play) {
             vm.tileStates[play.name] = {
                 showCustomMenu: false,

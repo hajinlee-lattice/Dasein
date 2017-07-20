@@ -57,10 +57,11 @@ angular.module('lp.playbook.wizard.insights', [])
             if (!vm.talkingPoints[i].content || !vm.talkingPoints[i].title) {
                 PlaybookWizardStore.setValidation('insights', false);
                 valid = false;
-                return false;
+                break;
             }
             valid = true;
         }
+        vm.valid = valid;
         if(valid) {
             PlaybookWizardStore.setTalkingPoints(vm.talkingPoints);
             PlaybookWizardStore.setValidation('insights', true);

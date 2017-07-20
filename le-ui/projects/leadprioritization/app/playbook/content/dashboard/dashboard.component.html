@@ -49,7 +49,7 @@
                     </div>
                     <div class="dashboard-section-content">
                         <div class="dashboard-section-content-subsection talking-points has-icon">
-                            <h5>{{vm.talkingPoints.length||'No'}} talking points have been created</h5>
+                            <h5>{{vm.play.talkingpoints.length||'No'}} talking points have been created</h5>
                             <ul class="controls">
                                 <li ng-if="!vm.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create</a></li>
                                 <li ng-if="vm.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Edit</a></li>
@@ -98,7 +98,11 @@
                     </div>
                     <div class="dashboard-section-footer">
                         <span ng-if="vm.play.timestamp">Created {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
-                        <button class="button blue-button" ng-click="vm.launchPlay()">Launch</button>
+                        <button class="launch button blue-button" ng-click="vm.launchPlay()">
+                            <span ng-if="!vm.launchHistory.length">Launch</span>
+                            <span ng-if="vm.showLaunchSpinner"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+                            <span ng-if="vm.launchHistory.length">Re-launch</span>
+                        </button>
                     </div>
                 </div>
             </div>

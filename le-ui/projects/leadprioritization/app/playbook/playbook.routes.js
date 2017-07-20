@@ -192,6 +192,13 @@ angular
                 }
             },
             views: {
+                "navigation@": {
+                    controller: function($scope, $stateParams, $state) {
+                        $scope.play_name = $stateParams.play_name || '';
+                        $scope.menuDisabled = true;
+                    },
+                    templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
+                },
                 'summary@': {
                     controller: function($scope, PlaybookWizardStore) {
                         $scope.$on('$destroy', function () {

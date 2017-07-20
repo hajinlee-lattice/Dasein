@@ -223,7 +223,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     this.getDanteUrl = function(previewResources) {
         var deferred = $q.defer();
         //ben::remove
-        var sessionid = '0827b80d-02a7-422b-a8b5-3e1dd84dea69',//previewResources.oAuthToken, //'00D80000000KvZo!AR0AQBWNZUrIO9q.DjIjFdXYW0USIN0SBQWCVvx0hw6naKZrc374OdQVP24EvFxZiWbf00dNdHjlPGFEScO4BMstUYEJlvka',
+        var sessionid = 'c7336357-1f7e-44f2-b740-f0617f5f6dfa',//previewResources.oAuthToken, //'00D80000000KvZo!AR0AQBWNZUrIO9q.DjIjFdXYW0USIN0SBQWCVvx0hw6naKZrc374OdQVP24EvFxZiWbf00dNdHjlPGFEScO4BMstUYEJlvka',
             preview_url = previewResources.danteUrl, //'https://localhost:44300/index.aspx',
             server_url = 'https://testapi.lattice-engines.com/tenants/oauthtotenant', //previewResources.serverUrl, //https://leinstallation.na6.visual.force.com/services/Soap/u/9.0/00D80000000KvZo&CustomSettings={%22hideNavigation%22:true,%22HideTabs%22:true,%22HideHeader%22:true}&LpiPreview=true'
             custom_settings_json = {

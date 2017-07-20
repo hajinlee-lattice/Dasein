@@ -102,6 +102,13 @@ angular.module('lp.playbook')
         $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
     }
 
+    this.nextLaunch = function() {
+        var play = PlaybookWizardStore.currentPlay;
+        PlaybookWizardStore.launchPlay(PlaybookWizardStore.currentPlay).then(function(data) {
+            $state.go('home.playbook.dashboard', {play_name: play.name});
+        });
+    }
+
     this.setTalkingPoints = function(talkingPoints) {
         this.savedTalkingPoints = talkingPoints;
     }
@@ -196,11 +203,6 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    this.nextLaunch = function() {
-        PlaybookWizardStore.launchPlay(PlaybookWizardStore.currentPlay).then(function(data) {
-        });
-    }
-
     this.getPlayLaunches = function(play_name, launch_state) {
         var deferred = $q.defer();
         if(this.playLaunches) {
@@ -217,7 +219,6 @@ angular.module('lp.playbook')
         PlaybookWizardService.launchPlay(play).then(function(data){
             deferred.resolve(data);
             PlaybookWizardStore.setPlay(data);
-            console.log('launched:',data);
         });
         return deferred.promise;
     }
@@ -344,8 +345,7 @@ angular.module('lp.playbook')
             method: 'POST',
             url: this.host + '/play/' + play_name + '/launches',
             data: {
-                playName: play.name,
-                playLaunch: play
+                launch_state: 'Launching'
             }
         }).then(function(response){
             deferred.resolve(response.data);
