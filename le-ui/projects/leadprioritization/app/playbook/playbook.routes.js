@@ -278,9 +278,6 @@ angular
         .state('home.playbook.wizard.settings.segment.rating.targets', {
             url: '/targets',
             resolve: {
-                LoadDemoData: function(QueryStore) {
-                    return QueryStore.loadData();
-                },
                 DefaultSelectedObject: function() {
                     return 'accounts';
                 },

@@ -2,8 +2,74 @@
 	.tiles > li {
 		border-top-color: #d0d0d0;
 		border-width: 1px;
+		padding: 13px 0;
 		&:hover {
 			border-top-color: #457eba;
+		}
+		&.no-style {
+			padding: 0;
+		}
+		.tile-header, .tile-metadata, .tile-body, .tile-footer {
+			padding: 0 13px;
+		}
+		.tile-header {
+			.edit button {
+				font-size: 20px;
+			}
+		}
+		.tile-metadata {
+			padding: 12px;
+			border-color: #ddd;
+			border-style: solid;
+			border-width: 1px 0;
+			font-size: 12px;
+		}
+		.tile-body {
+			padding-top: 16px;
+			overflow: auto;
+			strong {
+				font-weight: bold;
+			}
+			h4 {
+				text-align: center;
+				font-size: 16px;
+			}
+			ul {
+				display: flex;
+				justify-content: center;
+				li {
+					width: 15%;	
+				}
+			}
+		}
+		form {
+			padding: 0 13px 13px;
+		}
+		.tile-footer {
+			padding-top: 13px;	
+			.button {
+				font-size: 12px;
+				padding: 6px 10px;
+				text-transform: none;
+			}
+		}
+		&.editing {
+			&:hover {
+				border-color:#d0d0d0;
+			}
+			.tile-footer {
+				border-top-color: #e7e7e7;
+				span {
+					color: #bbb;
+				}
+				.button {
+					cursor: default;
+					border: #b7b7b7 solid 1px;
+					background-color: #e4e4e4;
+					color: #656565;
+					box-shadow: none;
+				}
+			}
 		}
 	}
 }

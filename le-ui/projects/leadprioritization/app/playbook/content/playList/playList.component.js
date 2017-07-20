@@ -27,6 +27,14 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
                 unfiltered: PlayList,
                 filtered: PlayList,
                 items: [
+                    { label: "All", action: { }, total: vm.totalLength }
+                ]
+            },
+            filter: {
+                label: 'Filter By',
+                unfiltered: PlayList,
+                filtered: PlayList,
+                items: [
                     { label: "All", action: { }, total: 278 }
                 ]
             }
@@ -41,7 +49,7 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
                 editSegment: false
             };
         });
-        // console.log(vm.plays);
+        console.log(vm.plays);
     }
     vm.init();
 
@@ -78,12 +86,10 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
     };
 
     var oldPlayDisplayName = '';
-    var oldPlayDescription = '';
     vm.editPlayClick = function($event, play){
         $event.stopPropagation();
 
         oldPlayDisplayName = play.display_name;
-        oldPlayDescription = play.description;
 
         var tileState = vm.tileStates[play.name];
         tileState.showCustomMenu = !tileState.showCustomMenu;
@@ -94,9 +100,7 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
         $event.stopPropagation();
 
         play.display_name = oldPlayDisplayName;
-        play.description = oldPlayDescription;
         oldPlayDisplayName = '';
-        oldPlayDescription = '';
 
         var tileState = vm.tileStates[play.name];
         tileState.editPlay = !tileState.editPlay;
@@ -108,12 +112,10 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
 
         vm.saveInProgress = true;
         oldPlayDisplayName = '';
-        oldPlayDescription = '';
 
         var updatedPlay = {
             name: play.name,
-            display_name: play.display_name,
-            description: play.description
+            display_name: play.display_name
         }
 
         updatePlay(updatedPlay);

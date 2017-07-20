@@ -172,7 +172,6 @@ Should be incorporated across PD and LP (models list, campaigns list).
     }
 }
 
-
 .tile-header {
     word-wrap: break-word;
     margin-bottom: 10px;
@@ -228,10 +227,24 @@ Should be incorporated across PD and LP (models list, campaigns list).
     }
 }
 
-
 .tile-body {
 
 }
+.tile-footer {
+  border-top: #ddd solid 1px;
+  padding-top: 13px;
+  position: absolute;
+  bottom: 13px;
+  width: 100%;
+  &:after {
+    display: table;
+    content: "";
+    clear: both;
+  }
+}
+
+
+
 
 
 .meta-data {
@@ -415,32 +428,47 @@ Should be incorporated across PD and LP (models list, campaigns list).
 		}
     }
 }
-@media (min-width: 800px) and (max-width: 1023px) {
+// @media (min-width: 800px) and (max-width: 1023px) {
+@media (min-width: 800px) {
     .tiles > li {
-        display: inline-block;
-        width: 31%;
-        margin: 0 1% 16px;
-        .meta-data {
-            position: absolute;
-        }
-		&:nth-child(3n+1) {
-			margin-left: 0;
-		}
-		&:nth-child(3n) {
-			margin-right: 0;
-		}
+      display: inline-block;
+      width: 31%;
+      margin: 0 1% 16px;
+      &:nth-child(3n+1) {
+        margin-left: 0;
+      }
+      &:nth-child(3n) {
+        margin-right: 0;
+      }
+      .meta-data {
+          position: absolute;
+      }
     }
 }
-@media (min-width: 1024px) {
-    .tiles > li {
-        display: inline-block;
-        width: 23.2%;
-        margin: 0 1% 26px;
-		&:nth-child(4n+1) {
-			margin-left: 0;
-		}
-		&:nth-child(4n) {
-			margin-right: 0;
-		}
-    }
-}
+// @media (min-width: 1024px) {
+//     .tiles > li {
+//       display: inline-block;
+//       width: 23.2%;
+//       margin: 0 1% 26px;
+//       &:nth-child(4n+1) {
+//         margin-left: 0;
+//       }
+//       &:nth-child(4n) {
+//         margin-right: 0;
+//       }
+//     }
+//     .tiles.play-tiles > li {
+//       display: inline-block;
+//       width: 31%;
+//       margin: 0 1% 16px;
+//       &:nth-child(3n+1) {
+//         margin-left: 0;
+//       }
+//       &:nth-child(3n) {
+//         margin-right: 0;
+//       }
+//       .meta-data {
+//           position: absolute;
+//       }
+//     }
+// }

@@ -3,6 +3,7 @@
     <div class="row">
         <div class="list-header">
             <div class="pull-left number-of-items" ng-if="vm.totalLength > 0">
+                <menu-filter-by config="vm.header.filter"></menu-filter-by>
                 <menu-sort-by config="vm.header.sort"></menu-sort-by>
                 <search-filter query="vm.query.display_name"></search-filter>
             </div>
@@ -36,7 +37,8 @@
                     data="play"
                     ng-click="vm.tileClick($event, play.name)"
                     ng-mouseleave="vm.tileStates[play.name].showCustomMenu ? vm.customMenuClick($event, play) : null"
-                    ng-if="vm.plays.length > 0">
+                    ng-if="vm.plays.length > 0"
+                    ng-class="{editing: vm.tileStates[play.name].editPlay}">
                     <div class="tile-header" ng-if="!vm.tileStates[play.name].editPlay">
                         <h2 title="{{play.display_name}}">{{play.display_name | limitTo: 44 }}{{play.display_name.length > 44 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
@@ -58,9 +60,61 @@
                             </ul>
                         </div>
                     </div>
+                    <div 
+                        class="tile-metadata"
+                        ng-if="!vm.tileStates[play.name].editPlay">
+                        <ul>
+                            <li>Created by <span class="blue-text">{{play.createdBy}}</span> on <span class="blue-text">{{play.lastupdatedtimestamp | date}}</span></li>
+                            <li ng-if="play.segment != null">Segment: <span class="blue-text">{{play.segment}}</span></li>
+                            <li>
+                                Last Launched: 
+                                <span ng-if="play.talkingpoints.length === 0 && play.rating === '' || play.rating === 0"><span class="error-text">Not launched yet</span></span>
+                                <span ng-if="play.talkingpoints.length != 0 && play.rating === {}"><span class="blue-text">Ready for launch</span></span>
+                                <span ng-if="play.talkingpoints.length != 0 && play.rating != '' || play.rating != 0"><span class="blue-text">Launched {{play.lastupdatedtimestamp | date}}</span></span>
+                            </li>
+                            <li>
+                                Insights: 
+                                <span ng-if="play.talkingpoints.length === 0 && play.rating === '' || play.rating === 0"><span class="error-text">None created</span></span>
+                                <span ng-if="play.talkingpoints.length != 0 && play.rating === {}"><span class="blue-text">{{play.talkingpoints.length}} Talking Points created</span></span>
+                                <span ng-if="play.talkingpoints.length != 0 && play.rating != '' || play.rating != 0"><span class="blue-text">{{play.talkingpoints.length}} Talking Points - Published {{play.lastupdatedtimestamp | date}}</span></span>
+                            </li>
+                        </ul>
+                    </div>
                     <div class="tile-body" ng-if="!vm.tileStates[play.name].editPlay">
-                        <p title="{{play.description}}" ng-if="play.description != null">{{play.description | limitTo: 250 }}{{play.description.length > 250 ? '&hellip;' : ''}}</p>
-                        <p ng-if="play.description === null || play.description === ''"><button class="button link-button" data-ng-click="vm.editPlayClick($event, play)">Add description</button></p>
+
+                        <div ng-if="play.talkingpoints.length === 0 && play.rating === '' || play.rating === 0">
+                            <strong>This play was started but not finished.</strong> It can be launched after all steps are completed.
+                        </div>
+                        <div ng-if="play.talkingpoints.length != 0 && play.rating === {}">
+                            {{play.talkingpoints.length}} Talking Points created
+                        </div>
+                        <div ng-if="play.talkingpoints.length != 0 && play.rating != '' || play.rating != 0">
+                            <h4>Account Ratings</h4>
+                            <ul>
+                               <li ng-repeat="rating in play.rating">
+                                    <span>{{rating.count}}</span>
+                                </li> 
+                            </ul>
+                        </div>
+
+                    </div>
+                    <div class="tile-footer">
+                        <button 
+                            type="button"
+                            class="button blue-button pull-right"
+                             ng-if="play.talkingpoints.length === 0 && play.rating === '' || play.rating === 0"
+                            ng-click="vm.continuePlaySetup($event)">
+                            Continue
+                        </button>
+                        <button 
+                            type="button"
+                            class="button blue-button pull-right"
+                             ng-if="play.talkingpoints.length != 0 && play.rating === {}"
+                            ng-click="vm.launchPlay($event)">
+                            Launch
+                        </button>
+                        <span class="launch-success pull-right" ng-if="play.talkingpoints.length != 0 && play.rating != '' || play.rating != 0">Launched {{play.lastupdatedtimestamp | date}}</span>
+
                     </div>
 
                     <form
@@ -78,15 +132,6 @@
                                 data-ng-model="play.display_name"
                                 class="form-control" />
                                 </label>
-                        </div>
-                        <div class="form-group">
-                            <label for="playDescription">Description</label>
-                            <textarea
-                                class="form-control"
-                                id="description"
-                                name="description"
-                                data-ng-model="play.description"
-                            ></textarea>
                         </div>
                         <div class="actions">
                             <button
@@ -113,12 +158,12 @@
 
                 </li>
 
-                <li class="no-style" ng-if="vm.plays.length === 0 || vm.plays.length === null || vm.plays.length === ''">
+                <li class="no-style" ng-if="vm.plays.length < 12">
                     <a
                         class="button new-tile-button"
                         ui-sref="home.playbook.wizard">
                         <span>&#43;</span>
-                        Add Play
+                        Create Play
                     </a>
                 </li>
 
