@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayOverview;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
@@ -50,32 +49,17 @@ public class PlayResource {
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all plays for a tenant")
+    @ApiOperation(value = "Get all full plays for a tenant")
     public List<Play> getPlays(HttpServletRequest request, HttpServletResponse response) {
-        return playService.getAllPlays();
+        return playService.getAllFullPlays();
     }
 
     @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get play for a specific tenant based on playName")
+    @ApiOperation(value = "Get full play for a specific tenant based on playName")
     public Play getPlay(@PathVariable String playName, HttpServletRequest request, HttpServletResponse response) {
-        Play play = playService.getPlayByName(playName);
+        Play play = playService.getFullPlayByName(playName);
         return play;
-    }
-
-    @RequestMapping(value = "/playoverview", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get all playoverviews for a tenant")
-    public List<PlayOverview> getPlayOverviews(HttpServletRequest request, HttpServletResponse response) {
-        return playService.getAllPlayOverviews();
-    }
-
-    @RequestMapping(value = "/playoverview/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get play for a specific tenant based on playName")
-    public PlayOverview getPlayOverview(@PathVariable String playName, HttpServletRequest request,
-            HttpServletResponse response) {
-        return playService.getPlayOverviewByName(playName);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

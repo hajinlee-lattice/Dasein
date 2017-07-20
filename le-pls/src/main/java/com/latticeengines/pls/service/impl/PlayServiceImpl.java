@@ -1,9 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.codehaus.plexus.util.StringUtils;
@@ -12,16 +10,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.BucketInformation;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.LaunchHistory;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayOverview;
-import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
+import com.latticeengines.domain.exposed.pls.RatingObject;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PlayEntityMgr;
 import com.latticeengines.pls.service.PlayLaunchService;
@@ -69,34 +66,28 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public List<PlayOverview> getAllPlayOverviews() {
-        List<PlayOverview> playOverviews = new ArrayList<PlayOverview>();
-        List<String> playNames = getAllPlays().stream().map(p -> p.getName()).collect(Collectors.toList());
-        log.info("playNames is " + playNames);
-        playNames.stream().forEach(p -> {
-            playOverviews.add(getPlayOverviewByName(p));
-        });
-        return playOverviews;
+    public List<Play> getAllFullPlays() {
+        List<Play> fullPlays = getAllPlays().stream().map(p -> getFullPlay(p)).collect(Collectors.toList());
+        return fullPlays;
     }
 
     @Override
-    public PlayOverview getPlayOverviewByName(String name) {
-        PlayOverview playOverview = new PlayOverview();
+    public Play getFullPlayByName(String name) {
         Play play = getPlayByName(name);
+        return getFullPlay(play);
+    }
+
+    private Play getFullPlay(Play play) {
         if (play == null) {
             return null;
         }
-        playOverview.setPlay(play);
-
-        ResponseDocument<List<TalkingPointDTO>> response = talkingPointProxy.findAllByPlayName(name);
-        playOverview.setTalkingPoints(response.getResult());
 
         List<LaunchState> launchStates = new ArrayList<>();
-        // launchStates.add(LaunchState.Launched);
+        launchStates.add(LaunchState.Launched);
         PlayLaunch playLaunch = playLaunchService.findLatestByPlayId(play.getPid(), launchStates);
         LaunchHistory launchHistory = new LaunchHistory();
-        launchHistory.setLastAccountsNum(playLaunch != null ? playLaunch.getAccountsNum() : null);
-        launchHistory.setLastContactsNum(playLaunch != null ? playLaunch.getContactsNum() : null);
+        launchHistory.setPlayLaunch(playLaunch);
+        play.setLaunchHistory(launchHistory);
         // ----------------------------------------------------------------------------------------------
         // TODO in M14, we will contact Redshift to get new contacts number and
         // accounts number
@@ -104,21 +95,32 @@ public class PlayServiceImpl implements PlayService {
         launchHistory.setNewAccountsNum(5000L);
         launchHistory.setNewContactsNum(6000L);
         // ----------------------------------------------------------------------------------------------
-        playOverview.setLaunchHistory(launchHistory);
 
         // ----------------------------------------------------------------------------------------------
         // TODO in M14, we will get real data for AccountRatingMap
         // for now, just mock them
-        Map<BucketName, Integer> accountRatingMap = new HashMap<BucketName, Integer>();
-        accountRatingMap.put(BucketName.A, 500);
-        accountRatingMap.put(BucketName.B, 1000);
-        accountRatingMap.put(BucketName.C, 1000);
-        accountRatingMap.put(BucketName.D, 1000);
-        accountRatingMap.put(BucketName.F, 500);
+        RatingObject rating = new RatingObject();
+        List<BucketInformation> accountRatingList = new ArrayList<BucketInformation>();
+        BucketInformation aBucket = new BucketInformation();
+        aBucket.setBucket(BucketName.A.name());
+        aBucket.setBucketCount(500);
+        BucketInformation bBucket = new BucketInformation();
+        bBucket.setBucket(BucketName.B.name());
+        bBucket.setBucketCount(500);
+        BucketInformation cBucket = new BucketInformation();
+        cBucket.setBucket(BucketName.C.name());
+        cBucket.setBucketCount(500);
+        BucketInformation dBucket = new BucketInformation();
+        dBucket.setBucket(BucketName.D.name());
+        dBucket.setBucketCount(500);
+        accountRatingList.add(aBucket);
+        accountRatingList.add(bBucket);
+        accountRatingList.add(cBucket);
+        accountRatingList.add(dBucket);
+        rating.setBucketInfoList(accountRatingList);
+        play.setRating(rating);
         // ----------------------------------------------------------------------------------------------
-        playOverview.setAccountRatingMap(accountRatingMap);
-
-        return playOverview;
+        return play;
     }
 
     @Override

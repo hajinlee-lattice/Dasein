@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -58,39 +56,40 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @JsonProperty("name")
+    @JsonProperty("Name")
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @JsonProperty("display_name")
+    @JsonProperty("DisplayName")
     @Column(name = "DISPLAY_NAME", nullable = false)
     private String displayName;
 
-    @JsonProperty("description")
+    @JsonProperty("Description")
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
 
-    @JsonProperty("segment")
+    @JsonProperty("Segment")
     @Column(name = "SEGMENT_NAME", nullable = true)
     private String segmentName;
 
     @JsonIgnore
     @Transient
     private MetadataSegment segment;
+    //
+    // @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    // @OnDelete(action = OnDeleteAction.CASCADE)
+    // @JoinColumn(name = "FK_CALL_PREP_ID")
+    // private CallPrep callPrep;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "FK_CALL_PREP_ID")
-    private CallPrep callPrep;
-
-    @JsonProperty("rating")
+    @JsonProperty("Rating")
     @Transient
-    private List<RatingObject> rating = new ArrayList<>();
-    {
-        rating.add(new RatingObject());
-    }
+    private RatingObject rating;
 
-    @JsonProperty("talkingpoints")
+    @JsonProperty("LaunchHistory")
+    @Transient
+    private LaunchHistory launchHistory;
+
+    @JsonProperty("TalkingPoints")
     @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
     private List<TalkingPoint> talkingPoints;
 
@@ -103,17 +102,17 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @JsonProperty("timestamp")
+    @JsonProperty("TimeStamp")
     @Column(name = "TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
 
-    @JsonProperty("lastupdatedtimestamp")
+    @JsonProperty("LastUpdatedTimestamp")
     @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdatedTimestamp;
 
-    @JsonProperty("createdBy")
+    @JsonProperty("CreatedBy")
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 
@@ -172,19 +171,11 @@ public class Play implements HasName, HasPid, HasTenantId {
         }
     }
 
-    public CallPrep getCallPrep() {
-        return callPrep;
-    }
-
-    public void setCallPrep(CallPrep callPrep) {
-        this.callPrep = callPrep;
-    }
-
-    public List<RatingObject> getRating() {
+    public RatingObject getRating() {
         return rating;
     }
 
-    public void setRating(List<RatingObject> rating) {
+    public void setRating(RatingObject rating) {
         this.rating = rating;
     }
 
@@ -243,6 +234,14 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     public void setLastUpdatedTimestamp(Date lastUpdatedTimestamp) {
         this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    }
+
+    public LaunchHistory getLaunchHistory() {
+        return this.launchHistory;
+    }
+
+    public void setLaunchHistory(LaunchHistory launchHistory) {
+        this.launchHistory = launchHistory;
     }
 
     @Override

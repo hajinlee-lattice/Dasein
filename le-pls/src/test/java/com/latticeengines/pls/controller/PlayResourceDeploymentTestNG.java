@@ -4,19 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayOverview;
 import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -30,9 +32,17 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
     private String LAUNCH_DESCRIPTION = "playLaunch done on " + CURRENT_TIME_MILLIS;
 
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
+        mainTestTenant = testBed.getMainTestTenant();
+        switchToSuperAdmin();
+        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -70,10 +80,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
     public void createPlayLaunch() {
-        PlayLaunch launch = createPlayLaunch(play);
-
         playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches", launch, PlayLaunch.class);
+                "/pls/play/" + name + "/launches", null, PlayLaunch.class);
 
         assertPlayLaunch(playLaunch);
     }
@@ -87,15 +95,18 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
+        internalResourceRestApiProxy.updatePlayLaunch(CustomerSpace.parse(mainTestTenant.getId()), name,
+                playLaunch.getLaunchId(), LaunchState.Launched);
+
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Canceled + "&launchStates="
-                + LaunchState.Failed + "&launchStates=" + LaunchState.Launching, List.class);
+                + LaunchState.Failed + "&launchStates=" + LaunchState.Launched, List.class);
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
 
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launching, List.class);
+                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launched, List.class);
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 1);
@@ -107,38 +118,38 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(launchList.size(), 1);
 
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launched, List.class);
+                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launching, List.class);
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
         PlayLaunch retrievedLaunch = restTemplate.getForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches/" + playLaunch.getLaunchId(), PlayLaunch.class);
-        assertPlayLaunch(retrievedLaunch);
+        Assert.assertNotNull(retrievedLaunch);
+        Assert.assertEquals(retrievedLaunch.getLaunchState(), LaunchState.Launched);
     }
 
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "searchPlayLaunch" })
-    private void testGetPlayOverviews() {
-        PlayOverview retrievedPlayOverview = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/play/playoverview/" + name, PlayOverview.class);
-        Assert.assertNotNull(retrievedPlayOverview);
-        System.out.println("retrievedPlayOverview is " + retrievedPlayOverview);
+    private void testGetFullPlays() {
+        Play retrievedFullPlay = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/" + name, Play.class);
+        Assert.assertNotNull(retrievedFullPlay);
+        Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
+        Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getPlayLaunch());
+        System.out.println("retrievedPlayOverview is " + retrievedFullPlay);
 
-        List<PlayOverview> retrievedPlayOverviewList = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/play/playoverview", List.class);
-        Assert.assertNotNull(retrievedPlayOverviewList);
-        Assert.assertEquals(retrievedPlayOverviewList.size(), 2);
-
+        List<Play> retrievedFullPlayList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play", List.class);
+        Assert.assertNotNull(retrievedFullPlayList);
+        Assert.assertEquals(retrievedFullPlayList.size(), 2);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = "deployment", dependsOnMethods = { "testGetPlayOverviews" })
+    @Test(groups = "deployment", dependsOnMethods = { "testGetFullPlays" })
     private void deletePlayLaunch() {
         restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + name + "/launches/" + playLaunch.getLaunchId());
 
         List<PlayLaunch> launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launching, List.class);
+                "/pls/play/" + name + "/launches?launchStates=" + LaunchState.Launched, List.class);
 
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
@@ -167,14 +178,6 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(playLaunch.getApplicationId());
         Assert.assertNotNull(playLaunch.getLaunchState());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
-    }
-
-    private PlayLaunch createPlayLaunch(Play retrievedPlay) {
-        PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setDescription(LAUNCH_DESCRIPTION);
-        playLaunch.setLaunchState(LaunchState.Launching);
-        playLaunch.setPlay(play);
-        return playLaunch;
     }
 
     private Play createDefaultPlay() {

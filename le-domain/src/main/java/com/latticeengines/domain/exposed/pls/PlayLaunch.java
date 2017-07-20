@@ -44,29 +44,29 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
 
     @Index(name = "PLAY_LAUNCH_ID")
     @Column(name = "LAUNCH_ID", unique = true, nullable = false)
-    @JsonProperty("launch_id")
+    @JsonProperty("LaunchId")
     private String launchId;
 
     @Column(name = "DESCRIPTION", nullable = true)
-    @JsonProperty("description")
+    @JsonProperty("Description")
     private String description;
 
     @Index(name = "PLAY_LAUNCH_CREATED_TIME")
     @Column(name = "CREATED_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonProperty("createdTimestamp")
+    @JsonProperty("CreatedTimestamp")
     private Date createdTimestamp;
 
     @Index(name = "PLAY_LAUNCH_LAST_UPD_TIME")
     @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonProperty("lastUpdatedTimestamp")
+    @JsonProperty("LastUpdatedTimestamp")
     private Date lastUpdatedTimestamp;
 
     @Index(name = "PLAY_LAUNCH_STATE")
     @Column(name = "STATE", nullable = false)
     @Enumerated(EnumType.STRING)
-    @JsonProperty("launch_state")
+    @JsonProperty("LaunchState")
     private LaunchState launchState;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
@@ -93,11 +93,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     private String tableName;
 
     @Column(name = "CONTACTS_NUM")
-    @JsonProperty("contacts_num")
+    @JsonProperty("ContactsNum")
     private Long contactsNum;
 
     @Column(name = "ACCOUNTS_NUM")
-    @JsonProperty("accounts_num")
+    @JsonProperty("AccountsNum")
     private Long accountsNum;
 
     @Override
