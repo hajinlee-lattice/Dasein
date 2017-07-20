@@ -3,15 +3,16 @@ FROM latticeengines/centos
 #install ruby
 ENV RUBY_VERSION 2.4.1
 
-RUN yum groupinstall -y "Development Tools" && yum install -y xz && yum clean all
-RUN gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
-    && curl -L get.rvm.io | bash -s stable
-RUN source /etc/profile.d/rvm.sh \
-    && rvm install ${RUBY_VERSION} \
-    && rvm use ${RUBY_VERSION} --default
-
-# install sass
-RUN gem install sass
+#RUN yum groupinstall -y "Development Tools" && yum install -y xz && yum clean all
+#RUN gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
+#    && curl -L get.rvm.io | bash -s stable
+#RUN usermod -G rvm $USER \
+#    && source /etc/profile.d/rvm.sh \
+#    && rvm install ${RUBY_VERSION} \
+#    && rvm use ${RUBY_VERSION} --default
+#
+## install sass
+#RUN gem install sass
 
 # gpg keys listed at https://github.com/nodejs/node
 RUN set -ex \
@@ -47,8 +48,7 @@ RUN npm install grunt-cli -g \
 RUN echo invalidate cache 1500567475 > /dev/null
 ADD le-ui.tar.gz /opt/node
 RUN mv /opt/node/le-ui /opt/node/app \
-    && cd /opt/node/app \
-    && npm install
+    && cd /opt/node/app
 
 COPY server.key /etc/pki/tls/private/private.key
 COPY server.crt /etc/pki/tls/star.lattice.local.crt
