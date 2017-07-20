@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -40,8 +41,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         dataRequest.setAccountIds(accountIds);
         List<String> attributes = new ArrayList<>();
         dataRequest.setAttributes(attributes);
-        DataPage dataPage = accountProxy.getAccounts(customerSpace, (new Date(start)).toGMTString(), offset, maximum,
-                dataRequest);
+        DataPage dataPage = accountProxy.getAccounts(customerSpace,
+                DateTimeUtils.convertToStringUTCISO8601(new Date(start)), offset, maximum, dataRequest);
 
         return dataPage.getData();
     }
@@ -51,7 +52,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         String customerSpace = "";
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(accountIds);
-        return (int) accountProxy.getAccountsCount(customerSpace, (new Date(start)).toGMTString(), dataRequest);
+        return (int) accountProxy.getAccountsCount(customerSpace,
+                DateTimeUtils.convertToStringUTCISO8601(new Date(start)), dataRequest);
     }
 
     @Override
