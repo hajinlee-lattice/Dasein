@@ -261,6 +261,8 @@ angular
                     filter.AttributeValue = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
                 }
 
+                console.log(filter);
+
                 return filter;
             }
 

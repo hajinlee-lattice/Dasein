@@ -31,12 +31,14 @@
                 </div>
             </div>
         </li>
-        <li class="tab-team" ui-sref="{{ vm.contacts }}" ui-sref-active="active">
+        <!-- <li class="tab-team" ui-sref="{{ vm.contacts }}" ui-sref-active="active"> -->
+        <li class="tab-team disabled">
             <div class="tab-container">
                 <h2>Contacts</h2>
                 <div class="enrichmentCounts">
-                    <span ng-if="!vm.counts.contacts.loading" class="count">{{vm.counts.contacts.value|number}}</span>
-                    <span ng-if="vm.counts.contacts.loading" class="count"><i class="fa fa-spinner fa-spin"></i></span>
+                    <span class="count">Currently not available</span>
+                    <!-- <span ng-if="!vm.counts.contacts.loading" class="count">{{vm.counts.contacts.value|number}}</span>
+                    <span ng-if="vm.counts.contacts.loading" class="count"><i class="fa fa-spinner fa-spin"></i></span> -->
                 </div>
             </div>
         </li>

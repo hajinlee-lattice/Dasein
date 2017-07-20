@@ -296,7 +296,7 @@ angular.module('common.datacloud')
         
         $http({
             method: 'get',
-            url: this.host + '/latticeinsights/insights/selectedattributes/count'
+            url: this.url('/attributes','/insights') + '/selectedattributes/count'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -309,7 +309,7 @@ angular.module('common.datacloud')
         
         $http({
             method: 'get',
-            url: this.host + '/latticeinsights/insights/categories'
+            url: this.url('/attributes','/insights') + '/categories'
         }).then(function(response){
             deferred.resolve(response);
         });
@@ -322,7 +322,7 @@ angular.module('common.datacloud')
         
         $http({
             method: 'get',
-            url: this.host + '/latticeinsights/insights/subcategories',
+            url: this.url('/attributes','/insights') + '/subcategories',
             params: {
                 category: category
             }
@@ -392,7 +392,7 @@ angular.module('common.datacloud')
 
     this.getCube = function(opts){
         var deferred = $q.defer(),
-            url = this.url('/statistics/cube','/stats/cube2');
+            url = this.url('/statistics/cube','/cube2');
         
         $http({
             method: 'get',

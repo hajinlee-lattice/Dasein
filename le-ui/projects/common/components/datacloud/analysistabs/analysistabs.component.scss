@@ -85,6 +85,14 @@
                 color: #26649b;
                 font-size: 18px;
             }
+            &.disabled {
+                .tab-container {
+                    background: #e2e2e2;
+                    .count {
+                        color: #aaa;
+                    }
+                }
+            }
             &.tab-edit {
                 min-width: 289px;
                 .enrichmentCounts {

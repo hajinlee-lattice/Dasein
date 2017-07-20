@@ -464,8 +464,8 @@ angular.module('common.datacloud.explorer', [
 
     var getHighlightMetadata = function() {
         var timestamp = new Date().getTime();
-
         vm.categories.forEach(function(category) {
+
             if (vm.enrichmentsObj && vm.enrichmentsObj[category]) {
                 vm.highlightMetadata.categories[category] = {};
 
@@ -938,6 +938,7 @@ angular.module('common.datacloud.explorer', [
                         }
                         enrichment.Hide = item.Hide;
                     }
+
                 });
             }
             var timestamp_c = new Date().getTime();
@@ -973,6 +974,7 @@ angular.module('common.datacloud.explorer', [
         /**
          * if we aren't showing highlighted items don't segment them even if the UI asks
          */
+
         if(segment === 'HighlightHighlighted' && !vm.showHighlighting()) {
             segment = '';
         }

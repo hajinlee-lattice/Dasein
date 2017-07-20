@@ -18,12 +18,9 @@ angular
             'home.datacloud.explorer': 'lattice',
             'home.datacloud.insights': 'lattice'
         }
-
         if (states[toState.name]) {
             DataCloudService.path = DataCloudService.paths[states[toState.name]];
         }
-
-        console.log('-!- stateChangeStart: ', toState.name, DataCloudService.path);
     });
 })
 .config(function($stateProvider) {
@@ -270,9 +267,6 @@ angular
                 segment: 'Create'
             },
             resolve: angular.extend({}, DataCloudResolve, {
-                LoadStub: ['QueryStore', function(QueryStore) {
-                    return QueryStore.loadData();
-                }],
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var deferred = $q.defer();
 

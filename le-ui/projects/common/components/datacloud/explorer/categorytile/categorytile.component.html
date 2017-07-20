@@ -18,8 +18,11 @@
                     <div class="column label">Highlighted Insights</div>
                     <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
                 </li>
+
+
+                <!-- | filter: vm.enrichmentsFilter -->
                 <li ng-repeat="attribute in (highlightAttributes = ((TileTableItems = vm.getTileTableItems(category, false, 'HighlightHighlighted', 5)).HighlightHighlighted 
-                        | filter: vm.enrichmentsFilter
+                        
                         | filter: vm.filterHideTrue
                         | orderBy: vm.categoryOrderBy()
                         | limitTo: (vm.showHighlighting() ? 5 : 0)))"
@@ -27,17 +30,23 @@
                         ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                     <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
-                    <div class="column data records" ng-if="!vm.lookupMode">{{ attribute.Count|number }}</div>
+                    <div class="column data records" ng-if="!vm.lookupMode">{{ attribute.NonNullCount|number }}</div>
                 </li>
             </ul>
             <ul class="attributes noselect-children">
-                <li class="header" ng-show="categoryAttributes.length > 0">
+
+                {{vm.TileTableItems.other}}
+
+                <!-- <li class="header" ng-show="vm.categoryAttributes.length > 0"> -->
+                <li class="header">
                     <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
                     <div class="column data" ng-if="!highlightAttributes.length && vm.section == 'segment.analysis'">Value</div>
                     <div class="column data" ng-if="!highlightAttributes.length">{{ vm.lookupMode ? 'Value' : (vm.section == 'segment.analysis' && vm.inModel() ? 'Lift' : 'Records') }}</div>
                 </li>
-                <li ng-repeat="attribute in (categoryAttributes = (TileTableItems.other 
-                        | filter: vm.enrichmentsFilter()
+
+
+                <!-- | filter: vm.enrichmentsFilter() -->
+                <li ng-repeat="attribute in (categoryAttributes = (TileTableItems.other
                         | filter: vm.filterHideTrue
                         | orderBy: vm.categoryOrderBy()
                         | limitTo: 5 - (highlightAttributes.length || 0)))"
@@ -49,6 +58,7 @@
                             'ignore-ngclick': vm.section !== 'segment.analysis'
                         }"
                         ng-click="vm.selectSegmentAttribute(attribute)">
+
                     <div class="column label" title="{{attribute.DisplayName}}">
                         <input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !vm.cube.Stats" ng-disabled="true" />
                         <input  type="checkbox" 
@@ -62,13 +72,13 @@
                     <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !vm.cube.Stats"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
                     <div class="column data value" ng-if="vm.section == 'segment.analysis' && vm.cube.Stats">{{ vm.displayAttributeValue(attribute) }}</div>
                     <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>
-                    <div class="column data records" ng-if="!vm.lookupMode && !vm.inModel()">{{ attribute.Count|number }}</div>
+                    <div class="column data records" ng-if="!vm.lookupMode && !vm.inModel()">{{ attribute.NonNullCount|number }}</div>
                     <div class="column data values" ng-if="vm.lookupMode && vm.section != 'segment.analysis'">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
                 </li>
             </ul>
         </div>
     </span>
-    <ul class="controls noselect" ng-if="!vm.lookupMode && !vm.category">
+    <ul class="controls noselect" >
         <li class="control highlight dropdown-container" ng-if="vm.section == 'team'">
             <div class="button"
                     ng-class="{'selected': vm.openHighlighter[category].open, 'enabled': vm.highlightTypesCategoryLabel(category).type == 'enabled' || vm.highlightTypesCategoryLabel(category).type == 'dirty'}"
