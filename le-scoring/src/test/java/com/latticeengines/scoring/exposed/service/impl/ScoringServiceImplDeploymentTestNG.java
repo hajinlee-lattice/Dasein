@@ -16,6 +16,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -26,6 +27,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -46,6 +48,7 @@ import com.latticeengines.scoring.util.ScoringTestUtils;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
+import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
 public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGBase {
 
@@ -54,6 +57,10 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @Autowired
     private ScoringServiceImpl scoringService;
+
+    @Autowired
+    @Qualifier(value = "deploymentTestBed")
+    protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     private static String TEST_INPUT_DATA_DIR;
 
@@ -83,8 +90,9 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @BeforeClass(groups = "deployment")
     public void setup() throws IOException {
-
-        TENANT_ID = this.getClass().getSimpleName() + String.valueOf(System.currentTimeMillis());
+        tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.LPA3);
+        TENANT_ID = tenant.getId();
+        deploymentTestBed.switchToSuperAdmin();
         customerSpace = CustomerSpace.parse(TENANT_ID);
         System.out.println(customerSpace.toString());
         TEST_INPUT_DATA_DIR = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), customerSpace)
@@ -97,7 +105,6 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         ScoringTestModelConfiguration modelConfiguration = new ScoringTestModelConfiguration(testModelFolderName,
                 applicationId, modelVersion);
         plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
-        tenant = setupTenant();
         ModelSummary modelSummary = createModel(plsRest, tenant, modelConfiguration, customerSpace);
         generateDefaultBucketMetadata(plsRest, tenant, modelSummary, customerSpace);
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
@@ -106,11 +113,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
 
     @AfterClass(groups = "deployment")
     public void cleanup() throws IOException {
-        plsRest.deleteTenant(customerSpace);
-        HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
-        HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
-        HdfsUtils.rmdir(yarnConfiguration, enhancementsDir);
-        HdfsUtils.rmdir(yarnConfiguration, TEST_INPUT_DATA_DIR);
+        deploymentTestBed.deleteTenant(tenant);
     }
 
     @Test(groups = "deployment")
@@ -171,16 +174,6 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         List<String> csvfiles = HdfsUtils.getFilesForDir(yarnConfiguration, targetDir, ".*.csv$");
         Assert.assertNotNull(csvfiles);
         Assert.assertEquals(csvfiles.size(), 1);
-    }
-
-    private Tenant setupTenant() throws IOException {
-        String tenantId = customerSpace.toString();
-        Tenant tenant = new Tenant();
-        tenant.setId(tenantId);
-        tenant.setName(tenantId);
-        plsRest.deleteTenant(customerSpace);
-        plsRest.createTenant(tenant);
-        return tenant;
     }
 
     private void generateDefaultBucketMetadata(InternalResourceRestApiProxy plsRest, Tenant tenant,
