@@ -3,6 +3,7 @@ FROM latticeengines/centos
 #install ruby
 ENV RUBY_VERSION 2.4.1
 
+RUN yum install -y xz && yum clean all
 #RUN yum groupinstall -y "Development Tools" && yum install -y xz && yum clean all
 #RUN gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
 #    && curl -L get.rvm.io | bash -s stable
