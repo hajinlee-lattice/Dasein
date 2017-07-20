@@ -22,7 +22,7 @@
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
-                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.show_sql">${dantedb.datasource.show_sql:false}</prop>
                 <prop key="hibernate.globally_quoted_identifiers">true</prop>
             </props>
         </property>
@@ -31,7 +31,6 @@
     <bean id="danteTransactionManager"
           class="org.springframework.orm.hibernate4.HibernateTransactionManager"
           p:sessionFactory-ref="danteSessionFactory">
-        <!--<qualifier value="danteTransactionManager"/>-->
     </bean>
 
     <tx:annotation-driven transaction-manager="danteTransactionManager"/>
