@@ -414,7 +414,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
             }
             while (records.hasNext()) {
                 GenericRecord record = records.next();
-                // log.info(record.toString());
+                log.info(record.toString());
                 Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
                 Object attr = record.get("AttrName");
                 Assert.assertNotNull(attr);

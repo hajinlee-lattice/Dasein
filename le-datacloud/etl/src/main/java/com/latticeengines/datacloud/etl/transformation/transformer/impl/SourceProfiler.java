@@ -5,14 +5,17 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.metadata.FundamentalType.AVRO_PROP_KEY;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,6 +29,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
@@ -42,13 +46,13 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategorizedIntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters;
+import com.latticeengines.domain.exposed.datacloud.dataflow.ProfileParameters.Attribute;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component(TRANSFORMER_NAME)
 public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, ProfileParameters> {
@@ -290,7 +294,6 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
     }
 
-    @SuppressWarnings("unchecked")
     private BucketAlgorithm parseBucketAlgo(String algo, String valueDict) {
         if (StringUtils.isBlank(algo)) {
             return null;
@@ -318,6 +321,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     @Override
     protected void postDataFlowProcessing(String workflowDir, ProfileParameters paras, ProfileConfig config) {
+        if (config.getStage().equals(DataCloudConstants.PROFILE_STAGE_ENRICH)) {
+            postProcessNumericAttrs(workflowDir, paras);
+        }
         List<Object[]> result = new ArrayList<>();
         result.add(profileIdAttr(paras.getIdAttr()));
         for (ProfileParameters.Attribute attr : paras.getAttrsToRetain()) {
@@ -328,10 +334,22 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         Map<String, List<ProfileParameters.Attribute>> exAttrsToEnc = groupAttrsToEnc(paras.getExAttrsToEnc(),
                 StringUtils.isBlank(config.getEncAttrPrefix()) ? DataCloudConstants.CEAttr : config.getEncAttrPrefix());
         int size = result.size() + paras.getNumericAttrs().size() + amAttrsToEnc.size() + exAttrsToEnc.size();
-        log.info(String.format(
-                "1 LatticeAccountId attr, %d numeric attrs, %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
-                paras.getNumericAttrs().size(), amAttrsToEnc.size(), exAttrsToEnc.size(),
-                paras.getAttrsToRetain().size()));
+        switch (config.getStage()) {
+        case DataCloudConstants.PROFILE_STAGE_ENRICH:
+            log.info(String.format(
+                    "1 LatticeAccountId attr, %d numeric attrs(groupd into encode attrs and retain attrs), %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
+                    paras.getNumericAttrs().size(), amAttrsToEnc.size(), exAttrsToEnc.size(),
+                    paras.getAttrsToRetain().size()));
+            break;
+        case DataCloudConstants.PROFILE_STAGE_SEGMENT:
+            log.info(String.format(
+                    "1 LatticeAccountId attr, %d numeric attrs, %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
+                    paras.getNumericAttrs().size(), amAttrsToEnc.size(), exAttrsToEnc.size(),
+                    paras.getAttrsToRetain().size()));
+            break;
+        default:
+            throw new RuntimeException("Unrecognized stage " + config.getStage());
+        }
         if (config.getStage().equals(DataCloudConstants.PROFILE_STAGE_SEGMENT) && size > maxAttrs) {
             log.warn(String.format("Attr num after bucket and encode is %d, exceeding expected maximum limit %d", size,
                     maxAttrs));
@@ -360,6 +378,42 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         uploadAvro(workflowDir, columns, data);
     }
 
+    private void postProcessNumericAttrs(String avroDir, ProfileParameters paras) {
+        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
+        List<Attribute> numericAttrs = paras.getNumericAttrs();
+        Map<String, Attribute> numericAttrMap = new HashMap<>(); // attr name -> attr
+        numericAttrs.forEach(numericAttr -> numericAttrMap.put(numericAttr.getAttr(), numericAttr));
+        for (GenericRecord record : records) {
+            String attrName = record.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME).toString();
+            IntervalBucket algo = record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO) == null ? null
+                    : JsonUtils.deserialize(record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString(),
+                            IntervalBucket.class);
+            numericAttrMap.get(attrName).setAlgo(algo);
+            Integer numBits = algo == null ? null
+                    : Math.max((int) Math.ceil(Math.log((algo.getBoundaries().size() + 2)) / Math.log(2)), 1);
+            numericAttrMap.get(attrName).setEncodeBitUnit(numBits);
+        }
+        Iterator<Attribute> iter = numericAttrs.iterator();
+        while (iter.hasNext()) {
+            Attribute attr = iter.next();
+            if (attr.getAlgo() == null) {
+                paras.getAttrsToRetain().add(attr);
+                iter.remove();
+                log.warn(String.format("Attribute %s is moved from encode numeric group to retained group (%s)",
+                        attr.getAttr(), JsonUtils.serialize(attr)));
+            }
+        }
+        paras.getAmAttrsToEnc().addAll(paras.getNumericAttrs());
+        try {
+            List<String> avros = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*\\.avro$");
+            for (String path : avros) {
+                HdfsUtils.rmdir(yarnConfiguration, path);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete " + avroDir + "/*.avro", e);
+        }
+    }
+
     private List<Pair<String, Class<?>>> prepareColumns() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of(DataCloudConstants.PROFILE_ATTR_ATTRNAME, String.class));
@@ -374,7 +428,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     private void uploadAvro(String targetDir, List<Pair<String, Class<?>>> schema, Object[][] data) {
         try {
-            AvroUtils.createAvroFileByData(yarnConfiguration, schema, data, targetDir, "AMProfileAdditional.avro");
+            AvroUtils.createAvroFileByData(yarnConfiguration, schema, data, targetDir, "Profile.avro");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

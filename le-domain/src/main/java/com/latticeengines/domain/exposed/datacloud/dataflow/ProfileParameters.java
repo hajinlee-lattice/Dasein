@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.dataflow;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -144,7 +145,9 @@ public class ProfileParameters extends TransformationFlowParameters {
         this.codeBookLookup = codeBookLookup;
     }
 
-    public static class Attribute {
+    public static class Attribute implements Serializable {
+        private static final long serialVersionUID = -4121611251810005974L;
+
         private String attr;
         private Integer encodeBitUnit;
         private String decodeStrategy;
