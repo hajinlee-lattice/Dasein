@@ -57,7 +57,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.createdDate = modelDetails[widgetConfig.CreatedDateProperty];
     $scope.createdDate = $scope.createdDate * 1000;
     $scope.createdDate = DateTimeFormatUtility.FormatShortDate($scope.createdDate);
-
     $scope.totalLeads = modelDetails[widgetConfig.TotalLeadsProperty];
     $scope.totalLeads = StringUtility.AddCommas($scope.totalLeads);
 

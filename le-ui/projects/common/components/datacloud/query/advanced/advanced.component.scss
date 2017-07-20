@@ -1,0 +1,27 @@
+@import "./input/input.component.scss";
+@import "./tree/tree.component.scss";
+
+div.advanced-query-builder {
+    position: relative;
+    
+    strong {
+        font-weight: bold;
+    }
+
+    .query-algorithm {
+        margin: 1em 0;
+        display: flex;
+        
+        .query-algorithm-display {
+            /*background: #fff;
+            border: 1px solid #d0d0d0;
+            border-radius: 5px;*/
+            width: 100%;
+            margin-right: 0.25em;
+        }
+
+        .query-algorithm-undo {
+            padding: 10px 10px;
+        }
+    }
+}

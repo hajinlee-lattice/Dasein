@@ -1,0 +1,287 @@
+div.advanced-query-builder {
+    .query-helper-text-one {
+        font-size: 1.2em;
+        padding-left: 8px;
+        margin-bottom: .8em;
+    }
+
+    .query-section-divider {
+        display: flex;
+        vertical-align: text-middle;
+        margin: 2em 0em 1em 0em;
+        
+        span {
+            display: inline-block;
+            font-weight: bold;
+            width: 5em;
+            font-size: .8em;
+            padding-top: 0.2em;
+            text-align: center;
+            
+            i {
+                position: relative;
+            }
+        }
+
+        div {
+            height: 0.8em;
+            border-bottom: 1px dashed;
+            width: 100%;
+        }
+    }
+    .query-section {
+        li {
+            position: relative;
+            margin-left: 1.5em;
+        }
+
+        &.query-tree-root > li > query-tree-directive:first-child > .query-section {
+            .query-section-operator {
+                display: none;
+            }
+            
+            .query-section-type-dotline {
+                display: none;
+            }
+        }
+
+        .query-section-type-dotline {
+            position: absolute;
+            margin-top: 1.15em;
+            left: 0;
+            width: 1.5em;
+            border-bottom: 1px dashed;
+        }
+
+        .query-section-operator {
+            position: absolute;
+            background: #fafafa;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: .8em;
+            width: 2em;
+            text-align: center;
+            z-index: 2;
+        }
+        
+        .query-section-operator.label-operator {
+            left: -1.1em;
+            top: 1.9em;
+            cursor: default;
+        }
+
+        .query-section-operator.item-operator {
+            top: -1em;
+            left: -3.4em;
+            cursor: default;
+        }
+
+        >li {
+            margin-left: 0em;
+            margin-bottom: 2em;
+        }
+
+        .query-section-item {
+            position: absolute;
+            top: 2em;
+            left: 1.5em;
+            right: 0;
+            background: white;
+            border: 1px solid #ccc;
+            border-left: 5px solid #999;
+            height: 3.5em;
+            display: flex;
+            cursor: move;
+            z-index: 1;
+            
+            & * {
+                cursor: move;
+            }
+            
+            &.query-section-item-end {
+                background: #fafafa;
+                border: none;
+                cursor: default;
+            
+                & {
+                    * {
+                        cursor: default;
+                    }
+
+                    a {
+                        cursor: pointer;
+                    }
+                }
+                
+                span {
+                    display: inline-block;
+                    margin: 1.2em 0em 0 0.2em;
+                    vertical-align: baseline;
+                    font-size: .9em;
+                    
+                    i {
+                        margin: 0.2em 0.5em;
+                        font-size: 1.2em;
+                    }
+                }
+
+                span, span * {
+                    display: inline-block;
+                }                
+            }
+
+            .query-section-item-label {
+                background-color: #f6f6f6;
+                border-right: 1px solid #ccc;
+                width: 2em;
+                padding-top: .9em;
+                text-align: center;
+                z-index: 1;
+            }
+            
+            .query-section-item-content {
+                border-right: 1px solid #ccc;
+                width: 100%;
+                padding-top: .4em;
+                padding-left: 1em;
+                line-height: 1.3em;
+                
+                span {
+                    float: left;
+                }
+
+                .query-section-item-category {
+                    font-size: .85em;
+                }
+
+                .query-section-item-displayname {
+                    clear: both;
+                    
+                    .query-section-item-name {
+
+                    }
+
+                    .query-section-item-operation {
+                        margin: 0 1em;
+                    }
+
+                    .query-section-item-value {
+
+                    }
+                }
+            }
+
+            .query-section-item-records {
+                border-right: none;
+                width: 12em;
+                padding-top: .3em;
+                padding-left: 1em;
+                line-height: 1.4em;
+                
+                span {
+                    float: left;
+                    
+                    &.query-section-item-records-label {
+                        color: #bbb;
+                        font-weight: bold;
+                        font-size: .85em;
+                    }
+
+                    &.query-section-item-records-number {
+                        clear: both;
+                        font-size: 1.1em;
+                    }
+                }
+
+                i {
+                    position: absolute;
+                    top: 0em;
+                    right: 0em;
+                    float: right;
+                    cursor: pointer;
+                    padding: 1.1em .8em;
+                }
+            }
+
+            &.category-contact { border-left-color: #ff9e64; }
+            &.category-product { border-left-color: #cd80bc; }
+            &.category-firmographics { border-left-color: #33bdb7; }
+            &.category-intent { border-left-color: #f15a5a; }
+            &.category-technology_profile { border-left-color: #70bf4a; }
+            &.category-website_profile { border-left-color: #26649b; }
+            &.category-growth_trends { border-left-color: #65b7e6; }
+            &.category-engagement { border-left-color: #aac43b; }
+            &.category-online_presence { border-left-color: #8e71b2; }
+            &.category-website_keywords { border-left-color: #fdbc49; }
+        }
+
+        .query-section-item-box {
+            position: relative;
+            border-left: 1px dashed #000;
+            border-bottom: 1px dashed #000;
+            padding: 2.5em 0 1.2em 1.5em;
+            margin-bottom: 0em;
+        }
+
+        .query-section-item-box-subtree {
+            border-bottom: none;
+        }
+
+        .query-section-item-end {
+            border-color: #bbb;
+        }
+
+        .query-section-item-end {
+            border-color: #bbb;
+        }
+
+        .query-section-label {
+            display: block;
+            background: #f3f3f3;
+            border: 1px solid #d0d0d0;
+            cursor: move;
+            
+            .query-section-label-text {
+                padding: 0.333em 1em;
+                display: inline-block;
+            }
+            
+            .fa {
+                font-size: .9em;
+                
+                &.fa-chevron-down {
+                    margin-left: .5em;
+                }
+            }
+
+            .query-section-controls i.fa {
+                display: inline-block;
+                padding: 0.75em 0.5em;
+                margin-right: .5em;
+                cursor: pointer;
+            }
+        }
+
+        .query-section-any {
+            
+        }
+
+        .query-section-all {
+            
+        }
+    }
+
+    .query-section-item-box:first-child {
+        padding-top: 1.25em;
+
+        &> query-tree-directive {
+            &> div > .query-section-operator {
+                display: none;
+            }
+
+            &> .query-section-item {
+                top: .75em;
+            }
+        }
+    }
+}

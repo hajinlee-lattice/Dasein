@@ -61,7 +61,7 @@ angular
                 if(vm.lookupMode) {
                     order = [ '-HighlightHighlighted', '-ImportanceOrdering', '-Value' ];
                 } else if(vm.section == 'segment.analysis') {
-                    order = [ 'SegmentChecked', '-NonNullCount', '-Value' ];
+                    order = [ 'SegmentChecked', '-Count', '-Value' ];
                 } else {
                     order = [ '-HighlightHighlighted', '-Value' ];
                 }
@@ -104,10 +104,10 @@ angular
             }
 
             vm.getAttributeStat = function(attribute) {
-                var enrichmentKey = attribute.Attribute || attribute.FieldName,
+                var enrichmentKey = attribute.Attribute || attribute.ColumnId,
                     index = vm.enrichmentsMap[enrichmentKey],
                     enrichment = vm.enrichments[index],
-                    stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].RowStats && vm.cube.Stats[enrichmentKey].RowStats.Bkts && vm.cube.Stats[enrichmentKey].RowStats.Bkts.List ? vm.cube.Stats[enrichmentKey].RowStats.Bkts.List : null),
+                    stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].Bkts && vm.cube.Stats[enrichmentKey].Bkts.List ? vm.cube.Stats[enrichmentKey].Bkts.List : null),
                     segmentRangeKey = null;
 
                 var stat = (stats && stats.length ? stats[0] : null);
@@ -138,8 +138,8 @@ angular
 
             vm.displayAttributeValue = function(attribute, property) {
                 var property = property || 'Lbl',
-                    enrichmentKey = attribute.Attribute || attribute.FieldName,
-                    stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].RowStats && vm.cube.Stats[enrichmentKey].RowStats.Bkts && vm.cube.Stats[enrichmentKey].RowStats.Bkts.List ? vm.cube.Stats[enrichmentKey].RowStats.Bkts.List : null);
+                    enrichmentKey = attribute.Attribute || attribute.ColumnId,
+                    stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].Bkts && vm.cube.Stats[enrichmentKey].Bkts.List ? vm.cube.Stats[enrichmentKey].Bkts.List : null);
 
                 /**
                  * sort stats by record count if there are more then 1

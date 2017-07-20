@@ -1,0 +1,104 @@
+div.advanced-query-builder {
+    ul.query-input {
+        display: inline-block;
+        vertical-align: text-top;
+        
+        li {
+            display: inline-block;
+            
+            span {
+                display: inline;
+                cursor: default;
+            }
+
+            span.query-input-number {
+                /*background: #333;*/
+                border-radius: 0px;
+                color: #000;
+                font-weight: bold;
+                margin: 0px 1px;
+                display: inline-block;
+                width: 1.4em;
+                text-align: center;
+                line-height: 1.2em;
+                cursor: default;
+
+                &.category-contact { border-bottom: 3px solid #ff9e64; }
+                &.category-product { border-bottom: 3px solid #cd80bc; }
+                &.category-firmographics { border-bottom: 3px solid #33bdb7; }
+                &.category-intent { border-bottom: 3px solid #f15a5a; }
+                &.category-technology_profile { border-bottom: 3px solid #70bf4a; }
+                &.category-website_profile { border-bottom: 3px solid #26649b; }
+                &.category-growth_trends { border-bottom: 3px solid #65b7e6; }
+                &.category-engagement { border-bottom: 3px solid #aac43b; }
+                &.category-online_presence { border-bottom: 3px solid #8e71b2; }
+                &.category-website_keywords { border-bottom: 3px solid #fdbc49; }
+            }
+
+            span.query-input-operator {
+                /*font-weight: bold;*/
+                text-transform: uppercase;
+                margin: 0 0.2em 0 0em;
+            }
+
+            span.query-input-parenthesis {
+                display: inline-block;
+                width: 0.3em;
+                height: 1em;
+            }
+            span.query-input-parenthesis-label {
+                font-size: 1.7em;
+                line-height: 1em;
+                margin-top: 2px;
+                display: inline-block;
+                position: absolute;
+                margin-left: 3px;
+            }
+            span.query-input-section-end .query-input-parenthesis-label {
+                margin-left: -5px;
+            }
+        }
+
+        li:last-child {
+            > span.query-input-operator {
+                display: none;
+                
+                .query-input-operator-alternate {
+                    display: block;
+                    margin-right: 0;
+                    float: left;
+                }
+            }
+
+            span.query-input-section-end {
+                /*display: none;*/
+            }
+        }
+
+        &.query-input-root {
+            .query-input {
+                /*background-color: rgba(0,0,0,.075);*/
+                border-top: 1px dashed;
+                margin-top: 2px;
+                padding: 0 2px;
+            }
+
+            &.query-input,
+            &.query-input > li > ul {
+                /*background-color: transparent;*/
+                border-top: none;
+                margin-top: 0;
+                padding: 0;
+            }
+        }
+
+        &.query-input-root {
+            > li {
+                > .query-input-parenthesis,
+                > span.query-input-operator-alternate {
+                    display: none;
+                }
+            }
+        }
+    }
+} 

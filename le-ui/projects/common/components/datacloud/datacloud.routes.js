@@ -5,8 +5,27 @@ angular
     'common.datacloud.explorertabs',
     'common.datacloud.analysistabs',
     'common.datacloud.query',
+    'common.datacloud.query.advanced',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
+.run(function($rootScope, $state, DataCloudService) {
+    $rootScope.$on('$stateChangeStart', function(event, toState, params, fromState, fromParams) {
+        var states = {
+            'home.segment.explorer': 'customer', 
+            'home.segment.explorer.attributes': 'customer',
+            'home.model.analysis.explorer': 'customer',
+            'home.model.analysis.explorer.attributes': 'customer',
+            'home.datacloud.explorer': 'lattice',
+            'home.datacloud.insights': 'lattice'
+        }
+
+        if (states[toState.name]) {
+            DataCloudService.path = DataCloudService.paths[states[toState.name]];
+        }
+
+        console.log('-!- stateChangeStart: ', toState.name, DataCloudService.path);
+    });
+})
 .config(function($stateProvider) {
     var DataCloudResolve = {
         EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
@@ -27,7 +46,7 @@ angular
             DataCloudStore.setHost(ApiHost);
 
             DataCloudStore.getAllTopAttributes().then(function(result) {
-                deferred.resolve(result || {});
+                deferred.resolve(result['Categories'] || result || {});
             });
 
             return deferred.promise;
@@ -338,13 +357,30 @@ angular
             params: {
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Analysis',
-                section: 'query',
+                section: 'query'
             },
             views: {
                 "main@": {
                     controller: 'QueryBuilderCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/builder/querybuilder.component.html'
+                }
+            }
+        },
+        advquery: {
+            url: '/advanced/:state',
+            params: {
+                pageIcon: 'ico-analysis',
+                pageTitle: 'Analysis',
+                state: 'tree1',
+                section: 'query'
+
+            },
+            views: {
+                "main@": {
+                    controller: 'AdvancedQueryCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
                 }
             }
         },
@@ -479,9 +515,15 @@ angular
 
         .state('home.segment', getState('main', {
             url: '/segment/:segment',
+            params: {
+                section: 'segment.analysis'
+            },
             redirectTo: 'home.segment.explorer'
         }))
         .state('home.segment.explorer', getState('explorer', {
+            params: {
+                section: 'segment.analysis'
+            },
             redirectTo: 'home.segment.explorer.attributes'
         }))
         .state('home.segment.explorer.attributes', getState('attributes', {
@@ -499,6 +541,7 @@ angular
             }
         }))
         .state('home.segment.explorer.query', getState('query'))
+        .state('home.segment.explorer.query.advanced', getState('advquery'))
         .state('home.segment.x', getState('abstract'))
         .state('home.segment.x.accounts', getState('xaccounts'))
         .state('home.segment.x.contacts', getState('xcontacts'))

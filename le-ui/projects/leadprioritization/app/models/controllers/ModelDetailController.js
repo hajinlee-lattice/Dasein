@@ -19,6 +19,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
 
     var modelId = $stateParams.modelId;
     var model = Model;
+    
     model.IsPmml = IsPmml;
     model.ModelId = modelId;
     model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);

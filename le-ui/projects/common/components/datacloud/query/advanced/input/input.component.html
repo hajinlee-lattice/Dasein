@@ -1,0 +1,33 @@
+<span   class="query-input-number category-{{ data.category.replace(' ','_') | lowercase }} noselect-children" 
+        ng-if="vm.tree.item" 
+        ng-init="data = vm.items[vm.tree.item]"
+        title="{{ data.category }} - {{ data.subcategory }} - {{ data.displayname }}">
+
+    {{ vm.tree.item }}
+</span>
+
+<span   ng-if="vm.tree.type && vm.tree.item"
+        class="query-input-operator noselect-children"
+        ng-class="{
+            'input-section-all': vm.tree.type == 'and',
+            'input-section-any': vm.tree.type == 'or'
+        }">
+    
+        {{ vm.tree.type }}
+</span>
+
+<span ng-if="vm.tree.items.length > 0" class="query-input-parenthesis"><span class="query-input-parenthesis-label">(</span></span>
+<ul ng-if="vm.tree.items" class="query-input">
+    <li     ng-class="{'input-section-item-box-subtree':item.items}" 
+            ng-repeat="item in vm.tree.items"
+            ng-if="vm.operator = item.type || vm.operator"
+            query-input-directive items="vm.items" tree="item" 
+            operator="{{ vm.operator }}">
+    </li>
+</ul>
+<span ng-if="vm.tree.items.length > 0" class="query-input-parenthesis query-input-section-end"><span class="query-input-parenthesis-label">)</span></span>
+<span ng-if="vm.tree.items.length > 0" class="query-input-operator query-input-operator-alternate noselect-children"
+        ng-class="{
+            'input-section-all': vm.tree.type == 'and',
+            'input-section-any': vm.tree.type == 'or'
+        }">{{ vm.operator == 'and' ? 'or' : 'and' }}</span>

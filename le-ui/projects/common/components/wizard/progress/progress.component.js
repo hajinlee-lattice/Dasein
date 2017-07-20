@@ -39,8 +39,8 @@ angular.module('common.wizard.progress', [
             $event.preventDefault();
 
             not_validated.forEach(function(key, index) {
-                console.log(key, vm.rootState, vm.itemMap[vm.rootState + key]);
                 vm.itemMap[vm.rootState + key].invalid = true;
+                
                 $timeout(function() {
                     vm.itemMap[vm.rootState + key].invalid = false;
                 }, 3000)

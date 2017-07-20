@@ -24,35 +24,35 @@
     </div>
 
     <p class="description" title="{{enrichment.Description}}">
-        <a ng-if="enrichment.FundamentalType === 'URI'" ng-href="{{vm.lookupFiltered[enrichment.FieldName]}}" target="_blank" class="{{vm.categoryClass(enrichment.Category)}} color"><strong>{{vm.lookupFiltered[enrichment.FieldName]}}</strong></a>
-        <strong ng-if="vm.lookupFiltered[enrichment.FieldName] && enrichment.FundamentalType !== 'URI'" title="{{vm.lookupFiltered[enrichment.FieldName]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.FieldName], enrichment.FundamentalType)}}</strong>
-        <span ng-if="!vm.lookupFiltered[enrichment.FieldName]">{{enrichment.Description}}</span>
+        <a ng-if="enrichment.FundamentalType === 'URI'" ng-href="{{vm.lookupFiltered[enrichment.ColumnId]}}" target="_blank" class="{{vm.categoryClass(enrichment.Category)}} color"><strong>{{vm.lookupFiltered[enrichment.ColumnId]}}</strong></a>
+        <strong ng-if="vm.lookupFiltered[enrichment.ColumnId] && enrichment.FundamentalType !== 'URI'" title="{{vm.lookupFiltered[enrichment.ColumnId]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.ColumnId], enrichment.FundamentalType)}}</strong>
+        <span ng-if="!vm.lookupFiltered[enrichment.ColumnId]">{{enrichment.Description}}</span>
     </p>
 
     <span class="lesser-description" ng-if="vm.lookupMode">
         {{ enrichment.Description }}
     </span>
     <!--
-    <div class="stats-boolean" ng-if="vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && !vm.lookupMode && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' && vm.section == 'team'">
-        <h3>{{vm.booleanStats(vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List).Yes.Cnt|number}}</h3>
+    <div class="stats-boolean" ng-if="vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List && vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List.length && !vm.lookupMode && vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.Type == 'Boolean' && vm.section == 'team'">
+        <h3>{{vm.booleanStats(vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List).Yes.Cnt|number}}</h3>
         <h4>Businesses with this product</h4>
         <p>
-            About {{vm.NumberUtility.AbbreviateLargeNumber(vm.booleanStats(vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List).No.Cnt, 1)}} mid-sized and enterprise companies don't use this.
+            About {{vm.NumberUtility.AbbreviateLargeNumber(vm.booleanStats(vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List).No.Cnt, 1)}} mid-sized and enterprise companies don't use this.
         </p>
     </div>
     -->
-    <div class="stats" ng-if="  vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List && 
-                                vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List.length && 
+    <div class="stats" ng-if="  vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List && 
+                                vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List.length && 
                                 !vm.lookupMode && 
-                                (vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)">
+                                (vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)">
         <h5><label>Attribute range</label><label>Records</label></h5>
         <ul class="attribute-stats">
-            <li ng-repeat="stat in vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.List | limitTo: 5"
+            <li ng-repeat="stat in vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List | limitTo: 5"
                 class="attribute-stat"
                 ng-class="{
                             'select-range': vm.section == 'segment.analysis', 
                             'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)],
-                            'disable-bar': (vm.section != 'segment.analysis' && vm.cube.Stats[enrichment.FieldName].RowStats.Bkts.Type == 'Boolean')
+                            'disable-bar': (vm.section != 'segment.analysis' && vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.Type == 'Boolean')
                             }"
                 ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))">
                 <ul class="graph">
@@ -66,7 +66,7 @@
                         {{stat.Lbl}}
                     </li>
                     <li class="bar_">
-                        <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.FieldName].RowStats.Cnt, '%', 0)}}">
+                        <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.ColumnId].RowStats.Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.ColumnId].RowStats.Cnt, '%', 0)}}">
                             <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
                         </div>
                     </li>
@@ -86,16 +86,16 @@
                 <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
             </button>
         </li>
-        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[enrichment.FieldName] = {}">
+        <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[enrichment.ColumnId] = {}">
             <!-- this can't be a <button> element because IE and FF don't like it -->
             <div class="button"
-                    ng-class="{'selected': vm.openHighlighter[enrichment.FieldName].open, 'enabled': enrichment.HighlightState.enabled}"
-                    ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[enrichment.FieldName].open = !vm.openHighlighter[enrichment.FieldName].open">
-                <span class="highlight-icon {{vm.openHighlighter[enrichment.FieldName].state.type || enrichment.HighlightState.type}}">
-                    {{vm.openHighlighter[enrichment.FieldName].state.label || enrichment.HighlightState.label || 'Set'}}
+                    ng-class="{'selected': vm.openHighlighter[enrichment.ColumnId].open, 'enabled': enrichment.HighlightState.enabled}"
+                    ng-click="vm.closeHighlighterButtons(); vm.openHighlighter[enrichment.ColumnId].open = !vm.openHighlighter[enrichment.ColumnId].open">
+                <span class="highlight-icon {{vm.openHighlighter[enrichment.ColumnId].state.type || enrichment.HighlightState.type}}">
+                    {{vm.openHighlighter[enrichment.ColumnId].state.label || enrichment.HighlightState.label || 'Set'}}
                 </span>
-                <ul ng-class="{open: vm.openHighlighter[enrichment.FieldName].open}" class="highlightOptions button-dropdown">
-                    <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-class="{current: type == enrichment.HighlightState.type}" ng-click="vm.openHighlighter[enrichment.FieldName].state = vm.setFlags(type, enrichment)">{{label}}</li>
+                <ul ng-class="{open: vm.openHighlighter[enrichment.ColumnId].open}" class="highlightOptions button-dropdown">
+                    <li ng-repeat="(type, label) in vm.highlightTypes" class="highlight-icon {{type}}" ng-class="{current: type == enrichment.HighlightState.type}" ng-click="vm.openHighlighter[enrichment.ColumnId].state = vm.setFlags(type, enrichment)">{{label}}</li>
                 </ul>
             </div>
         </li>

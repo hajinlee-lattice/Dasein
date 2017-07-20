@@ -15,8 +15,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     var parentData = $scope.parentData;
     var flags = FeatureFlagService.Flags();
     $scope.ResourceUtility = ResourceUtility;
-
     var chartData = data.ChartData;
+
     if (chartData && chartData.children) {
         // THIS IS PART OF THE UI BAND-AID TO COMBINE INTERNAL, EXTERNAL CATEGORIES WITH SAME NAME
         for (var i = 0; i < chartData.children.length; i++) {

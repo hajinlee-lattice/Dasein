@@ -24,8 +24,7 @@
                     ui-sref="home.model.ratings({ modelId: '{{ data.Id | escape }}' })"
                     data-ng-if="isNotPmmlModel && hasRatingsAvailable"
                     data-ng-click="reviewRatingsClick($event)">
-                    <a href="javascript:void(0)" title="Review Ratings">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}
-                    </a>
+                    <a href="javascript:void(0)" title="Review Ratings">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}</a>
                     <i class="ico ico-ratings"></i>
                 </li>
                 <li
@@ -39,7 +38,7 @@
                     data-ng-if="data.ModelType && showRefineAndClone && isNotPmmlModel && !data.Uploaded"
                     data-ng-click="refineAndCloneClick($event)">
                     <a href="javascript:void(0)" title="Refine &amp; Clone this Model">Refine &amp; Clone</a><!--Refine &amp; Clone-->
-                    <i class="fa fa-copy"></i>
+                    <i class="fa fa-clone"></i>
                 </li>
                 <li
                     ui-sref="home.model.remodel({ modelId: '{{ data.Id | escape }}' })"

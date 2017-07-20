@@ -60,7 +60,6 @@ angular.module('insightsApp')
                             console.log('### insightsApp: redirectTo home.datacloud.insights')
                             
                             FeatureFlagService.GetAllFlags(ApiHost).then(function(flags) {
-                                console.log('!! FeatureFlagService.GetAllFlags();', timestamp, data, flags);
                                 $state.go('home.datacloud.insights');
                             });
                         }, false);

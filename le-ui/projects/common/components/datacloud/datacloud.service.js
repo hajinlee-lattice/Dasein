@@ -78,14 +78,14 @@ angular.module('common.datacloud')
 
     this.getPremiumSelectMaximum = function(){
         var deferred = $q.defer();
-        if (this.premiumSelectMaximum) {
-            deferred.resolve(this.premiumSelectMaximum);
-        } else {
+        //if (this.premiumSelectMaximum) {
+        //    deferred.resolve(this.premiumSelectMaximum);
+        //} else {
             DataCloudService.getPremiumSelectMaximum().then(function(response){
                 DataCloudStore.setPremiumSelectMaximum(response);
                 deferred.resolve(response);
             });
-        }
+        //}
         return deferred.promise;
     }
 
@@ -95,14 +95,14 @@ angular.module('common.datacloud')
 
     this.getCategories = function(){
         var deferred = $q.defer();
-        if (this.categories) {
-            deferred.resolve(this.categories);
-        } else {
+        //if (this.categories) {
+        //    deferred.resolve(this.categories);
+        //} else {
             DataCloudService.getCategories().then(function(response){
                 DataCloudStore.setCategories(response);
                 deferred.resolve(response);
             });
-        }
+        //}
         return deferred.promise;
     }
 
@@ -112,14 +112,14 @@ angular.module('common.datacloud')
 
     this.getSubcategories = function(category){
         var deferred = $q.defer();
-        if (this.subcategories[category]) {
-            deferred.resolve(this.subcategories[category]);
-        } else {
+        //if (this.subcategories[category]) {
+        //    deferred.resolve(this.subcategories[category]);
+        //} else {
             DataCloudService.getSubcategories(category).then(function(response){
                 DataCloudStore.setSubcategories(category, response);
                 deferred.resolve(response);
             });
-        }
+        //}
         return deferred.promise;
     }
 
@@ -129,14 +129,14 @@ angular.module('common.datacloud')
 
     this.getEnrichments = function(opts){
         var deferred = $q.defer();
-        if (this.enrichments) {
-            deferred.resolve(this.enrichments);
-        } else {
+        //if (this.enrichments) {
+        //    deferred.resolve(this.enrichments);
+        //} else {
             DataCloudService.getEnrichments(opts).then(function(response){
-            //DataCloudStore.setEnrichments(response);
+                //DataCloudStore.setEnrichments(response);
                 deferred.resolve(response);
             });
-        }
+        //}
         return deferred.promise;
     }
 
@@ -150,25 +150,25 @@ angular.module('common.datacloud')
 
     this.getCount = function(){
         var deferred = $q.defer();
-        if (this.count) {
-            deferred.resolve(this.count);
-        } else {
+        //if (this.count) {
+        //    deferred.resolve(this.count);
+        //} else {
             DataCloudService.getCount().then(function(response){
                 deferred.resolve(response);
             });
-        }
+        //}
         return deferred.promise;
     }
 
     this.getSelectedCount = function(){
         var deferred = $q.defer();
-        if (this.selectedCount) {
-            deferred.resolve(this.selectedCount);
-        } else {
+        //if (this.selectedCount) {
+        //    deferred.resolve(this.selectedCount);
+        //} else {
             DataCloudService.getSelectedCount().then(function(response){
                 deferred.resolve(response);
             });
-        }
+        //}
         return deferred.promise;
     }
 
@@ -177,22 +177,22 @@ angular.module('common.datacloud')
         opts = opts || {};
         opts.category = opts.category || 'firmographics';
         opts.limit = opts.limit || 5;
-        if (this.topAttributes) {
-            deferred.resolve(this.topAttributes[opts.category]);
-        } else {
+        //if (this.topAttributes) {
+        //    deferred.resolve(this.topAttributes[opts.category]);
+        //} else {
             DataCloudService.getTopAttributes(opts).then(function(response) {
                 for(var i in response.data.SubCategories) {
                     var items = response.data.SubCategories[i];
                     for(var j in items) {
                         var item = items[j],
-                            attribute = _.findWhere(response.data.EnrichmentAttributes, {FieldName: item.Attribute});
+                            attribute = _.findWhere(response.data.EnrichmentAttributes, {ColumnId: item.Attribute});
                         item.DisplayName = (attribute ? attribute.DisplayName : null);
                     }
                 }
                 DataCloudStore.setTopAttributes(response, opts.category);
                 deferred.resolve(response);
             });
-        }
+        //}
         return deferred.promise;
     }
 
@@ -201,16 +201,16 @@ angular.module('common.datacloud')
         opts = opts || {};
         opts.max = opts.max || 5;
 
-        if (this.topAttributes) {
-            deferred.resolve(this.topAttributes);
-        } else {
+        //if (this.topAttributes) {
+        //    deferred.resolve(this.topAttributes);
+        //} else {
             var vm = this;
 
             DataCloudService.getAllTopAttributes(opts).then(function(response) {
                 vm.topAttributes = response.data; // ben
                 deferred.resolve(vm.topAttributes);
             });
-        }
+        //}
 
         return deferred.promise;
     }
@@ -221,9 +221,9 @@ angular.module('common.datacloud')
     }
 
     this.getCube = function() {
-        if (this.cube) {
-            return this.cube;
-        }
+        //if (this.cube) {
+        //    return this.cube;
+        //}
 
         var deferred = $q.defer();
         DataCloudService.getCube().then(function(response){
@@ -238,61 +238,88 @@ angular.module('common.datacloud')
         this.cube = cubePromise;
     }
 })
-.service('DataCloudService', function($q, $http, $state) {
-    this.host = '/pls'; //default
+.service('DataCloudService', function($q, $http, $state, $stateParams) {
+    this.host = '/pls';
+    this.paths = {
+        'lattice': '/latticeinsights',
+        'customer': '/datacollection'
+    };
+    this.path = this.paths['lattice'];
 
     this.setHost = function(value) {
         this.host = value;
     }
 
+    this.inModel = function() {
+        var name = $state.current.name.split('.');
+
+        return name[1] == 'model';
+    }
+
+    this.inSegment = function() {
+        return this.path == this.paths['customer'];
+    }
+
+    this.url = function(customerDataUrl, internalDataUrl) {
+        return this.host + this.path + (this.inSegment() ? customerDataUrl : internalDataUrl);
+    }
+
     this.getPremiumSelectMaximum = function(){
         var deferred = $q.defer();
+        
         $http({
             method: 'get',
-            //ENVs: Default, QA, Production
-            //url: '/Pods/<ENV>/Default/PLS/EnrichAttributeMaxNumber'
             url: this.host + '/latticeinsights/insights/premiumattributeslimitation'
         }).then(function(response){
             deferred.resolve(response);
         });
+        
         return deferred.promise;
     }
 
     this.getCount = function(){
-        var deferred = $q.defer();
+        var deferred = $q.defer(),
+            url = this.url('/attributes','/insights') + '/count';
+        
         $http({
             method: 'get',
-            url: this.host + '/latticeinsights/insights/count'
+            url: url
         }).then(function(response){
             deferred.resolve(response);
         });
+        
         return deferred.promise;
     }
 
     this.getSelectedCount = function(){
         var deferred = $q.defer();
+        
         $http({
             method: 'get',
             url: this.host + '/latticeinsights/insights/selectedattributes/count'
         }).then(function(response){
             deferred.resolve(response);
         });
+        
         return deferred.promise;
     }
 
     this.getCategories = function(){
         var deferred = $q.defer();
+        
         $http({
             method: 'get',
             url: this.host + '/latticeinsights/insights/categories'
         }).then(function(response){
             deferred.resolve(response);
         });
+        
         return deferred.promise;
     }
 
     this.getSubcategories = function(category){
         var deferred = $q.defer();
+        
         $http({
             method: 'get',
             url: this.host + '/latticeinsights/insights/subcategories',
@@ -302,18 +329,21 @@ angular.module('common.datacloud')
         }).then(function(response){
             deferred.resolve(response);
         });
+        
         return deferred.promise;
     }
 
     this.getEnrichments = function(opts){
-        var deferred = $q.defer();
-        var opts = opts || {},
+        var deferred = $q.defer(),
+            opts = opts || {},
             offset = opts.offset || 0,
             max = opts.max || null,
-            onlySelectedAttributes = opts.onlySelectedAttributes || null;
+            onlySelectedAttributes = opts.onlySelectedAttributes || null,
+            url = this.url('/attributes','/insights');
+        
         $http({
             method: 'get',
-            url: this.host + '/latticeinsights/insights',
+            url: url,
             params: {
                 offset: offset,
                 max: max,
@@ -322,75 +352,55 @@ angular.module('common.datacloud')
         }).then(function(response){
             deferred.resolve(response);
         });
+        
         return deferred.promise;
     }
 
     this.setEnrichments = function(data){
         var deferred = $q.defer();
+        
         $http({
             method: 'put',
-            url: this.host + '/latticeinsights/insights',
+            url: this.host + this.path,
             data: data
         }).then(function(response){
             deferred.resolve(response.data);
         }, function(response) { //on error
             deferred.resolve(response.data);
         });
-        return deferred.promise;
-    }
-
-    this.getTopAttributes = function(opts) {
-        var deferred = $q.defer(),
-        opts = opts || {};
-        opts.category = opts.category || 'firmographics';
-        opts.limit = opts.limit || 6;
-        opts.loadEnrichmentMetadata = opts.loadEnrichmentMetadata || false;
-        $http({
-            method: 'get',
-            url: this.host + '/latticeinsights/stats/topn',
-            params: {
-                category: opts.category,
-                limit: opts.limit,
-                loadEnrichmentMetadata: opts.loadEnrichmentMetadata
-            }
-        }).then(function(response) {
-            deferred.resolve(response);
-        });
+        
         return deferred.promise;
     }
 
     this.getAllTopAttributes = function(opts) {
         var deferred = $q.defer(),
-        opts = opts || {};
-        opts.category = opts.category || 'firmographics';
-        opts.limit = opts.limit || 6;
-        opts.loadEnrichmentMetadata = opts.loadEnrichmentMetadata || false;
+            url = this.url('/statistics','/stats') + '/topn';
+        
         $http({
             method: 'get',
-            url: this.host + '/latticeinsights/stats/topn/all',
+            url: url,
             params: {
                 max: 9999,
-                loadEnrichmentMetadata: opts.loadEnrichmentMetadata
+                loadEnrichmentMetadata: opts.loadEnrichmentMetadata || false
             }
         }).then(function(response) {
             deferred.resolve(response);
         });
+        
         return deferred.promise;
     }
 
     this.getCube = function(opts){
         var deferred = $q.defer(),
-            opts = opts || {},
-            query = opts.query || '';
+            url = this.url('/statistics/cube','/stats/cube2');
+        
         $http({
             method: 'get',
-            url: this.host + '/latticeinsights/stats/cube',
-            params: {
-                q: query
-            }
+            url: url
         }).then(function(response){
             deferred.resolve(response);
         });
+        
         return deferred.promise;
     }
 
@@ -400,6 +410,7 @@ angular.module('common.datacloud')
             fieldName = opts.fieldName || '',
             useCase = opts.useCase || 'CompanyProfile',
             flags = flags || {}; // json
+        
         $http({
             method: 'POST',
             url: '/pls/attributes/flags/' + fieldName + '/' + useCase,
@@ -407,6 +418,7 @@ angular.module('common.datacloud')
         }).then(function(response){
             deferred.resolve(response.data);
         });
+        
         return deferred.promise;
     }
 
@@ -417,6 +429,7 @@ angular.module('common.datacloud')
             useCase = opts.useCase || 'CompanyProfile',
             propertyName = opts.propertyName || '',
             boolean = boolean || false;
+        
         $http({
             method: 'POST',
             url: '/pls/attributes/flags/' + fieldName + '/' + useCase + '/' + propertyName,
@@ -424,6 +437,7 @@ angular.module('common.datacloud')
         }).then(function(response){
             deferred.resolve(response.data);
         });
+        
         return deferred.promise;
     }
 
@@ -433,16 +447,18 @@ angular.module('common.datacloud')
             categoryName = opts.categoryName || '',
             useCase = opts.useCase || 'CompanyProfile',
             flags = flags || {}; // json
+        
         $http({
             method: 'POST',
             url: '/pls/attributes/categories/flags/' + useCase,
             params: {
-                category: categoryName,
+                category: categoryName
             },
             data: flags
         }).then(function(response){
             deferred.resolve(response.data);
         });
+        
         return deferred.promise;
     }
 
@@ -453,6 +469,7 @@ angular.module('common.datacloud')
             subcategoryName = opts.subcategoryName || '',
             useCase = opts.useCase || 'CompanyProfile',
             flags = flags || {}; // json
+        
         $http({
             method: 'POST',
             url: '/pls/attributes/categories/subcategories/flags/' + useCase, //+ categoryName + '/' + subcategoryName + '/' + useCase,
@@ -464,7 +481,7 @@ angular.module('common.datacloud')
         }).then(function(response){
             deferred.resolve(response.data);
         });
+        
         return deferred.promise;
     }
-
 });

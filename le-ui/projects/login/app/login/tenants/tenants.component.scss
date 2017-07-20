@@ -125,6 +125,11 @@ div.panel-body .columns {
         }
     }
 
+    &:active {
+        background: #3989c4;
+        cursor: default;
+    }
+
     i {
         position: absolute;
     }

@@ -1,0 +1,44 @@
+<div class="container advanced-query-builder">
+    <div class="columns twelve">
+        <ul class="row controls">
+            <li class="buttons pull-right">
+                <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}"
+                    class="button icon-button white-button" target="_self" download>
+                    <i class="fa fa-download"></i>
+                </a>
+
+                <button class="button icon-button white-button" ng-click="vm.goAttributes()" ng-disabled="vm.saving">Add Attributes</button>
+                <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
+                <button ng-if="vm.saving" disabled class="button icon-button blue-button">Saving <i class="fa fa-spinner fa-pulse fw"></i></button>
+            </li>
+        </ul>
+
+        <div class="row query-algorithm noselect-children">
+            <div class="query-algorithm-display">
+                <ul class="query-input query-input-root">
+                    <li ng-repeat="tree in vm[vm.state]"
+                        query-input-directive 
+                        items="vm.items" tree="tree" operator="{{ vm.operator }}">
+                    </li>
+                </ul>
+                <!--1 <strong>OR</strong> (2 <strong>OR</strong> 3) <strong>OR</strong> 4-->
+            </div>
+
+            <div class="query-algorithm-undo button white-button" ng-click="vm.click()">
+                <i class="fa fa-undo"></i> UNDO
+            </div>
+        </div>
+
+        <ul class="query-section query-tree-root">
+            <li ng-repeat="tree in vm[vm.state]">
+                <query-tree-directive items="vm.items" tree="tree" operator="{{ vm.operator }}"></query-tree-directive>
+            </li>
+        </ul>
+
+        <!--div class="query-section-divider" ng-repeat-end>
+            <span>AND <i class="fa fa-chevron-down"></i></span>
+            <div></div>
+        </div-->
+
+    </div>
+</div>
