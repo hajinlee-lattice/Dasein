@@ -63,7 +63,7 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
     private List<String> tableNameList = Arrays
             .<String> asList(new String[] { "Account", "Contact", "Lead", "Opportunity", "OpportunityContactRole" });
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "manual")
     public void setup() throws Exception {
         cleanupCamilleAndHdfs(customer);
 
@@ -91,14 +91,14 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
         httpServer.start();
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "manual")
     public void cleanup() throws Exception {
         cleanupCamilleAndHdfs(customer);
         httpServer.stop();
         tenantService.discardTenant(tenant);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "manual", enabled = true)
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         targetPath = dataExtractionService.createTargetPath(customer) + "/"
