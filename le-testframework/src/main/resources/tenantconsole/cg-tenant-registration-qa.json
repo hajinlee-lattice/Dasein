@@ -37,14 +37,14 @@
   ],
   "CustomerSpaceInfo": {
     "properties": {
-      "displayName": "CG_${TENANT}",
+      "displayName": "${TENANT}_CG",
       "description": "A CG solution for ${TENANT} in ${TENANT}"
     },
     "featureFlags": "{\"EnableDataEncryption\":true,\"EnableCdl\":true,\"EnableTalkingPoints\":true}"
   },
   "TenantInfo": {
     "properties": {
-      "displayName": "CG_${TENANT}",
+      "displayName": "${TENANT}_CG",
       "description": "A CG tenant under the contract ${TENANT}"
     }
   },

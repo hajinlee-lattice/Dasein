@@ -37,15 +37,15 @@
   ],
   "CustomerSpaceInfo": {
     "properties": {
-      "displayName": "PD_${TENANT}",
-      "description": "A PD solution for ${TENANT} in ${TENANT}"
+      "displayName": "${TENANT}_LPI",
+      "description": "A LPI solution for ${TENANT} in ${TENANT}"
     },
     "featureFlags": "{\"EnableDataEncryption\":true}"
   },
   "TenantInfo": {
     "properties": {
-      "displayName": "${TENANT}_LP3",
-      "description": "A PD tenant under the contract ${TENANT}"
+      "displayName": "${TENANT}_LPI",
+      "description": "A LPI tenant under the contract ${TENANT}"
     }
   },
   "ContractInfo": {
