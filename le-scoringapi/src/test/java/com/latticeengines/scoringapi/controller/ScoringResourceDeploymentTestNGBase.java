@@ -515,7 +515,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
         }
 
         if (exception != null) {
-            Assert.assertNull(exception, "Got exception in one of the thread: " + getExceptionTrace(exception));
+            Assert.fail("Got exception in one of the thread.", exception);
         }
     }
 
