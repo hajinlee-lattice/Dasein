@@ -37,13 +37,38 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
         for (Play play : plays) {
             Map<String, Object> playMap = new HashMap<>();
-            playMap.put("name", play.getName());
-            playMap.put("pid", play.getPid());
-            playMap.put("segmentName", play.getSegmentName());
-            playMap.put("LastModificationDate,", play.getLastUpdatedTimestamp());
+            playMap.put("Id", play.getName());
+            playMap.put("ExternalId", play.getName());
+            playMap.put("DisplayName", play.getDisplayName());
+            playMap.put("Description", play.getDescription());
+            playMap.put("AverageProbability", dummyAvgProbability());
+            playMap.put("LastModificationDate,", secondsFromEpoch(play));
+            playMap.put("PlayGroups,", dummyPlayGroups());
+            playMap.put("TargetProducts,", dummyTargetProducts());
+            playMap.put("Workflow,", dummyWorkfowType());
             result.add(playMap);
         }
         return result;
+    }
+
+    private String dummyWorkfowType() {
+        return "WfTypeId1";
+    }
+
+    private String dummyTargetProducts() {
+        return "Wireless Router|productId1";
+    }
+
+    private String dummyPlayGroups() {
+        return "PG1|PG2";
+    }
+
+    private String dummyAvgProbability() {
+        return "0.5";
+    }
+
+    private long secondsFromEpoch(Play play) {
+        return play.getLastUpdatedTimestamp().getTime() / 1000;
     }
 
     @Override
