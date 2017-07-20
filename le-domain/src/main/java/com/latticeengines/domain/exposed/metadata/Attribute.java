@@ -932,10 +932,22 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         metadata.setColumnName(getName());
         metadata.setColumnId(getName());
         metadata.setDescription(getDescription());
-        metadata.setCategory(Category.fromName(getCategory()));
-        metadata.setSubcategory(getSubcategory());
+        if (StringUtils.isBlank(getCategory())) {
+            metadata.setCategory(Category.DEFAULT);
+        } else {
+            metadata.setCategory(Category.fromName(getCategory()));
+        }
+        if (StringUtils.isBlank(getSubcategory())) {
+            metadata.setSubcategory("Other");
+        } else {
+            metadata.setSubcategory(getSubcategory());
+        }
         metadata.setDataType(getDataType());
-        metadata.setFundamentalType(FundamentalType.fromName(getFundamentalType()));
+        if (StringUtils.isBlank(getFundamentalType())) {
+            metadata.setFundamentalType(FundamentalType.ALPHA);
+        } else {
+            metadata.setFundamentalType(FundamentalType.fromName(getFundamentalType()));
+        }
         metadata.setStatisticalType(StatisticalType.fromName(getStatisticalType()));
         metadata.setDiscretizationStrategy(getDisplayDiscretizationStrategy());
         metadata.setBitOffset(getBitOffset());
