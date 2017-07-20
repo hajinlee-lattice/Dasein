@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-APP_ROOT=/opt/node/le-ui
+echo "APP_ROOT=${APP_ROOT}"
 
 if [ -z "${LE_ENVIRONMENT}" ]; then
     echo "must specify LE_ENVIRONMENT"

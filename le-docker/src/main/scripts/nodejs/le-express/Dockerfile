@@ -35,11 +35,13 @@ RUN npm install grunt-cli -g \
 # put a random value here to invalidate docker cache
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 ADD le-ui.tar.gz /opt/node
+ENV APP_ROOT /opt/node/le-ui
+RUN cd ${APP_ROOT} && npm run InstallProduction --unsafe-perm
 
 COPY server.key /etc/pki/tls/private/private.key
 COPY server.crt /etc/pki/tls/star.lattice.local.crt
 COPY start.sh /start.sh
 
-WORKDIR /opt/node/app
+WORKDIR ${APP_ROOT}
 EXPOSE 3000 3002
 CMD ["bash", "/start.sh"]
