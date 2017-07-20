@@ -130,6 +130,8 @@ def haproxy_task(stackname, ec2s, ecr):
         .publish_port(80, 80) \
         .publish_port(443, 443) \
         .publish_port(81, 81) \
+        .publish_port(82, 82) \
+        .publish_port(83, 83) \
         .set_logging({
         "LogDriver": "awslogs",
         "Options": {

@@ -11,4 +11,5 @@ RUN chmod 600 /etc/ssl/private/server.pem
 COPY start.sh /start.sh
 
 ENTRYPOINT ["bash"]
+EXPOSE 82 83
 CMD ["/start.sh"]
