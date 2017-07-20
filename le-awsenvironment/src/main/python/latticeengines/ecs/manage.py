@@ -119,10 +119,11 @@ def update_tasks_count(cluster_arn, service_arn, target_count):
     print "Changing task count of %s in %s to %d" % (service_arn, cluster_arn, target_count)
     sys.stdout.flush()
     ECS_CLIENT.update_service(cluster=cluster_arn, service=service_arn, desiredCount=target_count)
+    time.sleep(20)
     count = count_tasks_in_service(cluster_arn, service_arn)
     t1 = time.clock()
     while count != target_count and time.clock() - t1 < 3600:
-        time.sleep(10)
+        time.sleep(5)
         count = count_tasks_in_service(cluster_arn, service_arn)
     if count != target_count:
         raise Exception("Failed to wait for the tasks count to be come %d with in one hour" % target_count)
