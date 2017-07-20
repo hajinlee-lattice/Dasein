@@ -73,12 +73,12 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> getAccountExtensionSchema() {
-        throw new NotImplementedException();
+        return lpiPMAccountExtension.getAccountExtensionSchema();
     }
 
     @Override
     public int getAccountExtensionColumnCount() {
-        throw new NotImplementedException();
+        return lpiPMAccountExtension.getAccountExtensionColumnCount();
     }
 
     @Override
@@ -105,12 +105,12 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> getContactExtensionSchema() {
-        throw new NotImplementedException();
+        return lpiPMAccountExtension.getContactExtensionSchema();
     }
 
     @Override
     public int getContactExtensionColumnCount() {
-        throw new NotImplementedException();
+        return lpiPMAccountExtension.getContactExtensionColumnCount();
     }
 
     @Override
@@ -140,19 +140,16 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> queryForListOfMap(String sql, MapSqlParameterSource parameters) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new NotImplementedException();
     }
 
     @Override
     public <T> T queryForObject(String sql, MapSqlParameterSource parameters, Class<T> requiredType) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new NotImplementedException();
     }
 
     @Override
     public void update(String sql, MapSqlParameterSource parameters) {
-        // TODO Auto-generated method stub
-
+        throw new NotImplementedException();
     }
 }
