@@ -105,6 +105,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
+        input.setDataCloudVersion("1.0.0");
         MatchOutput output = matchProxy.matchRealTime(input);
         Assert.assertNotNull(output);
         output = matchProxy.matchRealTime(input);
@@ -285,8 +286,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Test(groups = "deployment", dataProvider = "allDataCloudVersions", enabled = true)
     public void testBulkMatchWithSchema(String version) throws Exception {
+        String avroDirInThisRun = avroDir + "/" + version;
         HdfsPodContext.changeHdfsPodId(podId);
-        cleanupAvroDir(avroDir);
+        cleanupAvroDir(avroDirInThisRun);
         List<Class<?>> fieldTypes = new ArrayList<>();
         fieldTypes.add(Integer.class);
         fieldTypes.add(String.class);
@@ -294,12 +296,14 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         fieldTypes.add(String.class);
         fieldTypes.add(String.class);
         fieldTypes.add(String.class);
-        uploadDataCsv(avroDir, fileName, "matchinput/BulkMatchInput.csv", fieldTypes, "ID");
+        uploadDataCsv(avroDirInThisRun, fileName, "matchinput/BulkMatchInput.csv", fieldTypes, "ID");
 
-        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDir + "/" + fileName));
+        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDirInThisRun + "/" + fileName));
 
         // use avro dir and with schema
         MatchInput input = createAvroBulkMatchInput(true, schema, version);
+        AvroInputBuffer avroInputBuffer = (AvroInputBuffer) input.getInputBuffer();
+        avroInputBuffer.setAvroDir(avroDirInThisRun);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
@@ -347,8 +351,9 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(100));
     }
 
-    @Test(groups = "deployment", dataProvider = "allDataCloudVersions", enabled = true)
-    public void testMultiBlockBulkMatch(String version) throws InterruptedException {
+    @Test(groups = "deployment", enabled = true)
+    public void testMultiBlockBulkMatch() throws InterruptedException {
+        String version = "1.0.0";
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
         cleanupAvroDir(avroDir);
@@ -365,9 +370,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
             command = matchProxy.bulkMatchStatus(command.getRootOperationUid());
         }
         String blockAppId = command.getMatchBlocks().get(0).getApplicationId();
-        if (!MatchUtils.isValidForAccountMasterBasedMatch(version)) {
-            jobService.killJob(ConverterUtils.toApplicationId(blockAppId));
-        }
+        Assert.assertFalse(MatchUtils.isValidForAccountMasterBasedMatch(version));
+        jobService.killJob(ConverterUtils.toApplicationId(blockAppId));
 
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -392,29 +396,42 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(bulkConf.getSwpkgName(), "datacloud");
     }
 
-    @DataProvider(name = "allDataCloudVersions")
+    @DataProvider(name = "allDataCloudVersions", parallel = true)
     public Object[][] allDataCloudVersions() {
         List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
         Set<String> latestVersions = new HashSet<>();
+        Map<String, String> secondLatestVersion = new HashMap<>();
         for (DataCloudVersion version : versions) {
             if (!DataCloudVersion.Status.APPROVED.equals(version.getStatus())) {
                 continue;
             }
             String vString = version.getVersion();
-            if (vString.compareTo("3") < 0) {
+            if (vString.compareTo("90") > 0) {
                 latestVersions.add(vString);
             }
+            String latestCompatible = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(version.getMajorVersion())
+                    .getVersion();
+            latestVersions.add(latestCompatible);
+            if (!vString.equals(latestCompatible)) {
+                boolean isSecondLatest = !secondLatestVersion.containsKey(latestCompatible)
+                        || vString.compareTo(secondLatestVersion.get(latestCompatible)) > 0;
+                if (isSecondLatest) {
+                    secondLatestVersion.put(latestCompatible, vString);
+                }
+            }
         }
-        Object[][] objs = new Object[latestVersions.size() + 1][1];
+        List<String> allVersions = new ArrayList<>(latestVersions);
+        allVersions.addAll(secondLatestVersion.values());
+        Object[][] objs = new Object[allVersions.size() + 1][1];
         objs[0] = new Object[] { "1.0.0" };
         int i = 1;
-        for (String latestVersion : latestVersions) {
-            objs[i++] = new Object[] { latestVersion };
+        for (String version : allVersions) {
+            objs[i++] = new Object[] { version };
         }
         return objs;
     }
 
-    @DataProvider(name = "latestDataCloudVersions")
+    @DataProvider(name = "latestDataCloudVersions", parallel = true)
     public Object[][] latestDataCloudVersions() {
         List<DataCloudVersion> versions = dataCloudVersionEntityMgr.allVerions();
         Set<String> latestVersions = new HashSet<>();
