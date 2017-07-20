@@ -59,7 +59,9 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
         try {
             userService.deleteUser(PLSTenantId, testAdminUsername);
-            tenantService.discardTenant(tenant);
+            if (tenantService.hasTenantId(tenant.getId())) {
+                tenantService.discardTenant(tenant);
+            }
         } catch (Exception e) {
             // ignore
         }
@@ -67,7 +69,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBaseDeprecated {
         bootstrap();
 
         // wait a while, then test your installation
-        int numOfRetries = 30;
+        int numOfRetries = 45;
         BootstrapState state;
         do {
             state = batonService.getTenantServiceBootstrapState(contractId, tenantId, serviceName);
