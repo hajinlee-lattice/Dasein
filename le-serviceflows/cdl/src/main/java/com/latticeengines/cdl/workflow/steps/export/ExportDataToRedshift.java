@@ -48,7 +48,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private Map<BusinessEntity, Table> entityTableMap;
 
     private String customerSpace;
-    
+
     private boolean createNew;
 
     @Override
@@ -77,7 +77,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                 Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore());
                 dataCollectionProxy.upsertTable(customerSpace, sourceTable.getName(), entity.getServingStore());
                 if (oldTable != null) {
-                    //TODO: need to change after we have version
+                    // TODO: need to change after we have version
                     log.info("Removing old batch store from redshift " + oldTable.getName());
                     redshiftService.dropTable(AvroUtils.getAvroFriendlyString(oldTable.getName()));
                 }
@@ -124,6 +124,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,
             TableRoleInCollection tableRole) {
         HdfsToRedshiftConfiguration exportConfig = configuration.getHdfsToRedshiftConfiguration();
+        exportConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
         exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
         exportConfig.setExportTargetPath(sourceTable.getName());
         exportConfig.setNoSplit(true);
@@ -134,8 +135,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         redshiftTableConfig.setSortKeyType(RedshiftTableConfiguration.SortKeyType.Compound);
         redshiftTableConfig.setSortKeys(tableRole.getForeignKeysAsStringList());
         redshiftTableConfig.setTableName(targetTableName);
-        redshiftTableConfig.setJsonPathPrefix(
-                String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
+        redshiftTableConfig
+                .setJsonPathPrefix(String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
         return exportConfig;
     }
 
