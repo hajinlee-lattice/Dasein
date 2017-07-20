@@ -40,7 +40,7 @@
       "displayName": "{% TenantName %}",
       "description": "A CG solution upgraded from PlayMaker deployment {% TenantName %}"
     },
-    "featureFlags": "{\"EnableCdl\":true,\"Dante\":true,\"EnableTalkingPoints\":true}"
+    "featureFlags": "{% FeatureFlags %}"
   },
   "TenantInfo": {
     "properties": {

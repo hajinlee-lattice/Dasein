@@ -40,10 +40,17 @@ def main():
         logger.info('Recursively remove contract %s from ZK' % args.tenant)
         delete_contract(args.tenant)
 
+        flags = get_feature_flags(args.tenant)
+        flags["EnableCdl"] = True
+        flags["Dante"] = True
+        flags["EnableTalkingPoints"] = True
+        logger.info("Feature Flags are:\n%s" % json.dumps(flags, indent=2))
+
         template = post_body_template()
         template = template.replace('{% LatticeAdminEmails %}', pls_lattice_admins().replace('"', '\\\"'))
         template = template.replace('{% SuperAdminEmails %}', pls_super_admins().replace('"', '\\\"'))
         template = template.replace('{% TenantName %}', args.tenant)
+        template = template.replace('{% FeatureFlags %}', json.dumps(flags).replace('"', '\\\"'))
         admin_create_tenant(args.tenant, template)
         fake_dante_status(template)
         wait_bootstrap_ok(args.tenant)
@@ -52,7 +59,6 @@ def main():
     except Exception as e:
         restore_contract(contract)
         raise e
-
 
 def default_config_tree(service):
     node = "%s/Default/%s" % (pod_path(), service)
@@ -67,6 +73,10 @@ def pls_lattice_admins():
 
 def pls_super_admins():
     return default_config_value('PLS', 'SuperAdminEmails')
+
+def get_feature_flags(tenant):
+    node = "%s/Contracts/%s/Tenants/%s/Spaces/Production/feature-flags.json" % (pod_path(), tenant, tenant)
+    return json.loads(ZK.get(node)[0])
 
 def export_dante_tree(tenant):
     node = "%s/Contracts/%s/Tenants/%s/Spaces/Production/Services/Dante" % (pod_path(), tenant, tenant)
