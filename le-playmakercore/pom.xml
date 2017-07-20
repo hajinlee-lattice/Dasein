@@ -20,6 +20,7 @@
 		<le.db.version>3.7.0-SNAPSHOT</le.db.version>
 		<le.proxy.version>3.7.0-SNAPSHOT</le.proxy.version>
 		<le.remote.version>3.7.0-SNAPSHOT</le.remote.version>
+		<le.security.version>3.7.0-SNAPSHOT</le.security.version>
 		<le.testfwk.version>3.7.0-SNAPSHOT</le.testfwk.version>
 	</properties>
 
@@ -28,6 +29,11 @@
 			<groupId>com.latticeengines</groupId>
 			<artifactId>le-datadb</artifactId>
 			<version>${le.datadb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.latticeengines</groupId>
+			<artifactId>le-db</artifactId>
+			<version>${le.db.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.latticeengines</groupId>
@@ -41,6 +47,18 @@
 			<version>${le.remote.version}</version>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <classifier>tests</classifier>
+        </dependency>
 		<dependency>
 			<groupId>com.latticeengines</groupId>
 			<artifactId>le-testframework</artifactId>

@@ -12,10 +12,12 @@ public interface RecommendationDao extends BaseDao<Recommendation> {
     List<Recommendation> findByLaunchId(String launchId);
 
     List<Recommendation> findRecommendations(Date lastModificationDate, //
-            Long offset, Long max, String syncDestination, List<String> playIds);
+            int offset, int max, String syncDestination, List<String> playIds);
 
-    List<Map<String, String>> findRecommendationsAsMap(Date lastModificationDate, //
-            Long offset, Long max, String syncDestination, List<String> playIds);
+    int findRecommendationCount(Date lastModificationDate, String syncDestination, List<String> playIds);
+
+    List<Map<String, Object>> findRecommendationsAsMap(Date lastModificationDate, //
+            int offset, int max, String syncDestination, List<String> playIds);
 
     void deleteInBulkByCutoffDate(Date cutoffDate);
 

@@ -1,6 +1,6 @@
-package com.latticeengines.playmaker.controller;
+package com.latticeengines.domain.exposed.playmakercore;
 
-enum SynchronizationDestinationEnum {
+public enum SynchronizationDestinationEnum {
     SFDC(0), MAP(1), SFDC_AND_MAP(2);
 
     private int type;
@@ -17,5 +17,14 @@ enum SynchronizationDestinationEnum {
             }
         }
         return SFDC.type;
+    }
+
+    public static SynchronizationDestinationEnum fromIntValue(int intVal) {
+        for (SynchronizationDestinationEnum en : values()) {
+            if (en.type == intVal) {
+                return en;
+            }
+        }
+        return SFDC;
     }
 }

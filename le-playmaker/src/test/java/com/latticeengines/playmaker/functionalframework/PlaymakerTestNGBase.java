@@ -45,11 +45,13 @@ public class PlaymakerTestNGBase extends AbstractTestNGSpringContextTests {
         return tenant;
     }
 
-
     protected String getTenantName() {
         String hostName;
         try {
             hostName = InetAddress.getLocalHost().getHostName();
+            // hostname can have '.' chars which will make the tenantName
+            // corrupted. therefore using hash code to avoid any '.'
+            hostName = "" + hostName.hashCode();
         } catch (Exception ex) {
             hostName = "localhost";
         }

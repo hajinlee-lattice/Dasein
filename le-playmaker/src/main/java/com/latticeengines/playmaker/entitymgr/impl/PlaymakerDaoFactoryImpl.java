@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmaker.dao.PlaymakerDBVersionDao;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.dao.impl.PlaymakerDBVersionDaoImpl;
@@ -25,6 +27,8 @@ import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV710;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV740;
 import com.latticeengines.playmaker.dao.impl.PlaymakerRecommendationDaoImplV750;
 import com.latticeengines.playmaker.entitymgr.PlaymakerDaoFactory;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("daoFactory")
 public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
@@ -36,6 +40,9 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
 
     @Autowired
     private BatonService batonService;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
     @Qualifier(value = "lpiPMRecommendationDaoAdapter")
@@ -76,7 +83,39 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
 
     private boolean isLpiBasedPlaymakerEnabledForTenant(String tenantName) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantName);
-        return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_TALKING_POINTS);
+        try {
+            if (batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_TALKING_POINTS)) {
+                Tenant tenant = tenantEntityMgr.findByTenantId(tenantName);
+                MultiTenantContext.setTenant(tenant);
+                return true;
+            }
+        } catch (Exception ex) {
+            boolean isIgnorableException = false;
+            if (ex instanceof NoNodeException) {
+                // ignore this error as old PL tenant may not have ZK path
+                // created on LPI side. This will then return false by default
+                log.debug("Ignoring: " + ex.getMessage());
+                isIgnorableException = true;
+            } else {
+                Throwable th = ex.getCause();
+                while (th != null) {
+                    if (th instanceof NoNodeException) {
+                        // ignore this error as old PL tenant may not have ZK
+                        // path
+                        // created on LPI side. This will then return false by
+                        // default
+                        log.debug("Ignoring: " + th.getMessage());
+                        isIgnorableException = true;
+                        break;
+                    }
+                }
+
+                if (!isIgnorableException) {
+                    throw ex;
+                }
+            }
+        }
+        return false;
     }
 
     PlaymakerRecommendationDao findDao(NamedParameterJdbcTemplate namedJdbcTemplate, String normalizedVer,

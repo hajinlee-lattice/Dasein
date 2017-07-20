@@ -57,32 +57,41 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
     }
 
     @Override
-    public List<Recommendation> findRecommendations(Date lastModificationDate, Long offset, Long max,
+    @Transactional(value = "dataTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Recommendation> findRecommendations(Date lastModificationDate, int offset, int max,
             String syncDestination, List<String> playIds) {
-        // WIP
-        return null;
+        return recommendationDao.findRecommendations(lastModificationDate, offset, max, syncDestination, playIds);
     }
 
     @Override
-    public List<Map<String, String>> findRecommendationsAsMap(Date lastModificationDate, Long offset, Long max,
-            String syncDestination, List<String> playIds) {
-        // WIP
-        return null;
+    @Transactional(value = "dataTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public int findRecommendationCount(Date lastModificationDate, String syncDestination, List<String> playIds) {
+        return recommendationDao.findRecommendationCount(lastModificationDate, syncDestination, playIds);
     }
 
     @Override
+    @Transactional(value = "dataTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Map<String, Object>> findRecommendationsAsMap(Date lastModificationDate, int offset, int max,
+            String syncDestination, List<String> playIds) {
+        return recommendationDao.findRecommendationsAsMap(lastModificationDate, offset, max, syncDestination, playIds);
+    }
+
+    @Override
+    @Transactional(value = "dataTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public void deleteInBulkByCutoffDate(Date cutoffDate) {
         // WIP
 
     }
 
     @Override
+    @Transactional(value = "dataTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public void deleteInBulkByLaunchId(String launchId) {
         // WIP
 
     }
 
     @Override
+    @Transactional(value = "dataTransactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public void deleteInBulkByPlayId(String playId, Date cutoffDate) {
         // WIP
 

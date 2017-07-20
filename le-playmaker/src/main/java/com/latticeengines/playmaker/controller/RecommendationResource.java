@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;

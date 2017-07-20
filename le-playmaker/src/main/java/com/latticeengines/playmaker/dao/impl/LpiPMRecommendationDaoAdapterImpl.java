@@ -10,24 +10,23 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
-import com.latticeengines.playmaker.dao.LpiPMAccountExtensionDao;
-import com.latticeengines.playmaker.dao.LpiPMPlayDao;
-import com.latticeengines.playmaker.dao.LpiPMRecommendationDao;
+import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
+import com.latticeengines.playmaker.service.LpiPMAccountExtension;
+import com.latticeengines.playmaker.service.LpiPMPlay;
+import com.latticeengines.playmaker.service.LpiPMRecommendation;
 
 @Component("lpiPMRecommendationDaoAdapter")
-public class LpiPMRecommendationDaoAdapterImpl
-        extends BaseGenericDaoImpl //
-        implements PlaymakerRecommendationDao {
+public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
 
     @Autowired
-    private LpiPMPlayDao playDao;
+    private LpiPMPlay playDao;
 
     @Autowired
-    private LpiPMRecommendationDao recommendationDao;
+    private LpiPMRecommendation recommendationDao;
 
     @Autowired
-    private LpiPMAccountExtensionDao accountExtensionDao;
+    private LpiPMAccountExtension accountExtensionDao;
 
     public LpiPMRecommendationDaoAdapterImpl() {
         super(null);
@@ -40,12 +39,14 @@ public class LpiPMRecommendationDaoAdapterImpl
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
             List<String> playIds) {
-        return recommendationDao.getRecommendations(start, offset, maximum, syncDestination, playIds);
+        SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
+        return recommendationDao.getRecommendations(start, offset, maximum, syncDestEnum, playIds);
     }
 
     @Override
     public int getRecommendationCount(long start, int syncDestination, List<String> playIds) {
-        return recommendationDao.getRecommendationCount(start, syncDestination, playIds);
+        SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
+        return recommendationDao.getRecommendationCount(start, syncDestEnum, playIds);
     }
 
     @Override

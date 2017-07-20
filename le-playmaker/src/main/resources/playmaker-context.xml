@@ -21,6 +21,7 @@
     <import resource="classpath:common-properties-context.xml" />
     <import resource="classpath:playmaker-persistence-context.xml" />
     <import resource="classpath:playmaker-aspects-context.xml" />
+    <import resource="classpath:playmakercore-context.xml" />
     <import resource="classpath:oauth2db-context.xml" />
     <import resource="classpath:monitor-metric-context.xml"/>
 

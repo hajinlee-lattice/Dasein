@@ -1268,6 +1268,16 @@ public class InternalResource extends InternalResourceBase {
         return true;
     }
 
+    @RequestMapping(value = "/plays/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get plays.")
+    public List<Play> getPlayLaunch(@PathVariable("tenantId") String tenantId) {
+        log.debug("Get plays");
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        return playService.getAllPlays();
+    }
+
     @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get play launch.")

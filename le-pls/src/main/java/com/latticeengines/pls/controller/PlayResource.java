@@ -107,21 +107,29 @@ public class PlayResource {
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Create play launch for a given play")
-    public PlayLaunch createPlayLaunch(@PathVariable("playName") String playName, //
-            @RequestBody PlayLaunch playLaunch) {
+    public PlayLaunch createPlayLaunch(@PathVariable("playName") String playName, HttpServletResponse response) {
         Play play = playService.getPlayByName(playName);
-        // ----------------------------------------------------------------------------------------------
-        // TODO in M14, we will use objectapi to get the number of contacts and
-        // accounts for a given play
-        // for now, just mock them
-        playLaunch.setAccountsNum(4000L);
-        playLaunch.setContactsNum(5000L);
-        // ----------------------------------------------------------------------------------------------
-        playLaunch.setPlay(play);
-        playLaunchService.create(playLaunch);
-        String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
-        playLaunch.setApplicationId(appId);
-        playLaunchService.update(playLaunch);
+        PlayLaunch playLaunch = null;
+        if (play != null) {
+            playLaunch = new PlayLaunch();
+            playLaunch.setLaunchState(LaunchState.Launching);
+            // ----------------------------------------------------------------------------------------------
+            // TODO in M14, we will use objectapi to get the number of contacts
+            // and
+            // accounts for a given play
+            // for now, just mock them
+            playLaunch.setAccountsNum(4000L);
+            playLaunch.setContactsNum(5000L);
+            // ----------------------------------------------------------------------------------------------
+            playLaunch.setPlay(play);
+            playLaunchService.create(playLaunch);
+            String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+            playLaunch.setApplicationId(appId);
+            playLaunchService.update(playLaunch);
+        } else {
+            log.error("Invalid playName: " + playName);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
         return playLaunch;
     }
 

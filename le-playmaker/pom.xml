@@ -140,8 +140,19 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-playmakercore</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -191,6 +202,12 @@
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
             <version>${c3p0.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+            <version>${curator.version}</version>
         </dependency>
         
     </dependencies>
