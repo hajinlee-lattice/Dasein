@@ -1,9 +1,9 @@
 FROM latticeengines/centos
 
-#install ruby
-ENV RUBY_VERSION 2.4.1
-
 RUN yum install -y xz && yum clean all
+
+##install ruby
+#ENV RUBY_VERSION 2.4.1
 #RUN yum groupinstall -y "Development Tools" && yum install -y xz && yum clean all
 #RUN gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \
 #    && curl -L get.rvm.io | bash -s stable
@@ -11,7 +11,7 @@ RUN yum install -y xz && yum clean all
 #    && source /etc/profile.d/rvm.sh \
 #    && rvm install ${RUBY_VERSION} \
 #    && rvm use ${RUBY_VERSION} --default
-#
+
 ## install sass
 #RUN gem install sass
 
@@ -46,10 +46,8 @@ RUN npm install grunt-cli -g \
     && npm install express -g
 
 # put a random value here to invalidate docker cache
-RUN echo invalidate cache 1500567475 > /dev/null
+RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 ADD le-ui.tar.gz /opt/node
-RUN mv /opt/node/le-ui /opt/node/app \
-    && cd /opt/node/app
 
 COPY server.key /etc/pki/tls/private/private.key
 COPY server.crt /etc/pki/tls/star.lattice.local.crt
