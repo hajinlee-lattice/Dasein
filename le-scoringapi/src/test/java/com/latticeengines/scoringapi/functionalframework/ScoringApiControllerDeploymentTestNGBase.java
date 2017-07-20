@@ -317,6 +317,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
             scoreRecordContents = IOUtils.toString(scoreRequestUrl, Charset.defaultCharset());
         }
         ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
+        scoreRequest.setModelId(MODEL_ID);
         return scoreRequest;
     }
 
