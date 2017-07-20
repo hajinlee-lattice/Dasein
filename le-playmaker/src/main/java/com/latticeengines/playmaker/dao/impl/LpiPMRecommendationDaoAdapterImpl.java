@@ -20,13 +20,13 @@ import com.latticeengines.playmaker.service.LpiPMRecommendation;
 public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
 
     @Autowired
-    private LpiPMPlay playDao;
+    private LpiPMPlay lpiPMPlay;
 
     @Autowired
-    private LpiPMRecommendation recommendationDao;
+    private LpiPMRecommendation lpiPMRecommendation;
 
     @Autowired
-    private LpiPMAccountExtension accountExtensionDao;
+    private LpiPMAccountExtension lpiPMAccountExtension;
 
     public LpiPMRecommendationDaoAdapterImpl() {
         super(null);
@@ -40,35 +40,35 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
             List<String> playIds) {
         SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
-        return recommendationDao.getRecommendations(start, offset, maximum, syncDestEnum, playIds);
+        return lpiPMRecommendation.getRecommendations(start, offset, maximum, syncDestEnum, playIds);
     }
 
     @Override
     public int getRecommendationCount(long start, int syncDestination, List<String> playIds) {
         SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
-        return recommendationDao.getRecommendationCount(start, syncDestEnum, playIds);
+        return lpiPMRecommendation.getRecommendationCount(start, syncDestEnum, playIds);
     }
 
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
-        return playDao.getPlays(start, offset, maximum, playgroupIds);
+        return lpiPMPlay.getPlays(start, offset, maximum, playgroupIds);
     }
 
     @Override
     public int getPlayCount(long start, List<Integer> playgroupIds) {
-        return playDao.getPlayCount(start, playgroupIds);
+        return lpiPMPlay.getPlayCount(start, playgroupIds);
     }
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<String> accountIds,
             String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
-        return accountExtensionDao.getAccountExtensions(start, offset, maximum, accountIds, recStart, columns,
+        return lpiPMAccountExtension.getAccountExtensions(start, offset, maximum, accountIds, recStart, columns,
                 hasSfdcContactId);
     }
 
     @Override
     public int getAccountExtensionCount(long start, List<String> accountIds, String filterBy, Long recStart) {
-        return accountExtensionDao.getAccountExtensionCount(start, accountIds, recStart);
+        return lpiPMAccountExtension.getAccountExtensionCount(start, accountIds, recStart);
     }
 
     @Override
