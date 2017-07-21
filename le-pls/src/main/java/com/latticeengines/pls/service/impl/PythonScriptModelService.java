@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.MetadataUtils;
 

@@ -6,6 +6,8 @@ public enum SchemaInterpretation {
     SalesforceAccount, //
     SalesforceLead, //
     TestingData, //
+    CSVAccount,
+    VDBAccount,
     Account, //
     Contact, //
     TimeSeries, //

@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InputValidatorWrapper;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
@@ -34,7 +35,6 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.SourceFileService;

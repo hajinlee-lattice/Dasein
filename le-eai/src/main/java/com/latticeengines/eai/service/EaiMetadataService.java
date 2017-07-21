@@ -7,7 +7,6 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.VdbImportExtract;
 
 public interface EaiMetadataService {
 

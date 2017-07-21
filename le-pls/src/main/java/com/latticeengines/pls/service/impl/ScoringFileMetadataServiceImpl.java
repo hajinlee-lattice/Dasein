@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
@@ -46,7 +47,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;

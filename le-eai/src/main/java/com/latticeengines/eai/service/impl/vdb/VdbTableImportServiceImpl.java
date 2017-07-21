@@ -479,7 +479,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                 try {
                     HashMap<String, Attribute> attributeMap = new HashMap<>();
                     for (Attribute attr : table.getAttributes()) {
-                        attributeMap.put(attr.getName(), attr);
+                        attributeMap.put(attr.getDisplayName(), attr);
                     }
                     long getDLDataResultTime = 0;
                     while (!error) {

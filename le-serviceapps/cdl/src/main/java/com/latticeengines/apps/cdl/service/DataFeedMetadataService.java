@@ -20,9 +20,12 @@ public abstract class DataFeedMetadataService {
 
     public abstract Table getMetadata(String metadataStr);
 
+    public abstract Table resolveMetadata(Table original);
+
     public abstract boolean compareMetadata(Table srcTable, Table targetTable);
 
     public abstract CustomerSpace getCustomerSpace(String metadataStr);
 
     public abstract String getConnectorConfig(String metadataStr, String jobIdentifier);
+
 }

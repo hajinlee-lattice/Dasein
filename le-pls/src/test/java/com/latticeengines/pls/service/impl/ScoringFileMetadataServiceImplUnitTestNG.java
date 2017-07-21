@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 
 public class ScoringFileMetadataServiceImplUnitTestNG {
 

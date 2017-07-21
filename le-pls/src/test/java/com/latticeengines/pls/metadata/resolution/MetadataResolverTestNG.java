@@ -41,7 +41,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {

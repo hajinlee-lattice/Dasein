@@ -48,6 +48,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                                      String metadata) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         Table newMeta = dataFeedMetadataService.getMetadata(metadata);
+        newMeta = dataFeedMetadataService.resolveMetadata(newMeta);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(metadata);
         if (dlTenantMappingEnabled) {
             log.info("DL tenant mapping is enabled");

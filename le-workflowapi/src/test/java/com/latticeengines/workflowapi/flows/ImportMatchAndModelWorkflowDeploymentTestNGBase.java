@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportM
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
