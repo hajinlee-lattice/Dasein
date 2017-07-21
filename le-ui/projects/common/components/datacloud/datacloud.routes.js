@@ -298,16 +298,21 @@ angular
                 }],
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
                     var CreateOrUpdateSegment = function() {
-                        var segment = QueryStore.getSegment();
+                        var segment = QueryStore.getSegment(),
+                            ts = new Date().getTime();
+
                         if (segment === null) {
-                            var ts = new Date().getTime();
+                            segment = {
+                                'name': 'segment' + ts,
+                                'display_name': 'segment' + ts
+                            };
+                        } else {
                             segment = {
                                 'name': 'segment' + ts,
                                 'display_name': 'segment' + ts,
+                                'simple_restriction': QueryStore.getRestriction()
                             };
                         }
-                        segment.simple_restriction = QueryStore.getRestriction();
-
                         return SegmentService.CreateOrUpdateSegment(segment);
                     };
 
