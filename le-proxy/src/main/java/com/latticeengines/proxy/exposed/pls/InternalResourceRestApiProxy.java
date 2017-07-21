@@ -498,9 +498,10 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         restTemplate.put(url, null);
     }
 
-    public Play findPlayByName(String playName, String customerSpace) {
+    public Play findPlayByName(CustomerSpace customerSpace, //
+            String playName) {
         try {
-            String url = constructUrl("pls/internal/play/" + playName + "/customerspace/" + customerSpace);
+            String url = constructUrl("pls/internal/play/" + playName + "/customerspace/" + customerSpace.toString());
             log.debug("Find Play by name (" + playName + ")" + url);
             return restTemplate.getForObject(url, Play.class);
         } catch (Exception e) {
