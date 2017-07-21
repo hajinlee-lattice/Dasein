@@ -36,7 +36,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<String> accountIds,
             Long recStart, String columns, boolean hasSfdcContactId) {
-        String customerSpace = "";
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(accountIds);
         List<String> attributes = new ArrayList<>();
@@ -49,7 +49,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
     @Override
     public int getAccountExtensionCount(long start, List<String> accountIds, Long recStart) {
-        String customerSpace = "";
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(accountIds);
         return (int) accountProxy.getAccountsCount(customerSpace,
@@ -98,7 +98,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     }
 
     private List<Attribute> getSchemaAttributes(TableRoleInCollection role) {
-        String customerSpace = MultiTenantContext.getTenant().getId();
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Table schemaTable = dataCollectionProxy.getTable(customerSpace, role);
         List<Attribute> schemaAttributes = schemaTable.getAttributes();
         return schemaAttributes;
