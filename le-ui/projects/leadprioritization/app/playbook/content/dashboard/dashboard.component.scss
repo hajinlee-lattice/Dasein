@@ -146,75 +146,7 @@
             }
         }
         .ratings-graph {
-            @include flex-container;
-            justify-content: center;
             height: 200px;
-            & > ._rating {
-                @include flex-item(0 0 auto);
-                @include flex-container;
-                flex-direction: column;
-                justify-content: flex-end;
-                margin: 0 15px;
-                width: 55px;
-                div {
-                    @include flex-item(0 0 auto);
-                    text-align: center;
-                }
-                color: rgba(0,0,0,.5);
-                .rating-count {
-                    border-bottom: 5px solid rgba(0,0,0,.7);
-                    margin-bottom: 3px;
-                }
-                .rating-bar {
-                    background-color: rgba(0,0,0,.5);
-                    max-height: calc(100% - 55px);
-                }
-                &:nth-child(1) {
-                    color: #70bf4a;
-                    .rating-count {
-                        border-bottom-color: #0f9e4d;
-                    }
-                    .rating-bar {
-                        background-color: #70bf4a;
-                    }
-                }
-                &:nth-child(2) {
-                    color: #33bdb7;
-                    .rating-count {
-                        border-bottom-color: #149188;
-                    }
-                    .rating-bar {
-                        background-color: #33bdb7;
-                    }
-                }
-                &:nth-child(3) {
-                    color: #cd80bc;
-                    .rating-count {
-                        border-bottom-color: #aa5299;
-                    }
-                    .rating-bar {
-                        background-color: #cd80bc;
-                    }
-                }
-                &:nth-child(4) {
-                    color: #8e71b2;
-                    .rating-count {
-                        border-bottom-color: #7851a1;
-                    }
-                    .rating-bar {
-                        background-color: #8e71b2;
-                    }
-                }
-                &:nth-child(5) {
-                    color: #457eba;
-                    .rating-count {
-                        border-bottom-color: #26649b;
-                    }
-                    .rating-bar {
-                        background-color: #457eba;
-                    }
-                }
-            }
         }
     }
 }

@@ -46,11 +46,13 @@ angular
         .state('home.playbook.dashboard', {
             url: '/dashboard/:play_name',
             resolve: {
-                TalkingPoints: function(CgTalkingPointStore, $stateParams) {
+                TalkingPoints: function(){//CgTalkingPointStore, $stateParams) {
+                    return null;
                     var play_name = $stateParams.play_name || '';
                     return CgTalkingPointStore.getTalkingPoints(play_name);
                 },
-                TalkingPointAttributes: function (CgTalkingPointStore) {
+                TalkingPointAttributes: function (){//CgTalkingPointStore) {
+                    return null;
                     return CgTalkingPointStore.getAttributes();
                 }
             },
@@ -192,13 +194,6 @@ angular
                 }
             },
             views: {
-                "navigation@": {
-                    controller: function($scope, $stateParams, $state) {
-                        $scope.play_name = $stateParams.play_name || '';
-                        $scope.menuDisabled = true;
-                    },
-                    templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
-                },
                 'summary@': {
                     controller: function($scope, PlaybookWizardStore) {
                         $scope.$on('$destroy', function () {

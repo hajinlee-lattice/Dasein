@@ -38,22 +38,22 @@ angular.module('lp.playbook.dashboard', [
     }
 
     vm.makeRatingsGraph = function(ratings) {
-        ratings = [{
-            bucket: "A",
-            count: 105
-        },{
-            bucket: "B",
-            count: 132
-        },{
-            bucket: "C",
-            count: 244
-        },{
-            bucket: "D",
-            count: 512
-        },{
-            bucket: "F",
-            count: 680
-        }];
+        // ratings = [{
+        //     bucket: "A",
+        //     count: 105
+        // },{
+        //     bucket: "B",
+        //     count: 132
+        // },{
+        //     bucket: "C",
+        //     count: 244
+        // },{
+        //     bucket: "D",
+        //     count: 512
+        // },{
+        //     bucket: "F",
+        //     count: 680
+        // }];
 
         var total =  0;
         for (var i in ratings) {
@@ -66,7 +66,7 @@ angular.module('lp.playbook.dashboard', [
         }
     };
 
-    PlaybookWizardStore.clear();
+    //PlaybookWizardStore.clear();
     if(play_name) {
         PlaybookWizardStore.getPlay(play_name).then(function(play){
             vm.play = play;

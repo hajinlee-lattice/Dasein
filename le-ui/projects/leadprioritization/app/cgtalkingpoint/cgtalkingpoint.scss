@@ -25,7 +25,7 @@
             position: absolute;
             left: 340px;
             top: 0;
-            bottom: 0;
+            height: 45px;
             & > li {
                 @include flex-item(0 1 auto);
                 margin: 0 10px;

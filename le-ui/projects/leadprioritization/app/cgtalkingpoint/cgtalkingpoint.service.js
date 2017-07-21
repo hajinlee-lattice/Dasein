@@ -56,7 +56,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             deferred.resolve(this.talkingPointsPreviewResources);
         } else {
             CgTalkingPointService.getTalkingPointsPreviewResources().then(function(data){
-                this.talkingPointsPreviewResources = data;
+                CgTalkingPointStore.talkingPointsPreviewResources = data;
                 deferred.resolve(data);
             });
         }
@@ -222,10 +222,9 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
     this.getDanteUrl = function(previewResources) {
         var deferred = $q.defer();
-        //ben::remove
-        var sessionid = 'c7336357-1f7e-44f2-b740-f0617f5f6dfa',//previewResources.oAuthToken, //'00D80000000KvZo!AR0AQBWNZUrIO9q.DjIjFdXYW0USIN0SBQWCVvx0hw6naKZrc374OdQVP24EvFxZiWbf00dNdHjlPGFEScO4BMstUYEJlvka',
+        var sessionid = previewResources.oAuthToken, //'00D80000000KvZo!AR0AQBWNZUrIO9q.DjIjFdXYW0USIN0SBQWCVvx0hw6naKZrc374OdQVP24EvFxZiWbf00dNdHjlPGFEScO4BMstUYEJlvka',
             preview_url = previewResources.danteUrl, //'https://localhost:44300/index.aspx',
-            server_url = 'https://testapi.lattice-engines.com/tenants/oauthtotenant', //previewResources.serverUrl, //https://leinstallation.na6.visual.force.com/services/Soap/u/9.0/00D80000000KvZo&CustomSettings={%22hideNavigation%22:true,%22HideTabs%22:true,%22HideHeader%22:true}&LpiPreview=true'
+            server_url = 'https://testapi.lattice-engines.com/api',//previewResources.serverUrl, //https://leinstallation.na6.visual.force.com/services/Soap/u/9.0/00D80000000KvZo&CustomSettings={%22hideNavigation%22:true,%22HideTabs%22:true,%22HideHeader%22:true}&LpiPreview=true'
             custom_settings_json = {
                 hideNavigation: true,
                 HideTabs: true,
@@ -252,26 +251,32 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     };
 
-    this.getAccounts = function() {
+    this.getAccounts = function(count) {
         var deferred = $q.defer();
-
         var data = {
             data:[{
                 name: 'Campus Management',
-                id: '0018000000NW1EEAA1'
+                id: '00136000008KqgpAAC'
             }, {
                 name: 'RTG Medical',
-                id: '0018000000NW1EbAAL'
+                id: '00136000008KplQAAS'
             }, {
                 name: 'Omega Administrators',
-                id: '0018000000NW1EUAA1'
+                id: '00136000008KqrOAAS'
             }, {
                 name: 'AIT Laboratories',
-                id: '0018000000NW1EOAA1'
+                id: '00136000008Kpb8AAC'
             }]
         };
+        var count = count || 20;
+        $http({
+            method: 'GET',
+            url: this.host + '/dante/accounts/' + count,
+        }).then(function(response){
+            //deferred.resolve(response.data.Result);
+            //console.log(response.data.Result);
+        });
         deferred.resolve(data);
-
         return deferred.promise;
     };
 

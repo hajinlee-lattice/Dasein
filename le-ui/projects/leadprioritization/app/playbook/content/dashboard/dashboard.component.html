@@ -20,6 +20,7 @@
                             <h5>{{vm.play.segment}}</h5>
                             <ul class="controls">
                                 <li ng-if="!vm.play.segment"><a ui-sref="home.playbook.dashboard.segment({play_name: vm.play.name})">Add</a></li>
+                                <!--
                                 <li ng-if="vm.play.segment"><a ui-sref="home.playbook.dashboard.segment({play_name: vm.play.name})">Change</a></li>
                                 <li ng-if="vm.play.segment" ng-init="showRemoveSegmentModal = false">
                                     <button class="button white-button" ng-click="showRemoveSegmentModal = !showRemoveSegmentModal">X</button>
@@ -29,6 +30,7 @@
                                         <button class="button white-button" ng-click="showRemoveSegmentModal = false">Cancel</button>
                                     </div>
                                 </li>
+                                -->
                             </ul>
                         </div>
                         <div>
@@ -87,7 +89,7 @@
                             <div class="dashboard-subsection-header">
                                 <h3>Account ratings</h3>
                             </div>
-                            <ul class="ratings-graph" ng-if="vm.ratingsGraph">
+                            <ul class="playbook-ratings ratings-graph" ng-if="vm.ratingsGraph">
                                 <li class="_rating" ng-repeat="rating in vm.ratingsGraph.ratings">
                                     <div class="rating-count" ng-show="rating.count">{{rating.count}}</div>
                                     <div class="rating-bar" style="height:{{rating.count/vm.ratingsGraph.total*100}}%;"></div>
