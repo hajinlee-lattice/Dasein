@@ -6,9 +6,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +42,14 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(accountIds);
         List<String> attributes = new ArrayList<>();
+
+        if (StringUtils.isNotBlank(columns)) {
+            StringTokenizer tkz = new StringTokenizer(columns, ",");
+            while (tkz.hasMoreTokens()) {
+                attributes.add(tkz.nextToken().trim());
+            }
+        }
+
         dataRequest.setAttributes(attributes);
         DataPage dataPage = accountProxy.getAccounts(customerSpace,
                 DateTimeUtils.convertToStringUTCISO8601(new Date(start)), offset, maximum, dataRequest);

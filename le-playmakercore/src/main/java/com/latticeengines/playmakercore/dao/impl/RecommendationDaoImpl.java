@@ -86,13 +86,12 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT new map " //
                 + "( " //
-                + "pid AS pid, recommendationId AS recommendationId, accountId AS accountId, "
+                + "pid AS ID, recommendationId AS recommendationId, accountId AS accountId, "
                 + "leAccountExternalID AS leAccountExternalID, playId AS playId, launchId AS launchId, "
                 + "description AS description, launchDate AS launchDate, lastUpdatedTimestamp AS LastModificationDate, "
                 + "monetaryValue AS monetaryValue, likelihood AS likelihood, companyName AS companyName, "
                 + "sfdcAccountID AS sfdcAccountID, priorityID AS priorityID, priorityDisplayName AS priorityDisplayName, "
-                + "monetaryValueIso4217ID AS monetaryValueIso4217ID, contacts AS contacts "
-                + ") " //
+                + "monetaryValueIso4217ID AS monetaryValueIso4217ID, contacts AS contacts " + ") " //
                 + "FROM %s WHERE synchronizationDestination = :syncDestination ";
 
         if (!CollectionUtils.isEmpty(playIds)) {

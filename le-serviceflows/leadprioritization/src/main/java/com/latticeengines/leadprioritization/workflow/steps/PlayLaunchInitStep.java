@@ -18,10 +18,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
@@ -82,6 +84,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.info("For playLaunchId: " + playLaunchId);
 
             PlayLaunch playLauch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
+            Play play = internalResourceRestApiProxy.findPlayByName(customerSpace, playName);
+            playLauch.setPlay(play);
 
             executeLaunchActivity(tenant, playLauch, config);
 
@@ -98,8 +102,12 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
 
-        Restriction segmentRestrictionQuery = playLauch.getPlay().getSegment().getRestriction();
+        MetadataSegment segment = playLauch.getPlay().getSegment();
+        log.info("Processing segment: " + segment.getDisplayName());
+        Restriction segmentRestrictionQuery = segment.getRestriction();
+
         long segmentAccountsCount = accountProxy.getAccountsCount(tenant.toString(), segmentRestrictionQuery);
+        log.info("Total records in segment: " + segmentAccountsCount);
 
         if (segmentAccountsCount > 0) {
             List<String> accountSchema = getSchema(TableRoleInCollection.BucketedAccount);
@@ -107,12 +115,20 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             dataRequest.setAttributes(accountSchema);
 
             int numberOfLoops = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
+
+            log.info("Number of required loops: " + numberOfLoops + ", with pageSize: " + pageSize);
+
             long alreadyReadAccounts = 0;
 
             for (int loopId = 0; loopId < numberOfLoops; loopId++) {
+                log.info("Loop #" + loopId);
+
                 int expectedPageSize = (int) Math.min(pageSize * 1L, (segmentAccountsCount - alreadyReadAccounts));
                 DataPage accountPage = accountProxy.getAccounts(tenant.toString(), segmentRestrictionQuery,
                         (int) alreadyReadAccounts, expectedPageSize, dataRequest);
+
+                log.info("Got #" + accountPage.getData().size() + " elements in this loop");
+
                 List<Map<String, Object>> accountList = accountPage.getData();
                 alreadyReadAccounts += accountList.size();
 
