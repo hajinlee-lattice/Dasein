@@ -2,10 +2,10 @@ package com.latticeengines.yarn.exposed.runtime;
 
 import java.lang.reflect.ParameterizedType;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -47,7 +47,7 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     private String stackName;
 
     @Autowired
-    private LedpProgressReporter ledpProgressReporter;
+    protected LedpProgressReporter ledpProgressReporter;
 
     protected MindAppmasterServiceClient appmasterServiceClient;
 
