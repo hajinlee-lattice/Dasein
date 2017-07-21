@@ -39,14 +39,13 @@
                     vm="vm">
                 </li>
                 <li explorer-category-tile
-                    ng-repeat="category in (vm.categoriesMenu = vm.categories)
+                    ng-repeat="category in vm.categories
                         | startFrom: vm.categoryStartFrom()
                         | limitTo: vm.categoryLimitTo()" class="category"
                     ng-if="(count = vm.categoryCount(category)) && (vm.lookupMode ? vm.highlightMetadata.categories[category].enabled : true)"
                     ng-class="{active: vm.category == category, 'disabled-grayout': !vm.highlightMetadata.categories[category].enabled && vm.section == 'team'}"
                     ng-click="vm.categoryClick(category, $event);"
                     vm="vm" category="category" count="count">
-                    {{category}}
                 </li>
             </ul>
         </div>
