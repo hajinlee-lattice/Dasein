@@ -53,8 +53,7 @@ import cascading.operation.aggregator.Count;
 import cascading.tuple.Fields;
 
 /**
- * This dataflow generates a list of (AttrName, AttrCount, BktCounts, BktLabels,
- * BktAlgorithm, Dim1, Dim2, ...)
+ * This dataflow generates a list of (AttrName, AttrCount, BktCounts, BktAlgorithm, Dim1, Dim2, ...)
  */
 @Component(BEAN_NAME)
 public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
@@ -268,16 +267,18 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         } else {
             log.info("There will be " + paths.size() + " paths to roll up.");
         }
+        List<String> pathStrs = paths.stream().map(DimensionUtils::pathToString).collect(Collectors.toList());
         Map<String, Node> rollupNodes = new HashMap<>();
         List<String> fieldsInOrder = count.getFieldNames();
         for (List<AttrDimension> path : paths) {
             AttrDimension currDim = path.get(path.size() - 1);
             Node base = count;
+            List<AttrDimension> parentPath = new ArrayList<>();
             if (path.size() > 1) {
-                List<AttrDimension> parentPath = path.subList(0, path.size() - 1);
+                parentPath = path.subList(0, path.size() - 1);
                 base = rollupNodes.get(DimensionUtils.pathToString(parentPath));
             }
-            Node rollup = bruteForceRollupOneDim(base, currDim, dedup);
+            Node rollup = bruteForceRollupOneDim(base, parentPath, currDim, dedup);
             String pathName = DimensionUtils.pathToString(path);
             String pipeName = UUID.randomUUID().toString().replaceAll("-", "");
             rollup = rollup.retain(new FieldList(fieldsInOrder)).renamePipe(pipeName);
@@ -290,16 +291,22 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         }
     }
 
-    private Node bruteForceRollupOneDim(Node base, AttrDimension dimension, boolean dedup) {
+    private Node bruteForceRollupOneDim(Node base, List<AttrDimension> parentPath, AttrDimension dimension, boolean dedup) {
         List<String> dimFields = getGeneratedDimAttrs();
+        List<String> parentDims = parentPath.stream().map(AttrDimension::getName).collect(Collectors.toList());
         List<String> groupby = new ArrayList<>(dimFields);
         groupby.remove(DIM_PREFIX + dimension.getName());
+        parentDims.forEach(dim -> groupby.remove(DIM_PREFIX + dim));
         if (dedup) {
             groupby.addAll(getGeneratedDedupAttrs());
         }
         groupby.add(ATTR_ID);
         List<FieldMetadata> outputFms = new ArrayList<>();
-        dimFields.forEach(dim -> outputFms.add(new FieldMetadata(dim, String.class)));
+        dimFields.forEach(dim -> {
+            if (!parentDims.contains(dim.substring(DIM_PREFIX.length()))) {
+                outputFms.add(new FieldMetadata(dim, String.class));
+            }
+        });
         if (dedup) {
             getGeneratedDedupAttrs().forEach(f -> outputFms.add(base.getSchema(f)));
         }
@@ -307,7 +314,11 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         outputFms.add(new FieldMetadata(ATTR_COUNT, Long.class));
         outputFms.add(new FieldMetadata(ATTR_BKTS, String.class));
         Aggregator aggregator = new StatsRollupAggregator(groupby, dimension.getName(), ATTR_COUNT, ATTR_BKTS, dedup);
-        return base.groupByAndAggregate(new FieldList(groupby), aggregator, outputFms);
+        Node rollup = base.groupByAndAggregate(new FieldList(groupby), aggregator, outputFms);
+        for (String pd: parentDims) {
+            rollup = rollup.addColumnWithFixedValue(DIM_PREFIX + pd, StatsRollupAggregator.ALL, String.class);
+        }
+        return rollup;
     }
 
     private Node mergeCounts(Node count) {

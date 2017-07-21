@@ -93,9 +93,8 @@ def purge_internal(environment, image):
         for i in xrange(len(revisions) - REVISIONS_TO_KEEP):
             to_delete.append({'imageTag': revisions[i]})
 
-    print to_delete
-
     if len(to_delete) > 0:
+        print 'deleting images ', to_delete
         client.batch_delete_image(
             registryId=id,
             repositoryName=NAMESPACE + '/' + image,

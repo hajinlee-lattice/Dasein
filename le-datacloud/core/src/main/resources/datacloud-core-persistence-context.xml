@@ -32,7 +32,7 @@
           p:sessionFactory-ref="sessionFactoryPropDataManage">
         <qualifier value="propDataManage"/>
     </bean>
-    <tx:annotation-driven transaction-manager="transactionManagerPropDataManage"/>
+    <tx:annotation-driven/>
 
     <bean id="propDataManageJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
           p:dataSource-ref="propDataManage"/>

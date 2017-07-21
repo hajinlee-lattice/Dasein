@@ -39,7 +39,7 @@ public class StatsRollupAggregator extends BaseAggregator<StatsRollupAggregator.
     private boolean needRollup;
     private boolean dedup; // when dedup, pick first instead of add up
 
-    // grpFields + (rollupDim == __ALL__) + cntField + bktsField
+    // grpFields + (rollupDims == __ALL__) + cntField + bktsField
     // if rollup is null, means simply merge bkt cnts
     public StatsRollupAggregator(List<String> grpByFields, String rollupDim, String cntField, String bktsField, boolean dedup) {
         super(generateFieldDeclaration(grpByFields, rollupDim, cntField, bktsField));

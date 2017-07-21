@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
-
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS_DOMAIN;
 
@@ -14,20 +13,28 @@ import java.util.Map;
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.transformation.AMStatsHQDuns;
+import com.latticeengines.datacloud.dataflow.transformation.ExtractCube;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(AccountMasterStatisticsTestNG.class);
+    private static final List<String> dimensions = Arrays.asList( //
+            "LDC_Country", //
+            "LDC_PrimaryIndustry", //
+            "LE_REVENUE_RANGE", //
+            "LE_EMPLOYEE_RANGE" //
+    );
 
     @Override
     @Test(groups = "pipeline1", enabled = true)
@@ -42,14 +49,17 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        // correctness is tested in the dataflow functional test
+        // other than extract top cube, correctness is tested in the dataflow
+        // functional tests
         log.info("Start to verify records one by one.");
-        /*
+        long count = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            System.out.println(record);
+            count++;
+            record.getSchema().getFields().forEach(field -> Assert.assertFalse(dimensions.contains(field.name()),
+                    "Found a dimension attr in filtered cube: " + field.name()));
         }
-        */
+        Assert.assertEquals(count, 25549);
     }
 
     @Override
@@ -68,13 +78,14 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig hqduns = hqduns();
             TransformationStepConfig calcStats = calcStats();
+            TransformationStepConfig extractTopCube = extractTopCube();
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
                     profile, //
                     bucket, //
                     hqduns, //
-                    calcStats
-            );
+                    calcStats, //
+                    extractTopCube);
             // -----------
             steps.get(steps.size() - 1).setTargetSource(getTargetSourceName());
             configuration.setSteps(steps);
@@ -103,9 +114,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         step.setBaseSources(Collections.singletonList("AccountMaster"));
         step.setInputSteps(Collections.singletonList(1));
         step.setTransformer(AMStatsHQDuns.TRANSFORMER_NAME);
-        TransformerConfig conf = new TransformerConfig();
-        String confStr = setDataFlowEngine(JsonUtils.serialize(conf), "TEZ");
-        step.setConfiguration(confStr);
+        step.setConfiguration("{}");
         return step;
     }
 
@@ -115,15 +124,24 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         step.setInputSteps(Arrays.asList(0, 2));
         CalculateStatsConfig config = new CalculateStatsConfig();
         Map<String, List<String>> dims = new HashMap<>();
-        dims.put("LDC_Country", null);
-        dims.put("LDC_PrimaryIndustry", null);
-        dims.put("LE_REVENUE_RANGE", null);
-        dims.put("LE_EMPLOYEE_RANGE", null);
+        dimensions.forEach(d -> dims.put(d, null));
         config.setDimensionGraph(dims);
         config.setDedupFields(Arrays.asList(HQ_DUNS, HQ_DUNS_DOMAIN));
         String confStr = setDataFlowEngine(JsonUtils.serialize(config), "TEZ");
         step.setConfiguration(confStr);
         step.setTargetSource("AccountMasterStatistics");
+        return step;
+    }
+
+    private TransformationStepConfig extractTopCube() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(3));
+        step.setTransformer(ExtractCube.TRANSFORMER_NAME);
+        TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
+        engineConf.setPartitions(1);
+        String confStr = setDataFlowEngine("{}", engineConf);
+        step.setConfiguration(confStr);
+        step.setTargetSource("AccountMasterEnrichmentStats");
         return step;
     }
 
