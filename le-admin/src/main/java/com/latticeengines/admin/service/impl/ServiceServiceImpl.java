@@ -1,5 +1,8 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,9 +28,13 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.security.exposed.AccessLevel;
+
 
 @Component("serviceService")
 public class ServiceServiceImpl implements ServiceService {
+
+    private final String listDelimiter = ",";
 
     @Autowired
     private ServiceEntityMgr serviceEntityMgr;
@@ -178,5 +185,45 @@ public class ServiceServiceImpl implements ServiceService {
         node.setData(data);
         DocumentDirectory metaDir = getConfigurationSchema(serviceName);
         conf.applyMetadata(metaDir);
+    }
+
+    @Override
+    public Boolean patchNewConfig(String serviceName, AccessLevel level, String emails) {
+        String nodePath;
+        if (level.equals(AccessLevel.INTERNAL_ADMIN)) {
+            nodePath = "/LatticeAdminEmails";
+        } else {
+            nodePath = "/SuperAdminEmails";
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            SerializableDocumentDirectory conf = getDefaultServiceConfig(serviceName);
+            SerializableDocumentDirectory.Node node = conf.getNodeAtPath(nodePath);
+            String data = node.getData();
+            Set<String> emailSet = new HashSet<>();
+            for (String email : Arrays.asList(emails.trim().split(listDelimiter))) {
+                email = email.trim();
+                if(!StringUtils.isEmpty(email) && !data.contains(email)) {
+                    emailSet.add(email);
+                }
+            }
+            if(emailSet != null && emailSet.size() > 0) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    List<String> initial = mapper.readValue(data, List.class);
+                    initial.addAll(emailSet);
+                    data = mapper.writeValueAsString(initial);
+                } catch (Exception e) {
+                    throw new RuntimeException("parse data error when read or write");
+                }
+                patchDefaultConfigWithoutValidation(serviceName, nodePath, data);
+                return true;
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_19101, String.format(
+                    "Failed to patch new configuration for node %s in component %s", nodePath, serviceName), e);
+        }
+        return false;
     }
 }

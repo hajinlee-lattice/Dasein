@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.security.exposed.AccessLevel;
 
 public interface ServiceService {
 
@@ -26,4 +27,6 @@ public interface ServiceService {
     Boolean patchDefaultConfigWithOptions(String serviceName, SelectableConfigurationField field);
 
     Boolean patchDefaultConfig(String serviceName, String nodePath, String data);
+
+    Boolean patchNewConfig(String serviceName, AccessLevel level, String emails);
 }

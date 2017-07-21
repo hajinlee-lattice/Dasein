@@ -1,7 +1,10 @@
 package com.latticeengines.auth.exposed.entitymanager;
 
+import java.util.List;
+
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 
 public interface GlobalAuthTenantEntityMgr extends BaseEntityMgr<GlobalAuthTenant> {
 
@@ -11,4 +14,5 @@ public interface GlobalAuthTenantEntityMgr extends BaseEntityMgr<GlobalAuthTenan
 
     GlobalAuthTenant findById(Long id);
 
+    List<GlobalAuthTenant> findTenantNotInTenantRight(GlobalAuthUser user);
 }

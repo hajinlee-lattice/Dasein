@@ -22,12 +22,14 @@ import com.latticeengines.admin.dynamicopts.impl.DataStoreProvider;
 import com.latticeengines.admin.dynamicopts.impl.PermStoreProvider;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.service.UserService;
@@ -169,5 +171,30 @@ public class InternalResource extends InternalResourceBase {
         String defaultOption = defaultDir.getNodeAtPath(patch.getNode()).getData();
         patch.setDefaultOption(defaultOption);
         return patch.defaultIsValid();
+    }
+
+    @RequestMapping(value = "services/addUserAccessLevel", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "add user Access level")
+    public Boolean addUserAccessLevel(@RequestBody String emails, @RequestParam(value = "right", required = false, defaultValue = "SUPER_ADMIN") String right,
+            HttpServletRequest request) {
+        AccessLevel level = AccessLevel.valueOf(right);
+        if (level == null) {
+            return false;
+        }
+        checkHeader(request);
+        String ticket = request.getHeader(Constants.AUTHORIZATION);
+        String userName = "_defaultUser";
+        if (!StringUtils.isEmpty(ticket)) {
+            String decrypted = CipherUtils.decrypt(ticket);
+            String[] tokens = decrypted.split("\\|");
+            userName = tokens[0];
+        }
+        boolean  success = false;
+        String filterEmails = userService.addUserAccessLevel(userName, emails, level);
+        if (!StringUtils.isEmpty(filterEmails)) {
+            success = serviceService.patchNewConfig(PLSComponent.componentName, level, filterEmails);
+        }
+        return success;
     }
 }

@@ -1,6 +1,9 @@
 package com.latticeengines.admin.service.impl;
 
 import java.util.Arrays;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -13,12 +16,14 @@ import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.security.exposed.AccessLevel;
 
 public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
 
@@ -151,5 +156,35 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
 
         conf = tenantService.getDefaultSpaceConfig();
         Assert.assertEquals(conf.getTopology(), CRMTopology.MARKETO);
+    }
+
+    @Test(groups = "functional")
+    public void testpatchNewConfig() throws Exception {
+        SerializableDocumentDirectory dir = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
+        SerializableDocumentDirectory.Node node = dir.getNodeAtPath("/SuperAdminEmails");
+
+        String emails = "penglong.liu"+ UUID.randomUUID() +"@lattice-engines.com";
+        serviceService.patchNewConfig(PLSComponent.componentName, AccessLevel.SUPER_ADMIN, emails);
+        dir = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
+        node = dir.getNodeAtPath("/SuperAdminEmails");
+        Assert.assertEquals(node.getData().contains(emails), true);
+
+        emails = "";
+        boolean flag = serviceService.patchNewConfig(PLSComponent.componentName, AccessLevel.INTERNAL_ADMIN, emails);
+        Assert.assertEquals(flag, false);
+
+        String email = "penglong.liu"+ UUID.randomUUID() +"@lattice-engines.com";
+        emails = email + "," + email;
+        serviceService.patchNewConfig(PLSComponent.componentName, AccessLevel.SUPER_ADMIN, emails);
+        dir = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
+        node = dir.getNodeAtPath("/SuperAdminEmails");
+        String data = node.getData();
+        int count = 0;
+        Pattern pattern = Pattern.compile(email);
+        Matcher matcher = pattern.matcher(data);
+        while (matcher.find()) {
+            count++;
+        }
+        Assert.assertEquals(count, 1);
     }
 }

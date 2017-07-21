@@ -28,6 +28,7 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
     UserService userService;
 
     private Tenant tenant;
+    private Tenant anotherTenant;
     private final UserRegistration uReg = createUserRegistration();
 
     @BeforeClass(groups = "functional")
@@ -43,12 +44,20 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
         createUser(uReg.getCredentials().getUsername(), uReg.getUser().getEmail(), uReg.getUser().getFirstName(), uReg
                 .getUser().getLastName());
+
+        anotherTenant = new Tenant();
+        anotherTenant.setName("UserService Test Another Tenant");
+        anotherTenant.setId("USERSERVICE_TEST_ANOTHER_TENANT");
+
+        globalTenantManagementService.discardTenant(anotherTenant);
+        globalTenantManagementService.registerTenant(anotherTenant);
     }
 
     @AfterClass(groups = { "functional" })
     public void tearDown() {
         makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
         globalTenantManagementService.discardTenant(tenant);
+        globalTenantManagementService.discardTenant(anotherTenant);
     }
 
     @Test(groups = "functional")
@@ -63,6 +72,18 @@ public class UserServiceImplTestNG extends SecurityFunctionalTestNGBase {
         userService.resignAccessLevel(tenant.getId(), uReg.getCredentials().getUsername());
         level = userService.getAccessLevel(tenant.getId(), uReg.getCredentials().getUsername());
         assertNull(level);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = {"testGrantAndRevokeAccessLevel"})
+    public void testAddUserAccessLevel() {
+        AccessLevel level = userService.getAccessLevel(tenant.getId(), uReg.getCredentials().getUsername());
+        assertNull(level);
+        userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), uReg.getCredentials().getUsername());
+        level = userService.getAccessLevel(tenant.getId(), uReg.getCredentials().getUsername());
+        assertEquals(level, AccessLevel.SUPER_ADMIN);
+        userService.addUserAccessLevel("default", uReg.getUser().getEmail(), AccessLevel.INTERNAL_ADMIN);
+        level = userService.getAccessLevel(anotherTenant.getId(), uReg.getCredentials().getUsername());
+        assertEquals(level, AccessLevel.INTERNAL_ADMIN);
     }
 
     private UserRegistration createUserRegistration() {

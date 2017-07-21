@@ -47,4 +47,6 @@ public interface UserService {
     GlobalAuthUser findByEmailNoJoin(String username);
 
     boolean deleteUserByEmail(String email);
+
+    String addUserAccessLevel(String userName,String emails, AccessLevel level);
 }

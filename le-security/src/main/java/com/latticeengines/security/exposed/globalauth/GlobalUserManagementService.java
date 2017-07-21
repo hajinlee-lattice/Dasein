@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.security.exposed.AccessLevel;
 
 public interface GlobalUserManagementService {
 
@@ -39,4 +40,6 @@ public interface GlobalUserManagementService {
     GlobalAuthUser findByEmailNoJoin(String email);
 
     boolean deleteUserByEmail(String email);
+
+    String addUserAccessLevel(String emails, AccessLevel level);
 }

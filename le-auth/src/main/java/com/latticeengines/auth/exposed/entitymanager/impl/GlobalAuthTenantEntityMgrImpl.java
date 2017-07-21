@@ -1,5 +1,7 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -8,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.auth.exposed.dao.GlobalAuthTenantDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 
@@ -51,6 +54,12 @@ public class GlobalAuthTenantEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthT
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void delete(GlobalAuthTenant gaTenant) {
         super.delete(gaTenant);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthTenant> findTenantNotInTenantRight(GlobalAuthUser user) {
+        return gaTenantDao.findTenantNotInTenantRight(user);
     }
 
 }

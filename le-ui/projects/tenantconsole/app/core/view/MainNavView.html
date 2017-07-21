@@ -47,6 +47,7 @@
                         <li><a href="http://bodcprodvutl90.prod.lattice.local/ReportServer/Pages/ReportViewer.aspx?/ARM/ARMTenantDashboard" target="_blank">ARM Dashboard</a></li>
                         <li><a href="#" ng-click="onSignOutClick()">Sign Out</a></li>
                         <li><a href="#" ng-click="onDeactiveUserClick()">Deactive user</a>
+                        <li><a href="#" ng-click="onAddUserAccessLevelClick()">AddUserAccessLevel</a>
                     </ul>
                 </li>
             </ul>
@@ -67,6 +68,31 @@
                     <p ng-if="errorMsg" class="help-block"><span class="text-danger">{{ errorMsg }}</span></p>
                     <p ng-if="okClicked && !saving" class="help-block">You are about to delete users: {{emails}} </p>
                     <p ng-if="saving" class="help-block"><i class="fa fa-spinner fa-spin"></i> deleting</p>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="ok()" ng-disabled="!isValid">{{okClicked ? 'Confirm' :'Ok'}}</button>
+            <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+    <script type="text/ng-template" id="addUserAccessLevelModal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">AddUserAccessLevel</h3>
+        </div>
+        <div class="modal-body">
+            <form class="add-tenant-form form-inline" name="addform" novalidate>
+                <div class="control-group" ng-class='{"has-error": showEmailIdError}' ng-init="right='SUPER_ADMIN'">
+                    <label class="control-label">Emails</label>
+                    <input type="text" name="emailId" class="form-control" required
+                           ng-model-options="{ debounce: 200 }" ng-model="emails"
+                           ng-change="validateEmailInfo()"
+                           ng-disabled="okClicked || saving"/>
+                    <label class="control-label">AccessLevel</label>
+                    SuperAdmin<input type="radio" ng-model="right" value="SUPER_ADMIN" ng-checked="true">&nbsp;&nbsp;InternalAdmin<input type="radio" ng-model="right" value="INTERNAL_ADMIN">				
+                    <p ng-if="errorMsg" class="help-block"><span class="text-danger">{{ errorMsg }}</span></p>
+                    <p ng-if="okClicked && !saving" class="help-block">You are about to add users: {{emails}} to {{right}} </p>
+                    <p ng-if="saving" class="help-block"><i class="fa fa-spinner fa-spin"></i> adding</p>
                 </div>
             </form>
         </div>

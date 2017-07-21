@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
+import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
@@ -642,5 +643,35 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new RuntimeException("Unable to delete the user requested.");
         }
         return true;
+    }
+
+    @Override
+    public String addUserAccessLevel(String emails, AccessLevel level) {
+        String[] emailStr = emails.trim().split(",");
+        Set<String> emailSet = new HashSet<>();
+        for(String email : emailStr) {
+            emailSet.add(email.trim());
+        }
+        StringBuilder filterEmails = new StringBuilder("");
+        for (String email : emailSet) {
+            GlobalAuthUser gaUser = gaUserEntityMgr.findByEmail(email);
+            if (gaUser == null) {
+                log.info(String.format("the email %s is not valid, and can't find user in table GlobalUser", email));
+                continue;
+            }
+            List<GlobalAuthTenant> tenants = gaTenantEntityMgr.findTenantNotInTenantRight(gaUser);
+            if (tenants != null) {
+                filterEmails.append(email + ",");
+            }
+            for(GlobalAuthTenant tenant : tenants) {
+                GlobalAuthUserTenantRight gaUserTenantRight = new GlobalAuthUserTenantRight();
+                gaUserTenantRight.setGlobalAuthTenant(tenant);
+                gaUserTenantRight.setGlobalAuthUser(gaUser);
+                gaUserTenantRight.setOperationName(level.toString());
+                log.info(String.format("user %s is granted to %s", email, level));
+                gaUserTenantRightEntityMgr.create(gaUserTenantRight);
+            }
+        }
+        return filterEmails.toString();
     }
 }

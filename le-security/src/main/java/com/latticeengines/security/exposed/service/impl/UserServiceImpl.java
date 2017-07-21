@@ -339,4 +339,10 @@ public class UserServiceImpl implements UserService {
     public boolean deleteUserByEmail(String email) {
         return globalUserManagementService.deleteUserByEmail(email);
     }
+
+    @Override
+    public String addUserAccessLevel(String userName, String emails, AccessLevel level) {
+        LOGGER.info(String.format("%s sets user %s to %s", userName, emails, level));
+        return globalUserManagementService.addUserAccessLevel(emails, level);
+    }
 }
