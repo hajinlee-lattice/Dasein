@@ -23,12 +23,12 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperti
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
-public class PLSComponentTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
 
     private static final BatonService batonService = new BatonServiceImpl();
     private static final String serviceName = "PLS";
@@ -64,6 +64,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBaseDeprecated {
             }
         } catch (Exception e) {
             // ignore
+            logger.warn(e);
         }
 
         bootstrap();
@@ -82,7 +83,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBaseDeprecated {
                     + state.errorMessage);
         }
 
-        Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
+        Assert.assertTrue(tenantService.hasTenantId(tenant.getId()), "Tenant service does not have the tenant");
 
         Tenant newTenant = tenantService.findByTenantId(tenant.getId());
         Assert.assertEquals(newTenant.getName(), tenant.getName());
@@ -102,6 +103,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBaseDeprecated {
     }
 
     private void createTenantInZK() {
+        cleanupZK();
         // use Baton to create a tenant in ZK
         ContractInfo contractInfo = new ContractInfo(new ContractProperties());
         TenantProperties properties = new TenantProperties();
