@@ -15,14 +15,14 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 public abstract class OrchestrationConfig {
     private String className;
     private String pipelineConfig;
-    private List<OrchestrationPipelineStep> pipeline;
+    private List<DataCloudEngineStage> pipeline;
 
     public OrchestrationConfig() {
         setClassName(getClass().getSimpleName());
     }
 
     @JsonIgnore
-    public OrchestrationPipelineStep firstStep() {
+    public DataCloudEngineStage firstStage() {
         if (pipeline == null) {
             initEnginePipeline();
         }
@@ -30,13 +30,13 @@ public abstract class OrchestrationConfig {
     }
 
     @JsonIgnore
-    public OrchestrationPipelineStep nextStep(OrchestrationPipelineStep cur) {
+    public DataCloudEngineStage nextStage(DataCloudEngineStage cur) {
         if (pipeline == null) {
             initEnginePipeline();
         }
-        Iterator<OrchestrationPipelineStep> iter = pipeline.iterator();
+        Iterator<DataCloudEngineStage> iter = pipeline.iterator();
         while (iter.hasNext()) {
-            OrchestrationPipelineStep step = iter.next();
+            DataCloudEngineStage step = iter.next();
             if (step.equals(cur)) {
                 return iter.hasNext() ? iter.next() : null;
             }
@@ -45,7 +45,7 @@ public abstract class OrchestrationConfig {
     }
 
     @JsonIgnore
-    public List<OrchestrationPipelineStep> getEnginePipeline() {
+    public List<DataCloudEngineStage> getEnginePipeline() {
         if (pipeline == null) {
             initEnginePipeline();
         }
@@ -56,7 +56,7 @@ public abstract class OrchestrationConfig {
     @JsonIgnore
     private void initEnginePipeline() {
         List list = JsonUtils.deserialize(pipelineConfig, List.class);
-        pipeline = JsonUtils.convertList(list, OrchestrationPipelineStep.class);
+        pipeline = JsonUtils.convertList(list, DataCloudEngineStage.class);
     }
 
     @JsonProperty("ClassName")

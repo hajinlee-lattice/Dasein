@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
-import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
@@ -109,8 +108,8 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 2, "Should have one more progress.");
         // test status of latest publication progress with required version
-        EngineProgress status = publicationService.status(PUBLICATION_NAME, CURRENT_VERSION);
-        Assert.assertTrue(status.getStatus() == ProgressStatus.NEW);
+        ProgressStatus status = publicationService.findProgressAtVersion(PUBLICATION_NAME, CURRENT_VERSION);
+        Assert.assertTrue(status == ProgressStatus.NEW);
     }
 
     @Test(groups = "functional", priority = 1)

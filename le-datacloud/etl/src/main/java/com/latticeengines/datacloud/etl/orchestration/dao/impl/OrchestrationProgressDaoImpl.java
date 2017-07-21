@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.orchestration.dao.OrchestrationProgressDao;
@@ -70,14 +70,15 @@ public class OrchestrationProgressDaoImpl extends BaseDaoWithAssignedSessionFact
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<OrchestrationProgress> findProgressesToKickoff() {
+    public List<OrchestrationProgress> findProgressesToCheckStatus() {
         Session session = getSessionFactory().getCurrentSession();
         Class<OrchestrationProgress> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s p where p.status = :newStatus or (p.status = :failedStatus and p.retries < p.orchestration.maxRetries)",
+                "from %s p where p.status = :newStatus or p.status = :processingStatus or (p.status = :failedStatus and p.retries < p.orchestration.maxRetries)",
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("newStatus", ProgressStatus.NEW);
+        query.setParameter("processingStatus", ProgressStatus.PROCESSING);
         query.setParameter("failedStatus", ProgressStatus.FAILED);
         return query.list();
     }

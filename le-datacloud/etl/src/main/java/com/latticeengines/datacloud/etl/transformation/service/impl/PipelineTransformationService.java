@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PipelineTransformation
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
-import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationReport;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationStepReport;
@@ -783,15 +783,17 @@ public class PipelineTransformationService extends AbstractTransformationService
     }
 
     @Override
-    public EngineProgress findProgressAtVersion(String pipelineName, String version) {
-        TransformationProgress progress = progressEntityMgr.findPipelineProgressAtVersion(pipelineName, version);
+    public DataCloudEngineStage findProgressAtVersion(DataCloudEngineStage stage) {
+        stage.setEngine(DataCloudEngine.TRANSFORMATION);
+        TransformationProgress progress = progressEntityMgr.findPipelineProgressAtVersion(stage.getEngineName(),
+                stage.getVersion());
         if (progress == null) {
-            return new EngineProgress(DataCloudEngine.TRANSFORMATION, pipelineName, version, ProgressStatus.NOTSTARTED,
-                    null, null);
+            stage.setStatus(ProgressStatus.NOTSTARTED);
         } else {
-            return new EngineProgress(DataCloudEngine.TRANSFORMATION, pipelineName, version, progress.getStatus(), null,
-                    progress.getErrorMessage());
+            stage.setStatus(progress.getStatus());
+            stage.setMessage(progress.getErrorMessage());
         }
+        return stage;
     }
 
     @Override

@@ -1,37 +1,37 @@
 package com.latticeengines.datacloudapi.engine.orchestration.service.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.exceptions.YarnException;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.yarn.client.YarnClient;
 
-import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.datacloud.core.service.PropDataTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationEntityMgr;
 import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationProgressService;
 import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationValidator;
+import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
+import com.latticeengines.datacloudapi.engine.ingestion.service.IngestionService;
 import com.latticeengines.datacloudapi.engine.orchestration.service.OrchestrationService;
+import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
+import com.latticeengines.datacloudapi.engine.transformation.service.SourceTransformationService;
+import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 import com.latticeengines.domain.exposed.datacloud.orchestration.OrchestrationConfig;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 
 @Component("orchestrationService")
 public class OrchestrationServiceImpl implements OrchestrationService {
@@ -51,55 +51,40 @@ public class OrchestrationServiceImpl implements OrchestrationService {
     private OrchestrationValidator orchestrationValidator;
 
     @Autowired
-    private WorkflowProxy workflowProxy;
+    private IngestionService ingestionService;
 
     @Autowired
-    protected Configuration yarnConfiguration;
+    private SourceTransformationService sourceTransformationService;
 
     @Autowired
-    protected YarnClient yarnClient;
+    private PublicationService publicationService;
 
     @Autowired
-    private PropDataTenantService propDataTenantService;
+    private List<DataCloudEngineService> engineServices;
+
+    private Map<DataCloudEngine, DataCloudEngineService> serviceMap;
+
+    private static final String ORCHESTRATION = "Orchestration";
+
+    @PostConstruct
+    private void postConstruct() {
+        serviceMap = new HashMap<>();
+        for (DataCloudEngineService service : engineServices) {
+            serviceMap.put(service.getEngine(), service);
+        }
+    }
 
     @Override
     public List<OrchestrationProgress> scan(String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
-        killFailedProgresses();
-        triggerAll();
-        return kickoffAll();
+        trigger();
+        List<OrchestrationProgress> progresses = checkStatus();
+        return process(progresses);
     }
 
-    private void killFailedProgresses() {
-        Map<String, Object> fields = new HashMap<String, Object>();
-        fields.put("Status", ProgressStatus.PROCESSING);
-        List<OrchestrationProgress> progresses = orchestrationProgressEntityMgr.findProgressesByField(fields, null);
-        for (OrchestrationProgress progress : progresses) {
-            ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
-            try {
-                ApplicationReport report = YarnUtils.getApplicationReport(yarnClient, appId);
-                if (report == null || report.getYarnApplicationState() == null
-                        || report.getYarnApplicationState().equals(YarnApplicationState.FAILED)
-                        || report.getYarnApplicationState().equals(YarnApplicationState.KILLED)) {
-                    progress = orchestrationProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
-                            .message("Found application status to be FAILED or KILLED in the scan").commit(true);
-                    log.info("Killed progress: " + progress.toString());
-                }
-            } catch (YarnException | IOException e) {
-                log.error("Failed to track application status for " + progress.getApplicationId() + ". Error: "
-                        + e.toString());
-                if (e.getMessage().contains("doesn't exist in the timeline store")) {
-                    progress = orchestrationProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
-                            .message("Failed to track application status in the scan").commit(true);
-                    log.info("Killed progress: " + progress.toString());
-                }
-            }
-        }
-    }
-
-    private void triggerAll() {
+    private void trigger() {
         List<Orchestration> orchs = orchestrationEntityMgr.findAll();
         List<OrchestrationProgress> progresses = new ArrayList<>();
         for (Orchestration orch : orchs) {
@@ -113,38 +98,135 @@ public class OrchestrationServiceImpl implements OrchestrationService {
         orchestrationProgressEntityMgr.saveProgresses(progresses);
     }
 
-    private List<OrchestrationProgress> kickoffAll() {
-        List<OrchestrationProgress> progresses = orchestrationProgressService.findProgressesToKickoff();
+    private List<OrchestrationProgress> checkStatus() {
+        List<OrchestrationProgress> progresses = orchestrationProgressService.findProgressesToCheckStatus();
         if (progresses == null) {
             return new ArrayList<>();
         }
-        List<OrchestrationProgress> submitted = new ArrayList<>();
-        Boolean serviceTenantBootstrapped = false;
         for (OrchestrationProgress progress : progresses) {
-            try {
-                if (!serviceTenantBootstrapped) {
-                    propDataTenantService.bootstrapServiceTenant();
-                    serviceTenantBootstrapped = true;
-                }
-                ApplicationId applicationId = submitWorkflow(progress);
-                progress = orchestrationProgressService.updateSubmittedProgress(progress, applicationId.toString());
-                submitted.add(progress);
-                log.info(String.format("Submitted workflow for progress [%s]. ApplicationID = %s", progress.toString(),
-                        applicationId.toString()));
-            } catch (Exception e) {
-                log.error("Failed to submit workflow for progress " + progress, e);
+            if (progress.getStatus() == ProgressStatus.NEW || progress.getStatus() == ProgressStatus.FAILED) {
+                continue;
             }
+            DataCloudEngineStage currentStage = progress.getCurrentStage();
+            DataCloudEngineService engineService = serviceMap.get(currentStage.getEngine());
+            if (engineService == null) {
+                throw new UnsupportedOperationException(
+                        String.format("Not support to execute orchestration pipeline from %s engine",
+                                currentStage.getEngine().name()));
+            }
+            currentStage = engineService.findProgressAtVersion(currentStage);
+            progress.setCurrentStage(currentStage);
         }
-        return submitted;
+        return progresses;
     }
 
-    private ApplicationId submitWorkflow(OrchestrationProgress progress) {
+    private List<OrchestrationProgress> process(List<OrchestrationProgress> progresses) {
+        for (OrchestrationProgress progress : progresses) {
+            switch (progress.getStatus()) {
+            case FAILED:
+                retryFailedProgress(progress);
+                break;
+            case NEW:
+                startNewProgress(progress);
+                break;
+            case PROCESSING:
+                checkRunningProgress(progress);
+                break;
+            default:
+                throw new RuntimeException(String.format("Unsupported status %s to process", progress.getStatus()));
+            }
+        }
+        return progresses;
+    }
+
+    private OrchestrationProgress retryFailedProgress(OrchestrationProgress progress) {
+        DataCloudEngineStage currentStage = progress.getCurrentStage();
+        startJob(currentStage, progress.getHdfsPod());
+        progress = orchestrationProgressService.updateSubmittedProgress(progress);
+        return progress;
+    }
+
+    private OrchestrationProgress startNewProgress(OrchestrationProgress progress) {
         Orchestration orch = progress.getOrchestration();
         OrchestrationConfig config = orch.getConfig();
-        return new OrchestrationWorkflowSubmitter() //
-                .workflowProxy(workflowProxy) //
-                .orchestration(orch).orchestrationProgress(progress).orchestrationConfig(config)
-                .submit();
+        DataCloudEngineStage currentStage = config.firstStage();
+        startJob(currentStage, progress.getHdfsPod());
+        progress.setCurrentStage(currentStage);
+        progress = orchestrationProgressService.updateSubmittedProgress(progress);
+        return progress;
+    }
+
+    private OrchestrationProgress checkRunningProgress(OrchestrationProgress progress) {
+        DataCloudEngineStage currentStage = progress.getCurrentStage();
+        switch (currentStage.getStatus()) {
+        case FINISHED:
+            Orchestration orch = progress.getOrchestration();
+            OrchestrationConfig config = orch.getConfig();
+            DataCloudEngineStage nextStage = config.nextStage(currentStage);
+            if (nextStage != null) { // Proceed next stage
+                nextStage.setStatus(ProgressStatus.NOTSTARTED);
+                nextStage.setVersion(progress.getVersion());
+                progress = orchestrationProgressService.updateProgress(progress).currentStage(nextStage).message(null)
+                        .commit(true);
+            } else { // Finish the pipeline
+                progress = orchestrationProgressService.updateProgress(progress).currentStage(null)
+                        .status(ProgressStatus.FINISHED).message(null).commit(true);
+            }
+            break;
+        case FAILED:
+            progress = orchestrationProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
+                    .message(currentStage.getMessage()).commit(true);
+            break;
+        default:
+            Long startTime = progress.getLatestUpdateTime().getTime();
+            Long currentTime = System.currentTimeMillis();
+            if (currentTime - startTime > currentStage.getTimeout() * 60000) {
+                progress = orchestrationProgressService.updateProgress(progress).status(ProgressStatus.FAILED)
+                        .message("Timeout").commit(true);
+            }
+            break;
+        }
+        return progress;
+    }
+
+    private void startJob(DataCloudEngineStage stage, String hdfsPod) {
+        switch (stage.getEngine()) {
+        case INGESTION:
+            startIngest(stage, hdfsPod);
+            break;
+        case TRANSFORMATION:
+            startTransform(stage, hdfsPod);
+            break;
+        case PUBLICATION:
+            startPublish(stage, hdfsPod);
+            break;
+        default:
+            throw new UnsupportedOperationException(
+                    String.format("Unsupported engine type %s in orchestration pipeline", stage.getEngine().name()));
+        }
+    }
+
+    private void startIngest(DataCloudEngineStage stage, String hdfsPod) {
+        IngestionRequest request = new IngestionRequest();
+        request.setSubmitter(ORCHESTRATION);
+        request.setSourceVersion(stage.getVersion());
+        ingestionService.ingest(stage.getEngineName(), request, hdfsPod);
+    }
+
+    private void startTransform(DataCloudEngineStage stage, String hdfsPod) {
+        PipelineTransformationRequest request = new PipelineTransformationRequest();
+        request.setName(stage.getEngineName());
+        request.setSubmitter(ORCHESTRATION);
+        request.setVersion(stage.getVersion());
+        request.setKeepTemp(true);
+        sourceTransformationService.pipelineTransform(request, hdfsPod);
+    }
+
+    private void startPublish(DataCloudEngineStage stage, String hdfsPod) {
+        PublicationRequest request = new PublicationRequest();
+        request.setSubmitter(ORCHESTRATION);
+        request.setSourceVersion(stage.getVersion());
+        publicationService.publish(stage.getEngineName(), request, hdfsPod);
     }
 
 }

@@ -56,8 +56,8 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<OrchestrationProgress> findProgressesToKickoff() {
-        return orchestrationProgressDao.findProgressesToKickoff();
+    public List<OrchestrationProgress> findProgressesToCheckStatus() {
+        return orchestrationProgressDao.findProgressesToCheckStatus();
     }
 
     @Override

@@ -16,7 +16,7 @@ import com.latticeengines.datacloud.etl.orchestration.service.OrchestrationProgr
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 
 @Component("orchestrationProgressService")
 public class OrchestrationProgressServiceImpl implements OrchestrationProgressService {
@@ -53,20 +53,24 @@ public class OrchestrationProgressServiceImpl implements OrchestrationProgressSe
     }
 
     @Override
-    public List<OrchestrationProgress> findProgressesToKickoff() {
-        return orchestrationProgressEntityMgr.findProgressesToKickoff();
+    public List<OrchestrationProgress> findProgressesToCheckStatus() {
+        return orchestrationProgressEntityMgr.findProgressesToCheckStatus();
     }
 
     @Override
-    public OrchestrationProgress updateSubmittedProgress(OrchestrationProgress progress, String applicationId) {
-        progress.setApplicationId(applicationId);
+    public OrchestrationProgress updateSubmittedProgress(OrchestrationProgress progress) {
         progress.setLatestUpdateTime(new Date());
         progress.setStartTime(new Date());
         if (progress.getStatus() == ProgressStatus.FAILED) {
             progress.setRetries(progress.getRetries() + 1);
         }
         progress.setStatus(ProgressStatus.PROCESSING);
-        progress.setCurrentStage(null);
+        DataCloudEngineStage currentStage = progress.getCurrentStage();
+        currentStage.setVersion(progress.getVersion());
+        currentStage.setStatus(ProgressStatus.NOTSTARTED);
+        currentStage.setProgress(null);
+        currentStage.setMessage(null);
+        progress.setCurrentStage(currentStage); // Required, because currentStageStr needs to be set too
         orchestrationProgressEntityMgr.saveProgress(progress);
         return progress;
     }
@@ -83,8 +87,8 @@ public class OrchestrationProgressServiceImpl implements OrchestrationProgressSe
             return this;
         }
 
-        public OrchestrationProgressUpdater currentStage(DataCloudEngine stage) {
-            this.progress.setCurrentStage(stage);
+        public OrchestrationProgressUpdater currentStage(DataCloudEngineStage currentStage) {
+            this.progress.setCurrentStage(currentStage);
             return this;
         }
 

@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
+import javax.annotation.Resource;
+
 import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -26,6 +27,7 @@ import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionProgressEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionApiProviderService;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionVersionService;
+import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloudapi.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ApiConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.IngestionRequest;
@@ -33,13 +35,13 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
-import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
 import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
 
 @Component
 public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
     public final String POD_ID = this.getClass().getSimpleName();
 
+    @SuppressWarnings("unused")
     private static Logger log = LoggerFactory.getLogger(IngestionResourceDeploymentTestNG.class);
 
     @Autowired
@@ -53,6 +55,9 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
 
     @Autowired
     private IngestionVersionService ingestionVersionService;
+
+    @Resource(name = "ingestionVersionService")
+    private DataCloudEngineService datacloudEngineService;
 
     @Autowired
     private IngestionApiProviderService apiProviderService;
@@ -155,26 +160,23 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         List<IngestionProgress> progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         Assert.assertEquals(progresses.size(), expectedProgresses);
         Long startTime = System.currentTimeMillis();
-        EngineProgress engineProgress = ingestionVersionService.findProgressAtVersion(name, version);
-        log.info(JsonUtils.serialize(engineProgress));
-        while (engineProgress.getStatus() != ProgressStatus.FINISHED
-                && engineProgress.getStatus() != ProgressStatus.FAILED
+        ProgressStatus status = ingestionVersionService.findProgressAtVersion(name, version);
+        while (status != ProgressStatus.FINISHED && status != ProgressStatus.FAILED
                 && System.currentTimeMillis() - startTime <= timeout) {
             ingestionProxy.scan(POD_ID);
-            engineProgress = ingestionVersionService.findProgressAtVersion(name, version);
-            log.info(JsonUtils.serialize(engineProgress));
+            status = ingestionVersionService.findProgressAtVersion(name, version);
             try {
                 Thread.sleep(60000L);
             } catch (InterruptedException e) {
                 // Do nothing for InterruptedException
             }
         }
-        Assert.assertEquals(engineProgress.getStatus(), ProgressStatus.FINISHED);
+        Assert.assertEquals(status, ProgressStatus.FINISHED);
         progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         for (IngestionProgress progress : progresses) {
             ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 3600);
-            Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+            FinalApplicationStatus appStatus = YarnUtils.waitFinalStatusForAppId(yarnClient, appId, 3600);
+            Assert.assertEquals(appStatus, FinalApplicationStatus.SUCCEEDED);
             Assert.assertEquals(progress.getStatus(), ProgressStatus.FINISHED);
             if (size != null) {
                 Assert.assertEquals(progress.getSize().intValue(), size.intValue());

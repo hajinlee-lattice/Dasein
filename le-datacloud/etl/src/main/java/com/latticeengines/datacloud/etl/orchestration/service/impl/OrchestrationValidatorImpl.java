@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.etl.orchestration.service.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,9 +48,6 @@ public class OrchestrationValidatorImpl implements OrchestrationValidator {
     public boolean isTriggered(Orchestration orch, List<String> triggeredVersions) {
         if (!orch.isSchedularEnabled()) {
             return false;
-        }
-        if (triggeredVersions == null) {
-            triggeredVersions = new ArrayList<>();
         }
         if (orch.getConfig() instanceof PredefinedScheduleConfig) {
             PredefinedScheduleConfig config = (PredefinedScheduleConfig) orch.getConfig();

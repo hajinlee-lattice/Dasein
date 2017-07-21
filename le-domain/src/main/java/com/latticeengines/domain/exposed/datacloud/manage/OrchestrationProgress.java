@@ -17,7 +17,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
@@ -27,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
@@ -40,6 +39,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 public class OrchestrationProgress implements HasPid, Serializable {
 
     private static final long serialVersionUID = 4924847774951669528L;
+    private static final int STAGE_STR_LEN = 1000;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,21 +60,17 @@ public class OrchestrationProgress implements HasPid, Serializable {
     @Column(name = "Status", nullable = false, length = 20)
     private ProgressStatus status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "CurrentStage", length = 20)
-    private DataCloudEngine currentStage;
+    @Column(name = "CurrentStage", length = STAGE_STR_LEN)
+    private String currentStageStr;
 
     @Transient
-    private Pair<DataCloudEngine, String> currentStep;
+    private DataCloudEngineStage currentStage;
 
     @Column(name = "StartTime", nullable = false)
     private Date startTime;
 
     @Column(name = "LatestUpdateTime", nullable = false)
     private Date latestUpdateTime;
-
-    @Column(name = "ApplicationId", length = 50)
-    private String applicationId;
 
     @Column(name = "TriggeredBy", nullable = false, length = 50)
     private String triggeredBy;
@@ -128,13 +124,29 @@ public class OrchestrationProgress implements HasPid, Serializable {
     }
 
     @JsonProperty("CurrentStage")
-    public DataCloudEngine getCurrentStage() {
+    public DataCloudEngineStage getCurrentStage() {
+        if (currentStage == null && currentStageStr != null) {
+            currentStage = JsonUtils.deserialize(currentStageStr, DataCloudEngineStage.class);
+        }
         return currentStage;
     }
 
     @JsonProperty("CurrentStage")
-    public void setCurrentStage(DataCloudEngine currentStage) {
+    public void setCurrentStage(DataCloudEngineStage currentStage) {
         this.currentStage = currentStage;
+        this.currentStageStr = currentStage == null ? null
+                : currentStage.toString().substring(0, Math.min(STAGE_STR_LEN, currentStage.toString().length()));
+        System.out.println(currentStageStr);
+    }
+
+    @JsonIgnore
+    private String getCurrentStageStr() {
+        return currentStageStr;
+    }
+
+    @JsonIgnore
+    public void setCurrentStageStr(String currentStageStr) {
+        this.currentStageStr = currentStageStr;
     }
 
     @JsonProperty("StartTime")
@@ -155,16 +167,6 @@ public class OrchestrationProgress implements HasPid, Serializable {
     @JsonProperty("LatestUpdateTime")
     public void setLatestUpdateTime(Date latestUpdateTime) {
         this.latestUpdateTime = latestUpdateTime;
-    }
-
-    @JsonProperty("ApplicationId")
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    @JsonProperty("ApplicationId")
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
     }
 
     @JsonProperty("TriggeredBy")
@@ -195,16 +197,6 @@ public class OrchestrationProgress implements HasPid, Serializable {
     @JsonProperty("Message")
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    @JsonIgnore
-    public Pair<DataCloudEngine, String> getCurrentStep() {
-        return currentStep;
-    }
-
-    @JsonIgnore
-    public void setCurrentStep(Pair<DataCloudEngine, String> currentStep) {
-        this.currentStep = currentStep;
     }
 
     @JsonIgnore

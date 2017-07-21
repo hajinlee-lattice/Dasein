@@ -6,12 +6,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,17 +31,13 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion.IngestionType;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
-import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.proxy.exposed.datacloudapi.OrchestrationProxy;
 
-@Component
-public class OrchestrationResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(OrchestrationResourceDeploymentTestNG.class);
+public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(OrchestrationDeploymentTestNG.class);
 
     public final String POD_ID = this.getClass().getSimpleName();
-    
+
     private static final String DNB_ORCHESTRATION = "DnB_Orchestration";
     private static final String DNB_INGESTION = "DnB_Ingestion";
     private static final String DNB_TRANSFORMATION = "DnB_Transformation";
@@ -66,11 +60,9 @@ public class OrchestrationResourceDeploymentTestNG extends PropDataApiDeployment
     private IngestionVersionService ingestionVersionService;
     @Autowired
     private PipelineSource pipelineSource;
-    @SuppressWarnings("unused")
+
     @Autowired
     private OrchestrationService orchService;
-    @Autowired
-    private OrchestrationProxy orchProxy;
     @Autowired
     private TransformationProgressEntityMgr transformationProgressEntityMgr;
 
@@ -87,13 +79,12 @@ public class OrchestrationResourceDeploymentTestNG extends PropDataApiDeployment
                                 DNB_TRANSFORMATION, DNB_INGESTION) }, //
         };
     }
-    
+
     // IngestionName, Config, IngestionType
     private static Object[][] getIngestions() {
-        return new Object[][] {
-                { DNB_INGESTION,
-                        "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.41.1.31\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
-                        IngestionType.SFTP }, //
+        return new Object[][] { { DNB_INGESTION,
+                "{\"ClassName\":\"SftpConfiguration\",\"ConcurrentNum\":2,\"SftpHost\":\"10.41.1.31\",\"SftpPort\":22,\"SftpUsername\":\"sftpdev\",\"SftpPassword\":\"KPpl2JWz+k79LWvYIKz6cA==\",\"SftpDir\":\"/ingest_test/dnb\",\"CheckVersion\":1,\"CheckStrategy\":\"ALL\",\"FileExtension\":\"OUT.gz\",\"FileNamePrefix\":\"LE_SEED_OUTPUT_\",\"FileNamePostfix\":\"(.*)\",\"FileTimestamp\":\"yyyy_MM\"}",
+                IngestionType.SFTP }, //
         };
     }
 
@@ -124,44 +115,22 @@ public class OrchestrationResourceDeploymentTestNG extends PropDataApiDeployment
 
     @Test(groups = "deployment")
     public void testOrchestration() {
-        List<OrchestrationProgress> progresses = orchProxy.scan(POD_ID); // no job should be triggered
+        List<OrchestrationProgress> progresses = orchService.scan(POD_ID); // No job should be triggered
         Assert.assertEquals(progresses.size(), 0);  
         uploadDnBIngestion();
         uploadDnBPipelineConfig();
-        progresses = orchProxy.scan(POD_ID); // DnB pipeline is triggered
+        progresses = orchService.scan(POD_ID); // DnB pipeline is triggered
         Assert.assertEquals(progresses.size(), 1);
-        Assert.assertEquals(orchProxy.scan(POD_ID).size(), 0); // no job should be triggered
-        for (OrchestrationProgress progress : progresses) {
-            log.info(String.format("Waiting for progress to finish: %s", progress.toString()));
-            JobStatus status = jobService.waitFinalJobStatus(progress.getApplicationId(), 3600);
-            Assert.assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
-            OrchestrationProgress finished = orchestrationProgressEntityMgr.findProgress(progress);
-            Assert.assertEquals(finished.getStatus(), ProgressStatus.FINISHED);
-        }
-        // retry for failed progresses
-        for (OrchestrationProgress progress : progresses) {
-            progress = orchestrationProgressService.updateProgress(progress).status(ProgressStatus.FAILED).commit(true);
-        }
-        progresses = orchProxy.scan(POD_ID); // DnB pipeline is triggered again
-        Assert.assertEquals(progresses.size(), 1);
-        Assert.assertEquals(orchProxy.scan(POD_ID).size(), 0); // no job should be triggered
-        for (OrchestrationProgress progress : progresses) {
-            log.info(String.format("Waiting for progress to finish: %s", progress.toString()));
-            JobStatus status = jobService.waitFinalJobStatus(progress.getApplicationId(), 3600);
-            Assert.assertEquals(status.getStatus(), FinalApplicationStatus.SUCCEEDED);
-            OrchestrationProgress finished = orchestrationProgressEntityMgr.findProgress(progress);
-            Assert.assertEquals(finished.getStatus(), ProgressStatus.FINISHED);
-            Assert.assertEquals(finished.getRetries(), 1);
-        }
-        Assert.assertEquals(orchProxy.scan(POD_ID).size(), 0); // no job should be triggered
+        log.info(progresses.get(0).toString());
+
     }
 
     private void uploadDnBIngestion() {
         InputStream baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + DNB_FILE);
         String targetPath = hdfsPathBuilder.constructIngestionDir(DNB_INGESTION, DNB_VERSION).append("/" + DNB_FILE)
                 .toString();
-        String successPath = hdfsPathBuilder.constructIngestionDir(DNB_INGESTION, DNB_VERSION)
-                .append("_SUCCESS").toString();
+        String successPath = hdfsPathBuilder.constructIngestionDir(DNB_INGESTION, DNB_VERSION).append("_SUCCESS")
+                .toString();
         try {
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseSourceStream, targetPath);
             InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));

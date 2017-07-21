@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.datacloud.ingestion.FileCheckStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
-import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
+import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 
 public interface IngestionVersionService {
     List<String> getMostRecentVersionsFromHdfs(String ingestionName, int checkVersion);
@@ -23,5 +23,5 @@ public interface IngestionVersionService {
 
     String findCurrentVersion(Ingestion ingestion);
 
-    EngineProgress findProgressAtVersion(String ingestionName, String version);
+    ProgressStatus findProgressAtVersion(String ingestionName, String version);
 }

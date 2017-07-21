@@ -7,12 +7,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
@@ -27,18 +27,19 @@ import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityM
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressService;
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressUpdater;
+import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
-import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("publicationService")
-public class PublicationServiceImpl implements PublicationService {
+public class PublicationServiceImpl implements PublicationService, DataCloudEngineService {
 
     private static final Logger log = LoggerFactory.getLogger(PublicationServiceImpl.class);
 
@@ -154,7 +155,8 @@ public class PublicationServiceImpl implements PublicationService {
                 switch (publication.getMaterialType()) {
                     case SOURCE:
                         Source source = sourceService.findBySourceName(publication.getSourceName());
-                        avroDir = hdfsPathBuilder.constructSnapshotDir(source, progress.getSourceVersion()).toString();
+                    avroDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), progress.getSourceVersion())
+                            .toString();
                         break;
                     case INGESTION:
                         avroDir = hdfsPathBuilder.constructIngestionDir(publication.getSourceName(),
@@ -193,21 +195,41 @@ public class PublicationServiceImpl implements PublicationService {
     }
 
     @Override
-    public EngineProgress status(String publicationName, String version) {
-        Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
+    public ProgressStatus findProgressAtVersion(String publicationName, String version) {
+        DataCloudEngineStage stage = new DataCloudEngineStage(DataCloudEngine.PUBLICATION, publicationName, version);
+        return findProgressAtVersion(stage).getStatus();
+    }
+
+    @Override
+    public DataCloudEngineStage findProgressAtVersion(DataCloudEngineStage stage) {
+        stage.setEngine(DataCloudEngine.PUBLICATION);
+        Publication publication = publicationEntityMgr.findByPublicationName(stage.getEngineName());
         if (publication == null) {
-            throw new RuntimeException("Publication with name : " + publicationName + " does not exist");
+            throw new RuntimeException("Publication with name : " + stage.getEngineName() + " does not exist");
         }
         List<PublicationProgress> progressStatus = progressEntityMgr.findStatusByPublicationVersion(publication,
-                version);
+                stage.getVersion());
         if (CollectionUtils.isEmpty(progressStatus)) {
-            return new EngineProgress(DataCloudEngine.PUBLICATION, publication.getPublicationName(), version,
-                    ProgressStatus.NOTSTARTED, 0.0f, null);
+            stage.setStatus(ProgressStatus.NOTSTARTED);
+            stage.setProgress(null);
+            stage.setMessage(null);
         } else {
             PublicationProgress progress = progressStatus.get(0);
-            return new EngineProgress(DataCloudEngine.PUBLICATION, publication.getPublicationName(), version,
-                    progress.getStatus(), progress.getProgress(), progress.getErrorMessage());
+            stage.setStatus(progress.getStatus());
+            stage.setProgress(progress.getProgress());
+            stage.setMessage(progress.getErrorMessage());
         }
+        return stage;
+    }
+
+    @Override
+    public DataCloudEngine getEngine() {
+        return DataCloudEngine.PUBLICATION;
+    }
+
+    @Override
+    public String findCurrentVersion(String publicationName) {
+        return null;
     }
 
 }

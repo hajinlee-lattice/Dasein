@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.OrchestrationProgress;
 public interface OrchestrationProgressDao extends BaseDao<OrchestrationProgress> {
     List<OrchestrationProgress> findProgressesByField(Map<String, Object> fields, List<String> orderFields);
 
-    List<OrchestrationProgress> findProgressesToKickoff();
+    List<OrchestrationProgress> findProgressesToCheckStatus();
 
     boolean isDuplicateVersion(String orchName, String version);
 }

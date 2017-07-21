@@ -19,10 +19,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
-import com.latticeengines.domain.exposed.datacloud.orchestration.EngineProgress;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 
 @Component("ingestionVersionService")
 public class IngestionVersionServiceImpl implements IngestionVersionService, DataCloudEngineService {
@@ -283,18 +283,25 @@ public class IngestionVersionServiceImpl implements IngestionVersionService, Dat
     }
 
     @Override
-    public EngineProgress findProgressAtVersion(String ingestionName, String version) {
-        Ingestion ingestion = ingestionEntityMgr.getIngestionByName(ingestionName);
+    public ProgressStatus findProgressAtVersion(String ingestionName, String version) {
+        DataCloudEngineStage stage = new DataCloudEngineStage(DataCloudEngine.INGESTION, ingestionName, version);
+        return findProgressAtVersion(stage).getStatus();
+    }
+
+    @Override
+    public DataCloudEngineStage findProgressAtVersion(DataCloudEngineStage stage) {
+        stage.setEngine(DataCloudEngine.INGESTION);
+        Ingestion ingestion = ingestionEntityMgr.getIngestionByName(stage.getEngineName());
         if (ingestion == null) {
-            throw new IllegalArgumentException(String.format("Fail to find ingestion %s", ingestionName));
+            throw new IllegalArgumentException(String.format("Fail to find ingestion %s", stage.getEngineName()));
         }
         Map<String, Object> fields = new HashMap<>();
         fields.put("IngestionId", ingestion.getPid());
-        fields.put("Version", version);
+        fields.put("Version", stage.getVersion());
         List<IngestionProgress> progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);
         if (CollectionUtils.isEmpty(progresses)) {
-            return new EngineProgress(DataCloudEngine.INGESTION, ingestionName, version, ProgressStatus.NOTSTARTED,
-                    null, null);
+            stage.setStatus(ProgressStatus.NOTSTARTED);
+            return stage;
         }
         Set<String> allJobs = new HashSet<>();
         Set<String> finishedJobs = new HashSet<>();
@@ -314,15 +321,18 @@ public class IngestionVersionServiceImpl implements IngestionVersionService, Dat
             }
         }
         if (allJobs.size() == finishedJobs.size()) {
-            return new EngineProgress(DataCloudEngine.INGESTION, ingestionName, version, ProgressStatus.FINISHED, 1.0F,
-                    null);
+            stage.setStatus(ProgressStatus.FINISHED);
+            stage.setProgress(1.0F);
         } else if (allJobs.size() == finishedJobs.size() + runningJobs.size()) {
-            return new EngineProgress(DataCloudEngine.INGESTION, ingestionName, version, ProgressStatus.PROCESSING,
-                    (float) finishedJobs.size() / allJobs.size(), null);
+            stage.setStatus(ProgressStatus.PROCESSING);
+            stage.setProgress((float) finishedJobs.size() / allJobs.size());
         } else {
-            return new EngineProgress(DataCloudEngine.INGESTION, ingestionName, version, ProgressStatus.FAILED,
-                    (float) finishedJobs.size() / allJobs.size(), null);
+            stage.setStatus(ProgressStatus.FAILED);
+            stage.setProgress((float) finishedJobs.size() / allJobs.size());
+            stage.setMessage(String.format("%d ingestion jobs failed",
+                    allJobs.size() - finishedJobs.size() - runningJobs.size()));
         }
+        return stage;
     }
 
 }

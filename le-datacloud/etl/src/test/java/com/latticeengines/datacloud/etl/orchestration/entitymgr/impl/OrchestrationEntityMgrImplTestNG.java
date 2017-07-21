@@ -16,9 +16,9 @@ import com.latticeengines.datacloud.etl.orchestration.entitymgr.OrchestrationEnt
 import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.Orchestration;
 import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine;
+import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngineStage;
 import com.latticeengines.domain.exposed.datacloud.orchestration.ExternalTriggerConfig;
 import com.latticeengines.domain.exposed.datacloud.orchestration.OrchestrationConfig;
-import com.latticeengines.domain.exposed.datacloud.orchestration.OrchestrationPipelineStep;
 import com.latticeengines.domain.exposed.datacloud.orchestration.PredefinedScheduleConfig;
 
 @Component
@@ -38,18 +38,18 @@ public class OrchestrationEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
                 { "TestOrchestration1",
                         "{\"ClassName\":\"PredefinedScheduleConfig\",\"PipelineConfig\":\"[{\\\"Engine\\\":\\\"INGESTION\\\",\\\"EngineName\\\":\\\"DnBCacheSeed\\\",\\\"Timeout\\\":0}]\"}",
                         PredefinedScheduleConfig.class, 1,
-                        new OrchestrationPipelineStep(DataCloudEngine.INGESTION, "DnBCacheSeed", 0), null }, //
+                        new DataCloudEngineStage(DataCloudEngine.INGESTION, "DnBCacheSeed", 0), null }, //
                 { "TestOrchestration2",
                         "{\"ClassName\":\"ExternalTriggerConfig\",\"PipelineConfig\":\"[{\\\"Engine\\\":\\\"INGESTION\\\",\\\"EngineName\\\":\\\"DnBCacheSeed\\\",\\\"Timeout\\\":0},{\\\"Engine\\\":\\\"TRANSFORMATION\\\",\\\"EngineName\\\":\\\"DnBCacheSeed\\\",\\\"Timeout\\\":0}]\",\"Engine\":\"INGESTION\",\"EngineName\":\"DnBCacheSeed\",\"TriggerStrategy\":\"LATEST_VERSION\"}",
                         ExternalTriggerConfig.class, 2,
-                        new OrchestrationPipelineStep(DataCloudEngine.INGESTION, "DnBCacheSeed", 0),
-                        new OrchestrationPipelineStep(DataCloudEngine.TRANSFORMATION, "DnBCacheSeed", 0) }, //
+                        new DataCloudEngineStage(DataCloudEngine.INGESTION, "DnBCacheSeed", 0),
+                        new DataCloudEngineStage(DataCloudEngine.TRANSFORMATION, "DnBCacheSeed", 0) }, //
         };
     }
 
     @Test(groups = "functional", priority = 1, dataProvider = "Orchestrations")
     public void init(String name, String config, Class<?> configCls, int pipelineLen,
-            OrchestrationPipelineStep firstStep, OrchestrationPipelineStep nextStep) {
+            DataCloudEngineStage firstStep, DataCloudEngineStage nextStep) {
         Orchestration orch = new Orchestration();
         orch.setName(name);
         orch.setSchedularEnabled(false);
@@ -60,7 +60,7 @@ public class OrchestrationEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
 
     @Test(groups = "functional", priority = 2, dataProvider = "Orchestrations")
     public void testFindByName(String name, String configStr, Class<?> configCls, int pipelineLen,
-            OrchestrationPipelineStep firstStep, OrchestrationPipelineStep nextStep) {
+            DataCloudEngineStage firstStep, DataCloudEngineStage nextStep) {
         Orchestration orch = orchestrationEntityMgr.findByField("Name", name);
         orchestrations.add(orch);
         OrchestrationConfig config = orch.getConfig();
@@ -74,10 +74,10 @@ public class OrchestrationEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
             Assert.assertNotNull(((ExternalTriggerConfig) config).getEngineName());
             Assert.assertNotNull(((ExternalTriggerConfig) config).getStrategy());
         }
-        List<OrchestrationPipelineStep> enginePipeline = config.getEnginePipeline();
+        List<DataCloudEngineStage> enginePipeline = config.getEnginePipeline();
         Assert.assertEquals(enginePipeline.size(), pipelineLen);
-        Assert.assertEquals(config.firstStep(), firstStep);
-        Assert.assertEquals(config.nextStep(config.firstStep()), nextStep);
+        Assert.assertEquals(config.firstStage(), firstStep);
+        Assert.assertEquals(config.nextStage(config.firstStage()), nextStep);
     }
 
     @AfterClass(groups = "functional")
