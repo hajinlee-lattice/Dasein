@@ -106,9 +106,7 @@ public abstract class AbstractTransformationDataFlowService {
             TransformationFlowParameters tfParameters = (TransformationFlowParameters) parameters;
             if (tfParameters.getEngineConfiguration() != null && tfParameters.getEngineConfiguration().getPartitions() != null) {
                 Integer configuredPartitions = tfParameters.getEngineConfiguration().getPartitions();
-                if (configuredPartitions > 1) {
-                    ctx.setProperty(DataFlowProperty.PARTITIONS, configuredPartitions);
-                }
+                ctx.setProperty(DataFlowProperty.PARTITIONS, configuredPartitions);
             }
         }
 
