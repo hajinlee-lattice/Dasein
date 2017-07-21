@@ -46,6 +46,7 @@
                     ng-class="{active: vm.category == category, 'disabled-grayout': !vm.highlightMetadata.categories[category].enabled && vm.section == 'team'}"
                     ng-click="vm.categoryClick(category, $event);"
                     vm="vm" category="category" count="count">
+                    {{category}}
                 </li>
             </ul>
         </div>

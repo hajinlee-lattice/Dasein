@@ -7,7 +7,7 @@ angular
             vm:'='
         },
         templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
-        controller: function ($scope, $document, $state, $timeout, $interval, DataCloudStore, QueryStore) {
+        controller: function ($scope, $document, $state, $timeout, $interval, DataCloudStore, QueryStore, SegmentService) {
             var vm = $scope.vm;
 
             angular.extend(vm, {
@@ -244,9 +244,9 @@ angular
                     filter.IsPremium = false;
                 }
 
-                if (!vm.metadata.toggle.show.internal) {
-                    filter.IsInternal = false;
-                }
+                // if (!vm.metadata.toggle.show.internal) {
+                //     filter.IsInternal = false;
+                // }
 
                 if (vm.subcategory) {
                     filter.Subcategory = vm.subcategory;
@@ -261,8 +261,6 @@ angular
                     filter.AttributeValue = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
                 }
 
-                console.log(filter);
-
                 return filter;
             }
 
@@ -275,6 +273,7 @@ angular
 
                 return (count ? true : false);
             }
+
 
             vm.init_filters();
         }

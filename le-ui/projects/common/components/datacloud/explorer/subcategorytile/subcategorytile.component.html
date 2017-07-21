@@ -20,8 +20,9 @@
                 <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(subcategoryAttributes) }}</div>
                 <div class="column data">{{ vm.lookupMode ? 'Value' : 'Records' }}</div>
             </li>
+
+            <!-- | filter: vm.enrichmentsFilter() -->
             <li ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
-                    | filter: vm.enrichmentsFilter()
                     | filter: vm.filterHideTrue
                     | orderBy: vm.categoryOrderBy()
                     | limitTo: 5))"

@@ -104,6 +104,7 @@ angular
             }
 
             vm.getAttributeStat = function(attribute) {
+
                 var enrichmentKey = attribute.Attribute || attribute.ColumnId,
                     index = vm.enrichmentsMap[enrichmentKey],
                     enrichment = vm.enrichments[index],

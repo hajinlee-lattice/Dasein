@@ -28,6 +28,7 @@ angular.module('common.datacloud.analysistabs', [
         vm.contacts = vm.inModel()
             ? 'home.model.analysis.contacts'
             : 'home.segment.contacts';
+
     }
 
     vm.inModel = function() {

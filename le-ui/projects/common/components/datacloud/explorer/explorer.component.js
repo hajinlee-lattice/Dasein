@@ -357,7 +357,7 @@ angular.module('common.datacloud.explorer', [
         });
 
         var timestamp2 = new Date().getTime();
-        console.info('generateTree();\t\t\t', (timestamp2 - timestamp) + 'ms');
+        // console.info('generateTree();\t\t\t', (timestamp2 - timestamp) + 'ms');
 
         if (isComplete) {
             vm.categories.forEach(function(category, item) {
@@ -1382,7 +1382,7 @@ angular.module('common.datacloud.explorer', [
         }
         var attributeKey = attribute.Attribute || attribute.ColumnId,
             stat = vm.getAttributeStat(attribute) || {},
-            attributeRangeKey = (stat.Range ? vm.makeSegmentsRangeKey(attribute, stat.Range) : '');
+            attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : '');
 
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
@@ -1392,9 +1392,9 @@ angular.module('common.datacloud.explorer', [
         vm.saveSegmentEnabled = true;
 
         if (vm.segmentAttributeInput[attributeKey] === true) {
-            QueryStore.addRestriction({columnName: attributeKey, range: stat.Range});
+            QueryStore.addRestriction({columnName: attributeKey, range: stat.Rng});
         } else {
-            QueryStore.removeRestriction({columnName: attributeKey, range: stat.Range});
+            QueryStore.removeRestriction({columnName: attributeKey, range: stat.Rng});
         }
     }
 
@@ -1402,7 +1402,7 @@ angular.module('common.datacloud.explorer', [
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
         var disable = disable || false,
             attributeKey = enrichment.Attribute || enrichment.ColumnId,
-            attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Range),
+            attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng),
             fieldName = enrichment.ColumnId;
         if(disable) {
             return false;
@@ -1415,9 +1415,9 @@ angular.module('common.datacloud.explorer', [
         //vm.enrichments[index].SegmentChecked = true;
 
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-            QueryStore.addRestriction({columnName: fieldName, range: stat.Range});
+            QueryStore.addRestriction({columnName: fieldName, range: stat.Rng});
         } else {
-            QueryStore.removeRestriction({columnName: fieldName, range: stat.Range});
+            QueryStore.removeRestriction({columnName: fieldName, range: stat.Rng});
         }
         /*
          * Rebuild the tile table items
@@ -1445,6 +1445,8 @@ angular.module('common.datacloud.explorer', [
     vm.selectBucketInput = function(id, bucket) {
         var bucketId = id + bucket,
             range = {min: bucket, max: bucket, is_null_only: false};
+
+        console.log(bucketId, range);
 
         vm.segmentBucketInput[bucketId] = !vm.segmentBucketInput[bucketId];
         vm.saveSegmentEnabled = true;
