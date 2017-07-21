@@ -1,5 +1,7 @@
 package com.latticeengines.playmaker.dao.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -125,17 +127,40 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> getWorkflowTypes() {
-        throw new NotImplementedException();
+        // TODO - dummy impl in M13, fix in M14
+        List<Map<String, Object>> result = new ArrayList<>();
+        Map<String, Object> wf1 = new HashMap<>();
+        wf1.put("ID", "WfTypeId1");
+        wf1.put("DisplayName", "Workflow Type 1");
+        result.add(wf1);
+
+        return result;
     }
 
     @Override
     public List<Map<String, Object>> getPlayGroups(long start, int offset, int maximum) {
-        throw new NotImplementedException();
+        // TODO - dummy impl in M13, fix in M14
+        List<Map<String, Object>> result = new ArrayList<>();
+        Map<String, Object> pg1 = new HashMap<>();
+        pg1.put("ID", "PG1");
+        pg1.put("ExternalID", "PG1");
+        pg1.put("DisplayName", "Group 1");
+        pg1.put("LastModificationDate", 0);
+        result.add(pg1);
+        Map<String, Object> pg2 = new HashMap<>();
+        pg1.put("ID", "PG2");
+        pg1.put("ExternalID", "PG2");
+        pg1.put("DisplayName", "Group 2");
+        pg1.put("LastModificationDate", 0);
+        result.add(pg2);
+
+        return result;
     }
 
     @Override
     public int getPlayGroupCount(long start) {
-        throw new NotImplementedException();
+        // TODO - dummy impl in M13, fix in M14
+        return 2;
     }
 
     @Override
