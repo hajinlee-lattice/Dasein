@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("lpiPMPlay")
 public class LpiPMPlayImpl implements LpiPMPlay {
+
+    private static final Logger log = LoggerFactory.getLogger(LpiPMPlayImpl.class);
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -68,7 +72,12 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     private long secondsFromEpoch(Play play) {
-        return play.getLastUpdatedTimestamp().getTime() / 1000;
+        try {
+            return play.getLastUpdatedTimestamp().getTime() / 1000;
+        } catch (Exception ex) {
+            log.error("Ignoring this error", ex);
+            return 0L;
+        }
     }
 
     @Override
