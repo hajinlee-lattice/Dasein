@@ -150,6 +150,9 @@ angular
 
         FieldDocument.fieldMappings = _.chain(angular.extend({}, vm.standardFieldMappings, vm.additionalFieldMappings))
             .pick(function (item) {
+                if(item.userField == vm.ignoredFieldLabel) {
+                    FieldDocument.ignoredFields.push(item.mappedField);
+                }
                 return item.userField !== vm.ignoredFieldLabel;
             }).values().value();
 

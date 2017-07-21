@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -20,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -326,6 +330,23 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                 }
 
                 modelAttributes.add(getAttributeFromFieldName(unmappedScoringHeader, fieldMapping.getMappedField()));
+            }
+        }
+
+        if (fieldMappingDocument.getIgnoredFields() != null) {
+            for (final String ignoredField : fieldMappingDocument.getIgnoredFields()) {
+                if (ignoredField != null) {
+                    Attribute attribute = Iterables.find(modelAttributes, new Predicate<Attribute>() {
+                        @Override
+                        public boolean apply(@Nullable Attribute input) {
+                            return ignoredField.equals(input.getDisplayName());
+                        }
+                    }, null);
+                    if (attribute != null) {
+                        log.info(String.format("Current ignored fileds include %s.", attribute.getDisplayName()));
+                        attribute.setApprovedUsage(ApprovedUsage.NONE, ApprovedUsage.IGNORED);
+                    }
+                }
             }
         }
         log.info(String.format("After resolving attributes, the model attributes are: %s",
