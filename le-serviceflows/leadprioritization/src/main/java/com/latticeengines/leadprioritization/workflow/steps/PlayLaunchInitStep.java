@@ -1,11 +1,14 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,9 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.DataRequest;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
@@ -55,6 +61,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
+    private long launchTimestampMillis;
+
     @Override
     public void execute() {
         Tenant tenant = null;
@@ -63,6 +71,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        launchTimestampMillis = System.currentTimeMillis();
 
         try {
             log.info("Inside PlayLaunchInitStep execute()");
@@ -88,9 +97,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
 
-        /*
         Restriction segmentRestrictionQuery = playLauch.getPlay().getSegment().getRestriction();
-        int segmentAccountsCount = accountProxy.getSegmentAccountsCount(tenant.toString(), segmentRestrictionQuery);
+        long segmentAccountsCount = accountProxy.getAccountsCount(tenant.toString(), segmentRestrictionQuery);
 
         if (segmentAccountsCount > 0) {
             List<String> accountSchema = getSchema(TableRoleInCollection.BucketedAccount);
@@ -98,23 +106,61 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             dataRequest.setAttributes(accountSchema);
 
             int numberOfLoops = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
-            int alreadyReadAccounts = 0;
+            long alreadyReadAccounts = 0;
 
             for (int loopId = 0; loopId < numberOfLoops; loopId++) {
-                int expectedPageSize = Math.min(pageSize, segmentAccountsCount - alreadyReadAccounts);
-                DataPage accountPage = accountProxy.getSegmentAccounts(tenant.toString(), segmentRestrictionQuery,
-                        alreadyReadAccounts, expectedPageSize, dataRequest);
+                int expectedPageSize = (int) Math.min(pageSize * 1L, (segmentAccountsCount - alreadyReadAccounts));
+                DataPage accountPage = accountProxy.getAccounts(tenant.toString(), segmentRestrictionQuery,
+                        (int) alreadyReadAccounts, expectedPageSize, dataRequest);
                 List<Map<String, Object>> accountList = accountPage.getData();
                 alreadyReadAccounts += accountList.size();
-        */
-                for (int i = 0; i < 3; i++) {
-                    Recommendation recommendation = createDummyRecommendation(tenant, playLauch, config);
+
+                for (Map<String, Object> account : accountList) {
+                    // Recommendation recommendation =
+                    // createDummyRecommendation(tenant, playLauch, config);
+
+                    Recommendation recommendation = createRecommendation(tenant, playLauch, config, account);
                     recommendationService.create(recommendation);
                 }
-        /*
+
             }
         }
-        */
+
+    }
+
+    private Recommendation createRecommendation(Tenant tenant, PlayLaunch playLauch,
+            PlayLaunchInitStepConfiguration config, Map<String, Object> account) {
+        String playName = config.getPlayName();
+        String playLaunchId = config.getPlayLaunchId();
+
+        Recommendation recommendation = new Recommendation();
+        recommendation.setDescription(playLauch.getDescription());
+        recommendation.setLaunchId(playLaunchId);
+        recommendation.setPlayId(playName);
+
+        Date launchTime = playLauch.getCreatedTimestamp();
+        if (launchTime == null) {
+            launchTime = new Date(launchTimestampMillis);
+        }
+        recommendation.setLaunchDate(launchTime);
+
+        recommendation.setAccountId(account.get("AccountId").toString());
+        recommendation.setLeAccountExternalID(account.get("External_ID").toString());
+        recommendation.setSfdcAccountID(account.get("SalesforceAccountID").toString());
+
+        String valueStr = account.get("TotalMonetaryValue").toString();
+        Double value = 0D;
+        if (StringUtils.isNotEmpty(valueStr) && StringUtils.isNumeric(valueStr)) {
+            value = Double.parseDouble(valueStr);
+        }
+        recommendation.setMonetaryValue(value);
+        recommendation.setCompanyName(account.get("DisplayName").toString());
+        recommendation.setTenantId(tenant.getPid());
+        recommendation.setLikelihood(0.5D);
+        recommendation.setSynchronizationDestination("SFDC");
+        recommendation.setPriorityDisplayName("A");
+
+        return recommendation;
     }
 
     private Recommendation createDummyRecommendation(Tenant tenant, PlayLaunch playLauch,
