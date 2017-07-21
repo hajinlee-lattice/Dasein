@@ -56,19 +56,19 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @JsonProperty("Name")
+    @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @JsonProperty("DisplayName")
+    @JsonProperty("displayName")
     @Column(name = "DISPLAY_NAME", nullable = false)
     private String displayName;
 
-    @JsonProperty("Description")
+    @JsonProperty("description")
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
 
-    @JsonProperty("Segment")
+    @JsonProperty("segment")
     @Column(name = "SEGMENT_NAME", nullable = true)
     private String segmentName;
 
@@ -81,15 +81,15 @@ public class Play implements HasName, HasPid, HasTenantId {
     // @JoinColumn(name = "FK_CALL_PREP_ID")
     // private CallPrep callPrep;
 
-    @JsonProperty("Rating")
+    @JsonProperty("rating")
     @Transient
     private RatingObject rating;
 
-    @JsonProperty("LaunchHistory")
+    @JsonProperty("launchHistory")
     @Transient
     private LaunchHistory launchHistory;
 
-    @JsonProperty("TalkingPoints")
+    @JsonProperty("talkingPoints")
     @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
     private List<TalkingPoint> talkingPoints;
 
@@ -102,17 +102,17 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @JsonProperty("TimeStamp")
+    @JsonProperty("timeStamp")
     @Column(name = "TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
 
-    @JsonProperty("LastUpdatedTimestamp")
+    @JsonProperty("lastUpdatedTimestamp")
     @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdatedTimestamp;
 
-    @JsonProperty("CreatedBy")
+    @JsonProperty("createdBy")
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 

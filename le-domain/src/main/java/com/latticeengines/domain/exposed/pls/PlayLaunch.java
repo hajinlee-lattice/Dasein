@@ -44,29 +44,29 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
 
     @Index(name = "PLAY_LAUNCH_ID")
     @Column(name = "LAUNCH_ID", unique = true, nullable = false)
-    @JsonProperty("LaunchId")
+    @JsonProperty("launchId")
     private String launchId;
 
     @Column(name = "DESCRIPTION", nullable = true)
-    @JsonProperty("Description")
+    @JsonProperty("description")
     private String description;
 
     @Index(name = "PLAY_LAUNCH_CREATED_TIME")
     @Column(name = "CREATED_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonProperty("CreatedTimestamp")
+    @JsonProperty("createdTimestamp")
     private Date createdTimestamp;
 
     @Index(name = "PLAY_LAUNCH_LAST_UPD_TIME")
     @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonProperty("LastUpdatedTimestamp")
+    @JsonProperty("lastUpdatedTimestamp")
     private Date lastUpdatedTimestamp;
 
     @Index(name = "PLAY_LAUNCH_STATE")
     @Column(name = "STATE", nullable = false)
     @Enumerated(EnumType.STRING)
-    @JsonProperty("LaunchState")
+    @JsonProperty("launchState")
     private LaunchState launchState;
 
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
@@ -80,7 +80,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @JsonProperty("ApplicationId")
+    @JsonProperty("applicationId")
     @Column(name = "APPLICATION_ID", nullable = true)
     private String applicationId;
 
@@ -93,11 +93,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     private String tableName;
 
     @Column(name = "CONTACTS_NUM")
-    @JsonProperty("ContactsNum")
+    @JsonProperty("contactsNum")
     private Long contactsNum;
 
     @Column(name = "ACCOUNTS_NUM")
-    @JsonProperty("AccountsNum")
+    @JsonProperty("accountsNum")
     private Long accountsNum;
 
     @Override

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class BucketInformation {
 
-    @JsonProperty("Bucket")
+    @JsonProperty("bucket")
     private String bucket;
 
-    @JsonProperty("BucketCount")
+    @JsonProperty("bucketCount")
     private int bucketCount;
 
     public void setBucket(String bucket) {

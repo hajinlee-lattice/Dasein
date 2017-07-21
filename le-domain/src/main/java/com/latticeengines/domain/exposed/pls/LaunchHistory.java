@@ -5,13 +5,13 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class LaunchHistory {
 
-    @JsonProperty("PlayLaunch")
+    @JsonProperty("playLaunch")
     private PlayLaunch playLaunch;
 
-    @JsonProperty("NewContactsNum")
+    @JsonProperty("newContactsNum")
     private Long newContactsNum;
 
-    @JsonProperty("NewAccountsNum")
+    @JsonProperty("newAccountsNum")
     private Long newAccountsNum;
 
     public void setNewContactsNum(Long newContactsNum) {

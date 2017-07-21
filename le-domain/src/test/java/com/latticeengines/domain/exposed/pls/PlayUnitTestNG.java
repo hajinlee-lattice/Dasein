@@ -16,7 +16,8 @@ public class PlayUnitTestNG {
     private final static String DESCRIPTION = "playHardest";
     private final static String SEGMENT_NAME = "segment";
     private final static String CREATED_BY = "lattice@lattice-engines.com";
-    private final static String TALKING_POINT_TITILE = "Reason to Buy";
+    private final static String TALKING_POINT_TITLE = "Reason to Buy";
+    private final static String TALKING_POINT_CONTENT = "Because we want your money";
 
     private final static Logger log = LoggerFactory.getLogger(PlayUnitTestNG.class);
 
@@ -42,7 +43,7 @@ public class PlayUnitTestNG {
         play.setLaunchHistory(launchHistory);
 
         RatingObject rating = new RatingObject();
-        List<BucketInformation> accountRatingList = new ArrayList<BucketInformation>();
+        List<BucketInformation> accountRatingList = new ArrayList<>();
         BucketInformation aBucket = new BucketInformation();
         aBucket.setBucket(BucketName.A.name());
         aBucket.setBucketCount(500);
@@ -62,9 +63,10 @@ public class PlayUnitTestNG {
         rating.setBucketInfoList(accountRatingList);
         play.setRating(rating);
 
-        List<TalkingPoint> talkingPoints = new ArrayList<TalkingPoint>();
+        List<TalkingPoint> talkingPoints = new ArrayList<>();
         TalkingPoint tp = new TalkingPoint();
-        tp.setTitle(TALKING_POINT_TITILE);
+        tp.setTitle(TALKING_POINT_TITLE);
+        tp.setContent(TALKING_POINT_CONTENT);
         talkingPoints.add(tp);
         play.setTalkingPoints(talkingPoints);
 
