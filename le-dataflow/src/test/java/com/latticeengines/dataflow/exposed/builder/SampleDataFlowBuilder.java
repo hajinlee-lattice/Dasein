@@ -45,15 +45,15 @@ public class SampleDataFlowBuilder extends TypesafeDataFlowBuilder<DataFlowParam
 
         last = last.checkpoint("checkpoint");
 
-        // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees)
-        // TotalEmployees, HashCode(Domain) DomainHashCode
-        // FROM T GROUP BY Domain
-        last = last.addJythonFunction( //
-                "com.latticeengines.dataflow.exposed.builder", //
-                "encoder", //
-                "encode", //
-                new FieldList("Domain"), //
-                new FieldMetadata("DomainHashCode", Long.class));
+//        // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees)
+//        // TotalEmployees, HashCode(Domain) DomainHashCode
+//        // FROM T GROUP BY Domain
+//        last = last.addJythonFunction( //
+//                "com.latticeengines.dataflow.exposed.builder", //
+//                "encoder", //
+//                "encode", //
+//                new FieldList("Domain"), //
+//                new FieldMetadata("DomainHashCode", Long.class));
 
         return last;
     }

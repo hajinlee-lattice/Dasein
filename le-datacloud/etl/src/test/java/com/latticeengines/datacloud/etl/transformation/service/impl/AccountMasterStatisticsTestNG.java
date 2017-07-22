@@ -50,8 +50,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        // other than extract top cube, correctness is tested in the dataflow
-        // functional tests
+        // more about correctness is tested in the dataflow functional tests
         log.info("Start to verify records one by one ...");
         long count = 0;
         long zeroCountAttrs = 0;
@@ -65,6 +64,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             }
         }
         logger.info(count + " records in total, " + zeroCountAttrs + " has zero not null count");
+        //TODO: change to compare with rows in profile result
         Assert.assertEquals(count, 25973);
         Assert.assertTrue(zeroCountAttrs > 0, "Should have some attributes with zero count.");
     }

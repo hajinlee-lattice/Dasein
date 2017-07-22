@@ -124,7 +124,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty(DataFlowProperty.ENGINE, engine);
         Table table = dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
 
-        verifyMetadata(table, "/tmp/EventTable");
+        // verifyMetadata(table, "/tmp/EventTable");
         verifyNumRows(config, "/tmp/EventTable", 308);
     }
 
@@ -156,7 +156,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
 
     @DataProvider(name = "engineProvider")
     public Object[][] getEngine() {
-        return new Object[][] { { "MR" }, { "TEZ" } };
+        return new Object[][] { { "TEZ" }, { "FLINK" } };
     }
 
     @Test(groups = "functional", dataProvider = "engineProvider", enabled = true)
