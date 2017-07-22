@@ -109,7 +109,7 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testGetPreCreate" })
     public void testCreateLaunch() throws InterruptedException {
         playLaunchService.create(playLaunch1);
-        Thread.sleep(500);
+        Thread.sleep(2000);
         playLaunchService.create(playLaunch2);
     }
 

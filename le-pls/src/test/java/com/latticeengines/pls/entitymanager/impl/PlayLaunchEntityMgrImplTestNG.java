@@ -94,7 +94,7 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testGetPreCreate" })
     public void testCreateLaunch() throws InterruptedException {
         playLaunchEntityMgr.create(playLaunch1);
-        Thread.sleep(500);
+        Thread.sleep(2000);
         playLaunchEntityMgr.create(playLaunch2);
         Assert.assertNotNull(playLaunch1.getLaunchId());
         Assert.assertNotNull(playLaunch2.getLaunchId());
