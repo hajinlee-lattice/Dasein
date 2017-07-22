@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
@@ -87,7 +86,13 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             Play play = internalResourceRestApiProxy.findPlayByName(customerSpace, playName);
             playLauch.setPlay(play);
 
-            executeLaunchActivity(tenant, playLauch, config);
+            String segmentName = play.getSegmentName();
+            log.info("Processing segment: " + segmentName);
+
+            Restriction segmentRestrictionQuery = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
+                    segmentName);
+
+            executeLaunchActivity(tenant, playLauch, config, segmentRestrictionQuery);
 
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
         } catch (Exception ex) {
@@ -97,14 +102,11 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     }
 
-    private void executeLaunchActivity(Tenant tenant, PlayLaunch playLauch, PlayLaunchInitStepConfiguration config) {
+    private void executeLaunchActivity(Tenant tenant, PlayLaunch playLauch, PlayLaunchInitStepConfiguration config,
+            Restriction segmentRestrictionQuery) {
         // add processing logic
 
         // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
-
-        MetadataSegment segment = playLauch.getPlay().getSegment();
-        log.info("Processing segment: " + segment.getDisplayName());
-        Restriction segmentRestrictionQuery = segment.getRestriction();
 
         long segmentAccountsCount = accountProxy.getAccountsCount(tenant.toString(), segmentRestrictionQuery);
         log.info("Total records in segment: " + segmentAccountsCount);

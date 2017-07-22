@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
@@ -507,5 +508,10 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         } catch (Exception e) {
             throw new RuntimeException("getPlay: Remote call failure: " + e.getMessage(), e);
         }
+    }
+
+    public Restriction getSegmentRestrictionQuery(CustomerSpace customerSpace, String segmentName) {
+        String url = constructUrl("pls/internal/segment/" + segmentName + "/restriction", customerSpace.toString());
+        return restTemplate.getForObject(url, Restriction.class);
     }
 }

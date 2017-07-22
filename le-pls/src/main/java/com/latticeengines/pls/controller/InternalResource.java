@@ -78,6 +78,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -89,6 +90,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelNotesService;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -194,6 +196,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private PlayService playService;
+
+    @Autowired
+    private MetadataSegmentService metadataSegmentService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -1313,4 +1318,16 @@ public class InternalResource extends InternalResourceBase {
         log.debug(String.format("Get play with %s playName.", playName));
         return playService.getPlayByName(playName);
     }
+
+    @RequestMapping(value = "/segment/{segmentName}/restriction/" + TENANT_ID_PATH, method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Update play launch state.")
+    public Restriction getSegmentRestriction(@PathVariable("tenantId") String tenantId, //
+            @PathVariable("segmentName") String segmentName) {
+        log.debug(String.format("Getting restriction from %s segment", segmentName));
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        return metadataSegmentService.getSegmentByName(segmentName).getRestriction();
+    }
+
 }
