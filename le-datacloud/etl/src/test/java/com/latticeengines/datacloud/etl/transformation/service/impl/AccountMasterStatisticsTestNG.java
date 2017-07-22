@@ -65,7 +65,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             }
         }
         logger.info(count + " records in total, " + zeroCountAttrs + " has zero not null count");
-        Assert.assertEquals(count, 25549);
+        Assert.assertEquals(count, 25973);
         Assert.assertTrue(zeroCountAttrs > 0, "Should have some attributes with zero count.");
     }
 
