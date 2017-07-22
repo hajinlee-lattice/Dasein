@@ -158,7 +158,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(0, 2));
         step.setTransformer(CalculateStats.TRANSFORMER_NAME);
-        step.setConfiguration("{}");
+        step.setConfiguration(setDataFlowEngine("{}", "TEZ"));
         step.setTargetSource("AccountMasterBucketedStats");
         return step;
     }
