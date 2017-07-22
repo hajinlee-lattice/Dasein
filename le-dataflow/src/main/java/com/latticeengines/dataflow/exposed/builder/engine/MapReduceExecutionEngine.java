@@ -31,6 +31,9 @@ public class MapReduceExecutionEngine extends ExecutionEngine {
         properties.put("mapreduce.job.queuename", queue);
         if (enforceGlobalOrdering) {
             properties = FlowRuntimeProps.flowRuntimeProps().setGatherPartitions(1).buildProperties(properties);
+        } else {
+            properties = FlowRuntimeProps.flowRuntimeProps().setGatherPartitions(getPartitions(dataFlowCtx))
+                    .buildProperties(properties);
         }
         return new HadoopFlowConnector(properties);
     }

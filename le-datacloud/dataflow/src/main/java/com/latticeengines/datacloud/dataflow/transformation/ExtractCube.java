@@ -75,7 +75,7 @@ public class ExtractCube extends ConfigurableFlowBase<TransformerConfig> {
         Node stats = profile.leftJoin(STATS_ATTR_NAME, cube, PROFILE_ATTR_ATTRNAME);
         stats = stats.apply(String.format("%s == null ? new Long(0) : %s", STATS_ATTR_COUNT, STATS_ATTR_COUNT), //
                 new FieldList(STATS_ATTR_COUNT), stats.getSchema(STATS_ATTR_COUNT));
-        return stats.sort(STATS_ATTR_NAME);
+        return stats;
     }
 
     // (dim -> __ALL__)
