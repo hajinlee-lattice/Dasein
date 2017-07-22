@@ -91,6 +91,7 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     @JsonProperty("talkingPoints")
     @OneToMany(cascade = { CascadeType.REMOVE }, orphanRemoval = true, mappedBy = "play", fetch = FetchType.EAGER)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<TalkingPoint> talkingPoints;
 
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)

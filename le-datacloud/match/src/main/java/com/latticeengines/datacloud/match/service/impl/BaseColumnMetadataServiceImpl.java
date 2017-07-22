@@ -177,7 +177,7 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         ImmutablePair<String, Predefined>[] initKeys = predefinedForLatestVersion
                 .toArray(new ImmutablePair[predefinedForLatestVersion.size()]);
          predefinedMetaDataCache = WatcherCache.builder() //
-                .name("PredefinedSelectionCacheForRTSCache") //
+                .name("PredefinedSelectionCache") //
                 .watch(AMRelease) //
                 .maximum(10) //
                 .load(key -> {
