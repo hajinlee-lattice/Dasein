@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
@@ -10,9 +11,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.PlayService;
+import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -32,6 +35,9 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private TalkingPointProxy talkingPointProxy;
 
     private Play play;
 
@@ -93,6 +99,11 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
         play.setSegment(segment);
         play.setSegmentName(SEGMENT_NAME);
         play.setCreatedBy(CREATED_BY);
+
+        List<TalkingPointDTO> tps = new ArrayList<>();
+
+        talkingPointProxy.createOrUpdate(tps, tenant1.getId());
+
         return play;
     }
 

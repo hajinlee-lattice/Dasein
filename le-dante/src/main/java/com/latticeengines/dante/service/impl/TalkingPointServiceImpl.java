@@ -13,11 +13,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
 import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
-import com.latticeengines.dante.metadata.DanteTalkingPointValue;
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
+import com.latticeengines.domain.exposed.dante.DanteTalkingPointValue;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -158,9 +158,8 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
     public TalkingPointPreview getPreview(String playName, String customerSpace) {
         try {
-            List<DanteTalkingPoint> dtps = talkingPointEntityMgr.findAllByPlayName(playName).stream()
-                    .map(x -> convertForDante(x, CustomerSpace.parse(customerSpace).getTenantId()))
-                    .collect(Collectors.toList());
+            List<DanteTalkingPointValue> dtps = talkingPointEntityMgr.findAllByPlayName(playName).stream()
+                    .map(x -> new DanteTalkingPointValue(x)).collect(Collectors.toList());
             return new TalkingPointPreview(dtps);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38015, e, new String[] { playName, customerSpace });

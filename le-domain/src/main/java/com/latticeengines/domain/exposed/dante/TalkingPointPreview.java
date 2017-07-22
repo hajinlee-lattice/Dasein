@@ -20,7 +20,7 @@ public class TalkingPointPreview {
     public TalkingPointPreview() {
     }
 
-    public TalkingPointPreview(List<DanteTalkingPoint> talkingPoints) {
+    public TalkingPointPreview(List<DanteTalkingPointValue> talkingPoints) {
         notionObject = new DanteLeadNotionObject(talkingPoints);
     }
 

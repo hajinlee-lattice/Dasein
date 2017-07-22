@@ -1,4 +1,4 @@
-package com.latticeengines.dante.metadata;
+package com.latticeengines.domain.exposed.dante;
 
 import java.util.Date;
 

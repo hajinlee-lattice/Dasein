@@ -148,11 +148,11 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         restTemplate.delete(
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/"
-                        + tpPreview.getNotionObject().getTalkingPoints().get(0).getExternalID(),
+                        + tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(),
                 ResponseDocument.class);
         restTemplate.delete(
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/"
-                        + tpPreview.getNotionObject().getTalkingPoints().get(1).getExternalID(),
+                        + tpPreview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID(),
                 ResponseDocument.class);
 
         ResponseDocument<List<TalkingPointDTO>> playTpsResponse = restTemplate.getForObject( //
