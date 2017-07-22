@@ -260,7 +260,7 @@ public class StatsCubeUtils {
 
     private static List<TopAttribute> toSubcatTopTree(SubcategoryStatistics catStats) {
         return catStats.getAttributes().entrySet().stream() //
-                .sorted(Comparator.comparing(entry -> entry.getValue().getNonNullCount())) //
+                .sorted(Comparator.comparing(entry -> - entry.getValue().getNonNullCount())) //
                 .map(StatsCubeUtils::toTopAttr) //
                 .collect(Collectors.toList());
     }
