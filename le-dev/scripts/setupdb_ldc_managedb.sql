@@ -216,7 +216,8 @@ SET
   `DynamoTableSignature`        = '20170629',
   `DynamoTableSignature_Lookup` = '20170629',
   `AMBucketedRedShiftTable`     = 'AccountMasterBucketed_2017_07_17_19_21_03_UTC',
-  `SegmentStatsVersion`         = '2017-07-17_19-21-03_UTC'
+  `SegmentStatsVersion`         = '2017-07-17_19-21-03_UTC',
+  `EnrichmentStatsVersion`      = '2017-07-21_20-06-15_UTC'
 WHERE `Version` = '2.0.5';
 
 SET SQL_SAFE_UPDATES = 1;

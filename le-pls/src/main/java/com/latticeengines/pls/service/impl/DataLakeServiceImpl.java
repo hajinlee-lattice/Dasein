@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
-import com.latticeengines.pls.service.DataLakeService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -27,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
+import com.latticeengines.pls.service.DataLakeService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -111,12 +111,12 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    public TopNTree getTopNTree(int max) {
+    public TopNTree getTopNTree() {
         Statistics statistics = getStatistics();
         if (statistics == null) {
             return null;
         }
-        return StatsCubeUtils.toTopNTree(statistics, max);
+        return StatsCubeUtils.toTopNTree(statistics);
     }
 
     private Statistics getStatistics() {

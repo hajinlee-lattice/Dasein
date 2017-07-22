@@ -18,8 +18,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.watchers.WatcherCache;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -27,12 +29,15 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 @Component("columnMetadataProxyMatchapi")
 public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface {
 
-    private static final String AM_REPO = "AMCollection";
+    private static final String ATTR_REPO = "AttrRepo";
+    private static final String STATS_CUBE = "StatsCube";
+    private static final String TOPN_TREE = "TopNTree";
 
     private WatcherCache<String, List<ColumnMetadata>> enrichmentColumnsCache;
     private WatcherCache<String, List<ColumnMetadata>> segmentColumnsCache;
     private WatcherCache<String, DataCloudVersion> latestDataCloudVersionCache;
-    private WatcherCache<String, AttributeRepository> amAttrRepoCache;
+    private WatcherCache<String, Object> amStatsCache;
+
 
     private Map<Predefined, WatcherCache<String, List<ColumnMetadata>>> columnCacheMap = new HashMap<>();
 
@@ -68,12 +73,12 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                 .build();
         columnCacheMap.put(Predefined.Enrichment, enrichmentColumnsCache);
         columnCacheMap.put(Predefined.Segment, segmentColumnsCache);
-        amAttrRepoCache = WatcherCache.builder() //
-                .name("AMAttrRepoCache") //
+        amStatsCache = WatcherCache.builder() //
+                .name("AMStatsCubeCache") //
                 .watch(AMApiUpdate) //
-                .maximum(1) //
-                .load(key -> getAttrRepoViaREST()) //
-                .initKeys(new String[] { AM_REPO }) //
+                .maximum(5) //
+                .load(key -> getStatsObjectViaREST((String) key)) //
+                .initKeys(new String[] { ATTR_REPO, STATS_CUBE, TOPN_TREE }) //
                 .build();
     }
 
@@ -142,12 +147,28 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     }
 
     public AttributeRepository getAttrRepo() {
-        return amAttrRepoCache.get(AM_REPO);
+        return (AttributeRepository) amStatsCache.get(ATTR_REPO);
     }
 
-    private AttributeRepository getAttrRepoViaREST() {
-        String url = constructUrl("/attrrepo");
-        return get("get AM attr repo", url, AttributeRepository.class);
+    public StatsCube getStatsCube() {
+        return (StatsCube) amStatsCache.get(STATS_CUBE);
+    }
+
+    public TopNTree getTopNTree() {
+        return (TopNTree) amStatsCache.get(TOPN_TREE);
+    }
+
+    private Object getStatsObjectViaREST(String key) {
+        switch (key) {
+            case ATTR_REPO:
+                return get("get AM attr repo", constructUrl("/attrrepo"), AttributeRepository.class);
+            case STATS_CUBE:
+                return get("get AM status cube", constructUrl("/statscube"), StatsCube.class);
+            case TOPN_TREE:
+                return get("get AM top n tree", constructUrl("/topn"), TopNTree.class);
+            default:
+                throw new IllegalArgumentException("Unknown cache key " + key);
+        }
     }
 
     private DataCloudVersion requestLatestVersion(String compatibleVersion) {
@@ -157,8 +178,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         } else {
             url = constructUrl("/versions/latest");
         }
-        DataCloudVersion latestVersion = get("latest version", url, DataCloudVersion.class);
-        return latestVersion;
+        return get("latest version", url, DataCloudVersion.class);
     }
 
 }

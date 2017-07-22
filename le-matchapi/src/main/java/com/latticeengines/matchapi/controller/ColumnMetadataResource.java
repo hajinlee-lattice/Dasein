@@ -15,10 +15,12 @@ import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 import io.swagger.annotations.Api;
@@ -88,6 +90,28 @@ public class ColumnMetadataResource {
         }
         ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
         return columnMetadataService.getAttrRepo(dataCloudVersion);
+    }
+
+    @ApiIgnore
+    @RequestMapping(value = "/statscube", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get enrichment stats cube.")
+    public StatsCube getStatsCube(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
+        if (StringUtils.isBlank(dataCloudVersion)){
+            dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+        }
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
+        return columnMetadataService.getStatsCube(dataCloudVersion);
+    }
+
+    @ApiIgnore
+    @RequestMapping(value = "/topn", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get enrichment topn tree.")
+    public TopNTree getTopNTree(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
+        if (StringUtils.isBlank(dataCloudVersion)){
+            dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+        }
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
+        return columnMetadataService.getTopNTree(dataCloudVersion);
     }
 
 }

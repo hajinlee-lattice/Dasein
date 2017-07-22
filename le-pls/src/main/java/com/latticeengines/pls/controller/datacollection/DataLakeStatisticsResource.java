@@ -33,9 +33,7 @@ public class DataLakeStatisticsResource {
     @RequestMapping(value = "/topn", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get statistics")
-    public TopNTree getTopNTree( //
-            @ApiParam(value = "max", defaultValue = "5") //
-            @RequestParam(value = "max", required = false, defaultValue = "5") int max) {
-        return dataLakeService.getTopNTree(max);
+    public TopNTree getTopNTree() {
+        return dataLakeService.getTopNTree();
     }
 }

@@ -13,6 +13,7 @@ import javax.annotation.Resource;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -44,6 +46,7 @@ import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<AccountMasterColumn> {
 
     private WatcherCache<String, AttributeRepository> attrRepoCache;
+    private WatcherCache<String, Pair<StatsCube, TopNTree>> statsCache;
 
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
@@ -82,28 +85,29 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
         return attrRepoCache.get(dataCloudVersion);
     }
 
+    @Override
+    public StatsCube getStatsCube(String dataCloudVersion) {
+        return statsCache.get(dataCloudVersion).getLeft();
+    }
+
+    @Override
+    public TopNTree getTopNTree(String dataCloudVersion) {
+        return statsCache.get(dataCloudVersion).getRight();
+    }
+
     private AttributeRepository readAttrRepoFromHdfs(String dataCloudVersion) {
+        Statistics statistics = readStatisticsFromHdfs(dataCloudVersion, ColumnSelection.Predefined.Segment);
         DataCloudVersion fullVersion = versionEntityMgr.findVersion(dataCloudVersion);
         String redshiftTableName = fullVersion.getAmBucketedRedShiftTable();
         if (StringUtils.isBlank(redshiftTableName)) {
             throw new IllegalStateException(
                     "There is no redshift table for the data cloud version " + dataCloudVersion);
         }
-        String statsVersion = fullVersion.getSegmentStatsVersion();
-        if (StringUtils.isBlank(statsVersion)) {
-            throw new IllegalStateException(
-                    "There is not segment stats version for data cloud version " + dataCloudVersion);
-        }
-        String snapshotDir = hdfsPathBuilder.constructSnapshotDir("AccountMasterSegmentStats", statsVersion).toString();
-        Iterator<GenericRecord> recordIterator = AvroUtils.iterator(yarnConfiguration, snapshotDir + "/*.avro");
-        StatsCube cube = StatsCubeUtils.parseAvro(recordIterator);
-        List<ColumnMetadata> amAttrs = fromPredefinedSelection(ColumnSelection.Predefined.Segment,
-                fullVersion.getVersion());
-        Statistics statistics = StatsCubeUtils.constructStatistics(cube, //
-                Collections.singletonList(Pair.of(BusinessEntity.LatticeAccount, amAttrs)));
         Map<TableRoleInCollection, String> tableNameMap = ImmutableMap.<TableRoleInCollection, String> builder()
                 .put(TableRoleInCollection.AccountMaster, redshiftTableName).build();
         Map<AttributeLookup, ColumnMetadata> cmMap = new HashMap<>();
+        List<ColumnMetadata> amAttrs = fromPredefinedSelection(ColumnSelection.Predefined.Segment,
+                fullVersion.getVersion());
         amAttrs.forEach(cm -> cmMap.put(new AttributeLookup(BusinessEntity.LatticeAccount, cm.getName()), cm));
         ColumnMetadata idAttr = fromPredefinedSelection(ColumnSelection.Predefined.ID, fullVersion.getVersion()).get(0);
         cmMap.put( //
@@ -114,6 +118,29 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
                 DataCloudConstants.ACCOUNT_MASTER_COLLECTION);
     }
 
+    private Pair<StatsCube, TopNTree> readStatsPairFromHdfs(String dataCloudVersion) {
+        Statistics statistics = readStatisticsFromHdfs(dataCloudVersion, ColumnSelection.Predefined.Enrichment);
+        StatsCube statsCube = StatsCubeUtils.toStatsCube(statistics);
+        TopNTree topNTree = StatsCubeUtils.toTopNTree(statistics);
+        return ImmutablePair.of(statsCube, topNTree);
+    }
+
+    private Statistics readStatisticsFromHdfs(String dataCloudVersion, ColumnSelection.Predefined predefined) {
+        DataCloudVersion fullVersion = versionEntityMgr.findVersion(dataCloudVersion);
+        String statsVersion = ColumnSelection.Predefined.Segment.equals(predefined)
+                ? fullVersion.getSegmentStatsVersion() : fullVersion.getEnrichmentStatsVersion();
+        if (StringUtils.isBlank(statsVersion)) {
+            throw new IllegalStateException(
+                    "There is not " + predefined + " stats version for data cloud version " + dataCloudVersion);
+        }
+        String sourceName = ColumnSelection.Predefined.Segment.equals(predefined) ? "AccountMasterSegmentStats" : "AccountMasterEnrichmentStats";
+        String snapshotDir = hdfsPathBuilder.constructSnapshotDir(sourceName, statsVersion).toString();
+        Iterator<GenericRecord> recordIterator = AvroUtils.iterator(yarnConfiguration, snapshotDir + "/*.avro");
+        StatsCube cube = StatsCubeUtils.parseAvro(recordIterator);
+        List<ColumnMetadata> amAttrs = fromPredefinedSelection(predefined, fullVersion.getVersion());
+        return StatsCubeUtils.constructStatistics(cube, Collections.singletonList(Pair.of(BusinessEntity.LatticeAccount, amAttrs)));
+    }
+
     @SuppressWarnings("unchecked")
     private void initCache() {
         attrRepoCache = WatcherCache.builder() //
@@ -121,6 +148,14 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
                 .watch(AMRelease) //
                 .maximum(10) //
                 .load(dataCloudVersion -> readAttrRepoFromHdfs((String) dataCloudVersion)) //
+                .initKeys(new String[] { versionEntityMgr.currentApprovedVersionAsString() }) //
+                .build();
+
+        statsCache = WatcherCache.builder() //
+                .name("AMStatsCache") //
+                .watch(AMRelease) //
+                .maximum(10) //
+                .load(dataCloudVersion -> readStatsPairFromHdfs((String) dataCloudVersion)) //
                 .initKeys(new String[] { versionEntityMgr.currentApprovedVersionAsString() }) //
                 .build();
     }

@@ -13,7 +13,7 @@ public interface DataLakeService {
 
     List<ColumnMetadata> getAttributes(Integer start, Integer limit);
     long getAttributesCount();
-    TopNTree getTopNTree(int max);
+    TopNTree getTopNTree();
     StatsCube getStatsCube();
 
 }

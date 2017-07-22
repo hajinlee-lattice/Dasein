@@ -8,12 +8,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,14 +33,9 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.statistics.AMAttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes;
-import com.latticeengines.domain.exposed.datacloud.statistics.TopNAttributes.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
-import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -262,7 +255,7 @@ public class LatticeInsightsResource {
         return false;
     }
 
-    private Boolean shouldConsiderInternalAttributes(Tenant tenant) {
+    private boolean shouldConsiderInternalAttributes(Tenant tenant) {
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
         return batonService.isEnabled(space, LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
     }
@@ -271,163 +264,27 @@ public class LatticeInsightsResource {
 
     // ------------START for statistics---------------------//
     @Deprecated
-    @RequestMapping(value = AM_STATS_PATH + "/cube", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @RequestMapping(value = AM_STATS_PATH + "/cube", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
-    public AccountMasterCube loadAMStatisticsCube(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata") //
-            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
-            Boolean loadEnrichmentMetadata, //
-            @RequestParam(value = "q", required = false) String query) {
-        AccountMasterCube cube = enrichmentService.getCube(query);
-
-        if (loadEnrichmentMetadata) {
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, null, null, null,
-                    null, null);
-            cube.setEnrichmentAttributes(enrichmentAttributes);
-        }
-        return cube;
+    @ApiOperation(value = "Load account master cube", response = AccountMasterCube.class)
+    public StatsCube loadAMStatisticsCube() {
+        return enrichmentService.getStatsCube();
     }
 
-    @RequestMapping(value = AM_STATS_PATH + "/cube2", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @RequestMapping(value = AM_STATS_PATH + "/cube2", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
-    public StatsCube getAMStatsCube(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata") //
-            @RequestParam(value = "q", required = false) String query) {
-        AccountMasterCube cube = loadAMStatisticsCube(request, false, query);
-        return toStatsCube(cube);
+    public StatsCube getAMStatsCube() {
+        return enrichmentService.getStatsCube();
     }
 
-    @RequestMapping(value = AM_STATS_PATH + "/topn", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @RequestMapping(value = AM_STATS_PATH + "/topn", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get top N attributes for all category")
-    public TopNTree getTopTree(HttpServletRequest request, //
-            @ApiParam(value = "max", defaultValue = "5") //
-            @RequestParam(value = "max", required = false, defaultValue = "5") Integer max) {
-        Map<String, TopNAttributes> map = getTopNAttributes(request, max);
-        return toTopNTree(map);
-    }
-
-    private TopNAttributes getTopNAttributes(HttpServletRequest request, //
-            Boolean loadEnrichmentMetadata, //
-            String categoryName, //
-            Integer max) {
-        Category category;
-        try {
-            category = Category.fromName(categoryName);
-        } catch (Exception e) {
-            try {
-                category = Category.valueOf(categoryName);
-            } catch (Exception e1) {
-                throw new RuntimeException("Cannot recognize category name " + categoryName, e1);
-            }
-        }
-
+    public TopNTree getTopTree() {
         Tenant tenant = MultiTenantContext.getTenant();
-        Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
-
-        TopNAttributes topNAttr = enrichmentService.getTopAttrs(category, max,
-                considerInternalAttributes == null ? true : considerInternalAttributes);
-
-        if (loadEnrichmentMetadata) {
-            Set<String> allEnrichAttrNames = new HashSet<>();
-            for (String subCategoryKey : topNAttr.getTopAttributes().keySet()) {
-                for (TopAttribute attr : topNAttr.getTopAttributes().get(subCategoryKey)) {
-                    allEnrichAttrNames.add(attr.getAttribute());
-                }
-            }
-            List<LeadEnrichmentAttribute> enrichmentAttributes = getInsightsAttributes(request, null, categoryName,
-                    null, null, null, null);
-            List<LeadEnrichmentAttribute> attrs = new ArrayList<>();
-
-            for (LeadEnrichmentAttribute attr : enrichmentAttributes) {
-                if (allEnrichAttrNames.contains(attr.getFieldName())) {
-                    attrs.add(attr);
-                }
-            }
-
-            topNAttr.setEnrichmentAttributes(attrs);
-        }
-
-        return topNAttr;
+        boolean excludeInternalAttributes = !shouldConsiderInternalAttributes(tenant);
+        return enrichmentService.getTopNTree(excludeInternalAttributes);
     }
-
-    @Deprecated
-    @RequestMapping(value = AM_STATS_PATH + "/topn/all", //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get top N attributes per subcategory for each category")
-    public Map<String, TopNAttributes> getAllTopNAttributes(HttpServletRequest request, //
-            @ApiParam(value = "Should load enrichment attribute metadata") //
-            @RequestParam(value = "loadEnrichmentMetadata", required = false, defaultValue = "false") //
-            Boolean loadEnrichmentMetadata, //
-            @ApiParam(value = "max", defaultValue = "5") //
-            @RequestParam(value = "max", required = false, defaultValue = "5") Integer max) {
-        List<String> categories = getInsightsCategories(request);
-        Map<String, TopNAttributes> allTopNAttributes = new HashMap<>();
-
-        for (String categoryName : categories) {
-            TopNAttributes topNAttrs = getTopNAttributes(request, loadEnrichmentMetadata, categoryName, max);
-            allTopNAttributes.put(categoryName, topNAttrs);
-        }
-
-        return allTopNAttributes;
-    }
-
-    private Map<String, TopNAttributes> getTopNAttributes(HttpServletRequest request, int max) {
-        List<String> categories = getInsightsCategories(request);
-        Map<String, TopNAttributes> allTopNAttributes = new HashMap<>();
-        for (String categoryName : categories) {
-            TopNAttributes topNAttrs = getTopNAttributes(request, false, categoryName, max);
-            allTopNAttributes.put(categoryName, topNAttrs);
-        }
-        return allTopNAttributes;
-    }
-
-    private static TopNTree toTopNTree(Map<String, TopNAttributes> topNAttributesMap) {
-        TopNTree topNTree = new TopNTree();
-        Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
-        for (Map.Entry<String, TopNAttributes> entry : topNAttributesMap.entrySet()) {
-            catTrees.put(Category.fromName(entry.getKey()), toCatTopNTree(entry.getValue()));
-        }
-        topNTree.setCategories(catTrees);
-        return topNTree;
-    }
-
-    private static CategoryTopNTree toCatTopNTree(TopNAttributes topNAttributes) {
-        CategoryTopNTree topNTree = new CategoryTopNTree();
-        Map<String, List<com.latticeengines.domain.exposed.metadata.statistics.TopAttribute>> subCatTrees = new HashMap<>();
-        for (Map.Entry<String, List<TopAttribute>> entry : topNAttributes.getTopAttributes().entrySet()) {
-            List<com.latticeengines.domain.exposed.metadata.statistics.TopAttribute> attrs = entry.getValue().stream() //
-                    .map(LatticeInsightsResource::toMetadataTopAttr).collect(Collectors.toList());
-            subCatTrees.put(entry.getKey(), attrs);
-        }
-        topNTree.setSubcategories(subCatTrees);
-        return topNTree;
-    }
-
-    private static com.latticeengines.domain.exposed.metadata.statistics.TopAttribute toMetadataTopAttr(
-            TopAttribute topAttribute) {
-        return new com.latticeengines.domain.exposed.metadata.statistics.TopAttribute(topAttribute.getAttribute(),
-                topAttribute.getNonNullCount());
-    }
-
-    private static StatsCube toStatsCube(AccountMasterCube amCube) {
-        StatsCube statsCube = new StatsCube();
-        Map<String, AttributeStats> attrStats = new HashMap<>();
-        for (Map.Entry<String, AMAttributeStats> entry : amCube.getStatistics().entrySet()) {
-            attrStats.put(entry.getKey(), entry.getValue().getRowBasedStatistics());
-        }
-        statsCube.setStatistics(attrStats);
-        return statsCube;
-    }
-
+    
 }

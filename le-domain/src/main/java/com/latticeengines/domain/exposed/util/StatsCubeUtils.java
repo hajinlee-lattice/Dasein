@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
+import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -124,6 +125,8 @@ public class StatsCubeUtils {
             updateBooleanBucket(bucket, (BooleanBucket) algorithm, bktId);
         } else if (algorithm instanceof IntervalBucket) {
             updateIntervalBucket(bucket, (IntervalBucket) algorithm, bktId);
+        } else if (algorithm instanceof CategoricalBucket) {
+            updateCategoricalBucket(bucket, (CategoricalBucket) algorithm, bktId);
         } else {
             throw new UnsupportedOperationException(
                     "Do not know how to parse algorithm of type " + algorithm.getClass());
@@ -155,6 +158,13 @@ public class StatsCubeUtils {
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);
         bucket.setRange(Pair.of(min, max));
+    }
+
+    private static void updateCategoricalBucket(Bucket bucket, CategoricalBucket algo, int bktId) {
+        List<String> labels = algo.generateLabels();
+        String bucketLabel = labels.get(bktId);
+        bucket.setLabel(bucketLabel);
+        bucket.setRange(null);
     }
 
     public static Statistics constructStatistics(StatsCube statsCube,
@@ -221,34 +231,36 @@ public class StatsCubeUtils {
             }
         }
         cube.setStatistics(stats);
+        if (statistics.getCounts().containsKey(BusinessEntity.Account)) {
+            cube.setCount(statistics.getCounts().get(BusinessEntity.Account));
+        }
         return cube;
     }
 
-    public static TopNTree toTopNTree(Statistics statistics, int limit) {
+    public static TopNTree toTopNTree(Statistics statistics) {
         TopNTree topNTree = new TopNTree();
         Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
         for (Map.Entry<Category, CategoryStatistics> entry: statistics.getCategories().entrySet()) {
-            catTrees.put(entry.getKey(), toCatTopTree(entry.getValue(), limit));
+            catTrees.put(entry.getKey(), toCatTopTree(entry.getValue()));
         }
         topNTree.setCategories(catTrees);
         return topNTree;
     }
 
 
-    private static CategoryTopNTree toCatTopTree(CategoryStatistics catStats, int limit) {
+    private static CategoryTopNTree toCatTopTree(CategoryStatistics catStats) {
         CategoryTopNTree topNTree = new CategoryTopNTree();
         Map<String, List<TopAttribute>> subCatTrees = new HashMap<>();
         for (Map.Entry<String, SubcategoryStatistics> entry: catStats.getSubcategories().entrySet()) {
-            subCatTrees.put(entry.getKey(), toSubcatTopTree(entry.getValue(), limit));
+            subCatTrees.put(entry.getKey(), toSubcatTopTree(entry.getValue()));
         }
         topNTree.setSubcategories(subCatTrees);
         return topNTree;
     }
 
-    private static List<TopAttribute> toSubcatTopTree(SubcategoryStatistics catStats, int limit) {
+    private static List<TopAttribute> toSubcatTopTree(SubcategoryStatistics catStats) {
         return catStats.getAttributes().entrySet().stream() //
                 .sorted(Comparator.comparing(entry -> entry.getValue().getNonNullCount())) //
-                .limit(limit) //
                 .map(StatsCubeUtils::toTopAttr) //
                 .collect(Collectors.toList());
     }

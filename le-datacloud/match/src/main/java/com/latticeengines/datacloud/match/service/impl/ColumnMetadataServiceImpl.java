@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
+import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 
 @Component("columnMetadataService")
 public class ColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<ExternalColumn> {
@@ -37,5 +39,15 @@ public class ColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<Ext
     @Override
     public AttributeRepository getAttrRepo(String dataCloudVersion) {
         throw new UnsupportedOperationException("Attribute repository is not supported in 1.0.0");
+    }
+
+    @Override
+    public StatsCube getStatsCube(String dataCloudVersion) {
+        throw new UnsupportedOperationException("Stats cube is not supported in 1.0.0");
+    }
+
+    @Override
+    public TopNTree getTopNTree(String dataCloudVersion) {
+        throw new UnsupportedOperationException("Top N tree is not supported in 1.0.0");
     }
 }
