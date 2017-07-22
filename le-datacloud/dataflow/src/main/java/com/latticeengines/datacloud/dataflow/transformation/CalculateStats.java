@@ -231,10 +231,10 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
             groupby.addAll(getGeneratedDedupAttrs());
             Node merged = expanded.groupByAndLimit(new FieldList(groupby), 1);
             merged = merged.addColumnWithFixedValue(BKT_COUNT, 1L, Long.class);
-            return merged;
+            return merged.checkpoint();
         } else {
             return expanded.groupByAndAggregate(new FieldList(groupby), new Count(new Fields(BKT_COUNT, Long.class)), //
-                    countFields, Fields.ALL);
+                    countFields, Fields.ALL).checkpoint();
         }
     }
 
