@@ -4,6 +4,7 @@ function version_gt() { test "$(echo "$@" | tr " " "\n" | sort | head -n 1)" != 
 
 UNAME=`uname`
 threshold_version=5.6
+echo "Setting up PLS_Multitenant"
 
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"

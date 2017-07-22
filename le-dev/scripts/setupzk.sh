@@ -5,6 +5,8 @@ if [ -z "$(which zookeeper_import)" ]; then
     exit 1
 fi
 
+echo "Setting up Zookeeper"
+
 PYTHON=${PYTHON:=python}
 ZK_HOST="localhost:2181"
 LOCAL_TEST_ROOT="/Pods/Default/Contracts/LocalTest"

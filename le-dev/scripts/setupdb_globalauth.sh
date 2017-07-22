@@ -4,6 +4,7 @@ function version_gt() { test "$(echo "$@" | tr " " "\n" | sort | head -n 1)" != 
 
 UNAME=`uname`
 threshold_version=5.6
+echo "Setting up GlobalAuth"
 
 # Remove alter table drop foreign key statements from the script
 ls $WSHOME/le-db/ddl_globalauthentication_mysql5innodb.sql
