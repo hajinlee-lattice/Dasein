@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,10 +25,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCBucketedAttr;
 import com.latticeengines.domain.exposed.datacloud.dataflow.DCEncodedAttr;
+import com.latticeengines.domain.exposed.metadata.Extract;
 
 public class BucketEncodeUtils {
 
@@ -58,6 +61,17 @@ public class BucketEncodeUtils {
         fields.forEach(field -> attrNames.add(field.name()));
         BucketEncodeUtils.profileCols().forEach(p -> attrNames.remove(p.getLeft()));
         return attrNames.isEmpty();
+    }
+
+    public static boolean isProfileNode(Node node) {
+        for (Extract extract : node.getSourceSchema().getExtracts()) {
+            Iterator<GenericRecord> recordIterator = AvroUtils.iterator(node.getHadoopConfig(), extract.getPath());
+            if (recordIterator.hasNext()) {
+                GenericRecord record = recordIterator.next();
+                return BucketEncodeUtils.isProfile(record);
+            }
+        }
+        return false;
     }
 
     // fields that are not encoded and need to be kept

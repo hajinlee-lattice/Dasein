@@ -76,7 +76,7 @@ public class AdvancedCalcStatsTestNG extends CalcStatsTestNG {
         dims.put("A2", null);
         dims.put("B", null);
         dims.put("C", null);
-        conf.setDimensionGraph(dims);
+        conf.setDimensionTree(dims);
         conf.setDedupFields(Collections.singletonList("D"));
 
         TransformationFlowParameters parameters = new TransformationFlowParameters();

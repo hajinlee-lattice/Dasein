@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS;
 import static com.latticeengines.domain.exposed.datacloud.dataflow.AccountMasterStatsParameters.HQ_DUNS_DOMAIN;
 
@@ -51,15 +52,21 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         // other than extract top cube, correctness is tested in the dataflow
         // functional tests
-        log.info("Start to verify records one by one.");
+        log.info("Start to verify records one by one ...");
         long count = 0;
+        long zeroCountAttrs = 0;
         while (records.hasNext()) {
             GenericRecord record = records.next();
             count++;
             record.getSchema().getFields().forEach(field -> Assert.assertFalse(dimensions.contains(field.name()),
                     "Found a dimension attr in filtered cube: " + field.name()));
+            if ((long) record.get(STATS_ATTR_COUNT) == 0L) {
+                zeroCountAttrs++;
+            }
         }
+        logger.info(count + " records in total, " + zeroCountAttrs + " has zero not null count");
         Assert.assertEquals(count, 25549);
+        Assert.assertTrue(zeroCountAttrs > 0, "Should have some attributes with zero count.");
     }
 
     @Override
@@ -125,7 +132,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         CalculateStatsConfig config = new CalculateStatsConfig();
         Map<String, List<String>> dims = new HashMap<>();
         dimensions.forEach(d -> dims.put(d, null));
-        config.setDimensionGraph(dims);
+        config.setDimensionTree(dims);
         config.setDedupFields(Arrays.asList(HQ_DUNS, HQ_DUNS_DOMAIN));
         String confStr = setDataFlowEngine(JsonUtils.serialize(config), "TEZ");
         step.setConfiguration(confStr);
@@ -135,7 +142,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
 
     private TransformationStepConfig extractTopCube() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(3));
+        step.setInputSteps(Arrays.asList(0, 3));
         step.setTransformer(ExtractCube.TRANSFORMER_NAME);
         TransformationFlowParameters.EngineConfiguration engineConf = new TransformationFlowParameters.EngineConfiguration();
         engineConf.setPartitions(1);

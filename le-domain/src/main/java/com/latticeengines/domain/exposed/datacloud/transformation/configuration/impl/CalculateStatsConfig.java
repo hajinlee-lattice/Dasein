@@ -13,18 +13,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CalculateStatsConfig extends TransformerConfig {
 
-    @JsonProperty("DimensionGraph")
-    private Map<String, List<String>> dimensionGraph;
+    @JsonProperty("DimensionTree")
+    private Map<String, List<String>> dimensionTree;
 
     @JsonProperty("DedupFields")
     private List<String> dedupFields;
 
-    public Map<String, List<String>> getDimensionGraph() {
-        return dimensionGraph;
+    public Map<String, List<String>> getDimensionTree() {
+        return dimensionTree;
     }
 
-    public void setDimensionGraph(Map<String, List<String>> dimensionGraph) {
-        this.dimensionGraph = dimensionGraph;
+    public void setDimensionTree(Map<String, List<String>> dimensionTree) {
+        this.dimensionTree = dimensionTree;
     }
 
     public List<String> getDedupFields() {

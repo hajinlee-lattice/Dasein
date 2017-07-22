@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
 import static com.latticeengines.datacloud.dataflow.transformation.ExtractCube.BEAN_NAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.PROFILE_ATTR_ATTRNAME;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_ALGO;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_BKTS;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
@@ -15,8 +16,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.StatsRollupAggregator;
@@ -32,6 +36,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 @Component(BEAN_NAME)
 public class ExtractCube extends ConfigurableFlowBase<TransformerConfig> {
 
+
+    private static final Logger logger = LoggerFactory.getLogger(ExtractCube.class);
     public static final String BEAN_NAME = "extractCube";
     public static final String TRANSFORMER_NAME = "CubeExtractor";
 
@@ -46,10 +52,30 @@ public class ExtractCube extends ConfigurableFlowBase<TransformerConfig> {
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
-        Node allCubes = addSource(parameters.getBaseTables().get(0));
+        Node node1 = addSource(parameters.getBaseTables().get(0));
+        Node node2 = addSource(parameters.getBaseTables().get(1));
+
+        Node allCubes;
+        Node profile;
+        if (BucketEncodeUtils.isProfileNode(node2)) {
+            logger.info("Second input is the profile.");
+            allCubes = node1;
+            profile = node2;
+        } else if (BucketEncodeUtils.isProfileNode(node1)) {
+            logger.info("First input is the profile.");
+            allCubes = node2;
+            profile = node1;
+        } else {
+            throw new RuntimeException("Neither of the input avro has the profile schema.");
+        }
+
         Map<String, String> cubeDef = getDimensions(allCubes.getFieldNames());
         Node cube = filter(allCubes, cubeDef);
-        return cube.retain(new FieldList(STATS_ATTRS));
+        cube = cube.retain(new FieldList(STATS_ATTRS));
+        Node stats = profile.leftJoin(STATS_ATTR_NAME, cube, PROFILE_ATTR_ATTRNAME);
+        stats = stats.apply(String.format("%s == null ? new Long(0) : %s", STATS_ATTR_COUNT, STATS_ATTR_COUNT), //
+                new FieldList(STATS_ATTR_COUNT), stats.getSchema(STATS_ATTR_COUNT));
+        return stats.sort(STATS_ATTR_NAME);
     }
 
     // (dim -> __ALL__)

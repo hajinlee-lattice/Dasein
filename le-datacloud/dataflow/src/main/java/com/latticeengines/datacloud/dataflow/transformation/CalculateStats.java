@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +57,6 @@ import cascading.tuple.Fields;
 @Component(BEAN_NAME)
 public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(CalculateStats.class);
 
     public static final String BEAN_NAME = "calculateStats";
@@ -89,11 +87,11 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
 
         Node source;
         Node profile;
-        if (isProfileNode(node2)) {
+        if (BucketEncodeUtils.isProfileNode(node2)) {
             log.info("Second input is the profile.");
             source = node1;
             profile = node2;
-        } else if (isProfileNode(node1)) {
+        } else if (BucketEncodeUtils.isProfileNode(node1)) {
             log.info("First input is the profile.");
             source = node2;
             profile = node1;
@@ -102,7 +100,7 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         }
 
         CalculateStatsConfig config = getTransformerConfig(parameters);
-        if (config.getDimensionGraph() != null && !config.getDimensionGraph().isEmpty()) {
+        if (config.getDimensionTree() != null && !config.getDimensionTree().isEmpty()) {
             extractDimensions(source, config);
         }
         if (config.getDedupFields() != null) {
@@ -125,9 +123,14 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         count = resumeAttrName(count);
 
         // join with profile data
-        Node stats = profile.leftJoin(ATTR_NAME, count, PROFILE_ATTR_ATTRNAME);
-        stats = stats.apply(String.format("%s == null ? new Long(0) : %s", ATTR_COUNT, ATTR_COUNT), //
-                new FieldList(ATTR_COUNT), stats.getSchema(ATTR_COUNT));
+        Node stats;
+        if (config.getDimensionTree() != null && !config.getDimensionTree().isEmpty()) {
+            stats = profile.innerJoin(ATTR_NAME, count, PROFILE_ATTR_ATTRNAME);
+        } else {
+            stats = profile.leftJoin(ATTR_NAME, count, PROFILE_ATTR_ATTRNAME);
+            stats = stats.apply(String.format("%s == null ? new Long(0) : %s", ATTR_COUNT, ATTR_COUNT), //
+                    new FieldList(ATTR_COUNT), stats.getSchema(ATTR_COUNT));
+        }
 
         // retain
         List<String> toRetain = new ArrayList<>(count.getFieldNames());
@@ -267,7 +270,6 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         } else {
             log.info("There will be " + paths.size() + " paths to roll up.");
         }
-        List<String> pathStrs = paths.stream().map(DimensionUtils::pathToString).collect(Collectors.toList());
         Map<String, Node> rollupNodes = new HashMap<>();
         List<String> fieldsInOrder = count.getFieldNames();
         for (List<AttrDimension> path : paths) {
@@ -353,17 +355,6 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
         return node.rename(new FieldList(modifiedName), new FieldList(originalName));
     }
 
-    private boolean isProfileNode(Node node) {
-        for (Extract extract : node.getSourceSchema().getExtracts()) {
-            Iterator<GenericRecord> recordIterator = AvroUtils.iterator(node.getHadoopConfig(), extract.getPath());
-            if (recordIterator.hasNext()) {
-                GenericRecord record = recordIterator.next();
-                return BucketEncodeUtils.isProfile(record);
-            }
-        }
-        return false;
-    }
-
     private void parseProfile(Node source, Node profile) {
         List<GenericRecord> records = new ArrayList<>();
         for (Extract extract : profile.getSourceSchema().getExtracts()) {
@@ -405,7 +396,7 @@ public class CalculateStats extends ConfigurableFlowBase<CalculateStatsConfig> {
     }
 
     private void extractDimensions(Node source, CalculateStatsConfig config) {
-        Map<String, List<String>> claimedDims = config.getDimensionGraph();
+        Map<String, List<String>> claimedDims = config.getDimensionTree();
         if (claimedDims == null || claimedDims.isEmpty()) {
             return;
         }
