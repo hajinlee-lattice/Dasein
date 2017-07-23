@@ -351,10 +351,17 @@ def teardown(stackname, apps=None, completely=False):
     if (apps is None) or completely:
         apps = ALL_APPS
 
-    for app in apps.split(","):
-        thread = DeleteServiceThread(stackname, app)
-        thread.start()
-        threads.append(thread)
+    app_list = apps.split(",")
+    count = 0
+    while count < app_list:
+        batch_size = 0
+        while batch_size < 6 and count < app_list:
+            app = app_list[count]
+            thread = DeleteServiceThread(stackname, app)
+            thread.start()
+            threads.append(thread)
+            count += 1
+            batch_size += 1
 
     for thread in threads:
         thread.join(120)
