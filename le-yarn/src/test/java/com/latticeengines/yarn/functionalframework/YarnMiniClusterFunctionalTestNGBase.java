@@ -7,8 +7,6 @@ import java.lang.reflect.Constructor;
 import java.net.ServerSocket;
 import java.util.Properties;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -34,6 +32,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
@@ -73,14 +72,12 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     @Value("${yarn.use.minicluster}")
     private boolean useMiniCluster;
 
-    @Resource(name = "yarnConfiguration")
-    private Configuration yarnConfiguration;
-
     private static final String JACOCO_AGENT_FILE = System.getenv("JACOCO_AGENT_FILE");
 
     private static final String JACOCO_DEST_FILE = System.getenv("JACOCO_DEST_FILE");
 
     private String jacocoDestFile;
+    private String miniClusterName;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -114,7 +111,9 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
 
         miniclusterConfiguration.setClass(YarnConfiguration.RM_SCHEDULER, CapacityScheduler.class,
                 ResourceScheduler.class);
-        miniCluster = new MiniYARNCluster("minicluster", 1, 1, 1);
+        miniClusterName = NamingUtils.uuid("minicluster");
+        log.info("MiniCluster Name is " + miniClusterName);
+        miniCluster = new MiniYARNCluster(miniClusterName, 1, 1, 1);
 
         if (StringUtils.isNotBlank(JACOCO_AGENT_FILE)) {
             jacocoDestFile = JACOCO_DEST_FILE;
