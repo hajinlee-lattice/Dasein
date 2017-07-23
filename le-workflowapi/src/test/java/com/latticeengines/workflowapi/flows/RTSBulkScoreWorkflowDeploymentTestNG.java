@@ -40,8 +40,6 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.RTSBulk
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
@@ -61,9 +59,6 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private TenantService tenantService;
 
     private static String TEST_INPUT_DATA_DIR;
 
@@ -191,8 +186,6 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     }
 
     private void score(String modelId, String tableToScore) throws Exception {
-        Tenant tenantWithPid = tenantService.findByTenantId(mainTestTenant.getId());
-        MultiTenantContext.setTenant(tenantWithPid);
         RTSBulkScoreWorkflowConfiguration configuration = rtsBulkScoreWorkflowSubmitter.generateConfiguration(modelId,
                 tableToScore, tableToScore, true, false);
         WorkflowExecutionId workflowId = workflowService.start(configuration);

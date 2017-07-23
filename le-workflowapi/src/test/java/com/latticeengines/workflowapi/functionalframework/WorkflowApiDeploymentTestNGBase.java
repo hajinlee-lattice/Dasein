@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
@@ -20,6 +21,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
@@ -30,6 +32,9 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
 
     @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed testBed;
+
+    @Autowired
+    private TenantService tenantService;
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
@@ -62,6 +67,8 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
      */
     protected void setupTestTenant() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        Tenant tenantWithPid = tenantService.findByTenantId(mainTestTenant.getId());
+        MultiTenantContext.setTenant(tenantWithPid);
     }
 
     protected void setupTestEnvironmentWithOneTenantForProduct(LatticeProduct product)

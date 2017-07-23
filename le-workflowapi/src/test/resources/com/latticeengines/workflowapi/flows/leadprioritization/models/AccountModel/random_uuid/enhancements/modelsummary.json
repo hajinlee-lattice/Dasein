@@ -18863,8 +18863,8 @@
     ], 
     "ModelDetails": {
         "Name": "testWorkflowAccount", 
-        "LookupID": "DemoContract.DemoTenant.Production|RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib|20a331e9-f18b-4358-8023-e44a36cb17dd", 
-        "ModelID": "{% modelId %}",
+        "LookupID": "DemoContract.DemoTenant.Production|RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib|{% uuid %}",
+        "ModelID": "ms__{% uuid %}-testWorkflow",
         "TotalLeads": 250, 
         "TestingLeads": 52, 
         "TrainingLeads": 198, 

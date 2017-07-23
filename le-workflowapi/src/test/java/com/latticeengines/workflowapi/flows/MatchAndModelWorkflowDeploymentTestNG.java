@@ -6,9 +6,11 @@ import static org.testng.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.commons.io.IOUtils;
@@ -16,6 +18,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -104,10 +107,19 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
     }
 
     protected void setupModels() throws IOException {
-        URL url = getClass().getClassLoader().getResource(RESOURCE_BASE + "/models/AccountModel");
+        String uuid = UUID.randomUUID().toString();
+        URL url = getClass().getClassLoader().getResource(RESOURCE_BASE + "/models/AccountModel/random_uuid");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(),
                 "/user/s-analytics/customers/" + mainTestCustomerSpace.toString()
-                        + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/");
+                        + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/" + uuid);
+        String summaryHdfsPath = "/user/s-analytics/customers/" + mainTestCustomerSpace.toString()
+                + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/" + uuid + "/enhancements/modelsummary.json";
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, summaryHdfsPath));
+
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(RESOURCE_BASE + "/models/AccountModel/random_uuid/enhancements/modelsummary.json");
+        String summary = IOUtils.toString(is, Charset.forName("UTF-8"));
+        summary = summary.replace("{% uuid %}", uuid);
+        HdfsUtils.writeToFile(yarnConfiguration, summaryHdfsPath, summary);
     }
 
     @Test(groups = "deployment", enabled = true)
