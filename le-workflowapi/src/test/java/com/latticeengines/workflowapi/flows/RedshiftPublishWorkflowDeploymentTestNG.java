@@ -82,7 +82,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         metadataProxy.deleteTable(mainTestCustomerSpace.toString(), targetTableName);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "initialLoad")
+    @Test(groups = "workflow", dependsOnMethods = "initialLoad")
     public void updateRows() throws Exception {
         String localFilePath = getClass().getClassLoader().getResource(RESOURCE_BASE + "/part-00001.avro").getPath();
         String tableName = AvroUtils.readSchemaFromLocalFile(localFilePath).getName();
