@@ -190,10 +190,10 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         @SuppressWarnings("deprecation")
         Job mrJob = new Job(jobConf);
 
+        overwriteAMQueueAssignment(properties);
+        overwriteContainerQueueAssignment(properties);
         mrJobCustomization.customize(mrJob, properties);
         if (properties != null) {
-            overwriteAMQueueAssignment(properties);
-            overwriteContainerQueueAssignment(properties);
             Configuration config = mrJob.getConfiguration();
             config.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
             for (Object key : properties.keySet()) {
