@@ -192,6 +192,8 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
 
         mrJobCustomization.customize(mrJob, properties);
         if (properties != null) {
+            overwriteAMQueueAssignment(properties);
+            overwriteContainerQueueAssignment(properties);
             Configuration config = mrJob.getConfiguration();
             config.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
             for (Object key : properties.keySet()) {
@@ -234,5 +236,21 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         } catch (IOException e) {
             throw new RuntimeException("Failed to find an available port.", e);
         }
+    }
+
+    private String overwriteQueueInternal(String queue) {
+        return LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+    }
+
+    private void overwriteAMQueueAssignment(Properties appMasterProperties) {
+        String queue = (String) appMasterProperties.get(AppMasterProperty.QUEUE.name());
+        if (queue != null)
+            appMasterProperties.put(AppMasterProperty.QUEUE.name(), overwriteQueueInternal(queue));
+    }
+
+    private void overwriteContainerQueueAssignment(Properties containerProperties) {
+        String queue = (String) containerProperties.get("QUEUE");
+        if (queue != null)
+            containerProperties.put("QUEUE", overwriteQueueInternal(queue));
     }
 }
