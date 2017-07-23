@@ -159,7 +159,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     public TalkingPointPreview getPreview(String playName, String customerSpace) {
         try {
             List<DanteTalkingPointValue> dtps = talkingPointEntityMgr.findAllByPlayName(playName).stream()
-                    .map(x -> new DanteTalkingPointValue(x)).collect(Collectors.toList());
+                    .map(DanteTalkingPointValue::new).collect(Collectors.toList());
             return new TalkingPointPreview(dtps);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38015, e, new String[] { playName, customerSpace });

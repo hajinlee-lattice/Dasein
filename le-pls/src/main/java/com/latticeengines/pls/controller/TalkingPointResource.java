@@ -2,8 +2,6 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
@@ -35,17 +34,15 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Plays')")
 public class TalkingPointResource {
 
-    private static final Logger log = LoggerFactory.getLogger(TalkingPointResource.class);
-
     @Autowired
-    TalkingPointProxy talkingPointProxy;
+    private TalkingPointProxy talkingPointProxy;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create a Talking Point")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<?> createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints) {
+    public SimpleBooleanResponse createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_38008);
@@ -57,14 +54,14 @@ public class TalkingPointResource {
     @ResponseBody
     @ApiOperation(value = "Get a Talking Point")
     public ResponseDocument<TalkingPointDTO> findByName(@PathVariable String name) {
-        return talkingPointProxy.findByName(name);
+        return ResponseDocument.successResponse(talkingPointProxy.findByName(name));
     }
 
     @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Find all Talking Points defined for the given play")
     public ResponseDocument<List<TalkingPointDTO>> findAllByPlayName(@PathVariable String playName) {
-        return talkingPointProxy.findAllByPlayName(playName);
+        return ResponseDocument.successResponse(talkingPointProxy.findAllByPlayName(playName));
     }
 
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
@@ -75,7 +72,7 @@ public class TalkingPointResource {
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        return talkingPointProxy.getPreviewResources(customerSpace.toString());
+        return ResponseDocument.successResponse(talkingPointProxy.getPreviewResources(customerSpace.toString()));
     }
 
     @RequestMapping(value = "/preview", method = RequestMethod.GET)
@@ -87,9 +84,10 @@ public class TalkingPointResource {
             if (customerSpace == null) {
                 throw new LedpException(LedpCode.LEDP_38008);
             }
-            return talkingPointProxy.getTalkingPointPreview(playName, customerSpace.toString());
+            return ResponseDocument.successResponse(talkingPointProxy.getTalkingPointPreview(playName, customerSpace.toString()));
         } catch (Exception e) {
-            return ResponseDocument.failedResponse(e);
+            // TODO: convert to some LedpException with Code
+            throw(e);
         }
     }
 
@@ -97,7 +95,7 @@ public class TalkingPointResource {
     @ResponseBody
     @ApiOperation(value = "Publish given play's Talking Points to dante")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<?> publish(@RequestParam("playName") String playName) {
+    public SimpleBooleanResponse publish(@RequestParam("playName") String playName) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_38008);
@@ -109,7 +107,7 @@ public class TalkingPointResource {
     @ResponseBody
     @ApiOperation(value = "Delete a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
-    public ResponseDocument<?> delete(@PathVariable String talkingPointName) {
+    public SimpleBooleanResponse delete(@PathVariable String talkingPointName) {
         return talkingPointProxy.delete(talkingPointName);
     }
 }

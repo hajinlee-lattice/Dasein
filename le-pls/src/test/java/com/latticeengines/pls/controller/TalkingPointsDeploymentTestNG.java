@@ -17,10 +17,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -30,20 +30,18 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-//import org.apache.htrace.fasterxml.jackson.databind.ObjectMapper;
-
-//import org.apache.htrace.fasterxml.jackson.databind.MapperFeature;
-
 public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
+
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(TalkingPointsDeploymentTestNG.class);
+
     private static final String PLAY_DISPLAY_NAME = "Test TP Plays hard";
     private static final String SEGMENT_NAME = "testTPSegment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private static Play play;
-    private final ObjectMapper objMapper = new ObjectMapper();
 
     @Autowired
-    PlayService playService;
+    private PlayService playService;
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
@@ -51,7 +49,6 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         play = createDefaultPlay();
         playService.createOrUpdate(play, mainTestTenant.getId());
         switchToExternalUser();
-        objMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -86,21 +83,21 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         tp1.setContent("PLS Deployment Test Talking Point no 2");
         tps.add(tp1);
 
-        ResponseDocument<?> createResponse = restTemplate.postForObject( //
+        SimpleBooleanResponse createResponse = restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints", //
                 tps, //
-                ResponseDocument.class);
+                SimpleBooleanResponse.class);
         Assert.assertNotNull(createResponse);
         Assert.assertNull(createResponse.getErrors());
 
-        ResponseDocument<List<TalkingPointDTO>> playTpsResponse = restTemplate.getForObject( //
+        ResponseDocument<List> playTpsResponse = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/play/" + play.getName(), //
                 ResponseDocument.class);
 
         Assert.assertNotNull(playTpsResponse);
         Assert.assertEquals(playTpsResponse.getResult().size(), 2);
-        tps = objMapper.convertValue(playTpsResponse.getResult(), new TypeReference<List<TalkingPointDTO>>() {
-        });
+        tps = JsonUtils.convertList(playTpsResponse.getResult(), TalkingPointDTO.class);
+        Assert.assertNotNull(tps);
         Assert.assertNotEquals(tps.get(0).getName(), "plsDeploymentTestTP1");
         Assert.assertNotEquals(tps.get(1).getName(), "plsDeploymentTestTP2");
 
@@ -110,7 +107,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         createResponse = restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints", //
                 tps, //
-                ResponseDocument.class);
+                SimpleBooleanResponse.class);
         Assert.assertNotNull(createResponse);
         Assert.assertNull(createResponse.getErrors());
 
@@ -120,8 +117,8 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         Assert.assertNotNull(playTpsResponse);
         Assert.assertEquals(playTpsResponse.getResult().size(), 2);
-        tps = objMapper.convertValue(playTpsResponse.getResult(), new TypeReference<List<TalkingPointDTO>>() {
-        });
+        tps = JsonUtils.convertList(playTpsResponse.getResult(), TalkingPointDTO.class);
+        Assert.assertNotNull(tps);
         Assert.assertEquals(tps.get(0).getOffset(), 2);
         Assert.assertEquals(tps.get(1).getOffset(), 1);
     }
@@ -129,19 +126,21 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     @SuppressWarnings({ "unchecked" })
     @Test(groups = { "deployment" }, dependsOnMethods = { "testTalkingPointsCrud" })
     public void testPreviewAndPublish() {
-        ResponseDocument<TalkingPointPreview> tpPreviewResponse = restTemplate.getForObject( //
+        String raw = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/preview?playName=" + play.getName(), //
-                ResponseDocument.class);
-
+                String.class);
+        ResponseDocument<TalkingPointPreview> tpPreviewResponse = JsonUtils.deserialize(raw,
+                new TypeReference<ResponseDocument<TalkingPointPreview>>() {
+                });
         Assert.assertNotNull(tpPreviewResponse);
         Assert.assertNull(tpPreviewResponse.getErrors());
-        TalkingPointPreview tpPreview = objMapper.convertValue(tpPreviewResponse.getResult(),
-                TalkingPointPreview.class);
+        TalkingPointPreview tpPreview = tpPreviewResponse.getResult();
+        Assert.assertNotNull(tpPreview);
         Assert.assertEquals(tpPreview.getNotionObject().getTalkingPoints().size(), 2);
 
-        ResponseDocument<?> publishResponse = restTemplate.postForObject( //
+        SimpleBooleanResponse publishResponse = restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
-                null, ResponseDocument.class);
+                null, SimpleBooleanResponse.class);
 
         Assert.assertNotNull(publishResponse);
         Assert.assertNull(publishResponse.getErrors());
@@ -155,25 +154,29 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
                         + tpPreview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID(),
                 ResponseDocument.class);
 
-        ResponseDocument<List<TalkingPointDTO>> playTpsResponse = restTemplate.getForObject( //
+        ResponseDocument<List> playTpsResponse = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/play/" + play.getName(), //
                 ResponseDocument.class);
 
         Assert.assertNotNull(playTpsResponse);
         Assert.assertEquals(playTpsResponse.getResult().size(), 0);
 
-        tpPreviewResponse = restTemplate.getForObject( //
+        raw = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/preview?playName=" + play.getName(), //
-                ResponseDocument.class);
+                String.class);
+        tpPreviewResponse = JsonUtils.deserialize(raw,
+                new TypeReference<ResponseDocument<TalkingPointPreview>>() {
+                });
 
         Assert.assertNotNull(tpPreviewResponse);
         Assert.assertNull(tpPreviewResponse.getErrors());
-        tpPreview = objMapper.convertValue(tpPreviewResponse.getResult(), TalkingPointPreview.class);
+        tpPreview = tpPreviewResponse.getResult();
+        Assert.assertNotNull(tpPreview);
         Assert.assertEquals(tpPreview.getNotionObject().getTalkingPoints().size(), 0);
 
         publishResponse = restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
-                null, ResponseDocument.class);
+                null, SimpleBooleanResponse.class);
 
         Assert.assertNotNull(publishResponse);
         Assert.assertNull(publishResponse.getErrors());
@@ -182,22 +185,23 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     @SuppressWarnings({ "unchecked" })
     @Test(groups = { "deployment" }, dependsOnMethods = { "testPreviewAndPublish" })
     public void testDantePreviewResources() {
-        ResponseDocument<DantePreviewResources> previewResponse = restTemplate.getForObject( //
+        String raw = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/previewresources", //
-                ResponseDocument.class);
-
+                String.class);
+        ResponseDocument<DantePreviewResources> previewResponse = JsonUtils.deserialize(raw,
+                new TypeReference<ResponseDocument<DantePreviewResources>>() {
+                });
         Assert.assertNotNull(previewResponse);
         Assert.assertNotNull(previewResponse.getResult());
 
-        ResponseDocument<?> publishResponse = restTemplate.postForObject( //
+        SimpleBooleanResponse publishResponse = restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
-                null, ResponseDocument.class);
+                null, SimpleBooleanResponse.class);
 
         Assert.assertNotNull(publishResponse);
         Assert.assertNull(publishResponse.getErrors());
-        ObjectMapper objMapper = new ObjectMapper();
-        objMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        DantePreviewResources dpr = objMapper.convertValue(previewResponse.getResult(), DantePreviewResources.class);
+        DantePreviewResources dpr = previewResponse.getResult();
+        Assert.assertNotNull(dpr);
         Assert.assertNotNull(dpr.getDanteUrl());
         Assert.assertNotNull(dpr.getServerUrl());
         Assert.assertNotNull(dpr.getoAuthToken());

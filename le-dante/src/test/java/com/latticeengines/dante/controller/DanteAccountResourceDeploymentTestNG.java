@@ -10,7 +10,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.proxy.exposed.dante.DanteAccountProxy;
 
@@ -23,10 +22,9 @@ public class DanteAccountResourceDeploymentTestNG extends AbstractTestNGSpringCo
     @Test(groups = "deployment")
     public void testGetAccounts() {
         // Todo: create test tenant, add accounts in dante and then test this
-        ResponseDocument<List<DanteAccount>> result = danteAccountProxy.getAccounts(10, "LECLEANX.LECLEANX.Production");
+        List<DanteAccount> result = danteAccountProxy.getAccounts(10, "LECLEANX.LECLEANX.Production");
 
         Assert.assertNotNull(result);
-        Assert.assertNull(result.getErrors());
-        Assert.assertEquals(result.getResult().size(), 10);
+        Assert.assertEquals(result.size(), 10);
     }
 }

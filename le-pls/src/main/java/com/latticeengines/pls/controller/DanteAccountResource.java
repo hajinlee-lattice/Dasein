@@ -2,8 +2,6 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,10 +26,9 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/dante/accounts")
 @PreAuthorize("hasRole('View_PLS_Plays')")
 public class DanteAccountResource {
-    private static final Logger log = LoggerFactory.getLogger(DanteAccountResource.class);
 
     @Autowired
-    DanteAccountProxy danteAccountProxy;
+    private DanteAccountProxy danteAccountProxy;
 
     @RequestMapping(value = "/{count}", method = RequestMethod.GET)
     @ResponseBody
@@ -41,6 +38,6 @@ public class DanteAccountResource {
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        return danteAccountProxy.getAccounts(count, customerSpace.toString());
+        return ResponseDocument.successResponse(danteAccountProxy.getAccounts(count, customerSpace.toString()));
     }
 }

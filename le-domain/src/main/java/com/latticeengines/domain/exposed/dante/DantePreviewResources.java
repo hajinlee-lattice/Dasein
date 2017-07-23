@@ -1,8 +1,23 @@
 package com.latticeengines.domain.exposed.dante;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DantePreviewResources {
+
+    @JsonProperty("danteUrl")
     private String danteUrl;
+
+    @JsonProperty("serverUrl")
     private String serverUrl;
+
+    @JsonProperty("oAuthToken")
+    private String oAuthToken;
 
     public String getDanteUrl() {
         return danteUrl;
@@ -19,8 +34,6 @@ public class DantePreviewResources {
     public void setServerUrl(String serverUrl) {
         this.serverUrl = serverUrl;
     }
-
-    private String oAuthToken;
 
     public DantePreviewResources() {
     }

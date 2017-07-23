@@ -2,8 +2,6 @@ package com.latticeengines.dante.controller;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.dante.service.DanteAccountService;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.network.exposed.dante.DanteAccountInterface;
 
@@ -24,16 +21,15 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/accounts")
 public class DanteAccountResource implements DanteAccountInterface {
-    private static final Logger log = LoggerFactory.getLogger(DanteAccountResource.class);
 
     @Autowired
-    DanteAccountService danteAccountService;
+    private DanteAccountService danteAccountService;
 
     @RequestMapping(value = "/{count}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get Dante accounts")
-    public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count,
+    public List<DanteAccount> getAccounts(@PathVariable int count,
             @RequestParam("customerSpace") String customerSpace) {
-        return ResponseDocument.successResponse(danteAccountService.getAccounts(count, customerSpace));
+        return danteAccountService.getAccounts(count, customerSpace);
     }
 }

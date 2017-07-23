@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.network.exposed.dante.DanteAccountInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -17,8 +17,9 @@ public class DanteAccountProxy extends MicroserviceRestApiProxy implements Dante
     }
 
     @SuppressWarnings("unchecked")
-    public ResponseDocument<List<DanteAccount>> getAccounts(int count, String customerSpace) {
+    public List<DanteAccount> getAccounts(int count, String customerSpace) {
         String url = constructUrl("/" + count + "?customerSpace=" + customerSpace);
-        return get("getAccounts", url, ResponseDocument.class);
+        List list = get("getAccounts", url, List.class);
+        return JsonUtils.convertList(list, DanteAccount.class);
     }
 }

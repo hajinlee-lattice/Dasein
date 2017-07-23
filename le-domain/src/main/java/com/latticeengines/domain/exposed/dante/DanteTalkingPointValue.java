@@ -31,6 +31,9 @@ public class DanteTalkingPointValue {
     @JsonProperty(value = "Title", index = 8)
     private String title;
 
+    // for jackson
+    private DanteTalkingPointValue() {}
+
     public DanteTalkingPointValue(TalkingPoint tp) {
         baseExternalID = tp.getName();
         content = tp.getContent();
