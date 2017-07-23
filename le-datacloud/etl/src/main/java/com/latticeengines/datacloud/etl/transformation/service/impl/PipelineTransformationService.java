@@ -31,6 +31,7 @@ import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloud.core.util.LoggingUtils;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.PipelineTransformationReportEntityMgr;
@@ -122,6 +123,29 @@ public class PipelineTransformationService extends AbstractTransformationService
     @Override
     public boolean isManualTriggerred() {
         return true;
+    }
+
+    @Override
+    public TransformationProgress startNewProgress(PipelineTransformationConfiguration config, String creator) {
+        checkTransformationConfigurationValidity(config);
+        TransformationProgress progress;
+        try {
+            progress = progressEntityMgr.findEarliestFailureUnderMaxRetry(getSource(), config.getVersion());
+
+            if (progress == null) {
+                progress = progressEntityMgr.insertNewProgress(config.getName(), getSource(), config.getVersion(),
+                        creator);
+            } else {
+                log.info("Retrying " + progress.getRootOperationUID());
+                progress.setNumRetries(progress.getNumRetries() + 1);
+                progress = progressEntityMgr.updateStatus(progress, ProgressStatus.NEW);
+            }
+            writeTransConfOutsideWorkflow(config, progress);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to start a new progress for " + getSource(), e);
+        }
+        LoggingUtils.logInfo(getLogger(), progress, "Started a new progress with version=" + config.getVersion());
+        return progress;
     }
 
     @Override

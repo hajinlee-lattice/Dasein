@@ -150,6 +150,7 @@ public class OrchestrationServiceImpl implements OrchestrationService {
         Orchestration orch = progress.getOrchestration();
         OrchestrationConfig config = orch.getConfig();
         DataCloudEngineStage currentStage = config.firstStage();
+        currentStage.setVersion(progress.getVersion());
         startJob(currentStage, progress.getHdfsPod());
         progress.setCurrentStage(currentStage);
         progress = orchestrationProgressService.updateSubmittedProgress(progress);
@@ -166,6 +167,7 @@ public class OrchestrationServiceImpl implements OrchestrationService {
             if (nextStage != null) { // Proceed next stage
                 nextStage.setStatus(ProgressStatus.NOTSTARTED);
                 nextStage.setVersion(progress.getVersion());
+                startJob(nextStage, progress.getHdfsPod());
                 progress = orchestrationProgressService.updateProgress(progress).currentStage(nextStage).message(null)
                         .commit(true);
             } else { // Finish the pipeline

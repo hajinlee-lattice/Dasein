@@ -40,7 +40,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public abstract class AbstractTransformationService<T extends TransformationConfiguration>
         implements TransformationService<T> {
 
-    private static Logger LOG = LoggerFactory.getLogger(AbstractTransformationService.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractTransformationService.class);
 
     private static final String SUCCESS_FLAG = "_SUCCESS";
     private static final String TRANSFORMATION_CONF = "_CONF";
@@ -126,10 +126,10 @@ public abstract class AbstractTransformationService<T extends TransformationConf
                     transformationConfiguration.getVersion());
 
             if (progress == null) {
-                progress = progressEntityMgr.insertNewProgress(getSource(), transformationConfiguration.getVersion(),
-                        creator);
+                progress = progressEntityMgr.insertNewProgress(null, getSource(),
+                        transformationConfiguration.getVersion(), creator);
             } else {
-                LOG.info("Retrying " + progress.getRootOperationUID());
+                log.info("Retrying " + progress.getRootOperationUID());
                 progress.setNumRetries(progress.getNumRetries() + 1);
                 progress = progressEntityMgr.updateStatus(progress, ProgressStatus.NEW);
             }
@@ -230,7 +230,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     protected boolean hasSuccessFlag(String pathForSuccessFlagLookup) throws IOException {
         String successFlagPath = pathForSuccessFlagLookup + HDFS_PATH_SEPARATOR + SUCCESS_FLAG;
-        LOG.info("Checking for success flag in " + pathForSuccessFlagLookup);
+        log.info("Checking for success flag in " + pathForSuccessFlagLookup);
         return HdfsUtils.fileExists(yarnConfiguration, successFlagPath);
     }
 
@@ -321,7 +321,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
                     HdfsUtils.mkdir(yarnConfiguration, sourceDir);
                 }
                 String avroFileName = new Path(avroFilePath).getName();
-                LOG.info("Move file from " + avroFilePath + " to " + new Path(sourceDir, avroFileName).toString());
+                log.info("Move file from " + avroFilePath + " to " + new Path(sourceDir, avroFileName).toString());
                 HdfsUtils.moveFile(yarnConfiguration, avroFilePath, new Path(sourceDir, avroFileName).toString());
             }
 
@@ -337,7 +337,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
                 } catch (Exception e) {
                     // We can log this exception and ignore this error as
                     // probably file does not even exists
-                    LOG.debug("Could not read version file", e);
+                    log.debug("Could not read version file", e);
                     currentMaxVersion = null;
                 }
                 // overwrite max version if progress's version is higher

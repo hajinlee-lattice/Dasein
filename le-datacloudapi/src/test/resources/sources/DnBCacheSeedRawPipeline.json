@@ -1,0 +1,21 @@
+{
+  "Submitter": "RestScanner",
+  "Name": "DnBCacheSeedRawPipeline",
+  "Steps": [
+    {
+      "Transformer": "ingestedFileToSourceTransformer",
+      "BaseSources": [
+        "IngestionSource"
+      ],
+      "TargetSource": "DnBCacheSeedRaw",
+      "Configuration": {"IngestionName":"DnB_Ingestion",
+                        "FileNameOrExtension":".OUT",
+                        "CompressedFileNameOrExtension":".OUT.gz",
+                        "CompressType":"GZ",
+                        "Delimiter":"|",
+                        "Qualifier":"\"",
+                        "Charset":"ISO-8859-1"
+      }
+    }
+  ]
+}

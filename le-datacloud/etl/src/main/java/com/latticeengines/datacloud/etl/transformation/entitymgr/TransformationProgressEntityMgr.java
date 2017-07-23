@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 
 public interface TransformationProgressEntityMgr {
 
-    TransformationProgress insertNewProgress(Source source, String version, String creator);
+    TransformationProgress insertNewProgress(String pipelineName, Source source, String version, String creator);
 
     TransformationProgress updateProgress(TransformationProgress progress);
 

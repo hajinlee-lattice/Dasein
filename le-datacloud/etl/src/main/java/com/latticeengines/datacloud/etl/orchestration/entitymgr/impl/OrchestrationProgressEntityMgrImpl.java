@@ -32,6 +32,12 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
     }
 
     @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public OrchestrationProgress findProgress(Long pid) {
+        return orchestrationProgressDao.findByKey(OrchestrationProgress.class, pid);
+    }
+
+    @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
     public OrchestrationProgress saveProgress(OrchestrationProgress progress) {
         String podIdInProgress = progress.getHdfsPod();
@@ -42,6 +48,7 @@ public class OrchestrationProgressEntityMgrImpl implements OrchestrationProgress
         } else if (StringUtils.isBlank(podIdInProgress)) {
             progress.setHdfsPod(podIdInContext);
         }
+        progress.setCurrentStage(progress.getCurrentStage()); // set currentStageStr
         orchestrationProgressDao.createOrUpdate(progress);
         return orchestrationProgressDao.findByKey(progress);
     }

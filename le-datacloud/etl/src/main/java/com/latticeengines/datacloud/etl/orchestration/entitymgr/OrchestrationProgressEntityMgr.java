@@ -10,6 +10,8 @@ public interface OrchestrationProgressEntityMgr {
 
     OrchestrationProgress findProgress(OrchestrationProgress progress);
 
+    OrchestrationProgress findProgress(Long pid);
+
     OrchestrationProgress saveProgress(OrchestrationProgress progress);
 
     void saveProgresses(List<OrchestrationProgress> progresses);

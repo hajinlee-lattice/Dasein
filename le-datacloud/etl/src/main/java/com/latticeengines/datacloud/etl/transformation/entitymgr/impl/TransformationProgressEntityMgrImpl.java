@@ -28,7 +28,8 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
 
     @Override
     @Transactional(value = "propDataManage")
-    public TransformationProgress insertNewProgress(Source source, String version, String creator) {
+    public TransformationProgress insertNewProgress(String pipelineName, Source source, String version,
+            String creator) {
         try {
             Date currentDate = new Date();
             Date endDate = new Date(currentDate.getTime() + TIME_24_HOUR_IN_MILLISECONDS);
@@ -37,6 +38,7 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
             newProgress.setCreatedBy(creator);
             newProgress.setVersion(version);
             newProgress.setHdfsPod(HdfsPodContext.getHdfsPodId());
+            newProgress.setPipelineName(pipelineName);
             progressDao.create(newProgress);
             return newProgress;
         } catch (IllegalAccessException | InstantiationException e) {

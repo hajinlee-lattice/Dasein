@@ -136,7 +136,6 @@ public class OrchestrationProgress implements HasPid, Serializable {
         this.currentStage = currentStage;
         this.currentStageStr = currentStage == null ? null
                 : currentStage.toString().substring(0, Math.min(STAGE_STR_LEN, currentStage.toString().length()));
-        System.out.println(currentStageStr);
     }
 
     @JsonIgnore

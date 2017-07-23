@@ -70,7 +70,6 @@ public class OrchestrationProgressServiceImpl implements OrchestrationProgressSe
         currentStage.setStatus(ProgressStatus.NOTSTARTED);
         currentStage.setProgress(null);
         currentStage.setMessage(null);
-        progress.setCurrentStage(currentStage); // Required, because currentStageStr needs to be set too
         orchestrationProgressEntityMgr.saveProgress(progress);
         return progress;
     }
