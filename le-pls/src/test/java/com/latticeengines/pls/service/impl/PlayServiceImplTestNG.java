@@ -1,6 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
@@ -11,7 +10,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.PlayService;
@@ -100,9 +98,13 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
         play.setSegmentName(SEGMENT_NAME);
         play.setCreatedBy(CREATED_BY);
 
-        List<TalkingPointDTO> tps = new ArrayList<>();
+        // cannot use other servers in a functional test
+        // need to either change this test to a deployment test
+        // or mock the proxy using mockit
+        // or mock dante server using StandaloneHttpServer
 
-        talkingPointProxy.createOrUpdate(tps, tenant1.getId());
+        // List<TalkingPointDTO> tps = new ArrayList<>();
+        // talkingPointProxy.createOrUpdate(tps, tenant1.getId());
 
         return play;
     }
