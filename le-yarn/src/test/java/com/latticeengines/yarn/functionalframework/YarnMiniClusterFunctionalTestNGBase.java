@@ -212,9 +212,9 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.overwriteQueueAssignment(
                 appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()), queueScheme));
 
-        if (StringUtils.isNotBlank(JACOCO_AGENT_FILE)) {
+        if (StringUtils.isNotBlank(JACOCO_AGENT_FILE) && StringUtils.isNotBlank(jacocoDestFile)) {
             containerProperties.put(ContainerProperty.JACOCO_AGENT_FILE.name(), JACOCO_AGENT_FILE);
-            containerProperties.put(jacocoDestFile, jacocoDestFile);
+            containerProperties.put(ContainerProperty.JACOCO_DEST_FILE.name(), jacocoDestFile);
         }
 
         ClientRmTemplate clientTemplate = new ClientRmTemplate(miniclusterConfiguration);
