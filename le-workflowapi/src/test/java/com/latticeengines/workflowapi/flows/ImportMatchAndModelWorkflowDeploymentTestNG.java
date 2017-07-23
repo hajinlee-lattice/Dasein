@@ -25,7 +25,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
     @Autowired
     private ModelNotesService modelNotesService;
 
-    @Test(groups = "deployment")
+    @Test(groups = "workflow")
     public void modelSmallAccountData() throws Exception {
         SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/AccountSmallDataUpdated.csv",
                 SchemaInterpretation.SalesforceAccount);
@@ -48,7 +48,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         assertEquals(note.getNotesContents(), "this is a test case!");
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "workflow", enabled = false)
     public void modelLead() throws Exception {
         SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Lead.csv", SchemaInterpretation.SalesforceLead);
         ModelingParameters params = new ModelingParameters();

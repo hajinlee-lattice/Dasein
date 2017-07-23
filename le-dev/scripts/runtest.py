@@ -31,17 +31,22 @@ def commonOpts():
     return args
 
 def testOpts(args):
-    opts = ['-Pgenerate'] if args.project == 'security' else []
-    if args.groups is None:
-        testPattern = '-Dtest=%s' % args.test if args.test[-6:] == 'TestNG' else '-Dtest=*%s*' % args.test
-        return opts + ['-P%s' % p for p in args.profiles.split(',')] + [testPattern, 'clean'] +  args.command.split(',')
+    testPattern = '-Dtest=%s' % args.test if args.test[-6:] == 'TestNG' else '-Dtest=*%s*' % args.test
+    if args.xml:
+        profiles = [p for p in args.profiles.split(",") if p not in ('functional', 'deployment')]
+        profiles.append('testng')
+        testng_xml = '-Dtestng.xml=src/test/resources/testng/%s.xml' % args.xml
+        return ['-P%s' % p for p in profiles] + [testng_xml, testPattern, 'clean'] +  args.command.split(',')
+    elif args.groups is None:
+        return ['-P%s' % p for p in args.profiles.split(',')] + [testPattern, 'clean'] +  args.command.split(',')
     else:
-        return opts + ['-P%s' % p for p in args.profiles.split(',')] + ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups, '-Dtest=*%s*' % args.test, 'clean'] + args.command.split(',')
+        return ['-P%s' % p for p in args.profiles.split(',')] + ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups, testPattern, 'clean'] + args.command.split(',')
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Run test(s) using maven.')
     parser.add_argument('project', type=str, help='project name. e.g. pls, propdata, eai')
     parser.add_argument('-p', dest='profiles', type=str, default='functional', help='comma separated list of maven profiles. default is functional')
+    parser.add_argument('-x', dest='xml', type=str, default='', help='testng xml in src/test/resources. when this is set, it will ignore -p and hard code profile to be testng')
     parser.add_argument('-g', dest='groups', type=str, default=None,
                         help='test groups (optional). can set multiple by comma separated list.')
     parser.add_argument('-t', dest='test', type=str, default='',
@@ -54,6 +59,7 @@ def parseCliArgs():
 
 if __name__ == "__main__":
     args = parseCliArgs()
+
     chdirToProjectDir('le-' + args.project)
     print 'Executing [with common opts added]: ' + ' '.join(['mvn'] + testOpts(args))
     my_env = os.environ

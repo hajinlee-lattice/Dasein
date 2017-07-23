@@ -19,14 +19,14 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
 
     WorkflowExecutionId workflowId = null;
 
-    @Test(groups = "deployment")
+    @Test(groups = "workflow")
     public void testWorkflow() throws Exception {
         PlayLaunchWorkflowConfiguration configuration = generatePlayLaunchWorkflowConfiguration();
         workflowService.registerJob(configuration.getWorkflowName(), applicationContext);
         workflowId = workflowService.start(configuration);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testWorkflow" }, expectedExceptions = AssertionError.class)
+    @Test(groups = "workflow", dependsOnMethods = { "testWorkflow" }, expectedExceptions = AssertionError.class)
     public void testWorkflowStatus() throws Exception {
         waitForCompletion(workflowId);
     }

@@ -59,7 +59,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
     private String modelDisplayName;
     private int modelCount = 1;
 
-    @Test(groups = "deployment", dataProvider = "pmmlFileNameProvider", enabled = true)
+    @Test(groups = "workflow", dataProvider = "pmmlFileNameProvider", enabled = true)
     public void testWorkflow(String pmmlFileName, String pivotValueFileName) throws Exception {
         setupFiles(mainTestCustomerSpace, pmmlFileName, pivotValueFileName);
         PMMLModelWorkflowConfiguration configuration = generatePMMLModelWorkflowConfiguration();

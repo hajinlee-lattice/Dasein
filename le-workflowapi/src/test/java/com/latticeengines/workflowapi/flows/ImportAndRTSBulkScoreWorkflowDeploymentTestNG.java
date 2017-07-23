@@ -20,7 +20,7 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
 
     private SourceFile sourceFile;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
         super.setup();
         sourceFile = uploadFile(RESOURCE_BASE + "/csvfiles/Account.csv", SchemaInterpretation.SalesforceAccount);
@@ -28,7 +28,7 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
     }
 
     @Override
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "workflow", enabled = false)
     public void scoreAccount() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);

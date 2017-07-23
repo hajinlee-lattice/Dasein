@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="WorkflowApiDeploymentTests" parallel="classes" annotations="JDK" >
+    <groups>
+        <run>
+            <include name="workflow"/>
+        </run>
+    </groups>
+    <test name="Workflows" >
+        <packages>
+            <package name="com.latticeengines.workflowapi.flows" />
+        </packages>
+    </test>
+</suite>

@@ -81,7 +81,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
     private ModelSummary summary;
 
     @Override
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
         super.setup();
         TEST_INPUT_DATA_DIR = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), mainTestCustomerSpace)
@@ -144,7 +144,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         return selectedAttributeMap;
     }
 
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "workflow")
     public void cleanup() throws IOException {
         HdfsUtils.rmdir(yarnConfiguration, artifactTableDir);
         HdfsUtils.rmdir(yarnConfiguration, artifactBaseDir);
@@ -153,7 +153,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         HdfsUtils.rmdir(yarnConfiguration, SCORED_FILE_DIR);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "workflow")
     public void testScoreAccount() throws Exception {
         Assert.assertNotNull(summary);
         score(summary.getId(), summary.getTrainingTableName());

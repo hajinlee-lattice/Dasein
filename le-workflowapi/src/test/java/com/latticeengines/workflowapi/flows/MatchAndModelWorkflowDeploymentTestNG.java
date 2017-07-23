@@ -79,7 +79,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
     @Autowired
     private ModelNotesService modelNotesService;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
         super.setup();
         setupTables();

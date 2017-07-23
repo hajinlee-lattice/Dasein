@@ -47,13 +47,13 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
 
     private String targetTableName;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         targetTableName = String.join("_", mainTestCustomerSpace.getTenantId(), BusinessEntity.Account.name());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "workflow")
     public void initialLoad() throws Exception {
         String localFilePath = getClass().getClassLoader().getResource(RESOURCE_BASE + "/part-00000.avro").getPath();
         String tableName = AvroUtils.readSchemaFromLocalFile(localFilePath).getName();

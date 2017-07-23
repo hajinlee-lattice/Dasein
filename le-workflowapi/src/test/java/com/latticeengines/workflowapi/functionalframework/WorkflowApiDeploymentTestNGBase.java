@@ -51,7 +51,7 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
     }
 
     @Override
-    @BeforeClass(groups = { "deployment" })
+    @BeforeClass(groups = { "deployment", "workflow" })
     public void setup() throws Exception {
         setupTestTenant();
         if (softwareLibraryService != null) {

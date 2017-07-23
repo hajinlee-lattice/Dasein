@@ -44,7 +44,7 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
     @Autowired
     private WorkflowTranslator workflowTranslator;
 
-    @Test(groups = "functional")
+    @Test(groups = "workflow")
     public void test() throws Exception {
         SetConfigurationForScoring setConfigurationForScoring = new SetConfigurationForScoring();
         setConfigurationForScoring.setBeanName("setConfigurationForScoring");

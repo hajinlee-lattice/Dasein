@@ -52,7 +52,7 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
 
     private Table accountTable;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
         setup();
         setupTables();
@@ -61,7 +61,7 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
     }
 
     @Override
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "workflow", enabled = false)
     public void scoreAccount() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);

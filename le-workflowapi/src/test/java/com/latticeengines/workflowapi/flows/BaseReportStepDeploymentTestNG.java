@@ -25,7 +25,7 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
     @Autowired
     private ReportService reportService;
 
-    @Test(groups = "deployment")
+    @Test(groups = "workflow")
     public void testRegisterReport() throws Exception {
         TestReportWorkflowConfiguration configuration = generateConfiguration();
         WorkflowExecutionId workflowId = workflowService.start(configuration);

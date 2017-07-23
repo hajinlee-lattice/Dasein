@@ -40,7 +40,7 @@ public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkfl
 
     private Table accountTable;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
         super.setup();
         setupTables();
@@ -80,7 +80,7 @@ public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkfl
                         + "/data/RunMatchWithLEUniverse_152722_DerivedColumnsCache_with_std_attrib-Event-Metadata/datacomposition.json");
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "workflow", enabled = false)
     public void scoreAccount() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
