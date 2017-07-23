@@ -79,7 +79,9 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
         waitForCompletion(workflowId);
 
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
-        assertEquals(summaries.size(), modelCount++);
+        long numSummariesInTenant = summaries.stream()
+                .filter(summary -> summary.getTenant().getId().equals(mainTestTenant.getId())).count();
+        assertEquals(numSummariesInTenant, modelCount++);
         for (ModelSummary summary : summaries) {
             if (summary.getName().startsWith(modelName)) {
                 assertEquals(summary.getStatus(), ModelSummaryStatus.INACTIVE);
