@@ -15,28 +15,23 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.HGDataRaw;
 import com.latticeengines.datacloud.dataflow.transformation.HGDataCleanFlow;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.HGDataCleanConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class HGDataCleanTestNG
-        extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
 
     private static final Logger log = LoggerFactory.getLogger(HGDataCleanTestNG.class);
 
-    GeneralSource source = new GeneralSource("HGDataClean");
     @Autowired
     HGDataRaw baseSource;
 
     ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "pipeline1")
+    @Test(groups = "pipeline2")
     public void testTransformation() {
         uploadBaseAvro(baseSource, baseSourceVersion);
         TransformationProgress progress = createNewProgress();
@@ -47,25 +42,13 @@ public class HGDataCleanTestNG
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
-    }
-
-    @Override
-    protected Source getSource() {
-        return source;
+    protected String getTargetSourceName() {
+        return "HGDataClean";
     }
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
-    @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(getTargetSourceName(), targetVersion).toString();
     }
 
     @Override
@@ -80,9 +63,9 @@ public class HGDataCleanTestNG
             baseSources.add(baseSource.getSourceName());
             step1.setBaseSources(baseSources);
             step1.setTransformer(HGDataCleanFlow.TRANSFORMER_NAME);
-            step1.setTargetSource(source.getSourceName());
+            step1.setTargetSource(getTargetSourceName());
             String confParamStr1 = getHGDataCleanConfig();
-            step1.setConfiguration(confParamStr1);
+            step1.setConfiguration(setDataFlowEngine(confParamStr1, "TEZ"));
 
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();

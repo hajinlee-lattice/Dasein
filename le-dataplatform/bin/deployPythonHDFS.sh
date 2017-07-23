@@ -1,9 +1,9 @@
 #!/bin/bash
 
-$HADOOP_HOME/bin/hadoop fs -rm -f -r /app/dataplatform
-$HADOOP_HOME/bin/hadoop fs -mkdir /app/dataplatform
-$HADOOP_HOME/bin/hadoop fs -rm -f -r /app/playmaker
-$HADOOP_HOME/bin/hadoop fs -mkdir -p /app/playmaker/evmodel
+hdfs dfs -rm -f -r /app/dataplatform || true
+hdfs dfs -mkdir /app/dataplatform || true
+hdfs dfs -rm -f -r /app/playmaker || true
+hdfs dfs -mkdir -p /app/playmaker/evmodel || true
 
 rm -rf /tmp/app
 mkdir -p /tmp/app/dataplatform/scripts/algorithm
@@ -28,6 +28,4 @@ cp src/main/python/evpipeline/evpipeline.py /tmp/app/playmaker/evmodel
 cp src/main/python/algorithm/*.py /tmp/app/dataplatform/scripts/algorithm
 cp src/main/scripts/pythonlauncher.sh /tmp/app/dataplatform/scripts
 
-
-
-$HADOOP_HOME/bin/hadoop fs -copyFromLocal /tmp/app /
+hdfs dfs -copyFromLocal /tmp/app /
