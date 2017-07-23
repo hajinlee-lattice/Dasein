@@ -353,9 +353,9 @@ def teardown(stackname, apps=None, completely=False):
 
     app_list = apps.split(",")
     count = 0
-    while count < app_list:
+    while count < len(app_list):
         batch_size = 0
-        while batch_size < 6 and count < app_list:
+        while batch_size < 6 and count < len(app_list):
             app = app_list[count]
             thread = DeleteServiceThread(stackname, app)
             thread.start()
