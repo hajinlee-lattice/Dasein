@@ -122,7 +122,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         HdfsUtils.writeToFile(yarnConfiguration, summaryHdfsPath, summary);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "workflow", enabled = true)
     public void modelAccountData() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);

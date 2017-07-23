@@ -13,12 +13,12 @@ public class FitModelWorkflowInContainerDeploymentTestNG extends FitModelWorkflo
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(FitModelWorkflowInContainerDeploymentTestNG.class);
 
-    @BeforeClass(groups = { "deployment" })
+    @BeforeClass(groups = { "workflow" })
     public void setup() throws Exception {
         setupForFitModel();
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "workflow", enabled = false)
     public void testWorkflowInContainer() throws Exception {
         FitModelWorkflowConfiguration workflowConfig = generateFitModelWorkflowConfiguration();
 

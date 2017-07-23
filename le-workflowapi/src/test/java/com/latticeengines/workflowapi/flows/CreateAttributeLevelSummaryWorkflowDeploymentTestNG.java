@@ -41,12 +41,12 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
 
     private TargetMarket defaultTargetMarket;
 
-    @BeforeClass(groups = { "deployment" })
+    @BeforeClass(groups = { "workflow" })
     public void setup() throws Exception {
         setupForAttributeLevelSummary();
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "workflow", enabled = false)
     public void testWorkflow() throws Exception {
         CreateAttributeLevelSummaryWorkflowConfiguration workflowConfig = generateWorkflowConfiguration();
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
