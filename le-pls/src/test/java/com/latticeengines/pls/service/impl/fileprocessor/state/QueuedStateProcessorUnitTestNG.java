@@ -20,10 +20,11 @@ import com.latticeengines.domain.exposed.pls.FilePayload;
 import com.latticeengines.pls.service.impl.fileprocessor.FileProcessingState;
 
 public class QueuedStateProcessorUnitTestNG  {
-    
-    private File dataDir = new File("/tmp/data");
-    private File queuedDir = new File("/tmp/queued");
-    private File processingDir = new File("/tmp/processing");
+
+    private String root = "/tmp/queuestatetest";
+    private File dataDir = new File(root + "/data");
+    private File queuedDir = new File(root + "/queued");
+    private File processingDir = new File(root + "/processing");
     private QueuedStateProcessor processor = new QueuedStateProcessor();
     private final static String TENANT = "DemoContract.DemoTenant.Production";
 
@@ -50,7 +51,7 @@ public class QueuedStateProcessorUnitTestNG  {
     
     @Test(groups = "unit")
     public void processDir() throws Exception {
-        processor.processDir(new File("/tmp"), FileProcessingState.QUEUED, null, new Properties());
+        processor.processDir(new File(root), FileProcessingState.QUEUED, null, new Properties());
         
         assertTrue(queuedDir.exists());
         Collection<File> files = FileUtils.listFiles(queuedDir, new String[] { "json" }, false); 
@@ -59,13 +60,13 @@ public class QueuedStateProcessorUnitTestNG  {
         for (File f : files) {
             FilePayload payload = JsonUtils.deserialize(FileUtils.readFileToString(f), FilePayload.class);
             assertEquals(payload.customerSpace, TENANT);
-            File dataFile = new File("/tmp/data/" + processor.stripExtension(f)[1] + ".csv");
+            File dataFile = new File(root + "/data/" + processor.stripExtension(f)[1] + ".csv");
             assertEquals(payload.filePath, dataFile.getAbsolutePath());
             fileToTimestampMap.put(dataFile.getName(), dataFile.lastModified());
         }
         // Create 5 more files in the data directory then process
         createFiles(5, TENANT, dataDir);
-        processor.processDir(new File("/tmp"), FileProcessingState.QUEUED, null, new Properties());
+        processor.processDir(new File(root), FileProcessingState.QUEUED, null, new Properties());
         files = FileUtils.listFiles(queuedDir, new String[] { "json" }, false);
         assertEquals(files.size(), 10);
         
@@ -93,7 +94,7 @@ public class QueuedStateProcessorUnitTestNG  {
             i++;
         }
         // Out of the 10 data files, 5 are in QUEUED state and 5 are in PROCESSING state.
-        processor.processDir(new File("/tmp"), FileProcessingState.QUEUED, null, new Properties());
+        processor.processDir(new File(root), FileProcessingState.QUEUED, null, new Properties());
         files = FileUtils.listFiles(queuedDir, new String[] { "json" }, false);
         // No new payload files should be been created for the QUEUED state
         assertEquals(files.size(), 5);
