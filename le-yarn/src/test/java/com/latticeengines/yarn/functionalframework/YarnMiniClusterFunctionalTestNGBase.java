@@ -74,8 +74,6 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
 
     private static final String JACOCO_AGENT_FILE = System.getenv("JACOCO_AGENT_FILE");
 
-    private static final String JACOCO_DEST_FILE = System.getenv("JACOCO_DEST_FILE");
-
     private String jacocoDestFile;
     private String miniClusterName;
 
@@ -116,7 +114,7 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         miniCluster = new MiniYARNCluster(miniClusterName, 1, 1, 1);
 
         if (StringUtils.isNotBlank(JACOCO_AGENT_FILE)) {
-            jacocoDestFile = JACOCO_DEST_FILE;
+            jacocoDestFile = System.getenv("JACOCO_DEST_FILE");
             if (StringUtils.isBlank(jacocoDestFile)) {
                 jacocoDestFile = logDir + "/jacoco.exec";
             }
@@ -216,7 +214,7 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
 
         if (StringUtils.isNotBlank(JACOCO_AGENT_FILE)) {
             containerProperties.put(ContainerProperty.JACOCO_AGENT_FILE.name(), JACOCO_AGENT_FILE);
-            containerProperties.put(ContainerProperty.JACOCO_DEST_FILE.name(), jacocoDestFile);
+            containerProperties.put(jacocoDestFile, jacocoDestFile);
         }
 
         ClientRmTemplate clientTemplate = new ClientRmTemplate(miniclusterConfiguration);
