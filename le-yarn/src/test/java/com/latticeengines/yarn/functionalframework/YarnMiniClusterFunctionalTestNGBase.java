@@ -7,6 +7,8 @@ import java.lang.reflect.Constructor;
 import java.net.ServerSocket;
 import java.util.Properties;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -68,6 +70,12 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     @Value("${dataplatform.queue.scheme:legacy}")
     protected String queueScheme;
 
+    @Value("${yarn.use.minicluster}")
+    private boolean useMiniCluster;
+
+    @Resource(name = "yarnConfiguration")
+    private Configuration yarnConfiguration;
+
     private static final String JACOCO_AGENT_FILE = System.getenv("JACOCO_AGENT_FILE");
 
     private static final String JACOCO_DEST_FILE = System.getenv("JACOCO_DEST_FILE");
@@ -76,14 +84,21 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        setupMiniCluster();
-        uploadArtifactsToHdfs();
+        log.info("useMiniCluster=" + useMiniCluster);
+        if (useMiniCluster) {
+            setupMiniCluster();
+            uploadArtifactsToHdfs();
+        } else {
+            miniclusterConfiguration = yarnConfiguration;
+        }
     }
 
     @AfterClass(groups = "functional")
     public void clear() throws IOException {
-        miniCluster.close();
-        hdfsCluster.shutdown();
+        if (useMiniCluster) {
+            miniCluster.close();
+            hdfsCluster.shutdown();
+        }
     }
 
     public void setupMiniCluster() throws IOException {

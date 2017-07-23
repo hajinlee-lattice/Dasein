@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="WorkflowApiDeploymentTests" parallel="classes" annotations="JDK" >
+<suite name="WorkflowApiDeploymentTests">
     <groups>
         <run>
             <include name="workflow"/>
