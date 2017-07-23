@@ -362,11 +362,15 @@ def teardown(stackname, apps=None, completely=False):
             threads.append(thread)
             count += 1
             batch_size += 1
+        for thread in threads:
+            thread.join(120)
+        time.sleep(20)
+        threads = []
 
-    for thread in threads:
-        thread.join(120)
-
-    time.sleep(20)
+    if len(threads) > 0:
+        for thread in threads:
+            thread.join(120)
+        time.sleep(20)
 
     if completely:
         client = boto3.client('cloudformation')
