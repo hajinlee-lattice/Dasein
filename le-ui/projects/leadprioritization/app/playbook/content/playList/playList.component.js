@@ -16,10 +16,10 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
                 label: 'Sort By',
                 icon: 'numeric',
                 order: '-',
-                property: 'timestamp',
+                property: 'timeStamp',
                 items: [
-                    { label: 'Creation Date',   icon: 'numeric',    property: 'timestamp' },
-                    { label: 'Play Name',      icon: 'alpha',      property: 'dislay_name' }
+                    { label: 'Creation Date',   icon: 'numeric',    property: 'timeStamp' },
+                    { label: 'Play Name',      icon: 'alpha',      property: 'displayName' }
                 ]
             },
             filter: {
@@ -89,7 +89,7 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
     vm.editPlayClick = function($event, play){
         $event.stopPropagation();
 
-        oldPlayDisplayName = play.display_name;
+        oldPlayDisplayName = play.displayName;
 
         var tileState = vm.tileStates[play.name];
         tileState.showCustomMenu = !tileState.showCustomMenu;
@@ -99,7 +99,7 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
     vm.cancelEditPlayClicked = function($event, play) {
         $event.stopPropagation();
 
-        play.display_name = oldPlayDisplayName;
+        play.displayName = oldPlayDisplayName;
         oldPlayDisplayName = '';
 
         var tileState = vm.tileStates[play.name];
@@ -115,7 +115,7 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
 
         var updatedPlay = {
             name: play.name,
-            display_name: play.display_name
+            displayName: play.displayName
         }
 
         updatePlay(updatedPlay);

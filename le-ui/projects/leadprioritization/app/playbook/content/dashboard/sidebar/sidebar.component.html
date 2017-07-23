@@ -4,7 +4,7 @@
             <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
         </a>
     </div>
-    <ul class="menu model-view">
+    <ul class="menu playbook-view">
         <li role="presentation">
             <a ui-sref="home.playbook">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}">
@@ -16,7 +16,7 @@
         <li role="presentation" ui-sref-active-eq="active" ng-disabled="menuDisabled || dashboardDisabled">
             <a ui-sref="home.playbook.dashboard({play_name: play_name})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}">
-                    <span class="ico ico-analysis ico-light-gray"></span>
+                    <span class="ico ico-insights ico-light-gray"></span>
                 </span>
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}</span>
             </a>
@@ -24,7 +24,7 @@
         <li role="presentation" ui-sref-active="active" ng-disabled="menuDisabled || targetsDisabled">
             <a ui-sref="home.playbook.dashboard.targets({play_name: play_name})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS')}}">
-                    <span class="ico ico-alerts ico-light-gray"></span>
+                    <span class="ico ico-targets ico-light-gray"></span>
                 </span>
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS')}}</span>
             </a>

@@ -148,7 +148,7 @@ angular.module('lp.playbook')
         if (segment) {
             this.getPlay(play_name).then(function(play){
                 PlaybookWizardStore.savePlay({
-                    display_name: play.display_name,
+                    displayName: play.displayName,
                     name: play.name,
                     segment: segment.name
                 }).then(function(response){

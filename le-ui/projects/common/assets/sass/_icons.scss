@@ -305,6 +305,41 @@ Icons
 		-webkit-mask-image: url("/assets/images/enrichments/ico-attr-website-profile.svg");
 		mask: url("/assets/images/enrichments/ico-attr-website-profile.svg");
     }
+    &.ico-insights {
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/ico-insights.svg");
+		mask: url("/assets/images/ico-insights.svg");
+    }
+    &.ico-launch {
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/ico-launch.svg");
+		mask: url("/assets/images/ico-launch.svg");
+    }
+    &.ico-preview {
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/ico-preview.svg");
+		mask: url("/assets/images/ico-preview.svg");
+    }
+    &.ico-playbook-ratings {
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/ico-ratings.svg");
+		mask: url("/assets/images/ico-ratings.svg");
+    }
+    &.ico-playbook-segments {
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/ico-segments.svg");
+		mask: url("/assets/images/ico-segments.svg");
+    }
+    &.ico-settings {
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/ico-settings.svg");
+		mask: url("/assets/images/ico-settings.svg");
+    }
+    &.ico-targets {
+		background-color: $pearl-white;
+		-webkit-mask-image: url("/assets/images/ico-targets.svg");
+		mask: url("/assets/images/ico-targets.svg");
+	}
     &.ico-lattice-dots {
     	height: 15px;
     	width: 14px;

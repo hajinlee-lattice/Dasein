@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 45.1 (43504) - http://www.bohemiancoding.com/sketch -->
+    <title>launch-icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="All-NEW" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="launch-icon">
+            <circle id="Oval-2" stroke="#333333" stroke-width="2" cx="12" cy="12" r="11"></circle>
+            <path d="M13.1345,7.36849992 L10.077,10.4259999 L8.5,12.0029999 L10.077,13.5799999 L13.1345,16.6374999 L13.1345,16.6374999 C13.5699765,17.0729764 14.2760235,17.0729764 14.7115,16.6374999 L14.7115,16.6374999 L14.7115,16.6374999 C15.1469765,16.2020234 15.1469765,15.4959764 14.7115,15.0604999 L11.654,12.0029999 L14.7115,8.94549992 L14.7115,8.94549992 C15.1469765,8.5100234 15.1469765,7.80397645 14.7115,7.36849992 L14.7115,7.36849992 L14.7115,7.36849992 C14.2760235,6.9330234 13.5699765,6.9330234 13.1345,7.36849992 Z" id="Fill-87" fill="#333333" transform="translate(12.000000, 12.003000) rotate(-180.000000) translate(-12.000000, -12.003000) "></path>
+        </g>
+    </g>
+</svg>
