@@ -19,12 +19,6 @@ if CATALINA_HOME is None or CATALINA_HOME == '':
 else:
     print 'CATALINA_HOME=%s' % CATALINA_HOME
 
-HADOOP_COMMON_JAR = os.environ['HADOOP_COMMON_JAR']
-if HADOOP_COMMON_JAR is None or HADOOP_COMMON_JAR == '':
-    raise Error('HADOOP_COMMON_JAR is not defined')
-else:
-    print 'HADOOP_COMMON_JAR=%s' % HADOOP_COMMON_JAR
-
 LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
               'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante', 'cdl']
