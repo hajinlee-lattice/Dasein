@@ -5,6 +5,6 @@
 
     <import resource="classpath:modelquality-context.xml" />
     <import resource="classpath:common-properties-context.xml" />
-    <import resource="classpath:test-testframework-testbed-context.xml"/>
+    <import resource="classpath:testframework-context.xml"/>
 
 </beans>
