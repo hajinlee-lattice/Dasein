@@ -30,7 +30,7 @@ public class YarnServiceImplTestNG extends YarnFunctionalTestNGBase {
     @Autowired
     private YarnService yarnService;
 
-    @Test(groups = { "functionalm" })
+    @Test(groups = { "functional" })
     public void getSchedulerInfo() {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         assertNotNull(schedulerInfo);

@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.net.ServerSocket;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
@@ -22,6 +22,8 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.client.ClientRmTemplate;
@@ -66,9 +68,11 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     @Value("${dataplatform.queue.scheme:legacy}")
     protected String queueScheme;
 
-    public static final String JACOCO_AGENT_FILE = System.getenv("JACOCO_AGENT_FILE");
+    private static final String JACOCO_AGENT_FILE = System.getenv("JACOCO_AGENT_FILE");
 
-    public static final String JACOCO_DEST_FILE = System.getenv("JACOCO_DEST_FILE");
+    private static final String JACOCO_DEST_FILE = System.getenv("JACOCO_DEST_FILE");
+
+    private String jacocoDestFile;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -82,38 +86,50 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         hdfsCluster.shutdown();
     }
 
-    protected void setupMiniCluster() throws IOException {
+    public void setupMiniCluster() throws IOException {
         miniclusterConfiguration = new YarnConfiguration();
         miniclusterConfiguration.setInt(YarnConfiguration.RM_SCHEDULER_MINIMUM_ALLOCATION_MB, 2024);
         miniclusterConfiguration.setInt(YarnConfiguration.DEBUG_NM_DELETE_DELAY_SEC, 300);
-        miniclusterConfiguration.set(YarnConfiguration.NM_LOG_DIRS, ".");
+        String logDir = new File(".").getAbsolutePath();
+        log.info("Using log dir " + logDir);
+        miniclusterConfiguration.set(YarnConfiguration.NM_LOG_DIRS, logDir);
+        int port = findAvaliablePort();
+        log.info("Found an available local port " + port + " for mapreduce.shuffle.port");
+        miniclusterConfiguration.setInt("mapreduce.shuffle.port", port);
 
         miniclusterConfiguration.setClass(YarnConfiguration.RM_SCHEDULER, CapacityScheduler.class,
                 ResourceScheduler.class);
         miniCluster = new MiniYARNCluster("minicluster", 1, 1, 1);
 
-        String jacocoOpt = String.format(" -javaagent:%s=destfile=%s,append=true,includes=com.*", JACOCO_AGENT_FILE,
-                JACOCO_DEST_FILE);
-        miniclusterConfiguration.set(MRJobConfig.MAP_JAVA_OPTS, jacocoOpt);
-        miniclusterConfiguration.set(MRJobConfig.REDUCE_JAVA_OPTS, jacocoOpt);
+        if (StringUtils.isNotBlank(JACOCO_AGENT_FILE)) {
+            jacocoDestFile = JACOCO_DEST_FILE;
+            if (StringUtils.isBlank(jacocoDestFile)) {
+                jacocoDestFile = logDir + "/jacoco.exec";
+            }
+            String jacocoOpt = String.format(" -javaagent:%s=destfile=%s,append=true,includes=com.*", JACOCO_AGENT_FILE,
+                    jacocoDestFile);
+            miniclusterConfiguration.set(MRJobConfig.MAP_JAVA_OPTS, jacocoOpt);
+            miniclusterConfiguration.set(MRJobConfig.REDUCE_JAVA_OPTS, jacocoOpt);
+        }
+        log.info("Initializing mini yarn cluster ...");
         miniCluster.init(miniclusterConfiguration);
         miniCluster.start();
 
         miniclusterConfiguration = new YarnConfiguration(miniCluster.getConfig());
         miniclusterConfiguration.set(MiniDFSCluster.HDFS_MINIDFS_BASEDIR, ".");
         MiniDFSCluster.Builder builder = new MiniDFSCluster.Builder(miniclusterConfiguration);
+        log.info("Initializing mini hdfs cluster ...");
         hdfsCluster = builder.build();
     }
 
     protected void uploadArtifactsToHdfs() throws IOException {
-        String dpHdfsPath = String.format("/app/%s/dataplatform", versionManager.getCurrentVersionInStack(stackName))
-                .toString();
+        String dpHdfsPath = String.format("/app/%s/dataplatform", versionManager.getCurrentVersionInStack(stackName));
         FileUtils.deleteDirectory(new File("dataplatform"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, dpHdfsPath, ".");
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "dataplatform", dpHdfsPath);
 
         String log4jPath = String
-                .format("/app/%s/conf/log4j.properties", versionManager.getCurrentVersionInStack(stackName)).toString();
+                .format("/app/%s/conf/log4j.properties", versionManager.getCurrentVersionInStack(stackName));
         FileUtils.deleteQuietly(new File("log4j.properties"));
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, log4jPath, ".");
         FileUtils.deleteQuietly(new File(".log4j.properties.crc"));
@@ -129,7 +145,7 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, "latticeengines.properties", lepropertiesPath);
     }
 
-    protected Properties regenerateProperties(String lepropertiesPath) throws IOException {
+    private Properties regenerateProperties(String lepropertiesPath) throws IOException {
         Properties properties = new Properties();
         properties.load(HdfsUtils.getInputStream(yarnConfiguration, lepropertiesPath));
         properties.setProperty("hadoop." + YarnConfiguration.RM_ADDRESS,
@@ -172,7 +188,7 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
     }
 
     public ApplicationId testYarnJob(String yarnClientName, Properties appMasterProperties,
-            Properties containerProperties) throws Exception {
+                                        Properties containerProperties) throws Exception {
         ((YarnClientCustomizationServiceImpl) yarnClientCustomizationService)
                 .setConfiguration(miniclusterConfiguration);
 
@@ -182,8 +198,10 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.overwriteQueueAssignment(
                 appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()), queueScheme));
 
-        containerProperties.put(ContainerProperty.JACOCO_AGENT_FILE.name(), JACOCO_AGENT_FILE);
-        containerProperties.put(ContainerProperty.JACOCO_DEST_FILE.name(), JACOCO_DEST_FILE);
+        if (StringUtils.isNotBlank(JACOCO_AGENT_FILE)) {
+            containerProperties.put(ContainerProperty.JACOCO_AGENT_FILE.name(), JACOCO_AGENT_FILE);
+            containerProperties.put(ContainerProperty.JACOCO_DEST_FILE.name(), jacocoDestFile);
+        }
 
         ClientRmTemplate clientTemplate = new ClientRmTemplate(miniclusterConfiguration);
         clientTemplate.afterPropertiesSet();
@@ -194,5 +212,13 @@ public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBas
                 .setEnvironment(((CommandYarnClient) (applicationContext.getBean(yarnClientName))).getEnvironment());
         return jobService.submitYarnJob(((CommandYarnClient) yarnClient), yarnClientName, appMasterProperties,
                 containerProperties);
+    }
+
+    private int findAvaliablePort() {
+        try (ServerSocket s = new ServerSocket(0)) {
+            return s.getLocalPort();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to find an available port.", e);
+        }
     }
 }
