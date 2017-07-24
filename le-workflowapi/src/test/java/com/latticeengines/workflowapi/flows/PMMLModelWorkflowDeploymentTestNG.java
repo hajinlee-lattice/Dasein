@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -61,6 +62,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
 
     @Test(groups = "workflow", dataProvider = "pmmlFileNameProvider", enabled = true)
     public void testWorkflow(String pmmlFileName, String pivotValueFileName) throws Exception {
+        MultiTenantContext.setTenant(mainTestTenant);
         setupFiles(mainTestCustomerSpace, pmmlFileName, pivotValueFileName);
         PMMLModelWorkflowConfiguration configuration = generatePMMLModelWorkflowConfiguration();
         for (String key : configuration.getConfigRegistry().keySet()) {
@@ -79,10 +81,11 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
         waitForCompletion(workflowId);
 
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
-        long numSummariesInTenant = summaries.stream()
-                .filter(summary -> summary.getTenant().getId().equals(mainTestTenant.getId())).count();
-        assertEquals(numSummariesInTenant, modelCount++);
-        for (ModelSummary summary : summaries) {
+        List<ModelSummary> summariesInTenant = summaries.stream() //
+                .filter(summary -> summary.getTenant().getId().equals(mainTestTenant.getId())) //
+                .collect(Collectors.toList());
+        assertEquals(summariesInTenant.size(), modelCount++);
+        for (ModelSummary summary : summariesInTenant) {
             if (summary.getName().startsWith(modelName)) {
                 assertEquals(summary.getStatus(), ModelSummaryStatus.INACTIVE);
                 assertTrue(summary.getDisplayName().startsWith("PMML MODEL - "));
