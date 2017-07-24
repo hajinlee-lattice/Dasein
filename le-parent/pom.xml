@@ -342,7 +342,7 @@
                         <version>${maven.surefire.version}</version>
                         <configuration>
                             <shutdown>kill</shutdown>
-                            <forkCount>1C</forkCount>
+                            <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                             <trimStackTrace>false</trimStackTrace>
                         </configuration>
