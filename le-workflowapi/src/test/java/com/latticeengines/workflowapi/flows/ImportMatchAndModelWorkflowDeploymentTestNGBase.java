@@ -116,7 +116,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         for (ModelSummary summary : summaries) {
             if (summary.getName().startsWith(name)) {
                 lookupId = summary.getLookupId();
-                assertEquals(summary.getStatus(), ModelSummaryStatus.INACTIVE);
+                // assertEquals(summary.getStatus(), ModelSummaryStatus.INACTIVE);
             }
         }
 
