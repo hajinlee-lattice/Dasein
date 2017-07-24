@@ -39,8 +39,11 @@ public class EventDataSamplingJobTestNG extends DataplatformMiniClusterFunctiona
         s1.setPercentage(60);
         samplingConfig.addSamplingElement(s0);
         samplingConfig.addSamplingElement(s1);
-        HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, input,
-                customerBaseDir + "/" + CUSTOMER + "/data/" + EVENT_TABLE_NAME);
+        String targetPath = customerBaseDir + "/" + CUSTOMER + "/data/" + EVENT_TABLE_NAME;
+        if (HdfsUtils.fileExists(miniclusterConfiguration, targetPath)) {
+            HdfsUtils.rmdir(miniclusterConfiguration, targetPath);
+        }
+        HdfsUtils.copyFromLocalToHdfs(miniclusterConfiguration, input, targetPath);
 
         Properties properties = ((ModelingServiceImpl) ProxyUtils.getTargetObject(modelingService))
                 .customSamplingConfig(samplingConfig);
