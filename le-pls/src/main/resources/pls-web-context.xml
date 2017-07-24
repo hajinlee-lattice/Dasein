@@ -9,7 +9,6 @@
     <import resource="classpath:common-jmx-component-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
-    <bean class="com.latticeengines.pls.swagger.SwaggerConfig"/>
 
     <bean id="multipartResolver"
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
@@ -21,8 +20,6 @@
     </bean>
 
     <mvc:annotation-driven/>
-    <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
-    <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>
 </beans>
 
 
