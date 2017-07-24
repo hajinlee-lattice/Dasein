@@ -14,7 +14,7 @@
 
     <aop:aspectj-autoproxy/>
 
-    <bean id="multiTenancyAspect" class="com.latticeengines.playmakercore.entitymanager.impl.DataMultiTenantEntityMgrAspect">
+    <bean id="playmakerMultiTenancyAspect" class="com.latticeengines.playmakercore.entitymanager.impl.DataMultiTenantEntityMgrAspect">
         <property name="sessionFactory" ref="dataSessionFactory"/>
     </bean>
 

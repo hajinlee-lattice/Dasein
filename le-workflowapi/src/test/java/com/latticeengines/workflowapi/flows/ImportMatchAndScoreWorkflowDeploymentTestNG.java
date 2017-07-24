@@ -54,7 +54,7 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
 
     @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
-        setup();
+        super.setup();
         setupTables();
         sourceFile = uploadScoreFile(RESOURCE_BASE + "/csvfiles/Account.csv", accountTable);
         setupModels();
