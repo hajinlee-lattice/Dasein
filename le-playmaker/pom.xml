@@ -174,7 +174,6 @@
             <artifactId>spring-framework-bom</artifactId>
             <version>${spring.version}</version>
             <type>pom</type>
-            <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

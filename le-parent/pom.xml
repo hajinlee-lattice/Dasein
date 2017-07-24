@@ -111,6 +111,7 @@
         <jcabi.version>1.1</jcabi.version>
         <sourceforge.csvjdbc.version>1.0.28</sourceforge.csvjdbc.version>
         <jedis.version>2.8.0</jedis.version>
+        <okio.version>1.13.0</okio.version>
         <!-- Spring -->
         <spring.version>4.3.9.RELEASE</spring.version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
