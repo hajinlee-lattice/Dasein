@@ -30,7 +30,7 @@ PRESETS = {
     },
     'cdl': {
         'apps': ['admin', 'pls', 'microservice', 'matchapi'],
-        'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'datacloudapi', 'cdl']
+        'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'datacloudapi', 'cdl', 'dante']
     },
     'etl': {
         'apps': ['microservice', 'matchapi'],

@@ -32,15 +32,21 @@ def commonOpts():
 
 def testOpts(args):
     testPattern = '-Dtest=%s' % args.test if args.test[-6:] == 'TestNG' else '-Dtest=*%s*' % args.test
+    profile_opts = ['-P%s' % p for p in args.profiles.split(',')]
+    group_opts = [] if args.groups is None else ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups]
+    extra_opts = []
+    if len(group_opts) == 0:
+        if 'functional' in args.profiles.split(',') or 'functional2' in args.profiles.split(','):
+            group_opts = [ '-Dfunctional.groups=functional' ]
+        elif 'deployment' in args.profiles.split(',') or 'deployment2' in args.profiles.split(','):
+            group_opts = [ '-Ddeployment.groups=deployment' ]
     if args.xml:
         profiles = [p for p in args.profiles.split(",") if p not in ('functional', 'deployment')]
         profiles.append('testng')
         testng_xml = '-Dtestng.xml=src/test/resources/testng/%s.xml' % args.xml
-        return ['-P%s' % p for p in profiles] + [testng_xml, testPattern, 'clean'] +  args.command.split(',')
-    elif args.groups is None:
-        return ['-P%s' % p for p in args.profiles.split(',')] + [testPattern, 'clean'] +  args.command.split(',')
-    else:
-        return ['-P%s' % p for p in args.profiles.split(',')] + ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups, testPattern, 'clean'] + args.command.split(',')
+        extra_opts = [ testng_xml ]
+        profile_opts = ['-P%s' % p for p in profiles]
+    return profile_opts + group_opts + extra_opts + [testPattern, 'clean'] + args.command.split(',')
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Run test(s) using maven.')
@@ -63,7 +69,7 @@ if __name__ == "__main__":
     chdirToProjectDir('le-' + args.project)
     print 'Executing [with common opts added]: ' + ' '.join(['mvn'] + testOpts(args))
     my_env = os.environ
-    my_env["MAVEN_OPTS"] = "-Xmx2g" if args.project == "datacloud/etl" else "-Xmx1g"
+    my_env["MAVEN_OPTS"] = "-Xmx1g"
     if args.command == "jetty:run":
         my_env["MAVEN_OPTS"] += " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n"
     subprocess.call(['mvn'] + propDirsOpts() + commonOpts() + testOpts(args), env=my_env)

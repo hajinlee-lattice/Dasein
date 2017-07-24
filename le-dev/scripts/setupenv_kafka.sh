@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-if [ -z "${CONFLUENT_HOME}" ]; then
-    echo "Must set CONFLUENT_HOME to your root dir for confluent platform"
-    exit -1
-fi
+printf "%s\n" "${WSHOME:?Must set CONFLUENT_HOME to your root dir for confluent platform}"
 
 BOOTSTRAP_MODE=$1
 
