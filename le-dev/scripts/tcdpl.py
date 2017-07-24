@@ -26,10 +26,10 @@ MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring
 PRESETS = {
     'lp': {
         'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'matchapi'],
-        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop', 'dante']
+        'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'quartz', 'sqoop']
     },
     'cdl': {
-        'apps': ['admin', 'pls', 'microservice', 'matchapi'],
+        'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'datacloudapi', 'cdl', 'dante']
     },
     'etl': {

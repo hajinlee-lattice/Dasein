@@ -22,9 +22,8 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-common</artifactId>
+            <artifactId>le-common-web</artifactId>
             <version>${project.version}</version>
-            <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.hadoop</groupId>
@@ -203,13 +202,11 @@
             <artifactId>c3p0</artifactId>
             <version>${c3p0.version}</version>
         </dependency>
-        
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
             <version>${curator.version}</version>
         </dependency>
-        
     </dependencies>
 
 </project>
