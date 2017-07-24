@@ -34,8 +34,6 @@ public class LatticeIdRefreshServiceTestNG
 
     GeneralSource amsRefresh = new GeneralSource("AccountMasterSeedRefresh");
 
-    String targetSourceName = "AccountMasterId";
-
     ObjectMapper om = new ObjectMapper();
 
     @Test(groups = "pipeline1")
@@ -73,7 +71,7 @@ public class LatticeIdRefreshServiceTestNG
             baseSources.add(amsRefresh.getSourceName());
             step2.setBaseSources(baseSources);
             step2.setTransformer("latticeIdRefreshTransformer");
-            step2.setTargetSource(targetSourceName);
+            step2.setTargetSource(source.getSourceName());
             String confParamStr2 = getTransformerConfigForRefresh();
             step2.setConfiguration(confParamStr2);
 
@@ -116,14 +114,14 @@ public class LatticeIdRefreshServiceTestNG
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
     protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
+        Source targetSource = sourceService.findBySourceName(source.getSourceName());
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     private Object[][] amsInitData = new Object[][] { //

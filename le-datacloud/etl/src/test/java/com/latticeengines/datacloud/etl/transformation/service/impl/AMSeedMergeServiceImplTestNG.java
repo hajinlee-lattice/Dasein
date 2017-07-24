@@ -85,6 +85,7 @@ public class AMSeedMergeServiceImplTestNG
     private static final String OUT_OF_BUSINESS_INDICATOR = "OUT_OF_BUSINESS_INDICATOR";
     private static final String EMPLOYEES_TOTAL = "EMPLOYEES_TOTAL";
     private static final String CHIEF_EXECUTIVE_OFFICER_NAME = "CHIEF_EXECUTIVE_OFFICER_NAME";
+    private static final String SOURCE_PRIORITY = "__Source_Priority__";
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -286,31 +287,38 @@ public class AMSeedMergeServiceImplTestNG
         columns.add(Pair.of(EMPLOYEE_RANGE, String.class));
         columns.add(Pair.of(PRIMARY_INDUSTRY, String.class));
         columns.add(Pair.of(SOURCE, String.class));
+        columns.add(Pair.of(SOURCE_PRIORITY, Integer.class));
         uploadBaseSourceData(latticeCacheSeed.getSourceName(), baseSourceVersion, columns, leData);
     }
 
     private Object[][] leData = new Object[][] { //
-            { "a.com", "LeName111", null, null, null, "111", null, null, null, null, null, "LePI111", "Orb" }, //
-            { "b.com", "LeName222", null, null, null, "222", null, null, null, null, null, "LePI222", "HG" }, //
-            { "d.com", "LeName333", null, null, null, "333", null, null, null, null, null, "LePI333", "RTS" }, //
-            { "e.com", "LeName444", null, null, null, "444", null, null, null, null, null, "LePI444", "Orb" }, //
-            { "e.com", "LeName555", null, null, null, "555", null, null, null, null, null, "LePI555", "HG" }, //
-            { "f.com", "LeName666", null, null, null, "666", null, null, null, null, null, "LePI666", "RTS" }, //
-            { "f.com", "LeName777", null, null, null, "777", null, null, null, null, null, "LePI777", "Orb" }, //
-            { "g.com", "LeName888", null, null, null, "888", null, null, null, null, null, "LePI888", "HG" }, //
-            { "g.com", "LeName999", null, null, null, "999", null, null, null, null, null, "LePI999", "RTS" }, //
-            { "i.com", "LeName111111", null, null, null, "111111", null, null, null, null, null, "LePI111111", "Orb" }, //
-            { "ii.com", "LeName121212", null, null, null, "121212", null, null, null, null, null, "LePI121212", "HG" }, //
-            { "a.com", "LeNameNoDu111", null, null, null, "NoDu111", null, null, null, null, null, "LePINoDu111",
-                    "RTS" }, //
+            { "a.com", "LeName111", null, null, null, "111", null, null, null, null, null, "LePI111", "Orb", 1 }, //
+            { "b.com", "LeName222", null, null, null, "222", null, null, null, null, null, "LePI222", "HG", 1 }, //
+            { "d.com", "LeName333", null, null, null, "333", null, null, null, null, null, "LePI333", "RTS", 1 }, //
+            { "e.com", "LeName444", null, null, null, "444", null, null, null, null, null, "LePI444", "Orb", 1 }, //
+            { "e.com", "LeName555", null, null, null, "555", null, null, null, null, null, "LePI555", "HG", 1 }, //
+            { "f.com", "LeName666", null, null, null, "666", null, null, null, null, null, "LePI666", "RTS", 1 }, //
+            { "f.com", "LeName777", null, null, null, "777", null, null, null, null, null, "LePI777", "Orb", 1 }, //
+            { "g.com", "LeName888", null, null, null, "888", null, null, null, null, null, "LePI888", "HG", 1 }, //
+            { "g.com", "LeName999", null, null, null, "999", null, null, null, null, null, "LePI999", "RTS", 1 }, //
+            { "i.com", "LeName111111", null, null, null, "111111", null, null, null, null, null, "LePI111111", "Orb",
+                    1 }, //
+            { "ii.com", "LeName121212", null, null, null, "121212", null, null, null, null, null, "LePI121212", "HG",
+                    1 }, //
+            { "a.com", "LeNameNoDu111", null, null, null, "NoDu111", null, null, null, null, null, "LePINoDu111", "RTS",
+                    1 }, //
             { "c.com", "LeNameNoDu2221", null, null, null, "NoDu222", null, null, null, null, null, "LePINoDu2221",
-                    "Orb" }, //
+                    "Orb", 1 }, //
             { "d.com", "LeNameNoDu2222", null, null, null, "NoDu222", null, null, null, null, null, "LePINoDu2222",
-                    "HG" }, //
-            { "j.com", "LeNamej.com", null, null, null, null, null, null, null, null, null, "LePIj", "RTS" }, //
-            { "k.com", "LeNamek.com", null, null, null, null, null, null, null, null, null, "LePIk", "Orb" }, //
-            { "l.com", "LeNamel.com", null, null, null, "InvalidLeDuns", null, null, null, null, null, "LePIl", "HG" }, //
-            { "g.com", "LeNameg.com", null, null, null, "InvalidLeDuns", null, null, null, null, null, "LePIg", "RTS" }, //
+                    "HG", 1 }, //
+            { "j.com", "LeNamej.com", null, null, null, null, null, null, null, null, null, "LePIj", "RTS", 1 }, //
+            { "k.com", "LeNamek.com", null, null, null, null, null, null, null, null, null, "LePIk", "Orb", 1 }, //
+            { "l.com", "LeNamel.com", null, null, null, "InvalidLeDuns", null, null, null, null, null, "LePIl", "HG",
+                    1 }, //
+            { "l.com", "LeNamel.com", null, null, null, null, null, null, null, null, null, "LePIl", "HG",
+                        0 }, // Test dedup and sort by source_priority
+            { "g.com", "LeNameg.com", null, null, null, "InvalidLeDuns", null, null, null, null, null, "LePIg", "RTS",
+                    1 }, //
     };
 
     @Override

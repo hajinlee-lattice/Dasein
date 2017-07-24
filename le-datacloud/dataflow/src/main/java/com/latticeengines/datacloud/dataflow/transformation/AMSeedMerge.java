@@ -62,6 +62,7 @@ public class AMSeedMerge extends ConfigurableFlowBase<TransformerConfig> {
     private String leDomainSourceCol = "__Source__"; // Hardcode temporarily. Will migrate to pipeline config later
     private String amsEmployeesHere;
     private String amsSalesVolumeUsDollars;
+    private String leSourcePriority = "__Source_Priority__";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -82,7 +83,8 @@ public class AMSeedMerge extends ConfigurableFlowBase<TransformerConfig> {
         amsWithDuns = processWithDuns(amsWithDuns);
 
         // Process joined rows without Duns
-        Node amsWithoutDuns = ams.filter(String.format("%s == null", dnbDunsCol), new FieldList(dnbDunsCol));
+        Node amsWithoutDuns = ams.filter(String.format("%s == null", dnbDunsCol), new FieldList(dnbDunsCol))
+                .groupByAndLimit(new FieldList(leDomainCol), new FieldList(leSourcePriority), 1, true, false);
         // Rename is needed otherwise merge operation later will fail
         Node amsWithDunsRenamed = amsWithDuns.renamePipe("AmsWithDuns").retain(new FieldList(amsDomainCol));
         amsWithoutDuns = amsWithoutDuns.join(new FieldList(leDomainCol), amsWithDunsRenamed,
@@ -182,6 +184,7 @@ public class AMSeedMerge extends ConfigurableFlowBase<TransformerConfig> {
     private Node retainLeColumns(Node node) {
         List<String> columnNames = new ArrayList<>(leToAms.keySet());
         columnNames.add(leDomainSourceCol);
+        columnNames.add(leSourcePriority);
         return node.retain(new FieldList(columnNames));
     }
 
