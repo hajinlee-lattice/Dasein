@@ -84,6 +84,12 @@
             <groupId>io.confluent</groupId>
             <artifactId>kafka-connect-hdfs</artifactId>
             <version>${confluent.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.hive</groupId>
+                    <artifactId>hive-exec</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
