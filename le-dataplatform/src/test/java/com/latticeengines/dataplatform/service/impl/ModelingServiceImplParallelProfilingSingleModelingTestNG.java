@@ -54,7 +54,7 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
     }
 
     private String getCustomer() {
-        return "Nutanix";
+        return getClass().getSimpleName();
     }
 
     private Model createModel(ModelDefinition modelDef) {
@@ -88,7 +88,6 @@ public class ModelingServiceImplParallelProfilingSingleModelingTestNG extends Da
 
         model = createModel(modelDef);
     }
-
 
     @Test(groups = "sqoop")
     public void loadData() throws Exception {

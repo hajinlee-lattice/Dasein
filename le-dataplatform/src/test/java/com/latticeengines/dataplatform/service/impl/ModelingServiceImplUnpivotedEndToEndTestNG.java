@@ -54,7 +54,7 @@ import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
  * @author rgonzalez
  *
  */
-@Transactional
+
 public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
@@ -76,7 +76,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     private StandaloneHttpServer httpServer;
 
     public String getCustomer() {
-        return ModelingServiceImplUnpivotedEndToEndTestNG.class.getSimpleName();
+        return getClass().getSimpleName();
     }
 
     protected boolean doClearDbTables() {

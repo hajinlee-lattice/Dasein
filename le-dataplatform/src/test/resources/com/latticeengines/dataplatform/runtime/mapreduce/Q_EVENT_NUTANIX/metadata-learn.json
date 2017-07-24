@@ -104,19 +104,19 @@
   "targets": [
 	"Event: P1_Event"
   ],
-  "data_profile": "/user/s-analytics/customers/Nutanix/data/EventMetadata/profile.avro",
-  "config_metadata": "/user/s-analytics/customers/Nutanix/data/EventMetadata/metadata.avsc",
-  "diagnostics_path": "/user/s-analytics/customers/Nutanix/data/EventMetadata/diagnostics.json",
-  "schema": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/Q_EventTable_Nutanix.avsc",
-  "model_data_dir": "/user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59ca75d",
+  "data_profile": "/user/s-analytics/customers/$$CUSTOMER$$/data/EventMetadata/profile.avro",
+  "config_metadata": "/user/s-analytics/customers/$$CUSTOMER$$/data/EventMetadata/metadata.avsc",
+  "diagnostics_path": "/user/s-analytics/customers/$$CUSTOMER$$/data/EventMetadata/diagnostics.json",
+  "schema": "/user/s-analytics/customers/$$CUSTOMER$$/data/Q_EventTable_Nutanix/Q_EventTable_Nutanix.avsc",
+  "model_data_dir": "/user/s-analytics/customers/$$CUSTOMER$$/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59ca75d",
   "data_format": "avro",
   "key_columns": [
     "Nutanix_EventTable_Clean"
   ],
   "provenance_properties": "DataLoader_Instance=http://10.41.1.238/ DataLoader_TenantName=ADEBD2V67059448rX25059174r DataLoader_Query=DataForScoring_Lattice ",
   "algorithm_properties": "criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 max_depth=8 bootstrap=True",
-  "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/TrainingAll-r-00000.avro",
-  "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/TestingSet-r-00000.avro",
+  "training_data": "/user/s-analytics/customers/$$CUSTOMER$$/data/Q_EventTable_Nutanix/samples/TrainingAll-r-00000.avro",
+  "test_data": "/user/s-analytics/customers/$$CUSTOMER$$/data/Q_EventTable_Nutanix/samples/TestingSet-r-00000.avro",
   "python_script": "/app/$$VERSION$$/dataplatform/scripts/algorithm/parallel_rf_train.py",
   "python_pipeline_script":"/app/$$VERSION$$/dataplatform/scripts/pipeline.py",
   "python_pipeline_lib":"/app/$$VERSION$$/dataplatform/scripts/lepipeline.tar.gz",

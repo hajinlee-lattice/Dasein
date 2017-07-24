@@ -18,7 +18,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -36,7 +35,6 @@ import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 import com.latticeengines.yarn.exposed.runtime.python.PythonMRJobType;
 import com.latticeengines.yarn.exposed.runtime.python.PythonMRProperty;
 
-@Transactional
 public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final int NUM_MAPPER = 4;
@@ -56,7 +54,7 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private VersionManager versionManager;
 
-    private String customer = "Nutanix";
+    private String customer = getClass().getSimpleName();
     private String localDir = "com/latticeengines/dataplatform/runtime/mapreduce/Q_EVENT_NUTANIX";
 
     private String dataDir;
@@ -111,6 +109,7 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = { "functional" }, enabled = true)
     public void testProfiling() throws Exception {
         classifier = PythonMRTestUtils.readClassifier(localDir, "metadata-profile.json");
+        setCustomer(classifier);
         setVersion(classifier, versionManager.getCurrentVersionInStack(stackName));
         int linesPerMap = createProfilingInputConfig(classifier.getFeatures(), profileDir);
         Properties properties = setupProperties(linesPerMap, profileDir, metadataDir,
@@ -121,6 +120,23 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, metadataDir + "/" + FileAggregator.PROFILE_AVRO));
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, metadataDir + "/" + FileAggregator.DIAGNOSTICS_JSON));
+    }
+
+    private void setCustomer(Classifier classifier) {
+        classifier.setTrainingDataHdfsPath(classifier.getTrainingDataHdfsPath()
+                .replaceAll("\\$\\$" + MapReduceProperty.CUSTOMER.name() + "\\$\\$", customer));
+        classifier.setTestDataHdfsPath(classifier.getTestDataHdfsPath()
+                .replaceAll("\\$\\$" + MapReduceProperty.CUSTOMER.name() + "\\$\\$", customer));
+        classifier.setConfigMetadataHdfsPath(classifier.getConfigMetadataHdfsPath()
+                .replaceAll("\\$\\$" + MapReduceProperty.CUSTOMER.name() + "\\$\\$", customer));
+        classifier.setDataProfileHdfsPath(classifier.getDataProfileHdfsPath()
+                .replaceAll("\\$\\$" + MapReduceProperty.CUSTOMER.name() + "\\$\\$", customer));
+        classifier.setDataDiagnosticsPath(classifier.getDataDiagnosticsPath()
+                .replaceAll("\\$\\$" + MapReduceProperty.CUSTOMER.name() + "\\$\\$", customer));
+        classifier.setSchemaHdfsPath(classifier.getSchemaHdfsPath()
+                .replaceAll("\\$\\$" + MapReduceProperty.CUSTOMER.name() + "\\$\\$", customer));
+        classifier.setModelHdfsDir(classifier.getModelHdfsDir()
+                .replaceAll("\\$\\$" + MapReduceProperty.CUSTOMER.name() + "\\$\\$", customer));
     }
 
     private void setVersion(Classifier classifier, String currentVersion) {
@@ -135,6 +151,7 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = { "functional" }, dependsOnMethods = { "testProfiling" })
     public void testModeling() throws Exception {
         classifier = PythonMRTestUtils.readClassifier(localDir, "metadata-learn.json");
+        setCustomer(classifier);
         setVersion(classifier, versionManager.getCurrentVersionInStack(stackName));
         String modelInputDir = modelDir + "/modelName";
         int linesPerMap = createModelingInputConfig(sampleDir, modelInputDir);
