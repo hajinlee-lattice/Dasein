@@ -32,6 +32,7 @@ fi
 export JAVA_OPTS="-Duser.timezone=US/Eastern"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/etc/pki/java/cacerts"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
+export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.refreshScoreArtifactCache=true"
 export JAVA_OPTS="${JAVA_OPTS} -Dfile.encoding=UTF8"
 
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote"

@@ -5,11 +5,11 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -36,8 +36,7 @@ public class ScoreArtifactCache {
     @Value("${scoringapi.scoreartifact.cache.refresh.time:120}")
     private int scoreArtifactCacheRefreshTime;
 
-    @Autowired
-    @Qualifier("commonTaskScheduler")
+    @Resource(name = "commonTaskScheduler")
     private ThreadPoolTaskScheduler taskScheduler;
 
     private ModelRetrieverImpl modelRetriever;
@@ -69,7 +68,10 @@ public class ScoreArtifactCache {
                     };
                 });
         this.modelRetriever = modelRetriever;
-        scheduleRefreshJob();
+        boolean needToSchedule = Boolean.valueOf(System.getProperty("com.latticeengines.refreshScoreArtifactCache"));
+        if (needToSchedule) {
+            scheduleRefreshJob();
+        }
     }
 
     public LoadingCache<SimpleEntry<CustomerSpace, String>, ScoringArtifacts> getCache() {
@@ -77,12 +79,8 @@ public class ScoreArtifactCache {
     }
 
     void scheduleRefreshJob() {
-        taskScheduler.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                refreshCache();
-            }
-        }, TimeUnit.SECONDS.toMillis(scoreArtifactCacheRefreshTime));
+        taskScheduler.scheduleWithFixedDelay(this::refreshCache,
+                TimeUnit.SECONDS.toMillis(scoreArtifactCacheRefreshTime));
     }
 
     private void refreshCache() {
@@ -100,7 +98,7 @@ public class ScoreArtifactCache {
                 if (scoringArtifacts != null) {
                     scoringArtifacts.setBucketMetadataList(bucketMetadataList);
                     scoringArtifacts.setModelSummary(modelsummay);
-                    scoreArtifactCache.put(new AbstractMap.SimpleEntry<CustomerSpace, String>(cs, modelId),
+                    scoreArtifactCache.put(new AbstractMap.SimpleEntry<>(cs, modelId),
                             scoringArtifacts);
                     log.info(
                             String.format("Refresh cache for model %s in tenant %s finishes.", modelId, cs.toString()));
