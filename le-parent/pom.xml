@@ -97,6 +97,7 @@
         <jpmml.version>1.2.15</jpmml.version>
         <snappy.version>1.1.4</snappy.version>
         <curator.version>2.7.1</curator.version>
+        <curator.test.version>1.3.3</curator.test.version>
         <querydsl.version>4.1.4</querydsl.version>
         <testng.version>6.11</testng.version>
         <mockito.version>2.8.47</mockito.version>
@@ -883,59 +884,11 @@
                     </archive>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>${maven.war.version}</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <LE-SCM-Revision>${buildNumber}</LE-SCM-Revision>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
         </plugins>
 
         <defaultGoal>install</defaultGoal>
         <pluginManagement>
             <plugins>
-
-                <!-- The Jetty Maven plugin is useful for rapid development and testing. You can add
-                    it to any webapp project that is structured according to the usual Maven defaults. The plugin can then
-                    periodically scan your project for changes and automatically redeploy the webapp if any are found. This
-                    makes the development cycle more productive by eliminating the build and deploy steps: you use your IDE
-                    to make changes to the project, and the running web container automatically picks them up, allowing you
-                    to test them straight away. To run - mvn jetty:run -->
-                <plugin>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>jetty-maven-plugin</artifactId>
-                    <version>${jetty.version}</version>
-                    <executions>
-                        <execution>
-                            <id>start-jetty</id>
-                            <phase>process-test-classes</phase>
-                            <goals>
-                                <goal>start</goal>
-                            </goals>
-                            <configuration>
-                                <scanIntervalSeconds>10</scanIntervalSeconds>
-                                <daemon>true</daemon>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>stop-jetty</id>
-                            <phase>post-integration-test</phase>
-                            <goals>
-                                <goal>stop</goal>
-                            </goals>
-                            <configuration>
-                                <stopPort>9001</stopPort>
-                                <stopKey>secret</stopKey>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -1313,6 +1266,12 @@
             <artifactId>reflections</artifactId>
             <version>${reflections.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

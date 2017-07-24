@@ -447,13 +447,7 @@ public class BatonServiceImpl implements BatonService {
         try {
             String data = CamilleEnvironment.getCamille().get(productsPath).getData();
             List<String> productStrs = JsonUtils.convertList(JsonUtils.deserialize(data, List.class), String.class);
-            List<LatticeProduct> products = new ArrayList<>();
-            if (productStrs != null) {
-                for (String str : productStrs) {
-                    products.add(LatticeProduct.fromName(str));
-                }
-            }
-            return products.contains(product);
+            return productStrs != null && productStrs.stream().anyMatch(product.getName()::equals);
         } catch (Exception e) {
             throw new RuntimeException("Failed to get products for customer " + tenantId, e);
         }
