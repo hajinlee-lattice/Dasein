@@ -123,8 +123,7 @@ def tomcat_task(profile_vars, environment, enable_jacoco=False):
         jacoco = Volume("jacoco", "/mnt/efs/jacoco")
         container = container \
             .mount("/mnt/efs/jacoco", jacoco) \
-            .privileged() \
-            .set_env("ENABLE_JACOCO", "true")
+            .privileged()
 
     task = TaskDefinition("tomcattask")
     task.add_container(container)
