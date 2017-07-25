@@ -46,10 +46,11 @@ angular
             vm.categoryStartFrom = function() {
                 var size = vm.category ? vm.categorySize : vm.pagesize,
                     current = vm.metadata.currentCategory - 1,
-                    items = vm.categoriesMenu;
+                    items = vm.categoriesMenu,
+                    length = items ? items.length : 0;
 
-                return current * size + size > items.length 
-                    ? items.length - size 
+                return current * size + size > length
+                    ? length - size 
                     : current * size;
             }
 

@@ -33,9 +33,10 @@ angular.module('common.datacloud.query.factory.restriction', [])
 
     // used to convert bucket range in old data object
     function oldFormatRangeToBkt(range) {
-        if (range.is_null_only) {
+        if (!range || range.is_null_only) {
             return null;
         }
+        
         if (range.min = range.max) {
             return {
               'Lbl': range.min

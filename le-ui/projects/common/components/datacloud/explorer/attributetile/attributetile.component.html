@@ -30,31 +30,31 @@
     </p>
 
     <span class="lesser-description" ng-if="vm.lookupMode">
-        knjnjk {{ enrichment.Description }}
+        {{ enrichment.Description }}
     </span>
     <!--
-    <div class="stats-boolean" ng-if="vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List && vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List.length && !vm.lookupMode && vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.Type == 'Boolean' && vm.section == 'team'">
-        <h3>{{vm.booleanStats(vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List).Yes.Cnt|number}}</h3>
+    <div class="stats-boolean" ng-if="vm.cube.Stats[enrichment.ColumnId].Bkts.List && vm.cube.Stats[enrichment.ColumnId].Bkts.List.length && !vm.lookupMode && vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' && vm.section == 'team'">
+        <h3>{{vm.booleanStats(vm.cube.Stats[enrichment.ColumnId].Bkts.List).Yes.Cnt|number}}</h3>
         <h4>Businesses with this product</h4>
         <p>
-            About {{vm.NumberUtility.AbbreviateLargeNumber(vm.booleanStats(vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List).No.Cnt, 1)}} mid-sized and enterprise companies don't use this.
+            About {{vm.NumberUtility.AbbreviateLargeNumber(vm.booleanStats(vm.cube.Stats[enrichment.ColumnId].Bkts.List).No.Cnt, 1)}} mid-sized and enterprise companies don't use this.
         </p>
     </div>
     -->
-    <div class="stats" ng-if="  vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List && 
-                                vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List.length && 
-                                !vm.lookupMode && 
-                                (vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)">
+    <div class="stats" ng-if="  vm.cube.Stats[enrichment.ColumnId].Bkts.List && 
+                                vm.cube.Stats[enrichment.ColumnId].Bkts.List.length && 
+                                !vm.lookupMode">
+<!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
         <h5><label>Attribute range</label><label>Records</label></h5>
         <ul class="attribute-stats">
-            <li ng-repeat="stat in vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.List | limitTo: 5"
+            <li ng-repeat="stat in vm.cube.Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
                 class="attribute-stat"
                 ng-class="{
                             'select-range': vm.section == 'segment.analysis', 
-                            'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)],
-                            'disable-bar': (vm.section != 'segment.analysis' && vm.cube.Stats[enrichment.ColumnId].RowStats.Bkts.Type == 'Boolean')
-                            }"
+                            'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)]
+                          }"
                 ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))">
+<!--'disable-bar': (vm.section != 'segment.analysis' && vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean')-->
                 <ul class="graph">
                     <li class="label" title="{{stat.Lbl}}">
                         <input  type="checkbox"
@@ -66,7 +66,7 @@
                         {{stat.Lbl}}
                     </li>
                     <li class="bar_">
-                        <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.ColumnId].RowStats.Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.ColumnId].RowStats.Cnt, '%', 0)}}">
+                        <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.ColumnId].Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.ColumnId].Cnt, '%', 0)}}">
                             <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
                         </div>
                     </li>

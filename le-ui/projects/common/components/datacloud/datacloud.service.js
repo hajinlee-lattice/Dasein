@@ -9,9 +9,9 @@ angular.module('common.datacloud')
         this.count = null;
         this.selectedCount = null;
         this.premiumSelectMaximum = null;
-        this.topAttributes = this.topAttributes || null;;
-        this.cube = this.cube || null;
-        this.metadata = this.metadata || {
+        this.topAttributes = null;
+        this.cube = null;
+        this.metadata = {
             current: 1,
             currentCategory: 1,
             toggle: {
@@ -78,31 +78,31 @@ angular.module('common.datacloud')
 
     this.getPremiumSelectMaximum = function(){
         var deferred = $q.defer();
-        //if (this.premiumSelectMaximum) {
-        //    deferred.resolve(this.premiumSelectMaximum);
-        //} else {
+        if (DataCloudStore.premiumSelectMaximum) {
+            deferred.resolve(DataCloudStore.premiumSelectMaximum);
+        } else {
             DataCloudService.getPremiumSelectMaximum().then(function(response){
                 DataCloudStore.setPremiumSelectMaximum(response);
                 deferred.resolve(response);
             });
-        //}
+        }
         return deferred.promise;
     }
 
     this.setPremiumSelectMaximum = function(item){
-        this.premiumSelectMaximum = item;
+        DataCloudStore.premiumSelectMaximum = item;
     }
 
     this.getCategories = function(){
         var deferred = $q.defer();
-        //if (this.categories) {
-        //    deferred.resolve(this.categories);
-        //} else {
+        if (this.categories) {
+            deferred.resolve(this.categories);
+        } else {
             DataCloudService.getCategories().then(function(response){
                 DataCloudStore.setCategories(response);
                 deferred.resolve(response);
             });
-        //}
+        }
         return deferred.promise;
     }
 
@@ -112,14 +112,14 @@ angular.module('common.datacloud')
 
     this.getSubcategories = function(category){
         var deferred = $q.defer();
-        //if (this.subcategories[category]) {
-        //    deferred.resolve(this.subcategories[category]);
-        //} else {
+        if (this.subcategories[category]) {
+            deferred.resolve(this.subcategories[category]);
+        } else {
             DataCloudService.getSubcategories(category).then(function(response){
                 DataCloudStore.setSubcategories(category, response);
                 deferred.resolve(response);
             });
-        //}
+        }
         return deferred.promise;
     }
 
@@ -129,14 +129,14 @@ angular.module('common.datacloud')
 
     this.getEnrichments = function(opts){
         var deferred = $q.defer();
-        //if (this.enrichments) {
-        //    deferred.resolve(this.enrichments);
-        //} else {
+        if (this.enrichments) {
+            deferred.resolve(this.enrichments);
+        } else {
             DataCloudService.getEnrichments(opts).then(function(response){
-                //DataCloudStore.setEnrichments(response);
+                DataCloudStore.setEnrichments(response);
                 deferred.resolve(response);
             });
-        //}
+        }
         return deferred.promise;
     }
 
@@ -150,25 +150,30 @@ angular.module('common.datacloud')
 
     this.getCount = function(){
         var deferred = $q.defer();
-        //if (this.count) {
-        //    deferred.resolve(this.count);
-        //} else {
+        if (DataCloudStore.count) {
+            deferred.resolve(DataCloudStore.count);
+        } else {
             DataCloudService.getCount().then(function(response){
+                DataCloudStore.setCount(response);
                 deferred.resolve(response);
             });
-        //}
+        }
         return deferred.promise;
+    }
+
+    this.setCount = function(count){
+        DataCloudStore.count = count;
     }
 
     this.getSelectedCount = function(){
         var deferred = $q.defer();
-        //if (this.selectedCount) {
-        //    deferred.resolve(this.selectedCount);
-        //} else {
+        if (this.selectedCount) {
+            deferred.resolve(this.selectedCount);
+        } else {
             DataCloudService.getSelectedCount().then(function(response){
                 deferred.resolve(response);
             });
-        //}
+        }
         return deferred.promise;
     }
 
@@ -177,9 +182,9 @@ angular.module('common.datacloud')
         opts = opts || {};
         opts.category = opts.category || 'firmographics';
         opts.limit = opts.limit || 5;
-        //if (this.topAttributes) {
-        //    deferred.resolve(this.topAttributes[opts.category]);
-        //} else {
+        if (this.topAttributes) {
+            deferred.resolve(this.topAttributes[opts.category]);
+        } else {
             DataCloudService.getTopAttributes(opts).then(function(response) {
                 for(var i in response.data.SubCategories) {
                     var items = response.data.SubCategories[i];
@@ -192,7 +197,7 @@ angular.module('common.datacloud')
                 DataCloudStore.setTopAttributes(response, opts.category);
                 deferred.resolve(response);
             });
-        //}
+        }
         return deferred.promise;
     }
 
@@ -201,41 +206,40 @@ angular.module('common.datacloud')
         opts = opts || {};
         opts.max = opts.max || 5;
 
-        //if (this.topAttributes) {
-        //    deferred.resolve(this.topAttributes);
-        //} else {
+        if (this.topAttributes) {
+            deferred.resolve(this.topAttributes);
+        } else {
             var vm = this;
 
             DataCloudService.getAllTopAttributes(opts).then(function(response) {
                 vm.topAttributes = response.data; // ben
                 deferred.resolve(vm.topAttributes);
             });
-        //}
+        }
 
         return deferred.promise;
     }
 
     this.setTopAttributes = function(items, category) {
-        this.topAttributes = this.topAttributes || [];
+        this.topAttributes = this.topAttributes || {};
         this.topAttributes[category] = items;
     }
 
     this.getCube = function() {
-        //if (this.cube) {
-        //    return this.cube;
-        //}
-
         var deferred = $q.defer();
-        DataCloudService.getCube().then(function(response){
-            deferred.resolve(response);
-        });
-
-        DataCloudStore.setCube(deferred.promise);
+        if (DataCloudStore.cube) {
+            deferred.resolve(DataCloudStore.cube);
+        } else {
+            DataCloudService.getCube().then(function(response){
+                DataCloudStore.setCube(response);
+                deferred.resolve(response);
+            });
+        }
         return deferred.promise;
     }
 
-    this.setCube = function(cubePromise) {
-        this.cube = cubePromise;
+    this.setCube = function(cube) {
+        DataCloudStore.cube = cube;
     }
 })
 .service('DataCloudService', function($q, $http, $state, $stateParams) {
@@ -374,15 +378,11 @@ angular.module('common.datacloud')
 
     this.getAllTopAttributes = function(opts) {
         var deferred = $q.defer(),
-            url = this.url('/statistics','/stats') + '/topn';
+            url = this.url('/statistics/topn','/stats/topn');
         
         $http({
             method: 'get',
-            url: url,
-            params: {
-                max: 9999,
-                loadEnrichmentMetadata: opts.loadEnrichmentMetadata || false
-            }
+            url: url
         }).then(function(response) {
             deferred.resolve(response);
         });
@@ -392,7 +392,7 @@ angular.module('common.datacloud')
 
     this.getCube = function(opts){
         var deferred = $q.defer(),
-            url = this.url('/statistics/cube','/cube2');
+            url = this.url('/statistics/cube','/stats/cube');
         
         $http({
             method: 'get',

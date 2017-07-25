@@ -8,7 +8,7 @@ angular
     'common.datacloud.query.advanced',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.run(function($rootScope, $state, DataCloudService) {
+.run(function($rootScope, $state, DataCloudStore, DataCloudService) {
     $rootScope.$on('$stateChangeStart', function(event, toState, params, fromState, fromParams) {
         var states = {
             'home.segment.explorer': 'customer', 
@@ -16,10 +16,17 @@ angular
             'home.model.analysis.explorer': 'customer',
             'home.model.analysis.explorer.attributes': 'customer',
             'home.datacloud.explorer': 'lattice',
-            'home.datacloud.insights': 'lattice'
+            'home.datacloud.insights': 'lattice',
+            'home.datacloud.lookup.form': 'lattice'
         }
+
         if (states[toState.name]) {
-            DataCloudService.path = DataCloudService.paths[states[toState.name]];
+            if (DataCloudService.path != DataCloudService.paths[states[toState.name]]) {
+                DataCloudService.path = DataCloudService.paths[states[toState.name]];
+
+                // reset DataCloudStore if context changes
+                DataCloudStore.init();
+            }
         }
     });
 })

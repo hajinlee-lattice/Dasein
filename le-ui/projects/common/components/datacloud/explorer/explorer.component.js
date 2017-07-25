@@ -233,13 +233,13 @@ angular.module('common.datacloud.explorer', [
         vm.concurrent = concurrent;
         vm.concurrentIndex = 0;
 
-        //if (DataCloudStore.enrichments) {
-        //    vm.xhrResult(DataCloudStore.enrichments, true);
-        //} else {
+        if (DataCloudStore.enrichments) {
+            vm.xhrResult(DataCloudStore.enrichments, true);
+        } else {
             for (var j=0; j<iterations; j++) {
                 DataCloudStore.getEnrichments({ max: max, offset: j * max }).then(vm.xhrResult);
             }
-        //}
+        }
     }
 
     vm.xhrResult = function(result, cached) {
@@ -249,7 +249,7 @@ angular.module('common.datacloud.explorer', [
         if (cached) {
             vm.enrichmentsObj = {};
 
-            DataCloudStore.init();
+            //DataCloudStore.init();
         }
 
         vm.concurrentIndex++;
@@ -302,10 +302,11 @@ angular.module('common.datacloud.explorer', [
                 var timestamp3 = new Date().getTime();
                 vm.generateTree();
             }
+
             var timestamp4 = new Date().getTime();
 
-            if(vm.enrichments_completed) {
-                getEnrichmentCube().then(function(result){
+            if (vm.enrichments_completed) {
+                DataCloudStore.getCube().then(function(result) {
                     vm.cube = result.data;
                 });
             }
@@ -1220,10 +1221,6 @@ angular.module('common.datacloud.explorer', [
         }
 
         return 0;
-    }
-
-    var getEnrichmentCube = function() {
-        return DataCloudStore.getCube();
     }
 
     var ObjectValues = function(obj) {
