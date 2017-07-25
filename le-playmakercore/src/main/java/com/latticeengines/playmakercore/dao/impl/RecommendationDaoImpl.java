@@ -62,7 +62,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Session session = getSessionFactory().getCurrentSession();
 
         Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = "SELECT count(*) FROM %s WHERE synchronizationDestination = :syncDestination ";
+        String queryStr = "SELECT count(*) FROM %s WHERE synchronizationDestination = :syncDestination " //
+                + "AND lastUpdatedTimestamp >= :lastUpdatedTimestamp ";
 
         if (!CollectionUtils.isEmpty(playIds)) {
             queryStr += "AND playId IN (:playIds) ";
@@ -71,6 +72,12 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         queryStr = String.format(queryStr, entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("syncDestination", syncDestination);
+
+        if (lastModificationDate == null) {
+            lastModificationDate = new Date(0L);
+        }
+        query.setTimestamp("lastUpdatedTimestamp", lastModificationDate);
+
         if (!CollectionUtils.isEmpty(playIds)) {
             query.setParameterList("playIds", playIds);
         }
@@ -88,11 +95,13 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + "( " //
                 + "pid AS ID, recommendationId AS recommendationId, accountId AS accountId, "
                 + "leAccountExternalID AS leAccountExternalID, playId AS playId, launchId AS launchId, "
-                + "description AS description, launchDate AS launchDate, lastUpdatedTimestamp AS LastModificationDate, "
+                + "description AS description, UNIX_TIMESTAMP(launchDate) AS launchDate, "
+                + "UNIX_TIMESTAMP(lastUpdatedTimestamp) AS LastModificationDate, "
                 + "monetaryValue AS monetaryValue, likelihood AS likelihood, companyName AS companyName, "
                 + "sfdcAccountID AS sfdcAccountID, priorityID AS priorityID, priorityDisplayName AS priorityDisplayName, "
                 + "monetaryValueIso4217ID AS monetaryValueIso4217ID, contacts AS contacts " + ") " //
-                + "FROM %s WHERE synchronizationDestination = :syncDestination ";
+                + "FROM %s WHERE synchronizationDestination = :syncDestination " //
+                + "AND lastUpdatedTimestamp >= :lastUpdatedTimestamp ";
 
         if (!CollectionUtils.isEmpty(playIds)) {
             queryStr += "AND playId IN (:playIds) ";
@@ -103,6 +112,12 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setMaxResults(max);
         query.setFirstResult(offset);
         query.setString("syncDestination", syncDestination);
+
+        if (lastModificationDate == null) {
+            lastModificationDate = new Date(0L);
+        }
+        query.setTimestamp("lastUpdatedTimestamp", lastModificationDate);
+
         if (!CollectionUtils.isEmpty(playIds)) {
             query.setParameterList("playIds", playIds);
         }

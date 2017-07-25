@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -14,12 +15,14 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
+import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.playmaker.service.LpiPMRecommendation;
 
 @Component("lpiPMRecommendationDaoAdapter")
 public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
+    private static final String ACC_EXT_LAST_MODIFIED_FIELD_NAME = "LastModified";
 
     @Autowired
     private LpiPMPlay lpiPMPlay;
@@ -64,8 +67,22 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<String> accountIds,
             String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
-        return lpiPMAccountExtension.getAccountExtensions(start, offset, maximum, accountIds, recStart, columns,
-                hasSfdcContactId);
+
+        if (StringUtils.isBlank(columns)) {
+            columns = ACC_EXT_LAST_MODIFIED_FIELD_NAME;
+        } else {
+            columns = ACC_EXT_LAST_MODIFIED_FIELD_NAME + "," + columns;
+        }
+
+        List<Map<String, Object>> result = lpiPMAccountExtension.getAccountExtensions(start, offset, maximum,
+                accountIds, recStart, columns, hasSfdcContactId);
+
+        for (Map<String, Object> resRec : result) {
+            resRec.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY,
+                    resRec.get(ACC_EXT_LAST_MODIFIED_FIELD_NAME));
+        }
+
+        return result;
     }
 
     @Override

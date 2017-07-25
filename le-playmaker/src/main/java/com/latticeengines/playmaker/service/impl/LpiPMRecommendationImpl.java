@@ -1,6 +1,5 @@
 package com.latticeengines.playmaker.service.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -20,14 +19,15 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum,
             SynchronizationDestinationEnum syncDestination, List<String> playIds) {
-        return recommendationEntityMgr.findRecommendationsAsMap(new Date(start), offset, maximum,
+        return recommendationEntityMgr.findRecommendationsAsMap(LpiPMUtils.dateFromEpochSeconds(start), offset, maximum,
                 syncDestination.name(), playIds);
     }
 
     @Override
     public int getRecommendationCount(long start, SynchronizationDestinationEnum syncDestination,
             List<String> playIds) {
-        return recommendationEntityMgr.findRecommendationCount(new Date(start), syncDestination.name(), playIds);
+        return recommendationEntityMgr.findRecommendationCount(LpiPMUtils.dateFromEpochSeconds(start),
+                syncDestination.name(), playIds);
     }
 
 }

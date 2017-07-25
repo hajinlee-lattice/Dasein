@@ -38,19 +38,33 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         List<Play> plays = internalResourceRestApiProxy.getPlays(MultiTenantContext.getCustomerSpace());
 
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        int skipped = 0;
 
         for (Play play : plays) {
-            Map<String, Object> playMap = new HashMap<>();
-            playMap.put("ID", play.getPid());
-            playMap.put("ExternalId", play.getName());
-            playMap.put("DisplayName", play.getDisplayName());
-            playMap.put("Description", play.getDescription());
-            playMap.put("AverageProbability", dummyAvgProbability());
-            playMap.put("LastModificationDate,", secondsFromEpoch(play));
-            playMap.put("PlayGroups,", dummyPlayGroups());
-            playMap.put("TargetProducts,", dummyTargetProducts());
-            playMap.put("Workflow,", dummyWorkfowType());
-            result.add(playMap);
+            // TODO - implement this pagination in play dao impl and expose it
+            // via play resource
+            if (secondsFromEpoch(play) >= start) {
+                if (skipped < offset) {
+                    skipped++;
+                    continue;
+                }
+
+                if (result.size() >= maximum) {
+                    break;
+                }
+
+                Map<String, Object> playMap = new HashMap<>();
+                playMap.put("ID", play.getPid());
+                playMap.put("ExternalId", play.getName());
+                playMap.put("DisplayName", play.getDisplayName());
+                playMap.put("Description", play.getDescription());
+                playMap.put("AverageProbability", dummyAvgProbability());
+                playMap.put("LastModificationDate", secondsFromEpoch(play));
+                playMap.put("PlayGroups", dummyPlayGroups());
+                playMap.put("TargetProducts", dummyTargetProducts());
+                playMap.put("Workflow", dummyWorkfowType());
+                result.add(playMap);
+            }
         }
         return result;
     }
@@ -82,7 +96,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
     @Override
     public int getPlayCount(long start, List<Integer> playgroupIds) {
-        List<Play> plays = internalResourceRestApiProxy.getPlays(MultiTenantContext.getCustomerSpace());
+        List<Map<String, Object>> plays = getPlays(start, 0, Integer.MAX_VALUE, null);
         return plays.size();
     }
 
