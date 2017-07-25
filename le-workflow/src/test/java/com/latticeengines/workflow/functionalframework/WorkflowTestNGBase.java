@@ -48,7 +48,7 @@ public class WorkflowTestNGBase extends SecurityFunctionalTestNGBase {
     }
 
     @BeforeClass(groups = { "functional", "deployment" })
-    public void beforeEachClass() {
+    public void setup() throws Exception {
         jobRepositoryTestUtils = new JobRepositoryTestUtils(jobRepository, dataSource);
         jobRepositoryTestUtils.setTablePrefix(DataPlatformInfrastructure.WORKFLOW_PREFIX);
         bootstrapWorkFlowTenant();

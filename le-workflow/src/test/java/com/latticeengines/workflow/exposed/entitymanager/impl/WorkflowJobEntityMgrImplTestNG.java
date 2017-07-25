@@ -36,7 +36,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
     @BeforeClass(groups = "functional")
     @Override
-    public void beforeEachClass() {
+    public void setup() {
         tenantId1 = this.getClass().getSimpleName() + "1";
         tenantId2 = this.getClass().getSimpleName() + "2";
         Tenant tenant1 = tenantService.findByTenantId(tenantId1);
