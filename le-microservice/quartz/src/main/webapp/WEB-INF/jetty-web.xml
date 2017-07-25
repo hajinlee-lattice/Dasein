@@ -10,7 +10,7 @@
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="contextPath">/quartz</Set>
-    <Set name="war"><Property name="jetty.webapps" default="."/>/le-quartz-3.7.0-SNAPSHOT.war</Set>
+    <Set name="war"><Property name="jetty.webapps" default="."/>/le-quartz-3.8.0-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->
