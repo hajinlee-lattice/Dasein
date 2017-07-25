@@ -31,6 +31,9 @@
                                 <source>
                                     <location>src/main/python/replace_token.py</location>
                                 </source>
+                                <source>
+                                    <location>src/main/resources/jacocoagent.jar</location>
+                                </source>
                             </sources>
                         </mapping>
                     </mappings>

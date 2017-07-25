@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.yarn.fs.DefaultResourceLocalizer;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
@@ -91,6 +91,10 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
                 String.format("/app/%s/conf/log4j.properties", versionManager.getCurrentVersionInStack(stackName)), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                String.format("/app/%s/lib/jacocoagent.jar", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
 
         if (!excludeDataplatformLib) {
