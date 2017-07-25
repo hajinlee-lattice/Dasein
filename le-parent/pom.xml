@@ -391,7 +391,7 @@
                                     <goal>prepare-agent-integration</goal>
                                 </goals>
                                 <configuration>
-                                    <destFile>${basedir}/jacoco/jacoco-jetty.exec</destFile>
+                                    <destFile>${basedir}/jacoco/jacoco-it.exec</destFile>
                                     <excludes>
                                         <exclude>**/*Test*</exclude>
                                     </excludes>
@@ -528,6 +528,7 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <skip>false</skip>
+                                    <argLine>${jacoco.agent.itArgLine}</argLine>
                                     <includes>
                                         <include>${functional.classes.include}</include>
                                     </includes>
@@ -585,6 +586,7 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <skip>false</skip>
+                                    <argLine>${jacoco.agent.itArgLine}</argLine>
                                     <includes>
                                         <include>${deployment.classes.include}</include>
                                     </includes>
@@ -641,6 +643,7 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <skip>false</skip>
+                                    <argLine>${jacoco.agent.itArgLine}</argLine>
                                     <includes>
                                         <include>${functional.classes.include}</include>
                                     </includes>
@@ -699,6 +702,7 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <skip>false</skip>
+                                    <argLine>${jacoco.agent.itArgLine}</argLine>
                                     <includes>
                                         <include>${deployment.classes.include}</include>
                                     </includes>
