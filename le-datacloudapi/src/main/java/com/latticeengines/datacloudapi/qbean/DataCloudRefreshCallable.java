@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.datacloudapi.engine.ingestion.service.IngestionService;
+import com.latticeengines.datacloudapi.engine.orchestration.service.OrchestrationService;
 import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
 import com.latticeengines.datacloudapi.engine.transformation.service.SourceTransformationService;
 
@@ -17,13 +18,15 @@ public class DataCloudRefreshCallable implements Callable<Boolean> {
     private final SourceTransformationService transformationService;
     private final PublicationService publicationService;
     private final IngestionService ingestionService;
+    private final OrchestrationService orchestrationService;
 
-    private DataCloudRefreshCallable(SourceTransformationService transformationProxy, PublicationService publicationProxy,
-                                     IngestionService ingestionProxy) {
-
-        this.transformationService = transformationProxy;
-        this.publicationService = publicationProxy;
-        this.ingestionService = ingestionProxy;
+    private DataCloudRefreshCallable(SourceTransformationService transformationService,
+            PublicationService publicationService, IngestionService ingestionService,
+            OrchestrationService orchestrationService) {
+        this.transformationService = transformationService;
+        this.publicationService = publicationService;
+        this.ingestionService = ingestionService;
+        this.orchestrationService = orchestrationService;
     }
 
     @Override
@@ -47,6 +50,12 @@ public class DataCloudRefreshCallable implements Callable<Boolean> {
             log.error("Failed to scan ingestion engine", e);
         }
 
+        try {
+            orchestrationService.scan("");
+        } catch (Exception e) {
+            log.error("Failed to scan orchestration engine", e);
+        }
+
         return true;
     }
 
@@ -55,23 +64,30 @@ public class DataCloudRefreshCallable implements Callable<Boolean> {
         private SourceTransformationService transformationService;
         private PublicationService publicationService;
         private IngestionService ingestionService;
+        private OrchestrationService orchestrationService;
 
         public DataCloudRefreshCallable build() {
-            return new DataCloudRefreshCallable(transformationService, publicationService, ingestionService);
+            return new DataCloudRefreshCallable(transformationService, publicationService, ingestionService,
+                    orchestrationService);
         }
 
-        Builder transformationProxy(SourceTransformationService transformationProxy) {
-            this.transformationService = transformationProxy;
+        Builder transformationService(SourceTransformationService transformationService) {
+            this.transformationService = transformationService;
             return this;
         }
 
-        Builder publicationProxy(PublicationService publicationProxy) {
-            this.publicationService = publicationProxy;
+        Builder publicationService(PublicationService publicationService) {
+            this.publicationService = publicationService;
             return this;
         }
 
-        Builder ingestionProxy(IngestionService ingestionProxy) {
-            this.ingestionService = ingestionProxy;
+        Builder ingestionService(IngestionService ingestionService) {
+            this.ingestionService = ingestionService;
+            return this;
+        }
+
+        Builder orchestrationService(OrchestrationService orchestrationService) {
+            this.orchestrationService = orchestrationService;
             return this;
         }
 
