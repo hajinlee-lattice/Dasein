@@ -98,8 +98,7 @@ public class SalesforceToHdfsService extends EaiRuntimeService<ImportConfigurati
                 Thread.sleep(20000);
                 dataExtractionService.cleanUpTargetPathData(importContext);
             } catch (Exception e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                log.error("some other error:", e);
             }
             throw new LedpException(LedpCode.LEDP_00002, e);
         }

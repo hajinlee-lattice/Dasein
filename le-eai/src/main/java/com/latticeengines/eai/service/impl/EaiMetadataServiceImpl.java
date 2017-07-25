@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -154,20 +153,12 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
                             multipleRecords.get(table.getName()).get(i)));
                 }
             } else {
-                extracts.get(table.getName()).add(createExtract(targetPathsMap.get(table.getName()),
-                        processedRecordsMap.get(table.getName())));
+                extracts.get(table.getName()).add(
+                        createExtract(targetPathsMap.get(table.getName()), processedRecordsMap.get(table.getName())));
             }
         }
-
-
-//        HashMap<String, Extract> extracts = new HashMap<>();
-//        for (Table table : tableMetaData) {
-//            extracts.put(table.getName(),
-//                    createExtract(targetPathsMap.get(table.getName()), processedRecordsMap.get(table.getName())));
-//        }
         return extracts;
     }
-
 
     @VisibleForTesting
     void setLastModifiedTimeStamp(Table table, ImportContext importContext) {
