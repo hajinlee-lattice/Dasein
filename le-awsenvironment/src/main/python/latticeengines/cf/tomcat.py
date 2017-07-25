@@ -254,7 +254,7 @@ def parse_args():
     parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity. only honored when using auto scaling group.')
     parser1.add_argument('--le-stack', dest='lestack', type=str, help='the parent LE_STACK')
     parser1.add_argument('--second-tgrp', dest='secondtgrp', type=str, help='name of the secondary tgrp')
-    parser1.add_argument('--enable-jacoco', dest='enablejacoco', type=str, help='enable jacoco on tomcat')
+    parser1.add_argument('--enable-jacoco', dest='enablejacoco', action='store_true', help='enable jacoco on tomcat')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("teardown")
