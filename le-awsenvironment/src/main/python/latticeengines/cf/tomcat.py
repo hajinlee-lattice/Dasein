@@ -132,6 +132,10 @@ def tomcat_task(profile_vars, environment, enable_jacoco=False):
     task.add_volume(ledpLog)
     task.add_volume(scoringcache)
     task.add_volume(internal_addr)
+
+    if enable_jacoco:
+        task.add_volume(jacoco)
+
     return task
 
 def provision_cli(args):
