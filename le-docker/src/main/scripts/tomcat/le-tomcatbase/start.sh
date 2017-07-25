@@ -56,5 +56,6 @@ echo ${JAVA_OPTS}
 mkdir /var/log/ledp
 chmod a+w /var/log/ledp
 
+chmod +x /var/lib/jacocoagent.jar
 chown -R tomcat ${CATALINA_HOME}
 ${CATALINA_HOME}/bin/catalina.sh run
