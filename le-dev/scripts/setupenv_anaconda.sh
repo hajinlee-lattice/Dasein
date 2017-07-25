@@ -26,12 +26,13 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         wget https://repo.continuum.io/archive/$ANACONDA_SH -O $ARTIFACT_DIR/$ANACONDA_SH
     fi
 
-    echo "delete anaconda home, because installation script will create it"
-    rm -rf $ANACONDA_HOME || true
+    echo "Delete anaconda home, because installation script will create it"
+    sudo rm -rf $ANACONDA_HOME || true
     echo "Downloading Anaconda"
     pushd $ARTIFACT_DIR
-    bash $ARTIFACT_DIR/$ANACONDA_SH -b -p $ANACONDA_HOME
+    sudo bash $ARTIFACT_DIR/$ANACONDA_SH -b -p $ANACONDA_HOME
     popd
+    sudo chown -R $USER $ANACONDA_HOME
 
     CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
 
@@ -124,4 +125,8 @@ pip install sklearn-pandas==1.3.0
 pip install git+https://github.com/jpmml/sklearn2pmml.git@0.17.4
 
 source $ANACONDA_HOME/bin/deactivate
+
+if [ "${ANACONDA_HOME}" != "/opt/conda" ]; then
+    sudo ln -f -s ${ANACONDA_HOME} /opt/conda
+fi
 

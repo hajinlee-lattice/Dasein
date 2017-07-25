@@ -47,6 +47,7 @@ else
 fi
 
 echo "Configuring HDP ..."
+cp $WSHOME/le-dev/hadoop/hadoop-env.sh $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/capacity-scheduler.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/mapred-site.xml $HADOOP_CONF_DIR
 cp $WSHOME/le-dev/hadoop/tez-site.xml $HADOOP_CONF_DIR
