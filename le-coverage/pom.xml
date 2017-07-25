@@ -48,6 +48,7 @@
                                         <merge destfile="${jacoco.data.dir}/${jacoco.data.file}">
                                             <fileset dir="..">
                                                 <include name="${jacoco.merge.include}" />
+                                                <exclude name="**/le-coverage/target/jacoco/*.exec"/>
                                             </fileset>
                                         </merge>
                                     </target>
