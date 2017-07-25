@@ -20,6 +20,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
@@ -92,10 +93,12 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 LocalResourceVisibility.PUBLIC, //
                 String.format("/app/%s/conf/log4j.properties", versionManager.getCurrentVersionInStack(stackName)), //
                 false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/lib/jacocoagent.jar", versionManager.getCurrentVersionInStack(stackName)), //
-                false));
+        if (JacocoUtils.needToLocalizeJacoco()) {
+            hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                    LocalResourceVisibility.PUBLIC, //
+                    String.format("/app/%s/lib/jacocoagent.jar", versionManager.getCurrentVersionInStack(stackName)), //
+                    false));
+        }
 
         if (!excludeDataplatformLib) {
             hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //

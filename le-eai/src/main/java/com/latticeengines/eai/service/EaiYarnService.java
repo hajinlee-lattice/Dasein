@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
+import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.domain.exposed.BaseContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiJob;
@@ -34,6 +35,8 @@ public interface EaiYarnService {
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "128");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
+
+        JacocoUtils.setJacoco(containerProperties, "eai");
 
         eaiJob.setAppMasterPropertiesObject(appMasterProperties);
         eaiJob.setContainerPropertiesObject(containerProperties);

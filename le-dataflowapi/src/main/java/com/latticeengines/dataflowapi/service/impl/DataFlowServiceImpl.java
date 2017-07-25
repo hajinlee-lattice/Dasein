@@ -4,21 +4,26 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.dataflowapi.service.DataFlowService;
-import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowJob;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("dataFlowService")
 public class DataFlowServiceImpl implements DataFlowService {
+
+    private static final Logger log = LoggerFactory.getLogger(DataFlowServiceImpl.class);
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
@@ -93,6 +98,8 @@ public class DataFlowServiceImpl implements DataFlowService {
         if (StringUtils.isNotBlank(swLib)) {
             containerProperties.put(ContainerProperty.SWLIB_PKG.name(), swLib);
         }
+
+        JacocoUtils.setJacoco(containerProperties, "dataflowapi");
 
         dataFlowJob.setAppMasterPropertiesObject(appMasterProperties);
         dataFlowJob.setContainerPropertiesObject(containerProperties);

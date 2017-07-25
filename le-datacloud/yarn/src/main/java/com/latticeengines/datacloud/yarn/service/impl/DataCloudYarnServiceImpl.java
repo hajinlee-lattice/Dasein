@@ -2,10 +2,11 @@ package com.latticeengines.datacloud.yarn.service.impl;
 
 import java.util.Properties;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
@@ -28,8 +30,7 @@ import com.latticeengines.yarn.exposed.service.JobService;
 @Component("propDataYarnService")
 public class DataCloudYarnServiceImpl implements DataCloudYarnService {
 
-    @Autowired
-    @Qualifier(value = "jobEntityMgr")
+    @Resource(name = "jobEntityMgr")
     private JobEntityMgr jobEntityMgr;
 
     @Autowired
@@ -105,6 +106,8 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
         }
 
         containerProperties.put(ContainerProperty.PRIORITY.name(), "2");
+
+        JacocoUtils.setJacoco(containerProperties, "datacloud");
 
         propDataJob.setAppMasterPropertiesObject(appMasterProperties);
         propDataJob.setContainerPropertiesObject(containerProperties);
