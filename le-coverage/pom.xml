@@ -16,23 +16,115 @@
     <url>http://maven.apache.org</url>
   
     <properties>
-        <reports.directory>reports</reports.directory>
-
-        <classes.directory.dataplatform>../le-dataplatform/target/classes</classes.directory.dataplatform>
-        <classes.directory.common>../le-common/target/classes</classes.directory.common>
-        <classes.directory.api>../le-api/target/classes</classes.directory.api>
-        <classes.directory.domain>../le-domain/target/classes</classes.directory.domain>
-        <classes.directory.perf>../le-perf/target/classes</classes.directory.perf>
-        <classes.directory.scheduler>../le-scheduler/target/classes</classes.directory.scheduler>
-                
-
-        <sources.directory.dataplatform>../le-dataplatform/src/main/java</sources.directory.dataplatform>
-        <sources.directory.common>../le-common/src/main/java</sources.directory.common>
-        <sources.directory.api>../le-api/src/main/java</sources.directory.api>
-        <sources.directory.domain>../le-domain/src/main/java</sources.directory.domain>
-        <sources.directory.perf>../le-perf/src/main/java</sources.directory.perf>
-        <sources.directory.scheduler>../le-scheduler/src/main/java</sources.directory.scheduler>
+        <jacoco.data.dir>${project.build.directory}/jacoco</jacoco.data.dir>
+        <jacoco.data.file>jacoco.exec</jacoco.data.file>
+        <jacoco.merged.data.dir>${project.build.directory}/jacoco-merged</jacoco.merged.data.dir>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>merge</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven.antrun.version}</version>
+                        <executions>
+                            <execution>
+                                <id>merge-jacoco-exec</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- Execute an ant task within maven -->
+                                        <echo message="Merge JaCoCo Data Files" />
+                                        <taskdef name="merge" classname="org.jacoco.ant.MergeTask">
+                                            <classpath path="${basedir}/target/jacoco-jars/org.jacoco.ant.jar" />
+                                        </taskdef>
+                                        <delete file="${jacoco.data.dir}/${jacoco.data.file}" quiet="true" />
+                                        <merge destfile="${jacoco.data.dir}/${jacoco.data.file}">
+                                            <fileset dir="..">
+                                                <include name="${jacoco.merge.include:**/*.exec}" />
+                                            </fileset>
+                                        </merge>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.jacoco</groupId>
+                                <artifactId>org.jacoco.ant</artifactId>
+                                <version>${jacoco.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>report</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven.antrun.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- Execute an ant task within maven -->
+                                        <echo message="Generating JaCoCo Reports" />
+                                        <taskdef name="report" classname="org.jacoco.ant.ReportTask">
+                                            <classpath path="${basedir}/target/jacoco-jars/org.jacoco.ant.jar" />
+                                        </taskdef>
+                                        <mkdir dir="${basedir}/target/coverage-report" />
+                                        <report>
+                                            <executiondata>
+                                                <fileset dir="${jacoco.data.dir}"/>
+                                            </executiondata>
+                                            <structure name="jacoco-multi Coverage Project">
+                                                <group name="jacoco-multi">
+                                                    <classfiles>
+                                                        <fileset dir="..">
+                                                            <include name="**/target/classes/com/latticeengines/**" />
+                                                        </fileset>
+                                                    </classfiles>
+                                                    <sourcefiles encoding="UTF-8">
+                                                        <fileset dir="..">
+                                                            <include name="**/src/main/java/**" />
+                                                        </fileset>
+                                                    </sourcefiles>
+                                                </group>
+                                            </structure>
+                                            <html destdir="${basedir}/target/coverage-report/html" />
+                                            <xml destfile="${basedir}/target/coverage-report/coverage-report.xml" />
+                                            <csv destfile="${basedir}/target/coverage-report/coverage-report.csv" />
+                                        </report>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.jacoco</groupId>
+                                <artifactId>org.jacoco.ant</artifactId>
+                                <version>${jacoco.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
@@ -63,73 +155,17 @@
                 </executions>
             </plugin>
 
-
-            <!-- Ant plugin. -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.6</version>
-                <executions>
-                    <execution>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <!-- Execute an ant task within maven -->
-                                <echo message="Generating JaCoCo Reports" />
-                                <taskdef name="report" classname="org.jacoco.ant.ReportTask">
-                                    <classpath path="${basedir}/target/jacoco-jars/org.jacoco.ant.jar" />
-                                </taskdef>
-                                <mkdir dir="${basedir}/target/coverage-report" />
-                                <report>
-                                    <executiondata>
-                                        <fileset dir="${reports.directory}">
-                                        </fileset>
-                                    </executiondata>
-                                    <structure name="jacoco-multi Coverage Project">
-                                        <group name="jacoco-multi">
-                                            <classfiles>
-                                                <fileset dir="${classes.directory.dataplatform}" />
-                                                <fileset dir="${classes.directory.api}" />
-                                                <fileset dir="${classes.directory.common}" />
-                                                <fileset dir="${classes.directory.domain}" />
-                                                <fileset dir="${classes.directory.perf}" />
-                                                <fileset dir="${classes.directory.scheduler}" />
-                                            </classfiles>
-                                            <sourcefiles encoding="UTF-8">
-                                                <fileset dir="${sources.directory.dataplatform}" />
-                                                <fileset dir="${sources.directory.api}"/>
-                                                <fileset dir="${sources.directory.common}"/>
-                                                <fileset dir="${sources.directory.domain}"/>
-                                                <fileset dir="${sources.directory.perf}"/>
-                                                <fileset dir="${sources.directory.scheduler}"/>
-
-                                                <!-- <fileset dir="${generated-sources.directory.projecta}"></fileset>
-                                                <fileset
-                                                    dir="${generated-sources.directory.projectb}"></fileset> -->
-                                            </sourcefiles>
-                                        </group>
-                                    </structure>
-                                    <html destdir="${basedir}/target/coverage-report/html" />
-                                    <xml destfile="${basedir}/target/coverage-report/coverage-report.xml" />
-                                    <csv destfile="${basedir}/target/coverage-report/coverage-report.csv" />
-                                </report>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>org.jacoco.ant</artifactId>
-                        <version>${jacoco.version}</version>
-                    </dependency>
-                </dependencies>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <configuration>
+                    <destFile>${project.build.directory}/jacoco/${jacoco.file.name:jacoco.exec}</destFile>
+                    <append>true</append>
+                    <dataFile>${project.build.directory}/jacoco/${jacoco.file.name:jacoco.exec}</dataFile>
+                </configuration>
             </plugin>
         </plugins>
-
 
         <pluginManagement>
             <plugins>

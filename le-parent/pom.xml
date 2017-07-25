@@ -80,7 +80,7 @@
         <marketo.soap.sdk.version>2.7</marketo.soap.sdk.version> <!-- uploaded to nexues ? -->
 
         <!-- versions should be easy to upgrade: keep them updated! -->
-        <jacoco.version>0.7.5.201505241946</jacoco.version>
+        <jacoco.version>0.7.9</jacoco.version>
         <quartz.version>2.3.0</quartz.version>
         <newrelic.version>2.14.1</newrelic.version> <!-- to be removed -->
         <aspectj.version>1.8.7</aspectj.version>

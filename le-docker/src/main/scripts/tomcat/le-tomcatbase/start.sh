@@ -41,6 +41,11 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.authenticate=false
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote.local.only=false"
 export JAVA_OPTS="${JAVA_OPTS} -Djava.rmi.server.hostname=${RMI_SERVER}"
 
+if [ "${ENABLE_JACOCO}" == "true" ]; then
+    JACOCO_DEST_FILE="/mnt/efs/jacoco/${HOSTNAME}.exec"
+    export JAVA_OPTS="${JAVA_OPTS} -javaagent:/var/lib/jacocoagent.jar=includes=com.latticeengines.*,destFile=${JACOCO_DEST_FILE}"
+fi
+
 if [ ! -z "${CATALINA_OPTS}" ]; then
     export JAVA_OPTS="${JAVA_OPTS} ${CATALINA_OPTS}"
 fi

@@ -72,7 +72,7 @@ def create_template(environment, profile, fixed_instances=False, num_instances=1
         stack.exact_autoscale(tgt, "ScaleBack", num_instances, 600, ub=0)
     return stack
 
-def tomcat_task(profile_vars, environment):
+def tomcat_task(profile_vars, environment, enable_jacoco=False):
     config = AwsEnvironment(environment)
     container = ContainerDefinition("tomcat", { "Fn::Join" : [ "", [
         config.ecr_registry(), "/latticeengines/", PARAM_DOCKER_IMAGE.ref(), ":",  PARAM_DOCKER_IMAGE_TAG.ref()]]}) \
@@ -118,6 +118,13 @@ def tomcat_task(profile_vars, environment):
         .mount("/var/log/ledp", ledpLog) \
         .mount("/var/cache/scoringapi", scoringcache) \
         .mount("/etc/internaladdr.txt", internal_addr)
+
+    if enable_jacoco:
+        jacoco = Volume("jacoco", "/mnt/efs/jacoco")
+        container = container \
+            .mount("/mnt/efs/jacoco", jacoco) \
+            .privileged() \
+            .set_env("ENABLE_JACOCO", "true")
 
     task = TaskDefinition("tomcattask")
     task.add_container(container)
@@ -247,6 +254,7 @@ def parse_args():
     parser1.add_argument('--max-capacity', dest='mc', type=int, default='8', help='maximum capacity. only honored when using auto scaling group.')
     parser1.add_argument('--le-stack', dest='lestack', type=str, help='the parent LE_STACK')
     parser1.add_argument('--second-tgrp', dest='secondtgrp', type=str, help='name of the secondary tgrp')
+    parser1.add_argument('--enable-jacoco', dest='enablejacoco', type=str, help='enable jacoco on tomcat')
     parser1.set_defaults(func=provision_cli)
 
     parser1 = commands.add_parser("teardown")
