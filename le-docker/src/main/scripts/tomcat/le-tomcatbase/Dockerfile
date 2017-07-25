@@ -21,6 +21,7 @@ COPY conf/env/qacluster/latticeengines.properties /tmp/conf/env/qacluster/lattic
 COPY conf/env/prodcluster/latticeengines.properties /tmp/conf/env/prodcluster/latticeengines.properties
 COPY catalina.sh $CATALINA_HOME/bin/catalina.sh
 COPY jacocoagent.jar /var/lib/jacocoagent.jar
+RUN chmod +x /var/lib/jacocoagent.jar
 COPY start.sh /start.sh
 
 EXPOSE 8080 8443 1099
