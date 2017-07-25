@@ -34,10 +34,10 @@ def main():
     args.func(args)
 
 def template_cli(args):
-    template(args.environment, args.stackname, args.profile, fixed_instances=args.fixed, num_instances=args.numinstances, second_tgrp=args.secondtgrp, upload=args.upload)
+    template(args.environment, args.stackname, args.profile, fixed_instances=args.fixed, num_instances=args.numinstances, second_tgrp=args.secondtgrp, upload=args.upload, enable_jacoco=args.enablejacoco)
 
-def template(environment, stackname, profile, fixed_instances=False, num_instances=1, second_tgrp=False, upload=False):
-    stack = create_template(environment, profile, fixed_instances, num_instances, second_tgrp=second_tgrp)
+def template(environment, stackname, profile, fixed_instances=False, num_instances=1, second_tgrp=False, upload=False, enable_jacoco=False):
+    stack = create_template(environment, profile, fixed_instances, num_instances, second_tgrp=second_tgrp, enable_jacoco=enable_jacoco)
     if upload:
         stack.validate()
         stack.upload(environment, s3_path(stackname))
@@ -45,7 +45,7 @@ def template(environment, stackname, profile, fixed_instances=False, num_instanc
         print stack.json()
         stack.validate()
 
-def create_template(environment, profile, fixed_instances=False, num_instances=1, second_tgrp=False):
+def create_template(environment, profile, fixed_instances=False, num_instances=1, second_tgrp=False, enable_jacoco=False):
     stack = ECSStack("AWS CloudFormation template for Tomcat server on ECS cluster.", environment, use_asgroup=(not fixed_instances), instances=num_instances, efs=PARAM_EFS)
     stack.add_params([
         PARAM_DOCKER_IMAGE,
@@ -64,7 +64,7 @@ def create_template(environment, profile, fixed_instances=False, num_instances=1
             stack.attach_tgrp(PARAM_SECOND_TGRP_ARN)
     profile_vars = get_profile_vars(profile)
     stack.add_params(profile_vars.values())
-    task = tomcat_task(profile_vars, environment)
+    task = tomcat_task(profile_vars, environment, enable_jacoco=enable_jacoco)
     stack.add_resource(task)
     service, tgt = stack.add_service("tomcat", task, asrolearn=PARAM_ECS_SCALE_ROLE_ARN)
     if not fixed_instances:
