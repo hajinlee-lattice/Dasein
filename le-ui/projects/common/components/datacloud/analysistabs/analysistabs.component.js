@@ -3,7 +3,7 @@ angular.module('common.datacloud.analysistabs', [
     ])
 .controller('AnalysisTabsController', function (
     $state, $stateParams, $scope, FeatureFlagService, BrowserStorageUtility,
-    ResourceUtility, DataCloudStore, QueryStore
+    ResourceUtility, DataCloudStore, QueryService, QueryStore
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -13,10 +13,14 @@ angular.module('common.datacloud.analysistabs', [
         stateParams: $stateParams,
         section: $stateParams.section,
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
-        counts: QueryStore.getCounts()
+        restriction: QueryStore.getRestriction(),
+        counts: QueryService.GetCountByRestriction('accounts', {'restriction': vm.restriction})
     });
 
     vm.init = function() {
+
+        console.log(vm.restriction);
+
         vm.attributes = vm.inModel()
             ? 'home.model.analysis.explorer'
             : 'home.segment.explorer';

@@ -15,6 +15,9 @@ angular
             
             angular.extend(vm, { });
 
+
+            console.log(vm.count = vm.categoryCount(vm.category));
+
             vm.setCategory = function(category) {
                 vm.category = category;
                 DataCloudStore.setMetadata('category', category);

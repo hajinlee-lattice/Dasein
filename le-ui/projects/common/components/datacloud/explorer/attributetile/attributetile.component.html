@@ -79,6 +79,7 @@
     </div>
 
     <ul class="controls noselect" ng-if="!vm.lookupMode">
+
         <li class="control enrich" ng-if="vm.section == 'edit'">
             <button class="button"
                     ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}"
@@ -86,6 +87,7 @@
                 <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
             </button>
         </li>
+        
         <li class="control highlight dropdown-container" ng-if="vm.section == 'team'" ng-init="vm.openHighlighter[enrichment.ColumnId] = {}">
             <!-- this can't be a <button> element because IE and FF don't like it -->
             <div class="button"
@@ -99,5 +101,6 @@
                 </ul>
             </div>
         </li>
+
     </ul>
 </div>

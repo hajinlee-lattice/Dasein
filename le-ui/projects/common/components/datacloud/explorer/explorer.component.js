@@ -11,7 +11,7 @@ angular.module('common.datacloud.explorer', [
 .controller('DataCloudController', function(
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
-    EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryStore,
+    EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentServiceProxy, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse
 ){
     var vm = this,
@@ -1371,15 +1371,21 @@ angular.module('common.datacloud.explorer', [
         vm.hasCategoryCount = result.length;
         return result.length;
     }
-    
+
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
+
+
         if(!vm.cube.Stats) {
             return false;
         }
         var attributeKey = attribute.Attribute || attribute.ColumnId,
             stat = vm.getAttributeStat(attribute) || {},
-            attributeRangeKey = (stat.Range ? vm.makeSegmentsRangeKey(attribute, stat.Range) : '');
+            attributeRangeKey = (stat.Range ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : '');
+
+
+        console.log(attribute);
+
 
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
@@ -1389,17 +1395,25 @@ angular.module('common.datacloud.explorer', [
         vm.saveSegmentEnabled = true;
 
         if (vm.segmentAttributeInput[attributeKey] === true) {
-            QueryStore.addRestriction({columnName: attributeKey, range: stat.Range});
+            QueryStore.addRestriction({columnName: attributeKey, range: stat.Rng});
         } else {
-            QueryStore.removeRestriction({columnName: attributeKey, range: stat.Range});
+            QueryStore.removeRestriction({columnName: attributeKey, range: stat.Rng});
         }
+
+        console.log( QueryStore.getRestriction());
+        QueryService.GetCountByQuery('accounts', QueryStore.getRestriction()).then(function(response){
+            QueryStore.setResourceTypeCount('accounts', false, response);
+        });
+
     }
+
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
+
         var disable = disable || false,
             attributeKey = enrichment.Attribute || enrichment.ColumnId,
-            attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Range),
+            attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng),
             fieldName = enrichment.ColumnId;
         if(disable) {
             return false;
@@ -1409,12 +1423,12 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         vm.saveSegmentEnabled = true;
 
-        //vm.enrichments[index].SegmentChecked = true;
+        vm.enrichments[index].SegmentChecked = true;
 
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-            QueryStore.addRestriction({columnName: fieldName, range: stat.Range});
+            QueryStore.addRestriction({columnName: fieldName, range: stat.Rng});
         } else {
-            QueryStore.removeRestriction({columnName: fieldName, range: stat.Range});
+            QueryStore.removeRestriction({columnName: fieldName, range: stat.Rng});
         }
         /*
          * Rebuild the tile table items
@@ -1430,6 +1444,11 @@ angular.module('common.datacloud.explorer', [
             metadataSegments = vm.metadataSegments || QueryRestriction;
         if(metadataSegments && metadataSegments.all) {
             metadataSegments.all.forEach(function(item){
+
+
+                console.log(item);
+
+
                 var bucketId = item.bucketRestriction.lhs.columnLookup.column_name + item.bucketRestriction.range.max;
 
                 buckets[bucketId] = true;
@@ -1442,8 +1461,6 @@ angular.module('common.datacloud.explorer', [
     vm.selectBucketInput = function(id, bucket) {
         var bucketId = id + bucket,
             range = {min: bucket, max: bucket, is_null_only: false};
-
-        console.log(bucketId, range);
 
         vm.segmentBucketInput[bucketId] = !vm.segmentBucketInput[bucketId];
         vm.saveSegmentEnabled = true;
@@ -1476,7 +1493,8 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.saveSegment = function() {        
+    vm.saveSegment = function() {  
+
         if(Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {
             SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
                 if (!result.errorMsg) {

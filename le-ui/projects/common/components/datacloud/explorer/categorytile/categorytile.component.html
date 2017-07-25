@@ -33,8 +33,8 @@
             </ul>
             <ul class="attributes noselect-children">
 
-                <!-- <li class="header" ng-show="vm.categoryAttributes.length > 0"> -->
-                <li class="header">
+                <li class="header" ng-show="vm.categoryAttributes.length > 0">
+                <!-- <li class="header"> -->
                     <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
                     <div class="column data" ng-if="!highlightAttributes.length && vm.section == 'segment.analysis'">Value</div>
                     <div class="column data" ng-if="!highlightAttributes.length">{{ vm.lookupMode ? 'Value' : (vm.section == 'segment.analysis' && vm.inModel() ? 'Lift' : 'Records') }}</div>
@@ -74,7 +74,7 @@
             </ul>
         </div>
     </span>
-    <ul class="controls noselect" >
+    <ul class="controls noselect" ng-if="!vm.lookupMode && !vm.category">
         <li class="control highlight dropdown-container" ng-if="vm.section == 'team'">
             <div class="button"
                     ng-class="{'selected': vm.openHighlighter[category].open, 'enabled': vm.highlightTypesCategoryLabel(category).type == 'enabled' || vm.highlightTypesCategoryLabel(category).type == 'dirty'}"
