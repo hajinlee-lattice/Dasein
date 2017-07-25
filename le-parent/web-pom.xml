@@ -16,6 +16,12 @@
         <relativePath>pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <jetty.dir>main</jetty.dir>
+        <jetty.stop.port>10999</jetty.stop.port>
+        <jetty.use.test.cp>true</jetty.use.test.cp>
+    </properties>
+
     <profiles>
         <profile>
             <id>jetty</id>
@@ -50,16 +56,21 @@
                             <stopPort>${jetty.stop.port}</stopPort>
                             <stopKey>STOP</stopKey>
                             <stopWait>10</stopWait>
-                        </configuration>
+                            <daemon>true</daemon>
+                            </configuration>
                         <executions>
                             <execution>
                                 <id>start-jetty</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
-                                    <goal>start</goal>
+                                    <goal>stop</goal>
+                                    <goal>run-forked</goal>
                                 </goals>
                                 <configuration>
                                     <scanIntervalSeconds>0</scanIntervalSeconds>
+                                    <daemon>true</daemon>
+                                    <waitForChild>false</waitForChild>
+                                    <jvmArgs>${jacoco.agent.itArgLine}</jvmArgs>
                                 </configuration>
                             </execution>
                             <execution>

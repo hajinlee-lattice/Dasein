@@ -18,7 +18,7 @@
     <properties>
         <jacoco.data.dir>${project.build.directory}/jacoco</jacoco.data.dir>
         <jacoco.data.file>jacoco.exec</jacoco.data.file>
-        <jacoco.merged.data.dir>${project.build.directory}/jacoco-merged</jacoco.merged.data.dir>
+        <jacoco.merge.include>**/*.exec</jacoco.merge.include>
     </properties>
 
     <profiles>
@@ -47,7 +47,7 @@
                                         <delete file="${jacoco.data.dir}/${jacoco.data.file}" quiet="true" />
                                         <merge destfile="${jacoco.data.dir}/${jacoco.data.file}">
                                             <fileset dir="..">
-                                                <include name="${jacoco.merge.include:**/*.exec}" />
+                                                <include name="${jacoco.merge.include}" />
                                             </fileset>
                                         </merge>
                                     </target>

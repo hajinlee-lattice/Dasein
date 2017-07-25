@@ -32,6 +32,7 @@
         <maven.war.version>3.1.0</maven.war.version>
         <maven.surefire.version>2.20</maven.surefire.version>
         <maven.deploy.version>2.8.2</maven.deploy.version>
+        <maven.dependency.version>3.0.1</maven.dependency.version>
         <maven.assembly.version>3.0.0</maven.assembly.version>
         <maven.install.version>2.5.2</maven.install.version>
         <maven.eclipse.version>2.9</maven.eclipse.version> <!-- Users are advised to use m2e, the Eclipse Maven Integration instead of this plugin -->
@@ -158,9 +159,6 @@
         <jacoco.destfile>jacoco.exec</jacoco.destfile>
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
         <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize> <!-- for java 8 compatibility, where this variable is empty -->
-        <jetty.dir>main</jetty.dir>
-        <jetty.stop.port>10999</jetty.stop.port>
-        <jetty.use.test.cp>true</jetty.use.test.cp>
         <surefire.reuse.forks>true</surefire.reuse.forks>
     </properties>
 
@@ -335,6 +333,114 @@
             </build>
         </profile>
         <profile>
+            <id>cc</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>${maven.dependency.version}</version>
+                        <executions>
+                            <!-- Copy the ant tasks jar. Needed for ts.jacoco.report-ant . -->
+                            <execution>
+                                <id>copy-jacoco-agent</id>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <phase>initialize</phase>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.jacoco</groupId>
+                                            <artifactId>org.jacoco.agent</artifactId>
+                                            <version>${jacoco.version}</version>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <stripVersion>true</stripVersion>
+                                    <outputDirectory>${basedir}/target/jacoco-jars</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <configuration>
+                            <append>true</append>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>jacoco-initialize</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>${basedir}/jacoco/jacoco.exec</destFile>
+                                    <excludes>
+                                        <exclude>**/*Test*</exclude>
+                                    </excludes>
+                                    <propertyName>jacoco.agent.unitArgLine</propertyName>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>prepare-agent-integration</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>prepare-agent-integration</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>${basedir}/jacoco/jacoco-jetty.exec</destFile>
+                                    <excludes>
+                                        <exclude>**/*Test*</exclude>
+                                    </excludes>
+                                    <propertyName>jacoco.agent.itArgLine</propertyName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>cc-report</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <configuration>
+                            <append>true</append>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>jacoco-report-post-integration-test</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>merge</goal>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <fileSets>
+                                        <fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
+                                            <directory>${basedir}/jacoco</directory>
+                                            <includes>
+                                                <include>*.exec</include>
+                                            </includes>
+                                        </fileSet>
+                                    </fileSets>
+                                    <destFile>${project.build.directory}/jacoco/jacoco.exec</destFile>
+                                    <dataFile>${project.build.directory}/jacoco/jacoco.exec</dataFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>unit</id>
             <build>
                 <plugins>
@@ -347,6 +453,7 @@
                             <forkCount>4</forkCount>
                             <reuseForks>true</reuseForks>
                             <trimStackTrace>false</trimStackTrace>
+                            <argLine>${jacoco.agent.unitArgLine}</argLine>
                         </configuration>
                         <executions>
                             <execution>
@@ -711,47 +818,6 @@
                                         <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                 </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>cc</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>${jacoco.version}</version>
-                        <configuration>
-                            <destFile>${project.build.directory}/jacoco/${jacoco.destfile}</destFile>
-                            <append>true</append>
-                            <testFailureIgnore>true</testFailureIgnore>
-                            <dataFile>${project.build.directory}/jacoco/${jacoco.destfile}</dataFile>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>jacoco-initialize</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>jacoco-report-prepare-package</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>jacoco-report-post-integration-test</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
                             </execution>
                         </executions>
                     </plugin>
