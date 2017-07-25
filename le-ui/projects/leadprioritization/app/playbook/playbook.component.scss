@@ -89,7 +89,7 @@ section.playbook.container {
 /** 
  * Vertical ratings css
  */
-.playbook-ratings.ratings-graph {
+.playbook-ratings.graph {
     @include flex-container;
     justify-content: center;
     height: 100%; // control the height in your components css, this should just fill that height

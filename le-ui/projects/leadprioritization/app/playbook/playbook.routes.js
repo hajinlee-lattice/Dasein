@@ -4,6 +4,7 @@ angular
     'lp.cg.talkingpoint',
     'lp.playbook.plays',
     'lp.playbook.dashboard',
+    'lp.playbook.dashboard.launch_history',
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.segment',
     'lp.playbook.wizard.rating',
@@ -172,6 +173,21 @@ angular
                 }
             }
         })
+        .state('home.playbook.dashboard.launch_history', {
+            url: '/launch_history',
+            params: {
+                section: 'dashboard.launch_history'
+            },
+            resolve: {
+            },
+            views: {
+                'main@': {
+                    controller: 'PlaybookDashboardLaunchHistory',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/playbook/content/launch_history/launch_history.component.html'
+                }
+            }
+        })
         .state('home.playbook.wizard', {
             url: '/wizard/:play_name',
             resolve: {
@@ -222,7 +238,7 @@ angular
                 'wizard_controls@home.playbook.wizard': {
                     resolve: {
                         WizardControlsOptions: function() {
-                            return { backState: 'home.models', nextState: 'home.models' };
+                            return { backState: 'home.playbook', nextState: 'home.playbook' };
                         }
                     },
                     controller: 'ImportWizardControls',

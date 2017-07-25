@@ -5,15 +5,17 @@
             <div class="dashboard-section play">
                 <div class="dashboard-section-container">
                     <div class="dashboard-section-header">
-                        <h2>{{ vm.play.displayName||'Play Name' }}</h2>
+                        <h2><div contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'displayName')">{{ vm.play.displayName||'Play Name' }}</div></h2>
                     </div>
                     <div class="dashboard-section-content">
                         <p>
-                            {{vm.play.description}}
+                            <div contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'description')">
+                                {{vm.play.description}}
+                            </div>
                         </p>
                         <div class="dashboard-section-content-subsection rating_ has-icon">
                             <h4>Rating</h4>
-                            <h5>{{vm.play.rating[0].ratingName}}</h5>
+                            <h5>{{vm.play.rating.ratingName}}</h5>
                         </div>
                         <div class="dashboard-section-content-subsection segment has-icon">
                             <h4>Segment</h4>
@@ -51,22 +53,22 @@
                     </div>
                     <div class="dashboard-section-content">
                         <div class="dashboard-section-content-subsection talking-points has-icon">
-                            <h5>{{vm.play.talkingpoints.length||'No'}} talking points have been created</h5>
+                            <h5>{{vm.play.talkingPoints.length||'No'}} talking points have been created</h5>
                             <ul class="controls">
-                                <li ng-if="!vm.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create</a></li>
-                                <li ng-if="vm.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Edit</a></li>
+                                <li ng-if="!vm.play.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create</a></li>
+                                <li ng-if="vm.play.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Edit</a></li>
                             </ul>
                         </div>
 
                         <div>
                             <a href="#" ng-click="showTalkingPointsData = !showTalkingPointsData">debugging: {{!showTalkingPointsData ? "show" : "hide"}} talking points data</a>
                             <div ng-show="showTalkingPointsData">
-                                <pre>vm.talkingPoints: {{vm.talkingPoints|json}}</pre>
+                                <pre>vm.play.talkingPoints: {{vm.play.talkingPoints|json}}</pre>
                             </div>
                         </div>
                     </div>
                     <div class="dashboard-section-footer">
-                        <span ng-if="vm.play.timestamp">Published {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
+                        <span ng-if="vm.play.timeStamp">Published {{vm.TimestampIntervalUtility.timeAgo(vm.play.timeStamp)}} <i class="fa fa-check"></i></span>
                     </div>
                 </div>
             </div>
@@ -76,34 +78,50 @@
             <div class="dashboard-section launch-history">
                 <div class="dashboard-section-container">
                     <div class="dashboard-section-header">
-                        <h2>Last launch</h2>
+                        <h2>
+                            <div class="column">
+                                Last Launch
+                            </div>
+                            <div class="column">
+                                <a ui-sref="home.playbook.dashboard.launch_history({play_name: vm.play.name})"><span class="ico ico-cog ico-black"></span> Launch History</a>
+                            </div>
+                        </h2>
                     </div>
                     <div class="dashboard-section-content">
-                        <div class="dashboard-section-content-subsection launches">
-                            <a href="#" ng-click="showLaunchData = !showLaunchData">debugging: {{!showLaunchData ? "show" : "hide"}} launches data</a>
-                            <div ng-show="showLaunchData">
-                                <pre>vm.launchHistory: {{vm.launchHistory|json}}</pre>
+                        <div class="dashboard-section-content-subsection launches" ng-if="vm.launchGraph">
+                            <div class="dashboard-subsection-header">
+                                <h3>New vs Last Launched</h3>
                             </div>
+                            <ul class="playbook-launch-history graph">
+                                <li class="launch-history-graph" ng-repeat="(name, history) in vm.launchGraph.buckets">
+                                    <div class="history-label"><strong>{{name}}</strong></div>
+                                    <div class="history-bar" style="width:{{history.total/vm.launchGraph.total*100}}%;">
+                                        <div class="history-bar-current" ng-if="history.current" style="width:{{history.current/history.total*100}}%;"></div>
+                                        <div class="history-bar-new" ng-if="history.new" style="width:{{history.new/history.total*100}}%;"></div>
+                                    </div>
+                                    <div class="history-count" ng-show="history.total"><strong>{{vm.NumberUtility.AbbreviateLargeNumber(history.total)}}</strong></div>
+                                </li>
+                            </ul>
                         </div>
                         <div class="dashboard-section-content-subsection ratings">
                             <div class="dashboard-subsection-header">
                                 <h3>Account ratings</h3>
                             </div>
-                            <ul class="playbook-ratings ratings-graph" ng-if="vm.ratingsGraph">
-                                <li class="_rating" ng-repeat="rating in vm.ratingsGraph.ratings">
-                                    <div class="rating-count" ng-show="rating.count">{{rating.count}}</div>
-                                    <div class="rating-bar" style="height:{{rating.count/vm.ratingsGraph.total*100}}%;"></div>
+                            <ul class="playbook-ratings graph" ng-if="vm.ratingsGraph">
+                                <li class="_rating" ng-repeat="rating in vm.ratingsGraph.buckets">
+                                    <div class="rating-count" ng-show="rating.bucketCount">{{rating.bucketCount}}</div>
+                                    <div class="rating-bar" style="height:{{rating.bucketCount/vm.ratingsGraph.total*100}}%;"></div>
                                     <div class="rating-label">{{rating.bucket}}</div>
                                 </li>
                             </ul>
                         </div>
                     </div>
                     <div class="dashboard-section-footer">
-                        <span ng-if="vm.play.timestamp">Created {{vm.TimestampIntervalUtility.timeAgo(vm.play.timestamp)}}</span>
-                        <button class="launch button blue-button" ng-click="vm.launchPlay()">
-                            <span ng-if="!vm.launchHistory.length">Launch</span>
+                        <span ng-if="vm.play.timeStamp && vm.launchedState == 'Launched'">Launched {{vm.TimestampIntervalUtility.timeAgo(vm.play.timeStamp)}} <i class="fa fa-check"></i></span>
+                        <button class="launch button blue-button" ng-click="vm.launchPlay()" ng-disabled="vm.invalid.length">
+                            <span ng-if="vm.launchedState != 'Launched'">Launch now</span>
+                            <span ng-if="vm.launchedState == 'Launched'">Re-Launch now</span>
                             <span ng-if="vm.showLaunchSpinner"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
-                            <span ng-if="vm.launchHistory.length">Re-launch</span>
                         </button>
                     </div>
                 </div>

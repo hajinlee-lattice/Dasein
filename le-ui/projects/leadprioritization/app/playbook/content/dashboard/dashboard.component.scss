@@ -35,6 +35,18 @@
                         background-image: url('/assets/images/ico-settings.png');
                         background-position: left center;
                         padding-left: 35px;
+                        @include flex-container;
+                        div.column {
+                            @include flex-item(1 1 auto);
+                            &:last-child {
+                                text-align: right;
+                                font-size: .7em;
+                                strong {
+                                    display: block;
+                                    @include vertical-center-anything;
+                                }
+                            }
+                        }
                     }
                 }
                 .dashboard-subsection-header {
@@ -112,6 +124,12 @@
                         &.talking-points {
                             background-image: url('/assets/images/ico-insights.png');
                         }
+                        &.launches {
+                            .dashboard-subsection-header {
+                                margin-top: 20px;
+                                margin-bottom: 50px;
+                            }
+                        }
                         &.ratings {
                             .dashboard-subsection-header {
                                 margin-top: 20px;
@@ -144,9 +162,105 @@
                     }
                 }
             }
+            &.launch-history {
+                .dashboard-section-header {
+                    h2 {
+                        background-image: url('/assets/images/ico-launch.png');
+                    }
+                }
+                .dashboard-section-footer {
+                    button {
+                        margin-left: 20px;
+                    }
+                }
+            }
         }
-        .ratings-graph {
+        .playbook-ratings.graph {
             height: 200px;
+        }
+        .playbook-launch-history.graph {
+            .launch-history-graph {
+                @include flex-container;
+                height: 36px;
+                margin: 0 30px;
+                margin-bottom: 24px;
+                .history-count,
+                .history-label {
+                    @include flex-item(0 1 auto);
+                    width: 50px;
+                    strong {
+                        font-weight: bold;
+                        text-transform: capitalize;
+                        display: block;
+                        position: relative;
+                        top: 50%;
+                        transform: translateY(-50%);
+                    }
+                }
+                .history-count {
+                    width: 30px;
+                }
+                .history-bar {
+                    margin: 0 20px;
+                    @include flex-item(1 1 auto);
+                    @include flex-container;
+                    .history-bar-current {
+                        @include flex-item(1 1 auto);
+                        background-color: #457eba;
+                        height: 100%;
+                        margin-right: 5px;
+                    }
+                    .history-bar-new {
+                        @include flex-item(1 1 auto);
+                        background-color: #70bf4a;
+                        height: 100%;
+                        position: relative;
+                        &:after {
+                            content: 'New';
+                            position: absolute;
+                            bottom: -19px;
+                            right: 0;
+                            font-size: 12px;
+                            color: #70bf4a;
+                        }
+                    }
+                }
+                &:last-child {
+                    .history-bar-current {
+                        position: relative;
+                        &:after {
+                            content: 'Relaunched';
+                            position: absolute;
+                            bottom: -19px;
+                            left: 0;
+                            font-size: 12px;
+                            color: #457eba;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    *[contenteditable] {
+        position: relative;
+        padding: 5px;
+        margin-right: 20px;
+        &:after {
+            @include font-awesome-inline("\f040");
+            font-size: 12px;
+            position: absolute;
+            top: 50%;
+            right: -20px;
+            transform: translateY(-50%);
+            border: none;
+            outline:none;
+        }
+        &:active,
+        &:focus {
+            border: none;
+            outline: none;
+            box-shadow:inset 0px 0px 0px 1px #d0d0d0;
+
         }
     }
 }
