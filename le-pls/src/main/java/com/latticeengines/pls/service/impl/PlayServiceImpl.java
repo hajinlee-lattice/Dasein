@@ -49,7 +49,8 @@ public class PlayServiceImpl implements PlayService {
                 play.getSegmentName(), tenantId));
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         play.setTenant(tenant);
-        return playEntityMgr.createOrUpdatePlay(play);
+        Play retrievedPlay = playEntityMgr.createOrUpdatePlay(play);
+        return getFullPlay(retrievedPlay);
     }
 
     @Override

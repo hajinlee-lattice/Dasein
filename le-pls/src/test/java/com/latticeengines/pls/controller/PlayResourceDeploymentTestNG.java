@@ -29,9 +29,6 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private String name;
     private PlayLaunch playLaunch;
 
-    private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
-    private String LAUNCH_DESCRIPTION = "playLaunch done on " + CURRENT_TIME_MILLIS;
-
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
@@ -51,6 +48,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Play createdPlay1 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createDefaultPlay(),
                 Play.class);
         name = createdPlay1.getName();
+        play = createdPlay1;
         assertPlay(createdPlay1);
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(name);
@@ -143,8 +141,20 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(retrievedFullPlayList.size(), 2);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "testGetFullPlays" })
+    private void testIdempotentCreateOrUpdatePlays() {
+        Play createdPlay1 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", play, Play.class);
+        assertPlay(createdPlay1);
+        Assert.assertNotNull(createdPlay1.getTalkingPoints());
+
+        List<Play> retrievedFullPlayList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play", List.class);
+        Assert.assertNotNull(retrievedFullPlayList);
+        Assert.assertEquals(retrievedFullPlayList.size(), 2);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test(groups = "deployment", dependsOnMethods = { "testIdempotentCreateOrUpdatePlays" })
     private void deletePlayLaunch() {
         restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + name + "/launches/" + playLaunch.getLaunchId());
 
