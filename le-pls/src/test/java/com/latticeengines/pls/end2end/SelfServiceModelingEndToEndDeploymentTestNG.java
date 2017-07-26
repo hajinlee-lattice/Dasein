@@ -245,7 +245,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "createModel", enabled = truefalse)
+    @Test(groups = "deployment.lp", dependsOnMethods = "createModel", enabled = true)
     public void retrieveReport() {
         log.info("Retrieving report for modeling ...");
         Job job = restTemplate.getForObject( //
