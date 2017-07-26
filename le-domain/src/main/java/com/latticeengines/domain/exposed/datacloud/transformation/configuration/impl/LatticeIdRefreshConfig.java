@@ -9,6 +9,12 @@ public class LatticeIdRefreshConfig extends TransformerConfig {
     @JsonProperty("CurrentCount")
     private Long currentCount;
 
+    @JsonProperty("IdSrcIdx")
+    private Integer idSrcIdx;
+
+    @JsonProperty("EntitySrcIdx")
+    private Integer entitySrcIdx;
+
     public String getStrategy() {
         return strategy;
     }
@@ -23,6 +29,22 @@ public class LatticeIdRefreshConfig extends TransformerConfig {
 
     public void setCurrentCount(Long currentCount) {
         this.currentCount = currentCount;
+    }
+
+    public Integer getIdSrcIdx() {
+        return idSrcIdx;
+    }
+
+    public void setIdSrcIdx(Integer idSrcIdx) {
+        this.idSrcIdx = idSrcIdx;
+    }
+
+    public Integer getEntitySrcIdx() {
+        return entitySrcIdx;
+    }
+
+    public void setEntitySrcIdx(Integer entitySrcIdx) {
+        this.entitySrcIdx = entitySrcIdx;
     }
 
 }

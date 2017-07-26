@@ -1,40 +1,43 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.util.Utf8;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.LatticeIdRefreshTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.LatticeIdRefreshConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class LatticeIdRefreshServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(LatticeIdRefreshServiceTestNG.class);
 
-    GeneralSource source = new GeneralSource("AccountMasterId");
+    private GeneralSource source = new GeneralSource("AccountMasterId");
 
-    GeneralSource amsInit = new GeneralSource("AccountMasterSeedInit");
+    private GeneralSource amsInit = new GeneralSource("AccountMasterSeedInit");
 
-    GeneralSource amsRefresh = new GeneralSource("AccountMasterSeedRefresh");
+    private GeneralSource amsRefresh = new GeneralSource("AccountMasterSeedRefresh");
 
-    ObjectMapper om = new ObjectMapper();
+    private static final String STRATEGY = "AccountMasterSeedRebuild";
 
     @Test(groups = "pipeline1")
     public void testTransformation() {
@@ -59,7 +62,7 @@ public class LatticeIdRefreshServiceTestNG
             baseSources.add(source.getSourceName());
             baseSources.add(amsInit.getSourceName());
             step1.setBaseSources(baseSources);
-            step1.setTransformer("latticeIdRefreshTransformer");
+            step1.setTransformer(LatticeIdRefreshTransformer.TRANSFORMER_NAME);
             String confParamStr1 = getTransformerConfigForInit();
             step1.setConfiguration(confParamStr1);
 
@@ -70,7 +73,7 @@ public class LatticeIdRefreshServiceTestNG
             baseSources = new ArrayList<>();
             baseSources.add(amsRefresh.getSourceName());
             step2.setBaseSources(baseSources);
-            step2.setTransformer("latticeIdRefreshTransformer");
+            step2.setTransformer(LatticeIdRefreshTransformer.TRANSFORMER_NAME);
             step2.setTargetSource(source.getSourceName());
             String confParamStr2 = getTransformerConfigForRefresh();
             step2.setConfiguration(confParamStr2);
@@ -91,15 +94,19 @@ public class LatticeIdRefreshServiceTestNG
 
     private String getTransformerConfigForInit() throws JsonProcessingException {
         LatticeIdRefreshConfig config = new LatticeIdRefreshConfig();
-        config.setStrategy("AccountMasterSeedRebuild");
-        return om.writeValueAsString(config);
+        config.setStrategy(STRATEGY);
+        config.setIdSrcIdx(0);
+        config.setEntitySrcIdx(1);
+        return JsonUtils.serialize(config);
     }
 
     private String getTransformerConfigForRefresh() throws JsonProcessingException {
         LatticeIdRefreshConfig config = new LatticeIdRefreshConfig();
-        config.setStrategy("AccountMasterSeedRebuild");
+        config.setStrategy(STRATEGY);
         config.setCurrentCount(16L);
-        return om.writeValueAsString(config);
+        config.setIdSrcIdx(0);
+        config.setEntitySrcIdx(1);
+        return JsonUtils.serialize(config);
     }
 
     @Override
@@ -125,25 +132,25 @@ public class LatticeIdRefreshServiceTestNG
     }
 
     private Object[][] amsInitData = new Object[][] { //
-            { "dom1.com", "DUNS1" }, //
-            { "dom1.com", "DUNS2" }, //
-            { "dom2.com", "DUNS1" }, //
-            { "dom2.com", "DUNS2" }, //
-            { null, "DUNS1" }, //
-            { null, "DUNS3" }, //
-            { "dom1.com", null }, //
-            { "dom3.com", null }, //
-            { "dom11.com", "DUNS11" }, //
-            { "dom11.com", "DUNS22" }, //
-            { "dom22.com", "DUNS11" }, //
-            { "dom22.com", "DUNS22" }, //
-            { null, "DUNS11" }, //
-            { null, "DUNS33" }, //
-            { "dom11.com", null }, //
-            { "dom33.com", null }, //
-            { "dom1111.com", "DUNS1111" }, //
-            { "dom2222.com", "DUNS2222" }, //
-            { "dom3333.com", "DUNS3333" }, //
+            { "dom1.com", "DUNS1" }, // Not refreshed
+            { "dom1.com", "DUNS2" }, // Not refreshed
+            { "dom2.com", "DUNS1" }, // Not refreshed
+            { "dom2.com", "DUNS2" }, // Not refreshed
+            { null, "DUNS1" }, // Not refreshed
+            { null, "DUNS3" }, // Not refreshed
+            { "dom1.com", null }, // Not refreshed
+            { "dom3.com", null }, // Not refreshed
+            { "dom11.com", "DUNS11" }, // Retired
+            { "dom11.com", "DUNS22" }, // Retired
+            { "dom22.com", "DUNS11" }, // Retired
+            { "dom22.com", "DUNS22" }, // Retired
+            { null, "DUNS11" }, // Retired
+            { null, "DUNS33" }, // Retired
+            { "dom11.com", null }, // Retired
+            { "dom33.com", null }, // Retired
+            { "dom1111.com", "DUNS1111" }, // Redirected
+            { "dom2222.com", "DUNS2222" }, // Redirected
+            { "dom3333.com", "DUNS3333" }, // Redirected
     };
 
     private void prepareAMSeedInit() {
@@ -154,26 +161,26 @@ public class LatticeIdRefreshServiceTestNG
     }
     
     private Object[][] amsRefreshData = new Object[][] { //
-            { "dom1.com", "DUNS1" }, //
-            { "dom1.com", "DUNS2" }, //
-            { "dom2.com", "DUNS1" }, //
-            { "dom2.com", "DUNS2" }, //
-            { null, "DUNS1" }, //
-            { null, "DUNS3" }, //
-            { "dom1.com", null }, //
-            { "dom3.com", null }, //
-            { "dom111.com", "DUNS111" }, //
-            { "dom111.com", "DUNS222" }, //
-            { "dom222.com", "DUNS111" }, //
-            { "dom222.com", "DUNS222" }, //
-            { null, "DUNS111" }, //
-            { null, "DUNS333" }, //
-            { "dom111.com", null }, //
-            { "dom333.com", null }, //
-            { "dom1111.com", null }, //
-            { null, "DUNS1111" }, //
-            { "dom2222.com", null }, //
-            { null, "DUNS3333" }, //
+            { "dom1.com", "DUNS1" }, // Not refreshed
+            { "dom1.com", "DUNS2" }, // Not refreshed
+            { "dom2.com", "DUNS1" }, // Not refreshed
+            { "dom2.com", "DUNS2" }, // Not refreshed
+            { null, "DUNS1" }, // Not refreshed
+            { null, "DUNS3" }, // Not refreshed
+            { "dom1.com", null }, // Not refreshed
+            { "dom3.com", null }, // Not refreshed
+            { "dom111.com", "DUNS111" }, // New
+            { "dom111.com", "DUNS222" }, // New
+            { "dom222.com", "DUNS111" }, // New
+            { "dom222.com", "DUNS222" }, // New
+            { null, "DUNS111" }, // New
+            { null, "DUNS333" }, // New
+            { "dom111.com", null }, // New
+            { "dom333.com", null }, // New
+            { "dom1111.com", null }, // New
+            { null, "DUNS1111" }, // New
+            { "dom2222.com", null }, // New
+            { null, "DUNS3333" }, // New
     };
 
     private void prepareAMSeedRefresh() {
@@ -209,6 +216,8 @@ public class LatticeIdRefreshServiceTestNG
                 { "dom22.com", "DUNS22", "OBSOLETE" }, //
                 { null, "DUNS11", "OBSOLETE" }, //
                 { null, "DUNS33", "OBSOLETE" }, //
+                { "dom11.com", null, "OBSOLETE" }, //
+                { "dom33.com", null, "OBSOLETE" }, //
                 { "dom1111.com", "DUNS1111", "UPDATED" }, //
                 { "dom2222.com", "DUNS2222", "UPDATED" }, //
                 { "dom3333.com", "DUNS3333", "UPDATED" }, //
@@ -217,37 +226,32 @@ public class LatticeIdRefreshServiceTestNG
                 { "dom2222.com", null, "ACTIVE" }, //
                 { null, "DUNS3333", "ACTIVE" }, //
         };
+        Map<String, String> expected = new HashMap<>();
+        for (Object[] data : expectedData) {
+            expected.put(String.valueOf(data[0] + String.valueOf(data[1])), String.valueOf(data[2]));
+        }
+
+        List<GenericRecord> sorted = new ArrayList<>();
+        records.forEachRemaining(sorted::add);
+        sorted.sort(Comparator.comparing(r -> ((Long) r.get("LatticeID"))));
+
         int rowNum = 0;
-        Set<Long> ids = new HashSet<Long>();
-        while (records.hasNext()) {
-            GenericRecord record = records.next();
+        Set<Long> origIds = new HashSet<Long>();
+        Set<Long> activeIds = new HashSet<Long>();
+
+        for (GenericRecord record : sorted) {
+            log.info(record.toString());
             Long id = (Long) record.get("LatticeID");
             Long redirectFromId = (Long) record.get("RedirectFromId");
-            Assert.assertFalse(ids.contains(redirectFromId));
-            ids.add(redirectFromId);
-            Object duns = record.get("DUNS");
-            if (duns instanceof Utf8) {
-                duns = duns.toString();
+            Assert.assertFalse(origIds.contains(redirectFromId));
+            origIds.add(redirectFromId);
+            Assert.assertEquals(String.valueOf(record.get("Status")),
+                    expected.get(String.valueOf(record.get("Domain")) + String.valueOf(record.get("DUNS"))));
+            Assert.assertNotNull(record.get("Status"));
+            if ("ACTIVE".equals(record.get("Status").toString())) {
+                Assert.assertFalse(activeIds.contains(id));
+                activeIds.add(id);
             }
-            Object domain = record.get("Domain");
-            if (domain instanceof Utf8) {
-                domain = domain.toString();
-            }
-            Object status = record.get("Status");
-            if (status instanceof Utf8) {
-                status = status.toString();
-            }
-            log.info(String.format("LatticeAccountId = %d, DUNS = %s, Domain = %s, Status = %s, RedirectedFromId = %d",
-                    id, duns, domain, status, redirectFromId));
-            boolean flag = false;
-            for (Object[] data : expectedData) {
-                if ((domain == null && data[0] == null) || (domain != null && domain.equals(data[0]))
-                        || (duns == null && data[1] == null) || (duns != null && duns.equals(data[1]))
-                        || (status == null && data[2] == null) || (status != null && status.equals(data[2]))) {
-                    flag = true;
-                }
-            }
-            Assert.assertTrue(flag);
             rowNum++;
         }
         Assert.assertEquals(31L, rowNum);

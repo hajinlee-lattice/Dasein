@@ -19,13 +19,15 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
 
-@Component("latticeIdRefreshFlow")
+@Component(LatticeIdRefreshFlow.BEAN_NAME)
 public class LatticeIdRefreshFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, LatticeIdRefreshFlowParameter> {
     @Override
     public Class<? extends TransformationConfiguration> getTransConfClass() {
         return BasicTransformationConfiguration.class;
     }
+
+    public final static String BEAN_NAME = "latticeIdRefreshFlow";
 
     public final static String STATUS_FIELD = "Status";
     public final static String TIMESTAMP_FIELD = "LE_Last_Update_Date";
@@ -44,8 +46,8 @@ public class LatticeIdRefreshFlow
         List<String> idsKeys = getIdsKeys(strategy);
         List<String> entityKeys = getEntityKeys(strategy);
 
-        Node ids = addSource(parameters.getBaseTables().get(0));
-        Node entity = addSource(parameters.getBaseTables().get(1));
+        Node entity = addSource(parameters.getBaseTables().get(parameters.getEntitySrcIdx()));
+        Node ids = addSource(parameters.getBaseTables().get(parameters.getIdSrcIdx()));
         entity = renameColumns(entity, ENTITY);
         entity = entity.retain(new FieldList(entityKeys));
 

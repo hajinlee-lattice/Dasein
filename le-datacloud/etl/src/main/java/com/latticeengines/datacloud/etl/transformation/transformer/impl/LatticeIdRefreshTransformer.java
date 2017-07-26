@@ -11,9 +11,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.LatticeIdStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.LatticeIdRefreshConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("latticeIdRefreshTransformer")
+@Component(LatticeIdRefreshTransformer.TRANSFORMER_NAME)
 public class LatticeIdRefreshTransformer
         extends AbstractDataflowTransformer<LatticeIdRefreshConfig, LatticeIdRefreshFlowParameter> {
 
@@ -51,9 +51,7 @@ public class LatticeIdRefreshTransformer
     @Autowired
     private SourceService sourceService;
 
-    private static String transfomerName = "latticeIdRefreshTransformer";
-
-    private static String dataFlowBeanName = "latticeIdRefreshFlow";
+    public static final String TRANSFORMER_NAME = "latticeIdRefreshTransformer";
 
     @Override
     protected void updateParameters(LatticeIdRefreshFlowParameter parameters, Source[] baseTemplates,
@@ -70,6 +68,8 @@ public class LatticeIdRefreshTransformer
         } else {
             parameters.setCurrentCount(config.getCurrentCount());
         }
+        parameters.setIdSrcIdx(config.getIdSrcIdx());
+        parameters.setEntitySrcIdx(config.getEntitySrcIdx());
     }
 
     @Override
@@ -82,6 +82,10 @@ public class LatticeIdRefreshTransformer
             log.error("Number of base sources must be 2");
             return false;
         }
+        if (config.getIdSrcIdx() == null || config.getEntitySrcIdx() == null) {
+            log.error("Please provide index of ID source and Entity source in base source list");
+            return false;
+        }
         return true;
     }
 
@@ -91,8 +95,7 @@ public class LatticeIdRefreshTransformer
         if (strategy == null) {
             throw new RuntimeException("Fail to find LatticeIdStrategy with name " + config.getStrategy());
         }
-        // 0th base source should be source of LatticeId
-        initLatticeId(strategy, sourceNames.get(0));
+        initLatticeId(strategy, sourceNames.get(config.getIdSrcIdx()));
     }
 
     private void initLatticeId(LatticeIdStrategy strategy, String sourceName) {
@@ -148,12 +151,12 @@ public class LatticeIdRefreshTransformer
 
     @Override
     protected String getDataFlowBeanName() {
-        return dataFlowBeanName;
+        return LatticeIdRefreshFlow.BEAN_NAME;
     }
 
     @Override
     public String getName() {
-        return transfomerName;
+        return TRANSFORMER_NAME;
     }
 
     @Override
