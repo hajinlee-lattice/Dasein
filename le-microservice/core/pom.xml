@@ -19,9 +19,9 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-microservice-web</artifactId>
+        <artifactId>le-microservice-parent</artifactId>
         <version>3.8.0-SNAPSHOT</version>
-        <relativePath>../web-pom.xml</relativePath>
+        <relativePath>..</relativePath>
     </parent>
 
     <build>
@@ -36,4 +36,12 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -1,4 +1,4 @@
-<Configure id="eai" class="org.eclipse.jetty.webapp.WebAppContext">
+<Configure id="cdl" class="org.eclipse.jetty.webapp.WebAppContext">
 
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -6,7 +6,7 @@
     <!--  + contextPath                                                  -->
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <Set name="contextPath">/eai</Set>
+    <Set name="contextPath">/cdl</Set>
     <Set name="war"><Property name="jetty.webapps" default="."/>/le-cdl-microservice-3.8.0-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

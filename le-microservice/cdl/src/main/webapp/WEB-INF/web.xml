@@ -5,7 +5,7 @@
 <web-app>
 
     <display-name>IMPORT-EXPORT SERVICE API</display-name>
-    <description>Lattice Engines Import/Export Service REST API</description>
+    <description>Lattice Engines CDL Service REST API</description>
 
     <servlet>
         <servlet-name>cdl</servlet-name>
