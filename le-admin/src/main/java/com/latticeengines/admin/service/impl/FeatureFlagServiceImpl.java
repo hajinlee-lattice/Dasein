@@ -112,8 +112,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         Collection<LatticeProduct> pd = Collections.singleton(LatticeProduct.PD);
         createDefaultFeatureFlag(LatticeFeatureFlag.QUOTA, pd);
         createDefaultFeatureFlag(LatticeFeatureFlag.TARGET_MARKET, pd);
-        createDefaultFeatureFlag(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL,
-                pd);
+        createDefaultFeatureFlag(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, pd);
 
         // LPI flags
         Collection<LatticeProduct> lpi = Collections.singleton(LatticeProduct.LPA3);
@@ -135,7 +134,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         Collection<LatticeProduct> cg = Collections.singleton(LatticeProduct.CG);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CDL, cg);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_TALKING_POINTS, cg);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, cg);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
@@ -148,7 +147,8 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         registerAllFlags();
 
         // overwrite default for deprecated flags
-        // normally deprecated flag should always be true, but there are exceptions
+        // normally deprecated flag should always be true, but there are
+        // exceptions
         overwriteDefaultValueForDeprecatedFlag(LatticeFeatureFlag.QUOTA, false);
         overwriteDefaultValueForDeprecatedFlag(LatticeFeatureFlag.TARGET_MARKET, false);
         overwriteDefaultValueForDeprecatedFlag(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, false);

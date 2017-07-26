@@ -84,7 +84,7 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
     private boolean isLpiBasedPlaymakerEnabledForTenant(String tenantName) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantName);
         try {
-            if (batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_TALKING_POINTS)) {
+            if (batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER)) {
                 Tenant tenant = tenantEntityMgr.findByTenantId(tenantName);
                 MultiTenantContext.setTenant(tenant);
                 return true;

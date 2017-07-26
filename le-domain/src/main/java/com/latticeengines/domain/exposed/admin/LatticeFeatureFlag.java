@@ -28,8 +28,7 @@ public enum LatticeFeatureFlag {
     @Deprecated
     USE_DNB_RTS_AND_MODELING(true, "UseDnbRtsAndModeling", "User DNB RTS and Modeling"), //
     @Deprecated
-    ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE(true, "EnableLatticeMarketoCredentialPage",
-            "Enable Lattice Marketo Credential Page"), //
+    ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE(true, "EnableLatticeMarketoCredentialPage", "Enable Lattice Marketo Credential Page"), //
     ENABLE_DATA_ENCRYPTION("EnableDataEncryption", "Enable data encryption"), //
     ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES("EnableInternalEnrichmentAttributes",
             "Enable Internal Enrichment Attributes"), //
@@ -42,7 +41,7 @@ public enum LatticeFeatureFlag {
     BYPASS_DNB_CACHE(true, "BypassDnbCache", "Bypass DnB Cache"), //
     ENABLE_CDL("EnableCdl", "Enable Customer Data Lake"), //
     ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
-    ENABLE_TALKING_POINTS("EnableTalkingPoints", "Enable Talking Points"); //
+    ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"); //
 
     private String name;
     private String documentation;
