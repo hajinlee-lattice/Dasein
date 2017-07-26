@@ -1,9 +1,10 @@
 package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class RestrictionBuilder {
 
@@ -134,7 +135,7 @@ public class RestrictionBuilder {
 
     @SuppressWarnings("unchecked")
     public RestrictionBuilder and(Restriction... children) {
-        return and(new ArrayList<Restriction>(Arrays.asList(children)));
+        return and(Arrays.stream(children).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     public RestrictionBuilder and(List<Restriction> children) {
@@ -154,7 +155,7 @@ public class RestrictionBuilder {
 
     @SuppressWarnings("unchecked")
     public RestrictionBuilder or(Restriction... children) {
-        return or(new ArrayList<Restriction>(Arrays.asList(children)));
+        return or(Arrays.stream(children).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
     public RestrictionBuilder or(List<Restriction> children) {
