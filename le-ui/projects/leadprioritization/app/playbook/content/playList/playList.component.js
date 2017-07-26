@@ -29,8 +29,29 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
                 filtered: PlayList,
                 items: [
                     { label: "All", action: { }, total: vm.totalLength },
-                    { label: "Draft", action: { launchHistory: null, segment: null }, total: '' },
-                    { label: "Ready to Launch", action: { segment: null }, total: '' }
+                    { 
+                        label: "Draft", 
+                        action: { 
+                            launchHistory: {playLaunch: null},
+                            segment: null
+                        }, 
+                        total: ''
+                    },
+                    { 
+                        label: "Ready to Launch", 
+                        action: { 
+                            launchHistory: {playLaunch: null},
+                            hasSegment: true
+                        }, 
+                        total: '' 
+                    },
+                    {
+                       label: "Launched", 
+                        action: { 
+                            launchHistory: {playLaunch: []}
+                        }, 
+                        total: ''  
+                    }
                 ]
             }
         }
@@ -43,8 +64,15 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
                 showCustomMenu: false,
                 editSegment: false
             };
+
+            if(play.segment != null) {
+                play.hasSegment = true;
+            }
+
         });
+        
         console.log(vm.plays);
+
     }
     vm.init();
 
