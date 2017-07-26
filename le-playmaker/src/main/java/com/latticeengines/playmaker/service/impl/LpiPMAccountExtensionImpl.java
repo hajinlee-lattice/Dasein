@@ -92,14 +92,14 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         List<Attribute> schemaAttributes = getSchemaAttributes(role);
 
         Stream<Map<String, Object>> stream = schemaAttributes.stream() //
-                .sorted(Comparator.comparing(Attribute::getPid)) //
+                .sorted(Comparator.comparing(Attribute::getName)) //
                 .map(metadata -> {
                     Map<String, Object> metadataInfoMap = new HashMap<>();
-                    metadataInfoMap.put("DisplayName", metadata.getColumnMetadata().getDisplayName());
+                    metadataInfoMap.put("DisplayName", metadata.getDisplayName());
                     metadataInfoMap.put("Type", convertToSFDCFieldType(metadata.getSourceLogicalDataType()));
                     metadataInfoMap.put("JavaType", metadata.getPhysicalDataType());
                     metadataInfoMap.put("StringLength", findLengthIfStringType(metadata.getSourceLogicalDataType()));
-                    metadataInfoMap.put("Field", metadata.getColumnMetadata().getColumnId());
+                    metadataInfoMap.put("Field", metadata.getName());
                     return metadataInfoMap;
                 });
 
