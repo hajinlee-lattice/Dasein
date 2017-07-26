@@ -7,9 +7,9 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
     var vm = this;
     angular.extend(vm, {
         plays: PlayList || [],
+        filteredItems: [],
         totalLength: PlayList.length,
         tileStates: {},
-        filteredItems: [],
         query: '',
         header: {
             sort: {
@@ -18,6 +18,7 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
                 order: '-',
                 property: 'timeStamp',
                 items: [
+                    { label: 'Modified Date',   icon: 'numeric',    property: 'lastUpdatedTimestamp' },
                     { label: 'Creation Date',   icon: 'numeric',    property: 'timeStamp' },
                     { label: 'Play Name',      icon: 'alpha',      property: 'displayName' }
                 ]
@@ -27,15 +28,9 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
                 unfiltered: PlayList,
                 filtered: PlayList,
                 items: [
-                    { label: "All", action: { }, total: vm.totalLength }
-                ]
-            },
-            filter: {
-                label: 'Filter By',
-                unfiltered: PlayList,
-                filtered: PlayList,
-                items: [
-                    { label: "All", action: { }, total: 278 }
+                    { label: "All", action: { }, total: vm.totalLength },
+                    { label: "Draft", action: { launchHistory: null, segment: null }, total: '' },
+                    { label: "Ready to Launch", action: { segment: null }, total: '' }
                 ]
             }
         }

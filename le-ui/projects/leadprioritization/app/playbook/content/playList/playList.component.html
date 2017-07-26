@@ -1,6 +1,7 @@
 <section id="main-content" class="container tile-list play-list">
 
     <div class="row">
+        
         <div class="list-header">
             <div class="pull-left number-of-items" ng-if="vm.totalLength > 0">
                 <menu-filter-by config="vm.header.filter"></menu-filter-by>
@@ -15,16 +16,18 @@
                 </a>
             </div>
         </div>
-    </div>
 
+    </div>
     <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
+        
         <div class="twelve columns">
             <pd-pagination-controls current="current" max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
             </pd-pagination-controls>
         </div>
-    </div>
 
+    </div>
     <div class="row">
+
         <div class="twelve columns">
             <ul class="tiles">
                 <li
@@ -39,6 +42,8 @@
                     ng-mouseleave="vm.tileStates[play.name].showCustomMenu ? vm.customMenuClick($event, play) : null"
                     ng-if="vm.plays.length > 0"
                     ng-class="{editing: vm.tileStates[play.name].editPlay}">
+                    
+
                     <div class="tile-header" ng-if="!vm.tileStates[play.name].editPlay">
                         <h2 title="{{play.displayName}}">{{play.displayName | limitTo: 44 }}{{play.displayName.length > 44 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
@@ -59,70 +64,82 @@
                                 </li>
                             </ul>
                         </div>
-                    </div>
+
+                    </div><!-- End .tile-header -->
                     <div 
                         class="tile-metadata"
                         ng-if="!vm.tileStates[play.name].editPlay">
+                        
                         <ul>
                             <li>Created by <span class="blue-text">{{play.createdBy}}</span> on <span class="blue-text">{{play.timeStamp | date}}</span></li>
-                            <li ng-if="play.segment != null">Segment: <span class="blue-text">{{play.segment}}</span></li>
+                            <li>
+                                Segment: 
+                                <span ng-if="play.segment != null" class="blue-text">{{play.segment}}</span>
+                                <span ng-if="play.segment == null" class="gray-text">Segment not selected</span>
+                            </li>
                             <li>
                                 Last Launched: 
-                                <span ng-if="play.talkingpoints.length === 0 && play.rating === '' || play.rating === 0"><span class="error-text">Not launched yet</span></span>
-                                <span ng-if="play.talkingpoints.length != 0 && play.rating === {}"><span class="blue-text">Ready for launch</span></span>
-                                <span ng-if="play.talkingpoints.length != 0 && play.rating != '' || play.rating != 0"><span class="blue-text">Launched {{play.lastUpdatedTimestamp | date}}</span></span>
+                                <span ng-if="play.launchHistory.playLaunch == null && play.segment == null"><span class="error-text">Not launched yet</span></span>
+                                <span ng-if="play.launchHistory.playLaunch == null && play.segment != null"><span class="blue-text">Ready for launch</span></span>
+                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">Launched {{play.lastUpdatedTimestamp | date}}</span></span>
                             </li>
                             <li>
                                 Insights: 
-                                <span ng-if="play.talkingpoints.length === 0 && play.rating === '' || play.rating === 0"><span class="error-text">None created</span></span>
-                                <span ng-if="play.talkingpoints.length != 0 && play.rating === {}"><span class="blue-text">{{play.talkingpoints.length}} Talking Points created</span></span>
-                                <span ng-if="play.talkingpoints.length != 0 && play.rating != '' || play.rating != 0"><span class="blue-text">{{play.talkingpoints.length}} Talking Points - Published {{play.lastUpdatedTimestamp | date}}</span></span>
+                                <span ng-if="play.launchHistory.playLaunch == null && play.segment == null"><span class="error-text">None created</span></span>
+                                <span ng-if="play.launchHistory.playLaunch == null && play.segment != null"><span class="blue-text">{{play.talkingPoints.length}} Talking Points created</span></span>
+                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">{{play.talkingPoints.length}} Talking Points - Published {{play.lastUpdatedTimestamp | date}}</span></span>
                             </li>
                         </ul>
-                    </div>
+
+                    </div><!-- End .tile-metadata -->
                     <div class="tile-body" ng-if="!vm.tileStates[play.name].editPlay">
 
-                        <div ng-if="play.talkingpoints.length === 0 && play.rating === '' || play.rating === 0">
-                            <strong>This play was started but not finished.</strong> It can be launched after all steps are completed.
-                        </div>
-                        <div ng-if="play.talkingpoints.length != 0 && play.rating === {}">
-                            {{play.talkingpoints.length}} Talking Points created
-                        </div>
-                        <div ng-if="play.talkingpoints.length != 0 && play.rating != '' || play.rating != 0">
+                        <div ng-if="play.launchHistory.playLaunch == null && play.segment == null"><strong>This play was started but not finished.</strong> It can be launched after all steps are completed.</div>
+
+                        <div ng-if="play.launchHistory.playLaunch == null && play.segment != null">Play has been created and is ready for launch.</div>
+
+                        <div ng-if="play.launchHistory.playLaunch != null && play.segment != null">
                             <h4>Account Ratings</h4>
-                            <ul>
-                               <li ng-repeat="rating in play.rating">
-                                    <span>{{rating.count}}</span>
+                            <ul class="barChart ratings">
+                               <li ng-repeat="rating in play.rating.bucketInformation">
+                                    <div class="value">{{rating.bucketCount}}</div>
+                                    <div class="rating-bar" ng-style="{ height: ((10 / rating.bucketCount) * 1000) }"></div>
+                                    <div class="meta">{{rating.bucket}}</div>
                                 </li> 
                             </ul>
                         </div>
 
-                    </div>
+                    </div><!-- End .tile-body -->
                     <div class="tile-footer">
+
                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                             ng-if="play.talkingpoints.length === 0 && play.rating === '' || play.rating === 0"
+                             ng-if="play.launchHistory.playLaunch == null && play.segment == null"
                             ng-click="vm.continuePlaySetup($event)">
                             Continue
                         </button>
                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                             ng-if="play.talkingpoints.length != 0 && play.rating === {}"
+                             ng-if="play.launchHistory.playLaunch == null && play.segment != null"
                             ng-click="vm.launchPlay($event)">
                             Launch
                         </button>
-                        <span class="launch-success pull-right" ng-if="play.talkingpoints.length != 0 && play.rating != '' || play.rating != 0">Launched {{play.lastUpdatedTimestamp | date}}</span>
+                        <span 
+                            class="launch-success pull-right" 
+                            ng-if="play.launchHistory.playLaunch != null && play.segment != null">
+                            Launched {{play.lastUpdatedTimestamp | date}}
+                        </span>
 
-                    </div>
-
+                    </div><!-- End .tile-footer -->
                     <form
                         class="edit-form"
                         name="editPlayForm"
                         ng-if="vm.tileStates[play.name].editPlay"
                         ng-click="$event.stopPropagation()">
                         <div class="form-group">
+                            
                             <label for="playDisplayName">Name
                             <input
                                 autofocus
@@ -131,9 +148,11 @@
                                 name="display_name"
                                 data-ng-model="play.displayName"
                                 class="form-control" />
-                                </label>
+                            </label>
+
                         </div>
                         <div class="actions">
+
                             <button
                                 type="button"
                                 class="button white-button pull-left"
@@ -153,11 +172,11 @@
                                 ng-disabled="vm.saveInProgress"
                                 ng-if="vm.saveInProgress">
                                 Saving...</button>
+
                         </div>
                     </form>
 
                 </li>
-
                 <li class="no-style" ng-if="vm.plays.length < 12">
                     <a
                         class="button new-tile-button"
@@ -170,14 +189,11 @@
             </ul>
         </div>
     </div><!-- End .row -->
-
-
     <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
         <div class="twelve columns">
             <pd-pagination-controls current="current" max="max = (vm.header.filter.filtered | filter: vm.query).length / pagesize">
             </pd-pagination-controls>
         </div>
     </div>
-
 
 </section>

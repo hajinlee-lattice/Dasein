@@ -12,7 +12,11 @@ angular.module('lp.models.segments', [
         tileStates: {}
     });
 
+
     SegmentsList.forEach(function(segment) {
+
+        console.log(segment);
+
         vm.tileStates[segment.name] = {
             showCustomMenu: false,
             editSegment: false
