@@ -34,7 +34,6 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("playLaunchInitStep")
@@ -112,7 +111,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         log.info("Total records in segment: " + segmentAccountsCount);
 
         if (segmentAccountsCount > 0) {
-            List<String> accountSchema = getSchema(TableRoleInCollection.BucketedAccount);
+            List<String> accountSchema = getSchema(tenant, TableRoleInCollection.BucketedAccount);
             DataRequest dataRequest = new DataRequest();
             dataRequest.setAttributes(accountSchema);
 
@@ -205,8 +204,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         return recommendation;
     }
 
-    private List<String> getSchema(TableRoleInCollection role) {
-        List<Attribute> schemaAttributes = getSchemaAttributes(role);
+    private List<String> getSchema(Tenant tenant, TableRoleInCollection role) {
+        List<Attribute> schemaAttributes = getSchemaAttributes(tenant, role);
 
         Stream<String> stream = schemaAttributes.stream() //
                 .map(Attribute::getColumnMetadata) //
@@ -216,8 +215,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         return stream.collect(Collectors.toList());
     }
 
-    private List<Attribute> getSchemaAttributes(TableRoleInCollection role) {
-        String customerSpace = MultiTenantContext.getTenant().getId();
+    private List<Attribute> getSchemaAttributes(Tenant tenant, TableRoleInCollection role) {
+        String customerSpace = tenant.getId();
         Table schemaTable = dataCollectionProxy.getTable(customerSpace, role);
         List<Attribute> schemaAttributes = schemaTable.getAttributes();
         return schemaAttributes;
