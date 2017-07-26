@@ -33,9 +33,9 @@ public class LatticeIdRefreshFlow
     public final static String TIMESTAMP_FIELD = "LE_Last_Update_Date";
     public final static String REDIRECT_FROM_FIELD = "RedirectFromId";
 
-    private final static String OBSOLETE = "OBSOLETE";
-    private final static String ACTIVE = "ACTIVE";
-    private final static String UPDATED = "UPDATED";
+    public final static String OBSOLETE = "OBSOLETE";
+    public final static String ACTIVE = "ACTIVE";
+    public final static String UPDATED = "UPDATED";
     private final static String ENTITY = "ENTITY_";
 
     private static final Logger log = LoggerFactory.getLogger(LatticeIdRefreshFlow.class);

@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.LatticeIdStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 
-@Component("latticeIdAssignFlow")
+@Component(LatticeIdAssignFlow.BEAN_NAME)
 public class LatticeIdAssignFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, LatticeIdRefreshFlowParameter> {
     @Override
@@ -26,6 +26,8 @@ public class LatticeIdAssignFlow
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(LatticeIdAssignFlow.class);
 
+    public final static String BEAN_NAME = "latticeIdAssignFlow";
+
     private final static String ID = "ID_";
 
     @Override
@@ -34,8 +36,9 @@ public class LatticeIdAssignFlow
         List<String> idsKeys = getIdsKeys(strategy);
         List<String> entityKeys = getEntityKeys(strategy);
 
-        Node ids = addSource(parameters.getBaseTables().get(0));
-        Node entity = addSource(parameters.getBaseTables().get(1));
+        Node ids = addSource(parameters.getBaseTables().get(parameters.getIdSrcIdx()));
+        Node entity = addSource(parameters.getBaseTables().get(parameters.getEntitySrcIdx()));
+        ids = findActiveIds(ids);
         ids = renameIds(ids);
         entity = dropIdIfExist(entity, strategy);
 
@@ -69,6 +72,12 @@ public class LatticeIdAssignFlow
             src = src.rename(new FieldList(attr), new FieldList(ID + attr));
         }
         return src;
+    }
+
+    private Node findActiveIds(Node src) {
+        return src.filter(
+                String.format("%s.equals(\"%s\")", LatticeIdRefreshFlow.STATUS_FIELD, LatticeIdRefreshFlow.ACTIVE),
+                new FieldList(LatticeIdRefreshFlow.STATUS_FIELD));
     }
 
     private List<String> getIdsKeys(LatticeIdStrategy strategy) {
