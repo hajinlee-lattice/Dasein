@@ -133,7 +133,6 @@ public class RestrictionBuilder {
         return and(children);
     }
 
-    @SuppressWarnings("unchecked")
     public RestrictionBuilder and(Restriction... children) {
         return and(Arrays.stream(children).filter(Objects::nonNull).collect(Collectors.toList()));
     }
@@ -153,7 +152,6 @@ public class RestrictionBuilder {
         return or(children);
     }
 
-    @SuppressWarnings("unchecked")
     public RestrictionBuilder or(Restriction... children) {
         return or(Arrays.stream(children).filter(Objects::nonNull).collect(Collectors.toList()));
     }
