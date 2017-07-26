@@ -8,8 +8,8 @@
                         <h2><div contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'displayName')">{{ vm.play.displayName||'Play Name' }}</div></h2>
                     </div>
                     <div class="dashboard-section-content">
-                        <p>
-                            <div contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'description')">
+                        <p> 
+                            <div contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'description')" ng-class="{empty: !vm.play.description}">
                                 {{vm.play.description}}
                             </div>
                         </p>

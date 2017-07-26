@@ -1,6 +1,13 @@
 <div class="playbook-preview container" ng-class="{'dashboard-content': vm.stateParams.section.indexOf('dashboard.') !== -1}">
-    <div class="header">
-        <h2>Preview Talking Points</h2>
+    <div class="inner-container">
+        <div class="header">
+            <h2>Preview Talking Points</h2>
+        </div>
+
+        <cg-talking-point-preview play="vm.play"></cg-talking-point-preview>
+        
+        <div class="footer" ng-if="vm.stateParams.section.indexOf('dashboard.') !== -1" >
+            <button class="preview button white-button" ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Back</button>
+        </div>
     </div>
-    <cg-talking-point-preview play="vm.play"></cg-talking-point-preview>
 </div>

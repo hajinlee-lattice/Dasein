@@ -1,8 +1,8 @@
 .talking-point-container {
-    .talking-points-outer {
+    .talking-points-columns {
         display: flex;
         flex-direction: row;
-
+        min-height: 550px;
         &>div:first-child {
             flex: 1 1 auto;
             margin-left: 3px;
@@ -157,6 +157,10 @@
     border-radius: 12px 0 0 12px;
     background-color: white;
     transition: none;
+    z-index: 1;
+    &.loose {
+        box-shadow: 4px 4px 17px -7px rgba(0,0,0,0.75);
+    }
 
     h5 {
         text-align: center;

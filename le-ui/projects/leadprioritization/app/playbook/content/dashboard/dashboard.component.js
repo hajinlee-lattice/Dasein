@@ -85,7 +85,6 @@ angular.module('lp.playbook.dashboard', [
     }
 
     vm.edited = function($event, property) {
-        vm.editable = false; // block rapid edits
         var $element = angular.element($event.target),
             content = $element.text().trim(),
             newPlay = angular.copy(vm.play),
@@ -102,6 +101,7 @@ angular.module('lp.playbook.dashboard', [
         }
 
         if(save) {
+            vm.editable = false; // block rapid edits
             savePlay = {
                 name: vm.play.name,
                 createdBy: vm.play.createdBy,

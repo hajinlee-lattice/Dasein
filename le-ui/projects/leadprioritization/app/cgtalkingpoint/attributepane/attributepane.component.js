@@ -26,10 +26,12 @@ angular.module('lp.cg.talkingpoint.attributepane', [
                     containerBottom = $container.offset().top + $container.outerHeight();
 
                 if (scrollY > originalTop) {
+                    $element.addClass('loose');
                     if(paneBottom < containerBottom) {
                         $element[0].style.top = (scrollY - originalTop + 78) + 'px';
                     }
                 } else {
+                    $element.removeClass('loose');
                     $element[0].style.top = '';
                 }
             }

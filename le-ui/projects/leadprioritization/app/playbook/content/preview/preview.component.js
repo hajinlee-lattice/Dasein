@@ -5,7 +5,8 @@ angular.module('lp.playbook.wizard.preview', [])
     var vm = this;
 
     angular.extend(vm, {
-        play: Play
+        play: Play,
+        stateParams: $stateParams
     });
 
     vm.init = function() {
