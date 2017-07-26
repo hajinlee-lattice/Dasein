@@ -9,6 +9,8 @@ public interface MetadataSegmentService {
 
     MetadataSegment getSegmentByName(String name);
 
+    MetadataSegment getSegmentByName(String name, boolean shouldTransateForFrontend);
+
     MetadataSegment createOrUpdateSegment(MetadataSegment segment);
 
     void deleteSegmentByName(String name);

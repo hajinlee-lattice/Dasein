@@ -58,6 +58,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -1326,8 +1327,12 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("segmentName") String segmentName) {
         log.debug(String.format("Getting restriction from %s segment", segmentName));
         manufactureSecurityContextForInternalAccess(tenantId);
-
-        return metadataSegmentService.getSegmentByName(segmentName).getRestriction();
+        MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentName, false);
+        if (segment != null) {
+            return segment.getRestriction();
+        } else {
+            return null;
+        }
     }
 
 }

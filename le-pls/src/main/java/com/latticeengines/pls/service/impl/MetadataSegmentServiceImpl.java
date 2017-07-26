@@ -40,8 +40,18 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     @Override
     public MetadataSegment getSegmentByName(String name) {
+        return getSegmentByName(name, true);
+    }
+
+    @Override
+    public MetadataSegment getSegmentByName(String name, boolean shouldTransateForFrontend) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return translateForFrontend(segmentProxy.getMetadataSegmentByName(customerSpace, name));
+        MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace, name);
+
+        if (shouldTransateForFrontend) {
+            segment = translateForFrontend(segment);
+        }
+        return segment;
     }
 
     @Override
@@ -84,12 +94,16 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         Random random = new Random(System.currentTimeMillis());
         segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts, random.nextInt(1000));
 
-//        Query query = Query.builder().where(segment.getRestriction()).build();
-//        try {
-//            long count = accountProxy.getCount(MultiTenantContext.getTenant().getId(), query);
-//            segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts, count);
-//        } catch (Exception e) {
-//            log.error(String.format("Failed to update statistics for segment %s", segment.getName()), e);
-//        }
+        // Query query =
+        // Query.builder().where(segment.getRestriction()).build();
+        // try {
+        // long count =
+        // accountProxy.getCount(MultiTenantContext.getTenant().getId(), query);
+        // segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts,
+        // count);
+        // } catch (Exception e) {
+        // log.error(String.format("Failed to update statistics for segment %s",
+        // segment.getName()), e);
+        // }
     }
 }
