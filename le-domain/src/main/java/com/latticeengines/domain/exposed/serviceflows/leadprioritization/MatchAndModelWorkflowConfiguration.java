@@ -3,14 +3,10 @@ package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -25,7 +21,8 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfi
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
@@ -37,8 +34,6 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(MatchAndModelWorkflowConfiguration.class);
-
     public static class Builder {
         private MatchAndModelWorkflowConfiguration configuration = new MatchAndModelWorkflowConfiguration();
         private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
@@ -49,7 +44,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
         private ResolveMetadataFromUserRefinedAttributesConfiguration resolveAttributes = new ResolveMetadataFromUserRefinedAttributesConfiguration();
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
-        private ScoreStepConfiguration score = new ScoreStepConfiguration();
+        private RTSScoreStepConfiguration score = new RTSScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private CombineMatchDebugWithScoreDataFlowConfiguration combineMatchDebugWithScores = new CombineMatchDebugWithScoreDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
@@ -152,7 +147,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         }
 
         public Builder transformationGroup(TransformationGroup transformationGroup,
-                                           List<TransformDefinition> stdTransformDefns) {
+                List<TransformDefinition> stdTransformDefns) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
             addStandardAttributes.setTransforms(stdTransformDefns);
             model.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName, transformationGroup.getName());
@@ -204,6 +199,11 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         public Builder excludeUnmatchedWithPublicDomain(boolean excludePublicDomains) {
             match.setExcludeUnmatchedWithPublicDomain(excludePublicDomains);
             model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
+            return this;
+        }
+
+        public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
+            match.setRetainLatticeAccountId(retainLatticeAccountId);
             return this;
         }
 
@@ -308,6 +308,22 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
 
         public Builder matchQueue(String queue) {
             match.setMatchQueue(queue);
+            return this;
+        }
+
+        public Builder enableLeadEnrichment(boolean enableLeadEnrichment) {
+            score.setEnableLeadEnrichment(enableLeadEnrichment);
+            return this;
+        }
+
+        public Builder enableDebug(boolean enableDebug) {
+            score.setEnableDebug(enableDebug);
+            return this;
+        }
+
+        public Builder modelType(String modelType) {
+            score.setModelType(modelType);
+            combineInputWithScores.setModelType(modelType);
             return this;
         }
 

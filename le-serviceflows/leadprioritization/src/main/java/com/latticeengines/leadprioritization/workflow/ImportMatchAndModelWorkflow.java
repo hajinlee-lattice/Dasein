@@ -46,7 +46,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
     private SetConfigurationForScoring setConfigurationForScoring;
 
     @Autowired
-    private ScoreWorkflow scoreWorkflow;
+    private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
     @Autowired
     private PivotScoreAndEvent pivotScoreAndEventDataFlow;
@@ -72,7 +72,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
                 .next(addStandardAttributesDataFlow) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
-                .next(scoreWorkflow) //
+                .next(rtsBulkScoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

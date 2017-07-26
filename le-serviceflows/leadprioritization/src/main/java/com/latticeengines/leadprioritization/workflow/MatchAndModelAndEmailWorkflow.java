@@ -40,7 +40,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private SetConfigurationForScoring setConfigurationForScoring;
 
     @Autowired
-    private ScoreWorkflow scoreWorkflow;
+    private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
     @Autowired
     private PivotScoreAndEvent pivotScoreAndEventDataFlow;
@@ -65,7 +65,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
                 .next(resolveMetadataFromUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
-                .next(scoreWorkflow) //
+                .next(rtsBulkScoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

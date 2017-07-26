@@ -36,6 +36,8 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean retainMatchTables;
 
+    private boolean retainLatticeAccountId = false;
+
     private boolean excludeUnmatchedWithPublicDomain = false;
     private boolean publicDomainAsNormalDomain = false;
 
@@ -165,6 +167,16 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         this.excludeUnmatchedWithPublicDomain = excludeUnmatchedWithPublicDomain;
     }
 
+    @JsonProperty("retain_lattice_account_id")
+    public boolean isRetainLatticeAccountId() {
+        return retainLatticeAccountId;
+    }
+
+    @JsonProperty("retain_lattice_account_id")
+    public void setRetainLatticeAccountId(boolean retainLatticeAccountId) {
+        this.retainLatticeAccountId = retainLatticeAccountId;
+    }
+
     @JsonProperty("public_domain_as_normal_domain")
     public boolean isPublicDomainAsNormalDomain() {
         return publicDomainAsNormalDomain;
@@ -207,9 +219,9 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("data_cloud_version")
     public void setDataCloudVersion(String dataCloudVersion) {
-          this.dataCloudVersion = dataCloudVersion;
+        this.dataCloudVersion = dataCloudVersion;
     }
-    
+
     @JsonProperty("predefined_selection_version")
     public void setPredefinedSelectionVersion(String predefinedSelectionVersion) {
         this.predefinedSelectionVersion = predefinedSelectionVersion;
@@ -258,5 +270,5 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     public MatchRequestSource getMatchRequestSource() {
         return matchRequestSource;
     }
-    
+
 }

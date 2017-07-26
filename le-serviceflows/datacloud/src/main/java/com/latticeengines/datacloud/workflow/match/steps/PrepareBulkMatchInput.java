@@ -117,9 +117,6 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         for (Integer blockSize : blocks) {
             blockIdx++;
             String blockOperationUid = UUID.randomUUID().toString().toUpperCase();
-            if (blocks.length == 1) {
-                blockOperationUid = getConfiguration().getRootOperationUid();
-            }
 
             DataCloudJobConfiguration jobConfiguration = generateJobConfiguration();
             jobConfiguration.setBlockSize(blockSize);
@@ -127,8 +124,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             if (blocks.length == 1) {
                 jobConfiguration.setAvroPath(avroGlobs);
             } else {
-                String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(
-                        jobConfiguration.getRootOperationUid(), jobConfiguration.getBlockOperationUid()).toString();
+                String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(jobConfiguration.getRootOperationUid(),
+                        jobConfiguration.getBlockOperationUid()).toString();
                 jobConfiguration.setAvroPath(targetFile);
                 writeBlock(iterator, blockSize, targetFile);
             }
@@ -136,11 +133,11 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid())
                     .getApplicationId();
             if (StringUtils.isBlank(appId)) {
-                jobConfiguration.setAppName(String.format("%s~DataCloudMatch~Block[%d/%d]", getConfiguration()
-                        .getCustomerSpace().getTenantId(), blockIdx, blocks.length));
+                jobConfiguration.setAppName(String.format("%s~DataCloudMatch~Block[%d/%d]",
+                        getConfiguration().getCustomerSpace().getTenantId(), blockIdx, blocks.length));
             } else {
-                jobConfiguration.setAppName(String.format("%s~DataCloudMatch[%s]~Block[%d/%d]", getConfiguration()
-                        .getCustomerSpace().getTenantId(), appId, blockIdx, blocks.length));
+                jobConfiguration.setAppName(String.format("%s~DataCloudMatch[%s]~Block[%d/%d]",
+                        getConfiguration().getCustomerSpace().getTenantId(), appId, blockIdx, blocks.length));
             }
             configurations.add(jobConfiguration);
         }

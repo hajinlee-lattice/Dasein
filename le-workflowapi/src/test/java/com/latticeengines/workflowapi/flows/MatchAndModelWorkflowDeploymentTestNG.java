@@ -113,10 +113,12 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
                 "/user/s-analytics/customers/" + mainTestCustomerSpace.toString()
                         + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/" + uuid);
         String summaryHdfsPath = "/user/s-analytics/customers/" + mainTestCustomerSpace.toString()
-                + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/" + uuid + "/enhancements/modelsummary.json";
+                + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/" + uuid
+                + "/enhancements/modelsummary.json";
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, summaryHdfsPath));
 
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(RESOURCE_BASE + "/models/AccountModel/random_uuid/enhancements/modelsummary.json");
+        InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(RESOURCE_BASE + "/models/AccountModel/random_uuid/enhancements/modelsummary.json");
         String summary = IOUtils.toString(is, Charset.forName("UTF-8"));
         summary = summary.replace("{% uuid %}", uuid);
         HdfsUtils.writeToFile(yarnConfiguration, summaryHdfsPath, summary);
@@ -127,7 +129,6 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
         internalResourceProxy.createModelSummary(summary, mainTestCustomerSpace);
-
         List<VdbMetadataField> metadata = modelMetadataService.getMetadata(summary.getId());
         for (VdbMetadataField field : metadata) {
             if (field.getColumnName().equals(InterfaceName.Website.name())) {

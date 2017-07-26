@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -964,7 +965,7 @@ public class SchemaRepository {
     private AttributeBuilder attr(String name) {
         AttributeBuilder builder = new AttributeBuilder();
         builder.name(name);
-        builder.tag(ModelingMetadata.INTERNAL_TAG);
+        builder.tag(Tag.INTERNAL.toString());
         return builder;
     }
 

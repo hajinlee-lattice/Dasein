@@ -117,8 +117,10 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
     }
 
     private static boolean outputField(Field field) {
-        return field.name() != null && !field.name().equals(InterfaceName.InternalId.toString())
-                && !field.name().equals(ScoreResultField.RawScore.displayName)
-                && !field.name().endsWith(INT_LDC_DEDUPE_ID);
+        return field.name() != null //
+                && !field.name().equals(InterfaceName.InternalId.toString()) //
+                && !field.name().equals(ScoreResultField.RawScore.displayName) //
+                && !field.name().endsWith(INT_LDC_DEDUPE_ID) //
+                && !field.name().equals(InterfaceName.LatticeAccountId.toString());
     }
 }

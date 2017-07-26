@@ -118,7 +118,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         if (StringUtils.isNotEmpty(moduleName) && StringUtils.isNotEmpty(pivotFileName)) {
             List<Artifact> pivotArtifacts = metadataFileUploadService.getArtifacts(moduleName,
                     ArtifactType.PivotMapping);
-            pivotArtifact = pivotArtifacts.stream().filter(artifact -> artifact.getName().equals(pivotFileName)).findFirst().orElseGet(() -> null);
+            pivotArtifact = pivotArtifacts.stream().filter(artifact -> artifact.getName().equals(pivotFileName))
+                    .findFirst().orElseGet(() -> null);
             if (pivotArtifact == null) {
                 throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
             }
@@ -134,48 +135,55 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .getTransformDefinitions(schemaInterpretation, transformationGroup);
 
         ImportMatchAndModelWorkflowConfiguration.Builder builder = new ImportMatchAndModelWorkflowConfiguration.Builder()
-                .microServiceHostPort(microserviceHostPort)
-                .customer(getCustomerSpace())
-                .sourceFileName(sourceFile.getName())
-                .matchInputTableName(sourceFile.getTableName())
-                .sourceType(SourceType.FILE)
-                .internalResourceHostPort(internalResourceHostPort)
-                .importReportNamePrefix(sourceFile.getName() + "_Report")
-                .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport")
-                .dedupDataFlowBeanName("dedupEventTable")
-                .userId(parameters.getUserId())
-                .dedupType(parameters.getDeduplicationType())
-                .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)
-                .excludeDataCloudAttrs(parameters.getExcludePropDataColumns())
-                .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
-                .matchDebugEnabled(!parameters.getExcludePropDataColumns() && plsFeatureFlagService.isMatchDebugEnabled())
+                .microServiceHostPort(microserviceHostPort) //
+                .customer(getCustomerSpace()) //
+                .sourceFileName(sourceFile.getName()) //
+                .matchInputTableName(sourceFile.getTableName()) //
+                .sourceType(SourceType.FILE) //
+                .internalResourceHostPort(internalResourceHostPort) //
+                .importReportNamePrefix(sourceFile.getName() + "_Report") //
+                .eventTableReportNamePrefix(sourceFile.getName() + "_EventTableReport") //
+                .dedupDataFlowBeanName("dedupEventTable") //
+                .userId(parameters.getUserId()) //
+                .dedupType(parameters.getDeduplicationType()) //
+                .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
+                .excludeDataCloudAttrs(parameters.getExcludePropDataColumns()) //
+                .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) //
+                .matchDebugEnabled(
+                        !parameters.getExcludePropDataColumns() && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
-                .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE)
-                .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion())
+                .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE) //
+                .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //
                 // null means latest
-                .dataCloudVersion(getDataCloudVersion(parameters))
-                .modelName(parameters.getName())
-                .displayName(parameters.getDisplayName())
-                .sourceSchemaInterpretation(schemaInterpretation)
-                .trainingTableName(trainingTableName)
-                .inputProperties(inputProperties)
-                .minRows(minRows)
-                .minPositiveEvents(minPositiveEvents)
-                .minNegativeEvents(minNegativeEvents)
-                .transformationGroup(transformationGroup, stdTransformDefns)
-                .enableV2Profiling(plsFeatureFlagService.isV2ProfilingEnabled())
-                .excludePublicDomains(parameters.isExcludePublicDomains())
-                .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, sourceFile.getPath())
+                .dataCloudVersion(getDataCloudVersion(parameters)) //
+                .modelName(parameters.getName()) //
+                .displayName(parameters.getDisplayName()) //
+                .sourceSchemaInterpretation(schemaInterpretation) //
+                .trainingTableName(trainingTableName) //
+                .inputProperties(inputProperties) //
+                .minRows(minRows) //
+                .minPositiveEvents(minPositiveEvents) //
+                .minNegativeEvents(minNegativeEvents) //
+                .transformationGroup(transformationGroup, stdTransformDefns) //
+                .enableV2Profiling(plsFeatureFlagService.isV2ProfilingEnabled()) //
+                .excludePublicDomains(parameters.isExcludePublicDomains()) //
+                .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, sourceFile.getPath()) //
                 .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled,
-                        plsFeatureFlagService.isFuzzyMatchEnabled())
-                .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null)
-                .moduleName(moduleName != null ? moduleName : null).runTimeParams(parameters.runTimeParams)
-                .isDefaultDataRules(true).dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD))
-                .bucketMetadata(null)
+                        plsFeatureFlagService.isFuzzyMatchEnabled()) //
+                .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
+                .moduleName(moduleName != null ? moduleName : null) //
+                .runTimeParams(parameters.runTimeParams) //
+                .isDefaultDataRules(true) //
+                .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
+                .bucketMetadata(null) //
                 // TODO: legacy SQL based match engine configurations
-                .matchClientDocument(matchClientDocument).matchType(MatchCommandType.MATCH_WITH_UNIVERSE)
-                .matchDestTables("DerivedColumnsCache")
+                .matchClientDocument(matchClientDocument) //
+                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
+                .matchDestTables("DerivedColumnsCache") //
+                .enableLeadEnrichment(false) //
+                .enableDebug(false) //
+                .setRetainLatticeAccountId(true) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }

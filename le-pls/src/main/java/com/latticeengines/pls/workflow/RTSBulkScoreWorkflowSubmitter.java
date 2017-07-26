@@ -87,7 +87,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
             skipIdMatch = !modelSummary.isMatch();
         }
         String modelType = modelSummary != null ? modelSummary.getModelType() : ModelType.PYTHONMODEL.getModelType();
-        enableLeadEnrichment = enableLeadEnrichment & !modelType.equals(ModelType.PMML.getModelType());
+        enableLeadEnrichment = enableLeadEnrichment && !modelType.equals(ModelType.PMML.getModelType());
         skipIdMatch = skipIdMatch && !enableLeadEnrichment;
 
         log.info("Data Cloud Version=" + dataCloudVersion);
@@ -119,7 +119,8 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .dataCloudVersion(dataCloudVersion) //
                 .excludeDataCloudAttrs(skipIdMatch) //
                 .skipMatchingStep(ModelType.PMML.getModelType().equals(modelType)) //
-                .matchDebugEnabled(!skipIdMatch && !ModelType.PMML.getModelType().equals(modelType) && plsFeatureFlagService.isMatchDebugEnabled()) //
+                .matchDebugEnabled(!skipIdMatch && !ModelType.PMML.getModelType().equals(modelType)
+                        && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.ENRICHMENT) //
                 .matchClientDocument(matchClientDocument) //
                 .bucketMetadata(bucketMetadataList) //

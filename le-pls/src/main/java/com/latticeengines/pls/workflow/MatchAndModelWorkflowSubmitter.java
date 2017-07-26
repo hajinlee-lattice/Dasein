@@ -125,19 +125,25 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .excludeDataCloudAttrs(parameters.isExcludePropDataAttributes()) //
                 .skipStandardTransform(!parameters.enableTransformation()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, trainingFilePath) //
-                .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, plsFeatureFlagService.isFuzzyMatchEnabled()) //
+                .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled,
+                        plsFeatureFlagService.isFuzzyMatchEnabled()) //
                 .addProvenanceProperty(ProvenancePropertyName.RefineAndCloneParentModelId, modelSummary.getId()) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .dataCloudVersion(getDataCloudVersion(modelSummary.getDataCloudVersion()))//
-                .matchColumnSelection(Predefined.getDefaultSelection(), null).moduleName(modelSummary.getModuleName()) //
-                .matchDebugEnabled(!parameters.isExcludePropDataAttributes() && plsFeatureFlagService.isMatchDebugEnabled()) //
+                .matchColumnSelection(Predefined.getDefaultSelection(), null) //
+                .moduleName(modelSummary.getModuleName()) //
+                .matchDebugEnabled(
+                        !parameters.isExcludePropDataAttributes() && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //
                 .userRefinedAttributes(userRefinedAttributes) //
+                .enableDebug(false) //
+                .enableLeadEnrichment(false) //
+                .setRetainLatticeAccountId(true) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }

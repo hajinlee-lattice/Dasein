@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,5 +68,15 @@ public class AttributeUnitTestNG {
         result = attribute.getApprovedUsage();
         assertEquals(result.size(), 1);
         assertEquals(result.get(0), ModelingMetadata.MODEL_APPROVED_USAGE);
+    }
+
+    @Test(groups = "unit")
+    public void testInternalAttribute() {
+        Attribute internalAttribute = new Attribute();
+        internalAttribute.setTags(Tag.INTERNAL.toString());
+        assertTrue(internalAttribute.isInternalPredictor());
+        Attribute externalAttribute = new Attribute();
+        externalAttribute.setTags(Tag.EXTERNAL.toString());
+        assertFalse(externalAttribute.isInternalPredictor());
     }
 }

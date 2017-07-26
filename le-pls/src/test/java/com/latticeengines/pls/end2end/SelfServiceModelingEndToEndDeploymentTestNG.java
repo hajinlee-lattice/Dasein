@@ -245,7 +245,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "createModel", enabled = false)
+    @Test(groups = "deployment.lp", dependsOnMethods = "createModel", enabled = truefalse)
     public void retrieveReport() {
         log.info("Retrieving report for modeling ...");
         Job job = restTemplate.getForObject( //
@@ -266,14 +266,14 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 SchemaInterpretation.SalesforceLead.toString());
         assertNotNull(originalModelSummary.getTrainingTableName());
         assertFalse(originalModelSummary.getTrainingTableName().isEmpty());
-        assertEquals(originalModelSummary.getModelSummaryConfiguration().getString(
-                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
+        assertEquals(originalModelSummary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
         assertJobExistsWithModelIdAndModelName(originalModelSummary.getId());
         inspectOriginalModelSummaryPredictors(originalModelSummary);
         assertABCDBucketsCreated(originalModelSummary.getId());
     }
 
-    void activateModelSummary(String modelId) {
+    void activateModelSummary(String modelId) throws InterruptedException {
         log.info("Update model " + modelId + " to active.");
         String modelApi = getRestAPIHostPort() + "/pls/modelsummaries/" + modelId;
         AttributeMap attrMap = new AttributeMap();
@@ -284,10 +284,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         ModelSummary summary = restTemplate.getForObject(
                 String.format("%s/pls/modelsummaries/%s", getRestAPIHostPort(), modelId), ModelSummary.class);
         assertEquals(summary.getStatus(), ModelSummaryStatus.ACTIVE);
+        Thread.sleep(180000L);
+        log.info("Waitng for model in cache to be updated" + modelId);
     }
 
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
-    public void compareRtsScoreWithModelingForOriginalModelSummary() throws IOException {
+    public void compareRtsScoreWithModelingForOriginalModelSummary() throws IOException, InterruptedException {
         compareRtsScoreWithModeling(originalModelSummary, 843, firstTenant.getId());
     }
 
@@ -377,8 +379,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 originalModelSummary.getSourceSchemaInterpretation());
         assertNotNull(copiedModelSummary.getTrainingTableName());
         assertFalse(copiedModelSummary.getTrainingTableName().isEmpty());
-        assertEquals(originalModelSummary.getModelSummaryConfiguration().getString(
-                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
+        assertEquals(originalModelSummary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
 
         inspectOriginalModelSummaryPredictors(copiedModelSummary);
         compareRtsScoreWithModeling(copiedModelSummary, 687, secondTenant.getId());
@@ -450,8 +452,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }));
         assertEquals(clonedModelSummary.getSourceSchemaInterpretation(),
                 SchemaInterpretation.SalesforceLead.toString());
-        assertEquals(clonedModelSummary.getModelSummaryConfiguration().getString(
-                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
+        assertEquals(clonedModelSummary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
         String foundFileTableName = clonedModelSummary.getTrainingTableName();
         assertNotNull(foundFileTableName);
 
@@ -503,8 +505,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 SchemaInterpretation.SalesforceLead.toString());
         assertNotNull(replacedModelSummary.getTrainingTableName());
         assertEquals(replacedModelSummary.getTrainingTableName(), clonedModelSummary.getTrainingTableName());
-        assertEquals(replacedModelSummary.getModelSummaryConfiguration().getString(
-                ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
+        assertEquals(replacedModelSummary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
 
         // Inspect some predictors
         inspectOriginalModelSummaryPredictors(replacedModelSummary);
@@ -651,7 +653,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     private void compareRtsScoreWithModeling(ModelSummary modelSummary, int countsForScoring, String tenantId)
-            throws IOException {
+            throws IOException, InterruptedException {
         activateModelSummary(modelSummary.getId());
 
         Map<String, ComparedRecord> diffRecords = scoreCompareService.analyzeScores(tenantId,

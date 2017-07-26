@@ -8,7 +8,6 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
@@ -20,6 +19,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfig
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 
@@ -43,7 +43,6 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("rtsBulkScoreWorkflow", customerSpace, "rtsBulkScoreWorkflow");
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
-
             match.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
@@ -54,7 +53,6 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
         }
 
         public Builder internalResourcePort(String internalResourceHostPort) {
-
             match.setInternalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
@@ -67,7 +65,6 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
         public Builder microServiceHostPort(String microServiceHostPort) {
             microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             matchResult.setMicroServiceHostPort(microServiceHostPort);
-
             return this;
         }
 

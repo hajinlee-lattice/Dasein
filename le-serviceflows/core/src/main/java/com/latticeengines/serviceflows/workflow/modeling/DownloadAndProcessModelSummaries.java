@@ -2,7 +2,6 @@ package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +10,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
@@ -40,11 +40,13 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
 
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Status", ModelSummaryStatus.INACTIVE.getStatusCode());
-        for (String modelId : eventToModelId.values()) {
+        for (String event : eventToModelId.keySet()) {
+            String modelId = eventToModelId.get(event);
             proxy.updateModelSummary(modelId, attrMap);
 
             saveOutputValue(WorkflowContextConstants.Inputs.MODEL_ID.toString(), modelId);
             putStringValueInContext(SCORING_MODEL_ID, modelId);
+            putStringValueInContext(SCORING_MODEL_TYPE, eventToModelSummary.get(event).getModelType());
         }
 
         putObjectInContext(EVENT_TO_MODELID, eventToModelId);

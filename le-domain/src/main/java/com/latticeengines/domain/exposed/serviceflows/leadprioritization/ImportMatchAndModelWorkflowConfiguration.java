@@ -7,7 +7,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -24,7 +23,8 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfi
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
@@ -48,7 +48,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
-        private ScoreStepConfiguration score = new ScoreStepConfiguration();
+        private RTSScoreStepConfiguration score = new RTSScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private CombineMatchDebugWithScoreDataFlowConfiguration combineMatchDebugWithScores = new CombineMatchDebugWithScoreDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
@@ -182,6 +182,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
         public Builder excludePublicDomains(boolean excludePublicDomains) {
             match.setExcludeUnmatchedWithPublicDomain(excludePublicDomains);
             model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
+            return this;
+        }
+
+        public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
+            match.setRetainLatticeAccountId(retainLatticeAccountId);
             return this;
         }
 
@@ -344,6 +349,22 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
 
         public Builder matchQueue(String queue) {
             match.setMatchQueue(queue);
+            return this;
+        }
+
+        public Builder enableLeadEnrichment(boolean enableLeadEnrichment) {
+            score.setEnableLeadEnrichment(enableLeadEnrichment);
+            return this;
+        }
+
+        public Builder enableDebug(boolean enableDebug) {
+            score.setEnableDebug(enableDebug);
+            return this;
+        }
+
+        public Builder modelType(String modelType) {
+            score.setModelType(modelType);
+            combineInputWithScores.setModelType(modelType);
             return this;
         }
 

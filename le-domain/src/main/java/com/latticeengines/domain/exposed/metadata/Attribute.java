@@ -926,6 +926,22 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    public boolean isInternalPredictor() {
+        boolean isInternalAttribute = false;
+        List<String> tags = getTags();
+        if (tags != null) {
+            for (String tag : tags) {
+                if (tag.equals(Tag.INTERNAL.toString())) {
+                    isInternalAttribute = true;
+                    break;
+                }
+            }
+        }
+        return isInternalAttribute;
+    }
+
+    @Transient
+    @JsonIgnore
     public ColumnMetadata getColumnMetadata() {
         ColumnMetadata metadata = new ColumnMetadata();
         metadata.setDisplayName(getDisplayName());

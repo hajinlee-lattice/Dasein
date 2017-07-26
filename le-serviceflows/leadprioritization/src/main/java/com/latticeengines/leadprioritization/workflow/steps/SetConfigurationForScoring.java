@@ -1,52 +1,52 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AddStandardAttributesConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.DedupEventTableConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SetConfigurationForScoringConfiguration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SetConfigurationForScoringConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("setConfigurationForScoring")
 public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfigurationForScoringConfiguration> {
 
+    private static final Log log = LogFactory.getLog(SetConfigurationForScoring.class);
+
+    @Autowired
+    protected ColumnMetadataProxy columnMetadataProxy;
+
     @Override
     public void execute() {
+        log.info("Setting the configuration for scoring.");
         MatchStepConfiguration matchStepConfig = getConfigurationFromJobParameters(MatchStepConfiguration.class);
-
-        DedupEventTableConfiguration dedupStepConfig = getConfigurationFromJobParameters(
-                DedupEventTableConfiguration.class);
-        if (dedupStepConfig.isSkipStep()) {
-            Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
-            matchStepConfig.setInputTableName(eventTable.getName());
-            AddStandardAttributesConfiguration addStandardAttrStepConfig = getConfigurationFromJobParameters(
-                    AddStandardAttributesConfiguration.class);
-            addStandardAttrStepConfig.setSkipStep(true);
-            putObjectInContext(AddStandardAttributesConfiguration.class.getName(), addStandardAttrStepConfig);
-        } else {
-            Table eventTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
-            matchStepConfig.setInputTableName(eventTable.getName());
-        }
 
         matchStepConfig.setSkipStep(true);
         putObjectInContext(MatchStepConfiguration.class.getName(), matchStepConfig);
 
         ProcessMatchResultConfiguration processMatchResultStepConfig = getConfigurationFromJobParameters(
                 ProcessMatchResultConfiguration.class);
+
         processMatchResultStepConfig.setSkipStep(true);
         putObjectInContext(ProcessMatchResultConfiguration.class.getName(), processMatchResultStepConfig);
 
-        ScoreStepConfiguration scoreStepConfiguration = getConfigurationFromJobParameters(ScoreStepConfiguration.class);
-        scoreStepConfiguration.setModelId(getStringValueFromContext(SCORING_MODEL_ID));
-        putObjectInContext(ScoreStepConfiguration.class.getName(), scoreStepConfiguration);
+        RTSScoreStepConfiguration rtsScoreStepConfiguration = getConfigurationFromJobParameters(
+                RTSScoreStepConfiguration.class);
+        rtsScoreStepConfiguration.setModelId(getStringValueFromContext(SCORING_MODEL_ID));
+        rtsScoreStepConfiguration.setModelType(getStringValueFromContext(SCORING_MODEL_TYPE));
+        Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
+        rtsScoreStepConfiguration.setInputTableName(matchResultTable.getName());
+        log.info("rtsScoreStepConfiguration is ");
+        putObjectInContext(RTSScoreStepConfiguration.class.getName(), rtsScoreStepConfiguration);
 
         ExportStepConfiguration exportStepConfiguration = getConfigurationFromJobParameters(
                 ExportStepConfiguration.class);

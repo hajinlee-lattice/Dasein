@@ -16,15 +16,18 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.IOBufferType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
@@ -63,7 +66,8 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         Table preMatchEventTable = preMatchEventTable();
         putObjectInContext(PREMATCH_EVENT_TABLE, preMatchEventTable);
         MatchInput input = prepareMatchInput(preMatchEventTable);
-        BulkMatchWorkflowConfiguration configuration = matchProxy.getBulkConfig(input, getConfiguration().getMatchHdfsPod());
+        BulkMatchWorkflowConfiguration configuration = matchProxy.getBulkConfig(input,
+                getConfiguration().getMatchHdfsPod());
         putObjectInContext(BulkMatchWorkflowConfiguration.class.getName(), configuration);
     }
 
@@ -95,8 +99,23 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         }
 
         ColumnSelection.Predefined predefined = getConfiguration().getPredefinedColumnSelection();
+        boolean retainLatticeAccountId = getConfiguration().isRetainLatticeAccountId();
         if (predefined != null) {
-            matchInput.setPredefinedSelection(predefined);
+            if (retainLatticeAccountId) {
+                log.info("Retaining Lattice Account Id in the match result.");
+                ColumnSelection columnSelection = new ColumnSelection();
+                List<Column> columns = Arrays.asList(new Column(InterfaceName.LatticeAccountId.name()));
+                columnSelection.setColumns(columns);
+                UnionSelection unionSelection = new UnionSelection();
+                unionSelection.setCustomSelection(columnSelection);
+                Map<Predefined, String> map = new HashMap<>();
+                map.put(predefined, "1.0");
+                unionSelection.setPredefinedSelections(map);
+                matchInput.setUnionSelection(unionSelection);
+            } else {
+                matchInput.setPredefinedSelection(predefined);
+            }
+
             String version = getConfiguration().getPredefinedSelectionVersion();
             if (StringUtils.isEmpty(version)) {
                 version = "1.0";
@@ -122,23 +141,22 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         matchInput.setOutputBufferType(IOBufferType.AVRO);
 
         Map<MatchKey, List<String>> matchInputKeys = new HashMap<>();
-        if (configuration.getSourceSchemaInterpretation() != null
-                && configuration.getSourceSchemaInterpretation().equals(
-                SchemaInterpretation.SalesforceAccount.toString())) {
+        if (configuration.getSourceSchemaInterpretation() != null && configuration.getSourceSchemaInterpretation()
+                .equals(SchemaInterpretation.SalesforceAccount.toString())) {
             if (preMatchEventTable.getAttribute(InterfaceName.Website.name()) == null
-                    || (preMatchEventTable.getAttribute(InterfaceName.Website.name()).getApprovedUsage() != null && preMatchEventTable
-                    .getAttribute(InterfaceName.Website.name()).getApprovedUsage()
-                    .contains(ApprovedUsage.IGNORED.getName()))) {
+                    || (preMatchEventTable.getAttribute(InterfaceName.Website.name()).getApprovedUsage() != null
+                            && preMatchEventTable.getAttribute(InterfaceName.Website.name()).getApprovedUsage()
+                                    .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
                 matchInputKeys.put(MatchKey.Domain, Collections.singletonList(InterfaceName.Website.name()));
             }
-        } else if (configuration.getSourceSchemaInterpretation() != null
-                && configuration.getSourceSchemaInterpretation().equals(SchemaInterpretation.SalesforceLead.toString())) {
+        } else if (configuration.getSourceSchemaInterpretation() != null && configuration
+                .getSourceSchemaInterpretation().equals(SchemaInterpretation.SalesforceLead.toString())) {
             if (preMatchEventTable.getAttribute(InterfaceName.Email.name()) == null
-                    || (preMatchEventTable.getAttribute(InterfaceName.Email.name()).getApprovedUsage() != null && preMatchEventTable
-                    .getAttribute(InterfaceName.Email.name()).getApprovedUsage()
-                    .contains(ApprovedUsage.IGNORED.getName()))) {
+                    || (preMatchEventTable.getAttribute(InterfaceName.Email.name()).getApprovedUsage() != null
+                            && preMatchEventTable.getAttribute(InterfaceName.Email.name()).getApprovedUsage()
+                                    .contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(MatchKey.Domain, new ArrayList<>());
             } else {
                 matchInputKeys.put(MatchKey.Domain, Collections.singletonList(InterfaceName.Email.name()));
@@ -147,14 +165,14 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         for (MatchKey matchKey : MATCH_KEYS_TO_DISPLAY_NAMES.keySet()) {
             if (preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) == null
                     || (preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) != null
-                    && preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
-                    .getApprovedUsage() != null && preMatchEventTable
-                    .getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)).getApprovedUsage()
-                    .contains(ApprovedUsage.IGNORED.getName()))) {
+                            && preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
+                                    .getApprovedUsage() != null
+                            && preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey))
+                                    .getApprovedUsage().contains(ApprovedUsage.IGNORED.getName()))) {
                 matchInputKeys.put(matchKey, new ArrayList<>());
             } else {
-                log.info(String.format("attribute: %s is found as: %s", matchKey,
-                        JsonUtils.serialize(preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)))));
+                log.info(String.format("attribute: %s is found as: %s", matchKey, JsonUtils
+                        .serialize(preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)))));
                 matchInputKeys.put(matchKey, Arrays.asList(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)));
             }
         }

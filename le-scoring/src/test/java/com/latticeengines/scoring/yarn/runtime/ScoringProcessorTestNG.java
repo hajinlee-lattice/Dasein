@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
@@ -43,6 +44,7 @@ import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
@@ -69,15 +71,17 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         rtsBulkScoringConfig = new RTSBulkScoringConfiguration();
         rtsBulkScoringConfig.setModelGuids(Arrays.asList(new String[] { modelGuidString }));
         rtsBulkScoringConfig.setModelType(ModelType.PYTHONMODEL.getModelType());
+        rtsBulkScoringConfig.setEnableLeadEnrichment(true);
         bulkScoringProcessor = new ScoringProcessor(rtsBulkScoringConfig);
         bulkScoringProcessor.setConfiguration(yarnConfiguration);
     }
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() throws Exception {
-        URL uploadedAvro = ClassLoader.getSystemResource("com/latticeengines/scoring/data/upload-file.avro"); //
+        URL uploadedAvro = ClassLoader
+                .getSystemResource("com/latticeengines/scoring/data/allTest_with_lattice_accountId.avro"); //
         HdfsUtils.mkdir(yarnConfiguration, dir);
-        filePath = dir + "/upload-file.avro";
+        filePath = dir + "/allTest_with_lattice_accountId.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, uploadedAvro.getFile(), filePath);
     }
 
@@ -93,15 +97,14 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         FileReader<GenericRecord> reader = bulkScoringProcessor.instantiateReaderForBulkScoreRequest(dir);
         BulkRecordScoreRequest scoreRequest = null;
         do {
-            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig,
-                    new HashMap<String, String>());
+            scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig);
             if (scoreRequest == null) {
                 break;
             }
             scoreRequestList.add(scoreRequest);
         } while (scoreRequest != null);
 
-        Assert.assertEquals(scoreRequestList.size(), 213);
+        Assert.assertEquals(scoreRequestList.size(), 5);
         BulkRecordScoreRequest bulkRecordScoreRequest = scoreRequestList.get(0);
         Assert.assertNotNull(bulkRecordScoreRequest.getRecords());
         Assert.assertEquals(bulkRecordScoreRequest.getSource(), ScoringProcessor.RECORD_SOURCE);
@@ -109,10 +112,37 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Record record = bulkRecordScoreRequest.getRecords().get(0);
         Assert.assertEquals(record.getIdType(), ScoringProcessor.DEFAULT_ID_TYPE);
         Assert.assertEquals(bulkRecordScoreRequest.getRecords().size(), 100);
-        Assert.assertEquals(scoreRequestList.get(212).getRecords().size(), 62);
+        Assert.assertEquals(scoreRequestList.get(4).getRecords().size(), 26);
         Assert.assertEquals(record.getModelAttributeValuesMap().size(), 1);
         Assert.assertTrue(record.getModelAttributeValuesMap().containsKey(modelGuidString));
         Assert.assertEquals(record.getRule(), ScoringProcessor.RECORD_RULE);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testConvertAvroToBulkScoreRequest")
+    public void testConvertAvroToBulkScoreRequestWithEnrichmentOff() throws IllegalArgumentException, Exception {
+        List<BulkRecordScoreRequest> scoreRequestList = new ArrayList<>();
+        BulkRecordScoreRequest scoreRequest = null;
+        rtsBulkScoringConfig.setEnableLeadEnrichment(false);
+        Table metadataTable = MetadataConverter.getTable(yarnConfiguration, dir);
+        FileReader<GenericRecord> reader = bulkScoringProcessor.instantiateReaderForBulkScoreRequest(dir);
+        System.out.println("attributeList is " + metadataTable.getAttributes());
+        rtsBulkScoringConfig.setMetadataTable(metadataTable);
+
+        scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig);
+        scoreRequestList.add(scoreRequest);
+
+        Assert.assertEquals(scoreRequestList.size(), 1);
+        BulkRecordScoreRequest bulkRecordScoreRequest = scoreRequestList.get(0);
+        Assert.assertNotNull(bulkRecordScoreRequest.getRecords());
+        Assert.assertEquals(bulkRecordScoreRequest.getSource(), ScoringProcessor.RECORD_SOURCE);
+
+        Record record = bulkRecordScoreRequest.getRecords().get(0);
+        Assert.assertEquals(record.getIdType(), ScoringProcessor.DEFAULT_ID_TYPE);
+        Assert.assertEquals(bulkRecordScoreRequest.getRecords().size(), 100);
+        Assert.assertEquals(record.getModelAttributeValuesMap().size(), 1);
+        Assert.assertTrue(record.getModelAttributeValuesMap().containsKey(modelGuidString));
+        Assert.assertEquals(record.getRule(), ScoringProcessor.RECORD_RULE);
+        System.out.println("record is " + record);
     }
 
     @Test(groups = "functional")

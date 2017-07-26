@@ -5,10 +5,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -144,8 +146,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         Map<String, String> leadEnrichmentAttributeDisplayNameMap = null;
         Map<String, Boolean> leadEnrichmentInternalAttributeFlagMap = null;
         isEnableDebug = rtsBulkScoringConfig.isEnableDebug();
-        boolean enrichmentEnabledForInternalAttributes = batonService.isEnabled(
-                rtsBulkScoringConfig.getCustomerSpace(),
+        boolean enrichmentEnabledForInternalAttributes = batonService.isEnabled(rtsBulkScoringConfig.getCustomerSpace(),
                 LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
 
         if (rtsBulkScoringConfig.isEnableLeadEnrichment()) {
@@ -293,7 +294,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     @VisibleForTesting
     BulkRecordScoreRequest getBulkScoreRequest(FileReader<GenericRecord> reader,
-            RTSBulkScoringConfiguration rtsBulkScoringConfig, Map<String, String> fieldNameMapping) throws IOException {
+            RTSBulkScoringConfiguration rtsBulkScoringConfig) throws IOException {
         if (!reader.hasNext()) {
             return null;
         }
@@ -323,13 +324,45 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             }
 
             Map<String, Object> attributeValues = new HashMap<>();
-            for (Schema.Field field : fields) {
-                String fieldName = field.name();
-                Object fieldValue = avroRecord.get(fieldName) == null //
-                        ? null : avroRecord.get(fieldName).toString();
-                attributeValues.put(fieldName, fieldValue);
+            if (rtsBulkScoringConfig.isEnableLeadEnrichment()) { // Score a file
+                for (Schema.Field field : fields) {
+                    String fieldName = field.name();
+                    Object fieldValue = avroRecord.get(fieldName) == null //
+                            ? null : avroRecord.get(fieldName).toString();
+                    attributeValues.put(fieldName, fieldValue);
+                }
+            } else { // Score training data
+                Table metadataTable = rtsBulkScoringConfig.getMetadataTable();
+                if (metadataTable == null) {
+                    throw new LedpException(LedpCode.LEDP_20028, new String[] { rtsBulkScoringConfig.toString() });
+                }
+                List<Attribute> attributes = metadataTable.getAttributes();
+
+                Set<String> internalPlusMustHaveAttributeNames = new HashSet<>();
+                internalPlusMustHaveAttributeNames.add(InterfaceName.LatticeAccountId.toString());
+                internalPlusMustHaveAttributeNames.add(InterfaceName.InternalId.toString());
+                for (Attribute attribute : attributes) {
+                    if (attribute.isInternalPredictor()) {
+                        internalPlusMustHaveAttributeNames.add(attribute.getName());
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("internalPlusMustHaveAttributeNames is " + internalPlusMustHaveAttributeNames);
+                }
+
+                for (Schema.Field field : fields) {
+                    String fieldName = field.name();
+                    if (internalPlusMustHaveAttributeNames.contains(fieldName)) {
+                        Object fieldValue = avroRecord.get(fieldName) == null //
+                                ? null : avroRecord.get(fieldName).toString();
+                        attributeValues.put(fieldName, fieldValue);
+                    }
+                }
             }
 
+            if (log.isDebugEnabled()) {
+                log.debug("attributeValues is " + attributeValues);
+            }
             Map<String, Map<String, Object>> modelAttributeValuesMap = new HashMap<>();
             for (String modelguid : rtsBulkScoringConfig.getModelGuids()) {
                 modelAttributeValuesMap.put(modelguid, attributeValues);
@@ -606,8 +639,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             while (true) {
                 BulkRecordScoreRequest scoreRequest = null;
                 synchronized (reader) {
-                    scoreRequest = ScoringProcessor.this.getBulkScoreRequest(reader, rtsBulkScoringConfig,
-                            fieldNameMapping);
+                    scoreRequest = ScoringProcessor.this.getBulkScoreRequest(reader, rtsBulkScoringConfig);
+                    if (log.isDebugEnabled()) {
+                        log.debug("scoreRequest is " + scoreRequest);
+                    }
                     if (scoreRequest == null) {
                         break;
                     }
@@ -619,6 +654,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 }
                 List<RecordScoreResponse> scoreResponseList = ScoringProcessor.this.bulkScore(scoreRequest,
                         rtsBulkScoringConfig.getCustomerSpace().toString(), enrichmentEnabledForInternalAttributes);
+
                 log.info(String.format("Scored %d out of %d total records",
                         counter.addAndGet(scoreRequest.getRecords().size()), recordCount));
                 synchronized (dataFileWriter) {
