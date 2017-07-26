@@ -89,6 +89,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
 
     @Autowired
     private BulkMatchPlanner bulkMatchPlanner;
+
     @Autowired
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
@@ -108,7 +109,7 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     }
 
     private MatchCommand submitCascadingBulkMatchWorkflow(MatchInput input, String hdfsPodId, String rootOperationUid) {
-        propDataTenantService.bootstrapServiceTenant();
+        dataCloudTenantService.bootstrapServiceTenant();
         String targetPath = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
         CascadingBulkMatchWorkflowConfiguration.Builder builder = new CascadingBulkMatchWorkflowConfiguration.Builder();
         String queueName = StringUtils.isEmpty(matchQueueName) ? LedpQueueAssigner.getModelingQueueNameForSubmission()

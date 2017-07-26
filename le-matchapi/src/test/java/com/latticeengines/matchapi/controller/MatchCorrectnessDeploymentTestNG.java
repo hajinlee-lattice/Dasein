@@ -45,7 +45,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -267,7 +267,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
         private Future<MatchOutput> singleRun(List<Object> row, ExecutorService executor) {
             final MatchInput input = new MatchInput();
             input.setPredefinedSelection(Predefined.RTS);
-            input.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
+            input.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
             input.setFields(fields);
             input.setData(Collections.singletonList(row));
             input.setDataCloudVersion(dataCloudVersion);
@@ -348,7 +348,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
         private MatchInput constructMatchInput() {
             MatchInput matchInput = new MatchInput();
-            matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
+            matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
             matchInput.setPredefinedSelection(Predefined.RTS);
             AvroInputBuffer inputBuffer = new AvroInputBuffer();
             inputBuffer.setAvroDir(AVRO_DIR);

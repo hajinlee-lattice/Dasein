@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.datacloud.core.service.PropDataTenantService;
+import com.latticeengines.datacloud.core.service.DataCloudTenantService;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
@@ -51,7 +51,7 @@ public class IngestionServiceImpl implements IngestionService {
     private IngestionValidator ingestionValidator;
 
     @Autowired
-    private PropDataTenantService propDataTenantService;
+    private DataCloudTenantService dataCloudTenantService;
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -228,7 +228,7 @@ public class IngestionServiceImpl implements IngestionService {
         for (IngestionProgress progress : progresses) {
             try {
                 if (!serviceTenantBootstrapped) {
-                    propDataTenantService.bootstrapServiceTenant();
+                    dataCloudTenantService.bootstrapServiceTenant();
                     serviceTenantBootstrapped = true;
                 }
                 ApplicationId applicationId = submitWorkflow(progress);

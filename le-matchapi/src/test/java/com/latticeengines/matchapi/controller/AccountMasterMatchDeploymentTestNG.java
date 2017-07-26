@@ -24,10 +24,10 @@ import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.source.impl.AccountMasterLookup;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
@@ -245,7 +245,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
 
     private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema) {
         MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
+        matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setDataCloudVersion(dataCloudVersionEntityMgr.currentApprovedVersionAsString());
         matchInput.setExcludeUnmatchedWithPublicDomain(false);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();

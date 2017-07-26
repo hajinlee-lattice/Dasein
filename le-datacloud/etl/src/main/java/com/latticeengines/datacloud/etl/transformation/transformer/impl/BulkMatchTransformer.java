@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -53,7 +53,7 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
     private MatchInput constructMatchInput(String avroDir, MatchTransformerConfig config) {
         MatchInput matchInput = config.getMatchInput();
         if (matchInput.getTenant() == null) {
-            matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
+            matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
         }
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         inputBuffer.setAvroDir(avroDir);

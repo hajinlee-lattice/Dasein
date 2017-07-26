@@ -1,6 +1,6 @@
 package com.latticeengines.datacloud.core.service;
 
-public interface PropDataTenantService {
+public interface DataCloudTenantService {
 
     void bootstrapServiceTenant();
 

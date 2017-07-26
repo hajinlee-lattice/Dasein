@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
@@ -232,7 +233,7 @@ public class PatchServiceImpl implements PatchService {
 
     private MatchInput prepareMatchInput(MatchKeyTuple keyTuple) {
         MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant(PropDataConstants.PDSERVICE_TENANT));
+        matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_TENANT));
         matchInput.setUseRemoteDnB(true);
         matchInput.setLogLevel(Level.DEBUG);
         matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());

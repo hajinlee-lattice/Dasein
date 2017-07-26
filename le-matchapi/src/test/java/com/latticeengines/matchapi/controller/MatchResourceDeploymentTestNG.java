@@ -33,10 +33,10 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -457,7 +457,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     private MatchInput createAvroBulkMatchInput(boolean useDir, Schema inputSchema, String dataCloudVersion) {
         MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
+        matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setPredefinedSelection(Predefined.RTS);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {

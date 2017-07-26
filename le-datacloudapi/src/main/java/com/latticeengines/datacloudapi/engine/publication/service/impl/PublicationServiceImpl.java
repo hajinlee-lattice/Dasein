@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.datacloud.core.service.PropDataTenantService;
+import com.latticeengines.datacloud.core.service.DataCloudTenantService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -62,7 +62,7 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
     private SourceService sourceService;
 
     @Autowired
-    private PropDataTenantService propDataTenantService;
+    private DataCloudTenantService dataCloudTenantService;
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -147,7 +147,7 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
         for (PublicationProgress progress : publicationProgressService.scanNonTerminalProgresses()) {
             try {
                 if (!serviceTenantBootstrapped) {
-                    propDataTenantService.bootstrapServiceTenant();
+                    dataCloudTenantService.bootstrapServiceTenant();
                     serviceTenantBootstrapped = true;
                 }
                 Publication publication = progress.getPublication();

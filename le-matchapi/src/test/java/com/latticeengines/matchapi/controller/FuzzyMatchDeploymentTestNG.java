@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -370,7 +371,7 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private MatchInput prepareBulkMatchInput(String scenario, boolean useDnBCache) {
         MatchInput input = new MatchInput();
-        input.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
+        input.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
         input.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         input.setCustomSelection(prepareColumnSelection());
         input.setFields(prepareFields(scenario));
