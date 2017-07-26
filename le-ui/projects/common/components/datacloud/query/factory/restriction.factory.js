@@ -1,60 +1,61 @@
 angular.module('common.datacloud.query.factory.restriction', [])
 .factory('BucketRestriction', function() {
-    function BucketRestriction(columnName, objectType, range, attr, bkt) {
-        if (attr === null || attr === undefined) {
-            this.lhs = {
-                columnLookup: {
-                    column_name: columnName,
-                    object_type: objectType || 'LatticeAccount'
+    function BucketRestriction(columnName, objectType, Bkt) {
+
+
+        this.Attr = {
+            'Id': columnName,
+            'Entity': objectType,
+            'Bkt': Bkt
+        };
+        console.log(this.Attr);
+
+        if (Attr === null || Attr === undefined) {
+            this.Attr = objectType + '.' + columnName;
+        } else {
+            this.Attr = Attr;
+        }
+        if (this.Attr.Bkt === null || this.Attr === undefined) {
+            this.Attr.Bkt = oldFormatRangeToBkt(this.Attr.Bkt);
+        } else {
+            this.Attr.Bkt = function(){
+                if (Bkt.Rng === null || Attr === undefined) {
+                    this.Rng = {
+                        'min' : Bkt.Lbl,
+                        'max' : Bkt.Lbl
+                    };
+                } else {
+                    this.Rng = {
+                        'min' : Bkt.Rng[0],
+                        'max' : Bkt.Rng[1]
+                    };
                 }
             };
-            this.attr = objectType + '.' + columnName;
-        } else {
-            this.attr = attr;
-        }
-        if (bkt === null || attr === undefined) {
-            this.bkt = oldFormatRangeToBkt(range);
-            this.range = range;
-        } else {
-            this.bkt = bkt;
-            if (bkt.rng === null || attr === undefined) {
-                this.range = {
-                    'min' : bkt.lbl,
-                    'max' : bkt.lbl
-                };
-            } else {
-                this.range = {
-                    'min' : bkt.rng[0],
-                    'max' : bkt.rng[1]
-                };
-            }
-        }
+        };
+
     }
 
     // used to convert bucket range in old data object
-    function oldFormatRangeToBkt(range) {
-        if (!range || range.is_null_only) {
+    function oldFormatRangeToBkt(Rng) {
+        if (!Rng || Rng.is_null_only) {
             return null;
         }
         
-        if (range.min = range.max) {
+        if (Rng.min = Rng.max) {
             return {
-              'Lbl': range.min
+              'Lbl': Rng.min
             };
         } else {
             return {
-                'Rng': [range.min, range.max]
+                'Rng': [Rng.min, Rng.max]
             };
         }
     }
 
     BucketRestriction.isBucketRestrictionLike = function(bucketRestriction) {
-        return bucketRestriction instanceof BucketRestriction ||
-            (bucketRestriction.hasOwnProperty('bkt') &&
-            bucketRestriction.hasOwnProperty('attr')) ||
-            (bucketRestriction.hasOwnProperty('range') &&
-            bucketRestriction.hasOwnProperty('lhs') &&
-            bucketRestriction.lhs.hasOwnProperty('columnLookup'));
+        return bucketRestriction instanceof BucketRestriction || 
+        (bucketRestriction.hasOwnProperty('Bkt') && bucketRestriction.hasOwnProperty('Attr')) ||
+        (bucketRestriction.hasOwnProperty('Rng') && bucketRestriction.hasOwnProperty('lhs') && bucketRestriction.lhs.hasOwnProperty('columnLookup'));
     };
 
     BucketRestriction.isEqualRange = function (a, b) {
@@ -64,26 +65,26 @@ angular.module('common.datacloud.query.factory.restriction', [])
     };
 
     BucketRestriction.getColumnName = function(bucketRestriction) {
-        if (bucketRestriction.attr === null || bucketRestriction.attr === undefined) {
+        if (bucketRestriction.Attr === null || bucketRestriction.Attr === undefined) {
             return bucketRestriction.lhs.columnLookup.column_name;
         } else {
-            return bucketRestriction.attr.split(".")[1];
+            return bucketRestriction.Attr.split(".")[1];
         }
     };
 
     BucketRestriction.getObjectType = function(bucketRestriction) {
-        if (bucketRestriction.attr === null || bucketRestriction.attr === undefined) {
+        if (bucketRestriction.Attr === null || bucketRestriction.Attr === undefined) {
             if (bucketRestriction.lhs.columnLookup.object_type === 'BucketedAccountMaster') {
-                bucketRestriction.lhs.columnLookup.object_type = 'LatticeAccount'
+                bucketRestriction.lhs.columnLookup.object_type = 'Account'
             }
-            return bucketRestriction.lhs.columnLookup.object_type || 'LatticeAccount';
+            return bucketRestriction.lhs.columnLookup.object_type || 'Account';
         } else {
-            return bucketRestriction.attr.split(".")[0];
+            return bucketRestriction.Attr.split(".")[0];
         }
     };
 
     BucketRestriction.getRange = function(bucketRestriction) {
-        return bucketRestriction.range;
+        return bucketRestriction.Rng;
     };
 
     return BucketRestriction;

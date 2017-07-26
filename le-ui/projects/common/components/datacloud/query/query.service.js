@@ -90,11 +90,15 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.addRestriction = function(attribute) {
+
+
         attribute.resourceType = attribute.resourceType || 'Account';
 
         var attributesFound = this.findAttributes(attribute.columnName);
         var attributes = attributesFound.attributes;
         var groupKey = attributesFound.groupKey;
+
+        console.log(attribute);
 
         var found = false;
         for (var i = 0; i < attributes.length; i++) {
@@ -105,12 +109,10 @@ angular.module('common.datacloud.query.service',[
             }
         }
 
-        console.log(attribute);
-
         if (!found) {
             groupKey = groupKey || 'all';
             this.restriction[groupKey].push({
-                bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.range, attribute.attr, attribute.bkt)
+                bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.Bkt)
             });
         }
 
@@ -137,7 +139,7 @@ angular.module('common.datacloud.query.service',[
         var groupKey = null;
         var attributes = [];
         for (var group in this.restriction) {
-            attributes = this.findAttributesInGroup(group, columnName);
+            attributes = this.findAttributesInGroup(group);
             if (attributes.length > 0) {
                 groupKey = group;
                 break;
@@ -146,14 +148,12 @@ angular.module('common.datacloud.query.service',[
         return { groupKey: groupKey, attributes: attributes };
     };
 
-    this.findAttributesInGroup = function(groupKey, columnName) {
+    this.findAttributesInGroup = function(groupKey) {
         var group = this.restriction[groupKey];
         var results = [];
 
         for (var i = 0; i < group.length; i++) {
-            if (group[i].bucketRestriction.lhs.columnLookup.column_name === columnName) {
-                results.push({index: i, bucketRestriction: group[i].bucketRestriction });
-            }
+            results.push({index: i, bucketRestriction: group[i].bucketRestriction });
         }
 
         return results;
@@ -219,13 +219,11 @@ angular.module('common.datacloud.query.service',[
 
     this.GetCountByQuery = function(resourceType, query) {
         var defer = $q.defer();
-
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/count',
             data: query
         }).success(function(response) {
-            console.log(response);
             defer.resolve(response);
         }).error(function(error) {
             defer.resolve({error: error});

@@ -317,9 +317,12 @@ angular
                             segment = {
                                 'name': 'segment' + ts,
                                 'display_name': 'segment' + ts,
-                                'simple_restriction': QueryStore.getRestriction()
+                                'frontend_restriction': QueryStore.getRestriction()
                             };
                         }
+
+                        // console.log(segment);
+
                         return SegmentService.CreateOrUpdateSegment(segment);
                     };
 
