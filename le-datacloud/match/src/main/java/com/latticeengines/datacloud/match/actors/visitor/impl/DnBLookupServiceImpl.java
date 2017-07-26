@@ -99,6 +99,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Value("${datacloud.dnb.status.frequency:120}")
     private int statusFrequency;
 
+    @Value("${datacloud.dnb.bulk.redirect.realtime.threshold:100}")
+    private int bulkToRealtimeThreshold;
+
     @Autowired
     private DnBRealTimeLookupService dnbRealTimeLookupService;
 
@@ -185,6 +188,17 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     }
 
     @Override
+    protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
+            String returnAddress) {
+        if (!isBatchMode()) {
+            DnBMatchContext result = (DnBMatchContext) lookupFromService(lookupRequestId, request);
+            sendResponse(lookupRequestId, result, returnAddress);
+        } else {
+            acceptBulkLookup(lookupRequestId, request, returnAddress);
+        }
+    }
+
+    @Override
     protected Object lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
         MatchKeyTuple matchKeyTuple = (MatchKeyTuple) request.getInputData();
         DnBMatchContext context = new DnBMatchContext();
@@ -254,25 +268,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
         }
         if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
-            context.setCalledRemoteDnB(true);
-            context.setRequestTime(new Date());
-            Callable<DnBMatchContext> task = createCallableForRemoteDnBApiCall(context);
-            Future<DnBMatchContext> dnbFuture = dnbDataSourceServiceExecutor.submit(task);
-
-            try {
-                context = dnbFuture.get(dnbApiCallMaxWait, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                log.error(e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
-
-            context.setResponseTime(new Date());
-            validateDuns(context);
-            dnbMatchResultValidator.validate(context);
-            DnBCache dnBCache = dnbCacheService.addCache(context);
-            if (dnBCache != null) {
-                context.setCacheId(dnBCache.getId());
-            }
+            context = dnbRealtimeLookup(context);
             readyToReturn = true;
         }
 
@@ -283,17 +279,6 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         }
         context.setDuration(System.currentTimeMillis() - request.getTimestamp());
         return context;
-    }
-
-    @Override
-    protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
-            String returnAddress) {
-        if (!isBatchMode()) {
-            DnBMatchContext result = (DnBMatchContext) lookupFromService(lookupRequestId, request);
-            sendResponse(lookupRequestId, result, returnAddress);
-        } else {
-            acceptBulkLookup(lookupRequestId, request, returnAddress);
-        }
     }
 
     protected void acceptBulkLookup(String lookupRequestId, DataSourceLookupRequest request, String returnAddress) {
@@ -393,6 +378,43 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         }
     }
 
+    private DnBMatchContext dnbRealtimeLookup(DnBMatchContext context) {
+        context.setCalledRemoteDnB(true);
+        context.setRequestTime(new Date());
+        Callable<DnBMatchContext> task = createCallableForRemoteDnBApiCall(context);
+        Future<DnBMatchContext> dnbFuture = dnbDataSourceServiceExecutor.submit(task);
+
+        try {
+            context = dnbFuture.get(dnbApiCallMaxWait, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+
+        context.setResponseTime(new Date());
+        validateDuns(context);
+        dnbMatchResultValidator.validate(context);
+        DnBCache dnBCache = dnbCacheService.addCache(context);
+        if (dnBCache != null) {
+            context.setCacheId(dnBCache.getId());
+        }
+        return context;
+    }
+
+    private void dnbBatchRedirectToRealtime(DnBBatchMatchContext batchContext) {
+        log.info(String.format("Batch request %s, size=%d, smaller than threshold %d, redirecting to realtime lookup..",
+                batchContext.getRootOperationUid(), batchContext.getContexts().size(), bulkToRealtimeThreshold));
+        long duration = 0;
+        for (DnBMatchContext context : batchContext.getContexts().values()) {
+            dnbRealtimeLookup(context);
+            duration += context.getDuration() != null ? context.getDuration() : 0;
+        }
+        batchContext.setDuration(duration == 0 ? null : duration);
+        batchContext.setDnbCode(DnBReturnCode.OK);
+        log.info(String.format("Batch request %s finished using realtime lookup", batchContext.getRootOperationUid()));
+        processBulkMatchResult(batchContext, true, false);
+    }
+
     private void dnbBatchDispatchRequest() {
         try {
             if (unsubmittedBatches.isEmpty()) {
@@ -422,6 +444,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
             // Dispatch batch requests
             for (DnBBatchMatchContext batchContext : batchesToSubmit) {
+                if (batchContext.getContexts().size() <= bulkToRealtimeThreshold) {
+                    Runnable task = createBatchToRealtimeRunnable(batchContext);
+                    dnbDataSourceServiceExecutor.execute(task);
+                    continue;
+                }
                 try {
                     batchContext = dnbBulkLookupDispatcher.sendRequest(batchContext);
                 } catch (Exception ex) {
@@ -451,7 +478,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
             // Process failed batch requests
             for (DnBBatchMatchContext batchContext : failedBatches) {
-                processBulkMatchResult(batchContext, false);
+                processBulkMatchResult(batchContext, false, true);
             }
         } catch (Exception ex) {
             log.error("Exception in dispatching dnb batch requests", ex);
@@ -511,7 +538,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
             // Process failed batch requests
             for (DnBBatchMatchContext batchContext : failedBatches) {
-                processBulkMatchResult(batchContext, false);
+                processBulkMatchResult(batchContext, false, true);
             }
             // Retry batch requests
             for (DnBBatchMatchContext retryBatch : retryBatches) {
@@ -564,11 +591,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             }
             // Process failed batch requests
             for (DnBBatchMatchContext batchContext : failedBatches) {
-                processBulkMatchResult(batchContext, false);
+                processBulkMatchResult(batchContext, false, true);
             }
             // Process success batch requests
             for (DnBBatchMatchContext batchContext : successBatches) {
-                processBulkMatchResult(batchContext, true);
+                processBulkMatchResult(batchContext, true, true);
             }
         } catch (Exception ex) {
             log.error("Exception in fetching dnb batch request result", ex);
@@ -582,7 +609,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         unsubmittedBatches.add(0, retryContext);
     }
 
-    private void processBulkMatchResult(DnBBatchMatchContext batchContext, boolean success) {
+    private void processBulkMatchResult(DnBBatchMatchContext batchContext, boolean success,
+            boolean postProcessDnBContexts) {
         List<DnBMatchHistory> dnBMatchHistories = new ArrayList<>();
         Date finishTime = new Date();
         for (String lookupRequestId : batchContext.getContexts().keySet()) {
@@ -596,15 +624,17 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 continue;
             }
             DnBMatchContext context = batchContext.getContexts().get(lookupRequestId);
-            context.setCalledRemoteDnB(true);
-            context.setRequestTime(batchContext.getTimestamp());
-            context.setResponseTime(finishTime);
-            if (!success) {
-                context.setDnbCode(batchContext.getDnbCode());
-            } else {
-                validateDuns(context);
-                dnbMatchResultValidator.validate(context);
-                dnbCacheService.addCache(context);
+            if (postProcessDnBContexts) {
+                context.setCalledRemoteDnB(true);
+                context.setRequestTime(batchContext.getTimestamp());
+                context.setResponseTime(finishTime);
+                if (!success) {
+                    context.setDnbCode(batchContext.getDnbCode());
+                } else {
+                    validateDuns(context);
+                    dnbMatchResultValidator.validate(context);
+                    dnbCacheService.addCache(context);
+                }
             }
             removeReq(lookupRequestId);
             sendResponse(lookupRequestId, context, returnAddr);
@@ -613,10 +643,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         dnbMatchCommandService.dnbMatchCommandUpdate(batchContext);
         writeDnBMatchHistory(dnBMatchHistories);
         log.info(String.format(
-                "Finished processing DnB batch %s (StartTime=%s, FinishTime=%s, Size=%d, Duration=%d mins)",
-                batchContext.getServiceBatchId(), batchContext.getTimestamp(), finishTime,
-                batchContext.getContexts().size(),
-                (finishTime.getTime() - batchContext.getTimestamp().getTime()) / 60 / 1000));
+                "Finished processing DnB batch: ServiceBatchId=%s RootOperationUID=%s, StartTime=%s, FinishTime=%s, Size=%d, Duration=%d mins",
+                batchContext.getServiceBatchId(), batchContext.getRootOperationUid(), batchContext.getTimestamp(),
+                finishTime, batchContext.getContexts().size(),
+                (finishTime.getTime() - batchContext.getTimestamp().getTime()) / 60000));
     }
 
     /**
@@ -693,6 +723,16 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     log.error(ex.getMessage(), ex);
                 }
                 return returnedContext;
+            }
+        };
+        return task;
+    }
+
+    private Runnable createBatchToRealtimeRunnable(final DnBBatchMatchContext batchContext) {
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                dnbBatchRedirectToRealtime(batchContext);
             }
         };
         return task;

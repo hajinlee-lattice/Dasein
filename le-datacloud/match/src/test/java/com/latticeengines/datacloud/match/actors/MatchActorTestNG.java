@@ -100,6 +100,8 @@ public class MatchActorTestNG extends DataCloudMatchFunctionalTestNGBase {
         matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersion().getVersion());
         matchTravelerContext.setMatchInput(matchInput);
         msg.setMatchTravelerContext(matchTravelerContext);
+        matchInput.setUseDnBCache(false);
+        matchInput.setUseRemoteDnB(true);
 
         Response result = (Response) sendMessageToActor(msg, DnbLookupActor.class, true);
         Assert.assertNotNull(result);

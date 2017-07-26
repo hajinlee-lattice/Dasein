@@ -36,6 +36,9 @@ public class DnbMatchCommandServiceImpl implements DnbMatchCommandService {
     @Override
     public void dnbMatchCommandUpdate(DnBBatchMatchContext dnbMatchContext) {
         try {
+            if (dnbMatchContext.getServiceBatchId() == null) {
+                return;
+            }
             DnBMatchCommand dnbMatchCommand = dnbMatchEntityMgr.findRecordByField("BatchID",
                     dnbMatchContext.getServiceBatchId());
             // Initialization
