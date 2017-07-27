@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
@@ -20,20 +19,16 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
         super("/dante/talkingpoints");
     }
 
-    public SimpleBooleanResponse createOrUpdate(List<TalkingPointDTO> talkingPoints, String customerSpace) {
+    @SuppressWarnings("unchecked")
+    public List<TalkingPointDTO> createOrUpdate(List<TalkingPointDTO> talkingPoints, String customerSpace) {
         String url = constructUrl("?customerSpace=" + customerSpace);
         setErrorHandler(new PostResponseErrorHandler());
-        return post("createOrUpdate", url, talkingPoints, SimpleBooleanResponse.class);
+        return post("createOrUpdate", url, talkingPoints, List.class);
     }
 
-    public SimpleBooleanResponse delete(String name) {
+    public void delete(String name) {
         String url = constructUrl("/" + name);
-        try {
-            delete("delete", url);
-            return SimpleBooleanResponse.successResponse();
-        } catch (Exception e) {
-            return SimpleBooleanResponse.failedResponse(e);
-        }
+        delete("delete", url);
     }
 
     @SuppressWarnings("unchecked")
@@ -56,9 +51,9 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
     }
 
     @SuppressWarnings("unchecked")
-    public SimpleBooleanResponse publish(String playName, String customerSpace) {
+    public void publish(String playName, String customerSpace) {
         String url = constructUrl("/publish" + "?playName=" + playName + "&customerSpace=" + customerSpace);
-        return post("publish", url, null, SimpleBooleanResponse.class);
+        post("publish", url, null, String.class);
     }
 
     @SuppressWarnings("unchecked")

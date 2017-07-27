@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.dante.service.TalkingPointService;
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
@@ -38,10 +37,9 @@ public class TalkingPointResource implements TalkingPointInterface {
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "Create/Update a Talking Point. PID value of null or zero will create a TP.")
-    public SimpleBooleanResponse createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints,
+    public List<TalkingPointDTO> createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints,
             @RequestParam("customerSpace") String customerSpace) {
-        talkingPointService.createOrUpdate(talkingPoints, customerSpace);
-        return SimpleBooleanResponse.successResponse();
+        return talkingPointService.createOrUpdate(talkingPoints, customerSpace);
     }
 
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
@@ -61,8 +59,7 @@ public class TalkingPointResource implements TalkingPointInterface {
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get the resources needed to preview a Dante Talking Point")
-    public DantePreviewResources getPreviewResources(
-            @RequestParam("customerSpace") String customerSpace) {
+    public DantePreviewResources getPreviewResources(@RequestParam("customerSpace") String customerSpace) {
         return talkingPointService.getPreviewResources(customerSpace);
     }
 
@@ -77,21 +74,15 @@ public class TalkingPointResource implements TalkingPointInterface {
     @RequestMapping(value = "/publish", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Publish given play's Talking Points to dante")
-    public SimpleBooleanResponse publish(@RequestParam("playName") String playName,
+    public void publish(@RequestParam("playName") String playName,
             @RequestParam("customerSpace") String customerSpace) {
-        try {
-            talkingPointService.publish(playName, customerSpace);
-            return SimpleBooleanResponse.successResponse();
-        } catch (Exception e) {
-            return SimpleBooleanResponse.failedResponse(e);
-        }
+        talkingPointService.publish(playName, customerSpace);
     }
 
     @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete a Talking Point ")
-    public SimpleBooleanResponse delete(@PathVariable String talkingPointName) {
+    public void delete(@PathVariable String talkingPointName) {
         talkingPointService.delete(talkingPointName);
-        return SimpleBooleanResponse.successResponse();
     }
 }

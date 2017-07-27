@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -33,11 +32,11 @@ public class DanteAccountResource {
     @RequestMapping(value = "/{count}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get a Dante Talking Point ")
-    public ResponseDocument<List<DanteAccount>> getAccounts(@PathVariable int count) {
+    public List<DanteAccount> getAccounts(@PathVariable int count) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        return ResponseDocument.successResponse(danteAccountProxy.getAccounts(count, customerSpace.toString()));
+        return danteAccountProxy.getAccounts(count, customerSpace.toString());
     }
 }

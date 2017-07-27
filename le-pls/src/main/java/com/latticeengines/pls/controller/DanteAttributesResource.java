@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -30,12 +29,12 @@ public class DanteAttributesResource {
     private static final Logger log = LoggerFactory.getLogger(DanteAttributesResource.class);
 
     @Autowired
-    DanteAttributesProxy danteAttributesProxy;
+    private DanteAttributesProxy danteAttributesProxy;
 
     @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get account attributes for this tenant")
-    public ResponseDocument<Map<String, String>> getAccountAttributes() {
+    public Map<String, String> getAccountAttributes() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_38008);
@@ -46,7 +45,7 @@ public class DanteAttributesResource {
     @RequestMapping(value = "/recommendationattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "get recommendation attributes")
-    public ResponseDocument<Map<String, String>> getRecommendationAttributes() {
+    public Map<String, String> getRecommendationAttributes() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_38008);

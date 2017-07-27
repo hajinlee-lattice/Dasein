@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.dante.service.DanteAttributeService;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.network.exposed.dante.DanteAttributesInterface;
 
 import io.swagger.annotations.Api;
@@ -30,16 +29,14 @@ public class DanteAttributeResource implements DanteAttributesInterface {
     @RequestMapping(value = "/accountattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get account attributes for this tenant")
-    public ResponseDocument<Map<String, String>> getAccountAttributes(
-            @RequestParam("customerSpace") String customerSpace) {
-        return ResponseDocument.successResponse(danteAttributeService.getAccountAttributes(customerSpace));
+    public Map<String, String> getAccountAttributes(@RequestParam("customerSpace") String customerSpace) {
+        return danteAttributeService.getAccountAttributes(customerSpace);
     }
 
     @RequestMapping(value = "/recommendationattributes", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get recommendation attributes")
-    public ResponseDocument<Map<String, String>> getRecommendationAttributes(
-            @RequestParam("customerSpace") String customerSpace) {
-        return ResponseDocument.successResponse(danteAttributeService.getRecommendationAttributes(customerSpace));
+    public Map<String, String> getRecommendationAttributes(@RequestParam("customerSpace") String customerSpace) {
+        return danteAttributeService.getRecommendationAttributes(customerSpace);
     }
 }

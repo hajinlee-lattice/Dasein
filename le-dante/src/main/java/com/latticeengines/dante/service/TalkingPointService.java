@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 
 public interface TalkingPointService {
 
-    void createOrUpdate(List<TalkingPointDTO> dtp, String customerSpace);
+    List<TalkingPointDTO> createOrUpdate(List<TalkingPointDTO> dtp, String customerSpace);
 
     TalkingPointDTO findByName(String name);
 

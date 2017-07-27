@@ -1,76 +1,123 @@
 package com.latticeengines.dante.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import com.latticeengines.dante.testFramework.DanteTestNGBase;
 
-import com.latticeengines.dante.service.TalkingPointService;
+public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
 
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
-public class TalkingPointServiceImplTestNG extends AbstractTestNGSpringContextTests {
-
-    @Autowired
-    private TalkingPointService talkingPointService;
-
-    // @Autowired
-    // private DanteTalkingPointEntityMgr danteTalkingPointEntityMgr;
-    //
-    // private final String externalID = "talkingPointFTestExtID";
-    //
-    // @BeforeClass(groups = "functional")
-    // public void setup() {
-    // DanteTalkingPoint dtp =
-    // danteTalkingPointEntityMgr.findByExternalID(externalID);
-    // if (dtp != null)
-    // danteTalkingPointEntityMgr.delete(dtp);
-    // }
-    //
-    // @Test(groups = "functional")
-    // public void testCreateFromService() {
-    // List<DanteTalkingPoint> dtps = new ArrayList<>();
-    //
-    // DanteTalkingPoint dtp = new DanteTalkingPoint();
-    // dtp.setCustomerID("test");
-    // dtp.setExternalID(externalID);
-    // dtp.setPlayExternalID("testFPlayExtID");
-    // dtp.setValue("Some Talking Point");
-    //
-    // dtps.add(dtp);
-    //
-    // talkingPointService.createOrUpdate(dtps);
-    // Assert.assertNotNull(dtp.getCreationDate(), "Failure Cause: Creation Date
-    // is NULL");
-    // Assert.assertNotNull(dtp.getLastModificationDate(), "Failure Cause:
-    // LastModificationDate is NULL");
-    //
-    // Date oldLastModificationDate = dtp.getLastModificationDate();
-    // dtp.setValue("New Talking Point Test");
-    //
-    // talkingPointService.createOrUpdate(dtps);
-    //
-    // dtp = talkingPointService.findByExternalID(externalID);
-    // Assert.assertNotNull(dtp,
-    // "Failure Cause: Talking Point not found by extrenal ID where externalID =
-    // " + externalID);
-    // Assert.assertEquals(dtp.getValue(), "New Talking Point Test", "Failure
-    // Cause: Talking Point value incorrect");
-    // Assert.assertNotEquals(dtp.getLastModificationDate(),
-    // oldLastModificationDate,
-    // "Failure Cause: Lastmodification date not updated by createOrUpdate()");
-    //
-    // dtps = talkingPointService.findAllByPlayID("testFPlayExtID");
-    //
-    // Assert.assertEquals(dtps.size(), 1, "Failure Cause: Talking Points not
-    // found by findByPlayID");
-    //
-    // danteTalkingPointEntityMgr.delete(dtp);
-    //
-    // dtp = danteTalkingPointEntityMgr.findByField("External_ID", externalID);
-    // Assert.assertNull(dtp, "Failure Cause: Talking point was not deleted");
-    // }
+//    @Autowired
+//    @InjectMocks
+//    private TalkingPointService talkingPointService;
+//
+//    @Autowired
+//    private TalkingPointEntityMgr danteTalkingPointEntityMgr;
+//
+//    @Autowired
+//    private TestPlayDao testPlayDao;
+//
+//    @Autowired
+//    protected SessionFactory sessionFactory;
+//
+//    @Mock
+//    private InternalResourceRestApiProxy internalResourceRestApiProxy;
+//
+//    private final String externalID = "talkingPointFTestExtID";
+//
+//    private static final String PLAY_DISPLAY_NAME = "Test TP Plays hard";
+//    private static final String SEGMENT_NAME = "testTPSegment";
+//    private static final String CREATED_BY = "lattice@lattice-engines.com";
+//    private Play testPlay;
+//
+//    @BeforeClass(groups = "functional")
+//    public void setup() {
+//        testPlay = createTestPlay();
+//        initMocks();
+//
+//
+//    }
+//
+//    private void initMocks() {
+//        doReturn(testPlay)
+//                .when(internalResourceRestApiProxy)
+//                .findPlayByName(CustomerSpace.parse(mainTestTenant.getId()), testPlay.getName());
+//    }
+//
+//    @Test(groups = "functional")
+//    public void testCreateFromService() {
+//        List<TalkingPointDTO> dtps = new ArrayList<>();
+//
+//        TalkingPointDTO tp = new TalkingPointDTO();
+//        tp.setPlayName(testPlay.getName());
+//        tp.setOffset(1);
+//        tp.setTitle("Test TP Title");
+//        tp.setContent("PLS Deployment Test Talking Point no 1");
+//        dtps.add(tp);
+//
+//        talkingPointService.createOrUpdate(dtps, mainTestTenant.getId());
+//
+//        TalkingPointService spiedAnalyticPipelineService = spy((TalkingPointServiceImpl) talkingPointService);
+//        // dtp = talkingPointService.findByExternalID(externalID);
+//        // Assert.assertNotNull(dtp,
+//        // "Failure Cause: Talking Point not found by extrenal ID where
+//        // externalID =
+//        // " + externalID);
+//        // Assert.assertEquals(dtp.getValue(), "New Talking Point Test",
+//        // "Failure
+//        // Cause: Talking Point value incorrect");
+//        // Assert.assertNotEquals(dtp.getLastModificationDate(),
+//        // oldLastModificationDate,
+//        // "Failure Cause: Lastmodification date not updated by
+//        // createOrUpdate()");
+//        //
+//        // dtps = talkingPointService.findAllByPlayID("testFPlayExtID");
+//        //
+//        // Assert.assertEquals(dtps.size(), 1, "Failure Cause: Talking Points
+//        // not
+//        // found by findByPlayID");
+//        //
+//        // danteTalkingPointEntityMgr.delete(dtp);
+//        //
+//        // dtp = danteTalkingPointEntityMgr.findByField("External_ID",
+//        // externalID);
+//        // Assert.assertNull(dtp, "Failure Cause: Talking point was not
+//        // deleted");
+//
+//        deletePlay(testPlay);
+//    }
+//
+//    private void deletePlay(Play play) {
+//        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+//                PlatformTransactionManager.class);
+//        TransactionTemplate tx = new TransactionTemplate(ptm);
+//        tx.execute(new TransactionCallbackWithoutResult() {
+//            public void doInTransactionWithoutResult(TransactionStatus status) {
+//                testPlayDao.create(play);
+//            }
+//        });
+//    }
+//
+//    private Play createTestPlay() {
+//        Play play = new Play();
+//        MetadataSegment segment = new MetadataSegment();
+//        segment.setDisplayName(SEGMENT_NAME);
+//        play.setDisplayName(PLAY_DISPLAY_NAME);
+//        play.setSegment(segment);
+//        play.setSegmentName(SEGMENT_NAME);
+//        play.setCreatedBy(CREATED_BY);
+//        play.setTenant(mainTestTenant);
+//        play.setTenantId(mainTestTenant.getPid());
+//        play.setLastUpdatedTimestamp(new Date());
+//        play.setTimestamp(new Date());
+//
+//        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+//                PlatformTransactionManager.class);
+//        TransactionTemplate tx = new TransactionTemplate(ptm);
+//        tx.execute(new TransactionCallbackWithoutResult() {
+//            public void doInTransactionWithoutResult(TransactionStatus status) {
+//                testPlayDao.create(play);
+//            }
+//        });
+//        return play;
+//    }
 
     // @Test(groups = "functional")
     // public void testPublish() {

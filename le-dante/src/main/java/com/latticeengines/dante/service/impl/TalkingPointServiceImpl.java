@@ -1,5 +1,6 @@
 package com.latticeengines.dante.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     private static final Logger log = LoggerFactory.getLogger(TalkingPointServiceImpl.class);
 
     @Value("${common.dante.url}")
-    private String danteUrl; // TODO: correct for envs
+    private String danteUrl;
 
     @Value("${common.playmaker.url}")
     private String playmakerApiUrl;
@@ -59,10 +60,10 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
-    public void createOrUpdate(List<TalkingPointDTO> tps, String customerSpace) {
+    public List<TalkingPointDTO> createOrUpdate(List<TalkingPointDTO> tps, String customerSpace) {
         if (tps == null || tps.size() < 1) {
-            log.info("Attempted to update or creat empty set of talking points");
-            return;
+            log.info("Attempted to update or create empty set of talking points");
+            return new ArrayList<>();
         }
 
         if (tps.stream().anyMatch(x -> !x.getPlayName().equals(tps.get(0).getPlayName()))) {
@@ -87,6 +88,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
                 TalkingPoint tp = tpdto.convertToTalkingPoint(play);
                 talkingPointEntityMgr.createOrUpdate(tp);
             }
+            return findAllByPlayName(play.getName());
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new LedpException(LedpCode.LEDP_38002);
