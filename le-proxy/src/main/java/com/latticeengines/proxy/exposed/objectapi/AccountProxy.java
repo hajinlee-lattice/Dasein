@@ -53,13 +53,14 @@ public class AccountProxy extends MicroserviceRestApiProxy implements AccountInt
     }
 
     public DataPage getAccounts(String customerSpace, Restriction restriction, Integer offset, Integer pageSize,
-            DataRequest dataRequest) {
+            DataRequest dataRequest, BusinessEntity businessEntiity, String[] fields) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         PageFilter pageFilter = new PageFilter(offset, pageSize);
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setFrontEndRestriction(ReverseQueryTranslator.translateRestriction(restriction));
         frontEndQuery.setPageFilter(pageFilter);
         Query query = QueryTranslator.translate(frontEndQuery, null);
+        query.addLookups(businessEntiity, fields);
         return entityProxy.getData(customerSpace, query);
     }
 }

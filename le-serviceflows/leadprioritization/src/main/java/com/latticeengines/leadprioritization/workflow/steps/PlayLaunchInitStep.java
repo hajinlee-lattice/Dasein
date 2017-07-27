@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -40,6 +42,8 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStep.class);
+
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -91,6 +95,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             Restriction segmentRestrictionQuery = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
                     segmentName);
 
+            log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestrictionQuery));
+
             executeLaunchActivity(tenant, playLauch, config, segmentRestrictionQuery);
 
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
@@ -119,6 +125,9 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
             log.info("Number of required loops: " + numberOfLoops + ", with pageSize: " + pageSize);
 
+            String[] fields = new String[] { "Zip", "AccountId", "External_ID", "SalesforceAccountID",
+                    "TotalMonetaryValue", "DisplayName", "CrmAccount_External_ID" };
+
             long alreadyReadAccounts = 0;
 
             for (int loopId = 0; loopId < numberOfLoops; loopId++) {
@@ -126,7 +135,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
                 int expectedPageSize = (int) Math.min(pageSize * 1L, (segmentAccountsCount - alreadyReadAccounts));
                 DataPage accountPage = accountProxy.getAccounts(tenant.getId(), segmentRestrictionQuery,
-                        (int) alreadyReadAccounts, expectedPageSize, dataRequest);
+                        (int) alreadyReadAccounts, expectedPageSize, dataRequest, BusinessEntity.Account, fields);
 
                 log.info("Got #" + accountPage.getData().size() + " elements in this loop");
 
