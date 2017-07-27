@@ -12,9 +12,9 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -117,7 +117,8 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
     }
 
     @Override
-    protected Schema getTargetSchema(Table result, BucketEncodeParameters parameters, List<Schema> baseAvscSchemas) {
+    protected Schema getTargetSchema(Table result, BucketEncodeParameters parameters, BucketEncodeConfig configuration,
+            List<Schema> baseAvscSchemas) {
         String extractPath = result.getExtracts().get(0).getPath();
         String glob;
         if (extractPath.endsWith(".avro")) {

@@ -21,13 +21,15 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TblDrivenFuncConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("mapAttributeFlow")
+@Component(MapAttributeFlow.BEAN_NAME)
 public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapAttributeConfig.MapFunc> {
 
     private static final Logger log = LoggerFactory.getLogger(MapAttributeFlow.class);
 
     private static final String JOIN_KEY_PREFIX = "LDC_AM_JOINKEY_";
     private static final String JOIN_KEY_SUFFIX = "_";
+
+    public static final String BEAN_NAME = "mapAttributeFlow";
 
     public static final String MAP_TRANSFORMER = "mapAttribute";
     public static final String DERIVE_TRANSFORMER = "deriveAttribute";

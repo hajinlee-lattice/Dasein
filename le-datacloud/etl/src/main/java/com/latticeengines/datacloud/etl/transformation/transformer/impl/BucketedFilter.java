@@ -63,7 +63,8 @@ public class BucketedFilter extends AbstractDataflowTransformer<BucketedFilterCo
     }
 
     @Override
-    protected Schema getTargetSchema(Table result, FilterBucketedParameters parameters, List<Schema> baseAvscSchemas) {
+    protected Schema getTargetSchema(Table result, FilterBucketedParameters parameters,
+            BucketedFilterConfig configuration, List<Schema> baseAvscSchemas) {
         if (baseAvscSchemas != null) {
             Schema schema = baseAvscSchemas.get(0);
             if (schema != null) {

@@ -10,4 +10,6 @@ public interface DataCloudVersionService {
     DataCloudVersion latestApprovedForMajorVersion(String majorVersion);
 
     DataCloudVersion currentApprovedVersion();
+
+    String nextMinorVersion(String version);
 }

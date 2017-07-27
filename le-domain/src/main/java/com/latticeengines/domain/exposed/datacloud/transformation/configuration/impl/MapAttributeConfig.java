@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MapAttributeConfig extends TblDrivenTransformerConfig {
 
+    @JsonProperty("DataCloudVersion")
+    private String dataCloudVersion;
+
     @JsonProperty("Seed")
     private String seed;
 
@@ -14,6 +17,14 @@ public class MapAttributeConfig extends TblDrivenTransformerConfig {
 
     @JsonProperty("JoinConfigs")
     private List<JoinConfig> joinConfigs;
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
 
     public String getSeed() {
         return seed;

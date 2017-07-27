@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -16,11 +17,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.MapAttributeFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.MapAttributeTransformer;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MapAttributeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -50,7 +53,10 @@ public class AccountMasterRebuildRefreshTestNG
     private GeneralSource dnb = new GeneralSource("DnBCacheSeed");
 
     private Map<String[], Map<String, String[]>> keyMap;    // ams keys -> (source -> keys)
-    private Map<String[], Map<String, String[]>> keyMapRefresh;    // am keys -> (source -> keys)
+    private Map<String[], Map<String, String[]>> keyMapRefresh;    // am keys -> (source -> keys) 
+
+    @Autowired
+    private DataCloudVersionService dataCloudVersionService;
 
     @Test(groups = "functional")
     public void testTransformation() {
@@ -62,6 +68,7 @@ public class AccountMasterRebuildRefreshTestNG
         confirmResultFile(progress);
         confirmIntermediateSource(source, VERSION1);
         confirmIntermediateSource(source, VERSION2);
+        confirmSchema();
         cleanupProgressTables();
     }
 
@@ -404,6 +411,15 @@ public class AccountMasterRebuildRefreshTestNG
             Assert.assertTrue(equals(record.get("SemrushRank"), expected[14]));
             Assert.assertTrue(equals(record.get("SALES_VOLUME_US_DOLLARS"), expected[15]));
         }
+    }
+
+    private void confirmSchema() {
+        Schema rebuildSchema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source, VERSION1);
+        Schema refreshSchema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(source, VERSION2);
+        String currentVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+        String nextVersion = dataCloudVersionService.nextMinorVersion(currentVersion);
+        Assert.assertEquals(rebuildSchema.getProp(MapAttributeTransformer.DATA_CLOUD_VERSION), nextVersion);
+        Assert.assertEquals(refreshSchema.getProp(MapAttributeTransformer.DATA_CLOUD_VERSION), currentVersion);
     }
 
     @Override

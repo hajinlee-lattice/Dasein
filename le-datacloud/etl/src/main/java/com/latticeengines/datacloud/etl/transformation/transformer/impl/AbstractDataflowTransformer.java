@@ -151,7 +151,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             Table result = dataFlowService.executeDataFlow(step, getDataFlowBeanName(), parameters, workflowDir);
             step.setCount(result.getCount());
             List<Schema> baseSchemas = getBaseSourceSchemas(step);
-            step.setTargetSchema(getTargetSchema(result, parameters, baseSchemas));
+            step.setTargetSchema(getTargetSchema(result, parameters, configuration, baseSchemas));
             postDataFlowProcessing(workflowDir, parameters, configuration);
             updateStepCount(step, workflowDir);
         } catch (Exception e) {
@@ -240,13 +240,14 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return false;
     }
 
-    protected Schema getTargetSchema(Table result, P parameters, List<Schema> baseSchemas) {
+    protected Schema getTargetSchema(Table result, P parameters, T configuration, List<Schema> baseSchemas) {
         return null;
     }
 
     protected void preDataFlowProcessing(TransformStep step, String workflowDir, P parameters, T configuration) {}
 
-    protected void postDataFlowProcessing(String workflowDir, P parameters, T configuration) {}
+    protected void postDataFlowProcessing(String workflowDir, P parameters, T configuration) {
+    }
 
     protected void updateStepCount(TransformStep step, String workflowDir) {
     }

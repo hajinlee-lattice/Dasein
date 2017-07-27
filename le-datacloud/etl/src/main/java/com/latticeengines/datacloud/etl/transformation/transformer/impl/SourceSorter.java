@@ -20,15 +20,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -38,6 +37,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.Sort;
+import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.dataflow.SorterParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
@@ -103,7 +103,8 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     }
 
     @Override
-    protected Schema getTargetSchema(Table result, SorterParameters parameters, List<Schema> baseAvscSchemas) {
+    protected Schema getTargetSchema(Table result, SorterParameters parameters, SorterConfig config,
+            List<Schema> baseAvscSchemas) {
         Schema targetAVSCSchema = null;
         if (baseAvscSchemas != null) {
             Schema schema = baseAvscSchemas.get(0);
@@ -134,6 +135,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
         return AvroUtils.removeFields(schema, SORTED_PARTITION);
     }
 
+    @Override
     protected void postDataFlowProcessing(String workflowDir, SorterParameters paramters, SorterConfig configuration) {
         if (paramters.getPartitions() == 1) {
             if (Boolean.TRUE.equals(configuration.getCompressResult())) {
