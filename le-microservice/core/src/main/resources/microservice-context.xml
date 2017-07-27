@@ -23,5 +23,6 @@
 
     <import resource="classpath:monitor-aspects-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
+    <import resource="classpath:monitor-alerts-context.xml"/>
 
 </beans>
