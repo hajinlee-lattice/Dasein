@@ -168,10 +168,18 @@ app.directive('mainNav', function(){
                                 $scope.errorMsg = 'Emails is required.';
                                 $scope.isValid = false;
                                 return false;
-                            } else {
-                                $scope.errorMsg = '';
-                                $scope.isValid = true;
                             }
+                            var emails = $scope.emails.trim().split(",");
+                            for (var i = 0; i < emails.length; i++) {
+                                var email = emails[i];
+                                if(email.trim() !== '' && email.indexOf("lattice-engines") === -1) {
+                                    $scope.errorMsg = 'User '+ email +' is not a lattice user. Only lattice user is allowed';
+                                    $scope.isValid = false;
+                                    return false;
+                                }
+                            }
+                            $scope.errorMsg = '';
+                            $scope.isValid = true;
                             return true;
                         };
 
