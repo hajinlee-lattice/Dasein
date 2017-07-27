@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
@@ -46,10 +47,20 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         Table metaTable = new Table();
         for (VdbSpecMetadata metadata : vdbLoadTableConfig.getMetadataList()) {
             Attribute attr = new Attribute();
-            attr.setName(metadata.getColumnName());
+            attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()));
             attr.setDisplayName(metadata.getColumnName());
             attr.setSourceLogicalDataType(metadata.getDataType());
             attr.setPhysicalDataType(metadata.getDataType());
+            attr.setApprovedUsage(metadata.getApprovedUsage());
+            attr.setDescription(metadata.getDescription());
+            attr.setDataSource(metadata.getDataSource());
+            attr.setFundamentalType(metadata.getFundamentalType());
+            attr.setStatisticalType(metadata.getStatisticalType());
+            attr.setTags(metadata.getTags());
+            attr.setDisplayDiscretizationStrategy(metadata.getDisplayDiscretizationStrategy());
+            if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
+                attr.setDataQuality(metadata.getDataQuality().get(0));
+            }
             metaTable.addAttribute(attr);
         }
         metaTable.setPrimaryKey(null);
@@ -59,16 +70,16 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public Table resolveMetadata(Table original) {
-        Table table = SchemaRepository.instance().getSchema(SchemaInterpretation.VDBAccount);
+    public Table resolveMetadata(Table original, SchemaInterpretation schemaInterpretation) {
+        Table table = SchemaRepository.instance().getSchema(schemaInterpretation);
         List<Attribute> attributes = table.getAttributes();
         HashMap<String, Attribute> originalAttrs = new HashMap<>();
         for (Attribute attr : original.getAttributes()) {
-            log.info(String.format("Attributes: &s", attr.getName()));
             originalAttrs.put(attr.getName(), attr);
         }
         Set<String> findMatch = new HashSet<>();
         Set<String> originalAttrMatch = new HashSet<>();
+        //Match the DL metadata with table in SchemaRepository.
         for (Map.Entry<String, Attribute> entry : originalAttrs.entrySet()) {
             Iterator<Attribute> attrIterator = attributes.iterator();
             while (attrIterator.hasNext()) {
@@ -81,8 +92,6 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                     findMatch.add(attribute.getName());
                     break;
                 }
-                log.info(String.format("Original name: %s. Allowed display names: %s", entry.getKey().toUpperCase(),
-                        String.join(",", attribute.getAllowedDisplayNames())));
                 if (attribute.getAllowedDisplayNames().contains(entry.getKey().toUpperCase())) {
                     log.info(String.format("Matched column : %s", entry.getKey()));
                     attribute.setDisplayName(entry.getValue().getName());
@@ -92,18 +101,24 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                     findMatch.add(attribute.getName());
                     break;
                 }
+                //Remove nullable (not required) field in SchemaRepository.
+                if(attribute.isNullable()) {
+                    attrIterator.remove();
+                }
             }
         }
 
         if (findMatch.size() != attributes.size()) {
             List<String> missingField = new ArrayList<>();
             for (Attribute attr : attributes) {
-                if (!findMatch.contains(attr.getName())) {
+                if (!attr.isNullable() && !findMatch.contains(attr.getName())) {
                     missingField.add(attr.getName());
                 }
             }
-            throw new RuntimeException(String.format("Missing the following required field: %s",
-                    String.join(",", missingField)));
+            if (missingField.size() > 0) {
+                throw new RuntimeException(String.format("Missing the following required field: %s",
+                        String.join(",", missingField)));
+            }
         }
 
         for (Map.Entry<String, Attribute> entry : originalAttrs.entrySet()) {
@@ -118,10 +133,15 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public boolean compareMetadata(Table srcTable, Table targetTable) {
+    public boolean compareMetadata(Table srcTable, Table targetTable, boolean needSameType) {
         boolean result = false;
         if (srcTable == null || targetTable == null) {
             return result;
+        }
+        if (needSameType) {
+            if (!validateAttribute(srcTable, targetTable)) {
+                throw new RuntimeException("Table attribute type should not be changed!");
+            }
         }
         if (!StringUtils.equals(srcTable.getName(), targetTable.getName())) {
             return result;
@@ -147,6 +167,24 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             }
         }
         return result;
+    }
+
+    private boolean validateAttribute(Table srcTable, Table targetTable) {
+        HashMap<String, Attribute> srcAttrs = new HashMap<>();
+        for (Attribute attr : srcTable.getAttributes()) {
+            srcAttrs.put(attr.getName(),attr);
+        }
+        for (Attribute attr : targetTable.getAttributes()) {
+            if (srcAttrs.containsKey(attr.getName())) {
+                if (!StringUtils.equals(srcAttrs.get(attr.getName()).getSourceLogicalDataType(),
+                        attr.getSourceLogicalDataType())) {
+                    log.error(String.format("Field %s should have the type %s, not %s",
+                            attr.getName(), srcAttrs.get(attr.getName()).getSourceLogicalDataType(), attr.getSourceLogicalDataType()));
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override

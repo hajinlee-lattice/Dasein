@@ -17,7 +17,9 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -48,7 +50,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                                      String metadata) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         Table newMeta = dataFeedMetadataService.getMetadata(metadata);
-        newMeta = dataFeedMetadataService.resolveMetadata(newMeta);
+        newMeta = dataFeedMetadataService.resolveMetadata(newMeta, SchemaInterpretation.valueOf(entity));
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(metadata);
         if (dlTenantMappingEnabled) {
             log.info("DL tenant mapping is enabled");
@@ -62,7 +64,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask != null) {
             Table originMeta = dataFeedTask.getImportTemplate();
-            if (!dataFeedMetadataService.compareMetadata(originMeta, newMeta)) {
+            DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
+            if (!dataFeedMetadataService.compareMetadata(originMeta, newMeta,
+                    !dataFeed.getStatus().equals(DataFeed.Status.Initing))) {
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 dataFeedTask.setImportTemplate(newMeta);
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);

@@ -44,10 +44,6 @@ public class SchemaRepository {
             return getSalesforceAccountSchema();
         case SalesforceLead:
             return getSalesforceLeadSchema();
-        case CSVAccount:
-            return getAccountSchema();
-        case VDBAccount:
-            return getVDBAccountSchema();
         case Account:
             return getAccountSchema();
         case Contact:
@@ -399,23 +395,6 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
 
-        return table;
-    }
-
-    private Table getVDBAccountSchema() {
-        Table table = createTable(SchemaInterpretation.VDBAccount);
-        table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
-        table.setPrimaryKey(createPrimaryKey("Id"));
-
-        table.addAttribute(attr("Id") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "ACCOUNT", "ACCOUNT ID" })) //
-                .type(Schema.Type.STRING) //
-                .required() //
-                .interfaceName(InterfaceName.Id) //
-                .logicalType(LogicalDataType.Id) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .build());
         return table;
     }
 
