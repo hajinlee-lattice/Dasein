@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class SchemaRepository {
     private static SchemaRepository instance;
@@ -36,6 +37,17 @@ public class SchemaRepository {
     }
 
     private SchemaRepository() {
+    }
+
+    public Table getSchema(BusinessEntity entity) {
+        switch (entity) {
+        case Account:
+            return getAccountSchema();
+        case Contact:
+            return getContactSchema();
+        default:
+            throw new RuntimeException(String.format("Unsupported schema %s", entity));
+        }
     }
 
     public Table getSchema(SchemaInterpretation schema) {
