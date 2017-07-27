@@ -25,7 +25,7 @@
             <artifactId>le-query</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
-            <scope>test</scope>            
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.query.frontend;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.query.Restriction;
 

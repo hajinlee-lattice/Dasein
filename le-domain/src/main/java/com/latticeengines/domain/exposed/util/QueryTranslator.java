@@ -25,6 +25,10 @@ public class QueryTranslator {
     private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
     public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
+        return translate(frontEndQuery, decorator, null);
+    }
+
+    public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator, Restriction segmentRestriction) {
         Restriction restriction = translateFrontEndRestriction(frontEndQuery.getFrontEndRestriction());
         if (frontEndQuery.restrictNullSalesforceId()) {
             Restriction sfidRestriction = Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID")
@@ -34,6 +38,14 @@ public class QueryTranslator {
             Restriction sfidRestriction = Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID")
                     .isNotNull().build();
             restriction = Restriction.builder().and(restriction, sfidRestriction).build();
+        }
+
+        if (segmentRestriction != null) {
+            if (restriction != null) {
+                restriction = Restriction.builder().and(restriction, segmentRestriction).build();
+            } else {
+                restriction = segmentRestriction;
+            }
         }
 
         if (frontEndQuery.getPageFilter() == null) {
@@ -63,7 +75,7 @@ public class QueryTranslator {
     }
 
     public static Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
-        if (frontEndRestriction == null) {
+        if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
             return null;
         }
 

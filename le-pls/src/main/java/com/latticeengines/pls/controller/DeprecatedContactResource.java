@@ -17,11 +17,12 @@ import com.latticeengines.pls.entitymanager.ContactEntityMgr;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@Deprecated
 @Api(value = "contact", description = "REST resource for contacts")
 @RestController
 @RequestMapping("/contacts")
 // @PreAuthorize("hasRole('View_PLS_Data')")
-public class ContactResource {
+public class DeprecatedContactResource {
 
     @Autowired
     private ContactEntityMgr contactEntityMgr;
