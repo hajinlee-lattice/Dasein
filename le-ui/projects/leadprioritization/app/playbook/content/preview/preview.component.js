@@ -10,7 +10,6 @@ angular.module('lp.playbook.wizard.preview', [])
     });
 
     vm.init = function() {
-
     };
 
     vm.init();

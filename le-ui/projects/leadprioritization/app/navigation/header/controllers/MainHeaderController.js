@@ -56,6 +56,10 @@ angular.module('pd.navigation.header', [
         if (isModelDetailState(fromState.name) && ! isModelDetailState(toState.name)) {
             $scope.isModelDetailsPage = false;
         }
+
+        if($scope.headerBack && toState.name && !toState.name.match($scope.headerBack.path)) {
+            $scope.headerBack = null;
+        }
     });
 
     function setPageTitle(params) {
@@ -76,6 +80,15 @@ angular.module('pd.navigation.header', [
     $scope.$on('model-details', function(event, args) {
         $scope.isModelDetailsPage = true;
         $scope.modelDisplayName = args.displayName;
+    });
+
+    $scope.$on('header-back', function(event, args) {
+        /**
+         * args.path is required.  It's a regex compared to toState.name. When it fails headerBack is destroyed, otherwise your header back stuff will persist.
+         */
+        if(args.path) {
+            $scope.headerBack = args;
+        }
     });
     
     checkBrowserWidth();

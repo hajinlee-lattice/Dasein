@@ -28,18 +28,18 @@ angular.module('common.wizard.controls', [])
         vm.setButtons();
 
         if (vm.next && !isPrev) {
-            vm.go(vm.next);
+            vm.go(vm.next, isPrev);
         } else if (isPrev && vm.prev) {
-            vm.go(vm.prev);
+            vm.go(vm.prev, isPrev);
         } else if (!isPrev && !vm.next) {
-            vm.go(WizardControlsOptions.nextState);
+            vm.go(WizardControlsOptions.nextState, isPrev);
         }
     }
 
-    vm.go = function(state) {
+    vm.go = function(state, isPrev) {
         var current = vm.itemMap[$state.current.name];
 
-        if (current.nextFn) {
+        if (current.nextFn && !isPrev) {
             current.nextFn(state);
         } else {
             $state.go(state);

@@ -1,66 +1,68 @@
 <section class="playbook playbook-targets container" ng-class="{'dashboard-content': vm.stateParams.section.indexOf('dashboard.') !== -1}">
-    <div class="header">
-        <h2>Targets</h2>
-    </div>
-    <div>
-        <ul class="target-tabs">
-            <li ng-class="{'active':vm.selectedObjectType==='accounts'}"
-                ng-click="vm.selectObjectType('accounts')">
-                Accounts
-            </li>
-            <li ng-class="{'active':vm.selectedObjectType==='contacts'}"
-                ng-click="vm.selectObjectType('contacts')">
-                Contacts
-            </li>
-        </ul>
-    </div>
-    <div ng-if="vm.records.length > 0">
-        <div>
-            <label>
-                <input type="checkbox"/>
-                Exclude {{vm.selectedObjectType}} without SalesForce ID (0) | <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}">Export</a>
-            </label>
-        </div>
-        <div class="filters">
-            <div class="ng-search">
-                <a class="button icon-button white-button" ng-click="vm.queryText.length ? vm.queryText = null : ''">
-                    <span class="fa fa-search" ng-show="!vm.query.length"></span>
-                    <span class="fa fa-times" ng-show="vm.query.length"></span>
-                </a>
-                <input type="text" class="form-control" placeholder="Search {{vm.records.length}} {{vm.selectedObjectType | title}}" ng-model="vm.queryText" ng-change="vm.current = 1" />
-            </div>
+    <div class="inner-container">
+        <div class="header">
+            <h2>Targets</h2>
         </div>
         <div>
-            <table class="list-table" ng-if="vm.records.length > 0">
-                <thead>
-                    <tr>
-                        <th ng-repeat="col in ::vm.columns" ng-click="vm.sortBy(col.column_name)">
-                            <span ng-class="{'sort':vm.sortKey === col.column_name, 'sort-desc': vm.sortDesc}">{{::col.display_name}}</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="r in (vm.filtered = vm.records |
-                                    filter: vm.queryText) |
-                                    orderBy: vm.sortKey: !vm.sortDesc |
-                                    startFrom: (vm.current - 1) * vm.pagesize |
-                                    limitTo: vm.pagesize">
-                         <td ng-repeat="col in ::vm.columns">
-                            {{r[col.column_name]}}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <div ng-if="vm.filtered.length > 0" class="pull-right">
-                <pd-pagination-controls
-                    current="vm.current"
-                    max="vm.max = vm.filtered.length / vm.pagesize">
-                </pd-pagination-controls>
+            <ul class="target-tabs">
+                <li ng-class="{'active':vm.selectedObjectType==='accounts'}"
+                    ng-click="vm.selectObjectType('accounts')">
+                    Accounts
+                </li>
+                <li ng-class="{'active':vm.selectedObjectType==='contacts'}"
+                    ng-click="vm.selectObjectType('contacts')">
+                    Contacts
+                </li>
+            </ul>
+        </div>
+        <div ng-if="vm.records.length > 0">
+            <div>
+                <label>
+                    <input type="checkbox"/>
+                    Exclude {{vm.selectedObjectType}} without SalesForce ID (0) | <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}">Export</a>
+                </label>
+            </div>
+            <div class="filters">
+                <div class="ng-search">
+                    <a class="button icon-button white-button" ng-click="vm.queryText.length ? vm.queryText = null : ''">
+                        <span class="fa fa-search" ng-show="!vm.query.length"></span>
+                        <span class="fa fa-times" ng-show="vm.query.length"></span>
+                    </a>
+                    <input type="text" class="form-control" placeholder="Search {{vm.records.length}} {{vm.selectedObjectType | title}}" ng-model="vm.queryText" ng-change="vm.current = 1" />
+                </div>
+            </div>
+            <div>
+                <table class="list-table" ng-if="vm.records.length > 0">
+                    <thead>
+                        <tr>
+                            <th ng-repeat="col in ::vm.columns" ng-click="vm.sortBy(col.column_name)">
+                                <span ng-class="{'sort':vm.sortKey === col.column_name, 'sort-desc': vm.sortDesc}">{{::col.display_name}}</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="r in (vm.filtered = vm.records |
+                                        filter: vm.queryText) |
+                                        orderBy: vm.sortKey: !vm.sortDesc |
+                                        startFrom: (vm.current - 1) * vm.pagesize |
+                                        limitTo: vm.pagesize">
+                             <td ng-repeat="col in ::vm.columns">
+                                {{r[col.column_name]}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div ng-if="vm.filtered.length > 0" class="pull-right">
+                    <pd-pagination-controls
+                        current="vm.current"
+                        max="vm.max = vm.filtered.length / vm.pagesize">
+                    </pd-pagination-controls>
+                </div>
             </div>
         </div>
-    </div>
 
-    <p ng-if="vm.records.length === 0">
-        No Targets Found
-    <p>
+        <p ng-if="vm.records.length === 0">
+            No Targets Found
+        </p>
+    </div>
 </section>

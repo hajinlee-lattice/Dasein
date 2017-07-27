@@ -7,7 +7,7 @@
         <cg-talking-point-preview play="vm.play"></cg-talking-point-preview>
         
         <div class="footer" ng-if="vm.stateParams.section.indexOf('dashboard.') !== -1" >
-            <button class="preview button white-button" ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Back</button>
+            <button class="preview button white-button" ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})" ui-sref-opts="{reload: true}">Back</button>
         </div>
     </div>
 </div>

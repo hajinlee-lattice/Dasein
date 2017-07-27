@@ -55,12 +55,20 @@ angular
                 TalkingPointAttributes: function (){//CgTalkingPointStore) {
                     return null;
                     return CgTalkingPointStore.getAttributes();
+                },
+                Play: function(PlaybookWizardStore, $stateParams) {
+                    return PlaybookWizardStore.getPlay($stateParams.play_name);
                 }
             },
             views: {
                 "navigation@": {
-                    controller: function($scope, $stateParams, $state) {
+                    controller: function($scope, $stateParams, $state, $rootScope, Play) {
                         $scope.play_name = $stateParams.play_name || '';
+                        $rootScope.$broadcast('header-back', { 
+                            path: '^home.playbook.dashboard',
+                            displayName: Play.displayName,
+                            sref: 'home.playbook'
+                        });
                     },
                     templateUrl: 'app/playbook/content/dashboard/sidebar/sidebar.component.html'
                 },
@@ -77,10 +85,10 @@ angular
                 section: 'dashboard.insights'
             },
             resolve: {
-                TalkingPoints: function(CgTalkingPointStore, $stateParams) {
-                    var play_name = $stateParams.play_name || '';
-                    return CgTalkingPointStore.getTalkingPoints(play_name);
-                },
+                // TalkingPoints: function(CgTalkingPointStore, $stateParams) {
+                //     var play_name = $stateParams.play_name || '';
+                //     return CgTalkingPointStore.getTalkingPoints(play_name);
+                // },
                 TalkingPointAttributes: function (CgTalkingPointStore) {
                     return CgTalkingPointStore.getAttributes();
                 },

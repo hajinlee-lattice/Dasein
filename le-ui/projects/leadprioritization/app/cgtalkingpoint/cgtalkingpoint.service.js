@@ -34,12 +34,12 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return talkingPoints;
     }
 
-    this.getTalkingPoints = function(play_name) {
+    this.getTalkingPoints = function(play_name, no_cache) {
         if(!play_name) {
             return this.talkingPoints;
         }
         var deferred = $q.defer();
-        if(this.talkingPoints.length) {
+        if(this.talkingPoints.length && !no_cache) {
             deferred.resolve(this.talkingPoints);
         } else {
             CgTalkingPointService.getTalkingPoints(play_name).then(function(data){
@@ -73,10 +73,8 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     }
 
     this.deleteTalkingPoint = function(name) {
-        console.log('delete', name);
         var deferred = $q.defer();
         CgTalkingPointService.deleteTalkingPoint(name).then(function(data){
-            console.log(data);
             //this.talkingPoints = opts;
             deferred.resolve(data);
         });

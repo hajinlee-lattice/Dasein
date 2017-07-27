@@ -543,6 +543,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
     }
     .page-icon,
     .page-name,
+    .header-back-name,
     .model-name {
         display: inline-block;
         /*font-family: 'ProximaNova-Bold','Open Sans',sans-serif;*/
@@ -559,6 +560,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
     &.model-details-page {
         .page-icon,
         .page-name,
+        .header-back-name,
         .model-name {
             font-size: 18px;
         }
@@ -578,6 +580,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
             height: 16px;
         }
     }
+    .header-back-name,
     .model-name {
         @include text-ellipsis;
         position: relative;

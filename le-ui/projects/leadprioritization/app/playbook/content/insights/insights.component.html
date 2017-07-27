@@ -9,7 +9,7 @@
                         <em ng-if="vm.stateParams.section === 'dashboard.insights'">Keep in mind changes you make will overwrite changes made by other users.</em>
                     </p>
                 </div>
-                <div ng-repeat="tp in vm.talkingPoints | orderBy:'offset'" class="tp-entry">
+                <div ng-if="vm.talkingPoints" ng-repeat="tp in vm.talkingPoints | orderBy:'offset'" class="tp-entry">
                     <cg-talking-point-editor
                         tp="tp"
                         on-delete="vm.onDelete($index)">
