@@ -28,7 +28,9 @@ public abstract class BaseFrontEndEntityResource {
 
     public long getCountForRestriction(BusinessEntity businessEntity, FrontEndRestriction restriction) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setFrontEndRestriction(restriction);
+        if (restriction != null) {
+            frontEndQuery.setFrontEndRestriction(restriction);
+        }
         Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(false));
         query.addLookup(new EntityLookup(businessEntity));
         return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), query);
