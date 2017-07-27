@@ -6,7 +6,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.domain.exposed.BaseContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiJob;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -18,12 +17,11 @@ public interface EaiYarnService {
 
     default EaiJob createJob(EaiJobConfiguration eaiJobConfig) {
         EaiJob eaiJob = new EaiJob();
-        StringBuilder customerSpace = new StringBuilder("");
+        StringBuilder customerSpace = new StringBuilder();
         if (eaiJobConfig.getCustomerSpace() != null) {
-            customerSpace.append(eaiJobConfig.getCustomerSpace().toString());
-        } else {
-            customerSpace.append(CustomerSpace.parse(this.getClass().getSimpleName()).toString());
+            customerSpace.append(eaiJobConfig.getCustomerSpace().getTenantId()).append('~');
         }
+        customerSpace.append(eaiJobConfig.getClass().getSimpleName().replace("Configuration", ""));
         eaiJob.setClient("eaiClient");
         eaiJob.setCustomer(customerSpace.toString());
 
