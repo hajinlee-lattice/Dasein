@@ -44,6 +44,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
+        MultiTenantContext.setTenant(mainTestTenant);
         play = createDefaultPlay();
         playService.createOrUpdate(play, mainTestTenant.getId());
         switchToExternalUser();
