@@ -20,9 +20,10 @@ public interface EaiYarnService {
         EaiJob eaiJob = new EaiJob();
         StringBuilder customerSpace = new StringBuilder("");
         if (eaiJobConfig.getCustomerSpace() != null) {
-            customerSpace.append(eaiJobConfig.getCustomerSpace().toString()).append('~');
+            customerSpace.append(eaiJobConfig.getCustomerSpace().toString());
+        } else {
+            customerSpace.append(CustomerSpace.parse(this.getClass().getSimpleName()).toString());
         }
-        customerSpace.append(CustomerSpace.parse(eaiJobConfig.getClass().getSimpleName()).toString());
         eaiJob.setClient("eaiClient");
         eaiJob.setCustomer(customerSpace.toString());
 
