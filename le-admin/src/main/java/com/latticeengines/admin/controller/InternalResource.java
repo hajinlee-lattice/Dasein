@@ -143,6 +143,7 @@ public class InternalResource extends InternalResourceBase {
             userName = tokens[0];
         }
         userService.deactiveUserStatus(userName, emails);
+        serviceService.reduceConfig(PLSComponent.componentName, emails);
         return true;
     }
 

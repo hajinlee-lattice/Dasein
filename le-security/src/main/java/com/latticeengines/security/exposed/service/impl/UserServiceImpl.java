@@ -326,7 +326,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean deactiveUserStatus(String userName, String emails) {
+    public String deactiveUserStatus(String userName, String emails) {
         return globalUserManagementService.deactiveUserStatus(userName, emails);
     }
 

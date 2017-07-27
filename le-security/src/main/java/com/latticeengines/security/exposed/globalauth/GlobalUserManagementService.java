@@ -35,7 +35,7 @@ public interface GlobalUserManagementService {
 
     List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId);
 
-    Boolean deactiveUserStatus(String userName, String emails);
+    String deactiveUserStatus(String userName, String emails);
 
     GlobalAuthUser findByEmailNoJoin(String email);
 

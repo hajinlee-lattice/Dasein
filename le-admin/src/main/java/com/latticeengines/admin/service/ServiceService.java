@@ -29,4 +29,6 @@ public interface ServiceService {
     Boolean patchDefaultConfig(String serviceName, String nodePath, String data);
 
     Boolean patchNewConfig(String serviceName, AccessLevel level, String emails);
+
+    Boolean reduceConfig(String serviceName, String emails);
 }

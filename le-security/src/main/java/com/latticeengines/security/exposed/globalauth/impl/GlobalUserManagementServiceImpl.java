@@ -600,22 +600,27 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
-    public Boolean deactiveUserStatus(String userName, String emails) {
+    public String deactiveUserStatus(String userName, String emails) {
         String[] emailStr = emails.trim().split(",");
+        Set<String> emailSet = new HashSet<>();
+        for(String email : emailStr) {
+            emailSet.add(email.trim());
+        }
+        StringBuilder filterEmails = new StringBuilder("");
         for (String email : emailStr) {
-            GlobalAuthUser gaUser = gaUserEntityMgr.findByEmail(email.trim());
-            if (gaUser == null)
-            {
-                log.info(String.format("the email %s is not valid, and cann't find user in table GlobalUser", email));
+            GlobalAuthUser gaUser = gaUserEntityMgr.findByEmail(email);
+            if (gaUser == null) {
+                log.info(String.format("the email %s is not valid, and can't find user in table GlobalUser", email));
                 continue;
             }
+            filterEmails.append(email + ",");
             gaUser.setIsActive(false);
             gaUserEntityMgr.update(gaUser);
             log.info(String.format("%s set user %s isActive to false", userName, gaUser.getEmail()));
             gaUserTenantRightEntityMgr.deleteByUserId(gaUser.getPid());
             log.info(String.format("%s delete the %s's GlobalUserTenantRight", userName, gaUser.getEmail()));
         }
-        return true;
+        return filterEmails.toString();
     }
 
     @Override

@@ -42,7 +42,7 @@ public interface UserService {
 
     String getURLSafeUsername(String username);
 
-    boolean deactiveUserStatus(String userName, String emails);
+    String deactiveUserStatus(String userName, String emails);
 
     GlobalAuthUser findByEmailNoJoin(String username);
 

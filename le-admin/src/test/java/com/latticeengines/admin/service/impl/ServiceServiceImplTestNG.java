@@ -159,7 +159,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testpatchNewConfig() throws Exception {
+    public void testpatchNewConfigAndReduceConfig() throws Exception {
         SerializableDocumentDirectory dir = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
         SerializableDocumentDirectory.Node node = dir.getNodeAtPath("/SuperAdminEmails");
 
@@ -168,6 +168,11 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         dir = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
         node = dir.getNodeAtPath("/SuperAdminEmails");
         Assert.assertEquals(node.getData().contains(emails), true);
+
+        serviceService.reduceConfig(PLSComponent.componentName, emails);
+        dir = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
+        node = dir.getNodeAtPath("/SuperAdminEmails");
+        Assert.assertEquals(node.getData().contains(emails), false);
 
         emails = "";
         boolean flag = serviceService.patchNewConfig(PLSComponent.componentName, AccessLevel.INTERNAL_ADMIN, emails);
@@ -186,5 +191,9 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
             count++;
         }
         Assert.assertEquals(count, 1);
+        serviceService.reduceConfig(PLSComponent.componentName, emails);
+        dir = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
+        node = dir.getNodeAtPath("/SuperAdminEmails");
+        Assert.assertEquals(node.getData().contains(email), false);
     }
 }

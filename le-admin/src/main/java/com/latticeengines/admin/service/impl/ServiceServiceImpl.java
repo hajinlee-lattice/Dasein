@@ -226,4 +226,41 @@ public class ServiceServiceImpl implements ServiceService {
         }
         return false;
     }
+
+    @Override
+    public Boolean reduceConfig(String serviceName, String emails) {
+        String[] nodePaths = {"/LatticeAdminEmails", "/SuperAdminEmails", "/ExternalAdminEmails", "/ThirdPartyUserEmails"};
+        Set<String> emailSet = new HashSet<>();
+        for (String email : Arrays.asList(emails.trim().split(listDelimiter))) {
+            email = email.trim();
+            if(!StringUtils.isEmpty(email)) {
+                emailSet.add(email);
+            }
+        }
+        for (String nodePath : nodePaths) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                SerializableDocumentDirectory conf = getDefaultServiceConfig(serviceName);
+                SerializableDocumentDirectory.Node node = conf.getNodeAtPath(nodePath);
+                String data = node.getData();
+                try {
+                    @SuppressWarnings("unchecked")
+                    List<String> initial = mapper.readValue(data, List.class);
+                    for(String email : emailSet) {
+                        if(initial.contains(email)) {
+                            initial.remove(email);
+                        }
+                    }
+                    data = mapper.writeValueAsString(initial);
+                } catch (Exception e) {
+                    throw new RuntimeException("parse data error when read or write");
+                }
+                patchDefaultConfigWithoutValidation(serviceName, nodePath, data);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_19101, String.format(
+                        "Failed to patch new configuration for node %s in component %s", nodePath, serviceName), e);
+            }
+        }
+        return true;
+    }
 }
