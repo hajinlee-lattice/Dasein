@@ -166,6 +166,14 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
         return talkingPoint;
     }
+
+    this.publishTalkingPoints = function(play_name) {
+        var deferred = $q.defer();
+        CgTalkingPointService.publishTalkingPoints(play_name).then(function(data){
+            deferred.resolve(data);
+        });
+        return deferred.promise;
+    }
 })
 .service('CgTalkingPointService', function($q, $http, $state) {
     this.host = '/pls'; //default
@@ -286,4 +294,18 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
         return deferred.promise;
     };
+
+    this.publishTalkingPoints = function(play_name) {
+        var deferred = $q.defer();
+        $http({
+            method: 'POST',
+            url: this.host + '/dante/talkingpoints/publish',
+            params: {
+                playName: play_name
+            }
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
 });

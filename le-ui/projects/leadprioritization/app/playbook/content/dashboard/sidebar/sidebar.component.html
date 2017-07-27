@@ -13,7 +13,7 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_PLAYBOOK')}}</span>
             </a>
         </li>
-        <li role="presentation" ui-sref-active-eq="active" ng-disabled="menuDisabled || dashboardDisabled">
+        <li role="presentation" ng-class="{active: stateName() == 'home.playbook.dashboard'}" ng-disabled="menuDisabled || dashboardDisabled">
             <a ui-sref="home.playbook.dashboard({play_name: play_name})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}">
                     <span class="ico ico-insights ico-light-gray"></span>

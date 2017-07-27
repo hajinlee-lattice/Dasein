@@ -60,7 +60,6 @@ angular.module('lp.cg.talkingpoint.preview', [])
     }
 
     function emitLeadObject() {
-        console.log(vm.leadPreviewObject)
         iframe.contentWindow.postMessage(vm.leadPreviewObject,'*')
     }
 

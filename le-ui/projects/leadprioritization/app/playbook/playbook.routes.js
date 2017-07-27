@@ -46,6 +46,10 @@ angular
         })
         .state('home.playbook.dashboard', {
             url: '/dashboard/:play_name',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Play Book'
+            },
             resolve: {
                 TalkingPoints: function(){//CgTalkingPointStore, $stateParams) {
                     return null;
@@ -64,6 +68,9 @@ angular
                 "navigation@": {
                     controller: function($scope, $stateParams, $state, $rootScope, Play) {
                         $scope.play_name = $stateParams.play_name || '';
+                        $scope.stateName = function() {
+                            return $state.current.name;
+                        }
                         $rootScope.$broadcast('header-back', { 
                             path: '^home.playbook.dashboard',
                             displayName: Play.displayName,
@@ -82,6 +89,8 @@ angular
         .state('home.playbook.dashboard.insights', {
             url: '/insights',
             params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Play Book',
                 section: 'dashboard.insights'
             },
             resolve: {
@@ -116,6 +125,8 @@ angular
         .state('home.playbook.dashboard.insights.preview', {
             url: '/preview',
             params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Play Book',
                 section: 'dashboard.insights.preview'
             },
             resolve: {
@@ -137,6 +148,8 @@ angular
         .state('home.playbook.dashboard.segment', {
             url: '/segment',
             params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Play Book',
                 section: 'dashboard.segment'
             },
             resolve: {
@@ -155,6 +168,8 @@ angular
         .state('home.playbook.dashboard.targets', {
             url: '/targets',
             params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Play Book',
                 section: 'dashboard.targets'
             },
             resolve: {
@@ -184,6 +199,8 @@ angular
         .state('home.playbook.dashboard.launch_history', {
             url: '/launch_history',
             params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Play Book',
                 section: 'dashboard.launch_history'
             },
             resolve: {

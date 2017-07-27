@@ -5,6 +5,7 @@ angular.module('lp.playbook.wizard.targets', [])
     var vm = this;
 
     angular.extend(vm, {
+        stateParams: $stateParams,
         QueryStore: QueryStore,
         authToken: BrowserStorageUtility.getTokenDocument(),
         selectedObjectType: DefaultSelectedObject,
