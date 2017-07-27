@@ -10,8 +10,6 @@ if [ ! -f "${ANACONDA_HOME}/bin/conda" ]; then
     exit -1
 fi
 
-CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
-
 ENV_NAME='datacloud'
 PY_VERSION='2.7.13'
 
