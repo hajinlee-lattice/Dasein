@@ -22,6 +22,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
     void clearTableQueue();
 
+    void clearTableQueuePerTask(DataFeedTask task);
+
     void registerExtract(DataFeedTask dataFeedTask, String tableName, Extract extract);
 
     void registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts);

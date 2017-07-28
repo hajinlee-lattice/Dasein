@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
@@ -16,6 +17,7 @@ import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedProfileEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.DataFeedService;
+import com.latticeengines.metadata.service.DataFeedTaskService;
 
 @Component("datafeedService")
 public class DataFeedServiceImpl implements DataFeedService {
@@ -33,6 +35,9 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Autowired
     private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private DataFeedTaskService datafeedTaskService;
 
     @Override
     public DataFeedExecution startExecution(String customerSpace, String datafeedName) {
@@ -104,6 +109,18 @@ public class DataFeedServiceImpl implements DataFeedService {
         execution.setWorkflowId(workflowId);
         datafeedExecutionEntityMgr.update(execution);
         return execution;
+    }
+
+    @Override
+    public void resetImport(String customerSpace, String datafeedName) {
+        DataFeed dataFeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+        if (dataFeed == null) {
+            return;
+        }
+
+        for (DataFeedTask task : dataFeed.getTasks()) {
+             datafeedTaskService.resetImport(customerSpace, task);
+        }
     }
 
     public Status getSuccessfulDataFeedStatus(String initialDataFeedStatus) {

@@ -49,6 +49,13 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("getTable", url, Table.class);
     }
 
+    public void resetTable(String customerSpace, TableRoleInCollection tableRole) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/reset?role={tableRole}", //
+                shortenCustomerSpace(customerSpace), tableRole);
+        post("resetTable", url, null, Table.class);
+    }
+
     public void upsertTable(String customerSpace, String tableName, TableRoleInCollection role) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/datacollection/tables/{tableName}?role={role}",
@@ -70,5 +77,4 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         List<?> list = get("getAllTables", url, List.class);
         return JsonUtils.convertList(list, Table.class);
     }
-
 }

@@ -15,4 +15,6 @@ public interface DataFeedTaskTableDao extends BaseDao<DataFeedTaskTable> {
 
     List<DataFeedTaskTable> getDataFeedTaskTables(DataFeedTask task);
 
+    void deleteDataFeedTaskTables(DataFeedTask task);
+
 }

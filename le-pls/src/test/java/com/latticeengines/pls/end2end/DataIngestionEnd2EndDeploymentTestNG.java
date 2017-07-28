@@ -94,6 +94,9 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Test(groups = "deployment.cdl")
     public void testEndToEnd() throws Exception {
+
+        resetCollection();
+
         importData();
         initialConsolidate();
         firstProfile();
@@ -105,6 +108,12 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         thirdConsolidate();
 
         querySegment();
+    }
+
+    private void resetCollection() {
+        log.info("Start reset collection data ...");
+        boolean resetStatus = cdlProxy.reset(mainTenant.getId());
+        assertEquals(resetStatus, true);
     }
 
     private void importData() throws Exception {

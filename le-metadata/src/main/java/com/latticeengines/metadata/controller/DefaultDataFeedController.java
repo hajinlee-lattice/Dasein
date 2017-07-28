@@ -103,4 +103,11 @@ public class DefaultDataFeedController {
         return datafeedService.updateProfileWorkflowId(customerSpace, "", workflowId);
     }
 
+    @RequestMapping(value = "/resetimport", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Reset the pending import data for this data feed")
+    public void resetImport(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        datafeedService.resetImport(customerSpace, "");
+    }
 }

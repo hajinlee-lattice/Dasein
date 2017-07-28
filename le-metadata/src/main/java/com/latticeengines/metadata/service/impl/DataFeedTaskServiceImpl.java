@@ -55,12 +55,22 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     @Override
     public void registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract) {
         DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
+        DataFeed dataFeed = dataFeedTask.getDataFeed();
+        if (dataFeed.getStatus() == DataFeed.Status.Initing) {
+            // log.info("Skip registering extract for feed in initing state");
+            return;
+        }
         dataFeedTaskEntityMgr.registerExtract(dataFeedTask, tableName, extract);
     }
 
     @Override
     public void registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts) {
         DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
+        DataFeed dataFeed = dataFeedTask.getDataFeed();
+        if (dataFeed.getStatus() == DataFeed.Status.Initing) {
+            // log.info("Skip registering extract for feed in initing state");
+            return;
+        }
         dataFeedTaskEntityMgr.registerExtracts(dataFeedTask, tableName, extracts);
     }
 
@@ -69,5 +79,10 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
             String entity) {
         DataFeedTask datafeedTask = getDataFeedTask(customerSpace, source, dataFeedType, entity);
         return dataFeedTaskEntityMgr.getExtractsPendingInQueue(datafeedTask);
+    }
+
+    @Override
+    public void resetImport(String customerSpaceStr, DataFeedTask datafeedTask) {
+        dataFeedTaskEntityMgr.clearTableQueuePerTask(datafeedTask);
     }
 }

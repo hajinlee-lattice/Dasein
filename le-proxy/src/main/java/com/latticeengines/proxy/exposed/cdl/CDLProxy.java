@@ -39,4 +39,15 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
     }
 
+    @SuppressWarnings("unchecked")
+    public boolean reset(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/reset", shortenCustomerSpace(customerSpace));
+        ResponseDocument<String> responseDoc = post("kickoff reset", url, null, ResponseDocument.class);
+        if (responseDoc == null) {
+            return false;
+        }
+        String statusStr = responseDoc.getResult();
+        return ("Success".equals(statusStr));
+    }
+
 }

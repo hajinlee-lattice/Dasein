@@ -28,4 +28,6 @@ public interface DataFeedService {
 
     DataFeedProfile updateProfileWorkflowId(String customerSpace, String datafeedName, Long workflowId);
 
+    void resetImport(String customerSpace, String datafeedName);
+
 }

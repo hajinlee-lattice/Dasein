@@ -74,6 +74,22 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    public void resetTable(String customerSpace, String collectionName, TableRoleInCollection role) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
+
+        List<Table> existingTables = dataCollectionEntityMgr.getTablesOfRole(collectionName, role);
+        for (Table existingTable : existingTables) {
+            log.info("There are already table(s) of role " + role + " in data collection " + collectionName
+                    + ". Remove it from collection and delete it.");
+            dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTable.getName());
+            tableEntityMgr.deleteTableAndCleanupByName(existingTable.getName());
+        }
+    }
+
+    @Override
     public void addStats(String customerSpace, String collectionName, StatisticsContainer container) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);

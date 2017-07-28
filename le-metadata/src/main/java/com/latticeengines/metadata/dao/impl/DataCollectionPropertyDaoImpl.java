@@ -1,9 +1,8 @@
 package com.latticeengines.metadata.dao.impl;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionProperty;
 import com.latticeengines.metadata.dao.DataCollectionPropertyDao;
 

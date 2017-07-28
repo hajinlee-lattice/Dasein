@@ -165,6 +165,12 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
+    public void clearTableQueuePerTask(DataFeedTask dataFeedTask) {
+        datafeedTaskTableDao.deleteDataFeedTaskTables(dataFeedTask);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void registerExtract(DataFeedTask datafeedTask, String tableName, Extract extract) {
         boolean templateTableChanged = Status.Updated.equals(datafeedTask.getStatus());
         boolean dataTableConsumed = datafeedTask.getImportData() == null;

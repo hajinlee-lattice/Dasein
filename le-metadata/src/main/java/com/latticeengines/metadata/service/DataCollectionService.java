@@ -24,4 +24,5 @@ public interface DataCollectionService {
 
     AttributeRepository getAttrRepo(String customerSpace, String collectionName);
 
+    void resetTable(String customerSpace, String collectionName, TableRoleInCollection tableRole);
 }

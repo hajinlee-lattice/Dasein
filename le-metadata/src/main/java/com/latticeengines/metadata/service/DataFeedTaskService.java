@@ -22,4 +22,6 @@ public interface DataFeedTaskService {
     void registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts);
 
     List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType, String entity);
+
+    void resetImport(String customerSpace, DataFeedTask datafeedTask);
 }

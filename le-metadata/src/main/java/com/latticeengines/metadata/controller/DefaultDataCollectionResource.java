@@ -97,6 +97,16 @@ public class DefaultDataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
+    @RequestMapping(value = "/reset", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create or insert a table into the collection")
+    public SimpleBooleanResponse resetTable(@PathVariable String customerSpace, //
+            @RequestParam(value = "role") TableRoleInCollection role) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.resetTable(customerSpace, null, role);
+        return SimpleBooleanResponse.successResponse();
+    }
+
     @RequestMapping(value = "/stats", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create or update the main statistics of the collection")
@@ -106,5 +116,4 @@ public class DefaultDataCollectionResource {
         dataCollectionService.addStats(customerSpace, null, statisticsContainer);
         return SimpleBooleanResponse.successResponse();
     }
-
 }

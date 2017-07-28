@@ -2,6 +2,7 @@ package com.latticeengines.metadata.dao.impl;
 
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Component;
@@ -67,4 +68,14 @@ public class DataFeedTaskTableDaoImpl extends BaseDaoImpl<DataFeedTaskTable> imp
         return datafeedTaskTables;
     }
 
+    @Override
+    public void deleteDataFeedTaskTables(DataFeedTask datafeedTask) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<DataFeedTaskTable> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "Delete from %s where FK_TASK_ID =:pid", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setLong("pid", datafeedTask.getPid());
+        query.executeUpdate();
+    }
 }

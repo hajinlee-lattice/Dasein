@@ -65,6 +65,18 @@ public class DataCollectionResource {
         return SimpleBooleanResponse.successResponse();
     }
 
+    @RequestMapping(value = "/{collectionName}/reset", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Reset table for a specific role of the collection")
+    public SimpleBooleanResponse resetTable(@PathVariable String customerSpace, //
+            @PathVariable String collectionName, //
+            @RequestParam(value = "role") TableRoleInCollection role) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.resetTable(customerSpace, collectionName, role);
+        return SimpleBooleanResponse.successResponse();
+    }
+
+
     @RequestMapping(value = "/{collectionName}/stats", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create or update the main statistics of the collection")
