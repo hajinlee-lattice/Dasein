@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -30,10 +31,15 @@ public class BatchServiceImpl implements BatchService {
 
     private AWSBatch awsBatch = null;
 
+    @Value("${aws.region}")
+    private static String region;
+
     @Autowired
     public BatchServiceImpl(BasicAWSCredentials awsCredentials) {
         log.info("Constructing AWSBatch using BasicAWSCredentials.");
-        awsBatch = AWSBatchClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+        awsBatch = AWSBatchClientBuilder.standard() //
+                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
+                .withRegion(region) //
                 .build();
     }
 
