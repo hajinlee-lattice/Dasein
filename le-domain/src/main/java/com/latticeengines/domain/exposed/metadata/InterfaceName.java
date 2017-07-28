@@ -12,6 +12,9 @@ public enum InterfaceName {
     ContactId, //
     CategoryId, //
     SubcategoryId, //
+    CRMId, //
+    ProductId, //
+    TransactionId, //
 
     LastModifiedDate, //
     CreatedDate, //
@@ -39,7 +42,7 @@ public enum InterfaceName {
     AnnualRevenue, //
     NumberOfEmployees, //
     YearStarted, //
-    
+
     Quantity, //
     Amount,
 
@@ -48,8 +51,10 @@ public enum InterfaceName {
     LEAccountIDLong, // TODO: to be replaced by VdbAccountId
     VdbContactId, // contact id whose uniqueness is managed by vdb
     LEContactIDLong, // TODO: to be replaced by VdbContactId
-    External_ID, // TODO: temporarily used for contact Id before we have real contact data
+    External_ID, // TODO: temporarily used for contact Id before we have real
+                 // contact data
 
     // Data Cloud
     LatticeAccountId // Id in AccountMaster
+
 }

@@ -8,6 +8,8 @@ public enum SchemaInterpretation {
     TestingData, //
     Account, //
     Contact, //
+    Product, //
+    Transaction, //
     TimeSeries, //
     Category, //
     Profile, //

@@ -2,9 +2,9 @@ package com.latticeengines.domain.exposed.query;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMaster;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,8 +23,10 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 public enum BusinessEntity implements GraphNode {
     // Customer Data Lake
-    Account,
-    Contact,
+    Account, //
+    Contact, //
+    Product, //
+    Transaction, //
 
     // Lattice Data Cloud
     LatticeAccount;
@@ -41,6 +43,8 @@ public enum BusinessEntity implements GraphNode {
         // Relationships
         Account.addRelationship(Contact, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(LatticeAccount, Cardinality.ONE_TO_ONE, InterfaceName.LatticeAccountId);
+        Account.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
+        Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
     }
 
     // Entity Definitions
@@ -77,7 +81,8 @@ public enum BusinessEntity implements GraphNode {
             BusinessEntity entity = (BusinessEntity) object;
             if (!joinCache.containsKey(entity)) {
                 BusinessEntity parent = (BusinessEntity) ctx.getProperty("parent");
-                Relationship join = parent.relationships.stream().filter(r -> r.child.equals(entity)).findFirst().orElse(null);
+                Relationship join = parent.relationships.stream().filter(r -> r.child.equals(entity)).findFirst()
+                        .orElse(null);
                 joinCache.put(entity, join);
             }
         });
@@ -94,7 +99,9 @@ public enum BusinessEntity implements GraphNode {
         return new HashMap<>();
     }
 
-    public enum Cardinality { ONE_TO_ONE, ONE_TO_MANY, MANY_TO_MANY }
+    public enum Cardinality {
+        ONE_TO_ONE, ONE_TO_MANY, MANY_TO_MANY
+    }
 
     public static class Relationship {
         private final BusinessEntity parent;
@@ -106,7 +113,8 @@ public enum BusinessEntity implements GraphNode {
             this(parent, child, cardinality, Collections.singletonList(Pair.of(joinKey, joinKey)));
         }
 
-        Relationship(BusinessEntity parent, BusinessEntity child, Cardinality cardinality, List<Pair<InterfaceName, InterfaceName>> joinKeys) {
+        Relationship(BusinessEntity parent, BusinessEntity child, Cardinality cardinality,
+                List<Pair<InterfaceName, InterfaceName>> joinKeys) {
             this.parent = parent;
             this.child = child;
             this.cardinality = cardinality;

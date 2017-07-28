@@ -415,6 +415,18 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    public void setSourceAttrName(String sourceAttrName) {
+        setListPropertyFromString("SourceAttrName", sourceAttrName);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getSourceAttrName() {
+        return (String) properties.get("SourceAttrName");
+    }
+
+    @Transient
+    @JsonIgnore
     public void setApprovedUsage(String approvedUsage) {
         setListPropertyFromString("ApprovedUsage", approvedUsage);
     }
@@ -779,7 +791,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     @Transient
     public void setExcludeFromPlaymakerExport(String excludeFromPlaymakerExport) {
-        properties.put("xcludeFromPlaymakerExport", Boolean.valueOf(excludeFromPlaymakerExport));
+        properties.put("ExcludeFromPlaymakerExport", Boolean.valueOf(excludeFromPlaymakerExport));
     }
 
     @Transient
