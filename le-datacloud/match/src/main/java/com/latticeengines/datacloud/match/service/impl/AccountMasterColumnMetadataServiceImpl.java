@@ -115,6 +115,7 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
                 if (profileRecord.get(DataCloudConstants.PROFILE_ATTR_NUMBITS) != null) {
                     cm.setNumBits((int) profileRecord.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
                     cm.setBitOffset((int) profileRecord.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                    cm.setPhysicalName(profileRecord.get(DataCloudConstants.PROFILE_ATTR_ENCATTR).toString());
                 }
             }
             cmMap.put(new AttributeLookup(BusinessEntity.LatticeAccount, cm.getName()), cm);
