@@ -21,6 +21,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     cp -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}/* ${HADOOP_HOME}
     rm -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}
 
+    rm -rf ${HADOOP_HOME}/lib/native || true
     UNAME=`uname`
     if [[ "${UNAME}" == 'Darwin' ]]; then
         echo "You are on Mac"

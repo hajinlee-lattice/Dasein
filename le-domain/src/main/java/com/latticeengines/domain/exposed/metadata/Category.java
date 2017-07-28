@@ -20,6 +20,7 @@ public enum Category {
     TECHNOLOGY_PROFILE("Technology Profile"), //
     WEBSITE_KEYWORDS("Website Keywords"), //
     WEBSITE_PROFILE("Website Profile"), //
+    ACCOUNT_ATTRIBUTES("My Attributes"), //
     DEFAULT("Default");
 
     private final String name;

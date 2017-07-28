@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -78,7 +79,8 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (BusinessEntity.LatticeAccount.equals(entity)) {
             // it is cached in the proxy
             String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-            List<ColumnMetadata> cms = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment, currentDataCloudVersion);
+            List<ColumnMetadata> cms = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
+                    currentDataCloudVersion);
             cms.forEach(cm -> cm.setEntity(entity));
             return cms;
         }
@@ -88,10 +90,13 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (batchTable == null) {
             return Collections.emptyList();
         } else {
-            List<ColumnMetadata> cms =  batchTable.getAttributes().stream() //
+            List<ColumnMetadata> cms = batchTable.getAttributes().stream() //
                     .map(Attribute::getColumnMetadata) //
                     .collect(Collectors.toList());
             cms.forEach(cm -> cm.setEntity(entity));
+            if (BusinessEntity.Account.equals(entity)) {
+                cms.forEach(cm -> cm.setCategory(Category.ACCOUNT_ATTRIBUTES));
+            }
             return cms;
         }
     }
