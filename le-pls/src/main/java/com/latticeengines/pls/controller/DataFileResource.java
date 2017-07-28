@@ -1,15 +1,13 @@
 package com.latticeengines.pls.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-import org.python.jline.internal.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,11 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.pls.service.DataFileProviderService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 @Api(value = "datafile", description = "REST resource for retrieving data files")
 @RestController
 @RequestMapping(value = "/datafiles")
 @PreAuthorize("hasRole('View_PLS_Configurations')")
 public class DataFileResource {
+
+    private static final Logger log = LoggerFactory.getLogger(DataFileResource.class);
 
     @Autowired
     private DataFileProviderService dataFileProviderService;
@@ -115,9 +118,14 @@ public class DataFileResource {
             dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                     "postMatchEventTable.*allTraining.*.csv");
         } else if(eventTableType.equalsIgnoreCase("exportrftrain")) {
-            dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
-                    ".*exportrftrain.csv");
-
+            try {
+                dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
+                        ".*exportrftrain.csv");
+            } catch (Exception e) {
+                log.warn("Final modeling file does not exist, fall back to previous modeling file!");
+                dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
+                        "postMatchEventTable.*allTraining.*.csv");
+            }
         } else if (eventTableType.equalsIgnoreCase("test")) {
             dataFileProviderService.downloadFile(request, response, modelId, MediaType.APPLICATION_OCTET_STREAM,
                     "postMatchEventTable.*allTest.*.csv");
