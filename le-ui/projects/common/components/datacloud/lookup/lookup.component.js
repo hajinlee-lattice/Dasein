@@ -47,7 +47,7 @@ angular
     }
 
     vm.validate = function() {
-        if (vm.request.record.Website || vm.request.record.CompanyName) {
+        if (vm.request.record.Website || vm.request.record.CompanyName || vm.request.record.DUNS) {
             vm.requiredMissingField = {};
 
             if (vm.iframeMode && !vm.Authentication) {
@@ -59,7 +59,8 @@ angular
 
         vm.requiredMissingField = {
             Website: true,
-            CompanyName: true
+            CompanyName: true,
+            DUNS: true
         };
 
         if (vm.iframeMode && !vm.Authentication) {

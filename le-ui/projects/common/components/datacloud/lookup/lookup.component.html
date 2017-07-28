@@ -57,15 +57,29 @@
                             placeholder="Please provide the full name for better match" />
                     </div>
 
-                    <div class="form-group">
-                        <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_CITY') }}</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            ng-class="{'lookup-required': vm.requiredMissingField.City}"
-                            name="City"
-                            ng-model="vm.request.record.City"
-                            placeholder="" />
+                    <div class="row">
+                        <div class="columns six form-group">
+                            <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_DUNS') }}</label>
+                            <input
+                                type="text"
+                                class="form-control required"
+                                ng-class="{'lookup-required': vm.requiredMissingField.DUNS}"
+                                name="DUNS"
+                                ng-model="vm.request.record.DUNS"
+                                placeholder="Please provide the 9 digit DUNS number" />
+                        </div>
+
+                        <div class="columns six offset-six form-group align-right">
+                            <label>{{ ::vm.ResourceUtility.getString('ACCOUNT_LOOKUP_FORM_CITY') }}</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                ng-class="{'lookup-required': vm.requiredMissingField.City}"
+                                name="City"
+                                ng-model="vm.request.record.City"
+                                ng-disabled="vm.request.record.DUNS.length > 0"
+                                placeholder="Ex: 12345" />
+                        </div>
                     </div>
 
                     <div class="row">
@@ -77,6 +91,7 @@
                                 ng-class="{'lookup-required': vm.requiredMissingField.State}"
                                 name="State"
                                 ng-model="vm.request.record.State"
+                                ng-disabled="vm.request.record.DUNS.length > 0"
                                 placeholder="" />
                         </div>
 
@@ -100,6 +115,7 @@
                                 ng-class="{'lookup-required': vm.requiredMissingField.Country}"
                                 name="Country"
                                 ng-model="vm.request.record.Country"
+                                ng-disabled="vm.request.record.DUNS.length > 0"
                                 placeholder="" />
                         </div>
 
