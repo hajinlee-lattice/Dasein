@@ -1,6 +1,7 @@
 package com.latticeengines.common.exposed.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -43,6 +44,21 @@ public class JsonUtils {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public static <T> T deserialize(InputStream is, Class<T> clazz) {
+        if (is == null) {
+            return null;
+        }
+        ObjectMapper objectMapper = getObjectMapper();
+
+        T deserializedSchema;
+        try {
+            deserializedSchema = objectMapper.readValue(is, clazz);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return deserializedSchema;
     }
 
     public static <T> T deserialize(String jsonStr, Class<T> clazz) {

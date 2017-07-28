@@ -108,7 +108,17 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
         Map<AttributeLookup, ColumnMetadata> cmMap = new HashMap<>();
         List<ColumnMetadata> amAttrs = fromPredefinedSelection(ColumnSelection.Predefined.Segment,
                 fullVersion.getVersion());
-        amAttrs.forEach(cm -> cmMap.put(new AttributeLookup(BusinessEntity.LatticeAccount, cm.getName()), cm));
+        Map<String, GenericRecord> profileMap = readProfileFromHdfs(dataCloudVersion);
+        amAttrs.forEach(cm -> {
+            if (profileMap.containsKey(cm.getColumnId())) {
+                GenericRecord profileRecord = profileMap.get(cm.getColumnId());
+                if (profileRecord.get(DataCloudConstants.PROFILE_ATTR_NUMBITS) != null) {
+                    cm.setNumBits((int) profileRecord.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
+                    cm.setBitOffset((int) profileRecord.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                }
+            }
+            cmMap.put(new AttributeLookup(BusinessEntity.LatticeAccount, cm.getName()), cm);
+        });
         ColumnMetadata idAttr = fromPredefinedSelection(ColumnSelection.Predefined.ID, fullVersion.getVersion()).get(0);
         cmMap.put( //
                 new AttributeLookup(BusinessEntity.LatticeAccount, InterfaceName.LatticeAccountId.name()), //
@@ -127,18 +137,36 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
 
     private Statistics readStatisticsFromHdfs(String dataCloudVersion, ColumnSelection.Predefined predefined) {
         DataCloudVersion fullVersion = versionEntityMgr.findVersion(dataCloudVersion);
-        String statsVersion = ColumnSelection.Predefined.Segment.equals(predefined)
-                ? fullVersion.getSegmentStatsVersion() : fullVersion.getEnrichmentStatsVersion();
-        if (StringUtils.isBlank(statsVersion)) {
-            throw new IllegalStateException(
-                    "There is not " + predefined + " stats version for data cloud version " + dataCloudVersion);
-        }
+        String statsVersion = getStatsVersion(dataCloudVersion, predefined);
         String sourceName = ColumnSelection.Predefined.Segment.equals(predefined) ? "AccountMasterSegmentStats" : "AccountMasterEnrichmentStats";
         String snapshotDir = hdfsPathBuilder.constructSnapshotDir(sourceName, statsVersion).toString();
         Iterator<GenericRecord> recordIterator = AvroUtils.iterator(yarnConfiguration, snapshotDir + "/*.avro");
         StatsCube cube = StatsCubeUtils.parseAvro(recordIterator);
         List<ColumnMetadata> amAttrs = fromPredefinedSelection(predefined, fullVersion.getVersion());
         return StatsCubeUtils.constructStatistics(cube, Collections.singletonList(Pair.of(BusinessEntity.LatticeAccount, amAttrs)));
+    }
+
+    private Map<String, GenericRecord> readProfileFromHdfs(String dataCloudVersion) {
+        String statsVersion = getStatsVersion(dataCloudVersion, ColumnSelection.Predefined.Segment);
+        String snapshotDir = hdfsPathBuilder.constructSnapshotDir("AccountMasterProfile", statsVersion).toString();
+        Iterator<GenericRecord> recordIterator = AvroUtils.iterator(yarnConfiguration, snapshotDir + "/*.avro");
+        Map<String, GenericRecord> recordMap = new HashMap<>();
+        while (recordIterator.hasNext()) {
+            GenericRecord record = recordIterator.next();
+            recordMap.put(record.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME).toString(), record);
+        }
+        return recordMap;
+    }
+
+    private String getStatsVersion(String dataCloudVersion, ColumnSelection.Predefined predefined) {
+        DataCloudVersion fullVersion = versionEntityMgr.findVersion(dataCloudVersion);
+        String statsVersion = ColumnSelection.Predefined.Segment.equals(predefined)
+                ? fullVersion.getSegmentStatsVersion() : fullVersion.getEnrichmentStatsVersion();
+        if (StringUtils.isBlank(statsVersion)) {
+            throw new IllegalStateException(
+                    "There is not " + predefined + " stats version for data cloud version " + dataCloudVersion);
+        }
+        return statsVersion;
     }
 
     @SuppressWarnings("unchecked")
