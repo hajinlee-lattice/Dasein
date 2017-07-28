@@ -20,6 +20,7 @@
         <microservice.docker.context>src/main/scripts/tomcat/le-microservice</microservice.docker.context>
         <admin.docker.context>src/main/scripts/tomcat/le-admin</admin.docker.context>
         <pls.docker.context>src/main/scripts/tomcat/le-pls</pls.docker.context>
+        <workflowapp.docker.context>src/main/scripts/workflowapp</workflowapp.docker.context>
     </properties>
 
     <parent>
@@ -60,6 +61,15 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
                                       tofile="${project.basedir}/${config.docker.context}/conf/env/prodcluster/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/devcluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/devcluster/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/qacluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/qacluster/latticeengines.properties"
+                                      overwrite="true" />
+                                <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
+                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/prodcluster/latticeengines.properties"
                                       overwrite="true" />
 
                                 <!-- special wars -->
@@ -127,6 +137,10 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/cdl/target/le-cdl-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/cdl.war"
+                                      overwrite="true" />
+                                
+                                <copy file="${project.basedir}/../le-workflowapi/target/le-workflowapi-${project.version}-shaded.jar"
+                                      tofile="${project.basedir}/${workflowapp.docker.context}/workflowapp.jar"
                                       overwrite="true" />
                             </tasks>
                         </configuration>

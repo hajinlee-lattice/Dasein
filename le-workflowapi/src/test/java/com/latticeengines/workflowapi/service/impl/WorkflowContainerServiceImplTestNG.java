@@ -10,13 +10,17 @@ import java.util.Date;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBatchConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -103,6 +107,24 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
 
         workflowJob = workflowJobEntityMgr.findByApplicationId("applicationid_0001");
         assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED);
+    }
+
+    @Test(groups = "functional", enabled = false)
+    public void submitAwsWorkFlow() {
+        WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
+        workflowConfig.setWorkflowName("dummyWorkflow");
+        workflowConfig.setCustomerSpace(WFAPITEST_CUSTOMERSPACE);
+
+        AWSBatchConfiguration awsConfig = new AWSBatchConfiguration();
+        awsConfig.setCustomerSpace(WFAPITEST_CUSTOMERSPACE);
+        awsConfig.setMicroServiceHostPort("https://localhost");
+        awsConfig.setRunInAws(true);
+        workflowConfig.add(awsConfig);
+        BaseStepConfiguration baseConfig = new BaseStepConfiguration();
+        workflowConfig.add(baseConfig);
+
+        String jobId = workflowContainerService.submitAwsWorkFlow(workflowConfig);
+        Assert.assertNotNull(jobId);
     }
 
 }

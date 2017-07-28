@@ -22,4 +22,6 @@ public interface WorkflowContainerService {
     List<Job> getJobsByTenant(long tenantPid);
 
     Job getJobFromWorkflowJobAndYarn(WorkflowJob workflowJob);
+
+    String submitAwsWorkFlow(WorkflowConfiguration workflowConfig);
 }

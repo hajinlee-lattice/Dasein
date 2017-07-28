@@ -46,7 +46,7 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
         this.swpkgName = swpkgName;
     }
 
-    protected void add(BaseStepConfiguration configuration) {
+    public void add(BaseStepConfiguration configuration) {
         configRegistry.put(configuration.getClass().getName(), configuration.toString());
     }
 

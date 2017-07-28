@@ -1,5 +1,8 @@
 package com.latticeengines.workflowapi.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,9 +30,6 @@ import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 @Api(value = "workflow", description = "REST resource for workflows")
 @RestController
 @RequestMapping("/workflows")
@@ -52,6 +52,14 @@ public class WorkflowResource implements WorkflowInterface {
                 new ApplicationId[] { workflowContainerService.submitWorkFlow(workflowConfig) }));
     }
 
+    @RequestMapping(value = "/aws", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a workflow execution in a AWS container")
+    @Override
+    public String submitAWSWorkflowExecution(@RequestBody WorkflowConfiguration workflowConfig) {
+        return workflowContainerService.submitAwsWorkFlow(workflowConfig);
+    }
+
     @RequestMapping(value = "/job/{workflowId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Restart a previous workflow execution")
@@ -63,8 +71,8 @@ public class WorkflowResource implements WorkflowInterface {
         if (status == null) {
             throw new LedpException(LedpCode.LEDP_28017, new String[] { String.valueOf(workflowId) });
         } else if (!WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
-            throw new LedpException(LedpCode.LEDP_28018,
-                    new String[] { String.valueOf(workflowId), status.getStatus().name() });
+            throw new LedpException(LedpCode.LEDP_28018, new String[] { String.valueOf(workflowId),
+                    status.getStatus().name() });
         }
 
         WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
@@ -73,8 +81,8 @@ public class WorkflowResource implements WorkflowInterface {
         workflowConfig.setWorkflowIdToRestart(workflowExecutionId);
         workflowConfig.setCustomerSpace(status.getCustomerSpace());
 
-        return new AppSubmission(Arrays.<ApplicationId> asList(
-                new ApplicationId[] { workflowContainerService.submitWorkFlow(workflowConfig) }));
+        return new AppSubmission(Arrays.<ApplicationId> asList(new ApplicationId[] { workflowContainerService
+                .submitWorkFlow(workflowConfig) }));
     }
 
     @RequestMapping(value = "/yarnapps/id/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

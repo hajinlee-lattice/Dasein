@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.aws.batch.BatchService;
+import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.util.JacocoUtils;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -38,7 +41,9 @@ import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
+import com.latticeengines.yarn.exposed.service.JobNameService;
 import com.latticeengines.yarn.exposed.service.JobService;
+import com.latticeengines.yarn.exposed.service.impl.JobNameServiceImpl;
 
 @Component("workflowContainerService")
 public class WorkflowContainerServiceImpl implements WorkflowContainerService {
@@ -66,11 +71,57 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Autowired
     private JobProxy jobProxy;
 
+    @Autowired
+    private BatchService batchService;
+    @Autowired
+    private JobNameService jobNameService;
+
     @Override
     public ApplicationId submitWorkFlow(WorkflowConfiguration workflowConfig) {
         Job job = createJob(workflowConfig);
         ApplicationId appId = jobService.submitJob(job);
         job.setId(appId.toString());
+
+        createWorkflowJob(workflowConfig, job, appId.toString());
+        return appId;
+    }
+
+    @Override
+    public String submitAwsWorkFlow(WorkflowConfiguration workflowConfig) {
+        Job job = createJob(workflowConfig);
+        JobRequest jobRequest = createJobRequest(workflowConfig);
+        String jobId = batchService.submitJob(jobRequest);
+        job.setId(jobId);
+
+        createWorkflowJob(workflowConfig, job, jobId.toString());
+        return jobId;
+    }
+
+    private JobRequest createJobRequest(WorkflowConfiguration workflowConfig) {
+        String customer = workflowConfig.getCustomerSpace().toString();
+        JobRequest jobRequest = new JobRequest();
+        String jobName = jobNameService.createJobName(customer, "Aws") + JobNameServiceImpl.JOBNAME_DELIMITER
+                + workflowConfig.getWorkflowName().replace(" ", "_");
+        jobName = jobName.replaceAll(JobNameServiceImpl.JOBNAME_DELIMITER + "", "_");
+        jobRequest.setJobName(jobName);
+        jobRequest.setJobDefinition("AWS-Workflow-Job-Definition");
+        jobRequest.setJobQueue("AWS-Workflow-Job-Queue");
+        Integer memory = workflowConfig.getContainerMemoryMB();
+        if (memory == null) {
+            memory = 2048;
+        }
+        log.info("Set container memory to " + memory + " mb.");
+        jobRequest.setMemory(memory);
+        jobRequest.setCpus(1);
+        Map<String, String> envs = new HashMap<>();
+        envs.put(WorkflowProperty.WORKFLOWCONFIG, workflowConfig.toString());
+        envs.put(WorkflowProperty.WORKFLOWCONFIGCLASS, workflowConfig.getClass().getName());
+
+        jobRequest.setEnvs(envs);
+        return jobRequest;
+    }
+
+    private void createWorkflowJob(WorkflowConfiguration workflowConfig, Job job, String appId) {
         jobEntityMgr.create(job);
 
         Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfig);
@@ -80,12 +131,10 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         WorkflowJob workflowJob = new WorkflowJob();
         workflowJob.setTenant(tenant);
         workflowJob.setUserId(user);
-        workflowJob.setApplicationId(appId.toString());
+        workflowJob.setApplicationId(appId);
         workflowJob.setInputContext(workflowConfig.getInputProperties());
         workflowJob.setStartTimeInMillis(System.currentTimeMillis());
         workflowEntityMgr.create(workflowJob);
-
-        return appId;
     }
 
     @Override
@@ -162,8 +211,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         for (WorkflowJob workflowJob : workflowJobs) {
             if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
-                if (workflowId == null || (workflowJob.getStatus() != null
-                        && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED))) {
+                if (workflowId == null
+                        || (workflowJob.getStatus() != null && workflowJob.getStatus().equals(
+                                FinalApplicationStatus.FAILED))) {
                     com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
                     jobs.add(job);
                 } else {

@@ -27,6 +27,12 @@ public class WorkflowProxy extends MicroserviceRestApiProxy implements WorkflowI
     }
 
     @Override
+    public String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig) {
+        String url = constructUrl("/aws");
+        return post("submitAWSWorkflowExecution", url, workflowConfig, String.class);
+    }
+
+    @Override
     public AppSubmission restartWorkflowExecution(Long workflowId) {
         String url = constructUrl("/job/{workflowId}/restart", workflowId);
         return post("restartWorkflow", url, null, AppSubmission.class);

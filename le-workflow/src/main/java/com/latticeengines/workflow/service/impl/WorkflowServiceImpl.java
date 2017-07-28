@@ -115,27 +115,6 @@ public class WorkflowServiceImpl implements WorkflowService {
             throw new LedpException(LedpCode.LEDP_28000, new String[] { workflowConfiguration.getWorkflowName() });
         }
 
-        JobParametersBuilder parmsBuilder = new JobParametersBuilder().addString(WORKFLOW_SERVICE_UUID,
-                UUID.randomUUID().toString());
-        if (workflowConfiguration != null) {
-            if (workflowConfiguration.getCustomerSpace() != null) {
-                parmsBuilder.addString(CUSTOMER_SPACE, workflowConfiguration.getCustomerSpace().toString());
-            }
-            if (workflowConfiguration.getInternalResourceHostPort() != null) {
-                parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT,
-                        workflowConfiguration.getInternalResourceHostPort().toString());
-            }
-            if (workflowConfiguration.getUserId() != null) {
-                parmsBuilder.addString(USER_ID, workflowConfiguration.getUserId());
-            } else {
-                parmsBuilder.addString(USER_ID, WorkflowUser.DEFAULT_USER.name());
-            }
-            for (String configurationClassName : workflowConfiguration.getConfigRegistry().keySet()) {
-                parmsBuilder.addString(configurationClassName,
-                        workflowConfiguration.getConfigRegistry().get(configurationClassName));
-            }
-        }
-
         JobParameters parms = createJobParams(workflowConfiguration);
         JobExecution jobExecution = null;
         try {

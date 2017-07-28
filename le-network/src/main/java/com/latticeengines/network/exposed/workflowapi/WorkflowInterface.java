@@ -27,4 +27,6 @@ public interface WorkflowInterface {
     List<Job> getWorkflowExecutionsForTenant(long tenantPid, String type);
 
     void stopWorkflow(String workflowId);
+
+    String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig);
 }

@@ -27,6 +27,17 @@
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-aws</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.latticeengines</groupId>
+                    <artifactId>le-common</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
             <classifier>intf</classifier>
@@ -111,6 +122,17 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-redshiftdb</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.latticeengines</groupId>
+                    <artifactId>le-common</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <build>
