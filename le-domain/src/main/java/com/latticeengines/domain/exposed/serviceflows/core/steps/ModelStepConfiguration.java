@@ -11,7 +11,6 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ModelStepConfiguration extends MicroserviceStepConfiguration {
@@ -56,6 +55,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     private String notesContent;
 
     private String userName;
+
+    private boolean activateModelSummaryByDefault = false;
 
     @JsonProperty
     public List<DataRule> getDataRules() {
@@ -235,6 +236,16 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    @JsonProperty
+    public boolean getActivateModelSummaryByDefault() {
+        return this.activateModelSummaryByDefault;
+    }
+
+    @JsonProperty
+    public void setActivateModelSummaryByDefault(boolean activateModelSummaryByDefault) {
+        this.activateModelSummaryByDefault = activateModelSummaryByDefault;
     }
 
 }

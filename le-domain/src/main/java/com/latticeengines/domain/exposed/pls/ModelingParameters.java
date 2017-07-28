@@ -62,6 +62,9 @@ public class ModelingParameters {
     @JsonProperty
     private String notesContent;
 
+    @JsonProperty
+    private boolean activateModelSummaryByDefault = false;
+
     public String getFilename() {
         return filename;
     }
@@ -188,6 +191,14 @@ public class ModelingParameters {
 
     public void setNotesContent(String notesContent) {
         this.notesContent = notesContent;
+    }
+
+    public boolean getActivateModelSummaryByDefault() {
+        return this.activateModelSummaryByDefault;
+    }
+
+    public void setActivateModelSummaryByDefault(boolean value) {
+        this.activateModelSummaryByDefault = value;
     }
 
     @Override

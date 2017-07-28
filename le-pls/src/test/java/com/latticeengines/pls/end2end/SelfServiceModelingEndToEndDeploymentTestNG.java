@@ -178,6 +178,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setModuleName("module1");
         parameters.setPivotFileName("pivotvalues.csv");
         parameters.setFilename(sourceFile.getName());
+        parameters.setActivateModelSummaryByDefault(true);
         Map<String, String> runtimeParams = new HashMap<>();
         runtimeParams.put(SamplingFactory.MODEL_SAMPLING_SEED_KEY, "987654");
         runtimeParams.put(AlgorithmFactory.RF_SEED_KEY, "987654");
@@ -422,6 +423,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
         parameters.setEnableTransformations(true);
         parameters.setExcludePropDataAttributes(true);
+        parameters.setActivateModelSummaryByDefault(true);
 
         ResponseDocument<?> response;
         response = restTemplate.postForObject(String.format("%s/pls/models/%s/clone", getRestAPIHostPort(), modelName),
@@ -654,7 +656,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     private void compareRtsScoreWithModeling(ModelSummary modelSummary, int countsForScoring, String tenantId)
             throws IOException, InterruptedException {
-        activateModelSummary(modelSummary.getId());
 
         Map<String, ComparedRecord> diffRecords = scoreCompareService.analyzeScores(tenantId,
                 RESOURCE_BASE + "/" + fileName, modelSummary.getId(), countsForScoring);

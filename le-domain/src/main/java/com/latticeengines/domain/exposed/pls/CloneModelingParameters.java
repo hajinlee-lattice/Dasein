@@ -44,6 +44,9 @@ public class CloneModelingParameters {
     @JsonProperty
     private String notesContent;
 
+    @JsonProperty
+    private boolean activateModelSummaryByDefault = false;
+
     public String getName() {
         return name;
     }
@@ -138,6 +141,14 @@ public class CloneModelingParameters {
 
     public void setNotesContent(String notesContent) {
         this.notesContent = notesContent;
+    }
+
+    public boolean getActivateModelSummaryByDefault() {
+        return this.activateModelSummaryByDefault;
+    }
+
+    public void setActivateModelSummaryByDefault(boolean value) {
+        this.activateModelSummaryByDefault = value;
     }
 
     @Override

@@ -184,6 +184,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .enableLeadEnrichment(false) //
                 .enableDebug(false) //
                 .setRetainLatticeAccountId(true) //
+                .setActivateModelSummaryByDefault(parameters.getActivateModelSummaryByDefault()) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }

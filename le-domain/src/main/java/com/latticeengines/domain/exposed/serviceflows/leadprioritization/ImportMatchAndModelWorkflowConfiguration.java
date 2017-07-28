@@ -368,6 +368,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
             return this;
         }
 
+        public Builder setActivateModelSummaryByDefault(boolean value) {
+            model.setActivateModelSummaryByDefault(value);
+            return this;
+        }
+
         public ImportMatchAndModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
             export.setExportDestination(ExportDestination.FILE);

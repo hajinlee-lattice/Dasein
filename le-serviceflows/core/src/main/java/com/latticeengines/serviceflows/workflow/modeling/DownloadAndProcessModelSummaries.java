@@ -39,7 +39,11 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
         Map<String, String> eventToModelId = retrieveModelIds(eventToModelSummary);
 
         AttributeMap attrMap = new AttributeMap();
-        attrMap.put("Status", ModelSummaryStatus.INACTIVE.getStatusCode());
+        if (configuration.getActivateModelSummaryByDefault()) {
+            attrMap.put("Status", ModelSummaryStatus.ACTIVE.getStatusCode());
+        } else {
+            attrMap.put("Status", ModelSummaryStatus.INACTIVE.getStatusCode());
+        }
         for (String event : eventToModelId.keySet()) {
             String modelId = eventToModelId.get(event);
             proxy.updateModelSummary(modelId, attrMap);

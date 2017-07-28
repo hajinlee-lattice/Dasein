@@ -144,6 +144,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .enableDebug(false) //
                 .enableLeadEnrichment(false) //
                 .setRetainLatticeAccountId(true) //
+                .setActivateModelSummaryByDefault(parameters.getActivateModelSummaryByDefault()) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }
