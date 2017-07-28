@@ -278,7 +278,7 @@ angular
                     var deferred = $q.defer();
 
                     var segmentName = $stateParams.segment;
-                    var isCreateNew = segmentName === 'Create';
+                    var isCreateNew = segmentName === '';
                     var modelId = $stateParams.modelId;
                     var tenantName = $stateParams.tenantName;
 
@@ -321,7 +321,7 @@ angular
                             };
                         }
 
-                        // console.log(segment);
+                        console.log(segment);
 
                         return SegmentService.CreateOrUpdateSegment(segment);
                     };
@@ -406,6 +406,12 @@ angular
                             var deferred = $q.defer();
                             deferred.resolve(QueryStore.getCounts().accounts);
                             return deferred.promise;
+                        }],
+                        Columns: ['QueryStore', function(QueryStore) {
+                            return QueryStore.columns.accounts;
+                        }],
+                        Records: ['QueryStore', function(QueryStore) {
+                            return QueryStore.getRecordsForUiState('accounts');
                         }]
                     },
                     controller: 'QueryResultsCtrl',

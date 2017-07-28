@@ -60,8 +60,9 @@ angular.module('common.datacloud.query.factory.restriction', [])
 
     BucketRestriction.isEqualRange = function (a, b) {
         return (a.max === b.max) &&
-            (a.min === b.min) &&
-            (a.is_null_only === b.is_null_only);
+            (a.min === b.min);
+            // (a.min === b.min) &&
+            // (a.is_null_only === b.is_null_only);
     };
 
     BucketRestriction.getColumnName = function(bucketRestriction) {

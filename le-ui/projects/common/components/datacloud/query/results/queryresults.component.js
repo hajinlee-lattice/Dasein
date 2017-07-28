@@ -1,7 +1,7 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, SegmentServiceProxy, CountMetadata) {
+.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, SegmentServiceProxy, CountMetadata, Columns, Records, LookupStore) {
 
     var vm = this;
     angular.extend(vm, {
@@ -10,14 +10,15 @@ angular.module('common.datacloud.query.results', [
         inModel: $state.current.name.split('.')[1] === 'model',
         count: CountMetadata ? CountMetadata.count : 0,
         countMetadata: CountMetadata || {},
-        columns: [{displayName: 'Company Name', key: 'business_name'}],
-        results: [],
+        columns: Columns,
+        results: Records,
         current: 1,
         pagesize: 20,
         search: '',
         sortBy: null,
         sortDesc: false,
-        authToken: BrowserStorageUtility.getTokenDocument()
+        authToken: BrowserStorageUtility.getTokenDocument(),
+        saving: false,
     });
 
     var prevQuery = vm.search;

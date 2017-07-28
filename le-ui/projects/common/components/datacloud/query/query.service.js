@@ -4,6 +4,12 @@ angular.module('common.datacloud.query.service',[
 
     angular.extend(this, {});
 
+
+    var uiStates = [];
+    var defaultState = {};
+    var undefinedState = {};
+
+
     this.validResourceTypes = ['accounts', 'contacts'];
     this.segment = null;
     this.restriction = {
@@ -28,6 +34,8 @@ angular.module('common.datacloud.query.service',[
     this.setResourceTypeCount = function(resourceType, loading, value) {
         var resourceTypeCount = this.getCounts()[resourceType];
 
+        console.log(resourceTypeCount);
+
         if (resourceTypeCount) {
             if (typeof value  !== 'undefined') {
                 resourceTypeCount.value = value;
@@ -36,10 +44,6 @@ angular.module('common.datacloud.query.service',[
                 resourceTypeCount.loading = loading;
             }
         }
-    };
-
-    this.adjustCounts = function() {
-
     };
 
     this.setRestriction = function(restriction) {
@@ -67,15 +71,30 @@ angular.module('common.datacloud.query.service',[
         var self = this;
         var deferred = $q.defer();
 
+        console.log(segment);
+
         this.setSegment(segment);
+
         if (segment !== null) {
-            this.setRestriction(segment.simple_restriction || { all: [], any: [] });
+            this.setRestriction(segment.frontend_restriction || {});
             deferred.resolve();
         } else {
-            this.setRestriction( { all: [], any: [] } );
+            this.setRestriction( {   
+                'free_form_text_search': '',
+                'frontend_restriction': {},
+                'restrict_with_sfdcid': false,
+                'restrict_without_sfdcid': false,
+                'page_filter': { 
+                    "row_offset": 0, 
+                    "num_rows": 10 
+                }
+            });
         }
+
+        this.getRestriction();
+
         return deferred.promise;
-    };
+    };  
 
 
     this.getSegmentProperty = function(properties, propertyName) {
@@ -91,28 +110,32 @@ angular.module('common.datacloud.query.service',[
 
     this.addRestriction = function(attribute) {
 
+        attribute.Entity = attribute.Entity || 'Account';
 
-        attribute.resourceType = attribute.resourceType || 'Account';
+        this.restriction.frontend_restriction = attribute;
 
         var attributesFound = this.findAttributes(attribute.columnName);
         var attributes = attributesFound.attributes;
         var groupKey = attributesFound.groupKey;
 
-        console.log(attribute);
+        console.log(this.restriction, attributesFound);
 
         var found = false;
         for (var i = 0; i < attributes.length; i++) {
             var attributeMeta = attributes[i];
-            if (BucketRestriction.isEqualRange(attribute.range, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
+            if (BucketRestriction.isEqualRange(attribute.Bkg.Rng, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
                 found = true;
                 break;
             }
         }
 
         if (!found) {
-            groupKey = groupKey || 'all';
+            groupKey = groupKey || {};
+
+            console.log(groupKey);
+
             this.restriction[groupKey].push({
-                bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.Bkt)
+                bucketRestriction: new BucketRestriction(attribute.ColumnId, attribute.Entity, attribute.Bkt)
             });
         }
 
@@ -136,24 +159,29 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.findAttributes = function(columnName) {
+
         var groupKey = null;
         var attributes = [];
+
         for (var group in this.restriction) {
-            attributes = this.findAttributesInGroup(group);
+            attributes = this.findAttributesInGroup(group, columnName);
             if (attributes.length > 0) {
                 groupKey = group;
                 break;
             }
         }
-        return { groupKey: groupKey, attributes: attributes };
+
+        return { 'groupKey': groupKey, 'attributes': attributes };
     };
 
-    this.findAttributesInGroup = function(groupKey) {
+    this.findAttributesInGroup = function(groupKey, columnName) {
         var group = this.restriction[groupKey];
         var results = [];
 
         for (var i = 0; i < group.length; i++) {
-            results.push({index: i, bucketRestriction: group[i].bucketRestriction });
+            if (group[i].bucketRestriction.columnName === columnName) {
+                results.push({index: i, bucketRestriction: group[i].bucketRestriction });
+            }
         }
 
         return results;

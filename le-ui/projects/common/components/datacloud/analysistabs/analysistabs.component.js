@@ -13,13 +13,31 @@ angular.module('common.datacloud.analysistabs', [
         stateParams: $stateParams,
         section: $stateParams.section,
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
-        restriction: QueryStore.getRestriction(),
-        counts: QueryService.GetCountByRestriction('accounts', {'restriction': vm.restriction})
+        loadingData: false,
+        restriction: QueryStore.getRestriction() || null,
+        accountsCount: QueryStore.GetCountByQuery('accounts', {
+            'free_form_text_search': '',
+            'frontend_restriction': vm.restriction,
+            'restrict_with_sfdcid': false,
+            'restrict_without_sfdcid': false,
+            'page_filter': { 
+                "row_offset": 0, 
+                "num_rows": 10 
+            }
+        }),
+        accountsData: QueryService.GetDataByQuery('accounts', {
+            'free_form_text_search': '',
+            'frontend_restriction': vm.restriction,
+            'restrict_with_sfdcid': false,
+            'restrict_without_sfdcid': false,
+            'page_filter': { 
+                "row_offset": 0, 
+                "num_rows": 10 
+            }
+        })
     });
 
     vm.init = function() {
-
-        console.log(vm.restriction);
 
         vm.attributes = vm.inModel()
             ? 'home.model.analysis.explorer'

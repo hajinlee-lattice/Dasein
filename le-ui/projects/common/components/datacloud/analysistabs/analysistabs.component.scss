@@ -86,12 +86,7 @@
                 font-size: 18px;
             }
             &.disabled {
-                .tab-container {
-                    background: #e2e2e2;
-                    .count {
-                        color: #aaa;
-                    }
-                }
+                display: none;
             }
             &.tab-edit {
                 min-width: 289px;
