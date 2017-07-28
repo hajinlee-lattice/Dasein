@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -46,8 +47,8 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
         String hdfsPath = "/tmp/artifact";
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, ClassLoader.getSystemResource(RESOURCE_BASE + "/pivot.csv")
-                .getPath(), hdfsPath);
+        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration,
+                ClassLoader.getSystemResource(RESOURCE_BASE + "/pivot.csv").getPath(), hdfsPath);
         hdfsPath += "/pivot.csv";
         addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -58,8 +59,9 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
                     null, ResponseDocument.class);
             assertTrue(false);
         } catch (HttpServerErrorException e) {
-            assertTrue(e.getResponseBodyAsString().contains(
-                            "Unable to find required columns [SourceColumn, TargetColumn, SourceColumnType]"));
+            log.error(ExceptionUtils.getFullStackTrace(e));
+            assertTrue(e.getResponseBodyAsString()
+                    .contains("Unable to find required columns [SourceColumn, TargetColumn, SourceColumnType]"));
         }
     }
 
@@ -114,7 +116,8 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
 
         Artifact artifact = restTemplate.getForObject( //
                 String.format("%s/metadata/customerspaces/%s/artifactpath?file=%s", getRestAPIHostPort(),
-                        customerSpace1, hdfsPath), Artifact.class);
+                        customerSpace1, hdfsPath),
+                Artifact.class);
         assertEquals(artifact.getPath(), hdfsPath);
     }
 
