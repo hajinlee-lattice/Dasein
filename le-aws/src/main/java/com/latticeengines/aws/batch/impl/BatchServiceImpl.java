@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.batch.AWSBatch;
 import com.amazonaws.services.batch.AWSBatchClientBuilder;
 import com.amazonaws.services.batch.model.ContainerOverrides;
@@ -31,15 +32,12 @@ public class BatchServiceImpl implements BatchService {
 
     private AWSBatch awsBatch = null;
 
-    @Value("${aws.region}")
-    private String region;
-
     @Autowired
-    public BatchServiceImpl(BasicAWSCredentials awsCredentials) {
+    public BatchServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.region}") String region) {
         log.info("Constructing AWSBatch using BasicAWSCredentials.");
         awsBatch = AWSBatchClientBuilder.standard() //
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
-                .withRegion(region) //
+                .withRegion(Regions.fromName(region)) //
                 .build();
     }
 
