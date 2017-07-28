@@ -32,7 +32,7 @@ public class BatchServiceImpl implements BatchService {
     private AWSBatch awsBatch = null;
 
     @Value("${aws.region}")
-    private static String region;
+    private String region;
 
     @Autowired
     public BatchServiceImpl(BasicAWSCredentials awsCredentials) {
