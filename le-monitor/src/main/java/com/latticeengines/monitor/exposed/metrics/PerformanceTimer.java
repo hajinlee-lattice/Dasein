@@ -10,15 +10,15 @@ public class PerformanceTimer implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(PerformanceTimer.class);
 
     private Date start;
-    private String methodName;
+    private String timerMessage;
 
-    public PerformanceTimer(String methodName) {
+    public PerformanceTimer(String timerMessage) {
         this.start = new Date();
-        this.methodName = methodName;
+        this.timerMessage = timerMessage;
     }
 
     @Override
     public void close() {
-        log.info(String.format("Metrics for %s ElapsedTime=%d ms", methodName, new Date().getTime() - start.getTime()));
+        log.info(String.format("[Metrics] %s ElapsedTime=%d ms", timerMessage, new Date().getTime() - start.getTime()));
     }
 }
