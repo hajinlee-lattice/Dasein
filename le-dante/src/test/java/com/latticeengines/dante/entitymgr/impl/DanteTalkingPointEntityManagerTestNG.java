@@ -29,7 +29,7 @@ public class DanteTalkingPointEntityManagerTestNG extends AbstractTestNGSpringCo
     }
 
     @Test(groups = "functional")
-    public void testCreate() {
+    public void testCrud() {
 
         DanteTalkingPoint dtp = new DanteTalkingPoint();
         dtp.setCustomerID("test");

@@ -55,6 +55,10 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
+    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
+        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    }
+
     @PostConstruct
     public void initialize() throws Exception {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);

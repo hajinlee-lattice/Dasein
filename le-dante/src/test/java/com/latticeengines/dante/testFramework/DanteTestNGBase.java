@@ -7,6 +7,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
@@ -18,9 +19,12 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected Tenant mainTestTenant;
 
+    protected CustomerSpace mainTestCustomerSpace;
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
         testBed.bootstrap(1);
         mainTestTenant = testBed.getMainTestTenant();
+        mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());
     }
 }

@@ -81,11 +81,14 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         tp1.setContent("PLS Deployment Test Talking Point no 2");
         tps.add(tp1);
 
-        List<TalkingPointDTO> createResponse = restTemplate.postForObject( //
+        List<TalkingPointDTO> createResponseRaw = restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints", //
                 tps, //
                 List.class);
+        List<TalkingPointDTO> createResponse = JsonUtils.convertList(createResponseRaw, TalkingPointDTO.class);
+
         Assert.assertNotNull(createResponse);
+        Assert.assertEquals(createResponse.size(), 2);
 
         List<TalkingPointDTO> playTpsResponse = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/play/" + play.getName(), //
@@ -95,8 +98,8 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         tps = JsonUtils.convertList(playTpsResponse, TalkingPointDTO.class);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 2);
-        Assert.assertNotEquals(tps.get(0).getName(), "plsDeploymentTestTP1");
-        Assert.assertNotEquals(tps.get(1).getName(), "plsDeploymentTestTP2");
+        Assert.assertEquals(tps.get(0).getName(), createResponse.get(0).getName());
+        Assert.assertEquals(tps.get(1).getName(), createResponse.get(1).getName());
 
         tps.get(0).setOffset(2);
         tps.get(1).setOffset(1);
