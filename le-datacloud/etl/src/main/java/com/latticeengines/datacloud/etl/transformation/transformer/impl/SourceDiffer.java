@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.dataflow.transformation.Diff;
@@ -30,6 +32,9 @@ public class SourceDiffer extends AbstractDataflowTransformer<DifferConfig, Diff
 
     @Autowired
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    private DataCloudVersionService dataCloudVersionService;
 
     @Override
     protected String getDataFlowBeanName() {
@@ -84,11 +89,41 @@ public class SourceDiffer extends AbstractDataflowTransformer<DifferConfig, Diff
                 throw new RuntimeException("No enough versions to diff for source " + baseSource[0].getSourceName());
             }
             Collections.sort(versions, Collections.reverseOrder());
-            parameters.setDiffVersion(versions.get(0));
-            parameters.setDiffVersionCompared(versions.get(1));
+            if (baseSource[0].getSourceName().equals(MapAttributeTransformer.ACCOUNT_MASTER)) {
+                String dataCloudVersion = config.getDataCloudVersion() != null ? config.getDataCloudVersion()
+                        : dataCloudVersionService.currentApprovedVersion().getVersion();
+                log.info("Diff AccountMaster of datacloud version " + dataCloudVersion);
+                for (String version : versions) {
+                    Schema schema = hdfsSourceEntityMgr.getAvscSchemaAtVersion(baseSource[0], version);
+                    if (schema == null) {
+                        throw new RuntimeException("Fail to find schema file for AccountMaster @" + version);
+                    }
+                    if (dataCloudVersion.equals(schema.getProp(MapAttributeTransformer.DATA_CLOUD_VERSION))) {
+                        if (parameters.getDiffVersion() == null) {
+                            parameters.setDiffVersion(version);
+                        } else if (parameters.getDiffVersionCompared() == null) {
+                            parameters.setDiffVersionCompared(version);
+                        }
+                    }
+                    if (parameters.getDiffVersion() != null && parameters.getDiffVersionCompared() != null) {
+                        break;
+                    }
+                }
+                if (parameters.getDiffVersion() == null || parameters.getDiffVersionCompared() == null) {
+                    throw new RuntimeException(
+                            "Fail to find two versions of AccountMaster with DataCloudVersion " + dataCloudVersion);
+                }
+            } else {
+                parameters.setDiffVersion(versions.get(0));
+                parameters.setDiffVersionCompared(versions.get(1));
+            }
         } else {
             parameters.setDiffVersion(config.getDiffVersion());
             parameters.setDiffVersionCompared(config.getDiffVersionCompared());
+        }
+        if (baseSource.length == 1) {
+            log.info(String.format("Diff source %s between version %s and %s", baseSource[0].getSourceName(),
+                    parameters.getDiffVersion(), parameters.getDiffVersionCompared()));
         }
         parameters.setExcludeFields(config.getExcludeFields());
         parameters.setKeys(config.getKeys());

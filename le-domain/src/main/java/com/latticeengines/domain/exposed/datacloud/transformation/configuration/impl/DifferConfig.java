@@ -15,6 +15,9 @@ public class DifferConfig extends TransformerConfig {
     @JsonProperty("ExcludeFields")
     private String[] excludeFields;
 
+    @JsonProperty("DataCloudVersion")
+    private String dataCloudVersion; // By default, use latest approved version
+
     public String[] getKeys() {
         return keys;
     }
@@ -45,6 +48,14 @@ public class DifferConfig extends TransformerConfig {
 
     public void setExcludeFields(String[] excludeFields) {
         this.excludeFields = excludeFields;
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 
 }
