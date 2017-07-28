@@ -10,7 +10,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -52,12 +51,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertPlay(createdPlay1);
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(name);
-        ResponseDocument<?> createTPResponse = restTemplate.postForObject( //
+        List<TalkingPointDTO> createTPResponse = restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints", //
                 tps, //
-                ResponseDocument.class);
+                List.class);
         Assert.assertNotNull(createTPResponse);
-        Assert.assertNull(createTPResponse.getErrors());
 
         Play createdPlay2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createDefaultPlay(),
                 Play.class);
