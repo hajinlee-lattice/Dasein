@@ -39,6 +39,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         int skipped = 0;
+        int rowNum = offset + 1;
 
         for (Play play : plays) {
             // TODO - implement this pagination in play dao impl and expose it
@@ -63,6 +64,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                 playMap.put("PlayGroups", dummyPlayGroups());
                 playMap.put("TargetProducts", dummyTargetProducts());
                 playMap.put("Workflow", dummyWorkfowType());
+                playMap.put("RowNum", rowNum++);
                 result.add(playMap);
             }
         }
@@ -70,19 +72,28 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     private String dummyWorkfowType() {
-        return "WfTypeId1";
+        return "ADefault";
     }
 
-    private String dummyTargetProducts() {
-        return "Wireless Router|productId1";
+    private List<Map<String, String>> dummyTargetProducts() {
+        List<Map<String, String>> products = new ArrayList<>();
+        Map<String, String> prod1 = new HashMap<>();
+        prod1.put("DisplayName", "Series K Disk");
+        prod1.put("ExternalName", "NETSUITE-SRSK");
+        products.add(prod1);
+        Map<String, String> prod2 = new HashMap<>();
+        prod2.put("DisplayName", "Series L Disk");
+        prod2.put("ExternalName", "NETSUITE-SRSL");
+        products.add(prod2);
+        return products;
     }
 
     private String dummyPlayGroups() {
-        return "PG1|PG2";
+        return null;// "[PG2]";
     }
 
     private String dummyAvgProbability() {
-        return "0.5";
+        return null;// "0.5";
     }
 
     private long secondsFromEpoch(Play play) {

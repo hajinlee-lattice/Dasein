@@ -15,13 +15,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
-import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.playmaker.service.LpiPMRecommendation;
 
 @Component("lpiPMRecommendationDaoAdapter")
 public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
+
     private static final String ACC_EXT_LAST_MODIFIED_FIELD_NAME = "LastModified";
 
     @Autowired
@@ -77,11 +77,6 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
         List<Map<String, Object>> result = lpiPMAccountExtension.getAccountExtensions(start, offset, maximum,
                 accountIds, recStart, columns, hasSfdcContactId);
 
-        for (Map<String, Object> resRec : result) {
-            resRec.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY,
-                    resRec.get(ACC_EXT_LAST_MODIFIED_FIELD_NAME));
-        }
-
         return result;
     }
 
@@ -103,23 +98,27 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     @Override
     public List<Map<String, Object>> getContacts(long start, int offset, int maximum, List<Integer> contactIds,
             List<Integer> accountIds) {
-        throw new NotImplementedException();
+        // TODO - not implemented in M13
+        return new ArrayList<>();
     }
 
     @Override
     public int getContactCount(long start, List<Integer> contactIds, List<Integer> accountIds) {
-        throw new NotImplementedException();
+        // TODO - not implemented in M13
+        return 0;
     }
 
     @Override
     public List<Map<String, Object>> getContactExtensions(long start, int offset, int maximum,
             List<Integer> contactIds) {
-        throw new NotImplementedException();
+        // TODO - not implemented in M13
+        return new ArrayList<>();
     }
 
     @Override
     public int getContactExtensionCount(long start, List<Integer> contactIds) {
-        throw new NotImplementedException();
+        // TODO - not implemented in M13
+        return 0;
     }
 
     @Override
@@ -134,24 +133,35 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> getPlayValues(long start, int offset, int maximum, List<Integer> playgroupIds) {
-        throw new NotImplementedException();
+        // TODO - not implemented in M13
+        return new ArrayList<>();
     }
 
     @Override
     public int getPlayValueCount(long start, List<Integer> playgroupIds) {
-        throw new NotImplementedException();
+        // TODO - not implemented in M13
+        return 0;
     }
 
     @Override
     public List<Map<String, Object>> getWorkflowTypes() {
         // TODO - dummy impl in M13, fix in M14
         List<Map<String, Object>> result = new ArrayList<>();
-        Map<String, Object> wf1 = new HashMap<>();
-        wf1.put("ID", "WfTypeId1");
-        wf1.put("DisplayName", "Workflow Type 1");
-        result.add(wf1);
+
+        createWorkflowTypeMap(result, "ADefault", "List");
+        createWorkflowTypeMap(result, "Cross-Sell", "Cross-Sell");
+        createWorkflowTypeMap(result, "Prospecting", "Prospecting");
+        createWorkflowTypeMap(result, "Renewal", "Renewal");
+        createWorkflowTypeMap(result, "Upsell", "Upsell");
 
         return result;
+    }
+
+    private void createWorkflowTypeMap(List<Map<String, Object>> result, String type, String typeDisplayName) {
+        Map<String, Object> wf = new HashMap<>();
+        wf.put("ID", type);
+        wf.put("DisplayName", typeDisplayName);
+        result.add(wf);
     }
 
     @Override
@@ -159,19 +169,25 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
         // TODO - dummy impl in M13, fix in M14
         List<Map<String, Object>> result = new ArrayList<>();
         Map<String, Object> pg1 = new HashMap<>();
-        pg1.put("ID", "PG1");
-        pg1.put("ExternalID", "PG1");
-        pg1.put("DisplayName", "Group 1");
-        pg1.put("LastModificationDate", 0);
-        result.add(pg1);
-        Map<String, Object> pg2 = new HashMap<>();
-        pg1.put("ID", "PG2");
-        pg1.put("ExternalID", "PG2");
-        pg1.put("DisplayName", "Group 2");
-        pg1.put("LastModificationDate", 0);
-        result.add(pg2);
+
+        createPlayGroupMap(result, 1, "Enterprise", "Enterprise", 0, 1);
+        createPlayGroupMap(result, 2, "Marketing", "Marketing", 0, 2);
+        createPlayGroupMap(result, 3, "PlayGroup001", "Play Group 1", 0, 3);
+        createPlayGroupMap(result, 4, "PlayGroup002", "Play Group 2", 0, 4);
+        createPlayGroupMap(result, 5, "Renewals", "Renewals", 0, 5);
 
         return result;
+    }
+
+    private void createPlayGroupMap(List<Map<String, Object>> result, int id, String externalId, String displayName,
+            int lastModificationDate, int rowNum) {
+        Map<String, Object> pg = new HashMap<>();
+        pg.put("ID", id);
+        pg.put("ExternalID", externalId);
+        pg.put("DisplayName", displayName);
+        pg.put("LastModificationDate", lastModificationDate);
+        pg.put("RowNum", rowNum);
+        result.add(pg);
     }
 
     @Override

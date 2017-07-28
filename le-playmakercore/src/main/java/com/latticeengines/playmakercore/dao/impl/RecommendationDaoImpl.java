@@ -93,13 +93,13 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT new map " //
                 + "( " //
-                + "pid AS ID, recommendationId AS recommendationId, accountId AS accountId, "
-                + "leAccountExternalID AS leAccountExternalID, playId AS playId, launchId AS launchId, "
-                + "description AS description, UNIX_TIMESTAMP(launchDate) AS launchDate, "
+                + "pid AS ID, recommendationId AS RecommendationID, cast(accountId as int) AS AccountID, "
+                + "leAccountExternalID AS LEAccountExternalID, playId AS PlayID, launchId AS LaunchID, "
+                + "description AS Description, UNIX_TIMESTAMP(launchDate) AS LaunchDate, "
                 + "UNIX_TIMESTAMP(lastUpdatedTimestamp) AS LastModificationDate, "
-                + "monetaryValue AS monetaryValue, likelihood AS likelihood, companyName AS companyName, "
-                + "sfdcAccountID AS sfdcAccountID, priorityID AS priorityID, priorityDisplayName AS priorityDisplayName, "
-                + "monetaryValueIso4217ID AS monetaryValueIso4217ID, contacts AS contacts " + ") " //
+                + "monetaryValue AS MonetaryValue, likelihood AS Likelihood, companyName AS CompanyName, "
+                + "sfdcAccountID AS SfdcAccountID, priorityID AS PriorityID, priorityDisplayName AS PriorityDisplayName, "
+                + "monetaryValueIso4217ID AS MonetaryValueIso4217ID, contacts AS Contacts " + ") " //
                 + "FROM %s WHERE synchronizationDestination = :syncDestination " //
                 + "AND lastUpdatedTimestamp >= :lastUpdatedTimestamp ";
 

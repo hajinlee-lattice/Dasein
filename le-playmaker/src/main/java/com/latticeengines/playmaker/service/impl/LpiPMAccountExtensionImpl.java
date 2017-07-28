@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
+import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
@@ -54,7 +56,33 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                 DateTimeUtils.convertToStringUTCISO8601(LpiPMUtils.dateFromEpochSeconds(start)), offset, maximum,
                 dataRequest);
 
-        return dataPage.getData();
+        return postProcess(dataPage.getData(), offset);
+    }
+
+    private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, int offset) {
+
+        if (CollectionUtils.isNotEmpty(data)) {
+            int rowNum = offset + 1;
+
+            for (Map<String, Object> accExtRec : data) {
+                if (accExtRec.containsKey("AccountId")) {
+                    accExtRec.put("ID", accExtRec.get("AccountId"));
+                }
+                if (accExtRec.containsKey("SalesforceAccountID")) {
+                    accExtRec.put("SfdcAccountID", accExtRec.get("SalesforceAccountID"));
+                }
+                if (accExtRec.containsKey("LatticeAccountId")) {
+                    accExtRec.put("LEAccountExternalID", accExtRec.get("LatticeAccountId"));
+                }
+
+                accExtRec.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY,
+                        accExtRec.get("LastModified"));
+
+                accExtRec.put("RowNum", rowNum++);
+            }
+        }
+
+        return data;
     }
 
     @Override
@@ -97,7 +125,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                     Map<String, Object> metadataInfoMap = new HashMap<>();
                     metadataInfoMap.put("DisplayName", metadata.getDisplayName());
                     metadataInfoMap.put("Type", convertToSFDCFieldType(metadata.getSourceLogicalDataType()));
-                    metadataInfoMap.put("JavaType", metadata.getPhysicalDataType());
+                    // metadataInfoMap.put("JavaType",
+                    // metadata.getPhysicalDataType());
                     metadataInfoMap.put("StringLength", findLengthIfStringType(metadata.getSourceLogicalDataType()));
                     metadataInfoMap.put("Field", metadata.getName());
                     return metadataInfoMap;
@@ -125,7 +154,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             type = "";
         }
 
-        return type;
+        return type.toUpperCase();
     }
 
     private Integer findLengthIfStringType(String sourceLogicalDataType) {
