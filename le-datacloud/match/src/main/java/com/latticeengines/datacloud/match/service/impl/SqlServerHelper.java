@@ -376,6 +376,20 @@ public class SqlServerHelper implements DbHelper {
         }
         log.info("Retrieved " + results.size() + " results from SQL Server. Duration="
                 + (System.currentTimeMillis() - beforeQuerying) + " Rows=" + results.size() + " URL=" + url);
+        // --------------- Debug slow match ---------------
+        if (System.currentTimeMillis() - beforeQuerying >= 30000) {
+            String sqlStr = sql.replace("?", "%s");
+            try {
+                String[] argStrs = new String[args.length];
+                for (int i = 0; i < args.length; i++) {
+                    argStrs[i] = "'" + args[i] + "'";
+                }
+                log.info(String.format("SlowSQL=" + sqlStr, argStrs));
+            } catch (Exception e) {
+                log.info("SlowSQL=" + sqlStr + ", Args=" + String.join(",", args));
+            }
+        }
+        // ------------------------------------------------
         return results;
     }
 
