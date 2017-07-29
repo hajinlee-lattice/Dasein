@@ -33,6 +33,15 @@
                 errorMessage = None
                 installedVersion = 1
                 state = u'OK'
+            /DataCloud
+              /BypassDnBCache
+                string_value = 'false'
+              /lock
+              /state.json
+                desiredVersion = 1
+                errorMessage = None
+                installedVersion = 1
+                state = u'OK'
             /PLS
               /EnrichAttributesMaxNumber
                 string_value = '10'

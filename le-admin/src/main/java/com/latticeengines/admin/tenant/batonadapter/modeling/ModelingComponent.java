@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
@@ -27,6 +28,9 @@ public class ModelingComponent extends LatticeComponent {
 
     @Autowired
     private ModelingComponentManager modelingComponentManager;
+
+    @Autowired
+    private BatonService batonService;
 
     private ModelingInstaller installer = new ModelingInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new ModelingUpgrader();
@@ -51,7 +55,7 @@ public class ModelingComponent extends LatticeComponent {
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
         installer.setDataEncryptionService(dataEncryptionService);
-
+        installer.setBatonService(batonService);
         return installer;
     }
 

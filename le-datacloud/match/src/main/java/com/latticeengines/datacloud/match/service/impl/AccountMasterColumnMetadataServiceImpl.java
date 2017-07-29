@@ -112,7 +112,7 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
         amAttrs.forEach(cm -> {
             if (profileMap.containsKey(cm.getColumnId())) {
                 GenericRecord profileRecord = profileMap.get(cm.getColumnId());
-                if (profileRecord.get(DataCloudConstants.PROFILE_ATTR_NUMBITS) != null) {
+                if (profileRecord.get(DataCloudConstants.PROFILE_ATTR_ENCATTR) != null) {
                     cm.setNumBits((int) profileRecord.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
                     cm.setBitOffset((int) profileRecord.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
                     cm.setPhysicalName(profileRecord.get(DataCloudConstants.PROFILE_ATTR_ENCATTR).toString());

@@ -1,0 +1,9 @@
+{
+  "RootPath": "/",
+  "Nodes": [
+    {
+      "Node": "BypassDnBCache",
+      "Data": "false"
+    }
+  ]
+}

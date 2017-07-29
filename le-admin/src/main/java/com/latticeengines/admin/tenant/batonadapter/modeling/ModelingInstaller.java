@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.modeling;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ public class ModelingInstaller extends LatticeComponentInstaller {
 
     private DataEncryptionService dataEncryptionService;
 
+    private BatonService batonService;
+
     public ModelingInstaller() {
         super(ModelingComponent.componentName);
     }
@@ -24,7 +27,7 @@ public class ModelingInstaller extends LatticeComponentInstaller {
     @Override
     public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName,
             int dataVersion, DocumentDirectory configDir) {
-        boolean encrypt = FeatureFlagClient.isEnabled(space, LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName());
+        boolean encrypt = batonService.isEnabled(space, LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION);
 
         log.info(String.format("Data encryption is set to %s for customer %s", encrypt, space));
         if (encrypt) {
@@ -35,5 +38,9 @@ public class ModelingInstaller extends LatticeComponentInstaller {
 
     public void setDataEncryptionService(DataEncryptionService dataEncryptionService) {
         this.dataEncryptionService = dataEncryptionService;
+    }
+
+    public void setBatonService(BatonService batonService) {
+        this.batonService = batonService;
     }
 }

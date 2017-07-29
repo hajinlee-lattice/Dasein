@@ -33,6 +33,15 @@
           "Data": "[]"
         }
       ]
+    },
+    {
+      "RootPath": "/DataCloud",
+      "Nodes": [
+        {
+          "Node": "BypassDnBCache",
+          "Data": "false"
+        }
+      ]
     }
   ],
   "CustomerSpaceInfo": {
