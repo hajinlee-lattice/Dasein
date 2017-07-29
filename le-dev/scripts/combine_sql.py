@@ -103,7 +103,7 @@ def process_alter_table_line(line, flags):
         key = find_fk_to_be_created(line)
         if key is not None:
             line = line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE)
-            print "Find a FK to be creataed: " + line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE)
+            print "Find a FK to be created: " + line.replace('\n', '').replace('`%s`.' % DATABASE.lower(), '`%s`.' % DATABASE)
             CREATE_FKS.append(key)
         if line.strip() == '':
             flags['alter_table_block'] = False
@@ -205,7 +205,7 @@ def process_ddl(ddl_file):
                 continue
             for table in TABLE_TO_CREATE:
                 if ('`%s`' % table) in line:
-                    LINES_TO_FILE.append(table)
+                    LINES_TO_FILE.append(line)
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Replace tokens in properties')
