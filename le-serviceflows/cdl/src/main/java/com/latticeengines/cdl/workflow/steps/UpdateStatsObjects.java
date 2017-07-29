@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.Category;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -95,6 +96,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
                 latestVersion);
         List<ColumnMetadata> masterCols = masterTable.getColumnMetadata();
+        masterCols.forEach(cm -> cm.setCategory(Category.ACCOUNT_ATTRIBUTES));
         // hard code entity
         List<Pair<BusinessEntity, List<ColumnMetadata>>> mdPairs = Arrays.asList(
                 ImmutablePair.of(BusinessEntity.Account, masterCols),
