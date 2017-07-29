@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -125,6 +126,9 @@ public class AttributeRepository {
                 ColumnMetadata attribute = attrMap.get(lookup.getAttribute());
                 if (attribute == null) {
                     throw new RuntimeException("Cannot find metadata for attribute " + lookup);
+                }
+                if (BusinessEntity.Account.getServingStore().equals(role)) {
+                    attribute.setCategory(Category.ACCOUNT_ATTRIBUTES);
                 }
                 attributes.put(lookup, attribute);
             }
