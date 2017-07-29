@@ -1,10 +1,10 @@
 {
     "Customer": {
-        "contractId": "Segment_M13",
-        "tenantId": "Segment_M13",
+        "contractId": "LocalTest",
+        "tenantId": "LocalTest",
         "spaceId": "Production"
     },
-    "DataCollection": "DC_2017_06_29_23_13_26_UTC",
+    "DataCollection": "DC_2017_07_29_22_31_37_UTC",
     "AttrMap": {
         "Account.PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307": {
             "ColumnId": "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307",
@@ -46,10 +46,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSELLTICKETS_0E0936B53D": {
             "ColumnId": "PD_DC_FEATURETERMSELLTICKETS_0E0936B53D",
@@ -127,10 +127,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPB_3_CEEB4891C9": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_3_CEEB4891C9",
@@ -140,10 +140,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A": {
             "ColumnId": "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A",
@@ -194,10 +194,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSHOPPINGCARTSO_A0D77067DF": {
             "ColumnId": "PD_DC_FEATURETERMSHOPPINGCARTSO_A0D77067DF",
@@ -275,10 +275,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_EXPERIAN_SOURCE_ISMATCHED_50699F172F": {
             "ColumnId": "PD_DC_EXPERIAN_SOURCE_ISMATCHED_50699F172F",
@@ -306,10 +306,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_HIS_ID_5_7E80088EA3": {
             "ColumnId": "ACCT_SF_OPPTY_HIS_ID_5_7E80088EA3",
@@ -319,10 +319,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_DCC_L6M_83819D3348": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_DCC_L6M_83819D3348",
@@ -355,10 +355,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_PAGES_26D0C36EDF": {
             "ColumnId": "CUSTOM_DP_PAGES_26D0C36EDF",
@@ -409,10 +409,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_A71578B9E1": {
             "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_A71578B9E1",
@@ -463,10 +463,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_791A0B64EF": {
             "ColumnId": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_791A0B64EF",
@@ -517,10 +517,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREGLOBALBAG_931627B421": {
             "ColumnId": "PD_DC_FEATUREGLOBALBAG_931627B421",
@@ -553,10 +553,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_ETOV5_74CB5B61D2": {
             "ColumnId": "ACCT_ETOV5_74CB5B61D2",
@@ -688,10 +688,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREJAVASCRIPTSHOP_C29FB799D6": {
             "ColumnId": "PD_DC_FEATUREJAVASCRIPTSHOP_C29FB799D6",
@@ -724,10 +724,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCATALOG_24D8AA6480": {
             "ColumnId": "PD_DC_FEATURETERMCATALOG_24D8AA6480",
@@ -778,10 +778,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_TWITTER_FOLLOWERS_LASTM_893764C2D0": {
             "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_LASTM_893764C2D0",
@@ -832,10 +832,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREINPUTVALUEADDTOBAS_DE8208656F": {
             "ColumnId": "PD_DC_FEATUREINPUTVALUEADDTOBAS_DE8208656F",
@@ -868,10 +868,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMASSOCIATIONMAN_5C94FE8075": {
             "ColumnId": "PD_DC_FEATURETERMASSOCIATIONMAN_5C94FE8075",
@@ -922,10 +922,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_OWNERSHIP_110BD19C8A": {
             "ColumnId": "ACCT_OWNERSHIP_110BD19C8A",
@@ -935,10 +935,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_CUSTOMER_300B627A42": {
             "ColumnId": "CUSTOM_IS_CUSTOMER_300B627A42",
@@ -948,10 +948,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_SSL_TYPE_6C3DC792E0": {
             "ColumnId": "CUSTOM_DP_SSL_TYPE_6C3DC792E0",
@@ -961,10 +961,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Dante_Accounts": {
             "ColumnId": "Dante_Accounts",
@@ -997,10 +997,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FACEBOOK_LIKES_E8567E4791": {
             "ColumnId": "PD_DC_FACEBOOK_LIKES_E8567E4791",
@@ -1051,10 +1051,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_MONEY_MARKET_FUND_0F02B31810": {
             "ColumnId": "CUSTOM_HAS_MONEY_MARKET_FUND_0F02B31810",
@@ -1082,10 +1082,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.NAICSCode": {
             "ColumnId": "NAICSCode",
@@ -1095,10 +1095,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_PROSPECT_8EDA09BB26": {
             "ColumnId": "CUSTOM_IS_PROSPECT_8EDA09BB26",
@@ -1108,10 +1108,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXARANK_PERCENTILE_RA_7E915F082C": {
             "ColumnId": "ACCT_TP_ALEXARANK_PERCENTILE_RA_7E915F082C",
@@ -1121,10 +1121,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMMYACCOUNT_A8F1F4E862": {
             "ColumnId": "PD_DC_FEATURETERMMYACCOUNT_A8F1F4E862",
@@ -1175,10 +1175,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXAVIEWSPERUSER_76B157D8CB": {
             "ColumnId": "ACCT_TP_ALEXAVIEWSPERUSER_76B157D8CB",
@@ -1229,10 +1229,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMFREQUENTLYASKE_C1A71E3CF3": {
             "ColumnId": "PD_DC_FEATURETERMFREQUENTLYASKE_C1A71E3CF3",
@@ -1283,10 +1283,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMFREESHIPPING_9B4AA18889": {
             "ColumnId": "PD_DC_FEATURETERMFREESHIPPING_9B4AA18889",
@@ -1337,10 +1337,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSELLDIGITALDOW_1D661847F4": {
             "ColumnId": "PD_DC_FEATURETERMSELLDIGITALDOW_1D661847F4",
@@ -1382,10 +1382,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_CUST_ID_257EDAAB4D": {
             "ColumnId": "CUSTOM_CUST_ID_257EDAAB4D",
@@ -1395,10 +1395,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXAVIEWSPERMILLION_DBCA5E56ED": {
             "ColumnId": "PD_DC_ALEXAVIEWSPERMILLION_DBCA5E56ED",
@@ -1440,10 +1440,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_JOBSRECENTJOBS_7949D3FC95": {
             "ColumnId": "PD_DC_JOBSRECENTJOBS_7949D3FC95",
@@ -1494,10 +1494,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_FACEBOOK_LIKES_3MONTHSA_E4E243AC9B": {
             "ColumnId": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_E4E243AC9B",
@@ -1507,10 +1507,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_EC_L12M_D399B5814D": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_EC_L12M_D399B5814D",
@@ -1543,10 +1543,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_FIRST_TRANSACTION_DATE_3D893F4277": {
             "ColumnId": "CUSTOM_FIRST_TRANSACTION_DATE_3D893F4277",
@@ -1579,10 +1579,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_RESTRICTED_2B18E95E7F": {
             "ColumnId": "CUSTOM_IS_RESTRICTED_2B18E95E7F",
@@ -1610,10 +1610,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXAUSRANK_EC8ACC67F5": {
             "ColumnId": "PD_DC_ALEXAUSRANK_EC8ACC67F5",
@@ -1655,10 +1655,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_DETAIL_1_81B18613D3": {
             "ColumnId": "ACCT_SF_OPPTY_DETAIL_1_81B18613D3",
@@ -1668,10 +1668,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_ETOV2_C5836CBB17": {
             "ColumnId": "ACCT_ETOV2_C5836CBB17",
@@ -1713,10 +1713,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_SEMRUSHADWORDSCOST_2D345AA19C": {
             "ColumnId": "PD_DC_SEMRUSHADWORDSCOST_2D345AA19C",
@@ -1767,10 +1767,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURECURRENCYSWISSFRANC_95B2ABBAEE": {
             "ColumnId": "PD_DC_FEATURECURRENCYSWISSFRANC_95B2ABBAEE",
@@ -1821,10 +1821,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.AccountId": {
             "ColumnId": "AccountId",
@@ -1857,10 +1857,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_PAYPAL_ADVANCED_EA65B10125": {
             "ColumnId": "CUSTOM_HAS_PAYPAL_ADVANCED_EA65B10125",
@@ -1893,10 +1893,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMADDTOCART_017C8F8F69": {
             "ColumnId": "PD_DC_FEATURETERMADDTOCART_017C8F8F69",
@@ -1947,10 +1947,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.NumberOfEmployees": {
             "ColumnId": "NumberOfEmployees",
@@ -1983,10 +1983,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_VIRTUAL_TERMINAL_APP_F2285D90D2": {
             "ColumnId": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_F2285D90D2",
@@ -2014,10 +2014,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_DUNSNUMBER_C19195597A": {
             "ColumnId": "ACCT_DUNSNUMBER_C19195597A",
@@ -2027,10 +2027,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_ACTV_Y_N_L6M_FFC3AAA210": {
             "ColumnId": "CUSTOM_ACTV_Y_N_L6M_FFC3AAA210",
@@ -2040,10 +2040,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_ANTICIPATED_AVG_TRANS_SI_61156D4B7B": {
             "ColumnId": "CUSTOM_ANTICIPATED_AVG_TRANS_SI_61156D4B7B",
@@ -2076,10 +2076,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_PLAY_ID_1D31C1D8C5": {
             "ColumnId": "ACCT_PL_PLAY_ID_1D31C1D8C5",
@@ -2112,10 +2112,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_REFERRER_LAST_NAME_311DF014EB": {
             "ColumnId": "CUSTOM_REFERRER_LAST_NAME_311DF014EB",
@@ -2125,10 +2125,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_DETAIL_2_096DF24F75": {
             "ColumnId": "ACCT_SF_OPPTY_DETAIL_2_096DF24F75",
@@ -2138,10 +2138,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_WEBSITEENGAGEMENT_D2BD84AB5A": {
             "ColumnId": "ACCT_TP_WEBSITEENGAGEMENT_D2BD84AB5A",
@@ -2183,10 +2183,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_I_RANK_PCTCHANGE_9MONTH_A0AAF5CAEA": {
             "ColumnId": "ACCT_I_RANK_PCTCHANGE_9MONTH_A0AAF5CAEA",
@@ -2237,10 +2237,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHORGANICTRAFFIC_28F5CB7D5C": {
             "ColumnId": "ACCT_TP_SEMRUSHORGANICTRAFFIC_28F5CB7D5C",
@@ -2291,10 +2291,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_DDAAE3A3A9": {
             "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_DDAAE3A3A9",
@@ -2304,10 +2304,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PARENTID_C9795CBDCE": {
             "ColumnId": "ACCT_PARENTID_C9795CBDCE",
@@ -2317,10 +2317,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMPRICE_FFB3E2A887": {
             "ColumnId": "PD_DC_FEATURETERMPRICE_FFB3E2A887",
@@ -2371,10 +2371,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_PRICING_CATEGORY_A923DD7C26": {
             "ColumnId": "CUSTOM_PRICING_CATEGORY_A923DD7C26",
@@ -2384,10 +2384,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_TWITTER_FOLLOWERS_2MONT_D12355AA81": {
             "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_2MONT_D12355AA81",
@@ -2438,10 +2438,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_TWITTER_FOLLOWERS_3MONT_D665CC9024": {
             "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_D665CC9024",
@@ -2492,10 +2492,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXAUSUSERS_481783B737": {
             "ColumnId": "PD_DC_ALEXAUSUSERS_481783B737",
@@ -2546,10 +2546,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMEVENTMANAGEMEN_68D7F85E38": {
             "ColumnId": "PD_DC_FEATURETERMEVENTMANAGEMEN_68D7F85E38",
@@ -2591,10 +2591,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXAVIEWSPERUSER_PERC_DCA8A825F3": {
             "ColumnId": "ACCT_TP_ALEXAVIEWSPERUSER_PERC_DCA8A825F3",
@@ -2645,10 +2645,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXALINKSIN_36DEAA30E9": {
             "ColumnId": "PD_DC_ALEXALINKSIN_36DEAA30E9",
@@ -2699,10 +2699,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_EC_L6M_F4C08E6D53": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_EC_L6M_F4C08E6D53",
@@ -2735,10 +2735,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_PCT_ONLINE_REVENUE_AB089ECAD5": {
             "ColumnId": "CUSTOM_PCT_ONLINE_REVENUE_AB089ECAD5",
@@ -2748,10 +2748,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_SIMULATION_ID_0ACF092E3F": {
             "ColumnId": "ACCT_PL_SIMULATION_ID_0ACF092E3F",
@@ -2784,10 +2784,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_ETOV_D0F5DC5D0E": {
             "ColumnId": "ACCT_ETOV_D0F5DC5D0E",
@@ -2838,10 +2838,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREJAVASCRIPTPRODUCT_E0749BDB07": {
             "ColumnId": "PD_DC_FEATUREJAVASCRIPTPRODUCT_E0749BDB07",
@@ -2874,10 +2874,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_INDUSTRY_USER_PROVIDED_37A5FF05EB": {
             "ColumnId": "CUSTOM_INDUSTRY_USER_PROVIDED_37A5FF05EB",
@@ -2887,10 +2887,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_ECONOMIC_FOOTPRINT_4A39D727ED": {
             "ColumnId": "CUSTOM_DP_ECONOMIC_FOOTPRINT_4A39D727ED",
@@ -2941,10 +2941,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_CLOSED_418BD42888": {
             "ColumnId": "CUSTOM_IS_CLOSED_418BD42888",
@@ -2972,10 +2972,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.LastModified": {
             "ColumnId": "LastModified",
@@ -3008,10 +3008,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHADWORDSCOST_FFC0C9C2D3": {
             "ColumnId": "ACCT_TP_SEMRUSHADWORDSCOST_FFC0C9C2D3",
@@ -3062,10 +3062,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_NUM_TRANS_L12M_BCA0C660C2": {
             "ColumnId": "CUSTOM_NUM_TRANS_L12M_BCA0C660C2",
@@ -3098,10 +3098,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_HIS_ID_1_DDDF8029BC": {
             "ColumnId": "ACCT_SF_OPPTY_HIS_ID_1_DDDF8029BC",
@@ -3111,10 +3111,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.OwnerDisplayName": {
             "ColumnId": "OwnerDisplayName",
@@ -3124,10 +3124,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_VERIFIED_62D5F05DD7": {
             "ColumnId": "CUSTOM_IS_VERIFIED_62D5F05DD7",
@@ -3155,10 +3155,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPB_5_67BBC20975": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_5_67BBC20975",
@@ -3168,10 +3168,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_TWITTER_TWEETS_F1D1AFBCBF": {
             "ColumnId": "PD_DC_TWITTER_TWEETS_F1D1AFBCBF",
@@ -3222,10 +3222,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_TWITTER_FOLLOWERS_3MONT_3FA45F1F09": {
             "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_3FA45F1F09",
@@ -3276,10 +3276,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMFORMBUILDER_0CB4131FE5": {
             "ColumnId": "PD_DC_FEATURETERMFORMBUILDER_0CB4131FE5",
@@ -3321,10 +3321,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_HPA_NEW_PIVOTED_SOURCE_IS_0323A7B3BB": {
             "ColumnId": "PD_DC_HPA_NEW_PIVOTED_SOURCE_IS_0323A7B3BB",
@@ -3352,10 +3352,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TELESALES_ACQ_DT_67D841C5B9": {
             "ColumnId": "CUSTOM_TELESALES_ACQ_DT_67D841C5B9",
@@ -3365,10 +3365,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_PAYPAL_PRO_APPLICATI_86B988891F": {
             "ColumnId": "CUSTOM_HAS_PAYPAL_PRO_APPLICATI_86B988891F",
@@ -3396,10 +3396,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURECURRENCYEURO_6857DCA092": {
             "ColumnId": "PD_DC_FEATURECURRENCYEURO_6857DCA092",
@@ -3450,10 +3450,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSHIPPINGPOLICY_F5C2A2BA3E": {
             "ColumnId": "PD_DC_FEATURETERMSHIPPINGPOLICY_F5C2A2BA3E",
@@ -3504,10 +3504,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXAVIEWSRANK_FC0C796BE7": {
             "ColumnId": "PD_DC_ALEXAVIEWSRANK_FC0C796BE7",
@@ -3549,10 +3549,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_INTELLISCORE_BC64967AA9": {
             "ColumnId": "ACCT_TP_INTELLISCORE_BC64967AA9",
@@ -3562,10 +3562,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Country": {
             "ColumnId": "Country",
@@ -3575,10 +3575,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPA_5_9FFF2C2D48": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_5_9FFF2C2D48",
@@ -3588,10 +3588,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_ACCOUNTSTOSCORE_269134B7BD": {
             "ColumnId": "ACCT_ACCOUNTSTOSCORE_269134B7BD",
@@ -3619,10 +3619,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_ETOV4_B50B4FCB97": {
             "ColumnId": "ACCT_ETOV4_B50B4FCB97",
@@ -3655,10 +3655,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCUSTOMERSUPPOR_74116EE72E": {
             "ColumnId": "PD_DC_FEATURETERMCUSTOMERSUPPOR_74116EE72E",
@@ -3709,10 +3709,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_BUSINESSTECHNOLOGIESFIRST_4FF8982B79": {
             "ColumnId": "PD_DC_BUSINESSTECHNOLOGIESFIRST_4FF8982B79",
@@ -3745,10 +3745,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_SSL_START_DATE_1F118E40B7": {
             "ColumnId": "CUSTOM_DP_SSL_START_DATE_1F118E40B7",
@@ -3781,10 +3781,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_LARGE_ENTERPRISE_42B07659E1": {
             "ColumnId": "CUSTOM_IS_LARGE_ENTERPRISE_42B07659E1",
@@ -3812,10 +3812,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.External_ID": {
             "ColumnId": "External_ID",
@@ -3825,10 +3825,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Territory": {
             "ColumnId": "Territory",
@@ -3838,10 +3838,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_PAYPAL_DEBIT_CARD_1559FDB505": {
             "ColumnId": "CUSTOM_HAS_PAYPAL_DEBIT_CARD_1559FDB505",
@@ -3869,10 +3869,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMRETURNPOLICY_242DC935FA": {
             "ColumnId": "PD_DC_FEATURETERMRETURNPOLICY_242DC935FA",
@@ -3923,10 +3923,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PLAY_DISPLAY_NAME_F75C86D01F": {
             "ColumnId": "ACCT_PLAY_DISPLAY_NAME_F75C86D01F",
@@ -3936,10 +3936,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURE_PIVOTED_SOURCE_IS_09AD69A29D": {
             "ColumnId": "PD_DC_FEATURE_PIVOTED_SOURCE_IS_09AD69A29D",
@@ -3967,10 +3967,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_PAYPAL_PLUS_CE827950A6": {
             "ColumnId": "CUSTOM_HAS_PAYPAL_PLUS_CE827950A6",
@@ -3998,10 +3998,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_PAYPAL_5BB4AB47D7": {
             "ColumnId": "CUSTOM_PAYPAL_5BB4AB47D7",
@@ -4011,10 +4011,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_HIS_ID_3_6FB7BC5B4C": {
             "ColumnId": "ACCT_SF_OPPTY_HIS_ID_3_6FB7BC5B4C",
@@ -4024,10 +4024,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_SYSTEMALERT_7652835FC6": {
             "ColumnId": "PD_DC_SYSTEMALERT_7652835FC6",
@@ -4055,10 +4055,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXARANK_F6240F16C2": {
             "ColumnId": "PD_DC_ALEXARANK_F6240F16C2",
@@ -4100,10 +4100,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_SEMRUSHORGANICCOST_42067622B2": {
             "ColumnId": "PD_DC_SEMRUSHORGANICCOST_42067622B2",
@@ -4154,10 +4154,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_DETAIL_4_D2ECC83671": {
             "ColumnId": "ACCT_SF_OPPTY_DETAIL_4_D2ECC83671",
@@ -4167,10 +4167,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_NETNEW_PROSPECT_14D680508E": {
             "ColumnId": "CUSTOM_IS_NETNEW_PROSPECT_14D680508E",
@@ -4203,10 +4203,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_DETAIL_3_CBCD6C0DDD": {
             "ColumnId": "ACCT_SF_OPPTY_DETAIL_3_CBCD6C0DDD",
@@ -4216,10 +4216,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCREATEACCOUNT_136A55CF29": {
             "ColumnId": "PD_DC_FEATURETERMCREATEACCOUNT_136A55CF29",
@@ -4270,10 +4270,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREGLOBALSHOP_4D47CDAEC9": {
             "ColumnId": "PD_DC_FEATUREGLOBALSHOP_4D47CDAEC9",
@@ -4306,10 +4306,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSALE_6FADFF494E": {
             "ColumnId": "PD_DC_FEATURETERMSALE_6FADFF494E",
@@ -4360,10 +4360,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSHIPPINGANDHAN_1D1D151554": {
             "ColumnId": "PD_DC_FEATURETERMSHIPPINGANDHAN_1D1D151554",
@@ -4423,10 +4423,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMORDERSTATUS_9E0E44E0CF": {
             "ColumnId": "PD_DC_FEATURETERMORDERSTATUS_9E0E44E0CF",
@@ -4477,10 +4477,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_FACEBOOK_LIKES_CURRENTM_A7A9CF4321": {
             "ColumnId": "ACCT_TP_FACEBOOK_LIKES_CURRENTM_A7A9CF4321",
@@ -4513,10 +4513,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSHOPBY_7989A99E2C": {
             "ColumnId": "PD_DC_FEATURETERMSHOPBY_7989A99E2C",
@@ -4567,10 +4567,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_HPANUMPAGES_F62070D93D": {
             "ColumnId": "PD_DC_HPANUMPAGES_F62070D93D",
@@ -4621,10 +4621,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_SITE_TRAFFIC_ESTIMATI_74D81C8579": {
             "ColumnId": "CUSTOM_DP_SITE_TRAFFIC_ESTIMATI_74D81C8579",
@@ -4675,10 +4675,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMECOMMERCEPLATF_334CBC96A7": {
             "ColumnId": "PD_DC_FEATURETERMECOMMERCEPLATF_334CBC96A7",
@@ -4711,10 +4711,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMBASKET_64285026C0": {
             "ColumnId": "PD_DC_FEATURETERMBASKET_64285026C0",
@@ -4765,10 +4765,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_PDINTELLISCORE_RATING_143793F7F0": {
             "ColumnId": "ACCT_TP_PDINTELLISCORE_RATING_143793F7F0",
@@ -4778,10 +4778,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSCHEDULINGANDA_3C7D12C705": {
             "ColumnId": "PD_DC_FEATURETERMSCHEDULINGANDA_3C7D12C705",
@@ -4814,10 +4814,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_FF_L6M_63DE168A06": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_FF_L6M_63DE168A06",
@@ -4850,10 +4850,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPB_2_AC97B1C928": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_2_AC97B1C928",
@@ -4863,10 +4863,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCROWDFUNDING_FFFB4236F7": {
             "ColumnId": "PD_DC_FEATURETERMCROWDFUNDING_FFFB4236F7",
@@ -4908,10 +4908,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMPAYWALL_A6571B4551": {
             "ColumnId": "PD_DC_FEATURETERMPAYWALL_A6571B4551",
@@ -4998,10 +4998,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_VIRTUAL_TERMINAL_APP_9C600487DF": {
             "ColumnId": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_9C600487DF",
@@ -5029,10 +5029,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_QUANTITY_73CA98C1C7": {
             "ColumnId": "CUSTOM_QUANTITY_73CA98C1C7",
@@ -5065,10 +5065,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_LIKELIHOOD_A5FBD72C39": {
             "ColumnId": "ACCT_PL_LIKELIHOOD_A5FBD72C39",
@@ -5101,10 +5101,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_PROSPECT_LOAD_DATE_942DC58E61": {
             "ColumnId": "CUSTOM_PROSPECT_LOAD_DATE_942DC58E61",
@@ -5137,10 +5137,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_BUSINESSSICDESCRIPTION_24952FE74F": {
             "ColumnId": "ACCT_TP_BUSINESSSICDESCRIPTION_24952FE74F",
@@ -5150,10 +5150,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.LeadCount": {
             "ColumnId": "LeadCount",
@@ -5186,10 +5186,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_OWNERID_7F5ACED131": {
             "ColumnId": "ACCT_OWNERID_7F5ACED131",
@@ -5199,10 +5199,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMWEBSITEBUILDER_36DF4C8869": {
             "ColumnId": "PD_DC_FEATURETERMWEBSITEBUILDER_36DF4C8869",
@@ -5253,10 +5253,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_SFDC_MEMBER_ID_76127986DD": {
             "ColumnId": "CUSTOM_SFDC_MEMBER_ID_76127986DD",
@@ -5266,10 +5266,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURECURRENCYUKPOUND_9A5D64BE4B": {
             "ColumnId": "PD_DC_FEATURECURRENCYUKPOUND_9A5D64BE4B",
@@ -5320,10 +5320,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.City": {
             "ColumnId": "City",
@@ -5333,10 +5333,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_ETOV3_4A360727E0": {
             "ColumnId": "ACCT_ETOV3_4A360727E0",
@@ -5369,10 +5369,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSEARCH_E3C0C3ABB5": {
             "ColumnId": "PD_DC_FEATURETERMSEARCH_E3C0C3ABB5",
@@ -5423,10 +5423,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_YEARSONLINE_ADCC1A1A87": {
             "ColumnId": "ACCT_TP_YEARSONLINE_ADCC1A1A87",
@@ -5459,10 +5459,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_FULL_SHARE_CHECKOUT_D97C257C93": {
             "ColumnId": "CUSTOM_FULL_SHARE_CHECKOUT_D97C257C93",
@@ -5472,10 +5472,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_ACCOUNT_ID_9A87DCB1FC": {
             "ColumnId": "ACCT_PL_ACCOUNT_ID_9A87DCB1FC",
@@ -5508,10 +5508,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_WPS_UP_L12M_BCB0E4C2F5": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_WPS_UP_L12M_BCB0E4C2F5",
@@ -5544,10 +5544,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREINPUTVALUEADDTOBAG_9B872D2CA8": {
             "ColumnId": "PD_DC_FEATUREINPUTVALUEADDTOBAG_9B872D2CA8",
@@ -5580,10 +5580,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_SEMRUSHORGANICKEYWORDS_819E898E8B": {
             "ColumnId": "PD_DC_SEMRUSHORGANICKEYWORDS_819E898E8B",
@@ -5634,10 +5634,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_BUSINESSINDUSTRY_C084181874": {
             "ColumnId": "ACCT_TP_BUSINESSINDUSTRY_C084181874",
@@ -5647,10 +5647,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMADDTOBASKET_BD99188FFF": {
             "ColumnId": "PD_DC_FEATURETERMADDTOBASKET_BD99188FFF",
@@ -5746,10 +5746,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCREATEASTORE_62EFC56514": {
             "ColumnId": "PD_DC_FEATURETERMCREATEASTORE_62EFC56514",
@@ -5827,10 +5827,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHADWORDSCOST_INDU_D378281527": {
             "ColumnId": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_D378281527",
@@ -5840,10 +5840,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREGLOBALBASKET_333797FBFF": {
             "ColumnId": "PD_DC_FEATUREGLOBALBASKET_333797FBFF",
@@ -5876,10 +5876,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.EstimatedRevenue": {
             "ColumnId": "EstimatedRevenue",
@@ -5912,10 +5912,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_ACCOUNT_CREATED_DATE_43013FC8F7": {
             "ColumnId": "CUSTOM_ACCOUNT_CREATED_DATE_43013FC8F7",
@@ -5948,10 +5948,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_CREDIT_RATING_0A26EF631F": {
             "ColumnId": "ACCT_CREDIT_RATING_0A26EF631F",
@@ -6002,10 +6002,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_SSL_CERTIFICATE_B0D11E3744": {
             "ColumnId": "CUSTOM_DP_SSL_CERTIFICATE_B0D11E3744",
@@ -6015,10 +6015,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_BUSINESSTECHNOLOGIESSHOP_212C2F9F82": {
             "ColumnId": "PD_DC_BUSINESSTECHNOLOGIESSHOP_212C2F9F82",
@@ -6069,10 +6069,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMPAYMENTMETHOD_69B21B83AF": {
             "ColumnId": "PD_DC_FEATURETERMPAYMENTMETHOD_69B21B83AF",
@@ -6123,10 +6123,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHADWORDSTRAFFIC_47DD043941": {
             "ColumnId": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_47DD043941",
@@ -6177,10 +6177,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_TELESALES_ACQ_Y_N_829B11D1B3": {
             "ColumnId": "CUSTOM_IS_TELESALES_ACQ_Y_N_829B11D1B3",
@@ -6190,10 +6190,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREREFSRCSTORE_CEC5F567C7": {
             "ColumnId": "PD_DC_FEATUREREFSRCSTORE_CEC5F567C7",
@@ -6226,10 +6226,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHORGANICTRAFFIC_I_0CAD2C2222": {
             "ColumnId": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_0CAD2C2222",
@@ -6280,10 +6280,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_PAYPAL_PRO_APPROVED_8AA810356A": {
             "ColumnId": "CUSTOM_HAS_PAYPAL_PRO_APPROVED_8AA810356A",
@@ -6311,10 +6311,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Territory_External_ID": {
             "ColumnId": "Territory_External_ID",
@@ -6324,10 +6324,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMBUY_ED68682A4D": {
             "ColumnId": "PD_DC_FEATURETERMBUY_ED68682A4D",
@@ -6378,10 +6378,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSHOP_331151D1CF": {
             "ColumnId": "PD_DC_FEATURETERMSHOP_331151D1CF",
@@ -6432,10 +6432,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCONTINUESHOPPI_D0C8063380": {
             "ColumnId": "PD_DC_FEATURETERMCONTINUESHOPPI_D0C8063380",
@@ -6486,10 +6486,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMADDITEM_3A678867C2": {
             "ColumnId": "PD_DC_FEATURETERMADDITEM_3A678867C2",
@@ -6522,10 +6522,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.State_Province": {
             "ColumnId": "State_Province",
@@ -6535,10 +6535,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREREFSRCCART_F179D7C31E": {
             "ColumnId": "PD_DC_FEATUREREFSRCCART_F179D7C31E",
@@ -6571,10 +6571,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_B_BUSINESSVCFUNDED_CA24BC165E": {
             "ColumnId": "ACCT_B_BUSINESSVCFUNDED_CA24BC165E",
@@ -6602,10 +6602,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHORGANICCOST_INDU_F6DFEF04D5": {
             "ColumnId": "ACCT_TP_SEMRUSHORGANICCOST_INDU_F6DFEF04D5",
@@ -6615,10 +6615,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_HGDATA_PIVOTED_SOURCE_ISM_51E71A10D5": {
             "ColumnId": "PD_DC_HGDATA_PIVOTED_SOURCE_ISM_51E71A10D5",
@@ -6646,10 +6646,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_FACEBOOK_LIKES_3MONTHSA_FD2AC62470": {
             "ColumnId": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_FD2AC62470",
@@ -6700,10 +6700,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPA_4_AF09A4531A": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_4_AF09A4531A",
@@ -6713,10 +6713,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSHIPPINGADDRES_4DDB79EF9E": {
             "ColumnId": "PD_DC_FEATURETERMSHIPPINGADDRES_4DDB79EF9E",
@@ -6758,10 +6758,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPB_4_AC59614D56": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_4_AC59614D56",
@@ -6771,10 +6771,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.URL": {
             "ColumnId": "URL",
@@ -6784,10 +6784,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Address_Street_1": {
             "ColumnId": "Address_Street_1",
@@ -6797,10 +6797,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_SEMRUSHORGANICTRAFFIC_182F3ACEB1": {
             "ColumnId": "PD_DC_SEMRUSHORGANICTRAFFIC_182F3ACEB1",
@@ -6851,10 +6851,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_SSL_ISSUER_COMMON_NAM_9EC692C60F": {
             "ColumnId": "CUSTOM_DP_SSL_ISSUER_COMMON_NAM_9EC692C60F",
@@ -6864,10 +6864,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_3204324CBE": {
             "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_3204324CBE",
@@ -6918,10 +6918,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_CONTACT_ID_676A7A86BC": {
             "ColumnId": "ACCT_PL_CONTACT_ID_676A7A86BC",
@@ -6954,10 +6954,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMBARGAIN_C37466A6D6": {
             "ColumnId": "PD_DC_FEATURETERMBARGAIN_C37466A6D6",
@@ -6999,10 +6999,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DO_NOT_CALL_7ABC200B5F": {
             "ColumnId": "CUSTOM_DO_NOT_CALL_7ABC200B5F",
@@ -7030,10 +7030,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_TWITTER_FOLLOWERS_3MAVG_74CFD72D61": {
             "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_3MAVG_74CFD72D61",
@@ -7043,10 +7043,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMFREEONLINESTOR_50814B3138": {
             "ColumnId": "PD_DC_FEATURETERMFREEONLINESTOR_50814B3138",
@@ -7115,10 +7115,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMMARKETPLACE_9A605A999A": {
             "ColumnId": "PD_DC_FEATURETERMMARKETPLACE_9A605A999A",
@@ -7169,10 +7169,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURECURRENCYJAPANYEN_8BB47AF6A7": {
             "ColumnId": "PD_DC_FEATURECURRENCYJAPANYEN_8BB47AF6A7",
@@ -7223,10 +7223,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_DETAIL_5_0A3D5597A0": {
             "ColumnId": "ACCT_SF_OPPTY_DETAIL_5_0A3D5597A0",
@@ -7236,10 +7236,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREJAVASCRIPTSTORE_BB9FDE3130": {
             "ColumnId": "PD_DC_FEATUREJAVASCRIPTSTORE_BB9FDE3130",
@@ -7272,10 +7272,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMBUSINESSMANAGE_D4879C01B2": {
             "ColumnId": "PD_DC_FEATURETERMBUSINESSMANAGE_D4879C01B2",
@@ -7344,10 +7344,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_FACEBOOK_LIKES_LASTMONT_B6932AF338": {
             "ColumnId": "ACCT_TP_FACEBOOK_LIKES_LASTMONT_B6932AF338",
@@ -7398,10 +7398,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Address2": {
             "ColumnId": "Address2",
@@ -7411,10 +7411,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMRECURRINGBILLI_9E9281BEF1": {
             "ColumnId": "PD_DC_FEATURETERMRECURRINGBILLI_9E9281BEF1",
@@ -7492,10 +7492,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Address1": {
             "ColumnId": "Address1",
@@ -7505,10 +7505,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_EBAY_MEMBER_7FD5172EE2": {
             "ColumnId": "CUSTOM_IS_EBAY_MEMBER_7FD5172EE2",
@@ -7536,10 +7536,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_TWITTER_FOLLOWERS_CURRE_6D5EF2597D": {
             "ColumnId": "ACCT_TP_TWITTER_FOLLOWERS_CURRE_6D5EF2597D",
@@ -7572,10 +7572,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREJAVASCRIPTBAG_8C15013C08": {
             "ColumnId": "PD_DC_FEATUREJAVASCRIPTBAG_8C15013C08",
@@ -7608,10 +7608,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_EXPERIANPARENT_SOURCE_ISM_E071211F92": {
             "ColumnId": "PD_DC_EXPERIANPARENT_SOURCE_ISM_E071211F92",
@@ -7639,10 +7639,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_HPA_SOURCE_ISMATCHED_022606F3A4": {
             "ColumnId": "PD_DC_HPA_SOURCE_ISMATCHED_022606F3A4",
@@ -7670,10 +7670,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_SEMRUSHADWORDSKEYWORDS_18930AA801": {
             "ColumnId": "PD_DC_SEMRUSHADWORDSKEYWORDS_18930AA801",
@@ -7724,10 +7724,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMWEBBUILDER_C8E736387E": {
             "ColumnId": "PD_DC_FEATURETERMWEBBUILDER_C8E736387E",
@@ -7796,10 +7796,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMPAYMENTPROCESS_5AF36D2F81": {
             "ColumnId": "PD_DC_FEATURETERMPAYMENTPROCESS_5AF36D2F81",
@@ -7841,10 +7841,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_NORMALIZED_SCORE_2447FB15A9": {
             "ColumnId": "ACCT_PL_NORMALIZED_SCORE_2447FB15A9",
@@ -7877,10 +7877,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TPV_MODEL_STAMP_9EE67E9CA0": {
             "ColumnId": "ACCT_TPV_MODEL_STAMP_9EE67E9CA0",
@@ -7890,10 +7890,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_MATCHEDDOMAIN_CC3D72116D": {
             "ColumnId": "PD_DC_MATCHEDDOMAIN_CC3D72116D",
@@ -7903,10 +7903,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Vertical": {
             "ColumnId": "Vertical",
@@ -7916,10 +7916,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_REFERRER_LOCATION_F9ACA70E7C": {
             "ColumnId": "CUSTOM_REFERRER_LOCATION_F9ACA70E7C",
@@ -7929,10 +7929,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSELLONLINE_B0AD32BA29": {
             "ColumnId": "PD_DC_FEATURETERMSELLONLINE_B0AD32BA29",
@@ -7965,10 +7965,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_SEMRUSHADWORDSTRAFFIC_3C36F78623": {
             "ColumnId": "PD_DC_SEMRUSHADWORDSTRAFFIC_3C36F78623",
@@ -8019,10 +8019,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_INCOMING_LINKS_EA64999A6F": {
             "ColumnId": "CUSTOM_DP_INCOMING_LINKS_EA64999A6F",
@@ -8055,10 +8055,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_SSL_END_DATE_C7D6A92BED": {
             "ColumnId": "CUSTOM_DP_SSL_END_DATE_C7D6A92BED",
@@ -8091,10 +8091,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREGLOBALCART_D09AED4E1F": {
             "ColumnId": "PD_DC_FEATUREGLOBALCART_D09AED4E1F",
@@ -8127,10 +8127,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMPLUGINFORWORDP_B90B6EA567": {
             "ColumnId": "PD_DC_FEATURETERMPLUGINFORWORDP_B90B6EA567",
@@ -8172,10 +8172,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMBILLINGADDRESS_8753A9B6A9": {
             "ColumnId": "PD_DC_FEATURETERMBILLINGADDRESS_8753A9B6A9",
@@ -8217,10 +8217,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMBAG_6091C4A343": {
             "ColumnId": "PD_DC_FEATURETERMBAG_6091C4A343",
@@ -8271,10 +8271,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_VIRTUAL_DEBIT_CARD_D1C72AE604": {
             "ColumnId": "CUSTOM_HAS_VIRTUAL_DEBIT_CARD_D1C72AE604",
@@ -8302,10 +8302,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREREFSRCPRODUCT_7360050DE4": {
             "ColumnId": "PD_DC_FEATUREREFSRCPRODUCT_7360050DE4",
@@ -8338,10 +8338,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_4D33D54625": {
             "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_4D33D54625",
@@ -8351,10 +8351,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMONLINESTOREBUI_600B41EB86": {
             "ColumnId": "PD_DC_FEATURETERMONLINESTOREBUI_600B41EB86",
@@ -8414,10 +8414,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREGLOBALSTORE_080076D315": {
             "ColumnId": "PD_DC_FEATUREGLOBALSTORE_080076D315",
@@ -8450,10 +8450,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_BUYER_CREDIT_ED1466A6DE": {
             "ColumnId": "CUSTOM_HAS_BUYER_CREDIT_ED1466A6DE",
@@ -8481,10 +8481,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPA_1_5AAEA9FAA9": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_1_5AAEA9FAA9",
@@ -8494,10 +8494,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMORDERHISTORY_ED7B4AC178": {
             "ColumnId": "PD_DC_FEATURETERMORDERHISTORY_ED7B4AC178",
@@ -8548,10 +8548,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_JOBSASOF_B6C9EBF2B6": {
             "ColumnId": "PD_DC_JOBSASOF_B6C9EBF2B6",
@@ -8593,10 +8593,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_BUILTWITH_PIVOTED_SOURCE__3C36CD891A": {
             "ColumnId": "PD_DC_BUILTWITH_PIVOTED_SOURCE__3C36CD891A",
@@ -8624,10 +8624,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Zip": {
             "ColumnId": "Zip",
@@ -8637,10 +8637,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_I_RANK_PCTCHANGE_3MONTH_8637BF23DD": {
             "ColumnId": "ACCT_I_RANK_PCTCHANGE_3MONTH_8637BF23DD",
@@ -8691,10 +8691,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_WPS_UP_L6M_0AAF3F1FB3": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_WPS_UP_L6M_0AAF3F1FB3",
@@ -8727,10 +8727,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_CFG_TRAININGSET_US_E16FE9F723": {
             "ColumnId": "CUSTOM_CFG_TRAININGSET_US_E16FE9F723",
@@ -8763,10 +8763,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.TotalMonetaryValue": {
             "ColumnId": "TotalMonetaryValue",
@@ -8799,10 +8799,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.Display_Name": {
             "ColumnId": "Display_Name",
@@ -8812,10 +8812,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_PROSPECT_FILE_NAME_F58797B857": {
             "ColumnId": "CUSTOM_PROSPECT_FILE_NAME_F58797B857",
@@ -8825,10 +8825,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHORGANICCOST_DF3664D040": {
             "ColumnId": "ACCT_TP_SEMRUSHORGANICCOST_DF3664D040",
@@ -8879,10 +8879,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_TOTAL_AMOUNT_RAISED_5C025CC0C5": {
             "ColumnId": "PD_DC_TOTAL_AMOUNT_RAISED_5C025CC0C5",
@@ -8915,10 +8915,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSOFTWAREFORNON_E461FCB328": {
             "ColumnId": "PD_DC_FEATURETERMSOFTWAREFORNON_E461FCB328",
@@ -8951,10 +8951,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_PROSPECT_SHOPPING_CART_6D9374729A": {
             "ColumnId": "CUSTOM_PROSPECT_SHOPPING_CART_6D9374729A",
@@ -8982,10 +8982,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_WEBSITE_TYPE_33EDCADC15": {
             "ColumnId": "CUSTOM_DP_WEBSITE_TYPE_33EDCADC15",
@@ -8995,10 +8995,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_WPS_RM_L6M_3859A2D114": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_WPS_RM_L6M_3859A2D114",
@@ -9031,10 +9031,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_SFDC_PP_ACCOUNT_ID_8D2651B5AC": {
             "ColumnId": "CUSTOM_SFDC_PP_ACCOUNT_ID_8D2651B5AC",
@@ -9044,10 +9044,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ISMATCHED_83FE702FD0": {
             "ColumnId": "PD_DC_ISMATCHED_83FE702FD0",
@@ -9075,10 +9075,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_E3D6FA62C5": {
             "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_E3D6FA62C5",
@@ -9088,10 +9088,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.fnLEAccountIDLong": {
             "ColumnId": "fnLEAccountIDLong",
@@ -9124,10 +9124,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_SFDC_OPPORTUNITY_ID_RECE_E0697215FD": {
             "ColumnId": "CUSTOM_SFDC_OPPORTUNITY_ID_RECE_E0697215FD",
@@ -9137,10 +9137,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_FIT_SCORE_02308E850B": {
             "ColumnId": "ACCT_FIT_SCORE_02308E850B",
@@ -9173,10 +9173,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMMEMBERSHIPMANA_5F6BB5750B": {
             "ColumnId": "PD_DC_FEATURETERMMEMBERSHIPMANA_5F6BB5750B",
@@ -9218,10 +9218,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_47F7B3B032": {
             "ColumnId": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_47F7B3B032",
@@ -9272,10 +9272,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMPRODUCT_C24CBDA059": {
             "ColumnId": "PD_DC_FEATURETERMPRODUCT_C24CBDA059",
@@ -9326,10 +9326,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.LatticeAccountId": {
             "ColumnId": "LatticeAccountId",
@@ -9340,10 +9340,10 @@
             "Stats": {
                 "Cnt": 81875
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMFUNDRAISING_74655FC552": {
             "ColumnId": "PD_DC_FEATURETERMFUNDRAISING_74655FC552",
@@ -9394,10 +9394,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_TWITTER_FOLLOWERS_466D79437B": {
             "ColumnId": "PD_DC_TWITTER_FOLLOWERS_466D79437B",
@@ -9448,10 +9448,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_MONETARY_VALUE_30E0F3D241": {
             "ColumnId": "ACCT_PL_MONETARY_VALUE_30E0F3D241",
@@ -9484,10 +9484,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_SEMRUSHRANK_E4164C190E": {
             "ColumnId": "PD_DC_SEMRUSHRANK_E4164C190E",
@@ -9547,10 +9547,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_WPS_RM_L12M_F8AE375F8C": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_WPS_RM_L12M_F8AE375F8C",
@@ -9583,10 +9583,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_BUSINESSTECHNOLOGIESPAYME_8795EB9414": {
             "ColumnId": "PD_DC_BUSINESSTECHNOLOGIESPAYME_8795EB9414",
@@ -9637,10 +9637,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSTORE_38A5985FE2": {
             "ColumnId": "PD_DC_FEATURETERMSTORE_38A5985FE2",
@@ -9691,10 +9691,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREREFSRCBASKET_96A5841B62": {
             "ColumnId": "PD_DC_FEATUREREFSRCBASKET_96A5841B62",
@@ -9727,10 +9727,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_JOBSTRENDSTRING_384036BEC4": {
             "ColumnId": "PD_DC_JOBSTRENDSTRING_384036BEC4",
@@ -9740,10 +9740,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPA_3_EF23C06A1D": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_3_EF23C06A1D",
@@ -9753,10 +9753,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_HAS_EBAY_MASTERCARD_EB4839AD60": {
             "ColumnId": "CUSTOM_HAS_EBAY_MASTERCARD_EB4839AD60",
@@ -9784,10 +9784,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXAUSRANK_PERC_RATING_932182450A": {
             "ColumnId": "ACCT_TP_ALEXAUSRANK_PERC_RATING_932182450A",
@@ -9797,10 +9797,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREINPUTVALUEADDTOCAR_7C91B22555": {
             "ColumnId": "PD_DC_FEATUREINPUTVALUEADDTOCAR_7C91B22555",
@@ -9833,10 +9833,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_BUSINESSPRIMARYSIC4DIGI_86939C62B4": {
             "ColumnId": "ACCT_TP_BUSINESSPRIMARYSIC4DIGI_86939C62B4",
@@ -9846,10 +9846,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMPHPECOMMERCEPL_D3FCA1D2A2": {
             "ColumnId": "PD_DC_FEATURETERMPHPECOMMERCEPL_D3FCA1D2A2",
@@ -9882,10 +9882,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_FACEBOOK_LIKES_3MONTHSA_1AB3078C3C": {
             "ColumnId": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_1AB3078C3C",
@@ -9936,10 +9936,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.TopLeads": {
             "ColumnId": "TopLeads",
@@ -9949,10 +9949,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_EB7F1E8A8E": {
             "ColumnId": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_EB7F1E8A8E",
@@ -10003,10 +10003,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.SICCode": {
             "ColumnId": "SICCode",
@@ -10016,10 +10016,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_SHOPPING_CART_SYSTEM_20B9A6D4E6": {
             "ColumnId": "CUSTOM_DP_SHOPPING_CART_SYSTEM_20B9A6D4E6",
@@ -10029,10 +10029,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMDEAL_A53AABFEE9": {
             "ColumnId": "PD_DC_FEATURETERMDEAL_A53AABFEE9",
@@ -10083,10 +10083,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCROSSCHANNELCO_CDB20B600A": {
             "ColumnId": "PD_DC_FEATURETERMCROSSCHANNELCO_CDB20B600A",
@@ -10119,10 +10119,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_NTPV_12M_PREINACTIVE_476EFF99A8": {
             "ColumnId": "CUSTOM_NTPV_12M_PREINACTIVE_476EFF99A8",
@@ -10155,10 +10155,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCOMMERCESOLUTI_1DCAFA6186": {
             "ColumnId": "PD_DC_FEATURETERMCOMMERCESOLUTI_1DCAFA6186",
@@ -10191,10 +10191,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_NUM_CONF_BANK_ACCOUNTS_2B6CC17D1F": {
             "ColumnId": "CUSTOM_NUM_CONF_BANK_ACCOUNTS_2B6CC17D1F",
@@ -10227,10 +10227,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_HIS_ID_4_00013C429C": {
             "ColumnId": "ACCT_SF_OPPTY_HIS_ID_4_00013C429C",
@@ -10240,10 +10240,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMBILLINGSOLUTIO_5BC832F7F3": {
             "ColumnId": "PD_DC_FEATURETERMBILLINGSOLUTIO_5BC832F7F3",
@@ -10285,10 +10285,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMECOMMERCESOFTW_558DBD29BC": {
             "ColumnId": "PD_DC_FEATURETERMECOMMERCESOFTW_558DBD29BC",
@@ -10321,10 +10321,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXAVIEWSPERUSER_6E7963331A": {
             "ColumnId": "PD_DC_ALEXAVIEWSPERUSER_6E7963331A",
@@ -10375,10 +10375,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMFUNDRAISINGSOF_2088658937": {
             "ColumnId": "PD_DC_FEATURETERMFUNDRAISINGSOF_2088658937",
@@ -10438,10 +10438,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMPAYMENTSOLUTIO_10E8BC8DCD": {
             "ColumnId": "PD_DC_FEATURETERMPAYMENTSOLUTIO_10E8BC8DCD",
@@ -10474,10 +10474,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.StateProvince": {
             "ColumnId": "StateProvince",
@@ -10487,10 +10487,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMYOURACCOUNT_6814729195": {
             "ColumnId": "PD_DC_FEATURETERMYOURACCOUNT_6814729195",
@@ -10541,10 +10541,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHORGANICCOST_INDU_0C33F40A5D": {
             "ColumnId": "ACCT_TP_SEMRUSHORGANICCOST_INDU_0C33F40A5D",
@@ -10595,10 +10595,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.BestLikelihood": {
             "ColumnId": "BestLikelihood",
@@ -10631,10 +10631,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREJAVASCRIPTBASKET_E5E10E334C": {
             "ColumnId": "PD_DC_FEATUREJAVASCRIPTBASKET_E5E10E334C",
@@ -10667,10 +10667,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMRETAIL_4BFA113250": {
             "ColumnId": "PD_DC_FEATURETERMRETAIL_4BFA113250",
@@ -10721,10 +10721,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_PRELEAD_ID_4EE180CF2A": {
             "ColumnId": "ACCT_PL_PRELEAD_ID_4EE180CF2A",
@@ -10757,10 +10757,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCUSTOMERSERVIC_AFAA629156": {
             "ColumnId": "PD_DC_FEATURETERMCUSTOMERSERVIC_AFAA629156",
@@ -10811,10 +10811,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_PRODUCT_BUNDLES_AC2C1CED31": {
             "ColumnId": "CUSTOM_PRODUCT_BUNDLES_AC2C1CED31",
@@ -10824,10 +10824,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREJAVASCRIPTCART_E87B8A8779": {
             "ColumnId": "PD_DC_FEATUREJAVASCRIPTCART_E87B8A8779",
@@ -10860,10 +10860,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXAUSPAGEVIEWS_E3C710BD68": {
             "ColumnId": "PD_DC_ALEXAUSPAGEVIEWS_E3C710BD68",
@@ -10914,10 +10914,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMPAYMENTOPTION_38E62F3425": {
             "ColumnId": "PD_DC_FEATURETERMPAYMENTOPTION_38E62F3425",
@@ -10968,10 +10968,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PHONE_12A8493365": {
             "ColumnId": "ACCT_PHONE_12A8493365",
@@ -10981,10 +10981,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREAVERAGEDOCUMENTSIZ_52178C9041": {
             "ColumnId": "PD_DC_FEATUREAVERAGEDOCUMENTSIZ_52178C9041",
@@ -11035,10 +11035,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMADDTOBAG_F6A71AF160": {
             "ColumnId": "PD_DC_FEATURETERMADDTOBAG_F6A71AF160",
@@ -11098,10 +11098,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_SEMRUSH_ISMATCHED_17BCAB52B0": {
             "ColumnId": "PD_DC_SEMRUSH_ISMATCHED_17BCAB52B0",
@@ -11129,10 +11129,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSECUREORDER_E9AD304259": {
             "ColumnId": "PD_DC_FEATURETERMSECUREORDER_E9AD304259",
@@ -11210,10 +11210,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCHECKOUT_16ED68E665": {
             "ColumnId": "PD_DC_FEATURETERMCHECKOUT_16ED68E665",
@@ -11264,10 +11264,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_FACEBOOK_LIKES_2MONTHSA_8471388C40": {
             "ColumnId": "ACCT_TP_FACEBOOK_LIKES_2MONTHSA_8471388C40",
@@ -11318,10 +11318,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_HIS_ID_2_0C35CC252E": {
             "ColumnId": "ACCT_SF_OPPTY_HIS_ID_2_0C35CC252E",
@@ -11331,10 +11331,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DP_ECOMMERCE_CERTAINTY_14EA76A76E": {
             "ColumnId": "CUSTOM_DP_ECOMMERCE_CERTAINTY_14EA76A76E",
@@ -11385,10 +11385,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHORGANICTRAFFIC_I_965B5E1AB6": {
             "ColumnId": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_965B5E1AB6",
@@ -11398,10 +11398,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_IS_PARTNER_0F99469DCB": {
             "ColumnId": "CUSTOM_IS_PARTNER_0F99469DCB",
@@ -11429,10 +11429,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREREFSRCBAG_56CDDE32AA": {
             "ColumnId": "PD_DC_FEATUREREFSRCBAG_56CDDE32AA",
@@ -11465,10 +11465,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMYOURSTORE_8F56F19E77": {
             "ColumnId": "PD_DC_FEATURETERMYOURSTORE_8F56F19E77",
@@ -11564,10 +11564,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FUNDINGFISCALYEAR_F4000FBB88": {
             "ColumnId": "PD_DC_FUNDINGFISCALYEAR_F4000FBB88",
@@ -11609,10 +11609,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_AMOUNT_A1F8667141": {
             "ColumnId": "CUSTOM_AMOUNT_A1F8667141",
@@ -11645,10 +11645,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_SEMRUSHADWORDSCOST_INDU_808226D6CC": {
             "ColumnId": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_808226D6CC",
@@ -11699,10 +11699,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CrmAccount_External_ID": {
             "ColumnId": "CrmAccount_External_ID",
@@ -11712,10 +11712,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURECURRENCYUSDOLLAR_1F54F2F7DB": {
             "ColumnId": "PD_DC_FEATURECURRENCYUSDOLLAR_1F54F2F7DB",
@@ -11766,10 +11766,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREREFSRCSHOP_BD1145229F": {
             "ColumnId": "PD_DC_FEATUREREFSRCSHOP_BD1145229F",
@@ -11802,10 +11802,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FUNDINGAMOUNT_93F3A7DC87": {
             "ColumnId": "PD_DC_FUNDINGAMOUNT_93F3A7DC87",
@@ -11847,10 +11847,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_DCC_L12M_35F4FD859C": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_DCC_L12M_35F4FD859C",
@@ -11883,10 +11883,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_DISPLAY_NAME_E9E26FB9C7": {
             "ColumnId": "ACCT_PL_DISPLAY_NAME_E9E26FB9C7",
@@ -11896,10 +11896,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSHOPPINGCARTPL_8F997F8756": {
             "ColumnId": "PD_DC_FEATURETERMSHOPPINGCARTPL_8F997F8756",
@@ -11932,10 +11932,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_B_BUSINESSECOMMERCESITE_56E54259F3": {
             "ColumnId": "ACCT_B_BUSINESSECOMMERCESITE_56E54259F3",
@@ -11963,10 +11963,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_TP_ALEXAVIEWSPERUSER_PERC__9C23580A26": {
             "ColumnId": "ACCT_TP_ALEXAVIEWSPERUSER_PERC__9C23580A26",
@@ -11976,10 +11976,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPB_1_250C26F0B0": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPB_1_250C26F0B0",
@@ -11989,10 +11989,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_TOT_NTPV_MS_FF_L12M_BE28941823": {
             "ColumnId": "CUSTOM_TOT_NTPV_MS_FF_L12M_BE28941823",
@@ -12025,10 +12025,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.SalesforceAccountID": {
             "ColumnId": "SalesforceAccountID",
@@ -12038,10 +12038,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMCART_A332CA0D46": {
             "ColumnId": "PD_DC_FEATURETERMCART_A332CA0D46",
@@ -12092,10 +12092,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_LE_JOBS_SOURCE_ISMATCHED_1ED27CBC84": {
             "ColumnId": "PD_DC_LE_JOBS_SOURCE_ISMATCHED_1ED27CBC84",
@@ -12123,10 +12123,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ECOMMERCETECHNOLOGIESTOPA_97B75F546C": {
             "ColumnId": "PD_DC_ECOMMERCETECHNOLOGIESTOPA_97B75F546C",
@@ -12136,10 +12136,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXA_SOURCE_ISMATCHED_E48CA67022": {
             "ColumnId": "PD_DC_ALEXA_SOURCE_ISMATCHED_E48CA67022",
@@ -12167,10 +12167,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_L6M_TPV_MODELREADY_B07A71F485": {
             "ColumnId": "CUSTOM_L6M_TPV_MODELREADY_B07A71F485",
@@ -12203,10 +12203,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_SFDC_LEAD_ID_E65D8CA078": {
             "ColumnId": "CUSTOM_SFDC_LEAD_ID_E65D8CA078",
@@ -12216,10 +12216,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_ACCOUNT_EMAIL_AA7FA7BEA3": {
             "ColumnId": "CUSTOM_ACCOUNT_EMAIL_AA7FA7BEA3",
@@ -12252,10 +12252,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREINTLCOMMERCE_EFE348969B": {
             "ColumnId": "PD_DC_FEATUREINTLCOMMERCE_EFE348969B",
@@ -12265,10 +12265,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DATAPROVIDER_LOAD_D99F23F18C": {
             "ColumnId": "CUSTOM_DATAPROVIDER_LOAD_D99F23F18C",
@@ -12301,10 +12301,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMECOMMERCESOFTW_0DBE95CC65": {
             "ColumnId": "PD_DC_FEATURETERMECOMMERCESOFTW_0DBE95CC65",
@@ -12337,10 +12337,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXAREACHPERMILLION_229EA810CE": {
             "ColumnId": "PD_DC_ALEXAREACHPERMILLION_229EA810CE",
@@ -12382,10 +12382,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_ISACTIVE_BD61462974": {
             "ColumnId": "ACCT_PL_ISACTIVE_BD61462974",
@@ -12418,10 +12418,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMWISHLIST_8A484DF7D1": {
             "ColumnId": "PD_DC_FEATURETERMWISHLIST_8A484DF7D1",
@@ -12472,10 +12472,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMSHIPPINGINFO_05D852CDCE": {
             "ColumnId": "PD_DC_FEATURETERMSHIPPINGINFO_05D852CDCE",
@@ -12526,10 +12526,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATUREGLOBALPRODUCT_D42DFA860E": {
             "ColumnId": "PD_DC_FEATUREGLOBALPRODUCT_D42DFA860E",
@@ -12562,10 +12562,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_CREATION_DATE_7088439623": {
             "ColumnId": "ACCT_PL_CREATION_DATE_7088439623",
@@ -12598,10 +12598,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_ALEXAREACHRANK_5FA8818999": {
             "ColumnId": "PD_DC_ALEXAREACHRANK_5FA8818999",
@@ -12643,10 +12643,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.PD_DC_FEATURETERMREVIEW_300F39E867": {
             "ColumnId": "PD_DC_FEATURETERMREVIEW_300F39E867",
@@ -12697,10 +12697,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_PL_CRMLEAD_EXTERNAL_ID_E9FF6DE801": {
             "ColumnId": "ACCT_PL_CRMLEAD_EXTERNAL_ID_E9FF6DE801",
@@ -12710,10 +12710,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.ACCT_SF_OPPTY_NEXTSTEPA_2_A104F294D5": {
             "ColumnId": "ACCT_SF_OPPTY_NEXTSTEPA_2_A104F294D5",
@@ -12723,10 +12723,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.DisplayName": {
             "ColumnId": "DisplayName",
@@ -12736,10 +12736,10 @@
             "Stats": {
                 "Cnt": 100000
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         },
         "Account.CUSTOM_DOMAIN_CREATION_DATE_2409DDFC3B": {
             "ColumnId": "CUSTOM_DOMAIN_CREATION_DATE_2409DDFC3B",
@@ -12772,10 +12772,10 @@
                     ]
                 }
             },
-            "FundamentalType": "alpha",
-            "Tags": [],
             "ApprovedUsage": [],
-            "Category": "Default"
+            "Tags": [],
+            "Category": "My Attributes",
+            "FundamentalType": "alpha"
         }
     },
     "TableNameMap": {
