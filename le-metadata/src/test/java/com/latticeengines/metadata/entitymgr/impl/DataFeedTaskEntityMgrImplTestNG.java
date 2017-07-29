@@ -17,8 +17,8 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
@@ -37,7 +37,6 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
 
     private DataFeedTask task = new DataFeedTask();
 
-    private Table dataTable = new Table();
     private Table importTable = new Table();
 
     @Override
@@ -71,10 +70,6 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
         a1.setPhysicalDataType("string");
         importTable.addAttribute(a1);
 
-        dataTable.setName("dataTable");
-        dataTable.setDisplayName(dataTable.getName());
-        dataTable.setTenant(MultiTenantContext.getTenant());
-
         task.setDataFeed(datafeed);
         task.setActiveJob("Not specified");
         task.setEntity(SchemaInterpretation.Account.name());
@@ -82,7 +77,6 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
         task.setStatus(DataFeedTask.Status.Active);
         task.setSourceConfig("config");
         task.setImportTemplate(importTable);
-        task.setImportData(dataTable);
         task.setStartTime(new Date());
         task.setLastImported(new Date());
         task.setUniqueId(NamingUtils.uuid("DataFeedTask"));
@@ -96,20 +90,17 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void retrieve() {
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).toString(), dataTable.toString());
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 0);
 
-        Table dataTable2 = new Table();
-        dataTable2.setName("dataTable2");
-        dataTable2.setDisplayName(dataTable2.getName());
-        dataTable2.setTenant(MultiTenantContext.getTenant());
-        task.setImportData(dataTable2);
+        Table dataTable = new Table();
+        dataTable.setName("dataTable2");
+        dataTable.setDisplayName(dataTable.getName());
+        dataTable.setTenant(MultiTenantContext.getTenant());
+        task.setImportData(dataTable);
         datafeedTaskEntityMgr.addImportDataTableToQueue(task);
 
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 2);
-        assertEquals(datafeedTaskEntityMgr.pollFirstDataTable(task).toString(), dataTable.toString());
         assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).toString(), dataTable2.toString());
+        assertEquals(datafeedTaskEntityMgr.pollFirstDataTable(task).toString(), dataTable.toString());
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
@@ -124,9 +115,8 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
         extract1.setTable(task.getImportTemplate());
         datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract1);
         task = datafeedTaskEntityMgr.findByKey(task);
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 2);
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
         assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(), extract1.getPid());
-        assertEquals(task.getImportData().getDisplayName(), task.getImportTemplate().getDisplayName());
         assertEquals(task.getStatus(), DataFeedTask.Status.Active);
 
     }
@@ -153,11 +143,8 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
         extract2.setTable(task.getImportTemplate());
         datafeedTaskEntityMgr.clearTableQueue();
         datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract2);
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 2);
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getPid(),
-                new Long(task.getImportData().getPid() - 1));
+        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
         assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(), extract2.getPid());
-        assertEquals(task.getImportData().getDisplayName(), task.getImportTemplate().getDisplayName());
     }
 
     @Test(groups = "functional", dependsOnMethods = "registerExtractWhenDataTableConsumed")
