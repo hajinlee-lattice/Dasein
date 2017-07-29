@@ -18,21 +18,15 @@ public class AMSeedManualOverwriteFunction extends BaseOperation implements Func
 
     private static final long serialVersionUID = -8318232337793111030L;
     private Map<String, Integer> namePositionMap;
-    private String amSeedSales;
-    private String amSeedTotalEmp;
-    private String manualSeedSales;
-    private String manualSeedTotalEmp;
     private String manualSeed_le_hq;
+    private String[][] overwriteFieldsArray;
 
-    public AMSeedManualOverwriteFunction(Fields fieldDeclaration, String amSeedSales, String amSeedTotalEmp,
-            String manualSeedSales, String manualSeedTotalEmp, String manualSeed_le_hq) {
+    public AMSeedManualOverwriteFunction(Fields fieldDeclaration, String manualSeed_le_hq,
+            String[][] overwriteFieldsArray) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
-        this.amSeedSales = amSeedSales;
-        this.amSeedTotalEmp = amSeedTotalEmp;
-        this.manualSeedSales = manualSeedSales;
-        this.manualSeedTotalEmp = manualSeedTotalEmp;
         this.manualSeed_le_hq = manualSeed_le_hq;
+        this.overwriteFieldsArray = overwriteFieldsArray;
     }
 
     @Override
@@ -61,15 +55,16 @@ public class AMSeedManualOverwriteFunction extends BaseOperation implements Func
         for (int i = 0; i < arguments.size(); i++) {
             result.set(i, arguments.getObject(i));
         }
-        Long manSeedSales = arguments.getLong(manualSeedSales);
-        Integer manSeedEmp = arguments.getInteger(manualSeedTotalEmp);
         String manualSeedLeHq = arguments.getString(manualSeed_le_hq);
         if (!StringUtils.isEmpty(manualSeedLeHq)) {
-            if (manSeedSales != 0L && manSeedSales != null) {
-                result.set(namePositionMap.get(amSeedSales), manSeedSales);
-            }
-            if (manSeedEmp != 0 && manSeedEmp != null) {
-                result.set(namePositionMap.get(amSeedTotalEmp), manSeedEmp);
+            // overwriting total sales, total employees, revenue range and
+            // employee range fields
+            for (int i = 0; i < overwriteFieldsArray.length; i++) {
+                if (arguments.getObject(overwriteFieldsArray[i][0]) != null) {
+                    result.set(
+                            this.namePositionMap.get(String.valueOf(overwriteFieldsArray[i][1])),
+                            arguments.getObject(overwriteFieldsArray[i][0]));
+                }
             }
         }
     }

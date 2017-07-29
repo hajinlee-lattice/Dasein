@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ManualSeedTransformerConfig extends TransformerConfig {
 
+    // 0 position stored manual seed field and 1 position stores am seed field
+    @JsonProperty("OverwriteFields")
+    private String[][] overwriteFields;
+
     @JsonProperty("FixTreeFlag")
     private String fixTreeFlag;
 
@@ -22,25 +26,10 @@ public class ManualSeedTransformerConfig extends TransformerConfig {
     @JsonProperty("AmSeedDomain")
     private String amSeedDomain;
 
-    @JsonProperty("ManualSeedSalesVolume")
-    private String manualSeedSalesVolume;
-
-    @JsonProperty("ManualSeedTotalEmp")
-    private String manualSeedTotalEmp;
-
-    @JsonProperty("AmSeedSalesVolume")
-    private String amSeedSalesVolume;
-
-    @JsonProperty("AmSeedTotalEmp")
-    private String amSeedTotalEmp;
-
     @JsonProperty("AmSeedLeIsPrimDom")
     private String amSeedLeIsPrimDom;
 
-    @JsonProperty("AmSeedLdcCity")
-    private String amSeedLdcCity;
-
-    @JsonProperty("isPrimaryAccount")
+    @JsonProperty("IsPrimaryAccount")
     private String isPrimaryAccount;
 
     public String getFixTreeFlag() {
@@ -65,38 +54,6 @@ public class ManualSeedTransformerConfig extends TransformerConfig {
 
     public void setManualSeedDuns(String manualSeedDuns) {
         this.manualSeedDuns = manualSeedDuns;
-    }
-
-    public String getManualSeedTotalEmp() {
-        return manualSeedTotalEmp;
-    }
-
-    public void setManualSeedTotalEmp(String manualSeedTotalEmp) {
-        this.manualSeedTotalEmp = manualSeedTotalEmp;
-    }
-
-    public String getAmSeedTotalEmp() {
-        return amSeedTotalEmp;
-    }
-
-    public void setAmSeedTotalEmp(String amSeedTotalEmp) {
-        this.amSeedTotalEmp = amSeedTotalEmp;
-    }
-
-    public String getManualSeedSalesVolume() {
-        return manualSeedSalesVolume;
-    }
-
-    public void setManualSeedSalesVolume(String manualSeedSalesVolume) {
-        this.manualSeedSalesVolume = manualSeedSalesVolume;
-    }
-
-    public String getAmSeedSalesVolume() {
-        return amSeedSalesVolume;
-    }
-
-    public void setAmSeedSalesVolume(String amSeedSalesVolume) {
-        this.amSeedSalesVolume = amSeedSalesVolume;
     }
 
     public String getAmSeedDuns() {
@@ -131,20 +88,20 @@ public class ManualSeedTransformerConfig extends TransformerConfig {
         this.amSeedLeIsPrimDom = amSeedLeIsPrimDom;
     }
 
-    public String getAmSeedLdcCity() {
-        return amSeedLdcCity;
-    }
-
-    public void setAmSeedLdcCity(String amSeedLdcCity) {
-        this.amSeedLdcCity = amSeedLdcCity;
-    }
-
     public String getIsPrimaryAccount() {
         return isPrimaryAccount;
     }
 
     public void setIsPrimaryAccount(String isPrimaryAccount) {
         this.isPrimaryAccount = isPrimaryAccount;
+    }
+
+    public String[][] getOverwriteFields() {
+        return overwriteFields;
+    }
+
+    public void setOverwriteFieldsArray(String[][] overwriteFields) {
+        this.overwriteFields = overwriteFields;
     }
 
 }

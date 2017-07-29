@@ -16,21 +16,20 @@ public class ManualDomainEnrichAggregator extends BaseAggregator<ManualDomainEnr
     private String manSeedDomain;
     private String amSeedDomain;
     private int domainLoc;
-    private String lePrimaryDomain;
+    private String isPrimaryDomain;
 
     public static class Context extends BaseAggregator.Context {
         Set<String> manSeedDomainSet = new HashSet<String>();
         Set<String> amSeedDomainSet = new HashSet<String>();
-        TupleEntry arguments;
         Tuple result;
     }
 
     public ManualDomainEnrichAggregator(Fields fieldDeclaration, String manSeedDomain,
-            String amSeedDomain, String lePrimaryDomain) {
+            String amSeedDomain, String isPrimaryDomain) {
         super(fieldDeclaration);
         this.manSeedDomain = manSeedDomain;
         this.amSeedDomain = amSeedDomain;
-        this.lePrimaryDomain = lePrimaryDomain;
+        this.isPrimaryDomain = isPrimaryDomain;
         this.domainLoc = namePositionMap.get(amSeedDomain);
     }
 
@@ -47,8 +46,7 @@ public class ManualDomainEnrichAggregator extends BaseAggregator<ManualDomainEnr
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        context.arguments = arguments;
-        if (arguments.getString(lePrimaryDomain).equals("Y")) {
+        if (context.result == null || ("Y").equals(arguments.getString(isPrimaryDomain))) {
             setupTupleForArgument(context, arguments);
         }
         String manDomainVal = arguments.getString(manSeedDomain);
@@ -65,7 +63,7 @@ public class ManualDomainEnrichAggregator extends BaseAggregator<ManualDomainEnr
     private void setupTupleForArgument(Context context, TupleEntry arguments) {
         context.result = new Tuple();
         context.result = Tuple.size(getFieldDeclaration().size());
-        // overwrite value based on lePrimaryDomain
+        // overwrite value based on isPrimaryDomain
         for (int i = 0; i < arguments.size(); i++) {
             context.result.set(i, arguments.getObject(i));
         }
@@ -74,25 +72,16 @@ public class ManualDomainEnrichAggregator extends BaseAggregator<ManualDomainEnr
     @Override
     protected Tuple finalizeContext(Context context) {
         boolean checkFlag = false;
-        if(!context.manSeedDomainSet.isEmpty()) {
-            for (String obj : context.manSeedDomainSet) {
-                if (obj != null && !(context.amSeedDomainSet).contains(obj)) {
-                    // setting flag to indicate new domain was found
-                    checkFlag = true;
-                    // overwriting domain with remaining values from am seed as
-                    // it is based on le primary domain
-                    if (context.result == null) {
-                        setupTupleForArgument(context, context.arguments);
-                    }
-                    context.result.set(domainLoc, obj);
-                }
+        for (String obj : context.manSeedDomainSet) {
+            if (!(context.amSeedDomainSet).contains(obj)) {
+                // setting flag to indicate new domain was found
+                checkFlag = true;
+                context.result.set(domainLoc, obj);
             }
-            if (checkFlag == false) {
-                context.result = null;
-            }
-            return context.result;
-        } else {
-            return null;
         }
+        if (checkFlag == false) {
+            context.result = null;
+        }
+        return context.result;
     }
 }

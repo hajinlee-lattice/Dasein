@@ -6,20 +6,21 @@ import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.ManualSeedCleanFlow;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ManualSeedCleanTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
@@ -27,16 +28,6 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
     GeneralSource source = new GeneralSource("ManualSeedCleanedData");
 
     GeneralSource baseSource = new GeneralSource("ManualSeedData");
-
-    @Autowired
-    private PipelineTransformationService pipelineTransformationService;
-
-    @Autowired
-    SourceService sourceService;
-
-    String targetSourceName = "ManualSeedCleanedData";
-
-    ObjectMapper om = new ObjectMapper();
 
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() {
@@ -73,13 +64,22 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
             List<String> baseSourceStep1 = new ArrayList<String>();
             baseSourceStep1.add(baseSource.getSourceName());
             step1.setBaseSources(baseSourceStep1);
-            step1.setTargetSource(targetSourceName);
             step1.setTransformer(ManualSeedCleanFlow.TRANSFORMER_NAME);
             String confParamStr1 = getManualSeedConfig();
             step1.setConfiguration(confParamStr1);
             // -----------
+            TransformationStepConfig step2 = new TransformationStepConfig();
+            List<Integer> inputSteps = new ArrayList<Integer>();
+            inputSteps.add(0);
+            step2.setInputSteps(inputSteps);
+            step2.setTransformer("standardizationTransformer");
+            step2.setTargetSource(source.getSourceName());
+            String confParamStr2 = getRangeMappingConfig();
+            step2.setConfiguration(confParamStr2);
+            // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
             steps.add(step1);
+            steps.add(step2);
             // -----------
             configuration.setSteps(steps);
 
@@ -91,29 +91,46 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
 
     private String getManualSeedConfig() throws JsonProcessingException {
         ManualSeedCleanTransformerConfig conf = new ManualSeedCleanTransformerConfig();
-        conf.setSalesVolumeInUSDollars("SALES_VOLUME_US_DOLLARS");
-        conf.setEmployeesTotal("EMPLOYEES_TOTAL");
-        return om.writeValueAsString(conf);
+        conf.setSalesVolumeInUSDollars("Manual_SALES_VOLUME_US_DOLLARS");
+        conf.setEmployeesTotal("Manual_EMPLOYEES_TOTAL");
+        return JsonUtils.serialize(conf);
+    }
+
+    private String getRangeMappingConfig() throws JsonProcessingException {
+        StandardizationTransformerConfig conf = new StandardizationTransformerConfig();
+        String[] addConsolidatedRangeFields = { "Manual_LE_EMPLOYEE_RANGE", "Manual_LE_REVENUE_RANGE" };
+        conf.setAddConsolidatedRangeFields(addConsolidatedRangeFields);
+        ConsolidateRangeStrategy[] strategies = { ConsolidateRangeStrategy.MAP_VALUE,
+                ConsolidateRangeStrategy.MAP_VALUE };
+        conf.setConsolidateRangeStrategies(strategies);
+        String[] rangeInputFields = { "Manual_EMPLOYEES_TOTAL", "Manual_SALES_VOLUME_US_DOLLARS" };
+        conf.setRangeInputFields(rangeInputFields);
+        String[] rangeMapFileNames = { "EmployeeRangeMapping.txt", "ManualSeedRevenueRangeMap.txt" };
+        conf.setRangeMapFileNames(rangeMapFileNames);
+        StandardizationTransformerConfig.StandardizationStrategy[] sequence = {
+                StandardizationStrategy.CONSOLIDATE_RANGE };
+        conf.setSequence(sequence);
+        return JsonUtils.serialize(conf);
     }
 
     @Override
     protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(targetSourceName);
+        Source targetSource = sourceService.findBySourceName(source.getSourceName());
         String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     private void prepareManualSeedData() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
-        columns.add(Pair.of("Id", String.class));
-        columns.add(Pair.of("SALES_VOLUME_US_DOLLARS", String.class));
-        columns.add(Pair.of("EMPLOYEES_TOTAL", String.class));
+        columns.add(Pair.of("Manual_Id", String.class));
+        columns.add(Pair.of("Manual_SALES_VOLUME_US_DOLLARS", String.class));
+        columns.add(Pair.of("Manual_EMPLOYEES_TOTAL", String.class));
         Object[][] data = new Object[][] {
                 { "1", "$18.16", "5,001-10,000" },
-                { "2", "$3.93", "5203", }, { "3", "$21.04", ">10,000Œæ" },
-                { "4", "$35.97", "10001" }, { "5", "$5.42", "14,024-20,000" }, { "6", "$9.92", "15098" },
-                { "7", "$9.86", "23172" }, { "8", "$31.39", "" }, { "9", "$10.86", "80,000" },
-                { "10", "$22.76", "18,200" } };
+                { "2", "$3.93", "5203", }, { "3", "$21.04", ">10,000Œæ" }, { "4", "$35.97", "10001" },
+                { "5", "$5.42", "14,024-20,000" }, { "6", "$9.92", "15098" }, { "7", "$9.86", "23172" },
+                { "8", "$31.39", "" }, { "9", "$10.86", "80,000" },
+                { "10", "$22.76", "18,200" }, { "11", "", "" }, { "12", null, null } };
         uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data);
     }
 
@@ -121,25 +138,22 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
         Object[][] expectedData = new Object[][] {
-                { "1", "18160000000", null }, { "2", "3930000000", "5203" },
-                { "3", "21040000000", null }, { "4", "35970000000", "10001" }, { "5", "5420000000", null },
-                { "6", "9920000000", "15098" }, { "7", "9860000000", "23172" }, { "8", "31390000000", null },
-                { "9", "10860000000", "80000" },
-                { "10", "22760000000", "18200" } };
+                { "1", 18160000000L, null, null, ">10B" }, { "2", 3930000000L, 5203, "5001-10,000", "1-5B" },
+                { "3", 21040000000L, null, null, ">10B" }, { "4", 35970000000L, 10001, ">10,000", ">10B" },
+                { "5", 5420000000L, null, null, "5-10B" }, { "6", 9920000000L, 15098, ">10,000", "5-10B" },
+                { "7", 9860000000L, 23172, ">10,000", "5-10B" }, { "8", 31390000000L, null, null, ">10B" },
+                { "9", 10860000000L, 80000, ">10,000", ">10B" }, { "10", 22760000000L, 18200, ">10,000", ">10B" },
+                { "11", null, null, null, null }, { "12", null, null, null, null } };
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            String employeesTotal = null;
-            if(record.get("EMPLOYEES_TOTAL") != null)
-                employeesTotal = record.get("EMPLOYEES_TOTAL").toString();
-            String salesVolumeInDollars = record.get("SALES_VOLUME_US_DOLLARS").toString();
-            String id = record.get("Id").toString();
+            String id = String.valueOf(record.get("Manual_Id"));
             int counter = Integer.parseInt(id);
-            Assert.assertEquals(id, expectedData[counter - 1][0]);
-            Assert.assertEquals(salesVolumeInDollars, expectedData[counter - 1][1]);
-            Assert.assertEquals(employeesTotal, expectedData[counter - 1][2]);
+            Assert.assertTrue(equals(record.get("Manual_SALES_VOLUME_US_DOLLARS"), expectedData[counter - 1][1]));
+            Assert.assertTrue(equals(record.get("Manual_EMPLOYEES_TOTAL"), expectedData[counter - 1][2]));
+            Assert.assertTrue(equals(record.get("Manual_LE_EMPLOYEE_RANGE"), expectedData[counter - 1][3]));
+            Assert.assertTrue(equals(record.get("Manual_LE_REVENUE_RANGE"), expectedData[counter - 1][4]));
             rowCount++;
         }
-        Assert.assertEquals(rowCount, 10);
+        Assert.assertEquals(rowCount, 12);
     }
-
 }
