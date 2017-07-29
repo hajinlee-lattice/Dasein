@@ -7,9 +7,9 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -31,14 +31,17 @@ import com.latticeengines.proxy.exposed.RestApiClient;
 public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     private static final Logger log = LoggerFactory.getLogger(DnBAuthenticationServiceImpl.class);
 
-    @Value("${datacloud.dnb.transactionalmatch.api.key}")
+    @Value("${datacloud.dnb.realtime.api.key}")
     private String realtimeKey;
 
-    @Value("${datacloud.dnb.bulkmatch.api.key}")
+    @Value("${datacloud.dnb.bulk.api.key}")
     private String bulkKey;
 
-    @Value("${datacloud.dnb.password.encrypted}")
-    private String passwd;
+    @Value("${datacloud.dnb.realtime.password.encrypted}")
+    private String realtimePwd;
+
+    @Value("${datacloud.dnb.bulk.password.encrypted}")
+    private String bulkPwd;
 
     @Value("${datacloud.dnb.user.header}")
     private String userHeader;
@@ -91,9 +94,9 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     private String obtainAuthorizationReponseBody(DnBKeyType type) throws IOException {
         switch (type) {
         case REALTIME:
-            return dnbClient.post(authorityRequestEntity(realtimeKey, passwd), authorityUrl);
+            return dnbClient.post(authorityRequestEntity(realtimeKey, realtimePwd), authorityUrl);
         case BATCH:
-            return dnbClient.post(authorityRequestEntity(bulkKey, passwd), authorityUrl);
+            return dnbClient.post(authorityRequestEntity(bulkKey, bulkPwd), authorityUrl);
         default:
             throw new UnsupportedOperationException(
                     String.format("DnBKeyType %s is not supported in DnBAuthenticationService.", type.name()));

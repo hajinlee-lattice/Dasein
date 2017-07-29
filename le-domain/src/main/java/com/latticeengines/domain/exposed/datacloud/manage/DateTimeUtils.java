@@ -14,16 +14,16 @@ public class DateTimeUtils {
     private static Logger log = LoggerFactory.getLogger(DateTimeUtils.class);
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
     private static final String DATE_TZ_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-    private static final String DATE_T_FORMAT = "yyyy-MM-dd'T'HH:mm:ssXXX";
+    private static final String DATE_TX_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
     private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     private static final SimpleDateFormat formatterTZ = new SimpleDateFormat(DATE_TZ_FORMAT);
-    private static final SimpleDateFormat formatterT = new SimpleDateFormat(DATE_T_FORMAT);
+    private static final SimpleDateFormat formatterTX = new SimpleDateFormat(DATE_TX_FORMAT);
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     static {
         formatter.setCalendar(calendar);
         formatterTZ.setCalendar(calendar);
-        formatterT.setCalendar(calendar);
+        formatterTX.setCalendar(calendar);
     }
 
     public static Date parse(String dateStr) {
@@ -46,9 +46,9 @@ public class DateTimeUtils {
         }
     }
 
-    public static Date parseT(String dateStr) {
+    public static Date parseTX(String dateStr) {
         try {
-            return formatterT.parse(dateStr);
+            return formatterTX.parse(dateStr);
         } catch (Exception e) {
             log.error("Failed to parse timestamp [" + dateStr + "]", e);
             return null;
@@ -64,7 +64,7 @@ public class DateTimeUtils {
     }
 
     public static String formatT(Date date) {
-        return date == null ? null : formatterT.format(date);
+        return date == null ? null : formatterTX.format(date);
     }
 
 }

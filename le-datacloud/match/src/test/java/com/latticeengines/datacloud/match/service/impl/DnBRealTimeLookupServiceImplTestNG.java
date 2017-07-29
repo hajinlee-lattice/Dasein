@@ -153,7 +153,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         return new Object[][] {
                 { "BENCHMARK BLINDS", "GILBERT", "ARIZONA", "USA", "US", DnBReturnCode.OK, "038796548", 8,
                         new DnBMatchGrade("AZZAAZZZFAB") },
-                { "DÉSIRÉE DAUDE", null, null, "GERMANY", "DE", DnBReturnCode.DISCARD, null, 4,
+                { "DÉSIRÉE DAUDE", null, null, "GERMANY", "DE", DnBReturnCode.OK, null, 4,
                         new DnBMatchGrade("BZZZZZZZZZZ") },
                 { "ABCDEFG", "NEW YORK", "WASHINTON", "USA", "US", DnBReturnCode.UNMATCH, null, null, null },
                 { "GORMAN MANUFACTURING", null, null, "USA", "US", DnBReturnCode.OK, "804735132", 6,
@@ -162,7 +162,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
                         new DnBMatchGrade("AZZZAZZZFFZ") },
                 { "GOOGLE GERMANY", "HAMBURG", null, "GERMANY", "DE", DnBReturnCode.OK, "330465266", 7,
                         new DnBMatchGrade("AZZAZZZZZFZ") },
-                { "GORMAN MFG CO INC", "SACRAMENTO", "CA", "USA", "US", DnBReturnCode.DISCARD, "009175688", 7,
+                { "GORMAN MFG CO INC", "SACRAMENTO", "CA", "USA", "US", DnBReturnCode.OK, "009175688", 7,
                         new DnBMatchGrade("AZZAAZZZFFZ") } };
     }
 

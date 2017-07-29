@@ -258,8 +258,8 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     private void parseTimestamp(String response, DnBBatchMatchContext batchContext) {
         String receivedTimeStr = (String) retrieveXmlValueFromResponse(receiveTimestampXpath, response);
         String completeTimeStr = (String) retrieveXmlValueFromResponse(completeTimestampXpath, response);
-        Date receivedTime = DateTimeUtils.parseT(receivedTimeStr);
-        Date completeTime = DateTimeUtils.parseT(completeTimeStr);
+        Date receivedTime = DateTimeUtils.parseTX(receivedTimeStr);
+        Date completeTime = DateTimeUtils.parseTX(completeTimeStr);
         if (completeTime == null || receivedTime == null || completeTime.getTime() <= receivedTime.getTime()) {
             log.warn(String.format("Fail to parse timestamp field in the response of DnB bulk match request  %s",
                     batchContext.getServiceBatchId()));
