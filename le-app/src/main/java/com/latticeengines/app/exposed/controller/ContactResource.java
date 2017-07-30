@@ -26,14 +26,15 @@ public class ContactResource extends BaseFrontEndEntityResource {
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public long getCount(@RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "segment", required = false) String segment) {
-        return super.getCount(BusinessEntity.Contact, frontEndQuery, segment);
+        return super.getCount(frontEndQuery, segment);
     }
 
+    @Deprecated
     @RequestMapping(value = "/count/restriction", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified restriction")
     public long getCountForRestriction(@RequestBody FrontEndRestriction restriction) {
-        return super.getCountForRestriction(BusinessEntity.Contact, restriction);
+        return super.getCountForRestriction(restriction);
     }
 
     @Override
@@ -79,6 +80,11 @@ public class ContactResource extends BaseFrontEndEntityResource {
                 return addSelects;
             }
         };
+    }
+
+    @Override
+    BusinessEntity getMainEntity() {
+        return BusinessEntity.Contact;
     }
 
 }

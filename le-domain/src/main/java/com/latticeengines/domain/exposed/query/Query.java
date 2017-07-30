@@ -24,7 +24,6 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 /**
  * NOTE:
@@ -37,8 +36,8 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Query implements GraphNode {
 
-    @JsonProperty("object_type")
-    private SchemaInterpretation objectType;
+    @JsonProperty("main_entity")
+    private BusinessEntity mainEntity;
 
     @JsonProperty("lookups")
     private List<Lookup> lookups = new ArrayList<>();
@@ -74,16 +73,6 @@ public class Query implements GraphNode {
         return new QueryBuilder();
     }
 
-    public Query(SchemaInterpretation objectType, List<Lookup> lookups, Restriction restriction, Sort sort,
-            PageFilter pageFilter, String freeFromRestriction) {
-        this.objectType = objectType;
-        this.lookups = lookups;
-        this.restriction = restriction;
-        this.sort = sort;
-        this.pageFilter = pageFilter;
-        this.freeFormTextSearch = freeFromRestriction;
-    }
-
     Query() {
     }
 
@@ -103,14 +92,8 @@ public class Query implements GraphNode {
         this.lookups = lookups;
     }
 
-    public void setLookups(BusinessEntity businessEntity, String... attrNames) {
-        this.lookups = new ArrayList<String>(Arrays.asList(attrNames)).stream() //
-                .map((attrName) -> new AttributeLookup(businessEntity, attrName)) //
-                .collect(Collectors.toList());
-    }
-
     public void addLookups(BusinessEntity businessEntity, String... attrNames) {
-        List<Lookup> moreLookups = new ArrayList<String>(Arrays.asList(attrNames)).stream() //
+        List<Lookup> moreLookups = new ArrayList<>(Arrays.asList(attrNames)).stream() //
                 .map((attrName) -> new AttributeLookup(businessEntity, attrName)) //
                 .collect(Collectors.toList());
         lookups.addAll(moreLookups);
@@ -136,14 +119,6 @@ public class Query implements GraphNode {
         this.pageFilter = pageFilter;
     }
 
-    public SchemaInterpretation getObjectType() {
-        return objectType;
-    }
-
-    public void setObjectType(SchemaInterpretation objectType) {
-        this.objectType = objectType;
-    }
-
     public String getFreeFormTextSearch() {
         return freeFormTextSearch;
     }
@@ -160,43 +135,9 @@ public class Query implements GraphNode {
         this.freeFormTextSearchAttributes = freeFormTextSearchAttributes;
     }
 
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
-    }
-
-    public List<JoinSpecification> getNecessaryJoins() {
-        DepthFirstSearch search = new DepthFirstSearch();
-        List<JoinSpecification> joins = new ArrayList<>();
-
-        search.run(this, (object, ctx) -> {
-            GraphNode node = (GraphNode) object;
-            if (node instanceof ColumnLookup) {
-                ColumnLookup lookup = (ColumnLookup) node;
-                if (lookup.getObjectType() != null && !lookup.getObjectType().equals(getObjectType())) {
-                    joins.add(new JoinSpecification(getObjectType(), lookup.getObjectType(), ObjectUsage.LOOKUP));
-                }
-            } else if (node instanceof ExistsRestriction) {
-                ExistsRestriction exists = (ExistsRestriction) node;
-                joins.add(new JoinSpecification(getObjectType(), exists.getObjectType(), ObjectUsage.EXISTS));
-            }
-        });
-
-        return joins;
-    }
-
     public void analyze() {
         traverseEntities();
+        resolveMainEntity();
         generateJoins();
     }
 
@@ -217,6 +158,18 @@ public class Query implements GraphNode {
                 entitiesForExists.add(exists.getEntity());
             }
         });
+    }
+
+    private void resolveMainEntity() {
+        if (mainEntity != null) {
+            entitiesForJoin.add(mainEntity);
+        } else {
+            if (entitiesForJoin.contains(BusinessEntity.Account)) {
+                mainEntity = BusinessEntity.Account;
+            } else {
+                mainEntity = entitiesForJoin.iterator().next();
+            }
+        }
     }
 
     private void generateJoins() {
@@ -243,17 +196,11 @@ public class Query implements GraphNode {
     }
 
     public BusinessEntity getMainEntity() {
-        if (entitiesForJoin.contains(BusinessEntity.Account)) {
-            return BusinessEntity.Account;
-        }
-        return entitiesForJoin.iterator().next();
+        return mainEntity;
     }
 
-    public List<JoinSpecification> from(BusinessEntity entity) {
-        analyze();
-        List<JoinSpecification> joins = new ArrayList<>(lookupJoins);
-        joins.addAll(existsJoins);
-        return joins;
+    public void setMainEntity(BusinessEntity mainEntity) {
+        this.mainEntity = mainEntity;
     }
 
     public Set<BusinessEntity> getEntitiesForJoin() {
@@ -292,6 +239,21 @@ public class Query implements GraphNode {
     @Override
     public void accept(Visitor visitor, VisitorContext ctx) {
         visitor.visit(this, ctx);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

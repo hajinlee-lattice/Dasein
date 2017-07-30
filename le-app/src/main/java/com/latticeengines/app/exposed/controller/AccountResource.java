@@ -26,14 +26,15 @@ public class AccountResource extends BaseFrontEndEntityResource {
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public long getCount(@RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "segment", required = false) String segment) {
-        return super.getCount(BusinessEntity.Account, frontEndQuery, segment);
+        return super.getCount(frontEndQuery, segment);
     }
 
+    @Deprecated
     @RequestMapping(value = "/count/restriction", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified restriction")
     public long getCountForRestriction(@RequestBody FrontEndRestriction restriction) {
-        return super.getCountForRestriction(BusinessEntity.Account, restriction);
+        return super.getCountForRestriction(restriction);
     }
 
     @Override
@@ -79,6 +80,11 @@ public class AccountResource extends BaseFrontEndEntityResource {
                 return addSelects;
             }
         };
+    }
+
+    @Override
+    BusinessEntity getMainEntity() {
+        return BusinessEntity.Account;
     }
 
 }

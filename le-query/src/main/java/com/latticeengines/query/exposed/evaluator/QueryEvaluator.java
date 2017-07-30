@@ -38,7 +38,7 @@ public class QueryEvaluator {
         return run(sqlquery, repository, query);
     }
 
-    public DataPage run(SQLQuery<?> sqlquery, AttributeRepository repository, Query query) {
+    DataPage run(SQLQuery<?> sqlquery, AttributeRepository repository, Query query) {
         List<Map<String, Object>> data = new ArrayList<>();
         final Map<String, String> attrNames = new HashMap<>();
         query.getLookups().forEach(l -> {

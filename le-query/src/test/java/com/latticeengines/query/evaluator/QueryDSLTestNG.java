@@ -32,19 +32,19 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testWindowFunctionComparison() throws SQLException {
         SQLQueryFactory factory = factory();
-        StringPath tablePath = Expressions.stringPath("querytest_table");
-        StringPath columnPath = Expressions.stringPath(tablePath, "id");
+        StringPath tablePath = Expressions.stringPath("SegmentUI");
+        StringPath idPath = Expressions.stringPath(tablePath, "accountid");
         StringPath innerPath = Expressions.stringPath("inner");
         long count = factory
                 .query()
                 .from(factory //
-                        .select(SQLExpressions.max(columnPath).over().partitionBy(columnPath).orderBy(columnPath)
-                                .rows().between().unboundedPreceding().currentRow().as("max1"),
-                                SQLExpressions.max(columnPath).over().partitionBy(columnPath).orderBy(columnPath)
+                        .select(SQLExpressions.max(idPath).over().partitionBy(idPath).orderBy(idPath) //
+                                        .rows().between().unboundedPreceding().currentRow().as("max1"),
+                                SQLExpressions.max(idPath).over().partitionBy(idPath).orderBy(idPath) //
                                         .rows().between().unboundedPreceding().currentRow().as("max2")) //
                         .from(tablePath).as("inner")) //
-                .where(Expressions.stringPath(innerPath, "max1").eq("123")
-                        .and(Expressions.stringPath(innerPath, "max2").eq("123"))) //
+                .where(Expressions.stringPath(innerPath, "max1").eq("59129793")
+                        .and(Expressions.stringPath(innerPath, "max2").eq("59129793"))) //
                 .fetchCount();
         System.out.println(count);
     }
@@ -52,7 +52,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCount() throws SQLException {
         SQLQueryFactory factory = factory();
-        StringPath tablePath = Expressions.stringPath("querytest_table");
+        StringPath tablePath = Expressions.stringPath("SegmentUI");
         try (PerformanceTimer timer = new PerformanceTimer("getCount")) {
             long count = factory.query().from(tablePath).fetchCount();
             Assert.assertTrue(count > 0);
@@ -61,15 +61,15 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testExists() {
-        StringPath outerTable = Expressions.stringPath("querytest_table");
-        StringPath innerTable = Expressions.stringPath("querytest_table");
+        StringPath outerTable = Expressions.stringPath("SegmentUI");
+        StringPath innerTable = Expressions.stringPath("SegmentUI");
 
-        StringPath outerColumn = Expressions.stringPath(outerTable, "id");
-        StringPath innerColumn = Expressions.stringPath(innerTable, "id");
+        StringPath outerColumn = Expressions.stringPath(outerTable, "accountid");
+        StringPath innerColumn = Expressions.stringPath(innerTable, "accountid");
 
         long count = factory().query().from(outerTable)
                 .where(factory().from(innerTable).where(innerColumn.eq(outerColumn)).exists()).fetchCount();
-        assertEquals(count, 611136);
+        assertEquals(count, 100000);
     }
 
     private SQLQueryFactory factory() {
@@ -81,8 +81,8 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testWindowFunctionBug() throws SQLException {
         SQLQueryFactory factory = factory();
-        StringPath tablePath = Expressions.stringPath("querytest_table");
-        StringPath columnPath = Expressions.stringPath(tablePath, "id");
+        StringPath tablePath = Expressions.stringPath("SegmentUI");
+        StringPath columnPath = Expressions.stringPath(tablePath, "accountid");
         StringPath innerPath = Expressions.stringPath("inner");
         SQLQuery<?> query = factory
                 .query()
@@ -91,7 +91,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
                         .select(SQLExpressions.max(columnPath).over().partitionBy(columnPath).orderBy(columnPath)
                                 .rows().between().currentRow().following(1).as("max1")) //
                         .from(tablePath).as("inner")) //
-                .where(Expressions.stringPath(innerPath, "max1").eq("123"));
+                .where(Expressions.stringPath(innerPath, "max1").eq("59129793"));
         query.setUseLiterals(true);
         ResultSet results = query.getResults();
         while (results.next()) {

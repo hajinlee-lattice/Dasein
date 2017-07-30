@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.query.Query.FreeFormTextSearchAttribute
 public class QueryBuilder {
 
     private List<Lookup> lookups = new ArrayList<>();
+    private BusinessEntity mainEntity;
     private Restriction restriction;
     private Sort sort;
     private PageFilter pageFilter;
@@ -74,6 +75,11 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder from(BusinessEntity entity) {
+        this.mainEntity = entity;
+        return this;
+    }
+
     public Query build() {
         Query query = new Query();
         query.setLookups(lookups);
@@ -82,6 +88,7 @@ public class QueryBuilder {
         query.setPageFilter(pageFilter);
         query.setFreeFormTextSearch(freeFormTextSearch);
         query.setFreeFormTextSearchAttributes(freeFormTextSearchAttributes);
+        query.setMainEntity(mainEntity);
         return query;
     }
 

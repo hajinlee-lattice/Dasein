@@ -92,7 +92,6 @@ public class QueryProcessor {
         List<Predicate> joinKeys = new ArrayList<>();
         for (JoinSpecification join : lookupJoins) {
             BusinessEntity target = join.getDestinationEntity();
-            attrRepoUtils.getTablePath(repository, target); // TODO remove this line?
             // from all seen entities find one can join the current target
             BusinessEntity.Relationship relationship = joinedEntities.stream() //
                     .map(e -> e.join(target)) //
@@ -100,7 +99,7 @@ public class QueryProcessor {
                     .findAny().orElse(null);
             if (relationship == null) {
                 throw new QueryEvaluationException(
-                        "Broken Connectivity: Cannot find a connected path to entity " + target + ".");
+                        "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity() + " to entity " + target + ".");
             }
             // JOIN T1
             EntityPath<String> targetTableName = attrRepoUtils.getTablePathBuilder(repository, target);

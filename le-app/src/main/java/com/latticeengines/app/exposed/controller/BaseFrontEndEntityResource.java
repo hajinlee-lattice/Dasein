@@ -27,23 +27,23 @@ public abstract class BaseFrontEndEntityResource {
 
     protected abstract QueryDecorator getQueryDecorator(boolean addSelects);
 
-    public long getCount(BusinessEntity businessEntity, FrontEndQuery frontEndQuery, String segment) {
+    public long getCount(FrontEndQuery frontEndQuery, String segment) {
         Restriction segmentRestriction = null;
         if (StringUtils.isNotBlank(segment)) {
             segmentRestriction = getSegmentRestriction(segment);
         }
         Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(false), segmentRestriction);
-        query.addLookup(new EntityLookup(businessEntity));
+        query.addLookup(new EntityLookup(getMainEntity()));
         return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), query);
     }
 
-    public long getCountForRestriction(BusinessEntity businessEntity, FrontEndRestriction restriction) {
+    public long getCountForRestriction(FrontEndRestriction restriction) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         if (restriction != null) {
             frontEndQuery.setFrontEndRestriction(restriction);
         }
         Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(false));
-        query.addLookup(new EntityLookup(businessEntity));
+        query.addLookup(new EntityLookup(getMainEntity()));
         return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), query);
     }
 
@@ -53,6 +53,7 @@ public abstract class BaseFrontEndEntityResource {
             segmentRestriction = getSegmentRestriction(segment);
         }
         Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(true), segmentRestriction);
+        query.setMainEntity(getMainEntity());
         return entityProxy.getData(MultiTenantContext.getCustomerSpace().toString(), query);
     }
 
@@ -65,5 +66,7 @@ public abstract class BaseFrontEndEntityResource {
             return null;
         }
     }
+
+    abstract BusinessEntity getMainEntity();
 
 }

@@ -47,20 +47,6 @@ public class QueryUnitTestNG {
         assertEquals(contactJoin.getDestinationObjectUsage(), ObjectUsage.EXISTS);
     }
 
-    @Test(groups = "unit", enabled = false)
-    public void testGetJoins() {
-        Query query = getQuery();
-        List<JoinSpecification> joins = query.getNecessaryJoins();
-        assertEquals(joins.size(), 2);
-        JoinSpecification amJoin = joins.stream()
-                .filter(j -> j.getDestinationType().equals(SchemaInterpretation.AccountMaster)).findFirst()
-                .orElse(null);
-        assertEquals(amJoin.getDestinationObjectUsage(), ObjectUsage.LOOKUP);
-        JoinSpecification contactJoin = joins.stream()
-                .filter(j -> j.getDestinationType().equals(SchemaInterpretation.Contact)).findFirst().orElse(null);
-        assertEquals(contactJoin.getDestinationObjectUsage(), ObjectUsage.EXISTS);
-    }
-
     @Test(groups = "unit")
     public void testGetAllOfType() {
         Query query = getEntityQuery();
@@ -90,16 +76,6 @@ public class QueryUnitTestNG {
         Restriction deserialized = JsonUtils.deserialize(json, Restriction.class);
         List<AttributeLookup> lookups = GraphUtils.getAllOfType(deserialized, AttributeLookup.class);
         assertEquals(lookups.size(), 1);
-    }
-
-    @Deprecated
-    private Query getQuery() {
-        Query query = new Query();
-        query.setObjectType(SchemaInterpretation.Account);
-        query.addLookup(new ColumnLookup(SchemaInterpretation.Account, "foo"));
-        query.addLookup(new ColumnLookup(SchemaInterpretation.AccountMaster, "bar"));
-        query.setRestriction(new ExistsRestriction(SchemaInterpretation.Contact, false, null));
-        return query;
     }
 
     private Query getEntityQuery() {

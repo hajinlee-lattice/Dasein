@@ -33,16 +33,30 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
 
         if (isBucket(restriction)) {
             AttributeLookup attrLookup = (AttributeLookup) lhs;
-            ValueLookup valueLookup = (ValueLookup) rhs;
-            AttributeStats stats = findAttributeStats(attrLookup);
-            Buckets bkts = stats.getBuckets();
-            rhs = convert(bkts, (String) valueLookup.getValue());
+            if (restriction.getRelation().equals(ComparisonType.IS_NULL)) {
+                // is null means bktId = 0
+                restriction.setRelation(ComparisonType.EQUAL);
+                rhs = new ValueLookup(0);
+            } else {
+                ValueLookup valueLookup = (ValueLookup) rhs;
+                AttributeStats stats = findAttributeStats(attrLookup);
+                Buckets bkts = stats.getBuckets();
+                rhs = convert(bkts, (String) valueLookup.getValue());
+            }
         }
 
         LookupResolver lhsResolver = lookupFactory.getLookupResolver(lhs.getClass());
         List<ComparableExpression<String>> lhsPaths = lhsResolver.resolveForCompare(lhs);
         ComparableExpression<String> lhsPath = lhsPaths.get(0);
 
+        if (restriction.getRelation().equals(ComparisonType.EQUAL) && isNullValueLookup(rhs)) {
+            if (restriction.getNegate()) {
+                restriction.setRelation(ComparisonType.IS_NOT_NULL);
+            } else {
+                restriction.setRelation(ComparisonType.IS_NULL);
+            }
+        }
+        
         if (restriction.getRelation().equals(ComparisonType.IS_NULL)) {
             return lhsPath.isNull();
         } else if (restriction.getRelation().equals(ComparisonType.IS_NOT_NULL)) {
@@ -74,16 +88,25 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         }
     }
 
+    private boolean isNullValueLookup(Lookup lookup) {
+        return lookup instanceof ValueLookup && ((ValueLookup) lookup).getValue() == null;
+    }
+
     private boolean isBucket(ConcreteRestriction restriction) {
         Lookup lhs = restriction.getLhs();
-        Lookup rhs = restriction.getRhs();
-
-        if ((rhs != null) && (lhs instanceof AttributeLookup) && !(rhs instanceof AttributeLookup)) {
+        if (lhs instanceof AttributeLookup) {
             AttributeLookup attrLookup = (AttributeLookup) lhs;
             ColumnMetadata cm = findAttributeMetadata(attrLookup);
+            if (cm == null) {
+                throw new IllegalArgumentException("Cannot find metadata for attribute " + attrLookup + " in attr repo.");
+            }
             if (cm.getBitOffset() != null) {
-                // lhs is bucketed attribute, but rhs is not
-                if (rhs instanceof ValueLookup) {
+                // lhs is bit encoded
+                if (restriction.getRelation().equals(ComparisonType.IS_NULL)) {
+                    return true;
+                }
+                Lookup rhs = restriction.getRhs();
+                if (rhs != null && rhs instanceof ValueLookup) {
                     ValueLookup valueLookup = (ValueLookup) rhs;
                     Object val = valueLookup.getValue();
                     if (val == null || (val instanceof String)) {
