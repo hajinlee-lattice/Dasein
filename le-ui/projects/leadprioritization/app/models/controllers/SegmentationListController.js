@@ -8,14 +8,15 @@ angular.module('lp.models.segments', [
     angular.extend(vm, {
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
-        segments: SegmentsList,
-        tileStates: {}
+        segments: SegmentsList || [],
+        filteredItems: [],
+        totalLength: SegmentsList.length,
+        tileStates: {},
+        query: ''
     });
 
 
     SegmentsList.forEach(function(segment) {
-
-        console.log(segment);
 
         vm.tileStates[segment.name] = {
             showCustomMenu: false,

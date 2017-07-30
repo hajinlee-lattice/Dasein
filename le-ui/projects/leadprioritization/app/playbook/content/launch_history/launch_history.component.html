@@ -1,5 +1,67 @@
-<section class="playbook playbook-launch-history container" >
+
+
+<section class="playbook playbook-launch-history container">
+
     <div class="header">
-        <h2>Launch History</h2>
+        <h2>{{vm.totalRecoGen | number}}</h2>
+        <h3>Total Recommendations Generated</h3>
     </div>
-</div>
+    <ul class="history-metadata">
+    	<li>
+    		<dl>
+    			<dt>Errors</dt>
+    			<dd class="blue-text">{{vm.errors | number}}</dd>
+    		</dl>
+    	</li>
+    	<li>
+    		<dl>
+    			<dt>Suppressed</dt>
+    			<dd class="blue-text">{{vm.suppressed | number}}</dd>
+    		</dl>
+    	</li>
+    	<li>
+    		<dl>
+    			<dt>Expired</dt>
+    			<dd class="blue-text">{{vm.expired | number}}</dd>
+    		</dl>
+    	</li>
+    	<li>
+    		<dl>
+    			<dt>Disqualified</dt>
+    			<dd class="blue-text">{{vm.disqualified | number}}</dd>
+    		</dl>
+    	</li>
+    </ul>
+    <div class="table">
+    	<div class="table-metadata">
+    		<span class="blue-text">{{vm.launches.length}}</span> play launches resulting in <span class="blue-text">{{vm.totalRecoGen | number}}</span> total recommendations.
+    	</div>
+    	<!-- <div class="pagination">
+    		pagination is here
+    	</div> -->
+
+    	<table>
+    		<thead>
+    			<tr>
+    				<th>Launch Time</th>
+    				<th>Selected Targets</th>
+    				<th>Supressed</th>
+    				<th>Launched</th>
+    				<th>Contacts within Recommendation</th>
+    			</tr>
+    		</thead>
+    		<tbody>
+    			<tr ng-repeat="launch in vm.launches">
+    				<td>{{launch.lastUpdatedTimestamp | date}}</td>
+    				<td>{{launch.contactsNum | number}}</td>
+    				<td>{{vm.totalSuppressed | number}}</td>
+    				<td>{{launch.accountsNum | number}}</td>
+    				<td>{{launch.contactsNum | number}}</td>
+    			</tr>
+    		</tbody>
+    	</table>
+    </div>
+
+</section>
+
+

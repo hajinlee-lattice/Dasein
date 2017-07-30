@@ -1,50 +1,37 @@
 angular.module('common.datacloud.query.service',[
 ])
-.service('QueryStore', function($filter, $q, $timeout, QueryService, BucketRestriction) {
+.service('QueryStore', function($filter, $q, $stateParams, $timeout, QueryService, BucketRestriction) {
 
     angular.extend(this, {});
 
-
-    var uiStates = [];
-    var defaultState = {};
-    var undefinedState = {};
-
-
     this.validResourceTypes = ['accounts', 'contacts'];
     this.segment = null;
+    
+    this.validContexts = ['accounts', 'contacts'];
+    var allRestrictions = [];
+    var anyRestrictions = [];
     this.restriction = {
-        all: [],
-        any: []
-    };
-    this.counts = {
-        accounts: {
-            value: 0,
-            loading: false
-        },
-        contacts: {
-            value: 0,
-            loading: false
-        }
-    };
-
-    this.getCounts = function() {
-        return this.counts;
-    };
-
-    this.setResourceTypeCount = function(resourceType, loading, value) {
-        var resourceTypeCount = this.getCounts()[resourceType];
-
-        console.log(resourceTypeCount);
-
-        if (resourceTypeCount) {
-            if (typeof value  !== 'undefined') {
-                resourceTypeCount.value = value;
-            }
-            if (typeof loading !== 'undefined') {
-                resourceTypeCount.loading = loading;
+        "restriction": {
+            "logicalRestriction": {
+                "operator": "AND",
+                "restrictions": [
+                    {
+                        "logicalRestriction": {
+                            "operator": "AND",
+                            "restrictions": allRestrictions
+                        }
+                    },
+                    {
+                        "logicalRestriction": {
+                            "operator": "OR",
+                            "restrictions": anyRestrictions
+                        }
+                    }
+                ]
             }
         }
     };
+
 
     this.setRestriction = function(restriction) {
         this.restriction = restriction;
@@ -55,6 +42,9 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.updateRestriction = function(restriction) {
+
+        // update for refine query
+
         this.restriction.all = restriction.all;
         this.restriction.any = restriction.any;
     };
@@ -68,34 +58,25 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.setupStore = function(segment) {
+
+        // console.log(segment);
+
         var self = this;
         var deferred = $q.defer();
 
-        console.log(segment);
-
         this.setSegment(segment);
-
         if (segment !== null) {
-            this.setRestriction(segment.frontend_restriction || {});
+            this.setRestriction(segment.frontend_restriction);
             deferred.resolve();
         } else {
-            this.setRestriction( {   
-                'free_form_text_search': '',
-                'frontend_restriction': {},
-                'restrict_with_sfdcid': false,
-                'restrict_without_sfdcid': false,
-                'page_filter': { 
-                    "row_offset": 0, 
-                    "num_rows": 10 
-                }
-            });
+            this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
+            deferred.resolve();
         }
-
-        this.getRestriction();
-
         return deferred.promise;
-    };  
 
+        this.GetAccountsCount('accounts', '');
+
+    };
 
     this.getSegmentProperty = function(properties, propertyName) {
         for (var i = 0; i < properties.length; i++) {
@@ -110,49 +91,55 @@ angular.module('common.datacloud.query.service',[
 
     this.addRestriction = function(attribute) {
 
-        attribute.Entity = attribute.Entity || 'Account';
+        attribute.resourceType = attribute.resourceType || 'LatticeAccount';
+        attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
-        this.restriction.frontend_restriction = attribute;
+        // var attributesFound = this.findAttributes(attribute.columnName);
+        // var attributes = attributesFound.attributes;
+        // var groupKey = attributesFound.groupKey;
 
-        var attributesFound = this.findAttributes(attribute.columnName);
-        var attributes = attributesFound.attributes;
-        var groupKey = attributesFound.groupKey;
+        console.log(attribute);
 
-        console.log(this.restriction, attributesFound);
+        allRestrictions.push({
+            bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.attr, attribute.bkt)
+        });
 
-        var found = false;
-        for (var i = 0; i < attributes.length; i++) {
-            var attributeMeta = attributes[i];
-            if (BucketRestriction.isEqualRange(attribute.Bkg.Rng, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
-                found = true;
-                break;
-            }
-        }
+        $stateParams.accountCount = this.GetCountByQuery('accounts', '');
+        $stateParams.loadingData = true;
 
-        if (!found) {
-            groupKey = groupKey || {};
-
-            console.log(groupKey);
-
-            this.restriction[groupKey].push({
-                bucketRestriction: new BucketRestriction(attribute.ColumnId, attribute.Entity, attribute.Bkt)
-            });
-        }
-
+        // var found = false;
+        // for (var i = 0; i < attributes.length; i++) {
+        //     var attributeMeta = attributes[i];
+        //     if (BucketRestriction.isEqualRange(attribute.bkt.Rng, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
+        //         found = true;
+        //         break;
+        //     }
+        // }
+        // if (!found) {
+        //     groupKey = groupKey || {};
+        //     this.restriction[groupKey].push({
+        //         bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.attr, attribute.bkt)
+        //     });
+        //     // this.updateUiState(attribute.columnName, 1, this.restriction.all.length + this.restriction.any.length);
+        // }
 
     };
 
     this.removeRestriction = function(attribute) {
-        var attributesFound = this.findAttributes(attribute.columnName);
+        var attributesFound = this.findAttributes(attribute.attr);
         var attributes = attributesFound.attributes;
         var groupKey = attributesFound.groupKey;
 
         for (var i = 0; i < attributes.length; i++) {
             var attributeMeta = attributes[i];
+
             var columnName = BucketRestriction.getColumnName(attributeMeta.bucketRestriction);
             if (attribute.columnName === columnName &&
                 BucketRestriction.isEqualRange(attribute.range, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
-                this.restriction[groupKey].splice(attributeMeta.index, 1);
+                allRestrictions.splice(attributeMeta.index, 1);
+
+                // this.updateUiState(attribute.columnName, -1, this.restriction.all.length + this.restriction.any.length);
+
                 break;
             }
         }
@@ -164,41 +151,32 @@ angular.module('common.datacloud.query.service',[
         var attributes = [];
 
         for (var group in this.restriction) {
-            attributes = this.findAttributesInGroup(group, columnName);
+            var attributes = this.findAttributesInGroup(group, columnName);
+            
             if (attributes.length > 0) {
                 groupKey = group;
                 break;
             }
         }
-
-        return { 'groupKey': groupKey, 'attributes': attributes };
+        return { groupKey: groupKey, attributes: attributes };
     };
 
     this.findAttributesInGroup = function(groupKey, columnName) {
         var group = this.restriction[groupKey];
+
         var results = [];
 
         for (var i = 0; i < group.length; i++) {
+            console.log(group, "fired");
             if (group[i].bucketRestriction.columnName === columnName) {
                 results.push({index: i, bucketRestriction: group[i].bucketRestriction });
             }
         }
-
         return results;
     };
 
-    this.GetCountByRestriction = function(resourceType) {
-        if (!this.isValidResourceType(resourceType)) {
-            var deferred = $q.defer();
-            deferred.resolve({error: {errMsg:'Invalid resourceType: ' + resourceType} });
-            return deferred;
-        }
-        return QueryService.GetCountByRestriction(resourceType, this.restriction);
-
-    };
-
     this.GetCountByQuery = function(resourceType, query) {
-        query.restriction = this.getRestriction();
+        // query.restriction = this.getRestriction();
 
         if (!this.isValidResourceType(resourceType)) {
             var deferred = $q.defer();
@@ -206,11 +184,18 @@ angular.module('common.datacloud.query.service',[
             return deferred.promise;
         }
 
-        return QueryService.GetCountByQuery(resourceType, query);
+        return QueryService.GetCountByQuery(resourceType, { 
+            'free_form_text_search': query,
+            'frontend_restriction': this.restriction,
+            'page_filter': {
+                'num_rows': 10,
+                'row_offset': 0
+            }
+        });
     };
 
     this.GetDataByQuery = function(resourceType, query) {
-        query.restriction = this.getRestriction();
+        // query.restriction = this.getRestriction();
 
         if (!this.isValidResourceType(resourceType)) {
             var deferred = $q.defer();
@@ -218,7 +203,16 @@ angular.module('common.datacloud.query.service',[
             return deferred.promise;
         }
 
-        return QueryService.GetDataByQuery(resourceType, query);
+        return QueryService.GetDataByQuery(resourceType, { 
+            'free_form_text_search': query,
+            'frontend_restriction': this.restriction,
+            "restrict_with_sfdcid": false,
+            "restrict_without_sfdcid": false,
+            'page_filter': {
+                'num_rows': 10,
+                'row_offset': 0
+            }
+        });
     };
 
     this.isValidResourceType = function(resourceType) {
@@ -230,47 +224,47 @@ angular.module('common.datacloud.query.service',[
 .service('QueryService', function($http, $q) {
 
     this.GetCountByRestriction = function(resourceType, restriction) {
-        var defer = $q.defer();
+        var deferred = $q.defer();
 
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/count/restriction',
             data: restriction
-        }).success(function(response) {
-            defer.resolve(response);
-        }).error(function(error) {
-            defer.resolve({error: error});
+        }).success(function(result) {
+            deferred.resolve(result);
+        }).error(function(result) {
+            deferred.resolve(result);
         });
 
-        return defer.promise;
+        return deferred.promise;
     };
 
     this.GetCountByQuery = function(resourceType, query) {
-        var defer = $q.defer();
+        var deferred = $q.defer();
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/count',
             data: query
-        }).success(function(response) {
-            defer.resolve(response);
-        }).error(function(error) {
-            defer.resolve({error: error});
+        }).success(function(result) {
+            deferred.resolve(result);
+        }).error(function(result) {
+            deferred.resolve(result);
         });
 
-        return defer.promise;
+        return deferred.promise;
     };
 
     this.GetDataByQuery = function(resourceType, query) {
-        var defer = $q.defer();
+        var deferred = $q.defer();
 
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/data',
             data: query
-        }).success(function(response) {
-            defer.resolve(response);
-        }).error(function(error) {
-            defer.resolve({error: error});
+        }).success(function(result) {
+            deferred.resolve(result);
+        }).error(function(result) {
+            deferred.resolve(result);
         });
 
         return defer.promise;

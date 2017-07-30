@@ -52,8 +52,7 @@ angular.module('common.datacloud.explorer', [
         LookupResponse: LookupStore.response,
         no_lookup_results_message: false,
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
-        count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : EnrichmentCount.data),
-        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
+        count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : EnrichmentCount.data),        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         show_segmentation: FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL),
         enabledManualSave: false,
@@ -1385,61 +1384,60 @@ angular.module('common.datacloud.explorer', [
     }
 
 
+
+
+
+
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
-
         if(!vm.cube.Stats) {
             return false;
         }
+        // console.log(attribute);
 
-        var attributeKey = attribute.Attribute || attribute.ColumnId,
+        var attributeKey = attribute.Attribute || attribute.FieldName,
             stat = vm.getAttributeStat(attribute) || {},
             attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : '');
 
-
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
+
         if(attributeRangeKey) {
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
         vm.saveSegmentEnabled = true;
 
-
         if (vm.segmentAttributeInput[attributeKey] === true) {
-            QueryStore.addRestriction({ColumnId: attributeKey, Bkt: stat});
+            QueryStore.addRestriction({columnName: attributeKey, bkt: stat});
         } else {
-            QueryStore.removeRestriction({ColumnId: attributeKey, Bkt: stat});
+            QueryStore.removeRestriction({columnName: attributeKey, bkt: stat});
         }
-
-        QueryService.GetCountByQuery('accounts', QueryStore.getRestriction()).then(function(response){
-            QueryStore.setResourceTypeCount('accounts', false, response);
-        });
 
     }
 
 
+
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
-
         var disable = disable || false,
-            attributeKey = enrichment.Attribute || enrichment.ColumnId,
+            attributeKey = enrichment.Attribute || enrichment.FieldName,
             attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng),
-            // fieldName = enrichment.ColumnId;
             fieldName = enrichment.FieldName;
         if(disable) {
             return false;
         }
 
+        console.log(stat);
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         vm.saveSegmentEnabled = true;
 
-        vm.enrichments[index].SegmentChecked = true;
+        //vm.enrichments[index].SegmentChecked = true;
 
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-            QueryStore.addRestriction({columnName: fieldName, range: stat.Bkt.Rng});
+            QueryStore.addRestriction({columnName: fieldName, bkt: stat});
         } else {
-            QueryStore.removeRestriction({columnName: fieldName, range: stat.Bkt.Rng});
+            QueryStore.removeRestriction({columnName: fieldName, bkt: stat});
         }
         /*
          * Rebuild the tile table items
@@ -1449,6 +1447,7 @@ angular.module('common.datacloud.explorer', [
             getExplorerSegments(vm.enrichments);
         }
     }
+
 
     var getSegmentBucketInputs = function() {
         var buckets = {},
@@ -1498,9 +1497,7 @@ angular.module('common.datacloud.explorer', [
         }
     }
 
-    vm.saveSegment = function() {  
-
-        console.log("save");
+    vm.saveSegment = function() {
 
         if(Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {
             SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {

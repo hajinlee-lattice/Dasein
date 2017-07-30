@@ -26,7 +26,7 @@
             <div class="tab-container">
                 <h2>Accounts</h2>
                 <div class="enrichmentCounts">
-                    <span ng-if="!vm.loadingData" class="count">{{vm.accountsCount.$$state.value | number}}</span>
+                    <span ng-if="!vm.loadingData" class="count">{{vm.accountsCount|number}}</span>
                     <span ng-if="vm.loadingData" class="count"><i class="fa fa-spinner fa-spin"></i></span>
                 </div>
             </div>

@@ -282,6 +282,8 @@ angular
                     var modelId = $stateParams.modelId;
                     var tenantName = $stateParams.tenantName;
 
+                    // console.log(segmentName);
+
                     if (isCreateNew) {
                         QueryStore.setupStore(null);
                         deferred.resolve(QueryStore.getRestriction());
@@ -311,13 +313,22 @@ angular
                         if (segment === null) {
                             segment = {
                                 'name': 'segment' + ts,
-                                'display_name': 'segment' + ts
+                                'display_name': 'segment' + ts,
+                                'frontend_restriction': QueryStore.getRestriction(),
+                                'page_filter': {
+                                    'row_offset': 0,
+                                    'num_rows': 10
+                                }
                             };
                         } else {
                             segment = {
-                                'name': 'segment' + ts,
-                                'display_name': 'segment' + ts,
-                                'frontend_restriction': QueryStore.getRestriction()
+                                'name': segment.name,
+                                'display_name': segment.display_name,
+                                'frontend_restriction': QueryStore.getRestriction(),
+                                'page_filter': {
+                                    'row_offset': 0,
+                                    'num_rows': 10
+                                }
                             };
                         }
 
@@ -329,6 +340,9 @@ angular
                     return {
                         CreateOrUpdateSegment: CreateOrUpdateSegment
                     };
+                }],
+                GetAccountsCount: ['QueryStore', function(QueryStore){
+                    return QueryStore.GetCountByQuery('accounts', '');
                 }]
             }),
             redirectTo: 'home.model.analysis.explorer',
@@ -402,16 +416,11 @@ angular
             views: {
                 "main@": {
                     resolve: {
-                        CountMetadata: ['$q', 'QueryStore', function($q, QueryStore) {
-                            var deferred = $q.defer();
-                            deferred.resolve(QueryStore.getCounts().accounts);
-                            return deferred.promise;
+                        GetAccountsCount: ['QueryStore', function(QueryStore){
+                            return QueryStore.GetCountByQuery('accounts', '');
                         }],
-                        Columns: ['QueryStore', function(QueryStore) {
-                            return QueryStore.columns.accounts;
-                        }],
-                        Records: ['QueryStore', function(QueryStore) {
-                            return QueryStore.getRecordsForUiState('accounts');
+                        GetAccountsData: ['QueryStore', function(QueryStore){
+                            return QueryStore.GetDataByQuery('accounts', '');
                         }]
                     },
                     controller: 'QueryResultsCtrl',

@@ -99,8 +99,8 @@ angular
             url: '/pls/datacollection/segments',
             data: segment,
             headers: {
-                'Content-Type': 'application/json',
-                'ErrorDisplayMethod': 'none' // segment:demo:fixme
+                'Content-Type': 'application/json'
+                // 'ErrorDisplayMethod': 'none' // segment:demo:fixme
             }
         }).then(
             function onSuccess(response) {

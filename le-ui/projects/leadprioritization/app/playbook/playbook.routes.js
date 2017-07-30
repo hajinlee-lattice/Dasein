@@ -204,6 +204,14 @@ angular
                 section: 'dashboard.launch_history'
             },
             resolve: {
+                LaunchHistoryData: function($q, $stateParams, PlaybookWizardStore) {
+                    var deferred = $q.defer();
+                    PlaybookWizardStore.getPlayLaunches($stateParams.play_name, "Launched").then(function(result){
+                        console.log(result);
+                        deferred.resolve(result);
+                    });
+                    return deferred.promise;
+                }
             },
             views: {
                 'main@': {

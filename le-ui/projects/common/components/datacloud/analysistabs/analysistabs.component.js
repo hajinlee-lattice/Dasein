@@ -3,41 +3,45 @@ angular.module('common.datacloud.analysistabs', [
     ])
 .controller('AnalysisTabsController', function (
     $state, $stateParams, $scope, FeatureFlagService, BrowserStorageUtility,
-    ResourceUtility, DataCloudStore, QueryService, QueryStore
+    ResourceUtility, DataCloudStore, QueryService, QueryStore, GetAccountsCount
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
         DataCloudStore: DataCloudStore,
+        QueryStore: QueryStore,
         stateParams: $stateParams,
         section: $stateParams.section,
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
-        loadingData: false,
+        loadingData: true,
         restriction: QueryStore.getRestriction() || null,
-        accountsCount: QueryStore.GetCountByQuery('accounts', {
-            'free_form_text_search': '',
-            'frontend_restriction': vm.restriction,
-            'restrict_with_sfdcid': false,
-            'restrict_without_sfdcid': false,
-            'page_filter': { 
-                "row_offset": 0, 
-                "num_rows": 10 
-            }
-        }),
-        accountsData: QueryService.GetDataByQuery('accounts', {
-            'free_form_text_search': '',
-            'frontend_restriction': vm.restriction,
-            'restrict_with_sfdcid': false,
-            'restrict_without_sfdcid': false,
-            'page_filter': { 
-                "row_offset": 0, 
-                "num_rows": 10 
-            }
-        })
+        accountsCount: GetAccountsCount
+        // accountsCount: QueryStore.GetCountByQuery('accounts', {
+        //     'free_form_text_search': '',
+        //     'frontend_restriction': {},
+        //     'page_filter': {
+        //         "row_offset": 0, 
+        //         "num_rows": 10 
+        //     }
+        // }),
+        // accountsData: QueryStore.GetDataByQuery('accounts', {
+        //   "free_form_text_search": null,
+        //   "frontend_restriction": null,
+        //   "page_filter": {
+        //     "num_rows": 10,
+        //     "row_offset": 0
+        //   },
+        //   "restrict_with_sfdcid": false,
+        //   "restrict_without_sfdcid": false
+        // })
     });
 
     vm.init = function() {
+
+        vm.loadingData = false;
+
+        console.log(vm.accountsCount);
 
         vm.attributes = vm.inModel()
             ? 'home.model.analysis.explorer'

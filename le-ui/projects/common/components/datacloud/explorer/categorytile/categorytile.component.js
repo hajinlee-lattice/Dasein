@@ -15,9 +15,6 @@ angular
             
             angular.extend(vm, { });
 
-
-            console.log(vm.count = vm.categoryCount(vm.category));
-
             vm.setCategory = function(category) {
                 vm.category = category;
                 DataCloudStore.setMetadata('category', category);
@@ -117,14 +114,14 @@ angular
 
                 var stat = (stats && stats.length ? stats[0] : null);
 
-                if(stat && stat.Range) {
-                    segmentRangeKey = vm.makeSegmentsRangeKey(enrichment,stat.Range);
+                if(stat && stat.Rng) {
+                    segmentRangeKey = vm.makeSegmentsRangeKey(enrichment,stat.Rng);
                 }
 
                 if(stats && stats.length > 1) {
                     for(var i in stats) {
                         if(stats[i] && stats[i].Range) {
-                            if(vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stats[i].Range)]) {
+                            if(vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stats[i].Rng)]) {
                                 stat = stats[i];
                                 break;
                             }
@@ -132,12 +129,14 @@ angular
 
                     }
                 }
+
+
                 return stat;
             }
             
             vm.getAttributeRange = function(attribute) {
                 var stat = vm.getAttributeStat(attribute),
-                    range = (stat && stat.Range ? stat.Range : {});
+                    range = (stat && stat.Rng ? stat.Rng : {});
                 return range;
             }
 
