@@ -65,7 +65,7 @@ public class RedshiftUtils {
             case BOOLEAN:
                 return "BOOLEAN";
             case STRING:
-                return "NVARCHAR(MAX)"; // TODO This won't fly
+                return "NVARCHAR(1000)";
             case INT:
                 return "INT";
             case LONG:
