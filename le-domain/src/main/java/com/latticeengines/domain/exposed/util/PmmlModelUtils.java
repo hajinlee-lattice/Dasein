@@ -105,7 +105,8 @@ public class PmmlModelUtils {
         for (MiningField miningField : miningFields) {
             DataField f = dataFields.get(miningField.getName().getValue());
 
-            if (f == null && miningField.getUsageType() != FieldUsageType.PREDICTED) {
+            if (f == null && miningField.getUsageType() != FieldUsageType.PREDICTED
+                    && miningField.getUsageType() != FieldUsageType.TARGET) {
                 continue;
             }
             pmmlFields.add(new PmmlField(miningField, f));

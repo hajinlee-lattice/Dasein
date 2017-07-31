@@ -14,8 +14,6 @@ import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.dmg.pmml.DataField;
@@ -24,6 +22,8 @@ import org.dmg.pmml.MiningField;
 import org.dmg.pmml.OpType;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.JAXBUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -162,7 +162,8 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
         for (PmmlField pmmlField : pmmlFields) {
             DataField dataField = pmmlField.dataField;
 
-            if (dataField == null && pmmlField.miningField.getUsageType() != FieldUsageType.PREDICTED) {
+            if (dataField == null && pmmlField.miningField.getUsageType() != FieldUsageType.PREDICTED
+                    && pmmlField.miningField.getUsageType() != FieldUsageType.TARGET) {
                 continue;
             }
 
@@ -207,7 +208,8 @@ public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfigurati
             String name = field.getName().getValue();
             if (field.getUsageType() == FieldUsageType.ACTIVE && !pivotValuesByTargetColumn.containsKey(name)) {
                 features.add(name);
-            } else if (field.getUsageType() == FieldUsageType.PREDICTED) {
+            } else if (field.getUsageType() == FieldUsageType.PREDICTED
+                    || field.getUsageType() == FieldUsageType.TARGET) {
                 event = name;
             }
         }
