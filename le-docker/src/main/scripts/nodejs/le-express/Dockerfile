@@ -36,7 +36,6 @@ RUN npm install grunt-cli -g \
 RUN echo invalidate cache {{TIMESTAMP}} > /dev/null
 ADD le-ui.tar.gz /opt/node
 ENV APP_ROOT /opt/node/le-ui
-RUN cd ${APP_ROOT} && npm run InstallProduction --unsafe-perm
 
 COPY server.key /etc/pki/tls/private/private.key
 COPY server.crt /etc/pki/tls/star.lattice.local.crt
