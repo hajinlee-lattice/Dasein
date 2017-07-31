@@ -282,13 +282,19 @@ angular
                     var modelId = $stateParams.modelId;
                     var tenantName = $stateParams.tenantName;
 
-                    // console.log(segmentName);
+                    console.log($stateParams);
 
                     if (isCreateNew) {
+
+                        console.log("new");
+
                         QueryStore.setupStore(null);
                         deferred.resolve(QueryStore.getRestriction());
                     } else {
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
+
+                            console.log(result);
+
                             if (segmentName && !result) {
                                 if (modelId) {
                                     $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
@@ -296,6 +302,9 @@ angular
                                     $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
                                 }
                             } else {
+
+                                console.log(result);
+
                                 return QueryStore.setupStore(result);
                             }
                         }).then(function() {
@@ -309,6 +318,8 @@ angular
                     var CreateOrUpdateSegment = function() {
                         var segment = QueryStore.getSegment(),
                             ts = new Date().getTime();
+
+                        console.log(segment);
 
                         if (segment === null) {
                             segment = {

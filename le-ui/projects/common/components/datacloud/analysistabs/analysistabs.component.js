@@ -21,11 +21,11 @@ angular.module('common.datacloud.analysistabs', [
 
     vm.init = function() {
 
-        vm.loadingData = false;
-
         QueryStore.GetCountByQuery('accounts', '').then(function(data){
             vm.accountsCount = data;
         });
+
+        vm.loadingData = false;
 
         vm.attributes = vm.inModel()
             ? 'home.model.analysis.explorer'

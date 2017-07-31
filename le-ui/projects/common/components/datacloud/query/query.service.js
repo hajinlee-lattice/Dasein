@@ -88,64 +88,36 @@ angular.module('common.datacloud.query.service',[
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
-        console.log(attribute);
-
         allRestrictions.push({
             bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
 
-        $stateParams.accountCount = this.GetCountByQuery('accounts', '');
+        this.GetCountByQuery('accounts', '');
         $stateParams.loadingData = true;
 
         console.log(allRestrictions);
-
-
-        // var attributesFound = this.findAttributes(attribute.columnName);
-        // var attributes = attributesFound.attributes;
-        // var groupKey = attributesFound.groupKey;
-        // var found = false;
-        // for (var i = 0; i < attributes.length; i++) {
-        //     var attributeMeta = attributes[i];
-        //     if (BucketRestriction.isEqualRange(attribute.bkt.Rng, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
-        //         found = true;
-        //         break;
-        //     }
-        // }
-        // if (!found) {
-        //     groupKey = groupKey || {};
-        //     this.restriction[groupKey].push({
-        //         bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.attr, attribute.bkt)
-        //     });
-        //     // this.updateUiState(attribute.columnName, 1, this.restriction.all.length + this.restriction.any.length);
-        // }
 
     };
 
     this.removeRestriction = function(attribute) {
 
-        var index = allRestrictions.indexOf({ 'bucketRestriction': attribute });
+        attribute.resourceType = attribute.resourceType || 'LatticeAccount';
+        attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
-        console.log(index);
+        var searchTerm = attribute.attr,
+            index = -1;
+
+        for(var i = 0, len = allRestrictions.length; i < len; i++) {
+            if (allRestrictions[i].bucketRestriction.attr === searchTerm) {
+                var index = i;
+                break;
+            }
+        }
+
+        console.log(index, searchTerm);
         allRestrictions.splice(index, 1);
 
-        console.log(allRestrictions);
-
-
-        // var attributesFound = this.findAttributes(attribute.attr);
-        // var attributes = attributesFound.attributes;
-        // var groupKey = attributesFound.groupKey;
-        // for (var i = 0; i < attributes.length; i++) {
-        //     var attributeMeta = attributes[i];
-
-        //     var columnName = BucketRestriction.getColumnName(attributeMeta.bucketRestriction);
-        //     if (attribute.columnName === columnName &&
-        //         BucketRestriction.isEqualRange(attribute.range, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
-        //         allRestrictions.splice(attributeMeta.index, 1);
-        //         break;
-        //     }
-        // }
-
-        
+        console.log(allRestrictions);        
 
     };
 
