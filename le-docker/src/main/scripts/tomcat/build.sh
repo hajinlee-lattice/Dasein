@@ -19,7 +19,7 @@ pushd le-microservice
 bash build.sh $MICROSERVICES
 popd
 
-for img in 'config' 'playmaker' 'oauth2'; do
+for img in 'playmaker' 'oauth2'; do
 
     pushd le-${img} &&
     build_docker latticeengines/${img} &&
