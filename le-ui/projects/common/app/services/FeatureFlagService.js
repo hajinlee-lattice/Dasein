@@ -72,6 +72,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         ENABLE_DATA_PROFILING_V2: 'EnableDataProfilingV2',
         ENABLE_FUZZY_MATCH: 'EnableFuzzyMatch',
         ENABLE_CDL: 'EnableCdl',
+        //ENABLE_TALKING_POINTS: EnableTalkingPoints,
 
         LATTICE_INSIGHTS: 'LatticeInsights'
     };

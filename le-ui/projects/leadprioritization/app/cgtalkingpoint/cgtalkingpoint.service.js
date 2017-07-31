@@ -4,6 +4,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
     this.danteUrl = null;
     this.accounts = null;
+    this.danteAccounts = null;
     this.attributes = null;
     this.talkingPoints = [];
     this.talkingPointsPreviewResources = null;
@@ -11,6 +12,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     this.clear = function() {
         this.danteUrl = null;
         this.accounts = null;
+        this.danteAccounts = null;
         this.attributes = null;
         this.talkingPoints = [];
         this.talkingPointsPreviewResources = null;
@@ -39,7 +41,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             return this.talkingPoints;
         }
         var deferred = $q.defer();
-        if(this.talkingPoints.length && !no_cache) {
+        if(this.talkingPoints && this.talkingPoints.length && !no_cache) {
             deferred.resolve(this.talkingPoints);
         } else {
             CgTalkingPointService.getTalkingPoints(play_name).then(function(data){
@@ -97,20 +99,47 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     };
 
-    this.getAccounts = function() {
+    var makeDanteAccountsObj = function(obj) {
+        var accounts = [];
+        obj.forEach(function(value, key){
+            value.value = (typeof value.value === 'string' ? JSON.parse(value.value) : value.value);
+            var tmpObj = {
+                name: value.value.DisplayName,
+                id: value.value.BaseExternalID
+            };
+            accounts.push(tmpObj);
+        });
+        return accounts;
+    }
+
+    this.getDanteAccounts = function() {
         var deferred = $q.defer();
 
-        if (this.accounts !== null) {
-            deferred.resolve(this.accounts);
+        if (this.danteAccounts !== null) {
+            deferred.resolve(this.danteAccounts);
         } else {
             var self = this;
-            CgTalkingPointService.getAccounts().then(function(response) {
-                self.accounts = response.data;
-                deferred.resolve(self.accounts);
+            CgTalkingPointService.getDanteAccounts().then(function(response) {
+                self.danteAccounts = makeDanteAccountsObj(response);
+                deferred.resolve(self.danteAccounts);
             });
         }
 
         return deferred.promise;
+    };
+
+    this.getAccounts = function() {
+        var query = {
+            "free_form_text_search": "",
+            "restrict_with_sfdcid": false,
+            "restrict_without_sfdcid": false,
+            "page_filter": {
+                "row_offset": 0,
+                "num_rows": 10
+            }
+        };
+        
+        return QueryStore.GetDataByQuery('accounts', query, PlaybookWizardStore.currentPlay.segment);
     };
 
     this.getAttributes = function() {
@@ -132,7 +161,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         //return {"context":"lpipreview","notion":"lead","notionObject":{"ExpectedValue":UNKNOWN_UNTIL_LAUNCHED,"ExternalProbability":UNKNOWN_UNTIL_LAUNCHED,"LastLaunched":UNKNOWN_UNTIL_LAUNCHED,"Lift":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketDisplayName":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketOffset":UNKNOWN_UNTIL_LAUNCHED,"ModelID":null,"Percentile":UNKNOWN_UNTIL_LAUNCHED,"PlayDescription":PLACEHOLDER,"PlayDisplayName":PLACEHOLDER,"PlayID":PLACEHOLDER,"PlaySolutionType":null,"PlayTargetProductName":"D200-L","PlayType":"crosssell","Probability":UNKNOWN_UNTIL_LAUNCHED,"Rank":2,"Theme":"Sell Secure Star into Impravata owners","TalkingPoints":null}};
         var deferred = $q.defer();
         CgTalkingPointService.getPreviewObject(opts).then(function(data){
-            deferred.resolve(data.Result);
+            deferred.resolve(data);
         });
         return deferred.promise;
     };
@@ -184,7 +213,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             method: 'GET',
             url: this.host + '/dante/talkingpoints/play/'  + play_name
         }).then(function(response){
-            deferred.resolve(response.data.Result);
+            deferred.resolve(response.data);
         });
         return deferred.promise;
     }
@@ -195,7 +224,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             method: 'GET',
             url: this.host + '/dante/talkingpoints/previewresources'
         }).then(function(response){
-            deferred.resolve(response.data.Result);
+            deferred.resolve(response.data);
         });
         return deferred.promise;
     }
@@ -257,32 +286,15 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     };
 
-    this.getAccounts = function(count) {
-        var deferred = $q.defer();
-        var data = {
-            data:[{
-                name: 'Campus Management',
-                id: '00136000008KqgpAAC'
-            }, {
-                name: 'RTG Medical',
-                id: '00136000008KplQAAS'
-            }, {
-                name: 'Omega Administrators',
-                id: '00136000008KqrOAAS'
-            }, {
-                name: 'AIT Laboratories',
-                id: '00136000008Kpb8AAC'
-            }]
-        };
-        var count = count || 20;
+    this.getDanteAccounts = function(count, segment) {
+        var deferred = $q.defer(),
+            count = count || 20;
         $http({
             method: 'GET',
             url: this.host + '/dante/accounts/' + count,
         }).then(function(response){
-            //deferred.resolve(response.data.Result);
-            //console.log(response.data.Result);
+            deferred.resolve(response.data);
         });
-        deferred.resolve(data);
         return deferred.promise;
     };
 

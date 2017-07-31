@@ -36,7 +36,7 @@ angular.module('lp.cg.talkingpoint.preview', [])
 
         CgTalkingPointStore.generateLeadPreviewObject({playName: $stateParams.play_name}).then(function(leadPreviewObject){
             vm.leadPreviewObject = leadPreviewObject;
-            CgTalkingPointStore.getAccounts().then(function(accounts) {
+            CgTalkingPointStore.getDanteAccounts().then(function(accounts) {
                 vm.accounts = accounts;
 
                 return CgTalkingPointStore.getDanteUrl();

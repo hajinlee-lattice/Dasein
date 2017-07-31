@@ -200,7 +200,7 @@ angular.module('common.datacloud.query.service',[
 
     };
 
-    this.GetDataByQuery = function(resourceType, query) {
+    this.GetDataByQuery = function(resourceType, query, segment) {
         
         if (!this.isValidResourceType(resourceType)) {
             var deferred = $q.defer();
@@ -221,6 +221,7 @@ angular.module('common.datacloud.query.service',[
             return QueryService.GetDataByQuery(resourceType, queryWithRestriction);
         }
 
+        return QueryService.GetDataByQuery(resourceType, query, segment);
     };
 
     this.isValidResourceType = function(resourceType) {
@@ -262,13 +263,16 @@ angular.module('common.datacloud.query.service',[
         return deferred.promise;
     };
 
-    this.GetDataByQuery = function(resourceType, query) {
+    this.GetDataByQuery = function(resourceType, query, segment) {
         var deferred = $q.defer();
 
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/data',
-            data: query
+            data: query,
+            params: {
+                segment: segment
+            }
         }).success(function(result) {
             deferred.resolve(result);
         }).error(function(result) {

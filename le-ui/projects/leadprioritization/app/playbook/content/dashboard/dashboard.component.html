@@ -80,7 +80,8 @@
                     <div class="dashboard-section-header">
                         <h2>
                             <div class="column">
-                                Last Launch
+                                <span ng-if="vm.launchedState != 'Launched'">Avaliable for Launch</span>
+                                <span ng-if="vm.launchedState == 'Launched'">Last Launch</span>
                             </div>
                             <div class="column">
                                 <a ui-sref="home.playbook.dashboard.launch_history({play_name: vm.play.name})"><span class="ico ico-cog ico-black"></span> Launch History</a>

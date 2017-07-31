@@ -51,15 +51,6 @@ angular
                 pageTitle: 'Play Book'
             },
             resolve: {
-                TalkingPoints: function(){//CgTalkingPointStore, $stateParams) {
-                    return null;
-                    var play_name = $stateParams.play_name || '';
-                    return CgTalkingPointStore.getTalkingPoints(play_name);
-                },
-                TalkingPointAttributes: function (){//CgTalkingPointStore) {
-                    return null;
-                    return CgTalkingPointStore.getAttributes();
-                },
                 Play: function(PlaybookWizardStore, $stateParams) {
                     return PlaybookWizardStore.getPlay($stateParams.play_name);
                 }
@@ -94,10 +85,10 @@ angular
                 section: 'dashboard.insights'
             },
             resolve: {
-                // TalkingPoints: function(CgTalkingPointStore, $stateParams) {
-                //     var play_name = $stateParams.play_name || '';
-                //     return CgTalkingPointStore.getTalkingPoints(play_name);
-                // },
+                TalkingPoints: function(CgTalkingPointStore, $stateParams) {
+                    var play_name = $stateParams.play_name || '';
+                    return CgTalkingPointStore.getTalkingPoints(play_name);
+                },
                 TalkingPointAttributes: function (CgTalkingPointStore) {
                     return CgTalkingPointStore.getAttributes();
                 },
@@ -173,26 +164,42 @@ angular
                 section: 'dashboard.targets'
             },
             resolve: {
-                LoadDemoData: function(QueryStore) {
-                    return QueryStore.loadData();
-                },
-                DefaultSelectedObject: function() {
-                    return 'accounts';
-                },
-                SelectedSegment: function($q, PlaybookWizardStore, QueryStore) {
-                    var deferred = $q.defer();
-                    var segment = PlaybookWizardStore.getSavedSegment();
-                    QueryStore.setupStore(segment).then(function() {
-                        deferred.resolve(segment);
-                    });
-                    return deferred.promise;
-                }
+                // LoadDemoData: function(QueryStore) {
+                //     return QueryStore.getAccounts();
+                // },
+                // DefaultSelectedObject: function() {
+                //     return 'accounts';
+                // },
+                // SelectedSegment: function($q, PlaybookWizardStore, QueryStore) {
+                //     var deferred = $q.defer();
+                //     var segment = PlaybookWizardStore.getSavedSegment();
+                //     QueryStore.setupStore(segment).then(function() {
+                //         deferred.resolve(segment);
+                //     });
+                //     return deferred.promise;
+                // }
             },
             views: {
                 'main@': {
-                    controller: 'PlaybookWizardTargets',
+                    // controller: 'PlaybookWizardTargets',
+                    // controllerAs: 'vm',
+                    // templateUrl: 'app/playbook/content/targets/targets.component.html'
+                    resolve: {
+                        CountMetadata: ['$q', 'QueryStore', function($q, QueryStore) {
+                            var deferred = $q.defer();
+                            deferred.resolve(QueryStore.getCounts().accounts);
+                            return deferred.promise;
+                        }],
+                        Columns: ['QueryStore', function(QueryStore) {
+                            return QueryStore.columns.accounts;
+                        }],
+                        Records: ['QueryStore', function(QueryStore) {
+                            return QueryStore.getRecordsForUiState('accounts');
+                        }]
+                    },
+                    controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/targets/targets.component.html'
+                    templateUrl: '/components/datacloud/query/results/queryresults.component.html'
                 }
             }
         })
@@ -218,6 +225,35 @@ angular
                     controller: 'PlaybookDashboardLaunchHistory',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/launch_history/launch_history.component.html'
+                }
+            }
+        })
+        .state('home.playbook.dashboard.launch_job', {
+            url: '/launch/:applicationId/job',
+            params: {
+                pageIcon: 'ico-model',
+                pageTitle: 'Launch Play'
+            },
+            resolve:  {
+                BuildProgressConfig: function($stateParams) {
+                    var play_name = $stateParams.play_name || '';
+                    return {
+                        text: {
+                            main_title: 'Your play is launching',
+                            main_title_completed: 'Your play is launched',
+                            button_goto: 'Go to Play Book'
+                        },
+                        button_goto_sref: 'home.playbook',
+                        disable_create_button: true,
+                        disable_steps: true,
+                        disable_view_report: true
+                    };
+                }
+            },
+            views: {
+                "main@": {
+                    controller: 'ImportJobController',
+                    templateUrl: 'app/create/buildprogress/BuildProgressView.html'
                 }
             }
         })

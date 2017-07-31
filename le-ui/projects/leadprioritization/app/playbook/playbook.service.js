@@ -330,7 +330,7 @@ angular.module('lp.playbook')
             url: this.host + '/play/' + play_name + '/launches',
             params: {
                 playName: play_name,
-                launchStates: launch_state || 'Launched'
+                launchStates: launch_state
             }
         }).then(function(response){
             deferred.resolve(response.data);

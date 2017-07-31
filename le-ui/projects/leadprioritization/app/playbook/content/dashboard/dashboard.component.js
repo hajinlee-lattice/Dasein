@@ -2,7 +2,8 @@ angular.module('lp.playbook.dashboard', [
     'mainApp.appCommon.utilities.TimestampIntervalUtility'
 ])
 .controller('PlaybookDashboard', function(
-    $q, $stateParams, PlaybookWizardStore, TimestampIntervalUtility,NumberUtility
+    $q, $stateParams, $state, 
+    PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore
 ) {
     var vm = this,
         play_name = $stateParams.play_name;
@@ -28,11 +29,12 @@ angular.module('lp.playbook.dashboard', [
         PlaybookWizardStore.removeSegment(play);
     }
 
-    vm.launchPlay = function(play_name) {
+    vm.launchPlay = function() {
         vm.showLaunchSpinner = true;
         PlaybookWizardStore.launchPlay(vm.play).then(function(data) {
             vm.launchHistory.push(data);
             vm.showLaunchSpinner = false;
+            $state.go('home.playbook.dashboard.launch_job', {play_name: vm.play.name, applicationId: data.applicationId});
         });
     }
 

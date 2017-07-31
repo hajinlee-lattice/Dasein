@@ -141,6 +141,11 @@ angular
         })
         .state('home.models.import.job', {
             url: '/:applicationId/job',
+            resolve:  {
+                BuildProgressConfig: function() {
+                    return null;
+                }
+            },
             params: {
                 pageIcon: 'ico-model',
                 pageTitle: 'Create Model - CSV'

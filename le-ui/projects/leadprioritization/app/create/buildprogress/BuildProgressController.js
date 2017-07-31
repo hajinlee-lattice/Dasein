@@ -6,10 +6,14 @@ angular.module('lp.create.import.job', [
 .controller('ImportJobController', function(
     $scope, $state, $stateParams, $interval, ResourceUtility, 
     JobsStore, JobsService, ImportStore, ServiceErrorUtility,
-    CancelJobModal
+    CancelJobModal, BuildProgressConfig
 ) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.applicationId = $stateParams.applicationId;
+
+    $scope.config = BuildProgressConfig;
+    $scope.button_goto_sref = BuildProgressConfig.button_goto_sref || 'home.models';
+
     var REFRESH_JOB_INTERVAL_ID;
     var REFRESH_PERFORM_CALC_ID; 
     var TIME_BETWEEN_JOB_REFRESH = 10 * 1000;

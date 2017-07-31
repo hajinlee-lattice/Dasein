@@ -7,13 +7,14 @@ angular.module('lp.playbook.wizard.insights', [])
     angular.extend(vm, {
         previewResources: TalkingPointPreviewResources,
         attributes: TalkingPointAttributes,
-        talkingPoints: [],
+        talkingPoints: TalkingPoints,
         stateParams: $stateParams
     });
 
-    CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
-        vm.talkingPoints = talkingPoints;
-    });
+    // CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
+    //     vm.talkingPoints = talkingPoints;
+    // });
+    vm.talkingPoints = CgTalkingPointStore.talkingPoints;
 
     var cachedTalkingPoints = angular.copy(TalkingPoints);
 
