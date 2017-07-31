@@ -60,6 +60,7 @@ public class ArtifactResourceTestNG extends MetadataFunctionalTestNGBase {
             assertTrue(false);
         } catch (HttpServerErrorException e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
+            log.warn("ResponseBodyAsString is " + e.getResponseBodyAsString());
             assertTrue(e.getResponseBodyAsString()
                     .contains("Unable to find required columns [SourceColumn, TargetColumn, SourceColumnType]"));
         }
