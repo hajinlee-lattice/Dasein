@@ -23,11 +23,11 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -149,8 +149,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     public void testScoreTestingDataUsingMR() throws Exception {
         uploadTestingDataFile();
         resolveMetadata();
-        System.out.println(String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId,
-                sourceFile.getName()));
+        System.out.println(
+                String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()), //
                 null, String.class);
@@ -165,9 +165,9 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     public void testScoreTestingDataUsingRTS() throws Exception {
         uploadTestingDataFile();
         resolveMetadata();
-        System.out.println(String.format(
-                "%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE&debug=TRUE", getRestAPIHostPort(),
-                modelId, sourceFile.getName()));
+        System.out
+                .println(String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE&debug=TRUE",
+                        getRestAPIHostPort(), modelId, sourceFile.getName()));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s?fileName=%s&useRtsApi=TRUE&performEnrichment=TRUE&debug=TRUE",
                         getRestAPIHostPort(), modelId, sourceFile.getName()), //
@@ -209,10 +209,9 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         final String scoreDirPrefix = getRtsResult ? "/RTSBulkScoreResult_" : "/ScoreResult_";
         System.out.println("getRtsResult is " + getRtsResult + ", and scoreDirPrefix is " + scoreDirPrefix);
 
-        List<String> scoreDir = HdfsUtils.getFilesForDirRecursive(
-                yarnConfiguration,
-                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(),
-                        CustomerSpace.parse(tenant.getName())).toString(), new HdfsFileFilter() {
+        List<String> scoreDir = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, PathBuilder
+                .buildDataTablePath(CamilleEnvironment.getPodId().toString(), CustomerSpace.parse(tenant.getName()))
+                .toString(), new HdfsFileFilter() {
                     @Override
                     public boolean accept(FileStatus file) {
                         if (!file.isDirectory() && file.getPath().toString().contains(scoreDirPrefix)
@@ -234,8 +233,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         List<GenericRecord> scores = AvroUtils.getData(yarnConfiguration, scoreDir);
         for (GenericRecord score : scores) {
             String id = String.valueOf(score.get(InterfaceName.Id.toString()));
-            Double rawScore = score.get(ScoreResultField.RawScore.displayName) != null ? Double.valueOf(score.get(
-                    ScoreResultField.RawScore.displayName).toString()) : null;
+            Double rawScore = score.get(ScoreResultField.RawScore.displayName) != null
+                    ? Double.valueOf(score.get(ScoreResultField.RawScore.displayName).toString()) : null;
             if (score.get(ScoreResultField.Percentile.displayName) != null) {
                 Double percentileScore = Double.valueOf(score.get(ScoreResultField.Percentile.displayName).toString());
                 ScoreResult scoreResult = new ScoreResult(rawScore, percentileScore);
@@ -249,8 +248,14 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
             Map<String, ScoreResult> comparingResults) {
         int differentResultNum = 0;
         for (String key : truthResults.keySet()) {
-            if (!truthResults.get(key).equals(comparingResults.get(key))) {
-                System.err.println(String.format("For Id: %s, the MR score is %s, and rts score is %s.", key,
+            try {
+                if (!truthResults.get(key).equals(comparingResults.get(key))) {
+                    System.err.println(String.format("For Id: %s, the MR score is %s, and rts score is %s.", key,
+                            truthResults.get(key), comparingResults.get(key)));
+                    differentResultNum++;
+                }
+            } catch (Exception e) {
+                log.error(String.format("Exception occurred: for Id: %s, the MR score is %s, and rts score is %s.", key,
                         truthResults.get(key), comparingResults.get(key)));
                 differentResultNum++;
             }
@@ -307,7 +312,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
                 String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
-                        TESTING_FILE_DISPLAY_NAME), requestEntity, ResponseDocument.class);
+                        TESTING_FILE_DISPLAY_NAME),
+                requestEntity, ResponseDocument.class);
         assertTrue(response.isSuccess());
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
@@ -315,9 +321,9 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     @SuppressWarnings("rawtypes")
     private void resolveMetadata() {
-        ResponseDocument response = restTemplate.postForObject(String.format(
-                "%s/pls/scores/fileuploads/fieldmappings?modelId=%s&csvFileName=%s", getRestAPIHostPort(), modelId,
-                sourceFile.getName()), null, ResponseDocument.class);
+        ResponseDocument response = restTemplate
+                .postForObject(String.format("%s/pls/scores/fileuploads/fieldmappings?modelId=%s&csvFileName=%s",
+                        getRestAPIHostPort(), modelId, sourceFile.getName()), null, ResponseDocument.class);
 
         FieldMappingDocument fieldMappingDocument = new ObjectMapper().convertValue(response.getResult(),
                 FieldMappingDocument.class);
@@ -330,16 +336,17 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         fieldMappingDocument.setFieldMappings(fieldMappings);
         assertRequiredFieldsMapped(fieldMappings, fieldMappingDocument.getRequiredFields());
 
-        restTemplate.postForObject(String.format(
-                "%s/pls/scores/fileuploads/fieldmappings/resolve?modelId=%s&csvFileName=%s", getRestAPIHostPort(),
-                modelId, sourceFile.getName()), fieldMappingDocument, Void.class);
+        restTemplate.postForObject(
+                String.format("%s/pls/scores/fileuploads/fieldmappings/resolve?modelId=%s&csvFileName=%s",
+                        getRestAPIHostPort(), modelId, sourceFile.getName()),
+                fieldMappingDocument, Void.class);
     }
 
     @SuppressWarnings({ "unchecked", "unused" })
     private void assertAllHeaderFieldsIncludedInFieldMappings(List<FieldMapping> fieldMappings) {
-        List<String> fileHeaders = selfServiceModeling.getRestTemplate().getForObject(
-                String.format("%s/pls/scores/fileuploads/headerfields?csvFileName=%s", getRestAPIHostPort(),
-                        sourceFile.getName()), List.class);
+        List<String> fileHeaders = selfServiceModeling.getRestTemplate()
+                .getForObject(String.format("%s/pls/scores/fileuploads/headerfields?csvFileName=%s",
+                        getRestAPIHostPort(), sourceFile.getName()), List.class);
         for (FieldMapping fieldMapping : fieldMappings) {
             assertTrue(fileHeaders.contains(fieldMapping.getUserField()));
             fileHeaders.remove(fieldMapping.getUserField());
@@ -424,8 +431,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         boolean any = false;
         while (true) {
             @SuppressWarnings("unchecked")
-            List<Object> raw = selfServiceModeling.getRestTemplate().getForObject(
-                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
+            List<Object> raw = selfServiceModeling.getRestTemplate()
+                    .getForObject(String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
             any = Iterables.any(jobs, new Predicate<Job>() {
 
