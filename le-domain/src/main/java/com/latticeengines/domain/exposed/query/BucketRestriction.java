@@ -99,8 +99,17 @@ public class BucketRestriction extends Restriction {
         if (bkt.getRange() == null && StringUtils.isBlank(bkt.getLabel())) {
             return new ConcreteRestriction(false, attr, EQUAL, null);
         } else if (bkt.getRange() != null) {
-            return new ConcreteRestriction(false, attr, IN_RANGE,
-                    new RangeLookup(bkt.getRange().getLeft(), bkt.getRange().getRight()));
+            if (bkt.getRange().getLeft() != null && bkt.getRange().getRight() != null) {
+                return new ConcreteRestriction(false, attr, IN_RANGE,
+                        new RangeLookup(bkt.getRange().getLeft(), bkt.getRange().getRight()));
+            } else if (bkt.getRange().getLeft() != null) {
+                return new ConcreteRestriction(false, attr, GREATER_OR_EQUAL,
+                        new ValueLookup(bkt.getRange().getLeft()));
+            } else if (bkt.getRange().getRight() != null) {
+                return new ConcreteRestriction(false, attr, LESS_THAN, new ValueLookup(bkt.getRange().getRight()));
+            } else {
+                throw new IllegalArgumentException("A range cannot have both boundaries null.");
+            }
         } else {
             return new ConcreteRestriction(false, attr, EQUAL, new ValueLookup(bkt.getLabel()));
         }
