@@ -28,7 +28,7 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
     }
 
     @Override
-    @Test(groups = "workflow", enabled = false)
+    @Test(groups = "workflow", enabled = true)
     public void scoreAccount() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
