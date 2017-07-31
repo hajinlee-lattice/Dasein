@@ -18,10 +18,11 @@ import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@Deprecated
 @Api(value = "Playmaker tenant api", description = "REST resource for managing playmaker tenants")
 @RestController
-@RequestMapping(value = "/playmaker/tenants")
-public class TenantResource {
+@RequestMapping(value = "/tenants")
+public class DeprecatedTenantResource {
 
     @Autowired
     private OAuthUserEntityMgr oAuthUserEntityMgr;
