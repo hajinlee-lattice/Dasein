@@ -64,7 +64,7 @@ public class RedshiftPublishDataFlow extends TypesafeDataFlowBuilder<RedshiftPub
 
         String[] fieldNames = schema.getFields().stream().map(f -> f.name()).toArray(size -> new String[size]);
         String[] fieldTypes = schema.getFields().stream() //
-                .map(f -> RedshiftUtils.getSQLType(f.schema())).toArray(size -> new String[size]);
+                .map(f -> RedshiftUtils.getSQLType(f, false)).toArray(size -> new String[size]);
         String[] sortKeys = redshiftTableConfig.getSortKeys()
                 .toArray(new String[redshiftTableConfig.getSortKeys().size()]);
 
