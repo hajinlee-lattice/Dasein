@@ -285,8 +285,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         ModelSummary summary = restTemplate.getForObject(
                 String.format("%s/pls/modelsummaries/%s", getRestAPIHostPort(), modelId), ModelSummary.class);
         assertEquals(summary.getStatus(), ModelSummaryStatus.ACTIVE);
-        Thread.sleep(180000L);
-        log.info("Waitng for model in cache to be updated" + modelId);
     }
 
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
@@ -384,6 +382,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 .getString(ProvenancePropertyName.TransformationGroupName, null), TransformationGroup.ALL.getName());
 
         inspectOriginalModelSummaryPredictors(copiedModelSummary);
+        activateModelSummary(copiedModelSummary.getId());
         compareRtsScoreWithModeling(copiedModelSummary, 687, secondTenant.getId());
         assertABCDBucketsCreated(copiedModelSummary.getId());
     }
