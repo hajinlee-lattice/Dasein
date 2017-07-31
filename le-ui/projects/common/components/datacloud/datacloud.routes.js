@@ -340,9 +340,6 @@ angular
                     return {
                         CreateOrUpdateSegment: CreateOrUpdateSegment
                     };
-                }],
-                GetAccountsCount: ['QueryStore', function(QueryStore){
-                    return QueryStore.GetCountByQuery('accounts', '');
                 }]
             }),
             redirectTo: 'home.model.analysis.explorer',
@@ -415,14 +412,6 @@ angular
             },
             views: {
                 "main@": {
-                    resolve: {
-                        GetAccountsCount: ['QueryStore', function(QueryStore){
-                            return QueryStore.GetCountByQuery('accounts', '');
-                        }],
-                        GetAccountsData: ['QueryStore', function(QueryStore){
-                            return QueryStore.GetDataByQuery('accounts', '');
-                        }]
-                    },
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'

@@ -22,27 +22,19 @@
             </div>
         </li>
     </ul>
-    <ul class="filters">
-        <li>
-            <pd-pagination-controls
-                current="vm.current"
-                max="vm.count / vm.pagesize">
-            </pd-pagination-controls>
-        </li>
-    </ul>
 
     <table class="list-table">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
-                <th ng-repeat="col in ::vm.columns" ng-click="vm.sort(col.key);">
-                    <span ng-class="{'sort': vm.sortBy === col.key}">{{::col.displayName}}</span>
+                <th>
+                    <span ng-class="{'sort': vm.sortBy === col.key}">Account Name</span>
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="r in vm.results">
+            <tr ng-repeat="account in vm.accounts">
                  <td ng-repeat="col in ::vm.columns">
-                    {{::r[col.key]}}
+                    {{account.LDC_Name}}
                 </td>
             </tr>
         </tbody>
@@ -51,5 +43,14 @@
     <p ng-if="!vm.count">
         No Records Found
     <p>
+
+    <ul class="filters">
+        <li>
+            <pd-pagination-controls
+                current="vm.current"
+                max="vm.count / vm.pagesize">
+            </pd-pagination-controls>
+        </li>
+    </ul>
 
 </div>

@@ -802,7 +802,7 @@ angular.module('common.datacloud.explorer', [
         var opts = opts || {},
             category = opts.category;
 
-        //DataCloudStore.getAllTopAttributes().then(function(result){
+        DataCloudStore.getAllTopAttributes().then(function(result){
             var timestamp = new Date().getTime();
 
             Object.keys(EnrichmentTopAttributes).forEach(function(catKey, catItem) {
@@ -827,7 +827,7 @@ angular.module('common.datacloud.explorer', [
 
             var timestamp2 = new Date().getTime();
             // console.info('getTopAttributes();\t\t', timestamp2 - timestamp + 'ms');
-        //});
+        });
     }
 
     function swap(context, i, j) {
@@ -875,6 +875,11 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.getTileTableItems = function(category, subcategory, segment, limit, debug) {
+
+
+        // console.log(category, subcategory, segment, limit);
+
+
         var items = [],
             limit = (limit === 0 ? 0 : null) || limit || null;
 
@@ -1023,6 +1028,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.generateTileTableLabel = function(items) {
+
         return items
             ? 'Top ' + (items.length > 1 ? items.length + ' attributes' : 'attribute')
             : '';
@@ -1410,7 +1416,7 @@ angular.module('common.datacloud.explorer', [
         if (vm.segmentAttributeInput[attributeKey] === true) {
             QueryStore.addRestriction({columnName: attributeKey, bkt: stat});
         } else {
-            QueryStore.removeRestriction({columnName: attributeKey, bkt: stat});
+            QueryStore.removeRestriction(attribute);
         }
 
     }

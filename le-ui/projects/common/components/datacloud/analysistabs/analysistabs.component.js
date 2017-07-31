@@ -3,7 +3,7 @@ angular.module('common.datacloud.analysistabs', [
     ])
 .controller('AnalysisTabsController', function (
     $state, $stateParams, $scope, FeatureFlagService, BrowserStorageUtility,
-    ResourceUtility, DataCloudStore, QueryService, QueryStore, GetAccountsCount
+    ResourceUtility, DataCloudStore, QueryService, QueryStore
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -16,32 +16,16 @@ angular.module('common.datacloud.analysistabs', [
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         loadingData: true,
         restriction: QueryStore.getRestriction() || null,
-        accountsCount: GetAccountsCount
-        // accountsCount: QueryStore.GetCountByQuery('accounts', {
-        //     'free_form_text_search': '',
-        //     'frontend_restriction': {},
-        //     'page_filter': {
-        //         "row_offset": 0, 
-        //         "num_rows": 10 
-        //     }
-        // }),
-        // accountsData: QueryStore.GetDataByQuery('accounts', {
-        //   "free_form_text_search": null,
-        //   "frontend_restriction": null,
-        //   "page_filter": {
-        //     "num_rows": 10,
-        //     "row_offset": 0
-        //   },
-        //   "restrict_with_sfdcid": false,
-        //   "restrict_without_sfdcid": false
-        // })
+        accountsCount: 0
     });
 
     vm.init = function() {
 
         vm.loadingData = false;
 
-        console.log(vm.accountsCount);
+        QueryStore.GetCountByQuery('accounts', '').then(function(data){
+            vm.accountsCount = data;
+        });
 
         vm.attributes = vm.inModel()
             ? 'home.model.analysis.explorer'

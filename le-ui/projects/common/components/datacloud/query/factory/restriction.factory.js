@@ -1,28 +1,29 @@
 angular.module('common.datacloud.query.factory.restriction', [])
 .factory('BucketRestriction', function() {
-    function BucketRestriction(columnName, objectType, attr, bkt) {
+    function BucketRestriction(columnName, objectType, range, attr, bkt) {
 
-        console.log(bkt);
+        console.log(columnName, objectType, range, attr, bkt);
+
 
         if (attr === null || attr === undefined) {
-            this.lhs = {
-                columnLookup: {
-                    column_name: columnName,
-                    object_type: objectType || 'Account'
-                }
-            };
             this.attr = objectType + '.' + columnName;
         } else {
             this.attr = attr;
         }
-        if (bkt.Rng === null || attr === undefined) {
-            this.bkt = oldFormatRangeToBkt(bkt.Rng);
+        if (bkt === null || attr === undefined) {
+            this.bkt = oldFormatRangeToBkt(range);
+            this.bkt.Rng = range;
         } else {
             this.bkt = bkt;
-            if (bkt.Rng === null || attr === undefined) {
+            if (range === null || attr === undefined) {
                 this.bkt.Rng = {
                     'min' : bkt.Lbl,
                     'max' : bkt.Lbl
+                };
+            } else {
+                this.bkt.Rng = {
+                    'min' : range[0],
+                    'max' : range[1]
                 };
             }
         }
@@ -30,17 +31,18 @@ angular.module('common.datacloud.query.factory.restriction', [])
 
     // used to convert bucket range in old data object
     function oldFormatRangeToBkt(range) {
-        if (!range || range.is_null_only) {
+
+        if (!range) {
             return null;
         }
         
         if (range.min = range.max) {
             return {
-              'Lbl': range.min
+              'Lbl': bkt.Rng.min
             };
         } else {
             return {
-                'Rng': [range.min, range.max]
+                'Rng': [bkt.Rng.min, bkt.Rng.max]
             };
         }
     }

@@ -1,17 +1,16 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, SegmentServiceProxy, CountMetadata, Columns, Records, LookupStore) {
+.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore) {
 
     var vm = this;
     angular.extend(vm, {
         resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
         modelId: $stateParams.modelId,
         inModel: $state.current.name.split('.')[1] === 'model',
-        count: CountMetadata ? CountMetadata.count : 0,
-        countMetadata: CountMetadata || {},
-        columns: Columns,
-        results: Records,
+        accountsCount: 0,
+        accounts: [],
+        restriction: QueryStore.getRestriction(),
         current: 1,
         pagesize: 20,
         search: '',
@@ -21,6 +20,19 @@ angular.module('common.datacloud.query.results', [
         saving: false,
     });
 
+
+    vm.init = function() {
+    
+        QueryStore.GetCountByQuery('accounts', '').then(function(data){
+            vm.accountsCount = data;
+        });
+        QueryStore.GetDataByQuery('accounts', '').then(function(data){
+            vm.accounts = data;
+        });
+
+    };
+    vm.init();
+
     var prevQuery = vm.search;
     vm.submitQuery = function() {
         if ((vm.search && prevQuery) && (vm.search.toUpperCase() === prevQuery.toUpperCase())) {
@@ -29,7 +41,7 @@ angular.module('common.datacloud.query.results', [
 
         var query = { free_form_text_search: vm.search };
         QueryStore.GetCountByQuery(vm.resourceType, query).then(function(results) {
-            vm.count = results;
+            vm.accountsCount = results;
         });
 
         prevQuery = vm.search;
@@ -50,10 +62,9 @@ angular.module('common.datacloud.query.results', [
         vm.submitQuery();
     };
 
-    vm.sort = function(key) {
-        return; // sort currently unavailable
 
-        vm.sortBy = key;
+    vm.sort = function(columnName) {
+        vm.sortBy = columnName;
         vm.sortDesc = !vm.sortDesc;
         vm.current = 1;
 
@@ -79,7 +90,7 @@ angular.module('common.datacloud.query.results', [
         updatePage();
     });
 
-    function updatePage() { // debounce this
+    function updatePage() {
         var offset = (vm.current - 1) * vm.pagesize;
         var query = {
             free_form_text_search: vm.search,
@@ -105,5 +116,5 @@ angular.module('common.datacloud.query.results', [
         QueryStore.GetDataByQuery(vm.resourceType, query).then(function(results) {
             vm.results = results.data;
         });
-    }
+    };
 });

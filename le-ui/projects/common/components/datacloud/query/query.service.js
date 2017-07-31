@@ -32,7 +32,6 @@ angular.module('common.datacloud.query.service',[
         }
     };
 
-
     this.setRestriction = function(restriction) {
         this.restriction = restriction;
     };
@@ -42,11 +41,8 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.updateRestriction = function(restriction) {
-
-        // update for refine query
-
-        this.restriction.all = restriction.all;
-        this.restriction.any = restriction.any;
+        allRestrictions = restriction.all;
+        anyRestrictions = restriction.any;
     };
 
     this.setSegment = function(segment) {
@@ -74,8 +70,6 @@ angular.module('common.datacloud.query.service',[
         }
         return deferred.promise;
 
-        this.GetAccountsCount('accounts', '');
-
     };
 
     this.getSegmentProperty = function(properties, propertyName) {
@@ -94,19 +88,21 @@ angular.module('common.datacloud.query.service',[
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
-        // var attributesFound = this.findAttributes(attribute.columnName);
-        // var attributes = attributesFound.attributes;
-        // var groupKey = attributesFound.groupKey;
-
         console.log(attribute);
 
         allRestrictions.push({
-            bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.attr, attribute.bkt)
+            bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
 
         $stateParams.accountCount = this.GetCountByQuery('accounts', '');
         $stateParams.loadingData = true;
 
+        console.log(allRestrictions);
+
+
+        // var attributesFound = this.findAttributes(attribute.columnName);
+        // var attributes = attributesFound.attributes;
+        // var groupKey = attributesFound.groupKey;
         // var found = false;
         // for (var i = 0; i < attributes.length; i++) {
         //     var attributeMeta = attributes[i];
@@ -126,23 +122,31 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.removeRestriction = function(attribute) {
-        var attributesFound = this.findAttributes(attribute.attr);
-        var attributes = attributesFound.attributes;
-        var groupKey = attributesFound.groupKey;
 
-        for (var i = 0; i < attributes.length; i++) {
-            var attributeMeta = attributes[i];
+        var index = allRestrictions.indexOf({ 'bucketRestriction': attribute });
 
-            var columnName = BucketRestriction.getColumnName(attributeMeta.bucketRestriction);
-            if (attribute.columnName === columnName &&
-                BucketRestriction.isEqualRange(attribute.range, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
-                allRestrictions.splice(attributeMeta.index, 1);
+        console.log(index);
+        allRestrictions.splice(index, 1);
 
-                // this.updateUiState(attribute.columnName, -1, this.restriction.all.length + this.restriction.any.length);
+        console.log(allRestrictions);
 
-                break;
-            }
-        }
+
+        // var attributesFound = this.findAttributes(attribute.attr);
+        // var attributes = attributesFound.attributes;
+        // var groupKey = attributesFound.groupKey;
+        // for (var i = 0; i < attributes.length; i++) {
+        //     var attributeMeta = attributes[i];
+
+        //     var columnName = BucketRestriction.getColumnName(attributeMeta.bucketRestriction);
+        //     if (attribute.columnName === columnName &&
+        //         BucketRestriction.isEqualRange(attribute.range, BucketRestriction.getRange(attributeMeta.bucketRestriction))) {
+        //         allRestrictions.splice(attributeMeta.index, 1);
+        //         break;
+        //     }
+        // }
+
+        
+
     };
 
     this.findAttributes = function(columnName) {
@@ -175,44 +179,45 @@ angular.module('common.datacloud.query.service',[
         return results;
     };
 
-    this.GetCountByQuery = function(resourceType, query) {
-        // query.restriction = this.getRestriction();
 
+    this.GetCountByQuery = function(resourceType, query) {
+        
         if (!this.isValidResourceType(resourceType)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid resourceType: ' + resourceType} });
             return deferred.promise;
+        } else {
+            var queryWithRestriction = { 
+                'free_form_text_search': query,
+                'frontend_restriction': this.restriction,
+                'page_filter': {
+                    'num_rows': 10,
+                    'row_offset': 0
+                }
+            };
+            return QueryService.GetCountByQuery(resourceType, queryWithRestriction);
         }
 
-        return QueryService.GetCountByQuery(resourceType, { 
-            'free_form_text_search': query,
-            'frontend_restriction': this.restriction,
-            'page_filter': {
-                'num_rows': 10,
-                'row_offset': 0
-            }
-        });
     };
 
     this.GetDataByQuery = function(resourceType, query) {
-        // query.restriction = this.getRestriction();
-
+        
         if (!this.isValidResourceType(resourceType)) {
             var deferred = $q.defer();
             deferred.resolve({error: {errMsg:'Invalid resourceType: ' + resourceType} });
             return deferred.promise;
+        } else {
+            var queryWithRestriction = { 
+                'free_form_text_search': query,
+                'frontend_restriction': this.restriction,
+                'page_filter': {
+                    'num_rows': 10,
+                    'row_offset': 0
+                }
+            };
+            return QueryService.GetDataByQuery(resourceType, queryWithRestriction);
         }
 
-        return QueryService.GetDataByQuery(resourceType, { 
-            'free_form_text_search': query,
-            'frontend_restriction': this.restriction,
-            "restrict_with_sfdcid": false,
-            "restrict_without_sfdcid": false,
-            'page_filter': {
-                'num_rows': 10,
-                'row_offset': 0
-            }
-        });
     };
 
     this.isValidResourceType = function(resourceType) {
@@ -267,7 +272,7 @@ angular.module('common.datacloud.query.service',[
             deferred.resolve(result);
         });
 
-        return defer.promise;
+        return deferred.promise;
     };
 });
 // .service('QueryServiceStub', function($http, $timeout, $q, BucketRestriction) {
