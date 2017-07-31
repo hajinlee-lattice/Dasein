@@ -158,7 +158,7 @@ public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertEquals(conf.getTopology(), CRMTopology.MARKETO);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testpatchNewConfigAndReduceConfig() throws Exception {
         SerializableDocumentDirectory dir = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
         SerializableDocumentDirectory.Node node = dir.getNodeAtPath("/SuperAdminEmails");
