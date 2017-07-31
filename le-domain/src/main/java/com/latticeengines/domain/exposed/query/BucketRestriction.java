@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.query;
 import static com.latticeengines.domain.exposed.query.ComparisonType.EQUAL;
 import static com.latticeengines.domain.exposed.query.ComparisonType.GREATER_OR_EQUAL;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IN_RANGE;
+import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
 import static com.latticeengines.domain.exposed.query.ComparisonType.LESS_THAN;
 
 import java.util.ArrayList;
@@ -97,7 +98,7 @@ public class BucketRestriction extends Restriction {
     // from UI to backend
     public ConcreteRestriction convert() {
         if (bkt.getRange() == null && StringUtils.isBlank(bkt.getLabel())) {
-            return new ConcreteRestriction(false, attr, EQUAL, null);
+            return new ConcreteRestriction(false, attr, IS_NULL, null);
         } else if (bkt.getRange() != null) {
             if (bkt.getRange().getLeft() != null && bkt.getRange().getRight() != null) {
                 return new ConcreteRestriction(false, attr, IN_RANGE,
