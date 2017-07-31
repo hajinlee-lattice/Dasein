@@ -51,7 +51,7 @@ public class RedshiftServiceImpl implements RedshiftService {
                 + "FORMAT AVRO '%s' " //
                 + "EMPTYASNULL " //
                 + "TRUNCATECOLUMNS " //
-                + "COMPUPDATE ON " //
+                + "COMPUPDATE OFF " //
                 + "dateformat 'auto'";
         statement = String.format(statement, tableName, getS3Path(s3bucket, avroS3Prefix), awsAccessKey, awsSecretKey,
                 getS3Path(s3bucket, jsonPathS3Prefix));

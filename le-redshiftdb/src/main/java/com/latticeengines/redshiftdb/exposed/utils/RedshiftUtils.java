@@ -2,14 +2,17 @@ package com.latticeengines.redshiftdb.exposed.utils;
 
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
@@ -27,6 +30,13 @@ public class RedshiftUtils {
     }
 
     public static String getCreateTableStatement(RedshiftTableConfiguration redshiftTableConfig, Schema schema) {
+        Set<String> keys = new HashSet<>();
+        if (StringUtils.isNotBlank(redshiftTableConfig.getDistKey())) {
+            keys.add(redshiftTableConfig.getDistKey());
+        }
+        if (redshiftTableConfig.getSortKeys() != null && !redshiftTableConfig.getSortKeys().isEmpty()) {
+            keys.addAll(redshiftTableConfig.getSortKeys());
+        }
         StringBuffer sb = new StringBuffer();
         sb.append(String.format( //
                 "CREATE TABLE IF NOT EXISTS %s (%s)", //
@@ -34,7 +44,7 @@ public class RedshiftUtils {
                 String.join( //
                         ",", //
                         schema.getFields().stream() //
-                                .map(RedshiftUtils::getColumnSQLStatement) //
+                                .map(field -> getColumnSQLStatement(field, keys)) //
                                 .collect(Collectors.toList()))));
 
         if (redshiftTableConfig.getDistStyle() != null) {
@@ -50,33 +60,38 @@ public class RedshiftUtils {
         return sb.append(";").toString();
     }
 
-    public static String getColumnSQLStatement(Schema.Field field) {
-        return String.format("\"%s\" %s", field.name(), getSQLType(field.schema()));
+    private static String getColumnSQLStatement(Schema.Field field, Set<String> keys) {
+        return String.format("\"%s\" %s", field.name(), getSQLType(field, !keys.contains(field.name())));
     }
 
-    public static String getSQLType(Schema schema) {
-        if (schema.getType() == Schema.Type.UNION) {
-            List<Schema> innerTypes = schema.getTypes();
-            List<Schema> nonNull = innerTypes.stream().filter(t -> !t.getType().equals(Schema.Type.NULL))
-                    .collect(Collectors.toList());
-            return getSQLType(nonNull.get(0));
-        } else {
-            switch (schema.getType()) {
+    public static String getSQLType(Schema.Field field, boolean encode) {
+        Schema.Type type = AvroUtils.getType(field);
+        StringBuilder sb = new StringBuilder();
+        switch (type) {
             case BOOLEAN:
-                return "BOOLEAN";
+                sb.append("BOOLEAN");
+                encode = false;
+                break;
             case STRING:
-                return "NVARCHAR(1000)";
+                sb.append("NVARCHAR(1000)");
+                break;
             case INT:
-                return "INT";
+                sb.append("INT");
+                break;
             case LONG:
-                return "BIGINT";
+                sb.append("BIGINT");
+                break;
             case FLOAT:
             case DOUBLE:
-                return "FLOAT";
+                sb.append("FLOAT");
+                break;
             default:
-                throw new RuntimeException(String.format("Unsupported avro type %s", schema.getType()));
-            }
+                throw new RuntimeException(String.format("Unsupported avro type %s", type));
         }
+        if (encode) {
+            sb.append(" ENCODE lzo");
+        }
+        return sb.toString();
     }
 
     public static String dropTableStatement(String tableName) {
