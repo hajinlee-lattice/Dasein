@@ -207,12 +207,15 @@ angular.module('common.datacloud.query.service',[
             deferred.resolve({error: {errMsg:'Invalid resourceType: ' + resourceType} });
             return deferred.promise;
         } else {
+
+            console.log(query);
+
             var queryWithRestriction = { 
-                'free_form_text_search': query,
+                'free_form_text_search': query.free_form_text_search,
                 'frontend_restriction': this.restriction,
                 'page_filter': {
-                    'num_rows': 10,
-                    'row_offset': 0
+                    'num_rows': query.page_filter.num_rows,
+                    'row_offset': query.page_filter.row_offset
                 }
             };
             return QueryService.GetDataByQuery(resourceType, queryWithRestriction);

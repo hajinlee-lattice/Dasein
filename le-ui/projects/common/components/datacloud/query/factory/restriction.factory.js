@@ -16,15 +16,9 @@ angular.module('common.datacloud.query.factory.restriction', [])
         } else {
             this.bkt = bkt;
             if (range === null || attr === undefined) {
-                this.bkt.Rng = {
-                    'min' : bkt.Lbl,
-                    'max' : bkt.Lbl
-                };
+                this.bkt.Rng = [bkt.Lbl,bkt.Lbl];
             } else {
-                this.bkt.Rng = {
-                    'min' : range[0],
-                    'max' : range[1]
-                };
+                this.bkt.Rng = [range[0],range[1]];
             }
         }
     }
