@@ -15,7 +15,7 @@ angular.module('common.datacloud.query.factory.restriction', [])
             this.bkt.Rng = range;
         } else {
             this.bkt = bkt;
-            if (range === null || attr === undefined) {
+            if (range === null || range === undefined || attr === undefined) {
                 this.bkt.Rng = [bkt.Lbl,bkt.Lbl];
             } else {
                 this.bkt.Rng = [range[0],range[1]];
