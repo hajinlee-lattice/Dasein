@@ -11,35 +11,30 @@ angular.module('common.datacloud.query.factory.restriction', [])
             this.attr = attr;
         }
         if (bkt === null || attr === undefined) {
-            this.bkt = oldFormatRangeToBkt(range);
+            this.bkt = bkt;
             this.bkt.Rng = range;
         } else {
             this.bkt = bkt;
-            if (range === null || range === undefined || attr === undefined) {
-                this.bkt.Rng = [bkt.Lbl,bkt.Lbl];
-            } else {
-                this.bkt.Rng = [range[0],range[1]];
-            }
         }
     }
 
-    // used to convert bucket range in old data object
-    function oldFormatRangeToBkt(range) {
+    // // used to convert bucket range in old data object
+    // function oldFormatRangeToBkt(range) {
 
-        if (!range) {
-            return null;
-        }
+    //     if (!range) {
+    //         return null;
+    //     }
         
-        if (range.min = range.max) {
-            return {
-              'Lbl': bkt.Rng.min
-            };
-        } else {
-            return {
-                'Rng': [bkt.Rng.min, bkt.Rng.max]
-            };
-        }
-    }
+    //     if (range.min = range.max) {
+    //         return {
+    //           'Lbl': bkt.Rng.min
+    //         };
+    //     } else {
+    //         return {
+    //             'Rng': [bkt.Rng.min, bkt.Rng.max]
+    //         };
+    //     }
+    // }
 
     BucketRestriction.isBucketRestrictionLike = function(bucketRestriction) {
         return bucketRestriction instanceof BucketRestriction ||
