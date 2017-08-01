@@ -226,7 +226,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             workflowJob.setWorkflowId(jobExecution.getId());
             workflowJobEntityMgr.registerWorkflowId(workflowJob);
             log.info(String.format("Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
-                    workflowConfiguration.getWorkflowIdToRestart(), jobExecution.getId()));
+                    workflowConfiguration.getWorkflowIdToRestart().getId(), jobExecution.getId()));
         } catch (JobInstanceAlreadyCompleteException | NoSuchJobException | JobRestartException
                 | JobParametersInvalidException | JobExecutionAlreadyRunningException e) {
             throw new LedpException(LedpCode.LEDP_28002, e,
