@@ -98,7 +98,9 @@ angular.module('lp.playbook')
     }
 
     this.nextSaveInsight = function(nextState) {
-        CgTalkingPointStore.saveTalkingPoints(PlaybookWizardStore.savedTalkingPoints);
+        if(PlaybookWizardStore.savedTalkingPoints) {
+            CgTalkingPointStore.saveTalkingPoints(PlaybookWizardStore.savedTalkingPoints);
+        }
         $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
     }
 

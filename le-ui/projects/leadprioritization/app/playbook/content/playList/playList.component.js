@@ -71,7 +71,7 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
 
         });
         
-        console.log(vm.plays);
+        //console.log(vm.plays);
 
     }
     vm.init();
