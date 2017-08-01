@@ -10,8 +10,10 @@ angular.module('lp.playbook.wizard.rating', [])
     });
 
     vm.init = function() {
+        PlaybookWizardStore.setValidation('rating', false);
         if($stateParams.play_name) {
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+
             });
         }
     }
