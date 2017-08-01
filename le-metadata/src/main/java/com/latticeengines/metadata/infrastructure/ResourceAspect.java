@@ -23,11 +23,12 @@ public class ResourceAspect {
     private InternalResourceBase internalResourceBase = new InternalResourceBase();
 
     @Around("execution(* com.latticeengines.metadata.controller.ImportTableResource.*(..))")
-    public void allMethodsForImportTableResource(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object allMethodsForImportTableResource(ProceedingJoinPoint joinPoint) throws Throwable {
         checkHeader(joinPoint);
         setTableType(joinPoint, TableType.IMPORTTABLE);
-        joinPoint.proceed();
+        Object obj = joinPoint.proceed();
         setTableType(joinPoint, TableType.DATATABLE);
+        return obj;
     }
 
     @Before("execution(* com.latticeengines.metadata.controller.TableResource.*(..))")
