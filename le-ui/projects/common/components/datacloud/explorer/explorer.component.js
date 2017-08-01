@@ -316,7 +316,7 @@ angular.module('common.datacloud.explorer', [
             DisabledForSalesTeamTotal = vm.filter(EligibleEnrichments, 'AttributeFlagsMap.CompanyProfile.hidden', true),
             EnabledForSalesTeamTotal = EligibleEnrichments.length - DisabledForSalesTeamTotal.length;
 
-        if(!vm.lookupMode) {
+        if (!vm.lookupMode) {
             DataCloudStore.setMetadata('generalSelectedTotal', selectedTotal.length);
             DataCloudStore.setMetadata('premiumSelectedTotal', vm.filter(selectedTotal, 'IsPremium', true).length);
             DataCloudStore.setMetadata('enabledForSalesTeamTotal', EnabledForSalesTeamTotal);
@@ -875,11 +875,6 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.getTileTableItems = function(category, subcategory, segment, limit, debug) {
-
-
-        // console.log(category, subcategory, segment, limit);
-
-
         var items = [],
             limit = (limit === 0 ? 0 : null) || limit || null;
 
@@ -1189,13 +1184,15 @@ angular.module('common.datacloud.explorer', [
     var gotoNonemptyCategory = function() {
         var categories = [],
             category = '';
-        if(vm.category) {
-            for(var i in vm.categoryCounts) {
-                if(vm.categoryCounts[i] > 0) {
+        
+        if (vm.category) {
+            for (var i in vm.categoryCounts) {
+                if (vm.categoryCounts[i] > 0) {
                     categories.push(i);
                 }
             }
         }
+
         if(categories.length <= 1 && !vm.lookupMode) {
             vm.setCategory(categories[0]);
         }
@@ -1222,6 +1219,7 @@ angular.module('common.datacloud.explorer', [
             if (typeof limit != 'undefined') {
                 percentage = percentage.toFixed(limit);
             }
+            
             return percentage + suffix;
         }
 

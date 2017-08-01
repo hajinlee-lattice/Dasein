@@ -47,11 +47,12 @@ angular
                 var size = vm.category ? vm.categorySize : vm.pagesize,
                     current = vm.metadata.currentCategory - 1,
                     items = vm.categoriesMenu,
-                    length = items ? items.length : 0;
+                    length = items ? items.length : 0,
+                    result = (current * size + size) > length
+                        ? length - size 
+                        : current * size;
 
-                return current * size + size > length
-                    ? length - size 
-                    : current * size;
+                return (result < 0 ? 0 : result);
             }
 
             vm.categoryLimitTo = function() {
@@ -114,14 +115,14 @@ angular
 
                 var stat = (stats && stats.length ? stats[0] : null);
 
-                if(stat && stat.Rng) {
+                if (stat && stat.Rng) {
                     segmentRangeKey = vm.makeSegmentsRangeKey(enrichment,stat.Rng);
                 }
 
-                if(stats && stats.length > 1) {
-                    for(var i in stats) {
-                        if(stats[i] && stats[i].Range) {
-                            if(vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stats[i].Rng)]) {
+                if (stats && stats.length > 1) {
+                    for (var i in stats) {
+                        if (stats[i] && stats[i].Rng) {
+                            if (vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stats[i].Rng)]) {
                                 stat = stats[i];
                                 break;
                             }

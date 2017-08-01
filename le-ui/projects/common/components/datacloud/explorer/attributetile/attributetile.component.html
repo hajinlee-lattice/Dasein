@@ -84,7 +84,9 @@
             <button class="button"
                     ng-class="{'msg': enrichment.button_msg, 'error': enrichment.button_error, 'selected': enrichment.IsSelected}"
                     ng-click="enrichment.WasDirty = enrichment.IsDirty || false; enrichment.IsDirty = true; enrichment.IsSelected = !enrichment.IsSelected; vm.selectEnrichment(enrichment)">
-                <span>{{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}</span>
+                <span>
+                    {{!enrichment.IsSelected ? enrichment.button_select || vm.label.button_select : (enrichment.IsDirty ? vm.label.button_deselect : vm.label.button_selected)}}
+                </span>
             </button>
         </li>
         

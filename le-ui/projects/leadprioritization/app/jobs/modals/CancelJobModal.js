@@ -29,7 +29,7 @@ angular.module('lp.jobs.modals.cancelmodal', [
 .controller('CancelJobController', function ($scope, $state, $rootScope, ResourceUtility, JobsService,  ImportStore) {
     
     $scope.ResourceUtility = ResourceUtility;
-    
+        
     $scope.cancelJobClickConfirm = function ($event) {
         if ($event != null) {
             $event.preventDefault();

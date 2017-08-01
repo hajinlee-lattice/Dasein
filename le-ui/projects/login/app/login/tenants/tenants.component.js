@@ -6,7 +6,7 @@ angular.module('login.tenants', [
 .component('loginTenants', {
     templateUrl: 'app/login/tenants/tenants.component.html',
     controller: function (
-        $scope, $state, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
+        $scope, $state, $timeout, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
         LoginService, LoginStore, SessionTimeoutUtility
     ) {
         var vm = this,
@@ -120,6 +120,7 @@ angular.module('login.tenants', [
                     }
 
                     break;
+
                 case 40: // down
                     if (selected.length == 0) {
                         $(all[0]).addClass('active');
@@ -129,6 +130,7 @@ angular.module('login.tenants', [
                     }
 
                     break;
+
                 case 13: // enter
                     if (selected && selected.length > 0) {
                         var tenant = vm.tenantMap[selected[0].id];
@@ -139,12 +141,23 @@ angular.module('login.tenants', [
                     }
 
                     break;
+                    
+                default:
+                    angular.element('div.tenant-list-item').removeClass('active');
             }
             
             if (typeof n == 'number' && n > -1) {
                 $(all[n]).addClass('active');
                 $(all[index]).removeClass('active');
             }
+
+            $timeout(function() {
+                var filteredItems = angular.element('div.tenant-list-item');
+
+                if (filteredItems.length == 1) {
+                    filteredItems.addClass('active');
+                } else {}
+            },1);
         }
 
         vm.hover = function() {
