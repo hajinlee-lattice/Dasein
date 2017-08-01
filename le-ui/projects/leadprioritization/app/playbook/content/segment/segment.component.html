@@ -1,52 +1,54 @@
-<div class="playbook-segment playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section.indexOf('dashboard.') !== -1}">
-    <form name="segment_form">
-    <div class="header">
-        <h2>Segment
-            <span class="more-info">&#105;
-                <div class="tooltip_">
-                    <div class="cover">
-                        <h3>Stuff about segments</h3>
-                        <p>
-                            Segemwnts stuff long text or something here
-                        </p>
+<div class="playbook-segment playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
+    <div class="inner-container">
+        <form name="segment_form">
+        <div class="header">
+            <h2>Segment
+                <span class="more-info">&#105;
+                    <div class="tooltip_">
+                        <div class="cover">
+                            <h3>Stuff about segments</h3>
+                            <p>
+                                Segemwnts stuff long text or something here
+                            </p>
+                        </div>
                     </div>
-                </div>
-            </span>
-        </h2>
-    </div>
-    <div class="content-body">
-        <div class="filters">
-            <div class="ng-search">
-            <input type="text" class="form-control" placeholder="Search {{vm.segments.length}} Segments" ng-model="search" />
-                <a class="button icon-button white-button" ng-click="search.length ? search = '' : ''">
-                    <span class="fa fa-search" ng-show="!search.length"></span>
-                    <span class="fa fa-times" ng-show="search.length"></span>
-                </a>
-            </div>
+                </span>
+            </h2>
         </div>
-        <ul class="list">
-            <li class="item header segment">
-                <ul>
-                    <li class="name">Segment</li>
-                    <li class="accounts">Accounts</li>
-                </ul>
-            </li>
-            <li ng-repeat="segment in vm.segments | filter: {'display_name': search}" class="item segment">
-                <ul>
-                    <li class="name">
-                        <input  type="radio" 
-                                id="{{segment.name}}" 
-                                name="segment.name" 
-                                ng-value="segment.name"
-                                ng-model="vm.stored.segment_selection"
-                                ng-change="vm.checkValid(segment_form)" 
-                                ng-click="vm.saveSegment(segment)" />
-                        <label for="{{segment.name}}">{{segment.display_name}}</label></li>
-                    <li class="accounts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li>
-                </ul>
-            </li>
-        </ul>
+        <div class="content-body">
+            <div class="filters">
+                <div class="ng-search">
+                <input type="text" class="form-control" placeholder="Search {{vm.segments.length}} Segments" ng-model="search" />
+                    <a class="button icon-button white-button" ng-click="search.length ? search = '' : ''">
+                        <span class="fa fa-search" ng-show="!search.length"></span>
+                        <span class="fa fa-times" ng-show="search.length"></span>
+                    </a>
+                </div>
+            </div>
+            <ul class="list">
+                <li class="item header segment">
+                    <ul>
+                        <li class="name">Segment</li>
+                        <li class="accounts">Accounts</li>
+                    </ul>
+                </li>
+                <li ng-repeat="segment in vm.segments | filter: {'display_name': search}" class="item segment">
+                    <ul>
+                        <li class="name">
+                            <input  type="radio" 
+                                    id="{{segment.name}}" 
+                                    name="segment.name" 
+                                    ng-value="segment.name"
+                                    ng-model="vm.stored.segment_selection"
+                                    ng-change="vm.checkValid(segment_form)" 
+                                    ng-click="vm.saveSegment(segment)" />
+                            <label for="{{segment.name}}">{{segment.display_name}}</label></li>
+                        <li class="accounts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <button class="button blue-button" ng-if="vm.stateParams.section === 'dashboard.segment'" ng-click="vm.savePlay()" ng-disabled="!vm.stored.segment_selection">Save</button>
+        </form>
     </div>
-    <button class="button blue-button" ng-if="vm.stateParams.section === 'dashboard.segment'" ng-click="vm.savePlay()">Save</button>
-    </form>
 </div>
