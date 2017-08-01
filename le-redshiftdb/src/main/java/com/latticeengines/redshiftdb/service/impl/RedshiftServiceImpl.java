@@ -129,4 +129,16 @@ public class RedshiftServiceImpl implements RedshiftService {
         return String.format("s3://%s/%s", s3bucket, s3prefix);
     }
 
+    @Override
+    public void analyzeTable(String tableName) {
+        log.info("Analyze table " + tableName);
+        redshiftJdbcTemplate.execute(String.format("ANALYZE %s", tableName));
+    }
+
+    @Override
+    public void vacuumTable(String tableName) {
+        log.info("Vacuum table " + tableName);
+        redshiftJdbcTemplate.execute(String.format("VACUUM FULL %s", tableName));
+    }
+
 }

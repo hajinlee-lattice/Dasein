@@ -18,4 +18,8 @@ public interface RedshiftService {
     void renameTable(String originalTableName, String newTableName);
 
     void replaceTable(String stageTableName, String targetTableName);
+
+    void analyzeTable(String tableName);
+
+    void vacuumTable(String tableName);
 }
