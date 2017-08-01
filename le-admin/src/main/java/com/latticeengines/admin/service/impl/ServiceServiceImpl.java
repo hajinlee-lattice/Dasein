@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,7 @@ import com.latticeengines.security.exposed.AccessLevel;
 
 @Component("serviceService")
 public class ServiceServiceImpl implements ServiceService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceServiceImpl.class);
 
     private final String listDelimiter = ",";
 
@@ -257,7 +260,7 @@ public class ServiceServiceImpl implements ServiceService {
                 }
                 patchDefaultConfigWithoutValidation(serviceName, nodePath, data);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_19101, String.format(
+                LOGGER.error(String.format(
                         "Failed to patch new configuration for node %s in component %s", nodePath, serviceName), e);
             }
         }
