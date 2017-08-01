@@ -90,7 +90,11 @@ public class RedshiftUtils {
                 throw new RuntimeException(String.format("Unsupported avro type %s", type));
         }
         if (encode) {
-            sb.append(" ENCODE lzo");
+            if (Schema.Type.FLOAT.equals(type) || Schema.Type.DOUBLE.equals(type)) {
+                sb.append(" ENCODE bytedict");
+            } else {
+                sb.append(" ENCODE lzo");
+            }
         }
         return sb.toString();
     }
