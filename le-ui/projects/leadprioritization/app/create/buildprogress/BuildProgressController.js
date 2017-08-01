@@ -11,6 +11,8 @@ angular.module('lp.create.import.job', [
     $scope.ResourceUtility = ResourceUtility;
     $scope.applicationId = $stateParams.applicationId;
 
+    BuildProgressConfig = BuildProgressConfig || {};
+
     $scope.config = BuildProgressConfig;
     $scope.button_goto_sref = BuildProgressConfig.button_goto_sref || 'home.models';
 
