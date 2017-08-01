@@ -3,6 +3,8 @@ package com.latticeengines.metadata.infrastructure;
 import javax.servlet.http.HttpServletRequest;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +22,12 @@ public class ResourceAspect {
 
     private InternalResourceBase internalResourceBase = new InternalResourceBase();
 
-    @Before("execution(* com.latticeengines.metadata.controller.ImportTableResource.*(..))")
-    public void allMethodsForImportTableResource(JoinPoint joinPoint) {
+    @Around("execution(* com.latticeengines.metadata.controller.ImportTableResource.*(..))")
+    public void allMethodsForImportTableResource(ProceedingJoinPoint joinPoint) throws Throwable {
         checkHeader(joinPoint);
         setTableType(joinPoint, TableType.IMPORTTABLE);
+        joinPoint.proceed();
+        setTableType(joinPoint, TableType.DATATABLE);
     }
 
     @Before("execution(* com.latticeengines.metadata.controller.TableResource.*(..))")
