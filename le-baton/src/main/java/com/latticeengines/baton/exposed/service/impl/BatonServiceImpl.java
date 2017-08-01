@@ -470,6 +470,11 @@ public class BatonServiceImpl implements BatonService {
                 }
             }
         });
+        for (LatticeProduct product: LatticeProduct.values()) {
+            if (hasProduct(customerSpace, product)) {
+                valueMap.put(String.format("Has %s", product.getName()), true);
+            }
+        }
         return valueMap;
     }
 
