@@ -20,7 +20,7 @@ public class DummyWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     private DummyAwsStep dummyAwsStep;
 
     @Bean
-    public Job sleepableWorkflowJob() throws Exception {
+    public Job dummyWorkflowJob() throws Exception {
         return buildWorkflow();
     }
 
