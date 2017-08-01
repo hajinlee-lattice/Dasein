@@ -3,12 +3,7 @@ package com.latticeengines.query.evaluator;
 import java.util.List;
 import java.util.Map;
 
-import com.amazonaws.services.dynamodbv2.xspec.B;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -17,7 +12,6 @@ import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
-import com.latticeengines.query.util.QueryUtils;
 
 /**
  * This test will go out to a test table in Redshift
@@ -120,12 +114,12 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @DataProvider(name = "bitEncodedData", parallel = true)
     private Object[][] provideBitEncodedData() {
         return new Object[][] {
-                { "Yes", true, 2071 },
-                { "No", true, 40221 },
-                { null, true, 39583 },
-                { "Yes", false, 125202 },
-                { "No", false, 13814539 },
-                { null, false, 180837217 }
+            { "Yes", true, 2071 },
+            { "No", true, 40221 },
+            { null, true, 39583 },
+            { "Yes", false, 125202 },
+            { "No", false, 13814539 },
+            { null, false, 180837217 }
         };
     }
 

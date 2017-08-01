@@ -113,8 +113,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-camille</artifactId>
-            <version>${le.camille.version}</version>
+            <artifactId>le-baton</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

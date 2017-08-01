@@ -1,6 +1,9 @@
 {
   "ConfigDirectories": [
     {
+      "RootPath": "/Dante"
+    },
+    {
       "RootPath": "/Modeling",
       "Nodes": [
         {
@@ -33,6 +36,15 @@
           "Data": "[]"
         }
       ]
+    },
+    {
+      "RootPath": "/DataCloud",
+      "Nodes": [
+        {
+          "Node": "BypassDnBCache",
+          "Data": "false"
+        }
+      ]
     }
   ],
   "CustomerSpaceInfo": {
@@ -40,7 +52,7 @@
       "displayName": "${TENANT}_CG",
       "description": "A CG solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{\"EnableDataEncryption\":true,\"EnableCdl\":true,\"EnableTalkingPoints\":true}"
+    "featureFlags": "{\"Dante\":true,\"EnableDataEncryption\":true,\"EnableCdl\":true,\"EnableTalkingPoints\":true}"
   },
   "TenantInfo": {
     "properties": {
