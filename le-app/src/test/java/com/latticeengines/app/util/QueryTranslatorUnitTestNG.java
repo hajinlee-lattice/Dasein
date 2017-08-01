@@ -105,7 +105,7 @@ public class QueryTranslatorUnitTestNG {
         assertTrue(result.getFreeFormTextSearchAttributes().size() > 0);
     }
 
-    static enum Level {
+    private enum Level {
         Simple, Advanced
     }
 

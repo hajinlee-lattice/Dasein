@@ -6,8 +6,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,8 +37,6 @@ import com.querydsl.sql.SQLQuery;
 
 @Component("queryProcessor")
 public class QueryProcessor {
-
-    private static Logger log = LoggerFactory.getLogger(QueryProcessor.class);
 
     @Autowired
     private QueryFactory queryFactory;

@@ -3,6 +3,7 @@ package com.latticeengines.query.evaluator;
 import java.util.List;
 import java.util.Map;
 
+import com.amazonaws.services.dynamodbv2.xspec.B;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import org.testng.Assert;
@@ -108,7 +109,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .build();
         Query query;
         if (inCustomerUniverse) {
-            query = Query.builder().find(BusinessEntity.Account).where(restriction).build();
+            query = Query.builder().where(restriction).from(BusinessEntity.Account).build();
         } else {
             query = Query.builder().where(restriction).build();
         }
@@ -121,8 +122,10 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         return new Object[][] {
                 { "Yes", true, 2071 },
                 { "No", true, 40221 },
+                { null, true, 39583 },
                 { "Yes", false, 125202 },
-                { "No", false, 13814539 }
+                { "No", false, 13814539 },
+                { null, false, 180837217 }
         };
     }
 

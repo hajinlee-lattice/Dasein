@@ -94,6 +94,7 @@ public class DataLakeServiceImpl implements DataLakeService {
                     .map(Attribute::getColumnMetadata) //
                     .collect(Collectors.toList());
             cms.forEach(cm -> cm.setEntity(entity));
+            //TODO: should set category in metadata table
             if (BusinessEntity.Account.equals(entity)) {
                 cms.forEach(cm -> cm.setCategory(Category.ACCOUNT_ATTRIBUTES));
             }

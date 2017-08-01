@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ExistsRestriction extends Restriction {
 
+    @Deprecated
     @JsonProperty("object_type")
     private SchemaInterpretation objectType;
 
@@ -40,16 +41,7 @@ public class ExistsRestriction extends Restriction {
     @JsonProperty("restriction")
     private Restriction restriction;
 
-    public ExistsRestriction(SchemaInterpretation objectType, boolean negate, Restriction restriction) {
-        this.objectType = objectType;
-        this.negate = negate;
-        this.restriction = restriction;
-    }
-
-    public ExistsRestriction(SchemaInterpretation objectType) {
-        this.objectType = objectType;
-    }
-
+    @Deprecated
     public ExistsRestriction(SchemaInterpretation objectType, boolean negate) {
         this.objectType = objectType;
         this.negate = negate;
@@ -88,11 +80,13 @@ public class ExistsRestriction extends Restriction {
         this.negate = negate;
     }
 
-    public SchemaInterpretation getObjectType() {
+    @Deprecated
+    private SchemaInterpretation getObjectType() {
         return objectType;
     }
 
-    public void setObjectType(SchemaInterpretation objectName) {
+    @Deprecated
+    private void setObjectType(SchemaInterpretation objectName) {
         this.objectType = objectName;
     }
 

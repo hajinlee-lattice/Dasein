@@ -127,6 +127,7 @@ public class AttributeRepository {
                 if (attribute == null) {
                     throw new RuntimeException("Cannot find metadata for attribute " + lookup);
                 }
+                //TODO: should set category in metadata table
                 if (BusinessEntity.Account.getServingStore().equals(role)) {
                     attribute.setCategory(Category.ACCOUNT_ATTRIBUTES);
                 }

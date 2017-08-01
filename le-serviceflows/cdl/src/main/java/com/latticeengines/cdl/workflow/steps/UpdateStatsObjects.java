@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.metadata.Category;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -96,6 +96,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
                 latestVersion);
         List<ColumnMetadata> masterCols = masterTable.getColumnMetadata();
+        //TODO: should set category in metadata table
         masterCols.forEach(cm -> cm.setCategory(Category.ACCOUNT_ATTRIBUTES));
         // hard code entity
         List<Pair<BusinessEntity, List<ColumnMetadata>>> mdPairs = Arrays.asList(
