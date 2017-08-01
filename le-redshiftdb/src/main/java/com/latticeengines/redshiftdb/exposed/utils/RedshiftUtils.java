@@ -84,6 +84,7 @@ public class RedshiftUtils {
             case FLOAT:
             case DOUBLE:
                 sb.append("FLOAT");
+                encode = false;
                 break;
             default:
                 throw new RuntimeException(String.format("Unsupported avro type %s", type));
