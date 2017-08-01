@@ -573,6 +573,7 @@ public enum LedpCode {
 
     // le-app
     LEDP_36001("Invalid attribute name: {0}"), //
+    LEDP_36002("Failed to execute a query. Please make sure your data collection has been properly initialized, or contact our service for further assist."), //
 
     // le-query
     LEDP_37000("Lookup must have range specified"), //

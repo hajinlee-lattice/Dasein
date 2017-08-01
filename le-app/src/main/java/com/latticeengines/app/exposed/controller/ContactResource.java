@@ -1,5 +1,7 @@
 package com.latticeengines.app.exposed.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -7,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -21,12 +25,18 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/contacts")
 public class ContactResource extends BaseFrontEndEntityResource {
 
+    private static Logger logger = LoggerFactory.getLogger(ContactResource.class);
+
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public long getCount(@RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "segment", required = false) String segment) {
-        return super.getCount(frontEndQuery, segment);
+        try {
+            return super.getCount(frontEndQuery, segment);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_36002, e);
+        }
     }
 
     @Deprecated
@@ -34,7 +44,11 @@ public class ContactResource extends BaseFrontEndEntityResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified restriction")
     public long getCountForRestriction(@RequestBody FrontEndRestriction restriction) {
-        return super.getCountForRestriction(restriction);
+        try {
+            return super.getCountForRestriction(restriction);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_36002, e);
+        }
     }
 
     @Override
@@ -43,7 +57,11 @@ public class ContactResource extends BaseFrontEndEntityResource {
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public DataPage getData(@RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "segment", required = false) String segment) {
-        return super.getData(frontEndQuery, segment);
+        try {
+            return super.getData(frontEndQuery, segment);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_36002, e);
+        }
     }
 
     @Override
