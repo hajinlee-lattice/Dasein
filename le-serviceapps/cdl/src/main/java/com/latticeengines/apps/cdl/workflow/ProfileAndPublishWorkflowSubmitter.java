@@ -77,12 +77,12 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 throw new RuntimeException("We can't launch any profile workflow now as there is one still running.");
             }
         }
-        dataFeedProxy.startProfile(customerSpace);
         Table masterTableInDb = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
         if (masterTableInDb == null) {
             throw new LedpException(LedpCode.LEDP_37003,
                     new String[] { TableRoleInCollection.ConsolidatedAccount.name() });
         }
+        dataFeedProxy.startProfile(customerSpace);
         ProfileAndPublishWorkflowConfiguration configuration = generateConfiguration(customerSpace, datafeedStatus);
         return workflowJobService.submit(configuration);
 
