@@ -4,12 +4,13 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="com.latticeengines.testframework"/>
-
+    <import resource="classpath:camille-runtime-context.xml" />
     <import resource="classpath:security-no-controller-context.xml" />
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
     <import resource="classpath:hadoop-config-context.xml"/>
+
+    <context:component-scan base-package="com.latticeengines.testframework"/>
 
     <bean id="deploymentTestBed" class="com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed">
         <constructor-arg name="plsApiHostPort" value="${common.test.pls.url}"/>
