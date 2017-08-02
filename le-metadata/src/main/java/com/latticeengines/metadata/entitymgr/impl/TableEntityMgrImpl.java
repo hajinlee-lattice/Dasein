@@ -138,12 +138,13 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             List<String> extractPaths = ExtractUtils.getExtractPaths(yarnConfiguration, entity);
             deleteByName(name);
             extractPaths.forEach(p -> {
+                String avroDir = p.substring(0, p.lastIndexOf("/"));
                 try {
-                    HdfsUtils.rmdir(yarnConfiguration, p);
+                    HdfsUtils.rmdir(yarnConfiguration, avroDir);
                 } catch (IOException e) {
-                    log.error(String.format("Failed to delete extract %s", p));
+                    log.error(String.format("Failed to delete extract %s", avroDir));
                 }
-                String schemaPath = p.replace("/Tables/", "/TableSchemas/");
+                String schemaPath = avroDir.replace("/Tables/", "/TableSchemas/");
                 try {
                     if (HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
                         HdfsUtils.rmdir(yarnConfiguration, schemaPath);
