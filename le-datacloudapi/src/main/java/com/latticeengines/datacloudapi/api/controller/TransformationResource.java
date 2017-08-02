@@ -65,15 +65,10 @@ public class TransformationResource extends InternalResourceBase implements Tran
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
             HttpServletRequest request) {
         checkHeader(request);
-        try {
-            if (StringUtils.isEmpty(hdfsPod)) {
-                hdfsPod = HdfsPodContext.getHdfsPodId();
-            }
-
-            return sourceTransformationService.scan(hdfsPod);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25009, e);
+        if (StringUtils.isEmpty(hdfsPod)) {
+            hdfsPod = HdfsPodContext.getHdfsPodId();
         }
+        return sourceTransformationService.scan(hdfsPod);
     }
 
     @RequestMapping(value = "internal", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -99,8 +94,6 @@ public class TransformationResource extends InternalResourceBase implements Tran
                 throw new IllegalStateException("Cannot start a new progress for your request");
             }
             return progress;
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25011, e, new String[] { transformationRequest.getSourceBeanName() });
         } finally {
             hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
             HdfsPodContext.changeHdfsPodId(hdfsPod);
@@ -137,8 +130,6 @@ public class TransformationResource extends InternalResourceBase implements Tran
                 throw new IllegalStateException("Cannot start a new progress for your request");
             }
             return progress;
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25011, e, new String[] { "Failed to start pipeline transformation" });
         } finally {
             hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
             HdfsPodContext.changeHdfsPodId(hdfsPod);
@@ -149,9 +140,10 @@ public class TransformationResource extends InternalResourceBase implements Tran
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Get workflow configuration for a pipelined transformations. ")
-    public TransformationWorkflowConfiguration getWorkflowConf(@RequestBody PipelineTransformationRequest transformationRequest,
-                                                         @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
-                                                         HttpServletRequest request) {
+    public TransformationWorkflowConfiguration getWorkflowConf(
+            @RequestBody PipelineTransformationRequest transformationRequest,
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
+            HttpServletRequest request) {
         checkHeader(request);
         try {
             if (StringUtils.isEmpty(hdfsPod)) {
@@ -159,8 +151,6 @@ public class TransformationResource extends InternalResourceBase implements Tran
                 HdfsPodContext.changeHdfsPodId(hdfsPod);
             }
             return sourceTransformationService.generatePipelineWorkflowConf(transformationRequest, hdfsPod);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25011, e, new String[] { "Failed to start pipeline transformation" });
         } finally {
             hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
             HdfsPodContext.changeHdfsPodId(hdfsPod);
@@ -171,18 +161,23 @@ public class TransformationResource extends InternalResourceBase implements Tran
     @ResponseBody
     @ApiIgnore
     @ApiOperation(value = "Get the TransformationProgress.")
-    public TransformationProgress getProgress(
-            @RequestParam(value = "rootOperationUid") String rootOperationUid,
+    public TransformationProgress getProgress(@RequestParam(value = "rootOperationUid") String rootOperationUid,
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
             HttpServletRequest request) {
         checkHeader(request);
         try {
+            if (StringUtils.isEmpty(hdfsPod)) {
+                hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+                HdfsPodContext.changeHdfsPodId(hdfsPod);
+            }
             TransformationProgress progress = sourceTransformationService.getProgress(rootOperationUid);
             if (progress == null) {
                 throw new IllegalStateException("Cannot find progress for rootOperationUid=" + rootOperationUid);
             }
             return progress;
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25041, e, new String[] { rootOperationUid });
+        } finally {
+            hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
     }
 }
