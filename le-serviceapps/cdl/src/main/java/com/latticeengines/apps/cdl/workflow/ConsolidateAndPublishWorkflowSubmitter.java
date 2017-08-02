@@ -34,17 +34,21 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateAndPublishWorkflowSubmitter.class);
 
-    @Inject
-    private DataFeedProxy dataFeedProxy;
+    private final DataFeedProxy dataFeedProxy;
 
-    @Inject
-    private WorkflowProxy workflowProxy;
+    private final WorkflowProxy workflowProxy;
 
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
     @Value("${cdl.transform.workflow.mem.mb}")
     protected int workflowMemMb;
+
+    @Inject
+    public ConsolidateAndPublishWorkflowSubmitter(DataFeedProxy dataFeedProxy, WorkflowProxy workflowProxy) {
+        this.dataFeedProxy = dataFeedProxy;
+        this.workflowProxy = workflowProxy;
+    }
 
     public ApplicationId submit(String customerSpace) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
