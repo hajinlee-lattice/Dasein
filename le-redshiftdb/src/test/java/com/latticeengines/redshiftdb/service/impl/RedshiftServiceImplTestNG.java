@@ -111,8 +111,8 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
         redshiftTableConfig.setS3Bucket(s3Bucket);
         redshiftService.createTable(redshiftTableConfig, schema);
         redshiftService.loadTableFromAvroInS3(TABLE_NAME, s3Bucket, avroPrefix, jsonPathPrefix);
-        redshiftService.analyzeTable(TABLE_NAME);
         redshiftService.vacuumTable(TABLE_NAME);
+        redshiftService.analyzeTable(TABLE_NAME);
     }
 
     @Test(groups = "functional", dependsOnMethods = "loadDataToRedshift")
