@@ -244,9 +244,9 @@ angular
                     filter.IsPremium = false;
                 }
 
-                // if (!vm.metadata.toggle.show.internal) {
-                //     filter.IsInternal = false;
-                // }
+                if (!vm.metadata.toggle.show.internal) {
+                    filter.IsInternal = false;
+                }
 
                 if (vm.subcategory) {
                     filter.Subcategory = vm.subcategory;
