@@ -157,7 +157,7 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
         Assert.assertNotNull(previewResources.getoAuthToken());
         Assert.assertNotNull(previewResources.getServerUrl());
 
-        String url = previewResources.getServerUrl() + "/tenants/oauthtotenant";
+        String url = previewResources.getServerUrl() + "/playmaker/tenants/oauthtotenant";
         RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + previewResources.getoAuthToken());

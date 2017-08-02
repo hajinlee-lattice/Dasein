@@ -181,7 +181,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
                 null, String.class);
 
-        String url = previewResources.getServerUrl() + "/tenants/oauthtotenant";
+        String url = previewResources.getServerUrl() + "/playmaker/tenants/oauthtotenant";
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + previewResources.getoAuthToken());
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);

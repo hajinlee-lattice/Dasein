@@ -25,7 +25,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
 
     @Test(groups = "deployment")
     public void createTenantWithTenantNameByNonAdmin() {
-        String url = apiHostPort + "/tenants";
+        String url = apiHostPort + "/playmaker/tenants";
         PlaymakerTenant newTenant = restTemplate.postForObject(url, tenant, PlaymakerTenant.class);
         Assert.assertNotNull(newTenant);
 
@@ -40,7 +40,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
     public void createTenantWithTenantNameByAdmin() {
-        String url = apiHostPort + "/tenants";
+        String url = apiHostPort + "/playmaker/tenants";
         PlaymakerTenant newTenant = adminRestTemplate.postForObject(url, tenant, PlaymakerTenant.class);
         Assert.assertNotNull(newTenant);
         Assert.assertNotNull(newTenant.getTenantPassword());
@@ -52,7 +52,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
     public void updateTenantWithTenantName() {
-        String url = apiHostPort + "/tenants/" + tenant.getTenantName();
+        String url = apiHostPort + "/playmaker/tenants/" + tenant.getTenantName();
         tenant.setExternalId("externalId2");
         adminRestTemplate.put(url, tenant);
 
@@ -64,7 +64,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "updateTenantWithTenantName")
     public void getOauthTokenToTenant() {
-        String url = apiHostPort + "/tenants/oauthtotenant";
+        String url = apiHostPort + "/playmaker/tenants/oauthtotenant";
         String tenantNameViaToken = adminRestTemplate.getForObject(url, String.class);
         Assert.assertNotNull(tenantNameViaToken);
         Assert.assertEquals(tenantNameViaToken, tenantName);
@@ -72,7 +72,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToTenant")
     public void deleteTenantWithTenantName() {
-        String url = apiHostPort + "/tenants/" + tenant.getTenantName();
+        String url = apiHostPort + "/playmaker/tenants/" + tenant.getTenantName();
         adminRestTemplate.delete(url);
         PlaymakerTenant newTenant = adminRestTemplate.getForObject(url, PlaymakerTenant.class);
         Assert.assertNull(newTenant.getTenantName());
