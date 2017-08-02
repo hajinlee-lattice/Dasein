@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
-import akka.pattern.Patterns;
 import akka.util.Timeout;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -243,7 +242,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     private Future<Object> askFuzzyMatchAnchor(MatchTraveler traveler) {
         Timeout timeout = actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT;
-        return Patterns.ask(actorSystem.getFuzzyMatchAnchor(), traveler, timeout);
+        return actorSystem.askAnchor(traveler, timeout);
     }
 
     private void checkRecordType(List<? extends OutputRecord> matchRequests) {

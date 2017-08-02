@@ -30,9 +30,9 @@ public class MatchGuideBook extends GuideBook {
 
     private static final Logger log = LoggerFactory.getLogger(MatchGuideBook.class);
     private static final String MICROENGINE_ACTOR = "MicroEngineActor";
-    public static final String DEFAULT_GRAPH = null;
 
     private String fuzzyMatchAnchorPath;
+    private boolean initialized;
 
     @Autowired
     private MatchActorSystem actorSystem;
@@ -46,10 +46,7 @@ public class MatchGuideBook extends GuideBook {
     private LoadingCache<String, DecisionGraph> decisionGraphLoadingCache;
 
     @PostConstruct
-    public void init() {
-        log.info("Initialize fuzzy match guide book.");
-        fuzzyMatchAnchorPath = actorSystem.getFuzzyMatchAnchor().path().toSerializationFormat();
-
+    private void postConstruct() {
         decisionGraphLoadingCache = CacheBuilder.newBuilder().maximumSize(20).expireAfterWrite(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<String, DecisionGraph>() {
                     @Override
@@ -61,6 +58,7 @@ public class MatchGuideBook extends GuideBook {
 
     @Override
     public String next(String currentLocation, Traveler traveler) {
+        initialize();
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         if (fuzzyMatchAnchorPath.equals(currentLocation)) {
             return nextMoveForAnchor(matchTraveler);
@@ -76,6 +74,7 @@ public class MatchGuideBook extends GuideBook {
 
     @Override
     public void logVisit(String traversedActor, Traveler traveler) {
+        initialize();
         if (fuzzyMatchAnchorPath.equals(traversedActor)) {
             return;
         }
@@ -181,6 +180,18 @@ public class MatchGuideBook extends GuideBook {
 
     private String toActorClassName(String actorName) {
         return actorName + MICROENGINE_ACTOR;
+    }
+
+    private void initialize() {
+        if (!initialized) {
+            synchronized (this) {
+                if (!initialized) {
+                    log.info("Initialize fuzzy match guide book.");
+                    fuzzyMatchAnchorPath = actorSystem.getFuzzyMatchAnchor().path().toSerializationFormat();
+                    initialized = true;
+                }
+            }
+        }
     }
 
 }

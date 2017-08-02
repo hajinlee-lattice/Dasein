@@ -9,7 +9,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +23,7 @@ import com.latticeengines.actors.exposed.ActorFactory;
 import com.latticeengines.actors.exposed.ActorSystemFactory;
 import com.latticeengines.actors.exposed.MetricActor;
 import com.latticeengines.actors.exposed.RoutingLogic;
+import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DnbLookupActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainBasedMicroEngineActor;
 import com.latticeengines.datacloud.match.actors.visitor.impl.DomainCountryBasedMicroEngineActor;
@@ -37,6 +37,9 @@ import com.latticeengines.datacloud.match.actors.visitor.impl.LocationToDunsMicr
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import scala.concurrent.Future;
 
 @Component("matchActorSystem")
 public class MatchActorSystem {
@@ -72,30 +75,27 @@ public class MatchActorSystem {
     @Value("${datacloud.match.actor.datasource.default.threadpool.queue.size}")
     private Integer defaultThreadpoolQueueSize;
 
-    @Autowired
-    private ActorFactory actorFactory;
+    private final ActorFactory actorFactory;
 
     private ExecutorService dataSourceServiceExecutor;
 
     private ConcurrentMap<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
     private ConcurrentMap<String, String> actorPathMap = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    public void postConstruct() {
-        system = ActorSystemFactory.create("datacloud", 16);
-
-        initDefaultDataSourceThreadPool();
-
-        initActors();
+    @Autowired
+    public MatchActorSystem(ActorFactory actorFactory) {
+        this.actorFactory = actorFactory;
     }
 
     @PreDestroy
-    public void preDestroy() {
+    private void preDestroy() {
         log.info("Shutting down match actor system");
-        system.shutdown();
-
-        dataSourceServiceExecutor.shutdown();
-
+        if (system != null) {
+            system.shutdown();
+        }
+        if (dataSourceServiceExecutor != null) {
+            dataSourceServiceExecutor.shutdown();
+        }
         log.info("Completed shutdown of match actor system");
     }
 
@@ -104,11 +104,11 @@ public class MatchActorSystem {
     }
 
     ActorRef getActorRef(String actorClassName) {
-        return actorRefMap.get(actorClassName);
+        return getActorRefMap().get(actorClassName);
     }
 
     String getActorName(String actorPath) {
-        return actorPathMap.get(actorPath);
+        return getActorPathMap().get(actorPath);
     }
 
     public String getActorName(ActorRef actorRef) {
@@ -121,17 +121,22 @@ public class MatchActorSystem {
         }
     }
 
-    public ActorRef getFuzzyMatchAnchor() {
+    ActorRef getFuzzyMatchAnchor() {
         return getActorRef(FuzzyMatchAnchorActor.class);
     }
 
     public ActorRef getMetricActor() {
+        initilize();
         return getActorRef(MetricActor.class);
     }
 
+    public Future<Object> askAnchor(MatchTraveler traveler, Timeout timeout) {
+        initilize();
+        return Patterns.ask(getFuzzyMatchAnchor(), traveler, timeout);
+    }
+
     public void sendResponse(Object response, String returnAddress) {
-        ActorRef ref = system.actorFor(returnAddress);
-        ref.tell(response, null);
+        getActorSystem().actorSelection(returnAddress).tell(response, null);
     }
 
     public boolean isBatchMode() {
@@ -156,6 +161,33 @@ public class MatchActorSystem {
         return dataSourceServiceExecutor;
     }
 
+    private ActorSystem getActorSystem() {
+        initilize();
+        return system;
+    }
+
+    private ConcurrentMap<String, ActorRef> getActorRefMap() {
+        initilize();
+        return actorRefMap;
+    }
+
+    private ConcurrentMap<String, String> getActorPathMap() {
+        initilize();
+        return actorPathMap;
+    }
+
+    private void initilize() {
+        if (system == null) {
+            synchronized (this) {
+                if (system == null) {
+                    system = ActorSystemFactory.create("datacloud", 16);
+                    initDefaultDataSourceThreadPool();
+                    initActors();
+                }
+            }
+        }
+    }
+
     private void initActors() {
         initNamedActor(DynamoLookupActor.class, true, dynamoLookupActorCardinality);
         initNamedActor(DnbLookupActor.class, true, dnbLookupActorCardinality);
@@ -166,7 +198,7 @@ public class MatchActorSystem {
 
         initNamedActor(MetricActor.class, true, metricActorCardinality);
 
-        log.info("All match actors started");
+        log.info("All match actors created.");
     }
 
     private void initMicroEngines() {
