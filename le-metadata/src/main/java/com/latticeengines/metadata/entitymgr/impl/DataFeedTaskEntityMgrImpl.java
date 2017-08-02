@@ -199,6 +199,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     public void registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts) {
         tableTypeHolder.setTableType(TableType.IMPORTTABLE);
         Table extractTable = tableEntityMgr.findByName(tableName);
+        tableTypeHolder.setTableType(TableType.DATATABLE);
         extractTable.getExtracts().clear();
         for (int i = 0; i < extracts.size(); i++) {
             Extract extract = extracts.get(i);
