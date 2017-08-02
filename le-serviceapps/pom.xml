@@ -21,6 +21,7 @@
     <modules>
         <module>core</module>
         <module>cdl</module>
+        <module>lp</module>
     </modules>
 
     <build>
@@ -38,7 +39,6 @@
     </build>
 
     <dependencies>
-
         <!-- TEST dependencies -->
         <dependency>
             <groupId>com.latticeengines</groupId>

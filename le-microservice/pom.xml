@@ -131,6 +131,7 @@
         <module>objectapi</module>
         <module>dante</module>
         <module>cdl</module>
+        <module>lp</module>
     </modules>
 
 </project>

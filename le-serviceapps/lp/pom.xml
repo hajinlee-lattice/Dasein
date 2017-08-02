@@ -3,12 +3,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-serviceapps-cdl</artifactId>
+    <artifactId>le-serviceapps-lp</artifactId>
     <packaging>jar</packaging>
     <name>le-serviceapps-${component-name}</name>
 
     <properties>
-        <component-name>cdl</component-name>
+        <component-name>lp</component-name>
         <jetty.dir>test</jetty.dir>
     </properties>
 
