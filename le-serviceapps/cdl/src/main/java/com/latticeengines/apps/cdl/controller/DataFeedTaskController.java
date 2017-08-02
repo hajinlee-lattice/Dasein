@@ -36,11 +36,11 @@ public class DataFeedTaskController extends InternalResourceBase {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
-    public Map<String, String> createDataFeedTaskDeprecated(HttpServletRequest request, @PathVariable String customerSpace,
+    public Map<String, String> createDataFeedTaskDeprecated(@PathVariable String customerSpace,
                                                             @RequestParam(value = "source") String source,
                                                             @RequestParam(value = "feedtype") String feedtype,
                                                             @RequestParam(value = "entity") String entity,
-                                                            @RequestBody String metadata) {
+                                                            @RequestBody String metadata, HttpServletRequest request) {
         checkHeader(request);
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return ImmutableMap.of("task_id",
@@ -51,10 +51,9 @@ public class DataFeedTaskController extends InternalResourceBase {
             "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
-    public Map<String, String>  startImportJobDeprecated(HttpServletRequest request,
-                                                         @PathVariable String customerSpace,
+    public Map<String, String>  startImportJobDeprecated(@PathVariable String customerSpace,
                                                          @PathVariable String taskIdentifier,
-                                                         @RequestBody String metadata) {
+                                                         @RequestBody String metadata, HttpServletRequest request) {
         checkHeader(request);
         return ImmutableMap.of("application_id",
                 dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier, metadata));

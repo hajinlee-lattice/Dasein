@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.controller;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,32 +35,33 @@ public class DataFeedController extends InternalResourceBase {
         this.profileAndPublishWorkflowSubmitter = profileAndPublishWorkflowSubmitter;
     }
 
-    @RequestMapping(value = "/consolidate", method = RequestMethod.POST)
+    @RequestMapping(value = "/consolidate", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke data feed consolidate workflow. Returns the job id.")
-    public ResponseDocument<String> consolidate(HttpServletRequest request, @PathVariable String customerSpace) {
+    public ResponseDocument<String> consolidate(@PathVariable String customerSpace, HttpServletRequest request) {
         checkHeader(request);
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return ResponseDocument.successResponse( //
-                consolidateAndPublishWorkflowSubmitter.submit(customerSpace).toString());
+        ApplicationId appId = consolidateAndPublishWorkflowSubmitter.submit(customerSpace);
+        return ResponseDocument.successResponse(appId.toString());
     }
 
-    @RequestMapping(value = "/consolidate/restart", method = RequestMethod.POST)
+    @RequestMapping(value = "/consolidate/restart", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Restart a previous failed consolidate execution")
-    public ResponseDocument<String> restart(HttpServletRequest request, @PathVariable String customerSpace) {
+    public ResponseDocument<String> restart(@PathVariable String customerSpace, HttpServletRequest request) {
         checkHeader(request);
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return ResponseDocument
-                .successResponse(consolidateAndPublishWorkflowSubmitter.retryLatestFailed(customerSpace).toString());
+        ApplicationId appId = consolidateAndPublishWorkflowSubmitter.retryLatestFailed(customerSpace);
+        return ResponseDocument.successResponse(appId.toString());
     }
 
-    @RequestMapping(value = "/profile", method = RequestMethod.POST)
+    @RequestMapping(value = "/profile", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
-    public ResponseDocument<String> profile(HttpServletRequest request, @PathVariable String customerSpace) {
+    public ResponseDocument<String> profile(@PathVariable String customerSpace, HttpServletRequest request) {
         checkHeader(request);
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return ResponseDocument.successResponse(profileAndPublishWorkflowSubmitter.submit(customerSpace).toString());
+        ApplicationId appId = profileAndPublishWorkflowSubmitter.submit(customerSpace);
+        return ResponseDocument.successResponse(appId.toString());
     }
 }
