@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -93,6 +95,7 @@ public class PlayResource {
     @ApiOperation(value = "Create play launch for a given play")
     public PlayLaunch createPlayLaunch(@PathVariable("playName") String playName, HttpServletResponse response) {
         Play play = playService.getPlayByName(playName);
+        validatePlayBeforeLaunch(play);
         PlayLaunch playLaunch = null;
         if (play != null) {
             playLaunch = new PlayLaunch();
@@ -115,6 +118,13 @@ public class PlayResource {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         return playLaunch;
+    }
+
+    private void validatePlayBeforeLaunch(Play play) {
+        if (play.getSegmentName() == null) {
+            throw new LedpException(LedpCode.LEDP_18149, new String[] { play.getName() });
+        }
+        // TODO in M14, we are going to check Rating as well
     }
 
     @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)
