@@ -1,0 +1,3792 @@
+{
+  "type": "record",
+  "name": "Accounts",
+  "doc": "",
+  "fields": [
+    {
+      "name": "ACCT_ACCOUNTSTOSCORE_269134B7BD",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "ACCT_ACCOUNTSTOSCORE_269134B7BD",
+      "sourceLogicalType": "Bit",
+      "uuid": "a26e4457-5bbd-4c70-ab1e-2e7148584ba0",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_B_BUSINESSECOMMERCESITE_56E54259F3",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "ACCT_B_BUSINESSECOMMERCESITE_56E54259F3",
+      "sourceLogicalType": "Bit",
+      "uuid": "545529d3-a7e6-4e31-bfd7-1019f26ffe50",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_B_BUSINESSVCFUNDED_CA24BC165E",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "ACCT_B_BUSINESSVCFUNDED_CA24BC165E",
+      "sourceLogicalType": "Bit",
+      "uuid": "86ae6788-460e-4193-8675-92ac0b647560",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_CREDIT_RATING_0A26EF631F",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_CREDIT_RATING_0A26EF631F",
+      "sourceLogicalType": "Long",
+      "uuid": "15b694aa-ac27-482a-9de4-ac9617aa15f2",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_DUNSNUMBER_C19195597A",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_DUNSNUMBER_C19195597A",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "be79878c-2d9e-4daf-9dbd-1a3bc20a4d09",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_ETOV2_C5836CBB17",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_ETOV2_C5836CBB17",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "c76c4f94-752c-40e3-a2c7-6b3402fc3ad2",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_ETOV3_4A360727E0",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_ETOV3_4A360727E0",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "2f86628d-fe2e-45af-a414-8cec56977fca",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_ETOV4_B50B4FCB97",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_ETOV4_B50B4FCB97",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "45927f48-d969-4f12-98b6-658ebd7dcc3c",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_ETOV5_74CB5B61D2",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_ETOV5_74CB5B61D2",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "027a25eb-0be7-41b8-bf5e-c920c43994b9",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_ETOV_D0F5DC5D0E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_ETOV_D0F5DC5D0E",
+      "sourceLogicalType": "Long",
+      "uuid": "20aca633-8bd3-4dbe-a4c4-c2b42bb85ddf",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_FIT_SCORE_02308E850B",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_FIT_SCORE_02308E850B",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "5265846a-7a9c-4ed7-9327-cb4ba1e3aa1c",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_I_RANK_PCTCHANGE_3MONTH_8637BF23DD",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_I_RANK_PCTCHANGE_3MONTH_8637BF23DD",
+      "sourceLogicalType": "Long",
+      "uuid": "82e9e2b4-fcc3-4085-b98a-30408a1ee68e",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A",
+      "sourceLogicalType": "Long",
+      "uuid": "564e7753-17a6-4cd0-b257-fe26963c926d",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_I_RANK_PCTCHANGE_9MONTH_A0AAF5CAEA",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_I_RANK_PCTCHANGE_9MONTH_A0AAF5CAEA",
+      "sourceLogicalType": "Long",
+      "uuid": "919b50b0-8ea1-4a15-9bba-4477a0e2370d",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_OWNERID_7F5ACED131",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_OWNERID_7F5ACED131",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "665928e8-493b-4e1f-b16e-e97925815345",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_OWNERSHIP_110BD19C8A",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_OWNERSHIP_110BD19C8A",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "7f18e7d2-f2cf-4b3d-9646-3de2a8b70abd",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PARENTID_C9795CBDCE",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PARENTID_C9795CBDCE",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e69c36b7-baea-4afb-87a4-88dec4738a90",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PHONE_12A8493365",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PHONE_12A8493365",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "ded97194-4b28-4c94-afeb-dc9a62714b73",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PLAY_DISPLAY_NAME_F75C86D01F",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PLAY_DISPLAY_NAME_F75C86D01F",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "a57f712b-484d-4c5d-bb92-c321a963548b",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_ACCOUNT_ID_9A87DCB1FC",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_ACCOUNT_ID_9A87DCB1FC",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "0cd2b622-16bd-4773-9707-6452759841b6",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_CONTACT_ID_676A7A86BC",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_CONTACT_ID_676A7A86BC",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "1c447358-5938-4ec1-a65c-28e91ba49e38",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_CREATION_DATE_7088439623",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_CREATION_DATE_7088439623",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "8528f0b2-3a51-4577-9093-de1efc943c01",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_CRMLEAD_EXTERNAL_ID_E9FF6DE801",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_CRMLEAD_EXTERNAL_ID_E9FF6DE801",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "95230c67-5acd-43a8-845a-41aa01c49b43",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_DISPLAY_NAME_E9E26FB9C7",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_DISPLAY_NAME_E9E26FB9C7",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "af492e79-e58f-4ca4-9028-6a947578a56f",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_ISACTIVE_BD61462974",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_ISACTIVE_BD61462974",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "18c8c3de-87f2-4be5-82f9-86ad7a340282",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_LIKELIHOOD_A5FBD72C39",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_LIKELIHOOD_A5FBD72C39",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "eb6b43e9-738d-49fe-89e6-ee1f5312b0bd",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_MONETARY_VALUE_30E0F3D241",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_MONETARY_VALUE_30E0F3D241",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "4c2309fc-13b2-47b8-9010-2b466ac7cd6b",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_NORMALIZED_SCORE_2447FB15A9",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_NORMALIZED_SCORE_2447FB15A9",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "dd816dd7-f82c-4b91-8304-f1006b69a117",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_PLAY_ID_1D31C1D8C5",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_PLAY_ID_1D31C1D8C5",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e08c11e3-aa29-4271-877e-3ec70149296d",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_PRELEAD_ID_4EE180CF2A",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_PRELEAD_ID_4EE180CF2A",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "83598ea4-ab63-478e-a7d8-aac49a17d1ad",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_PL_SIMULATION_ID_0ACF092E3F",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_PL_SIMULATION_ID_0ACF092E3F",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "17031cb6-7fe6-44e5-b220-403dcf756579",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_DETAIL_1_81B18613D3",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_DETAIL_1_81B18613D3",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "d651fb93-8f21-43c1-bd57-8adede43df03",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_DETAIL_2_096DF24F75",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_DETAIL_2_096DF24F75",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e197fad3-a8d3-4c77-be43-3567f3a587a1",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_DETAIL_3_CBCD6C0DDD",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_DETAIL_3_CBCD6C0DDD",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "3bb634d9-d00b-430e-b18b-abb4af93572b",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_DETAIL_4_D2ECC83671",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_DETAIL_4_D2ECC83671",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "a93163f9-7b75-4d46-acdb-56f1056ab909",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_DETAIL_5_0A3D5597A0",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_DETAIL_5_0A3D5597A0",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "3839c37e-0ef1-46fb-813f-b9c6cfc61f2c",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_HIS_ID_1_DDDF8029BC",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_HIS_ID_1_DDDF8029BC",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "3eae29f9-1e48-47ac-ab7e-71f8a6b018cf",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_HIS_ID_2_0C35CC252E",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_HIS_ID_2_0C35CC252E",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "5cdd0e20-fb02-442a-9a34-be5e2ebca908",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_HIS_ID_3_6FB7BC5B4C",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_HIS_ID_3_6FB7BC5B4C",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "9562625c-24df-47e6-91bd-c5a5603dff95",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_HIS_ID_4_00013C429C",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_HIS_ID_4_00013C429C",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "6226ab4b-7d17-4542-a00d-4d5b999af91c",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_HIS_ID_5_7E80088EA3",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_HIS_ID_5_7E80088EA3",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "26dcb4e0-15b1-4d0c-9ba3-2d7b01db2520",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPA_1_5AAEA9FAA9",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_1_5AAEA9FAA9",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e0817369-a794-4a24-853e-5b91bd50361b",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPA_2_A104F294D5",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_2_A104F294D5",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "9b51eb4f-e0c3-41e9-ae25-0edf6f00279d",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPA_3_EF23C06A1D",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_3_EF23C06A1D",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "bd768d7c-23b9-49b9-aec7-7a4d2127c2bf",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPA_4_AF09A4531A",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_4_AF09A4531A",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "fe7ab0cb-621e-47d2-9149-0e0d3370fcb3",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPA_5_9FFF2C2D48",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_5_9FFF2C2D48",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "59053a6b-4b6c-4143-be59-a66559c4c4b4",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPB_1_250C26F0B0",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_1_250C26F0B0",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "37ed3e05-fc47-4bd8-9368-8d0bb4b26b75",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPB_2_AC97B1C928",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_2_AC97B1C928",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "6fb75b24-cdfd-4d9a-880f-675ea80ff9da",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPB_3_CEEB4891C9",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_3_CEEB4891C9",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "18c0c0da-8f4b-4050-91f6-83b614913290",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPB_4_AC59614D56",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_4_AC59614D56",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "f0196712-16ac-437a-b1c4-71eb79c4de38",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_SF_OPPTY_NEXTSTEPB_5_67BBC20975",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_5_67BBC20975",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "8bfb959b-ed4c-4146-bdf0-fd6e91eaac03",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TPV_MODEL_STAMP_9EE67E9CA0",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TPV_MODEL_STAMP_9EE67E9CA0",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "9521ed9c-f10d-4243-86a9-e1fdaab7153f",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXARANK_PERCENTILE_RA_7E915F082C",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXARANK_PERCENTILE_RA_7E915F082C",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "2be28275-2a64-4a89-a6ab-769b09b940b8",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXAUSRANK_PERC_RATING_932182450A",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXAUSRANK_PERC_RATING_932182450A",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "c12ed2be-846b-483e-956f-9337d1b4b216",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXAVIEWSPERUSER_76B157D8CB",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXAVIEWSPERUSER_76B157D8CB",
+      "sourceLogicalType": "Double",
+      "uuid": "85468c15-dbbb-4de7-83d9-15a35d18b37f",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXAVIEWSPERUSER_PERC_DCA8A825F3",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC_DCA8A825F3",
+      "sourceLogicalType": "Long",
+      "uuid": "6421d087-587d-413c-aa6e-1242940f129d",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXAVIEWSPERUSER_PERC__9C23580A26",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC__9C23580A26",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "1bdd495b-8d89-4906-a9f0-7baac3f5ac41",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_4D33D54625",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_4D33D54625",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "07b27b3c-b399-4929-965e-c2421e02845e",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_A71578B9E1",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_A71578B9E1",
+      "sourceLogicalType": "Long",
+      "uuid": "45631799-fc73-4d1c-a1b7-3ba71c77c027",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_3204324CBE",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_3204324CBE",
+      "sourceLogicalType": "Long",
+      "uuid": "1d9c96b4-203a-4622-9f0f-aa1d17c35220",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_DDAAE3A3A9",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_DDAAE3A3A9",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "ae13e054-f43c-4177-9bc9-9af193f084a0",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_E3D6FA62C5",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_E3D6FA62C5",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "5a68e2fe-05db-42ef-b970-15bec7318244",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_EB7F1E8A8E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_EB7F1E8A8E",
+      "sourceLogicalType": "Long",
+      "uuid": "3ee99bb7-36cb-414c-aa94-71920d73c673",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_BUSINESSINDUSTRY_C084181874",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_BUSINESSINDUSTRY_C084181874",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "8a907527-82d0-4109-bf50-eacd7ed65dba",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_BUSINESSPRIMARYSIC4DIGI_86939C62B4",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_BUSINESSPRIMARYSIC4DIGI_86939C62B4",
+      "sourceLogicalType": "Long",
+      "uuid": "a88d1ace-76de-4a6a-a749-693cb86d3f1b",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_BUSINESSSICDESCRIPTION_24952FE74F",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_BUSINESSSICDESCRIPTION_24952FE74F",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "46ed1af4-dbd3-420e-8762-855adf26383f",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_FACEBOOK_LIKES_2MONTHSA_8471388C40",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_FACEBOOK_LIKES_2MONTHSA_8471388C40",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "dfc78c04-d31e-4ae5-b0e6-1ad72e7842f7",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_1AB3078C3C",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_1AB3078C3C",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "081444dd-43cf-4e0b-96dd-d52cc203a5d3",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_E4E243AC9B",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_E4E243AC9B",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "3fef409b-fd3a-49fe-aea2-696f2c9d1472",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_FD2AC62470",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_FD2AC62470",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "d5e7d6ee-6be0-4a5b-8b1a-57f52e9d8751",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_FACEBOOK_LIKES_CURRENTM_A7A9CF4321",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_FACEBOOK_LIKES_CURRENTM_A7A9CF4321",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "639e723a-7509-4ce5-ac0a-e7016ff6df6b",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_FACEBOOK_LIKES_LASTMONT_B6932AF338",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_FACEBOOK_LIKES_LASTMONT_B6932AF338",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e66bbf0c-924a-4a97-a7a5-599778b721f8",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_INTELLISCORE_BC64967AA9",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_INTELLISCORE_BC64967AA9",
+      "sourceLogicalType": "Long",
+      "uuid": "219edcf2-a68e-42ff-b880-d4c7c7729f1b",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_PDINTELLISCORE_RATING_143793F7F0",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_PDINTELLISCORE_RATING_143793F7F0",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "ec5ffca5-d2d4-42f5-915c-815e07f5903e",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHADWORDSCOST_FFC0C9C2D3",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHADWORDSCOST_FFC0C9C2D3",
+      "sourceLogicalType": "Long",
+      "uuid": "d6fe34fa-c4c7-4646-8afe-db9f7aec2e60",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_808226D6CC",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_808226D6CC",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "d85fb8f1-b1db-40dd-931d-1a5ca36a6a37",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_D378281527",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_D378281527",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "3b368e82-d20a-4bfc-a774-e24a56cd02a9",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_47DD043941",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_47DD043941",
+      "sourceLogicalType": "Long",
+      "uuid": "113d3310-4d94-456c-8f55-20fa6e29fda8",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_47F7B3B032",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_47F7B3B032",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "d0cebd7d-b088-443a-9cea-4d7541216760",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_791A0B64EF",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_791A0B64EF",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "88a3aed6-f048-4605-9e6f-f00291baa0ab",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHORGANICCOST_DF3664D040",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHORGANICCOST_DF3664D040",
+      "sourceLogicalType": "Long",
+      "uuid": "4c5fbc52-2306-4f7a-b6e6-336955ca65ab",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHORGANICCOST_INDU_0C33F40A5D",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_0C33F40A5D",
+      "sourceLogicalType": "Long",
+      "uuid": "b21fdaf4-f8dd-40a0-89fe-8943170cdcac",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHORGANICCOST_INDU_F6DFEF04D5",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_F6DFEF04D5",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "79e2de90-0682-4f81-a1cc-f4b15710a18d",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHORGANICTRAFFIC_28F5CB7D5C",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_28F5CB7D5C",
+      "sourceLogicalType": "Long",
+      "uuid": "a7b0168b-0db7-4241-9c2e-0307469a5784",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_0CAD2C2222",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_0CAD2C2222",
+      "sourceLogicalType": "Long",
+      "uuid": "ec06db42-4336-4826-b48f-12af032d70bb",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_965B5E1AB6",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_965B5E1AB6",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "d3bffc03-3b47-46ce-b626-1dffc98d5128",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_TWITTER_FOLLOWERS_2MONT_D12355AA81",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_TWITTER_FOLLOWERS_2MONT_D12355AA81",
+      "sourceLogicalType": "Long",
+      "uuid": "4a5b9572-8a43-49aa-88e4-8fd858478f8f",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_TWITTER_FOLLOWERS_3MAVG_74CFD72D61",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_TWITTER_FOLLOWERS_3MAVG_74CFD72D61",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "10efcf0c-2166-4e7c-94f5-5cabaa5f8866",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_3FA45F1F09",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_3FA45F1F09",
+      "sourceLogicalType": "Long",
+      "uuid": "8d488554-9274-4e12-80b4-745dda5f8478",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_D665CC9024",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_D665CC9024",
+      "sourceLogicalType": "Long",
+      "uuid": "4bc078b6-a80e-4754-aa46-eb62af479c93",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_TWITTER_FOLLOWERS_CURRE_6D5EF2597D",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "ACCT_TP_TWITTER_FOLLOWERS_CURRE_6D5EF2597D",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "dba13511-5635-47bb-bc46-7bc38279d5e2",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_TWITTER_FOLLOWERS_LASTM_893764C2D0",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_TWITTER_FOLLOWERS_LASTM_893764C2D0",
+      "sourceLogicalType": "Long",
+      "uuid": "d32cf629-bef6-4498-984a-4aa27a0b33a0",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_WEBSITEENGAGEMENT_D2BD84AB5A",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_WEBSITEENGAGEMENT_D2BD84AB5A",
+      "sourceLogicalType": "Long",
+      "uuid": "89feb6bd-3514-4269-86fa-960586f0ba4c",
+      "Nullable": "false"
+    },
+    {
+      "name": "ACCT_TP_YEARSONLINE_ADCC1A1A87",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "ACCT_TP_YEARSONLINE_ADCC1A1A87",
+      "sourceLogicalType": "Long",
+      "uuid": "cdc824be-9a16-42c1-a1a7-61bd29246842",
+      "Nullable": "false"
+    },
+    {
+      "name": "Address1",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "Address1",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "5c1b903a-86c5-4e4d-b40b-7ae361c92725",
+      "Nullable": "false"
+    },
+    {
+      "name": "Address2",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "Address2",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "651a06ad-42f3-4e6b-8798-ce954331484e",
+      "Nullable": "false"
+    },
+    {
+      "name": "Address_Street_1",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "Address_Street_1",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e2ba3f91-713d-4f77-a836-b4cac949c239",
+      "Nullable": "false"
+    },
+    {
+      "name": "BestLikelihood",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "BestLikelihood",
+      "sourceLogicalType": "Long",
+      "uuid": "288995aa-5c60-4842-b6f8-dca2d25fe986",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_ACCOUNT_EMAIL_AA7FA7BEA3",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_ACCOUNT_EMAIL_AA7FA7BEA3",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "d675fcdc-446d-4e06-9e5e-ec4a3f7f0622",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_AMOUNT_A1F8667141",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "CUSTOM_AMOUNT_A1F8667141",
+      "sourceLogicalType": "Double",
+      "uuid": "c0d7b4c2-8647-4d13-b2d2-464803423945",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_ANTICIPATED_AVG_TRANS_SI_61156D4B7B",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_ANTICIPATED_AVG_TRANS_SI_61156D4B7B",
+      "sourceLogicalType": "Long",
+      "uuid": "b11097f7-3c2c-4f0b-9262-49021241f1f8",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_CFG_TRAININGSET_US_E16FE9F723",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_CFG_TRAININGSET_US_E16FE9F723",
+      "sourceLogicalType": "Long",
+      "uuid": "4e8499db-1310-4ee4-8b8f-bb34f653ceb8",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_CUST_ID_257EDAAB4D",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_CUST_ID_257EDAAB4D",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "96af284c-ae9c-494f-8f68-fe92515a336b",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DATAPROVIDER_LOAD_D99F23F18C",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_DATAPROVIDER_LOAD_D99F23F18C",
+      "sourceLogicalType": "Long",
+      "uuid": "1ada966a-93a0-4b82-ba56-b4a418ab11dc",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DOMAIN_CREATION_DATE_2409DDFC3B",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_DOMAIN_CREATION_DATE_2409DDFC3B",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "4acb5838-264b-4fb0-8cc3-cc1d8eb44dd2",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DO_NOT_CALL_7ABC200B5F",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_DO_NOT_CALL_7ABC200B5F",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "1c5037a8-23b5-4385-bfb9-70c15fc8fb28",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_ECOMMERCE_CERTAINTY_14EA76A76E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_ECOMMERCE_CERTAINTY_14EA76A76E",
+      "sourceLogicalType": "Long",
+      "uuid": "5bfd4d1a-9c8d-4179-b949-3469189e6d63",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_ECONOMIC_FOOTPRINT_4A39D727ED",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_ECONOMIC_FOOTPRINT_4A39D727ED",
+      "sourceLogicalType": "Long",
+      "uuid": "673b8a22-6e2f-492e-bf4f-d54c904c7947",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_INCOMING_LINKS_EA64999A6F",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_INCOMING_LINKS_EA64999A6F",
+      "sourceLogicalType": "Long",
+      "uuid": "3e96171c-93bf-46fb-9338-32e129ad203a",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_PAGES_26D0C36EDF",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_PAGES_26D0C36EDF",
+      "sourceLogicalType": "Long",
+      "uuid": "64051eb3-8c46-482e-8389-80f7c90594b1",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_SHOPPING_CART_SYSTEM_20B9A6D4E6",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_SHOPPING_CART_SYSTEM_20B9A6D4E6",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "89693e7d-a3f3-4262-b7a8-4e4ea77a9457",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_SITE_TRAFFIC_ESTIMATI_74D81C8579",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_SITE_TRAFFIC_ESTIMATI_74D81C8579",
+      "sourceLogicalType": "Long",
+      "uuid": "f0e04992-c39b-48a5-a898-f20fc0d81f98",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_SSL_CERTIFICATE_B0D11E3744",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_SSL_CERTIFICATE_B0D11E3744",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "765b5ec6-04f3-46c6-bd5a-bd098b76c9a3",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_SSL_END_DATE_C7D6A92BED",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_SSL_END_DATE_C7D6A92BED",
+      "sourceLogicalType": "Long",
+      "uuid": "ffdc9518-e063-4705-87e1-6a90a9471af3",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_SSL_ISSUER_COMMON_NAM_9EC692C60F",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_SSL_ISSUER_COMMON_NAM_9EC692C60F",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "ae0728ea-ef26-4caa-b76f-dbaf0b1b38d1",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_SSL_START_DATE_1F118E40B7",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_SSL_START_DATE_1F118E40B7",
+      "sourceLogicalType": "Long",
+      "uuid": "7b590000-1240-4dd1-a2ab-eacd0990e09d",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_SSL_TYPE_6C3DC792E0",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_SSL_TYPE_6C3DC792E0",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "9d0c5843-410d-4486-abaa-5ce72c1a5585",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_DP_WEBSITE_TYPE_33EDCADC15",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_DP_WEBSITE_TYPE_33EDCADC15",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "ad8c71a9-d455-4c0c-b800-46e20bd46e75",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_FIRST_TRANSACTION_DATE_3D893F4277",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_FIRST_TRANSACTION_DATE_3D893F4277",
+      "sourceLogicalType": "Long",
+      "uuid": "7ac55bfe-72e3-4204-a979-c8b5e6fcde21",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_FULL_SHARE_CHECKOUT_D97C257C93",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_FULL_SHARE_CHECKOUT_D97C257C93",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "8ee20034-c4db-4d56-b4d8-2c4dee6b70f7",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_BUYER_CREDIT_ED1466A6DE",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_BUYER_CREDIT_ED1466A6DE",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "26b102b8-bd65-48ff-8ee9-f9ba044ae9ef",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_EBAY_MASTERCARD_EB4839AD60",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_EBAY_MASTERCARD_EB4839AD60",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "4981d55a-294e-4484-8c0b-a14d1f3f751f",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_MONEY_MARKET_FUND_0F02B31810",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_MONEY_MARKET_FUND_0F02B31810",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "f72da61f-8ac4-4515-8da8-08d7c63559e9",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_PAYPAL_ADVANCED_EA65B10125",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_PAYPAL_ADVANCED_EA65B10125",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "214b2b87-3437-475d-bfed-032978982f5f",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_PAYPAL_DEBIT_CARD_1559FDB505",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_PAYPAL_DEBIT_CARD_1559FDB505",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "c76269b0-bf13-487c-80d5-d744226be73b",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_PAYPAL_PLUS_CE827950A6",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_PAYPAL_PLUS_CE827950A6",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "1cc9b636-9566-43ed-8e54-4a68a09e5f30",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_PAYPAL_PRO_APPLICATI_86B988891F",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_PAYPAL_PRO_APPLICATI_86B988891F",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "9e9c6cca-d2df-4f6b-91e8-1ac9939614b7",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_PAYPAL_PRO_APPROVED_8AA810356A",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_PAYPAL_PRO_APPROVED_8AA810356A",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "7ea27b33-8039-481f-8d94-e208259aab77",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_VIRTUAL_DEBIT_CARD_D1C72AE604",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_VIRTUAL_DEBIT_CARD_D1C72AE604",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "45e13856-a42e-4ae3-a5b1-0f967973a2b2",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_9C600487DF",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_9C600487DF",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "22aedaf2-4cf7-4d1d-a631-fd080f7e42d9",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_F2285D90D2",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_F2285D90D2",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e5d9e539-da68-461c-862e-53cd9e12fafc",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_INDUSTRY_USER_PROVIDED_37A5FF05EB",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_INDUSTRY_USER_PROVIDED_37A5FF05EB",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "3e4328fc-c768-4d4c-9250-2b8d42ab010d",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_CLOSED_418BD42888",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_CLOSED_418BD42888",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "03719c84-fede-4f2e-b074-a3f30141d3d3",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_CUSTOMER_300B627A42",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_CUSTOMER_300B627A42",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "b5af4a27-5311-48d6-bf2e-17e58218b371",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_EBAY_MEMBER_7FD5172EE2",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_EBAY_MEMBER_7FD5172EE2",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "dfe623be-1d7b-4ef5-a49e-d0a33b50f836",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_LARGE_ENTERPRISE_42B07659E1",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_LARGE_ENTERPRISE_42B07659E1",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "5177a85a-a320-46c0-9271-07d433e86bb1",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_NETNEW_PROSPECT_14D680508E",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_NETNEW_PROSPECT_14D680508E",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "7c309f49-0517-467c-a894-2f2296242dc4",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_PARTNER_0F99469DCB",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_PARTNER_0F99469DCB",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "75fe7d52-290b-4f1f-97db-417cb42c57d6",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_PROSPECT_8EDA09BB26",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_PROSPECT_8EDA09BB26",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "70518306-f785-40fe-9c8e-17533e48689f",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_RESTRICTED_2B18E95E7F",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_RESTRICTED_2B18E95E7F",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "b2920763-cd8e-4dc2-8390-199b9af8d1e7",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_TELESALES_ACQ_Y_N_829B11D1B3",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_TELESALES_ACQ_Y_N_829B11D1B3",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "91c6beca-9c6a-4476-b609-53dc64786791",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_IS_VERIFIED_62D5F05DD7",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_IS_VERIFIED_62D5F05DD7",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e4640fd9-f2cb-4efa-b2c4-bd721d396d6a",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_L6M_TPV_MODELREADY_B07A71F485",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "CUSTOM_L6M_TPV_MODELREADY_B07A71F485",
+      "sourceLogicalType": "Double",
+      "uuid": "be15ef6a-6345-4cb7-b7d6-cc5ccffe84d9",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_NTPV_12M_PREINACTIVE_476EFF99A8",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_NTPV_12M_PREINACTIVE_476EFF99A8",
+      "sourceLogicalType": "Long",
+      "uuid": "fa64749a-c23a-43f0-9c79-87fd29eb5043",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_NUM_CONF_BANK_ACCOUNTS_2B6CC17D1F",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_NUM_CONF_BANK_ACCOUNTS_2B6CC17D1F",
+      "sourceLogicalType": "Long",
+      "uuid": "026f7d69-d530-48ec-8afd-063b02eff84c",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_NUM_TRANS_L12M_BCA0C660C2",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_NUM_TRANS_L12M_BCA0C660C2",
+      "sourceLogicalType": "Long",
+      "uuid": "6ef9d2cb-f181-445c-ad3e-582c069d55e6",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_PAYPAL_5BB4AB47D7",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_PAYPAL_5BB4AB47D7",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "7090ef73-613d-491c-9826-7776c34713bb",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_PCT_ONLINE_REVENUE_AB089ECAD5",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_PCT_ONLINE_REVENUE_AB089ECAD5",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "f7729c57-534d-45ff-a2b1-4a9c3bc99c9b",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_PRICING_CATEGORY_A923DD7C26",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_PRICING_CATEGORY_A923DD7C26",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "49ece701-8645-4e02-9ba1-a2369367b676",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_PRODUCT_BUNDLES_AC2C1CED31",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_PRODUCT_BUNDLES_AC2C1CED31",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "021f8592-b028-4052-b4f3-902fd0e2a0c5",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_PROSPECT_FILE_NAME_F58797B857",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_PROSPECT_FILE_NAME_F58797B857",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "2e9e371f-e7d9-4207-8135-89adf79ad663",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_PROSPECT_LOAD_DATE_942DC58E61",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_PROSPECT_LOAD_DATE_942DC58E61",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "888ce0d6-e608-416c-8200-b7cb23af8211",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_PROSPECT_SHOPPING_CART_6D9374729A",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_PROSPECT_SHOPPING_CART_6D9374729A",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "19cfc811-fa89-43b1-b1b6-cb9b5e5ab957",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_QUANTITY_73CA98C1C7",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_QUANTITY_73CA98C1C7",
+      "sourceLogicalType": "Long",
+      "uuid": "a89c5402-195c-4cfe-a5a0-d3c24a3149ed",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_REFERRER_LAST_NAME_311DF014EB",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_REFERRER_LAST_NAME_311DF014EB",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "cf8eb21f-817b-4d53-bf0f-79b842bd76f3",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_REFERRER_LOCATION_F9ACA70E7C",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_REFERRER_LOCATION_F9ACA70E7C",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "3bd7d099-4fec-497a-a958-014947860764",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_SFDC_LEAD_ID_E65D8CA078",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_SFDC_LEAD_ID_E65D8CA078",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "96d63670-8adb-479e-ad00-cda6986b97c8",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_SFDC_MEMBER_ID_76127986DD",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_SFDC_MEMBER_ID_76127986DD",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e8e0227d-93d8-4c4a-9277-f630ac3d86ed",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_SFDC_OPPORTUNITY_ID_RECE_E0697215FD",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_SFDC_OPPORTUNITY_ID_RECE_E0697215FD",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "59afcfd6-6c73-4bb2-96f4-ea5ea11b7c7f",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_SFDC_PP_ACCOUNT_ID_8D2651B5AC",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CUSTOM_SFDC_PP_ACCOUNT_ID_8D2651B5AC",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "e4b00093-e4a2-4000-be46-ec307015cf1c",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TELESALES_ACQ_DT_67D841C5B9",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_TELESALES_ACQ_DT_67D841C5B9",
+      "sourceLogicalType": "Long",
+      "uuid": "020d3433-2e45-4e1f-b683-11e59e942f4e",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_DCC_L12M_35F4FD859C",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_DCC_L12M_35F4FD859C",
+      "sourceLogicalType": "Long",
+      "uuid": "32dd64b8-7202-43c0-836f-d5827ac0c05b",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_DCC_L6M_83819D3348",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_DCC_L6M_83819D3348",
+      "sourceLogicalType": "Long",
+      "uuid": "d508f2cf-a22f-40d7-802d-55b0139491f9",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_EC_L12M_D399B5814D",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_EC_L12M_D399B5814D",
+      "sourceLogicalType": "Double",
+      "uuid": "265f95c6-fd5b-4147-af09-5d928fb502f0",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_EC_L6M_F4C08E6D53",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_EC_L6M_F4C08E6D53",
+      "sourceLogicalType": "Double",
+      "uuid": "175d348c-8bfc-45f3-ba98-bce31e2d738f",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_FF_L12M_BE28941823",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_FF_L12M_BE28941823",
+      "sourceLogicalType": "Double",
+      "uuid": "60ca9f66-ee53-4c67-91a8-1baf41c8d832",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_FF_L6M_63DE168A06",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_FF_L6M_63DE168A06",
+      "sourceLogicalType": "Double",
+      "uuid": "54bf91a8-ca64-4f1c-a1bf-78e1ad443227",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_WPS_RM_L12M_F8AE375F8C",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L12M_F8AE375F8C",
+      "sourceLogicalType": "Double",
+      "uuid": "ae76c047-add4-47ba-a088-e96f09e8fcc1",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_WPS_RM_L6M_3859A2D114",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L6M_3859A2D114",
+      "sourceLogicalType": "Double",
+      "uuid": "a775ab45-e4b3-404f-8225-1d389a9268a4",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_WPS_UP_L12M_BCB0E4C2F5",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L12M_BCB0E4C2F5",
+      "sourceLogicalType": "Double",
+      "uuid": "e596ffa6-3942-4ad1-960c-3b472d10910b",
+      "Nullable": "false"
+    },
+    {
+      "name": "CUSTOM_TOT_NTPV_MS_WPS_UP_L6M_0AAF3F1FB3",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L6M_0AAF3F1FB3",
+      "sourceLogicalType": "Long",
+      "uuid": "3ed6e153-c3d2-46b4-9256-6c8bac2795b7",
+      "Nullable": "false"
+    },
+    {
+      "name": "City",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "City",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "b5e9717c-a444-4ebe-9a1d-93707cb386eb",
+      "Nullable": "false"
+    },
+    {
+      "name": "Country",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "Country",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "178731cb-5439-49bd-8ab7-e1354d43e408",
+      "Nullable": "false"
+    },
+    {
+      "name": "CrmAccount_External_ID",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "CrmAccount_External_ID",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "fe490df7-1fb7-43df-958c-4641529a6029",
+      "Nullable": "false"
+    },
+    {
+      "name": "Dante_Accounts",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "Dante_Accounts",
+      "sourceLogicalType": "Long",
+      "uuid": "145e1d69-e2b6-461a-a510-dab8aef9a9b5",
+      "Nullable": "false"
+    },
+    {
+      "name": "DisplayName",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "DisplayName",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "9a3bb0ac-4665-47c5-bed8-1c048bab1a9b",
+      "Nullable": "false"
+    },
+    {
+      "name": "Display_Name",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "Display_Name",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "44860102-96d6-4bcb-a6b7-c74211855bf2",
+      "Nullable": "false"
+    },
+    {
+      "name": "EstimatedRevenue",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "EstimatedRevenue",
+      "sourceLogicalType": "Long",
+      "uuid": "a4863bd0-2209-4345-9e28-573ac6d34b99",
+      "Nullable": "false"
+    },
+    {
+      "name": "External_ID",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "External_ID",
+      "sourceLogicalType": "Long",
+      "uuid": "d9f954f1-e903-4964-a20b-02ee46ba20be",
+      "Nullable": "false"
+    },
+    {
+      "name": "LEAccountIDLong",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "LEAccountIDLong",
+      "sourceLogicalType": "Long",
+      "uuid": "9641d563-b6f3-4127-a0eb-54631360225b",
+      "Nullable": "false"
+    },
+    {
+      "name": "LastModified",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "LastModified",
+      "sourceLogicalType": "Long",
+      "uuid": "1d7e679b-6813-4368-9ec0-3d18a4750cc8",
+      "Nullable": "false"
+    },
+    {
+      "name": "LeadCount",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "LeadCount",
+      "sourceLogicalType": "Long",
+      "uuid": "78c60e18-34bf-463e-b9ab-8ba94cf945b9",
+      "Nullable": "false"
+    },
+    {
+      "name": "NAICSCode",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "NAICSCode",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "89803be0-0307-49df-838a-ad08837006db",
+      "Nullable": "false"
+    },
+    {
+      "name": "NumberOfEmployees",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "NumberOfEmployees",
+      "sourceLogicalType": "Long",
+      "uuid": "63d78af8-db08-403f-9e9f-3d353afbc0cb",
+      "Nullable": "false"
+    },
+    {
+      "name": "OwnerDisplayName",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "OwnerDisplayName",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "9d65117a-6d47-4dc4-a869-9d509f707ebe",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXALINKSIN_36DEAA30E9",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXALINKSIN_36DEAA30E9",
+      "sourceLogicalType": "Long",
+      "uuid": "acd49a84-87af-4d08-a7fa-e55155a07eda",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXARANK_F6240F16C2",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXARANK_F6240F16C2",
+      "sourceLogicalType": "Long",
+      "uuid": "5bad19d7-95d4-42bb-aeb4-a811d559ad78",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXAREACHPERMILLION_229EA810CE",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXAREACHPERMILLION_229EA810CE",
+      "sourceLogicalType": "Double",
+      "uuid": "8910c51c-ee20-42df-9d52-001af3cd4adc",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXAREACHRANK_5FA8818999",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXAREACHRANK_5FA8818999",
+      "sourceLogicalType": "Long",
+      "uuid": "ddabc562-6ec7-4b4c-9c18-06240aeffbfd",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXAUSPAGEVIEWS_E3C710BD68",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXAUSPAGEVIEWS_E3C710BD68",
+      "sourceLogicalType": "Double",
+      "uuid": "e1a128ab-37ed-4fff-baac-3a895cfae2f2",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXAUSRANK_EC8ACC67F5",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXAUSRANK_EC8ACC67F5",
+      "sourceLogicalType": "Long",
+      "uuid": "802ffe84-5d42-4424-b29d-82e5f4178c07",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXAUSUSERS_481783B737",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXAUSUSERS_481783B737",
+      "sourceLogicalType": "Double",
+      "uuid": "d2f0e45f-48a5-403a-baed-abc9afe8e034",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXAVIEWSPERMILLION_DBCA5E56ED",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXAVIEWSPERMILLION_DBCA5E56ED",
+      "sourceLogicalType": "Double",
+      "uuid": "d1c72912-15f1-40e8-b32a-e8a54891844a",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXAVIEWSPERUSER_6E7963331A",
+      "type": [
+        "double",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXAVIEWSPERUSER_6E7963331A",
+      "sourceLogicalType": "Double",
+      "uuid": "b176e875-e7d6-4556-b5cf-2a6cfd1edfee",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXAVIEWSRANK_FC0C796BE7",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXAVIEWSRANK_FC0C796BE7",
+      "sourceLogicalType": "Long",
+      "uuid": "ded76f61-fbce-4c6a-af95-cfcdc88c17cb",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ALEXA_SOURCE_ISMATCHED_E48CA67022",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_ALEXA_SOURCE_ISMATCHED_E48CA67022",
+      "sourceLogicalType": "Bit",
+      "uuid": "e7a3919a-347b-4e33-95c4-b31a20fec8f5",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_BUILTWITH_PIVOTED_SOURCE__3C36CD891A",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_BUILTWITH_PIVOTED_SOURCE__3C36CD891A",
+      "sourceLogicalType": "Bit",
+      "uuid": "cbed6063-a400-44e1-9365-24ce6d607bbb",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_BUSINESSTECHNOLOGIESFIRST_4FF8982B79",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_BUSINESSTECHNOLOGIESFIRST_4FF8982B79",
+      "sourceLogicalType": "Long",
+      "uuid": "f1341bbd-44eb-4c2e-80cc-905c06ce6ff1",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_BUSINESSTECHNOLOGIESPAYME_8795EB9414",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_BUSINESSTECHNOLOGIESPAYME_8795EB9414",
+      "sourceLogicalType": "Long",
+      "uuid": "3f4b8af5-3235-4f4f-a4fd-b1e982bda1e6",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_BUSINESSTECHNOLOGIESSHOP_212C2F9F82",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_BUSINESSTECHNOLOGIESSHOP_212C2F9F82",
+      "sourceLogicalType": "Long",
+      "uuid": "eef77d98-66f9-4564-9a18-1eaa4eab4873",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ECOMMERCETECHNOLOGIESTOPA_97B75F546C",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "PD_DC_ECOMMERCETECHNOLOGIESTOPA_97B75F546C",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "f86f8dc2-54f2-4262-b254-2a91bc53d37c",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_EXPERIANPARENT_SOURCE_ISM_E071211F92",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_EXPERIANPARENT_SOURCE_ISM_E071211F92",
+      "sourceLogicalType": "Bit",
+      "uuid": "c65a6df2-941c-49ee-b741-c58bed8e484f",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_EXPERIAN_SOURCE_ISMATCHED_50699F172F",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_EXPERIAN_SOURCE_ISMATCHED_50699F172F",
+      "sourceLogicalType": "Bit",
+      "uuid": "86fee97f-6b95-42f9-ad3b-9a6a374469bf",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FACEBOOK_LIKES_E8567E4791",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FACEBOOK_LIKES_E8567E4791",
+      "sourceLogicalType": "Long",
+      "uuid": "a33731cb-9bd7-4cd2-9f1b-b0a4fdf40e30",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREAVERAGEDOCUMENTSIZ_52178C9041",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREAVERAGEDOCUMENTSIZ_52178C9041",
+      "sourceLogicalType": "Long",
+      "uuid": "5aa30c4e-42a6-4fd0-8680-a148c8b39f30",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURECURRENCYEURO_6857DCA092",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURECURRENCYEURO_6857DCA092",
+      "sourceLogicalType": "Long",
+      "uuid": "4161dfd8-b26f-4be8-bfa4-a1df2cbb2dfd",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURECURRENCYJAPANYEN_8BB47AF6A7",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURECURRENCYJAPANYEN_8BB47AF6A7",
+      "sourceLogicalType": "Long",
+      "uuid": "7f571e28-744d-4ea7-b290-6f3b2fddeac0",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURECURRENCYSWISSFRANC_95B2ABBAEE",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURECURRENCYSWISSFRANC_95B2ABBAEE",
+      "sourceLogicalType": "Long",
+      "uuid": "7a18bf3f-f05e-481f-bf5f-6910b9a01c46",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURECURRENCYUKPOUND_9A5D64BE4B",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURECURRENCYUKPOUND_9A5D64BE4B",
+      "sourceLogicalType": "Long",
+      "uuid": "59fbc0e9-edc0-4055-8ec4-9748cd1efbd7",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURECURRENCYUSDOLLAR_1F54F2F7DB",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURECURRENCYUSDOLLAR_1F54F2F7DB",
+      "sourceLogicalType": "Long",
+      "uuid": "48c3a8ee-45d3-472c-b785-f4af85994752",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREGLOBALBAG_931627B421",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREGLOBALBAG_931627B421",
+      "sourceLogicalType": "Long",
+      "uuid": "d49f7229-7b46-4029-9f71-f38d6a6aea1a",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREGLOBALBASKET_333797FBFF",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREGLOBALBASKET_333797FBFF",
+      "sourceLogicalType": "Long",
+      "uuid": "630ee059-926d-4dbd-a6a5-1bae3b663ea7",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREGLOBALCART_D09AED4E1F",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREGLOBALCART_D09AED4E1F",
+      "sourceLogicalType": "Long",
+      "uuid": "ecf80484-6029-46df-8eb2-8adb765004b4",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREGLOBALPRODUCT_D42DFA860E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREGLOBALPRODUCT_D42DFA860E",
+      "sourceLogicalType": "Long",
+      "uuid": "b24f7db6-7d5c-4a65-bcdb-b44b0c1d60cf",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREGLOBALSHOP_4D47CDAEC9",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREGLOBALSHOP_4D47CDAEC9",
+      "sourceLogicalType": "Long",
+      "uuid": "4fae3a74-156a-422e-95f6-8cdcece7c0c2",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREGLOBALSTORE_080076D315",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREGLOBALSTORE_080076D315",
+      "sourceLogicalType": "Long",
+      "uuid": "e5671051-dd70-4964-93db-a9274ec56aa2",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREINPUTVALUEADDTOBAG_9B872D2CA8",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREINPUTVALUEADDTOBAG_9B872D2CA8",
+      "sourceLogicalType": "Long",
+      "uuid": "5458ac2a-70f5-417f-a8c8-b2693d5692a9",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREINPUTVALUEADDTOBAS_DE8208656F",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREINPUTVALUEADDTOBAS_DE8208656F",
+      "sourceLogicalType": "Long",
+      "uuid": "8afd59fa-6aa3-4cf8-897c-95d7ccc9b851",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREINPUTVALUEADDTOCAR_7C91B22555",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREINPUTVALUEADDTOCAR_7C91B22555",
+      "sourceLogicalType": "Long",
+      "uuid": "03654d81-0bce-4cfd-8516-ca53982f7791",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREINTLCOMMERCE_EFE348969B",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREINTLCOMMERCE_EFE348969B",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "f986dc96-24a8-48d0-a3b9-c87e1db4c2f3",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREJAVASCRIPTBAG_8C15013C08",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREJAVASCRIPTBAG_8C15013C08",
+      "sourceLogicalType": "Long",
+      "uuid": "c050ae83-0b09-4954-bd48-fac1e112e278",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREJAVASCRIPTBASKET_E5E10E334C",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREJAVASCRIPTBASKET_E5E10E334C",
+      "sourceLogicalType": "Long",
+      "uuid": "f93650ea-4d8d-4d34-ad59-d9ddc0f4e51c",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREJAVASCRIPTCART_E87B8A8779",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREJAVASCRIPTCART_E87B8A8779",
+      "sourceLogicalType": "Long",
+      "uuid": "18f4758a-3d85-42f6-b6f4-08a50fc969fa",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREJAVASCRIPTPRODUCT_E0749BDB07",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREJAVASCRIPTPRODUCT_E0749BDB07",
+      "sourceLogicalType": "Long",
+      "uuid": "d4bfd021-6c51-4f43-a7d9-85ed6fc26664",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREJAVASCRIPTSHOP_C29FB799D6",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREJAVASCRIPTSHOP_C29FB799D6",
+      "sourceLogicalType": "Long",
+      "uuid": "77afd85e-b40f-4d23-bfdd-195abfb1a33f",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREJAVASCRIPTSTORE_BB9FDE3130",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREJAVASCRIPTSTORE_BB9FDE3130",
+      "sourceLogicalType": "Long",
+      "uuid": "63b4eaa6-12c0-4308-a13f-d7a5d6d4ed26",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREREFSRCBAG_56CDDE32AA",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREREFSRCBAG_56CDDE32AA",
+      "sourceLogicalType": "Long",
+      "uuid": "c7ca7fcd-bdf4-4ce3-82d5-55e80b8c1a9d",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREREFSRCBASKET_96A5841B62",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREREFSRCBASKET_96A5841B62",
+      "sourceLogicalType": "Long",
+      "uuid": "3c4f8912-08de-40d1-8f7e-77a78a5ad0fe",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREREFSRCCART_F179D7C31E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREREFSRCCART_F179D7C31E",
+      "sourceLogicalType": "Long",
+      "uuid": "a557acd9-55b7-43de-8c10-55648502d6a3",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREREFSRCPRODUCT_7360050DE4",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREREFSRCPRODUCT_7360050DE4",
+      "sourceLogicalType": "Long",
+      "uuid": "93c45176-76bf-4edd-8e5e-00b500c756ad",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREREFSRCSHOP_BD1145229F",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREREFSRCSHOP_BD1145229F",
+      "sourceLogicalType": "Long",
+      "uuid": "59b4017c-5f09-4796-a7e1-779216384c76",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATUREREFSRCSTORE_CEC5F567C7",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATUREREFSRCSTORE_CEC5F567C7",
+      "sourceLogicalType": "Long",
+      "uuid": "c1950539-c76e-4f84-aa9f-2649baec7c94",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMADDITEM_3A678867C2",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMADDITEM_3A678867C2",
+      "sourceLogicalType": "Long",
+      "uuid": "5ce9fd84-9e96-484e-b92e-cf3a9eb9f29e",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMADDTOBAG_F6A71AF160",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMADDTOBAG_F6A71AF160",
+      "sourceLogicalType": "Long",
+      "uuid": "03564fd0-0002-46f6-939d-68eff40c1d59",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMADDTOBASKET_BD99188FFF",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMADDTOBASKET_BD99188FFF",
+      "sourceLogicalType": "Long",
+      "uuid": "200ec6fd-59ac-43f4-a876-dad7d0ded741",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMADDTOCART_017C8F8F69",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMADDTOCART_017C8F8F69",
+      "sourceLogicalType": "Long",
+      "uuid": "dbb784fc-1dd8-496f-ab1e-bb86d680b9e8",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMASSOCIATIONMAN_5C94FE8075",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMASSOCIATIONMAN_5C94FE8075",
+      "sourceLogicalType": "Long",
+      "uuid": "89ec3c5e-8178-4e03-b880-a949a964ade1",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMBAG_6091C4A343",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMBAG_6091C4A343",
+      "sourceLogicalType": "Long",
+      "uuid": "749c4b78-9f38-49e9-b6ef-f63f223a8a80",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMBARGAIN_C37466A6D6",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMBARGAIN_C37466A6D6",
+      "sourceLogicalType": "Long",
+      "uuid": "ed163916-de2d-4b18-ba37-27ad513ad408",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMBASKET_64285026C0",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMBASKET_64285026C0",
+      "sourceLogicalType": "Long",
+      "uuid": "2573b259-9d0a-4b2d-87ac-e42be2d614c8",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMBILLINGADDRESS_8753A9B6A9",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMBILLINGADDRESS_8753A9B6A9",
+      "sourceLogicalType": "Long",
+      "uuid": "2b775f18-b6e2-44bd-a106-a3a096a7a31a",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMBILLINGSOLUTIO_5BC832F7F3",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMBILLINGSOLUTIO_5BC832F7F3",
+      "sourceLogicalType": "Long",
+      "uuid": "d20fb472-7dc8-4f58-ac40-0659017bd228",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMBUSINESSMANAGE_D4879C01B2",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMBUSINESSMANAGE_D4879C01B2",
+      "sourceLogicalType": "Long",
+      "uuid": "d499b312-baa9-46c6-af4d-f2a3a155573f",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMBUY_ED68682A4D",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMBUY_ED68682A4D",
+      "sourceLogicalType": "Long",
+      "uuid": "cc3e410d-84e4-45c8-8362-b8005e1fd9f6",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCART_A332CA0D46",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCART_A332CA0D46",
+      "sourceLogicalType": "Long",
+      "uuid": "7f3b356f-cfdb-4d0d-a771-a3378b865fe1",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCATALOG_24D8AA6480",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCATALOG_24D8AA6480",
+      "sourceLogicalType": "Long",
+      "uuid": "9655bb33-669d-4a42-8e1c-41e23393feb5",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCHECKOUT_16ED68E665",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCHECKOUT_16ED68E665",
+      "sourceLogicalType": "Long",
+      "uuid": "41b22641-874f-4650-9ca2-59ef849c946a",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCOMMERCESOLUTI_1DCAFA6186",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCOMMERCESOLUTI_1DCAFA6186",
+      "sourceLogicalType": "Long",
+      "uuid": "7296c9d7-2b6d-45cb-a2da-8dfbe56a4423",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCONTINUESHOPPI_D0C8063380",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCONTINUESHOPPI_D0C8063380",
+      "sourceLogicalType": "Long",
+      "uuid": "81440f1a-3c22-48ac-9e5a-5091be5d68c4",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCREATEACCOUNT_136A55CF29",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCREATEACCOUNT_136A55CF29",
+      "sourceLogicalType": "Long",
+      "uuid": "2f077c27-b3d7-4bb1-89b0-567b1071377a",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307",
+      "sourceLogicalType": "Long",
+      "uuid": "7df8ff30-d5f1-493f-8077-81dd2023963f",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCREATEASTORE_62EFC56514",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCREATEASTORE_62EFC56514",
+      "sourceLogicalType": "Long",
+      "uuid": "e724e82b-ddbc-466f-a298-e65056517787",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCROSSCHANNELCO_CDB20B600A",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCROSSCHANNELCO_CDB20B600A",
+      "sourceLogicalType": "Long",
+      "uuid": "22147d8c-75a3-4514-ab25-c4e4ac8ce2c8",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCROWDFUNDING_FFFB4236F7",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCROWDFUNDING_FFFB4236F7",
+      "sourceLogicalType": "Long",
+      "uuid": "b8ea3ba9-9a5a-4fa7-b80e-b9e73b25b81b",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCUSTOMERSERVIC_AFAA629156",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCUSTOMERSERVIC_AFAA629156",
+      "sourceLogicalType": "Long",
+      "uuid": "4d86f9cb-86e8-4553-80e1-85ac90af1f3b",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMCUSTOMERSUPPOR_74116EE72E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMCUSTOMERSUPPOR_74116EE72E",
+      "sourceLogicalType": "Long",
+      "uuid": "45864703-000c-4fe3-8a57-5b812ec3706e",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMDEAL_A53AABFEE9",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMDEAL_A53AABFEE9",
+      "sourceLogicalType": "Long",
+      "uuid": "21c250bb-f7a5-4877-897e-664148f13cb9",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMECOMMERCEPLATF_334CBC96A7",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMECOMMERCEPLATF_334CBC96A7",
+      "sourceLogicalType": "Long",
+      "uuid": "a300c376-1957-438c-8bd9-f0bc31caf6e9",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMECOMMERCESOFTW_0DBE95CC65",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMECOMMERCESOFTW_0DBE95CC65",
+      "sourceLogicalType": "Long",
+      "uuid": "ffc44a08-1abb-456b-baec-6f6d3f3caf74",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMECOMMERCESOFTW_558DBD29BC",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMECOMMERCESOFTW_558DBD29BC",
+      "sourceLogicalType": "Long",
+      "uuid": "270648cf-60eb-4138-80c6-a5d3e04b7c77",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMEVENTMANAGEMEN_68D7F85E38",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMEVENTMANAGEMEN_68D7F85E38",
+      "sourceLogicalType": "Long",
+      "uuid": "d1b34840-cc20-46f3-b12a-f78a2603fd55",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMFORMBUILDER_0CB4131FE5",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMFORMBUILDER_0CB4131FE5",
+      "sourceLogicalType": "Long",
+      "uuid": "8de203b0-6d70-4df3-ac20-d3ecf943016d",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMFREEONLINESTOR_50814B3138",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMFREEONLINESTOR_50814B3138",
+      "sourceLogicalType": "Long",
+      "uuid": "ba2efc8b-79d2-4d8c-b136-11a25b62ef68",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMFREESHIPPING_9B4AA18889",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMFREESHIPPING_9B4AA18889",
+      "sourceLogicalType": "Long",
+      "uuid": "abdeb0b5-6af7-4f73-9293-3bf035906313",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMFREQUENTLYASKE_C1A71E3CF3",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMFREQUENTLYASKE_C1A71E3CF3",
+      "sourceLogicalType": "Long",
+      "uuid": "1cca5c1c-fdb5-47f1-a2c4-b04b9a434863",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMFUNDRAISINGSOF_2088658937",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMFUNDRAISINGSOF_2088658937",
+      "sourceLogicalType": "Long",
+      "uuid": "b124d184-fd79-46fa-9631-bd1d6eedf709",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMFUNDRAISING_74655FC552",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMFUNDRAISING_74655FC552",
+      "sourceLogicalType": "Long",
+      "uuid": "a922eae4-6d11-4eee-bb76-1d236fe324f8",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMMARKETPLACE_9A605A999A",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMMARKETPLACE_9A605A999A",
+      "sourceLogicalType": "Long",
+      "uuid": "fd73a512-5680-4b01-a0a4-3aaf2ad21851",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMMEMBERSHIPMANA_5F6BB5750B",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMMEMBERSHIPMANA_5F6BB5750B",
+      "sourceLogicalType": "Long",
+      "uuid": "6e1003f8-408b-4019-8e1f-d380b592af96",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMMYACCOUNT_A8F1F4E862",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMMYACCOUNT_A8F1F4E862",
+      "sourceLogicalType": "Long",
+      "uuid": "b38f4416-b036-4877-9bd1-4ad920e4cb5c",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMONLINESTOREBUI_600B41EB86",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMONLINESTOREBUI_600B41EB86",
+      "sourceLogicalType": "Long",
+      "uuid": "e4d9d3c2-1be7-404f-85f3-c5f771d6e2ce",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMORDERHISTORY_ED7B4AC178",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMORDERHISTORY_ED7B4AC178",
+      "sourceLogicalType": "Long",
+      "uuid": "bc21cc4d-3151-4346-97af-a62d935079ad",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMORDERSTATUS_9E0E44E0CF",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMORDERSTATUS_9E0E44E0CF",
+      "sourceLogicalType": "Long",
+      "uuid": "e12a9f19-b8d4-4e1a-831f-9698e129543a",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMPAYMENTMETHOD_69B21B83AF",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMPAYMENTMETHOD_69B21B83AF",
+      "sourceLogicalType": "Long",
+      "uuid": "41ad59c9-71dd-4b38-b513-f7a074fd1c1d",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMPAYMENTOPTION_38E62F3425",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMPAYMENTOPTION_38E62F3425",
+      "sourceLogicalType": "Long",
+      "uuid": "b654f1c3-eb18-4fc4-82da-bf6065260dd6",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMPAYMENTPROCESS_5AF36D2F81",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMPAYMENTPROCESS_5AF36D2F81",
+      "sourceLogicalType": "Long",
+      "uuid": "641cf75d-30f2-4672-a789-f7433a9be544",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMPAYMENTSOLUTIO_10E8BC8DCD",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMPAYMENTSOLUTIO_10E8BC8DCD",
+      "sourceLogicalType": "Long",
+      "uuid": "5fc3eee6-37e0-4dec-8909-97d05a71c691",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMPAYWALL_A6571B4551",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMPAYWALL_A6571B4551",
+      "sourceLogicalType": "Long",
+      "uuid": "9b26e312-4e3b-448e-9852-1979a1e4f634",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMPHPECOMMERCEPL_D3FCA1D2A2",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMPHPECOMMERCEPL_D3FCA1D2A2",
+      "sourceLogicalType": "Long",
+      "uuid": "7a40e0c5-db43-4255-bd18-e8b65e3c3fe2",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMPLUGINFORWORDP_B90B6EA567",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMPLUGINFORWORDP_B90B6EA567",
+      "sourceLogicalType": "Long",
+      "uuid": "737e68f0-afc0-4785-8343-40567433ddab",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMPRICE_FFB3E2A887",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMPRICE_FFB3E2A887",
+      "sourceLogicalType": "Long",
+      "uuid": "32a00296-0b9c-4f2d-9b65-528f4f63dfd8",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMPRODUCT_C24CBDA059",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMPRODUCT_C24CBDA059",
+      "sourceLogicalType": "Long",
+      "uuid": "928808c5-c0ee-435d-b3b0-54088ec1bd94",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMRECURRINGBILLI_9E9281BEF1",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMRECURRINGBILLI_9E9281BEF1",
+      "sourceLogicalType": "Long",
+      "uuid": "cbfd7340-8eda-4e0d-b668-21c890926b9a",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMRETAIL_4BFA113250",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMRETAIL_4BFA113250",
+      "sourceLogicalType": "Long",
+      "uuid": "9ddac951-181e-4585-ac6e-dea8931287e4",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMRETURNPOLICY_242DC935FA",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMRETURNPOLICY_242DC935FA",
+      "sourceLogicalType": "Long",
+      "uuid": "bac7ea23-7917-45fc-8221-273d44a37bab",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMREVIEW_300F39E867",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMREVIEW_300F39E867",
+      "sourceLogicalType": "Long",
+      "uuid": "47895c7c-71b5-4c01-af3a-0eff6c07ab47",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSALE_6FADFF494E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSALE_6FADFF494E",
+      "sourceLogicalType": "Long",
+      "uuid": "ed95cbff-084a-4b5e-92cc-4540c326411e",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSCHEDULINGANDA_3C7D12C705",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSCHEDULINGANDA_3C7D12C705",
+      "sourceLogicalType": "Long",
+      "uuid": "88ad4851-818a-4164-ac5c-fead3d338dc7",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSEARCH_E3C0C3ABB5",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSEARCH_E3C0C3ABB5",
+      "sourceLogicalType": "Long",
+      "uuid": "cc569cae-13d9-47a5-82ef-9ef71e3836ad",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSECUREORDER_E9AD304259",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSECUREORDER_E9AD304259",
+      "sourceLogicalType": "Long",
+      "uuid": "7353bd5f-9cbb-464c-891d-510b877c132b",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSELLDIGITALDOW_1D661847F4",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSELLDIGITALDOW_1D661847F4",
+      "sourceLogicalType": "Long",
+      "uuid": "440426f6-f5fa-49c1-974e-dce3a340b244",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSELLONLINE_B0AD32BA29",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSELLONLINE_B0AD32BA29",
+      "sourceLogicalType": "Long",
+      "uuid": "f5a99e86-fa36-4ba8-bbe9-1f16dbc851d1",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSELLTICKETS_0E0936B53D",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSELLTICKETS_0E0936B53D",
+      "sourceLogicalType": "Long",
+      "uuid": "b9ecb0cb-4bb6-47c8-85a7-b3c7c4b638ab",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSHIPPINGADDRES_4DDB79EF9E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSHIPPINGADDRES_4DDB79EF9E",
+      "sourceLogicalType": "Long",
+      "uuid": "329f0888-e907-416b-a289-f0a75320b021",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSHIPPINGANDHAN_1D1D151554",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSHIPPINGANDHAN_1D1D151554",
+      "sourceLogicalType": "Long",
+      "uuid": "d7eafc28-cab1-475c-8db5-3496d656d4dd",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSHIPPINGINFO_05D852CDCE",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSHIPPINGINFO_05D852CDCE",
+      "sourceLogicalType": "Long",
+      "uuid": "9c0871d4-877f-4758-a73c-67912376816f",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSHIPPINGPOLICY_F5C2A2BA3E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSHIPPINGPOLICY_F5C2A2BA3E",
+      "sourceLogicalType": "Long",
+      "uuid": "6624ab30-4360-4e8d-9d6a-bacb23594fc5",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSHOPBY_7989A99E2C",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSHOPBY_7989A99E2C",
+      "sourceLogicalType": "Long",
+      "uuid": "8d4c5663-bfcc-4647-9f9c-f2b689a06e76",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSHOPPINGCARTPL_8F997F8756",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSHOPPINGCARTPL_8F997F8756",
+      "sourceLogicalType": "Long",
+      "uuid": "2ea11341-ced5-4191-98cb-46725c774c8c",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSHOPPINGCARTSO_A0D77067DF",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSHOPPINGCARTSO_A0D77067DF",
+      "sourceLogicalType": "Long",
+      "uuid": "f9f814c8-e848-46c6-9632-09fdf63d4349",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSHOP_331151D1CF",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSHOP_331151D1CF",
+      "sourceLogicalType": "Long",
+      "uuid": "d88fdc1d-332f-4837-9c07-0e9137d01ff3",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSOFTWAREFORNON_E461FCB328",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSOFTWAREFORNON_E461FCB328",
+      "sourceLogicalType": "Long",
+      "uuid": "316fb3f5-44d6-4938-8a7d-eab60364f51e",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMSTORE_38A5985FE2",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMSTORE_38A5985FE2",
+      "sourceLogicalType": "Long",
+      "uuid": "fd2ce8a1-3629-457a-a6fe-9f64b564c9ec",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMWEBBUILDER_C8E736387E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMWEBBUILDER_C8E736387E",
+      "sourceLogicalType": "Long",
+      "uuid": "cedc88a4-f1be-4fe1-a43f-079348632bc6",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMWEBSITEBUILDER_36DF4C8869",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMWEBSITEBUILDER_36DF4C8869",
+      "sourceLogicalType": "Long",
+      "uuid": "e65aa56c-2272-47c4-866f-2c45ff6edd3f",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMWISHLIST_8A484DF7D1",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMWISHLIST_8A484DF7D1",
+      "sourceLogicalType": "Long",
+      "uuid": "1a8e3283-ab2a-4e38-8139-f5605285e178",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMYOURACCOUNT_6814729195",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMYOURACCOUNT_6814729195",
+      "sourceLogicalType": "Long",
+      "uuid": "1cb23e8c-91cf-428f-915a-a7b5916adfae",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURETERMYOURSTORE_8F56F19E77",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURETERMYOURSTORE_8F56F19E77",
+      "sourceLogicalType": "Long",
+      "uuid": "0a38e370-ee6e-40ce-8a5f-37c4986c1274",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FEATURE_PIVOTED_SOURCE_IS_09AD69A29D",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_FEATURE_PIVOTED_SOURCE_IS_09AD69A29D",
+      "sourceLogicalType": "Bit",
+      "uuid": "657978e1-0e35-47d6-b55c-d8bb9318c295",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FUNDINGAMOUNT_93F3A7DC87",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "PD_DC_FUNDINGAMOUNT_93F3A7DC87",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "78b753b9-a54e-4b8f-a79c-3aa8a7ed981d",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_FUNDINGFISCALYEAR_F4000FBB88",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "PD_DC_FUNDINGFISCALYEAR_F4000FBB88",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "566572da-00da-411e-92ad-f875777e1879",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_HGDATA_PIVOTED_SOURCE_ISM_51E71A10D5",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_HGDATA_PIVOTED_SOURCE_ISM_51E71A10D5",
+      "sourceLogicalType": "Bit",
+      "uuid": "a23a2e42-c81a-4659-95b0-514ef4287991",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_HPANUMPAGES_F62070D93D",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_HPANUMPAGES_F62070D93D",
+      "sourceLogicalType": "Long",
+      "uuid": "7b0b7fef-474f-4484-b16b-6c4f59340dc3",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_HPA_NEW_PIVOTED_SOURCE_IS_0323A7B3BB",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_HPA_NEW_PIVOTED_SOURCE_IS_0323A7B3BB",
+      "sourceLogicalType": "Bit",
+      "uuid": "1c421f02-a1f5-423b-9611-4048b548ba52",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_HPA_SOURCE_ISMATCHED_022606F3A4",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_HPA_SOURCE_ISMATCHED_022606F3A4",
+      "sourceLogicalType": "Bit",
+      "uuid": "5043762a-9ee9-45c9-8993-ff3be7c18c51",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_ISMATCHED_83FE702FD0",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_ISMATCHED_83FE702FD0",
+      "sourceLogicalType": "Bit",
+      "uuid": "2a8e7d61-0cb9-4975-82ce-03b1f58772e7",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_JOBSASOF_B6C9EBF2B6",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "PD_DC_JOBSASOF_B6C9EBF2B6",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "223d1d98-6a23-4831-9193-948eeb10e519",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_JOBSRECENTJOBS_7949D3FC95",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "PD_DC_JOBSRECENTJOBS_7949D3FC95",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "8b0bc88a-4f92-46f0-ba81-c48860a71ac4",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_JOBSTRENDSTRING_384036BEC4",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "PD_DC_JOBSTRENDSTRING_384036BEC4",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "4cb7ce8d-d284-4162-b652-f6a25d0a8a86",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_LE_JOBS_SOURCE_ISMATCHED_1ED27CBC84",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_LE_JOBS_SOURCE_ISMATCHED_1ED27CBC84",
+      "sourceLogicalType": "Bit",
+      "uuid": "6a1a4dfe-408c-4f7e-a64b-4d52a28a07be",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_MATCHEDDOMAIN_CC3D72116D",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "PD_DC_MATCHEDDOMAIN_CC3D72116D",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "38246054-b703-4e0a-8228-2c3503354579",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_SEMRUSHADWORDSCOST_2D345AA19C",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_SEMRUSHADWORDSCOST_2D345AA19C",
+      "sourceLogicalType": "Long",
+      "uuid": "8b823d6e-877c-40e7-acfd-c6b0a7e0a2b9",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_SEMRUSHADWORDSKEYWORDS_18930AA801",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_SEMRUSHADWORDSKEYWORDS_18930AA801",
+      "sourceLogicalType": "Long",
+      "uuid": "45a8a39b-8345-448f-8e4a-5d78d2a328fa",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_SEMRUSHADWORDSTRAFFIC_3C36F78623",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_SEMRUSHADWORDSTRAFFIC_3C36F78623",
+      "sourceLogicalType": "Long",
+      "uuid": "aaa8f1cc-3988-4e52-b4ea-ca4aa2229a36",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_SEMRUSHORGANICCOST_42067622B2",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_SEMRUSHORGANICCOST_42067622B2",
+      "sourceLogicalType": "Long",
+      "uuid": "8e5f60df-52c9-4d9c-8d5f-38a3eef4bdca",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_SEMRUSHORGANICKEYWORDS_819E898E8B",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_SEMRUSHORGANICKEYWORDS_819E898E8B",
+      "sourceLogicalType": "Long",
+      "uuid": "310c8197-8a33-4aa9-b699-9bd105b03e05",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_SEMRUSHORGANICTRAFFIC_182F3ACEB1",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_SEMRUSHORGANICTRAFFIC_182F3ACEB1",
+      "sourceLogicalType": "Long",
+      "uuid": "41c515e0-7154-46ed-a4f9-1c61ab067376",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_SEMRUSHRANK_E4164C190E",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_SEMRUSHRANK_E4164C190E",
+      "sourceLogicalType": "Long",
+      "uuid": "0b2cbc2d-206a-46d0-903a-3f7f0f6e059f",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_SEMRUSH_ISMATCHED_17BCAB52B0",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_SEMRUSH_ISMATCHED_17BCAB52B0",
+      "sourceLogicalType": "Bit",
+      "uuid": "2a0d50fb-79d3-42a1-9090-760add3c2b2e",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_SYSTEMALERT_7652835FC6",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "displayName": "PD_DC_SYSTEMALERT_7652835FC6",
+      "sourceLogicalType": "Bit",
+      "uuid": "5bbeb095-1e4d-4b77-a2fd-16884b9f0832",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_TOTAL_AMOUNT_RAISED_5C025CC0C5",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "PD_DC_TOTAL_AMOUNT_RAISED_5C025CC0C5",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "2e29054a-ec29-4370-9c35-d6f574a5e370",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_TWITTER_FOLLOWERS_466D79437B",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_TWITTER_FOLLOWERS_466D79437B",
+      "sourceLogicalType": "Long",
+      "uuid": "6279de62-b425-41f4-b86c-2c9c84ecd292",
+      "Nullable": "false"
+    },
+    {
+      "name": "PD_DC_TWITTER_TWEETS_F1D1AFBCBF",
+      "type": [
+        "long",
+        "null"
+      ],
+      "displayName": "PD_DC_TWITTER_TWEETS_F1D1AFBCBF",
+      "sourceLogicalType": "Long",
+      "uuid": "55d4f476-b209-4dd6-ae77-31014f30229d",
+      "Nullable": "false"
+    },
+    {
+      "name": "SICCode",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "SICCode",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "2ef54c09-95e1-4a0b-b1a8-424fcb3d29a1",
+      "Nullable": "false"
+    },
+    {
+      "name": "SalesforceAccountID",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "SalesforceAccountID",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "11f07d18-a2bd-4df5-8bef-389a5cdfccb6",
+      "Nullable": "false"
+    },
+    {
+      "name": "StateProvince",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "StateProvince",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "acb89489-b134-4015-a613-7cce63d8b917",
+      "Nullable": "false"
+    },
+    {
+      "name": "State_Province",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "State_Province",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "f39ca0e8-30e4-4063-a1da-ed037d4830b1",
+      "Nullable": "false"
+    },
+    {
+      "name": "Territory",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "Territory",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "174a8352-5966-45e2-b8f6-c9765c5e87c9",
+      "Nullable": "false"
+    },
+    {
+      "name": "Territory_External_ID",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "Territory_External_ID",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "350d328c-c1e0-4dc7-baca-0dab6d50d96d",
+      "Nullable": "false"
+    },
+    {
+      "name": "TopLeads",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "TopLeads",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "c388e301-ff5c-4892-aa6c-f601aeedefbe",
+      "Nullable": "false"
+    },
+    {
+      "name": "TotalMonetaryValue",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "TotalMonetaryValue",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "74115345-d0ac-418d-b176-49e7cb8ac9ec",
+      "Nullable": "false"
+    },
+    {
+      "name": "URL",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "URL",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "fb792133-32b9-4812-8e55-93fdc12c41ba",
+      "Nullable": "false"
+    },
+    {
+      "name": "Vertical",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "Vertical",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "cf70a859-3398-4c25-b801-d7fdd271089c",
+      "Nullable": "false"
+    },
+    {
+      "name": "Zip",
+      "type": [
+        "string",
+        "null"
+      ],
+      "displayName": "Zip",
+      "sourceLogicalType": "NVarChar(256)",
+      "uuid": "f1089255-668c-4380-b749-c6cfd09d96cd",
+      "Nullable": "false"
+    }
+  ],
+  "uuid": "713bb19c-fc63-4bae-9f52-854eb25c843b"
+}
