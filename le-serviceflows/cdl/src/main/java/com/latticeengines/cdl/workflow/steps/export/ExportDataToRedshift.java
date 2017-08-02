@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -123,6 +125,13 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
 
     private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,
             TableRoleInCollection tableRole) {
+        // all distributed on account id
+        String distKey = TableRoleInCollection.BucketedAccount.getPrimaryKey().name();
+        List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
+        if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
+            sortKeys.add(distKey);
+        }
+
         HdfsToRedshiftConfiguration exportConfig = configuration.getHdfsToRedshiftConfiguration();
         exportConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
         exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
@@ -131,9 +140,9 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         exportConfig.setExportDestination(ExportDestination.REDSHIFT);
         RedshiftTableConfiguration redshiftTableConfig = exportConfig.getRedshiftTableConfiguration();
         redshiftTableConfig.setDistStyle(RedshiftTableConfiguration.DistStyle.Key);
-        redshiftTableConfig.setDistKey(tableRole.getPrimaryKey().name());
-        redshiftTableConfig.setSortKeyType(RedshiftTableConfiguration.SortKeyType.Compound);
-        redshiftTableConfig.setSortKeys(tableRole.getForeignKeysAsStringList());
+        redshiftTableConfig.setDistKey(distKey);
+        redshiftTableConfig.setSortKeyType(RedshiftTableConfiguration.SortKeyType.Interleaved);
+        redshiftTableConfig.setSortKeys(sortKeys);
         redshiftTableConfig.setTableName(targetTableName);
         redshiftTableConfig
                 .setJsonPathPrefix(String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));

@@ -107,10 +107,6 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         exportConfig.setCreateNew(true);
         exportConfig.setAppend(true);
         RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
-        redshiftTableConfig.setDistStyle(DistStyle.Key);
-        redshiftTableConfig.setDistKey(TableRoleInCollection.BucketedAccount.getPrimaryKey().name());
-        redshiftTableConfig.setSortKeyType(SortKeyType.Compound);
-        redshiftTableConfig.setSortKeys(TableRoleInCollection.BucketedAccount.getForeignKeysAsStringList());
         redshiftTableConfig.setS3Bucket(s3Bucket);
         exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
         return exportConfig;

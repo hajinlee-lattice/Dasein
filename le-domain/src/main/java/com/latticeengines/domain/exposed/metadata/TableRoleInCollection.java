@@ -23,10 +23,6 @@ public enum TableRoleInCollection {
         return primaryKey;
     }
 
-    public List<InterfaceName> getForeignKeys() {
-        return foreignKeys;
-    }
-
     public List<String> getForeignKeysAsStringList() {
         return foreignKeys.stream().map(InterfaceName::name).collect(Collectors.toList());
     }
