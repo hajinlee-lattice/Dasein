@@ -86,7 +86,7 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Value("${eai.vdb.file.size:10000000}")
     private int sizePerFile;
 
-    @Value("${eai.vdb.extract.size:100000000}")
+    @Value("${eai.vdb.extract.size:1000000}")
     private int recordsPerExtract;
 
     private static final int MAX_RETRIES = 3;
