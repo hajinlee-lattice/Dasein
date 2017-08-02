@@ -144,7 +144,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 } catch (IOException e) {
                     log.error(String.format("Failed to delete extract %s", avroDir));
                 }
-                String schemaPath = avroDir.replace("/Tables/", "/TableSchemas/");
+                String schemaPath = avroDir.replace("/Tables", "/TableSchemas");
                 try {
                     if (HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
                         HdfsUtils.rmdir(yarnConfiguration, schemaPath);
