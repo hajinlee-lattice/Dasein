@@ -365,7 +365,7 @@ angular.module('common.datacloud')
         
         $http({
             method: 'put',
-            url: this.host + this.path,
+            url: this.host + this.path + '/insights',
             data: data
         }).then(function(response){
             deferred.resolve(response.data);
