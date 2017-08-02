@@ -1,6 +1,12 @@
 package com.latticeengines.redshiftdb.service.impl;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,6 +145,21 @@ public class RedshiftServiceImpl implements RedshiftService {
     public void vacuumTable(String tableName) {
         log.info("Vacuum table " + tableName);
         redshiftJdbcTemplate.execute(String.format("VACUUM FULL %s", tableName));
+    }
+
+    @Override
+    public List<String> getTables(String prefix) {
+        String sql = "SELECT DISTINCT tablename FROM pg_table_def WHERE schemaname = 'public'";
+        if (StringUtils.isNotBlank(prefix)) {
+            sql += " AND tablename LIKE '" + prefix.toLowerCase() + "%'";
+        }
+        sql += " ORDER BY tablename";
+        List<Map<String, Object>> results = redshiftJdbcTemplate.queryForList(sql);
+        if (results == null || results.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return results.stream().map(m -> (String) m.get("tablename")).collect(Collectors.toList());
+        }
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.apache.avro.Schema;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,26 +69,26 @@ public class RedshiftUtils {
         Schema.Type type = AvroUtils.getType(field);
         StringBuilder sb = new StringBuilder();
         switch (type) {
-            case BOOLEAN:
-                sb.append("BOOLEAN");
-                encode = false;
-                break;
-            case STRING:
-                sb.append("NVARCHAR(1000)");
-                break;
-            case INT:
-                sb.append("INT");
-                break;
-            case LONG:
-                sb.append("BIGINT");
-                break;
-            case FLOAT:
-            case DOUBLE:
-                sb.append("FLOAT");
-                encode = false;
-                break;
-            default:
-                throw new RuntimeException(String.format("Unsupported avro type %s", type));
+        case BOOLEAN:
+            sb.append("BOOLEAN");
+            encode = false;
+            break;
+        case STRING:
+            sb.append("NVARCHAR(1000)");
+            break;
+        case INT:
+            sb.append("INT");
+            break;
+        case LONG:
+            sb.append("BIGINT");
+            break;
+        case FLOAT:
+        case DOUBLE:
+            sb.append("FLOAT");
+            encode = false;
+            break;
+        default:
+            throw new RuntimeException(String.format("Unsupported avro type %s", type));
         }
         if (encode) {
             if (Schema.Type.FLOAT.equals(type) || Schema.Type.DOUBLE.equals(type)) {
@@ -127,4 +128,19 @@ public class RedshiftUtils {
             return e1 + " AND " + e2;
         }).orElse(null);
     }
+
+    public static String prependTenantToTableName(CustomerSpace customerSpace, String tableName) {
+        String tenant = CustomerSpace.parse(customerSpace.getTenantId()).equals(customerSpace)
+                ? customerSpace.getTenantId() : customerSpace.toString();
+        return tenant + "_" + tableName;
+    }
+
+    public static String extractTenantFromTableName(String tableName) {
+        if (StringUtils.isBlank(tableName)) {
+            return null;
+        } else {
+            return tableName.substring(0, tableName.indexOf("_"));
+        }
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.latticeengines.redshiftdb.exposed.service;
 
+import java.util.List;
+
 import org.apache.avro.Schema;
 
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
@@ -22,4 +24,6 @@ public interface RedshiftService {
     void analyzeTable(String tableName);
 
     void vacuumTable(String tableName);
+
+    List<String> getTables(String prefix);
 }

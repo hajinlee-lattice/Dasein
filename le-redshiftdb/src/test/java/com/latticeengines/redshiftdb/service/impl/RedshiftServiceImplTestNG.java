@@ -22,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -71,7 +72,6 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     @AfterClass(groups = "functional")
     public void tearDown() {
         cleanupS3();
-        // cleanupRedshift();
     }
 
     private void cleanupS3() {
@@ -111,6 +111,8 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
         redshiftTableConfig.setS3Bucket(s3Bucket);
         redshiftService.createTable(redshiftTableConfig, schema);
         redshiftService.loadTableFromAvroInS3(TABLE_NAME, s3Bucket, avroPrefix, jsonPathPrefix);
+        redshiftService.analyzeTable(TABLE_NAME);
+        redshiftService.vacuumTable(TABLE_NAME);
     }
 
     @Test(groups = "functional", dependsOnMethods = "loadDataToRedshift")
@@ -155,5 +157,13 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
         for (Map<String, Object> row : result) {
             assertNotNull(row.get("Id"));
         }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "queryTable")
+    public void getTables() {
+        List<String> tables = redshiftService.getTables("");
+        Assert.assertTrue(tables.contains(TABLE_NAME.toLowerCase()));
+        tables = redshiftService.getTables(TABLE_NAME.split("_")[0]);
+        Assert.assertTrue(tables.contains(TABLE_NAME.toLowerCase()));
     }
 }

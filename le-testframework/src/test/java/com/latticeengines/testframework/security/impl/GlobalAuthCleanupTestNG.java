@@ -40,12 +40,14 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
+import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-testframework-cleanup-context.xml" })
@@ -63,6 +65,9 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private DataLoaderService dataLoaderService;
+
+    @Autowired
+    private RedshiftService redshiftService;
 
     @Value("${admin.test.deployment.api:http://localhost:8085}")
     private String adminApiHostPort;
@@ -102,6 +107,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
         cleanupTenantsInHdfs();
         cleanupZK();
+        cleanupRedshift();
 
         log.info("Finished cleaning up test tenants.");
     }
@@ -228,6 +234,27 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         } catch (Exception e) {
             log.error("Failed to clean up dl tenant " + tenantName + " : " + errorHandler.getStatusCode() + ", "
                     + errorHandler.getResponseString());
+        }
+    }
+
+    private void cleanupRedshift() throws Exception {
+        try {
+            List<String> tables = redshiftService.getTables(TestFrameworkUtils.TENANTID_PREFIX);
+            if (tables != null && !tables.isEmpty()) {
+                log.info(String.format("Found %d test tenant tables in redshift.", tables.size()));
+                for (String table: tables) {
+                    String tenant = RedshiftUtils.extractTenantFromTableName(table);
+                    if (TestFrameworkUtils.isTestTenant(tenant)) {
+                        long testTime = TestFrameworkUtils.getTestTimestamp(tenant);
+                        if (testTime > 0 && (System.currentTimeMillis() - testTime) > cleanupThreshold) {
+                            log.info("Dropping redshift table " + table);
+                            redshiftService.dropTable(table);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to clean up test tenants in redshift.", e);
         }
     }
 

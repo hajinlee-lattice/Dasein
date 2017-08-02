@@ -8,6 +8,7 @@
     <import resource="classpath:security-no-controller-context.xml" />
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
+    <import resource="classpath:redshiftdb-context.xml"/>
     <import resource="classpath:hadoop-config-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.testframework"/>

@@ -127,6 +127,11 @@
             <version>${le.hadoop.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-redshiftdb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.mortbay.jetty</groupId>
             <artifactId>jetty</artifactId>
             <version>${mortbay.jetty.version}</version>
