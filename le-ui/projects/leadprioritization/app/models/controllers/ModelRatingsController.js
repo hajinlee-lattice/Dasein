@@ -124,6 +124,12 @@ angular.module('lp.models.ratings', [
             vm.buckets[i].left_bound_score = vm.previousRightBoundScore - 1;
             vm.buckets[0].left_bound_score = 99;
 
+            if(vm.buckets[i].right_bound_score === 0){
+                vm.buckets[i].right_bound_score = 5;
+            };
+
+            console.log(vm.buckets[i].right_bound_score);
+
             vm.rightScore = vm.buckets[i].right_bound_score - 1;
             vm.rightLeads = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_leads;
             vm.rightConverted = vm.ratingsSummary.bucketed_scores[vm.rightScore].left_num_converted;
@@ -192,6 +198,7 @@ angular.module('lp.models.ratings', [
         vm.showRemoveBucketText = false;
         vm.startingPosition = ev.clientX;
         vm.updateContent = false;
+        vm.right = bucket.right_bound_score;
         
         document.addEventListener('mousemove', eleMouseMove, false);
         document.addEventListener('mouseup', eleMouseUp, false);

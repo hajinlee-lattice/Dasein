@@ -52,7 +52,8 @@ angular.module('common.datacloud.explorer', [
         LookupResponse: LookupStore.response,
         no_lookup_results_message: false,
         hasCompanyInfo: (LookupStore.response && LookupStore.response.companyInfo ? Object.keys(LookupStore.response.companyInfo).length : 0),
-        count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : EnrichmentCount.data),        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
+        count: (LookupResponse.attributes ? Object.keys(LookupResponse.attributes).length : EnrichmentCount.data),        
+        show_internal_filter: FeatureFlagService.FlagIsEnabled(flags.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES) && $stateParams.section != 'insights' && $stateParams.section != 'team',
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         show_segmentation: FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL),
         enabledManualSave: false,
@@ -171,6 +172,7 @@ angular.module('common.datacloud.explorer', [
         if (vm.section === 'segment.analysis') {
             vm.metadataSegments = QueryRestriction;
         }
+
     }
 
     vm.closeHighlighterButtons = function(index) {
@@ -474,6 +476,7 @@ angular.module('common.datacloud.explorer', [
                     enabled = breakOnFirstEncounter(items, 'HighlightHidden', false),
                     dirty = breakOnFirstEncounter(items, 'AttributeFlagsMap', {});
 
+                
                 vm.highlightMetadata.categories[category].enabled = enabled ? 1 : 0;
                 vm.highlightMetadata.categories[category].disabled = disabled ? 1 : 0;
                 vm.highlightMetadata.categories[category].dirty = dirty ? 1 : 0;
@@ -1257,6 +1260,9 @@ angular.module('common.datacloud.explorer', [
                         fieldName = enrichment.ColumnId,
                         category = enrichment.Category,
                         index = vm.enrichmentsMap[fieldName];
+
+                        console.log(entity);
+
                         if(index || index === 0) {
                             vm.enrichments[index].SegmentChecked = true;
                             vm.enrichments[index].SegmentRangesChecked = {};
@@ -1388,16 +1394,11 @@ angular.module('common.datacloud.explorer', [
     }
 
 
-
-
-
-
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
         if(!vm.cube.Stats) {
             return false;
         }
-        // console.log(attribute);
 
         var attributeKey = attribute.Attribute || attribute.FieldName,
             stat = vm.getAttributeStat(attribute) || {},
@@ -1405,6 +1406,8 @@ angular.module('common.datacloud.explorer', [
 
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
+
+        console.log(attribute);
 
         if(attributeRangeKey) {
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
@@ -1414,12 +1417,10 @@ angular.module('common.datacloud.explorer', [
         if (vm.segmentAttributeInput[attributeKey] === true) {
             QueryStore.addRestriction({columnName: attributeKey, bkt: stat});
         } else {
-            QueryStore.removeRestriction(attribute);
+            QueryStore.removeRestriction({columnName: attributeKey, bkt: stat});
         }
 
     }
-
-
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {

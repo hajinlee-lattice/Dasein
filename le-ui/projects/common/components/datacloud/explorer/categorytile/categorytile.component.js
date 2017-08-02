@@ -131,7 +131,6 @@ angular
                     }
                 }
 
-
                 return stat;
             }
             
@@ -142,6 +141,7 @@ angular
             }
 
             vm.displayAttributeValue = function(attribute, property) {
+
                 var property = property || 'Lbl',
                     enrichmentKey = attribute.Attribute || attribute.ColumnId,
                     stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].Bkts && vm.cube.Stats[enrichmentKey].Bkts.List ? vm.cube.Stats[enrichmentKey].Bkts.List : null);

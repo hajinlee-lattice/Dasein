@@ -91,7 +91,10 @@
                                 id="description"
                                 name="description"
                                 data-ng-model="segment.description"
+                                maxlength="1000"
+                                ng-trim="false"
                             ></textarea>
+                            <span>{{1000 - segment.description.length}} characters remaining</span>
                         </div>
                         <div class="actions">
                             <button

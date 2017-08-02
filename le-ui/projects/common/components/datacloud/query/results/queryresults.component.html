@@ -29,18 +29,29 @@
                 <th>
                     <span ng-class="{'sort': vm.sortBy === col.key}">Account Name</span>
                 </th>
+                <th>Domain</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Country</th>
             </tr>
         </thead>
         <tbody>
+            <tr ng-if="!vm.accounts">
+                <td colspan="5"><i class="fa fa-spinner fa-pulse fw"></i> Loading Accounts</td>
+            </tr>
             <tr ng-repeat="account in vm.accounts">
-                 <td ng-repeat="col in ::vm.columns">
+                <td>
                     {{account.LDC_Name}}
                 </td>
+                <td>{{account.LDC_Domain}}</td>
+                <td>{{account.LDC_City}}</td>
+                <td>{{account.LDC_State}}</td>
+                <td>{{account.LDC_Country}}</td>
             </tr>
         </tbody>
     </table>
 
-    <p ng-if="!vm.count">
+    <p ng-if="!vm.accountsCount">
         No Records Found
     <p>
 
@@ -48,7 +59,7 @@
         <li>
             <pd-pagination-controls
                 current="vm.current"
-                max="vm.count / vm.pagesize">
+                max="vm.accountsCount / vm.pagesize">
             </pd-pagination-controls>
         </li>
     </ul>

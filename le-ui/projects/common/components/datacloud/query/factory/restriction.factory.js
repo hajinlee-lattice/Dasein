@@ -60,6 +60,11 @@ angular.module('common.datacloud.query.factory.restriction', [])
     };
 
     BucketRestriction.getObjectType = function(bucketRestriction) {
+
+
+        console.log(bucketRestriction);
+
+
         if (bucketRestriction.attr === null || bucketRestriction.attr === undefined) {
             if (bucketRestriction.lhs.columnLookup.object_type === 'BucketedAccountMaster') {
                 bucketRestriction.lhs.columnLookup.object_type = 'LatticeAccount'

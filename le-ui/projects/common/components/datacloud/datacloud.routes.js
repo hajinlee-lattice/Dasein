@@ -278,23 +278,15 @@ angular
                     var deferred = $q.defer();
 
                     var segmentName = $stateParams.segment;
-                    var isCreateNew = segmentName === '';
+                    var isCreateNew = segmentName === 'Create';
                     var modelId = $stateParams.modelId;
                     var tenantName = $stateParams.tenantName;
 
-                    console.log($stateParams);
-
                     if (isCreateNew) {
-
-                        console.log("new");
-
                         QueryStore.setupStore(null);
                         deferred.resolve(QueryStore.getRestriction());
                     } else {
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
-                            console.log(result);
-
                             if (segmentName && !result) {
                                 if (modelId) {
                                     $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
@@ -302,9 +294,6 @@ angular
                                     $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
                                 }
                             } else {
-
-                                console.log(result);
-
                                 return QueryStore.setupStore(result);
                             }
                         }).then(function() {
@@ -351,6 +340,19 @@ angular
                     return {
                         CreateOrUpdateSegment: CreateOrUpdateSegment
                     };
+                }],
+                AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
+                    var deferred = $q.defer(),
+                        query = { 
+                            'free_form_text_search': '',
+                            'frontend_restriction': null,
+                            'page_filter': {
+                                'num_rows': 10,
+                                'row_offset': 0
+                            }
+                        };
+                    deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
+                    return deferred.promise;
                 }]
             }),
             redirectTo: 'home.model.analysis.explorer',
@@ -423,6 +425,26 @@ angular
             },
             views: {
                 "main@": {
+                    resolve: {
+                        AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
+                            var deferred = $q.defer();
+                            
+                            QueryStore.GetCountByQuery('accounts').then(function(data){ 
+                                deferred.resolve(data);
+                            });
+
+                            return deferred.promise;
+                        }],
+                        Accounts: ['$q', 'QueryStore', function($q, QueryStore) {
+                            var deferred = $q.defer();
+                            
+                            QueryStore.GetDataByQuery('accounts').then(function(data){ 
+                                deferred.resolve(data);
+                            });
+
+                            return deferred.promise;
+                        }]
+                    },
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
@@ -497,6 +519,7 @@ angular
                 pageTitle: 'My Data',
                 pageIcon: 'ico-analysis',
                 section: 'segment.analysis',
+                segment: 'segment.name',
                 category: { value: null, squash: true },
                 subcategory: { value: null, squash: true }
             },

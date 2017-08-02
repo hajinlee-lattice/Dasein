@@ -3,7 +3,7 @@ angular.module('common.datacloud.analysistabs', [
     ])
 .controller('AnalysisTabsController', function (
     $state, $stateParams, $scope, FeatureFlagService, BrowserStorageUtility,
-    ResourceUtility, DataCloudStore, QueryService, QueryStore
+    ResourceUtility, DataCloudStore, QueryService, QueryStore, AccountsCount
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -16,14 +16,10 @@ angular.module('common.datacloud.analysistabs', [
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         loadingData: true,
         restriction: QueryStore.getRestriction() || null,
-        accountsCount: 0
+        accountsCount: AccountsCount
     });
 
     vm.init = function() {
-
-        QueryStore.GetCountByQuery('accounts', '').then(function(data){
-            vm.accountsCount = data;
-        });
 
         vm.loadingData = false;
 

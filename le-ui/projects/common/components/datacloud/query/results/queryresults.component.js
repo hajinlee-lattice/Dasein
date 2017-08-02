@@ -1,15 +1,15 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore) {
+.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore, AccountsCount, Accounts) {
 
     var vm = this;
     angular.extend(vm, {
         resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
         modelId: $stateParams.modelId,
         inModel: $state.current.name.split('.')[1] === 'model',
-        accountsCount: 0,
-        accounts: null,
+        accountsCount: AccountsCount,
+        accounts: Accounts,
         restriction: QueryStore.getRestriction(),
         current: 1,
         pagesize: 20,
@@ -22,23 +22,8 @@ angular.module('common.datacloud.query.results', [
 
 
     vm.init = function() {
-        var offset = (vm.current - 1) * vm.pagesize,
-            query = {
-                free_form_text_search: vm.search,
-                frontend_restriction: vm.restriction,
-                page_filter: {
-                    num_rows: vm.pagesize,
-                    row_offset: offset
-                }
-            };
 
-        QueryStore.GetCountByQuery('accounts', query).then(function(data){
-            vm.accountsCount = data;
-        });
-
-        QueryStore.GetDataByQuery('accounts', query).then(function(data){
-            vm.accounts = data;
-        });
+        console.log(vm.accountsCount, vm.accounts);
 
     };
     vm.init();
@@ -48,14 +33,6 @@ angular.module('common.datacloud.query.results', [
         if ((vm.search && prevQuery) && (vm.search.toUpperCase() === prevQuery.toUpperCase())) {
             return;
         }
-
-        var query = { free_form_text_search: vm.search };
-        QueryStore.GetCountByQuery(vm.resourceType, query).then(function(results) {
-            vm.accountsCount = results;
-        });
-
-        prevQuery = vm.search;
-        vm.current = 1;
         updatePage();
     };
 
@@ -111,21 +88,8 @@ angular.module('common.datacloud.query.results', [
             }
         };
 
-        if (vm.sortBy) {
-            query.sort = {
-                descending: vm.sortDesc,
-                lookups: [
-                    {
-                        columnLookup: {
-                            column_name: vm.sortBy
-                        }
-                    }
-                ]
-            };
-        }
-
-        QueryStore.GetDataByQuery(vm.resourceType, query).then(function(results) {
-            vm.results = results.data;
+        QueryStore.GetDataByQuery('accounts').then(function(data){ 
+            vm.accounts = data;
         });
     };
 });
