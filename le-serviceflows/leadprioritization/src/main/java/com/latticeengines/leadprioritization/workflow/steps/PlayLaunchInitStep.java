@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -125,8 +125,13 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
             log.info("Number of required loops: " + numberOfLoops + ", with pageSize: " + pageSize);
 
-            String[] fields = new String[] { "Zip", "AccountId", "External_ID", "SalesforceAccountID",
-                    "TotalMonetaryValue", "DisplayName", "CrmAccount_External_ID" };
+            String[] fields = new String[] { PlaymakerConstants.CdlKeyZip, //
+                    PlaymakerConstants.AccountId, //
+                    PlaymakerConstants.CdlKeyExternal_ID, //
+                    PlaymakerConstants.SalesforceAccountID, //
+                    PlaymakerConstants.CdlKeyTotalMonetaryValue, //
+                    PlaymakerConstants.CdlKeyDisplayName, //
+                    PlaymakerConstants.CdlKeyCrmAccount_External_ID };
 
             long alreadyReadAccounts = 0;
 
@@ -171,43 +176,20 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         }
         recommendation.setLaunchDate(launchTime);
 
-        recommendation.setAccountId(account.get("AccountId").toString());
-        recommendation.setLeAccountExternalID(account.get("External_ID").toString());
-        recommendation.setSfdcAccountID(account.get("SalesforceAccountID").toString());
+        recommendation.setAccountId(account.get(PlaymakerConstants.AccountId).toString());
+        recommendation.setLeAccountExternalID(account.get(PlaymakerConstants.CdlKeyExternal_ID).toString());
+        recommendation.setSfdcAccountID(account.get(PlaymakerConstants.SalesforceAccountID).toString());
 
-        String valueStr = account.get("TotalMonetaryValue").toString();
+        String valueStr = account.get(PlaymakerConstants.CdlKeyTotalMonetaryValue).toString();
         Double value = 0D;
         if (StringUtils.isNotEmpty(valueStr) && StringUtils.isNumeric(valueStr)) {
             value = Double.parseDouble(valueStr);
         }
         recommendation.setMonetaryValue(value);
-        recommendation.setCompanyName(account.get("DisplayName").toString());
+        recommendation.setCompanyName(account.get(PlaymakerConstants.CdlKeyDisplayName).toString());
         recommendation.setTenantId(tenant.getPid());
         recommendation.setLikelihood(0.5D);
-        recommendation.setSynchronizationDestination("SFDC");
-        recommendation.setPriorityDisplayName("A");
-
-        return recommendation;
-    }
-
-    private Recommendation createDummyRecommendation(Tenant tenant, PlayLaunch playLauch,
-            PlayLaunchInitStepConfiguration config) {
-        Random rand = new Random();
-        String ACCOUNT_ID = "acc__" + System.currentTimeMillis() + rand.nextInt(50000);
-
-        String playName = config.getPlayName();
-        String playLaunchId = config.getPlayLaunchId();
-
-        Recommendation recommendation = new Recommendation();
-        recommendation.setDescription(playLauch.getDescription());
-        recommendation.setLaunchId(playLaunchId);
-        recommendation.setPlayId(playName);
-        recommendation.setLaunchDate(playLauch.getCreatedTimestamp());
-        recommendation.setAccountId(ACCOUNT_ID);
-        recommendation.setLeAccountExternalID(ACCOUNT_ID);
-        recommendation.setTenantId(tenant.getPid());
-        recommendation.setLikelihood(Math.min(0.5D, 1 / rand.nextDouble()));
-        recommendation.setSynchronizationDestination("SFDC");
+        recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
         recommendation.setPriorityDisplayName("A");
 
         return recommendation;

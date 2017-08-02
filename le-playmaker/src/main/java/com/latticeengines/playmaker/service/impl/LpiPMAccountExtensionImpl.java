@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
@@ -28,8 +29,6 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("lpiPMAccountExtension")
 public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
-
-    private String VAR_CHAR = "varchar";
 
     @Autowired
     private AccountProxy accountProxy;
@@ -65,20 +64,20 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             int rowNum = offset + 1;
 
             for (Map<String, Object> accExtRec : data) {
-                if (accExtRec.containsKey("AccountId")) {
-                    accExtRec.put("ID", accExtRec.get("AccountId"));
+                if (accExtRec.containsKey(PlaymakerConstants.AccountId)) {
+                    accExtRec.put(PlaymakerConstants.ID, accExtRec.get(PlaymakerConstants.AccountId));
                 }
-                if (accExtRec.containsKey("SalesforceAccountID")) {
-                    accExtRec.put("SfdcAccountID", accExtRec.get("SalesforceAccountID"));
+                if (accExtRec.containsKey(PlaymakerConstants.SalesforceAccountID)) {
+                    accExtRec.put(PlaymakerConstants.SfdcAccountID, accExtRec.get(PlaymakerConstants.SalesforceAccountID));
                 }
-                if (accExtRec.containsKey("LatticeAccountId")) {
-                    accExtRec.put("LEAccountExternalID", accExtRec.get("LatticeAccountId"));
+                if (accExtRec.containsKey(PlaymakerConstants.LatticeAccountId)) {
+                    accExtRec.put(PlaymakerConstants.LEAccountExternalID, accExtRec.get(PlaymakerConstants.LatticeAccountId));
                 }
 
                 accExtRec.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY,
-                        accExtRec.get("LastModified"));
+                        accExtRec.get(PlaymakerConstants.LastModified));
 
-                accExtRec.put("RowNum", rowNum++);
+                accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
             }
         }
 
@@ -123,66 +122,16 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                 .sorted(Comparator.comparing(Attribute::getName)) //
                 .map(metadata -> {
                     Map<String, Object> metadataInfoMap = new HashMap<>();
-                    metadataInfoMap.put("DisplayName", metadata.getDisplayName());
-                    metadataInfoMap.put("Type", convertToSFDCFieldType(metadata.getSourceLogicalDataType()));
-                    // metadataInfoMap.put("JavaType",
-                    // metadata.getPhysicalDataType());
-                    metadataInfoMap.put("StringLength", findLengthIfStringType(metadata.getSourceLogicalDataType()));
-                    metadataInfoMap.put("Field", metadata.getName());
+                    metadataInfoMap.put(PlaymakerConstants.DisplayName, metadata.getDisplayName());
+                    metadataInfoMap.put(PlaymakerConstants.Type,
+                            LpiPMUtils.convertToSFDCFieldType(metadata.getSourceLogicalDataType()));
+                    metadataInfoMap.put(PlaymakerConstants.StringLength,
+                            LpiPMUtils.findLengthIfStringType(metadata.getSourceLogicalDataType()));
+                    metadataInfoMap.put(PlaymakerConstants.Field, metadata.getName());
                     return metadataInfoMap;
                 });
 
         return stream.collect(Collectors.toList());
-    }
-
-    private String convertToSFDCFieldType(String sourceLogicalDataType) {
-        String type = sourceLogicalDataType;
-
-        if (StringUtils.isNotBlank(sourceLogicalDataType)) {
-            sourceLogicalDataType = sourceLogicalDataType.toLowerCase();
-
-            if (sourceLogicalDataType.contains(VAR_CHAR)) {
-                type = "nvarchar";
-            } else if (sourceLogicalDataType.equals("double")) {
-                type = "decimal";
-            } else if (sourceLogicalDataType.equals("long")) {
-                type = "bigint";
-            } else if (sourceLogicalDataType.equals("boolean")) {
-                type = "bit";
-            }
-        } else {
-            type = "";
-        }
-
-        return type.toUpperCase();
-    }
-
-    private Integer findLengthIfStringType(String sourceLogicalDataType) {
-        Integer length = null;
-
-        if (StringUtils.isNotBlank(sourceLogicalDataType)) {
-            sourceLogicalDataType = sourceLogicalDataType.toLowerCase();
-
-            if (sourceLogicalDataType.contains(VAR_CHAR)) {
-                length = 4000;
-
-                if (sourceLogicalDataType.contains("(")) {
-
-                    sourceLogicalDataType = sourceLogicalDataType.substring(sourceLogicalDataType.indexOf("("));
-
-                    if (sourceLogicalDataType.contains(")")) {
-
-                        sourceLogicalDataType = sourceLogicalDataType.substring(0, sourceLogicalDataType.indexOf(")"));
-
-                        if (StringUtils.isNumeric(sourceLogicalDataType)) {
-                            length = Integer.parseInt(sourceLogicalDataType);
-                        }
-                    }
-                }
-            }
-        }
-
-        return length;
     }
 
     private List<Attribute> getSchemaAttributes(TableRoleInCollection role) {

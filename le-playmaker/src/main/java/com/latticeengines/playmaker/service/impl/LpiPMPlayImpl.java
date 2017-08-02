@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -55,16 +56,16 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                 }
 
                 Map<String, Object> playMap = new HashMap<>();
-                playMap.put("ID", play.getPid());
-                playMap.put("ExternalId", play.getName());
-                playMap.put("DisplayName", play.getDisplayName());
-                playMap.put("Description", play.getDescription());
-                playMap.put("AverageProbability", dummyAvgProbability());
-                playMap.put("LastModificationDate", secondsFromEpoch(play));
-                playMap.put("PlayGroups", dummyPlayGroups());
-                playMap.put("TargetProducts", dummyTargetProducts());
-                playMap.put("Workflow", dummyWorkfowType());
-                playMap.put("RowNum", rowNum++);
+                playMap.put(PlaymakerConstants.ID, play.getPid());
+                playMap.put(PlaymakerConstants.ExternalId, play.getName());
+                playMap.put(PlaymakerConstants.DisplayName, play.getDisplayName());
+                playMap.put(PlaymakerConstants.Description, play.getDescription());
+                playMap.put(PlaymakerConstants.AverageProbability, dummyAvgProbability());
+                playMap.put(PlaymakerConstants.LastModificationDate, secondsFromEpoch(play));
+                playMap.put(PlaymakerConstants.PlayGroups, dummyPlayGroups());
+                playMap.put(PlaymakerConstants.TargetProducts, dummyTargetProducts());
+                playMap.put(PlaymakerConstants.Workflow, dummyWorkfowType());
+                playMap.put(PlaymakerConstants.RowNum, rowNum++);
                 result.add(playMap);
             }
         }
@@ -72,18 +73,18 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     }
 
     private String dummyWorkfowType() {
-        return "ADefault";
+        return PlaymakerConstants.DefaultWorkflowType;
     }
 
     private List<Map<String, String>> dummyTargetProducts() {
         List<Map<String, String>> products = new ArrayList<>();
         Map<String, String> prod1 = new HashMap<>();
-        prod1.put("DisplayName", "Series K Disk");
-        prod1.put("ExternalName", "NETSUITE-SRSK");
+        prod1.put(PlaymakerConstants.DisplayName, "Series K Disk");
+        prod1.put(PlaymakerConstants.ExternalName, "NETSUITE-SRSK");
         products.add(prod1);
         Map<String, String> prod2 = new HashMap<>();
-        prod2.put("DisplayName", "Series L Disk");
-        prod2.put("ExternalName", "NETSUITE-SRSL");
+        prod2.put(PlaymakerConstants.DisplayName, "Series L Disk");
+        prod2.put(PlaymakerConstants.ExternalName, "NETSUITE-SRSL");
         products.add(prod2);
         return products;
     }

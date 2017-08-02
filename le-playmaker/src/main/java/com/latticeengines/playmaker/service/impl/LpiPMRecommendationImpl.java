@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -57,14 +58,14 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
             int rowNum = offset + 1;
 
             for (Map<String, Object> accExtRec : data) {
-                String playName = (String) accExtRec.get("PlayID");
+                String playName = (String) accExtRec.get(PlaymakerConstants.PlayID);
 
-                if (accExtRec.containsKey("PlayID")) {
-                    accExtRec.put("PlayID", playNameAndPidMap.get(playName));
+                if (accExtRec.containsKey(PlaymakerConstants.PlayID)) {
+                    accExtRec.put(PlaymakerConstants.PlayID, playNameAndPidMap.get(playName));
                 }
 
-                if (accExtRec.containsKey("LaunchID")) {
-                    String launchName = (String) accExtRec.get("LaunchID");
+                if (accExtRec.containsKey(PlaymakerConstants.LaunchID)) {
+                    String launchName = (String) accExtRec.get(PlaymakerConstants.LaunchID);
                     if (!playLaunchNameAndPidMap.containsKey(launchName)) {
                         PlayLaunch launch = internalResourceRestApiProxy
                                 .getPlayLaunch(MultiTenantContext.getCustomerSpace(), playName, launchName);
@@ -72,19 +73,24 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                             playLaunchNameAndPidMap.put(launchName, launch.getPid());
                         }
                     }
-                    accExtRec.put("LaunchID", playLaunchNameAndPidMap.get(launchName));
+                    accExtRec.put(PlaymakerConstants.LaunchID, playLaunchNameAndPidMap.get(launchName));
                 }
 
-                if (accExtRec.containsKey("LaunchDate")) {
-                    accExtRec.put("ExpirationDate", (long) accExtRec.get("LaunchDate") + 8000000L);
+                if (accExtRec.containsKey(PlaymakerConstants.LaunchDate)) {
+                    accExtRec.put(PlaymakerConstants.ExpirationDate,
+                            (long) accExtRec.get(PlaymakerConstants.LaunchDate) + 8000000L);
                 }
 
-                accExtRec.put("PriorityID", 25);
-                accExtRec.put("SfdcContactID", "");
-                accExtRec.put("Contacts", createContacts());
+                accExtRec.put(PlaymakerConstants.PriorityID, 25);
+                accExtRec.put(PlaymakerConstants.SfdcContactID, "");
+                accExtRec.put(PlaymakerConstants.Contacts,
 
-                accExtRec.put("RowNum", rowNum++);
+                        createContacts());
+
+                accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
+
             }
+
         }
 
         return data;
@@ -93,16 +99,16 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     private List<Map<String, String>> createContacts() {
         List<Map<String, String>> contacts = new ArrayList<>();
         Map<String, String> contact = new HashMap<>();
-        contact.put("Email", "tom.james@C2education.com");
-        contact.put("Address", "5725 Delphi Drive");
-        contact.put("Phone", "248.813.2000");
-        contact.put("State", "MI");
-        contact.put("ZipCode", "48098-2815");
-        contact.put("Country", "USA");
-        contact.put("SfdcContactID", "");
-        contact.put("City", "Troy");
-        contact.put("ContactID", "17");
-        contact.put("Name", "Tom James");
+        contact.put(PlaymakerConstants.Email, "tom.james@C2education.com");
+        contact.put(PlaymakerConstants.Address, "5725 Delphi Drive");
+        contact.put(PlaymakerConstants.Phone, "248.813.2000");
+        contact.put(PlaymakerConstants.State, "MI");
+        contact.put(PlaymakerConstants.ZipCode, "48098-2815");
+        contact.put(PlaymakerConstants.Country, "USA");
+        contact.put(PlaymakerConstants.SfdcContactID, "");
+        contact.put(PlaymakerConstants.City, "Troy");
+        contact.put(PlaymakerConstants.ContactID, "17");
+        contact.put(PlaymakerConstants.Name, "Tom James");
         contacts.add(contact);
         return contacts;
     }
