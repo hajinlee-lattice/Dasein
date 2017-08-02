@@ -25,21 +25,17 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component
 public abstract class WorkflowSubmitter {
 
-    protected final WorkflowJobService workflowJobService;
+    @Inject
+    protected WorkflowJobService workflowJobService;
 
-    private final ColumnMetadataProxy columnMetadataProxy;
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Value("${common.test.pls.url}")
     protected String internalResourceHostPort;
 
     @Value("${common.test.microservice.url}")
     protected String microserviceHostPort;
-
-    @Inject
-    public WorkflowSubmitter(WorkflowJobService workflowJobService, ColumnMetadataProxy columnMetadataProxy) {
-        this.workflowJobService = workflowJobService;
-        this.columnMetadataProxy = columnMetadataProxy;
-    }
 
     protected CustomerSpace getCustomerSpace() {
         Tenant tenant = MultiTenantContext.getTenant();
