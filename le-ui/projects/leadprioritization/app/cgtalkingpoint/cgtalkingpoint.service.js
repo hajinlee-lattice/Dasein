@@ -8,6 +8,9 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     this.attributes = null;
     this.talkingPoints = [];
     this.talkingPointsPreviewResources = null;
+    this.editedTalkingPoint = {};
+
+    this.savedTalkingPoints = null;
 
     this.clear = function() {
         this.danteUrl = null;
@@ -16,6 +19,38 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         this.attributes = null;
         this.talkingPoints = [];
         this.talkingPointsPreviewResources = null;
+        this.editedTalkingPoint = {};
+        this.savedTalkingPoints = null;
+    }
+
+    this.setEditedTalkingPoint = function(talkingPoint, propertyName) {
+        if(talkingPoint && !propertyName) {
+            this.editedTalkingPoint = talkingPoint;
+        } else if(talkingPoint && propertyName && typeof talkingPoint === 'object') {
+            this.editedTalkingPoint = talkingPoint;
+            this.editedTalkingPoint[propertyName] = talkingPoint[propertyName];
+        } else if(talkingPoint && propertyName && typeof talkingPoint === 'string') {
+            this.editedTalkingPoint[propertyName] = talkingPoint;
+        }
+    };
+
+    this.getEditedTalkingPoint = function() {
+        return this.editedTalkingPoint;
+    };
+
+    this.isTalkingPointDirty = function(talkingPoint) {
+        if(!talkingPoint.pid) { // this means it's a new talking point
+            return true;
+        }
+        for(var i in this.savedTalkingPoints) {
+            var currentTalkingPoint = this.savedTalkingPoints[i];
+            if(currentTalkingPoint.name === talkingPoint.name) {
+                var foundCurrentTalkingPoint = angular.copy(currentTalkingPoint),
+                    newTalkingPoint = angular.copy(talkingPoint);
+                break;
+            }
+        }
+        return !_.isEqual(foundCurrentTalkingPoint, newTalkingPoint);
     }
 
     this.setTalkingPoints = function(talkingPoints) {
@@ -46,6 +81,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         } else {
             CgTalkingPointService.getTalkingPoints(play_name).then(function(data){
                 CgTalkingPointStore.setTalkingPoints(data);
+                CgTalkingPointStore.savedTalkingPoints = angular.copy(data);
                 deferred.resolve(data);
             });
         }

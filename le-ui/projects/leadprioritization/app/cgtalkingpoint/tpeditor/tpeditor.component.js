@@ -12,7 +12,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
         controllerAs: 'vm'
     }
 })
-.service('CgTinyMceConfig', function() {
+.service('CgTinyMceConfig', function($stateParams, CgTalkingPointStore) {
     this.config = {
         branding: false,
         plugins: 'textcolor lists link table legacyoutput paste code',
@@ -30,10 +30,22 @@ angular.module('lp.cg.talkingpoint.editor', [])
         preformatted : true,
         convert_fonts_to_spans: false,
         default_link_target: '_blank',
-        target_list: false
+        target_list: false,
+        setup : function(ed) {
+            ed.on('blur', function(e) {
+                var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint();
+                    content = ed.contentDocument.body.innerHTML;
+                CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
+                if(CgTalkingPointStore.isTalkingPointDirty(talkingPoint)) {
+                    CgTalkingPointStore.saveTalkingPoints([talkingPoint]).then(function(results){
+                        CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true);
+                    });
+                }
+            });
+        }
     };
 })
-.controller('CgTalkingPointEditorController', function($scope, $element, $document, $timeout, $q, CgTinyMceConfig) {
+.controller('CgTalkingPointEditorController', function($scope, $stateParams, $element, $document, $timeout, $q, CgTinyMceConfig, CgTalkingPointStore) {
     var vm = this;
     angular.extend(this, {
         tinyMceConfig: CgTinyMceConfig.config,
@@ -47,7 +59,12 @@ angular.module('lp.cg.talkingpoint.editor', [])
     }
 
     vm.expand = function() {
+        CgTalkingPointStore.setEditedTalkingPoint($scope.tp);
         vm.expanded = !vm.expanded;
+        var tmce = angular.element('iframe');
+        tmce.on('focus',function(){
+            console.log(focused);
+        });
     };
 
     vm.deleteClick = function($event, val) {
@@ -60,6 +77,15 @@ angular.module('lp.cg.talkingpoint.editor', [])
             $document.off('click', handleDocumentClick);
         }
     };
+
+    vm.saveTitle = function() {
+        CgTalkingPointStore.setEditedTalkingPoint($scope.tp, 'title');
+        if(CgTalkingPointStore.isTalkingPointDirty($scope.tp)) {
+            CgTalkingPointStore.saveTalkingPoints([$scope.tp]).then(function(results){
+                CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true);
+            });
+        };
+    }
 
     function handleDocumentClick(evt) {
         if (vm.deleteClicked) {

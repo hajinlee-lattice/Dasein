@@ -164,39 +164,46 @@ angular
                 section: 'dashboard.targets'
             },
             resolve: {
-                // LoadDemoData: function(QueryStore) {
-                //     return QueryStore.getAccounts();
-                // },
-                // DefaultSelectedObject: function() {
-                //     return 'accounts';
-                // },
-                // SelectedSegment: function($q, PlaybookWizardStore, QueryStore) {
-                //     var deferred = $q.defer();
-                //     var segment = PlaybookWizardStore.getSavedSegment();
-                //     QueryStore.setupStore(segment).then(function() {
-                //         deferred.resolve(segment);
-                //     });
-                //     return deferred.promise;
-                // }
+                SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
+                    var CreateOrUpdateSegment = function() {
+                        var segment = QueryStore.getSegment(),
+                            ts = new Date().getTime();
+
+                        if (segment === null) {
+                            segment = {
+                                'name': 'segment' + ts,
+                                'display_name': 'segment' + ts,
+                                'frontend_restriction': QueryStore.getRestriction(),
+                                'page_filter': {
+                                    'row_offset': 0,
+                                    'num_rows': 10
+                                }
+                            };
+                        } else {
+                            segment = {
+                                'name': segment.name,
+                                'display_name': segment.display_name,
+                                'frontend_restriction': QueryStore.getRestriction(),
+                                'page_filter': {
+                                    'row_offset': 0,
+                                    'num_rows': 10
+                                }
+                            };
+                        }
+
+                        return SegmentService.CreateOrUpdateSegment(segment);
+                    };
+
+                    return {
+                        CreateOrUpdateSegment: CreateOrUpdateSegment
+                    };
+                }]
             },
             views: {
                 'main@': {
                     // controller: 'PlaybookWizardTargets',
                     // controllerAs: 'vm',
                     // templateUrl: 'app/playbook/content/targets/targets.component.html'
-                    resolve: {
-                        CountMetadata: ['$q', 'QueryStore', function($q, QueryStore) {
-                            var deferred = $q.defer();
-                            deferred.resolve(QueryStore.getCounts().accounts);
-                            return deferred.promise;
-                        }],
-                        Columns: ['QueryStore', function(QueryStore) {
-                            return QueryStore.columns.accounts;
-                        }],
-                        Records: ['QueryStore', function(QueryStore) {
-                            return QueryStore.getRecordsForUiState('accounts');
-                        }]
-                    },
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'

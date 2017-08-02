@@ -1,6 +1,7 @@
 angular.module('lp.playbook.wizard.insights', [])
 .controller('PlaybookWizardInsights', function(
-    $scope, $state, $stateParams, PlaybookWizardStore, CgTalkingPointStore, TalkingPointPreviewResources, TalkingPointAttributes, TalkingPoints, BrowserStorageUtility
+    $scope, $state, $stateParams, $document,
+    PlaybookWizardStore, CgTalkingPointStore, TalkingPointPreviewResources, TalkingPointAttributes, TalkingPoints, BrowserStorageUtility
 ) {
     var vm = this;
 
@@ -11,10 +12,9 @@ angular.module('lp.playbook.wizard.insights', [])
         stateParams: $stateParams
     });
 
-    // CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
-    //     vm.talkingPoints = talkingPoints;
-    // });
-    vm.talkingPoints = CgTalkingPointStore.talkingPoints;
+    CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
+        vm.talkingPoints = talkingPoints;
+    });
 
     var cachedTalkingPoints = angular.copy(TalkingPoints);
 
@@ -56,6 +56,10 @@ angular.module('lp.playbook.wizard.insights', [])
         vm.talkingPoints.forEach(function(tp, i) {
             tp.offset = i;
         });
+        CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints).then(function(results){
+            CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true);
+        });
+        
     };
 
     function validateTalkingPoints() {
