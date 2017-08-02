@@ -3,15 +3,16 @@ package com.latticeengines.apps.cdl.workflow;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeeingines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -33,17 +34,21 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateAndPublishWorkflowSubmitter.class);
 
-    @Autowired
-    private DataFeedProxy dataFeedProxy;
+    private final DataFeedProxy dataFeedProxy;
 
-    @Autowired
-    private WorkflowProxy workflowProxy;
+    private final WorkflowProxy workflowProxy;
 
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
     @Value("${cdl.transform.workflow.mem.mb}")
     protected int workflowMemMb;
+
+    @Inject
+    public ConsolidateAndPublishWorkflowSubmitter(DataFeedProxy dataFeedProxy, WorkflowProxy workflowProxy) {
+        this.dataFeedProxy = dataFeedProxy;
+        this.workflowProxy = workflowProxy;
+    }
 
     public ApplicationId submit(String customerSpace) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);

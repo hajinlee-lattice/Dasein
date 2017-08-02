@@ -1,10 +1,11 @@
 package com.latticeengines.apps.core.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.service.WorkflowJobService;
@@ -20,8 +21,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobService.class);
 
-    @Autowired
-    private WorkflowProxy workflowProxy;
+    private final WorkflowProxy workflowProxy;
+
+    @Inject
+    public WorkflowJobServiceImpl(WorkflowProxy workflowProxy) {
+        this.workflowProxy = workflowProxy;
+    }
 
     @Override
     public ApplicationId restart(Long jobId) {

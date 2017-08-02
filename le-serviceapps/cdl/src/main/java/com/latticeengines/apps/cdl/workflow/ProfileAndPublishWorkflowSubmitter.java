@@ -1,14 +1,15 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeeingines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
@@ -21,8 +22,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
-import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
-import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProfileAndPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -41,14 +40,19 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${cdl.transform.workflow.mem.mb}")
     protected int workflowMemMb;
 
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
+    private final DataCollectionProxy dataCollectionProxy;
 
-    @Autowired
-    private DataFeedProxy dataFeedProxy;
+    private final DataFeedProxy dataFeedProxy;
 
-    @Autowired
-    private WorkflowProxy workflowProxy;
+    private final WorkflowProxy workflowProxy;
+
+    @Inject
+    public ProfileAndPublishWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy,
+            WorkflowProxy workflowProxy) {
+        this.dataCollectionProxy = dataCollectionProxy;
+        this.dataFeedProxy = dataFeedProxy;
+        this.workflowProxy = workflowProxy;
+    }
 
     public ApplicationId submit(String customerSpace) {
         if (customerSpace == null) {

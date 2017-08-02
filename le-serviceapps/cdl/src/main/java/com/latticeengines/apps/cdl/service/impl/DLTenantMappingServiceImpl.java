@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymanager.DLTenantMappingEntityMgr;
@@ -10,8 +11,12 @@ import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 @Component("dlTenantMappingService")
 public class DLTenantMappingServiceImpl implements DLTenantMappingService {
 
-    @Autowired
-    private DLTenantMappingEntityMgr dlTenantMappingEntityMgr;
+    private final DLTenantMappingEntityMgr dlTenantMappingEntityMgr;
+
+    @Inject
+    public DLTenantMappingServiceImpl(DLTenantMappingEntityMgr dlTenantMappingEntityMgr) {
+        this.dlTenantMappingEntityMgr = dlTenantMappingEntityMgr;
+    }
 
     @Override
     public DLTenantMapping getDLTenantMapping(String dlTenantId, String dlLoadGroup) {

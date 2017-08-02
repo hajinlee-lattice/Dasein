@@ -2,9 +2,9 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +26,12 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks")
 public class DataFeedTaskController extends InternalResourceBase {
 
-    @Autowired
-    private DataFeedTaskManagerService dataFeedTaskManagerService;
+    private final DataFeedTaskManagerService dataFeedTaskManagerService;
+
+    @Inject
+    public DataFeedTaskController(DataFeedTaskManagerService dataFeedTaskManagerService) {
+        this.dataFeedTaskManagerService = dataFeedTaskManagerService;
+    }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody

@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.entitymanager.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +15,12 @@ import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 @Component("dlTenantMappingEntityMgr")
 public class DLTenantMappingEntityMgrImpl extends BaseEntityMgrImpl<DLTenantMapping> implements DLTenantMappingEntityMgr {
 
-    @Autowired
-    private DLTenantMappingDao dlTenantMappingDao;
+    private final DLTenantMappingDao dlTenantMappingDao;
+
+    @Inject
+    public DLTenantMappingEntityMgrImpl(DLTenantMappingDao dlTenantMappingDao) {
+        this.dlTenantMappingDao = dlTenantMappingDao;
+    }
 
     @Override
     public BaseDao<DLTenantMapping> getDao() {

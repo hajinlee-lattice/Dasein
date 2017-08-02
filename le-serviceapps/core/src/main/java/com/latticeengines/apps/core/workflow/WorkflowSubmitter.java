@@ -1,9 +1,10 @@
-package com.latticeeingines.apps.core.workflow;
+package com.latticeengines.apps.core.workflow;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,17 +25,21 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component
 public abstract class WorkflowSubmitter {
 
-    @Autowired
-    protected WorkflowJobService workflowJobService;
+    protected final WorkflowJobService workflowJobService;
 
-    @Autowired
-    protected ColumnMetadataProxy columnMetadataProxy;
+    private final ColumnMetadataProxy columnMetadataProxy;
 
     @Value("${common.test.pls.url}")
     protected String internalResourceHostPort;
 
     @Value("${common.test.microservice.url}")
     protected String microserviceHostPort;
+
+    @Inject
+    public WorkflowSubmitter(WorkflowJobService workflowJobService, ColumnMetadataProxy columnMetadataProxy) {
+        this.workflowJobService = workflowJobService;
+        this.columnMetadataProxy = columnMetadataProxy;
+    }
 
     protected CustomerSpace getCustomerSpace() {
         Tenant tenant = MultiTenantContext.getTenant();

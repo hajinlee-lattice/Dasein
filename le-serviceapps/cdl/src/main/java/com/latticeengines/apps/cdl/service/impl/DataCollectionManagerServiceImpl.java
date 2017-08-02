@@ -1,17 +1,12 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.Date;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
-import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
@@ -25,25 +20,29 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
 
     private static final Logger log = LoggerFactory.getLogger(DataCollectionManagerServiceImpl.class);
 
-    @Autowired
-    private DataFeedProxy dataFeedProxy;
+    private final DataFeedProxy dataFeedProxy;
 
-    @Autowired
-    private DataCollectionProxy dataCollectionProxy;
+    private final DataCollectionProxy dataCollectionProxy;
 
-    @Autowired
-    private WorkflowProxy workflowProxy;
+    private final WorkflowProxy workflowProxy;
+
+    @Inject
+    public DataCollectionManagerServiceImpl(DataFeedProxy dataFeedProxy, DataCollectionProxy dataCollectionProxy,
+            WorkflowProxy workflowProxy) {
+        this.dataFeedProxy = dataFeedProxy;
+        this.dataCollectionProxy = dataCollectionProxy;
+        this.workflowProxy = workflowProxy;
+    }
 
     @Override
     public boolean resetAll(String customerSpaceStr) {
         DataFeed df = dataFeedProxy.getDataFeed(customerSpaceStr);
 
         DataFeed.Status status = df.getStatus();
-        if ((status == DataFeed.Status.Deleting) ||
-            (status == DataFeed.Status.Initing)) {
+        if ((status == DataFeed.Status.Deleting) || (status == DataFeed.Status.Initing)) {
             return true;
         }
-        
+
         quiesceDataFeed(customerSpaceStr, df);
 
         dataFeedProxy.updateDataFeedStatus(customerSpaceStr, DataFeed.Status.Initing.getName());
@@ -61,12 +60,10 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
     public boolean resetEntity(String customerSpaceStr, BusinessEntity entity) {
         DataFeed df = dataFeedProxy.getDataFeed(customerSpaceStr);
         DataFeed.Status status = df.getStatus();
-        if ((status == DataFeed.Status.Deleting) ||
-            (status == DataFeed.Status.Initing) ||
-            (status == DataFeed.Status.InitialLoaded)) {
+        if ((status == DataFeed.Status.Deleting) || (status == DataFeed.Status.Initing)
+                || (status == DataFeed.Status.InitialLoaded)) {
             return true;
-        } else if ((df.getStatus() == DataFeed.Status.Profiling) ||
-                   (df.getStatus() == DataFeed.Status.Consolidating)) {
+        } else if ((df.getStatus() == DataFeed.Status.Profiling) || (df.getStatus() == DataFeed.Status.Consolidating)) {
             return false;
         }
         resetBatchStore(customerSpaceStr, entity);
@@ -97,8 +94,7 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
         dataFeedProxy.resetImport(customerSpaceStr);
     }
 
-
     private void resetBatchStore(String customerSpaceStr, BusinessEntity entity) {
-         dataCollectionProxy.resetTable(customerSpaceStr, entity.getBatchStore());
+        dataCollectionProxy.resetTable(customerSpaceStr, entity.getBatchStore());
     }
 }

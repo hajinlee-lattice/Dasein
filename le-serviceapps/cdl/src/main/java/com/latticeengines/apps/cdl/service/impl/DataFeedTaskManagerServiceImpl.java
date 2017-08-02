@@ -2,10 +2,11 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Date;
 
+import javax.inject.Inject;
+
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -30,20 +31,24 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskManagerServiceImpl.class);
 
-    @Autowired
-    private DataFeedProxy dataFeedProxy;
+    private final DataFeedProxy dataFeedProxy;
 
-    @Autowired
-    private TenantService tenantService;
+    private final TenantService tenantService;
 
-    @Autowired
-    private DLTenantMappingService dlTenantMappingService;
+    private final DLTenantMappingService dlTenantMappingService;
 
-    @Autowired
-    private CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter;
+    private final CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter;
 
     @Value("${cdl.dataloader.tenant.mapping.enabled:false}")
     private boolean dlTenantMappingEnabled;
+
+    @Inject
+    public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter, DataFeedProxy dataFeedProxy, TenantService tenantService, DLTenantMappingService dlTenantMappingService) {
+        this.cdlDataFeedImportWorkflowSubmitter = cdlDataFeedImportWorkflowSubmitter;
+        this.dataFeedProxy = dataFeedProxy;
+        this.tenantService = tenantService;
+        this.dlTenantMappingService = dlTenantMappingService;
+    }
 
     @Override
     public String createDataFeedTask(String customerSpaceStr, String feedType, String entity, String source,

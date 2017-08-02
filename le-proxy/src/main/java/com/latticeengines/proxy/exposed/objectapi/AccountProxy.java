@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed.objectapi;
 
+import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,17 +31,15 @@ public class AccountProxy extends MicroserviceRestApiProxy implements AccountInt
 
     @Override
     public long getAccountsCount(String customerSpace, String start, DataRequest dataRequest) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        String url = constructUrl("/{customerSpace}/accounts/count?start={start}", customerSpace, start);
+        String url = constructUrl("/{customerSpace}/accounts/count?start={start}", shortenCustomerSpace(customerSpace), start);
         return post("get Count", url, dataRequest, Integer.class);
     }
 
     @Override
     public DataPage getAccounts(String customerSpace, String start, Integer offset, Integer pageSize,
             DataRequest dataRequest) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
         String url = constructUrl("/{customerSpace}/accounts/data?start={start}&offset={offset}&pageSize={pagesize}",
-                customerSpace, start, offset, pageSize);
+                shortenCustomerSpace(customerSpace), start, offset, pageSize);
         return post("get Data", url, dataRequest, DataPage.class);
     }
 

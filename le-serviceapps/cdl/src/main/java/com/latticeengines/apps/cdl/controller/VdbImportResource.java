@@ -1,8 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,8 +27,12 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/vdbimport")
 public class VdbImportResource extends InternalResourceBase {
 
-    @Autowired
-    private VdbImportService vdbImportService;
+    private final VdbImportService vdbImportService;
+
+    @Inject
+    public VdbImportResource(VdbImportService vdbImportService) {
+        this.vdbImportService = vdbImportService;
+    }
 
     @RequestMapping(value = "/loadvisidbdata", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody

@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeeingines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
@@ -31,8 +31,8 @@ public class ImportVdbTableAndPublishWorkflowSubmitter extends WorkflowSubmitter
         return workflowJobService.submit(configuration);
     }
 
-    public ImportVdbTableAndPublishWorkflowConfiguration generateConfiguration(VdbLoadTableConfig loadConfig,
-            String collectionIdentifier) {
+    private ImportVdbTableAndPublishWorkflowConfiguration generateConfiguration(VdbLoadTableConfig loadConfig,
+                                                                                String collectionIdentifier) {
         CustomerSpace customerSpace = CustomerSpace.parse(loadConfig.getTenantId());
         VdbConnectorConfiguration vdbConnectorConfiguration = new VdbConnectorConfiguration();
         vdbConnectorConfiguration.setGetQueryDataEndpoint(loadConfig.getGetQueryDataEndpoint());
