@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -172,26 +173,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void registerExtract(DataFeedTask datafeedTask, String tableName, Extract extract) {
-        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
-        Table extractTable = tableEntityMgr.findByName(tableName);
-        extractTable.getExtracts().clear();
-        extractTable = TableUtils.clone(extractTable, NamingUtils.uuid("DataTable"));
-        extractTable.setTenant(MultiTenantContext.getTenant());
-        extractTable.addExtract(extract);
-        extractTable.setTableType(TableType.DATATABLE);
-        tableTypeHolder.setTableType(TableType.DATATABLE);
-        log.info(String.format("adding extract to new data table %s", extractTable.getName()));
-        tableEntityMgr.create(extractTable);
-        addTableToQueue(datafeedTask, extractTable);
-        datafeedTask.setLastImported(new Date());
-
-        boolean templateTableChanged = Status.Updated.equals(datafeedTask.getStatus());
-        if (templateTableChanged) {
-            datafeedTask.setStatus(Status.Active);
-            log.info(String.format("Since import table has been updated, set data feed task to Active status %s",
-                    datafeedTask));
+        if (extract != null) {
+            registerExtracts(datafeedTask, tableName, Arrays.asList(extract));
         }
-        update(datafeedTask, datafeedTask.getImportData(), datafeedTask.getStatus(), datafeedTask.getLastImported());
     }
 
     @Override
@@ -207,12 +191,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             cloneTable.setTenant(MultiTenantContext.getTenant());
             cloneTable.addExtract(extract);
             cloneTable.setTableType(TableType.DATATABLE);
-            tableTypeHolder.setTableType(TableType.DATATABLE);
-            log.info(String.format("data table has been consumed, adding extract to new data table %s",
-                    extractTable.getName()));
+            log.info(String.format("Adding extract to new data table %s", extractTable.getName()));
             tableEntityMgr.create(cloneTable);
             addTableToQueue(datafeedTask, cloneTable);
         }
+        datafeedTask.setLastImported(new Date());
+
+        boolean templateTableChanged = Status.Updated.equals(datafeedTask.getStatus());
+        if (templateTableChanged) {
+            datafeedTask.setStatus(Status.Active);
+            log.info(String.format("Since import table has been updated, set data feed task to Active status %s",
+                    datafeedTask));
+        }
+        update(datafeedTask, datafeedTask.getImportData(), datafeedTask.getStatus(), datafeedTask.getLastImported());
 
     }
 
