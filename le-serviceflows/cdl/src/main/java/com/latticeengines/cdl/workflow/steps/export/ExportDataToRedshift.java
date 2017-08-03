@@ -129,7 +129,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         String distKey = TableRoleInCollection.BucketedAccount.getPrimaryKey().name();
         List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
         if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
-            sortKeys.add(distKey);
+            sortKeys.add(tableRole.getPrimaryKey().name());
         }
 
         HdfsToRedshiftConfiguration exportConfig = configuration.getHdfsToRedshiftConfiguration();
