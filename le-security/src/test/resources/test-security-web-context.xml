@@ -31,6 +31,8 @@
                    pattern="/security/internal/**"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
+        <security:intercept-url pattern="/security/internal/health/**" access="permitAll" />
+        <security:intercept-url pattern="/security/internal/**" access="hasRole('ROLE_INTERNAL_USER')" />
         <security:custom-filter ref="internalRestServicesFilter" before="PRE_AUTH_FILTER" />
     </security:http>
 

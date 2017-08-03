@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.web.client.RestTemplate;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
@@ -29,6 +31,13 @@ public class InternalResourceTestNG extends SecurityFunctionalTestNGBase {
             assertEquals(code, "401");
         }
         assertTrue(exception);
+    }
+
+    @Test(groups = "functional")
+    public void accessHealthCheck() {
+        RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+        StatusDocument statusDocument = restTemplate.getForObject(getRestAPIHostPort() + "/internal/health", StatusDocument.class);
+        Assert.assertNotNull(statusDocument);
     }
 
     @SuppressWarnings("unchecked")

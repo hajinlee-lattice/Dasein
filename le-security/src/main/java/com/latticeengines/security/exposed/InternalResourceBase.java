@@ -6,6 +6,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
 
+//TODO: Use spring security to protect internal apis
+@Deprecated
 public class InternalResourceBase {
 
     public void checkHeader(HttpServletRequest request) {
