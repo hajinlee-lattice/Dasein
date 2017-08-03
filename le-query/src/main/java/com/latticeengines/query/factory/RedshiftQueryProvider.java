@@ -1,9 +1,8 @@
 package com.latticeengines.query.factory;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -15,8 +14,7 @@ import com.querydsl.sql.SQLTemplates;
 @Component("redshiftQueryProvider")
 public class RedshiftQueryProvider extends QueryProvider {
 
-    @Autowired
-    @Qualifier("redshiftDataSource")
+    @Resource(name ="redshiftSegmentDataSource")
     private DataSource redshiftDataSource;
 
     @Override
