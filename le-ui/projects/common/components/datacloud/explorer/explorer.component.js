@@ -286,6 +286,9 @@ angular.module('common.datacloud.explorer', [
                 vm.enrichmentsObj[item.Category].push(item);
                 vm.enrichments.push(item);
 
+                if (item.IsInternal !== true) {
+                    item.IsInternal = false;
+                }
             }
 
             numbersNumber = 0;
@@ -841,7 +844,7 @@ angular.module('common.datacloud.explorer', [
 
     var getEnrichmentCategories = function() {
         if (EnrichmentTopAttributes) {
-            vm.categories = Object.keys(EnrichmentTopAttributes);
+            vm.categories = Object.keys(EnrichmentTopAttributes).sort();
 
             if (vm.show_segmentation && vm.section == 'segment.analysis') {
                 var topCategories = [

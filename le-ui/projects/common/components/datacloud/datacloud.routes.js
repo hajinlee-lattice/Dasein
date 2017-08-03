@@ -282,8 +282,6 @@ angular
                     var modelId = $stateParams.modelId;
                     var tenantName = $stateParams.tenantName;
 
-                    console.log($stateParams);
-
                     if (isCreateNew) {
                         QueryStore.setupStore(null);
                         deferred.resolve(QueryStore.getRestriction());
