@@ -9,8 +9,6 @@
 
     <import resource="classpath:oauth2db-persistence-datasource-context.xml"/>
 
-    <tx:annotation-driven transaction-manager="transactionManager"/>
-
     <bean id="sessionFactoryOauth2" primary="true"
           class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourceOauth2"/>
@@ -30,9 +28,11 @@
         <property name="sessionFactory" ref="sessionFactoryOauth2"/>
     </bean>
 
-    <bean id="transactionManagerOauth2"
+    <bean id="transactionManager"
           class="org.springframework.orm.hibernate4.HibernateTransactionManager"
           p:sessionFactory-ref="sessionFactoryOauth2">
         <qualifier value="oauth2"/>
     </bean>
+
+    <tx:annotation-driven/>
 </beans>
