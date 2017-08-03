@@ -55,8 +55,6 @@ angular.module('common.datacloud.query.service',[
 
     this.setupStore = function(segment) {
 
-        console.log(segment);
-
         var self = this;
         var deferred = $q.defer();
 
@@ -86,7 +84,6 @@ angular.module('common.datacloud.query.service',[
     this.addRestriction = function(attribute) {
 
         console.log(attribute);
-
 
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
@@ -178,6 +175,8 @@ angular.module('common.datacloud.query.service',[
                 };
             };
 
+            console.log(queryWithRestriction);
+
             return QueryService.GetCountByQuery(resourceType, queryWithRestriction);
         }
     };
@@ -207,6 +206,8 @@ angular.module('common.datacloud.query.service',[
                     }
                 };
             };
+
+            console.log(queryWithRestriction, segment);
 
             return QueryService.GetDataByQuery(resourceType, queryWithRestriction, segment);
         }

@@ -12,6 +12,7 @@ angular.module('common.datacloud.analysistabs', [
         DataCloudStore: DataCloudStore,
         QueryStore: QueryStore,
         stateParams: $stateParams,
+        segment: $stateParams.segment,
         section: $stateParams.section,
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         loadingData: true,
@@ -53,6 +54,10 @@ angular.module('common.datacloud.analysistabs', [
 
         var params = {
             section: vm.section
+        };
+
+        var segment = {
+            segment: vm.segment
         };
 
         if (goHome) {

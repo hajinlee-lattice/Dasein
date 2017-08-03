@@ -2,7 +2,7 @@ angular.module('lp.models.segments', [
     'mainApp.models.modals.DeleteSegmentModal'
 ])
 .controller('SegmentationListController', function ($scope, $element, $state, $stateParams,
-    SegmentsList, DeleteSegmentModal, SegmentService) {
+    SegmentsList, DeleteSegmentModal, SegmentService, QueryStore) {
 
     var vm = this;
     angular.extend(vm, {
@@ -52,7 +52,7 @@ angular.module('lp.models.segments', [
         }
     };
 
-    vm.tileClick = function ($event, segmentName) {
+    vm.tileClick = function ($event, segment) {
         $event.preventDefault();
 
         if ($state.current.name == 'home.segments') {

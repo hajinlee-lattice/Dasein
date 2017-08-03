@@ -282,6 +282,8 @@ angular
                     var modelId = $stateParams.modelId;
                     var tenantName = $stateParams.tenantName;
 
+                    console.log($stateParams);
+
                     if (isCreateNew) {
                         QueryStore.setupStore(null);
                         deferred.resolve(QueryStore.getRestriction());
@@ -321,6 +323,9 @@ angular
                                 }
                             };
                         } else {
+
+                            console.log(segment.name);
+
                             segment = {
                                 'name': segment.name,
                                 'display_name': segment.display_name,
@@ -439,7 +444,7 @@ angular
                             var deferred = $q.defer();
                             
                             QueryStore.GetDataByQuery('accounts').then(function(data){ 
-                                deferred.resolve(data);
+                                deferred.resolve(data.data);
                             });
 
                             return deferred.promise;
