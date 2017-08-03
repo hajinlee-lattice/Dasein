@@ -7,6 +7,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -24,6 +25,7 @@ public class ResourceAspect {
     public void allControllerMethods(JoinPoint joinPoint) {
         checkHeader(joinPoint);
         String customerSpace = (String) joinPoint.getArgs()[0];
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         setSecurityContext(customerSpace);
     }
 
