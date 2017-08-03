@@ -117,7 +117,9 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void importData() throws Exception {
-        // TODO: after we make change to enforce single extract per table, we can simplify the test and remove third consolidate
+        // TODO: after we make change to enforce single extract per table, we
+        // can simplify the test and remove third consolidate
+        dataFeedProxy.updateDataFeedStatus(mainTenant.getId(), DataFeed.Status.Initialized.getName());
         mockAvroData(0, 300);
         Thread.sleep(2000);
         mockAvroData(300, 200);
@@ -315,8 +317,8 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
                 .getResourceAsStream("com/latticeengines/pls/end2end/cdl/Account.avro");
         try {
             List<GenericRecord> records = AvroUtils.readFromInputStream(dataIs);
-            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro", records.subList(offset, offset + limit),
-                    true);
+            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro",
+                    records.subList(offset, offset + limit), true);
             log.info("Uploaded " + limit + " records to " + targetPath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload avro for " + entity);

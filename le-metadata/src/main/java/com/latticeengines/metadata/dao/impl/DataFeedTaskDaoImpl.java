@@ -8,7 +8,6 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
 import com.latticeengines.metadata.dao.DataFeedTaskDao;
@@ -47,43 +46,28 @@ public class DataFeedTaskDaoImpl extends BaseDaoImpl<DataFeedTask> implements Da
     }
 
     @Override
-    public void update(DataFeedTask datafeedTask, Table importData) {
+    public void update(DataFeedTask datafeedTask, Date startTime) {
         Session session = getSessionFactory().getCurrentSession();
         Class<DataFeedTask> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s datafeedtask set datafeedtask.importData=:importData where datafeedtask.pid=:pid",
-                entityClz.getSimpleName());
-        Query query = session.createQuery(queryStr);
-        query.setLong("pid", datafeedTask.getPid());
-        query.setParameter("importData", importData);
-        query.executeUpdate();
-    }
-
-    @Override
-    public void update(DataFeedTask datafeedTask, Table importData, Date startTime) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<DataFeedTask> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "update %s datafeedtask set datafeedtask.startTime=:startTime, datafeedtask.importData=:importData where datafeedtask.pid=:pid",
+                "update %s datafeedtask set datafeedtask.startTime=:startTime where datafeedtask.pid=:pid",
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("pid", datafeedTask.getPid());
         query.setDate("startTime", startTime);
-        query.setParameter("importData", importData);
         query.executeUpdate();
     }
 
     @Override
-    public void update(DataFeedTask datafeedTask, Table importData, Status status, Date lastImported) {
+    public void update(DataFeedTask datafeedTask, Status status, Date lastImported) {
         Session session = getSessionFactory().getCurrentSession();
         Class<DataFeedTask> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s datafeedtask set datafeedtask.importData=:importData, lastImported=:lastImported, status=:status where datafeedtask.pid=:pid",
+                "update %s datafeedtask set lastImported=:lastImported, status=:status where datafeedtask.pid=:pid",
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("pid", datafeedTask.getPid());
         query.setDate("lastImported", lastImported);
-        query.setParameter("importData", importData);
         query.setString("status", status.name());
         query.executeUpdate();
     }

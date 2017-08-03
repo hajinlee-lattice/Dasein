@@ -96,8 +96,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
         dataTable.setName("dataTable2");
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(MultiTenantContext.getTenant());
-        task.setImportData(dataTable);
-        datafeedTaskEntityMgr.addImportDataTableToQueue(task);
+        datafeedTaskEntityMgr.addTableToQueue(task, dataTable);
 
         assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
         assertEquals(datafeedTaskEntityMgr.pollFirstDataTable(task).toString(), dataTable.toString());

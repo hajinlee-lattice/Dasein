@@ -7,8 +7,8 @@ import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 
 public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
@@ -17,8 +17,6 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
     Table peekFirstDataTable(DataFeedTask task);
 
     int getDataTableSize(DataFeedTask task);
-
-    void addImportDataTableToQueue(DataFeedTask task);
 
     void clearTableQueue();
 
@@ -40,11 +38,9 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
     void updateDataFeedTask(DataFeedTask dataFeedTask);
 
-    void update(DataFeedTask task, Table importData, Date startTime);
+    void update(DataFeedTask task, Date startTime);
 
-    void update(DataFeedTask dataFeedTask, Table importData);
-
-    void update(DataFeedTask datafeedTask, Table importData, Status status, Date lastImported);
+    void update(DataFeedTask datafeedTask, Status status, Date lastImported);
 
     List<DataFeedTaskTable> getDataTables(DataFeedTask datafeedTask);
 

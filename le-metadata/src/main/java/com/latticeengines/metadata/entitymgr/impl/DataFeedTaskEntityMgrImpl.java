@@ -1,7 +1,6 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -68,17 +67,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(DataFeedTask datafeedTask) {
-        Table dataTable = datafeedTask.getImportData();
         Table templateTable = datafeedTask.getImportTemplate();
-        if (dataTable != null) {
-            Table existing = tableEntityMgr.findByName(dataTable.getName());
-            if (existing == null) {
-                dataTable.setTableType(TableType.DATATABLE);
-                tableEntityMgr.create(dataTable);
-            } else {
-                datafeedTask.setImportData(existing);
-            }
-        }
         tableTypeHolder.setTableType(TableType.IMPORTTABLE);
         if (templateTable != null) {
             Table existing = tableEntityMgr.findByName(templateTable.getName());
@@ -91,7 +80,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         }
         tableTypeHolder.setTableType(TableType.DATATABLE);
         datafeedTaskDao.create(datafeedTask);
-        addImportDataTableToQueue(datafeedTask);
     }
 
     @Override
@@ -130,24 +118,11 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void addImportDataTableToQueue(DataFeedTask datafeedTask) {
-        try {
-            if (datafeedTask.getImportData() != null) {
-                if (datafeedTask.getImportData().getPid() == null) {
-                    datafeedTask.getImportData().setTableType(TableType.DATATABLE);
-                    tableEntityMgr.create(datafeedTask.getImportData());
-                    update(datafeedTask, datafeedTask.getImportData());
-                }
-                addTableToQueue(datafeedTask, datafeedTask.getImportData());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
     public void addTableToQueue(DataFeedTask datafeedTask, Table table) {
+        if (table.getPid() == null) {
+            table.setTableType(TableType.DATATABLE);
+            tableEntityMgr.create(table);
+        }
         if (!TableType.DATATABLE.equals(table.getTableType())) {
             throw new IllegalArgumentException(
                     "Can only put data table in the queue. But " + table.getName() + " is a " + table.getTableType());
@@ -201,9 +176,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
         Table cloneTable = TableUtils.clone(template, NamingUtils.uuid("DataTable"));
         cloneTable.setTenant(MultiTenantContext.getTenant());
         cloneTable.addExtract(extract);
-        cloneTable.setTableType(TableType.DATATABLE);
         log.info(String.format("Adding extract to new data table %s", template.getName()));
-        tableEntityMgr.create(cloneTable);
         addTableToQueue(datafeedTask, cloneTable);
     }
 
@@ -215,7 +188,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             log.info(String.format("Since import table has been updated, set data feed task to Active status %s",
                     datafeedTask));
         }
-        update(datafeedTask, datafeedTask.getImportData(), datafeedTask.getStatus(), datafeedTask.getLastImported());
+        update(datafeedTask, datafeedTask.getStatus(), datafeedTask.getLastImported());
     }
 
     @Override
@@ -335,20 +308,14 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void update(DataFeedTask datafeedTask, Table importData, Date startTime) {
-        datafeedTaskDao.update(datafeedTask, importData, startTime);
+    public void update(DataFeedTask datafeedTask, Date startTime) {
+        datafeedTaskDao.update(datafeedTask, startTime);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void update(DataFeedTask datafeedTask, Table importData) {
-        datafeedTaskDao.update(datafeedTask, importData);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void update(DataFeedTask datafeedTask, Table importData, Status status, Date lastImported) {
-        datafeedTaskDao.update(datafeedTask, importData, status, lastImported);
+    public void update(DataFeedTask datafeedTask, Status status, Date lastImported) {
+        datafeedTaskDao.update(datafeedTask, status, lastImported);
     }
 
     @Override

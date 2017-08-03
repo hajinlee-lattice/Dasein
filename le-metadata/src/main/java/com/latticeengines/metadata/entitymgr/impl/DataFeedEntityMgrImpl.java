@@ -160,7 +160,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeed.setStatus(Status.Consolidating);
         tasks = datafeed.getTasks();
         tasks.forEach(task -> {
-            datafeedTaskEntityMgr.update(task, null, new Date());
+            datafeedTaskEntityMgr.update(task, new Date());
         });
         log.info(String.format("starting execution: updating data feed to %s", datafeed));
         update(datafeed);
