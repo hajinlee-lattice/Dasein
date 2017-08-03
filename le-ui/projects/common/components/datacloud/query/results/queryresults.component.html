@@ -12,7 +12,7 @@
                 </form>
             </div>
         </li>
-        <li class="buttons">
+        <li class="buttons" ng-if="vm.section != 'dashboard.targets'">
             <div>
                 <a href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}"><button class="button icon-button white-button"><i class="fa fa-download"></i></button></a>
                 <button ng-if="!vm.inModel" class="button white-button" ui-sref="home.import.entry">Import Data</button>

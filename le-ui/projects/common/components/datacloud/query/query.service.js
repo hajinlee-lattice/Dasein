@@ -232,7 +232,7 @@ angular.module('common.datacloud.query.service',[
 
             console.log(query, this.restriction);
 
-            if(query === undefined){
+            if(query === undefined || query === ''){
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
                     'frontend_restriction': this.restriction,

@@ -59,6 +59,7 @@ angular
                 "navigation@": {
                     controller: function($scope, $stateParams, $state, $rootScope, Play) {
                         $scope.play_name = $stateParams.play_name || '';
+                        $scope.segment = Play.segment;
                         $scope.stateName = function() {
                             return $state.current.name;
                         }
@@ -157,7 +158,7 @@ angular
             }
         })
         .state('home.playbook.dashboard.targets', {
-            url: '/targets',
+            url: '/targets/:segment',
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Play Book',
@@ -167,7 +168,7 @@ angular
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
                     var CreateOrUpdateSegment = function() {
                         var segment = QueryStore.getSegment(),
-                        ts = new Date().getTime();
+                            ts = new Date().getTime();
 
                         if (segment === null) {
                             segment = {
@@ -180,6 +181,7 @@ angular
                                 }
                             };
                         } else {
+
                             segment = {
                                 'name': segment.name,
                                 'display_name': segment.display_name,
@@ -197,29 +199,28 @@ angular
                     return {
                         CreateOrUpdateSegment: CreateOrUpdateSegment
                     };
-                }],
-                AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
-                    var deferred = $q.defer(),
-                        query = { 
-                            'free_form_text_search': '',
-                            'frontend_restriction': null,
-                            'page_filter': {
-                                'num_rows': 10,
-                                'row_offset': 0
-                            }
-                        };
-                    deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
-                    return deferred.promise;
-                }],
-                Accounts: ['$q', 'QueryStore', function($q, QueryStore) {
-                    var deferred = $q.defer();
-
-                    QueryStore.GetDataByQuery('accounts').then(function(data){ 
-                        deferred.resolve(data);
-                    });
-
-                    return deferred.promise;
                 }]
+                // AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
+                //     var deferred = $q.defer();
+
+                //     QueryStore.GetCountByQuery('accounts').then(function(data){ 
+                //         deferred.resolve(data);
+                //     });
+
+                //     return deferred.promise;
+                // }],
+                // Accounts: ['$q', 'QueryStore', 'PlaybookWizardStore', function($q, QueryStore, PlaybookWizardStore) {
+                //     var deferred = $q.defer(),
+                //         segment = PlaybookWizardStore.getSavedSegment();
+                //     QueryStore.setAccounts('', segment);
+                //     QueryStore.getAccounts().then(function(){
+                //          deferred.resolve(data.data);
+                //     });
+                //     // QueryStore.GetDataByQuery('accounts', '', segment).then(function(data){ 
+                //     //     deferred.resolve(data.data);
+                //     // });
+                //     return deferred.promise;
+                // }]
             },
             views: {
                 'main@': {

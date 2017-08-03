@@ -18,6 +18,7 @@ angular.module('common.datacloud.query.results', [
         sortDesc: false,
         authToken: BrowserStorageUtility.getTokenDocument(),
         saving: false,
+        section: $stateParams.section
     });
 
 
@@ -32,8 +33,13 @@ angular.module('common.datacloud.query.results', [
         };
 
         console.log(vm.loadingAccounts);
-
-        QueryStore.setAccounts();
+        
+        if($stateParams.segment != null){
+            QueryStore.setAccounts('', $stateParams.segment);
+        } else {
+            QueryStore.setAccounts();
+        };
+        //QueryStore.setAccounts();
         QueryStore.getAccounts().then(function(data){
             vm.accounts = data;
         });

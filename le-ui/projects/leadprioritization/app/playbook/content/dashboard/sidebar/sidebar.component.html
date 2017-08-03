@@ -22,7 +22,7 @@
             </a>
         </li>
         <li role="presentation" ui-sref-active="active" ng-disabled="menuDisabled || targetsDisabled">
-            <a ui-sref="home.playbook.dashboard.targets({play_name: play_name})">
+            <a ui-sref="home.playbook.dashboard.targets({play_name: play_name, segment: segment})">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_TARGETS')}}">
                     <span class="ico ico-targets ico-light-gray"></span>
                 </span>

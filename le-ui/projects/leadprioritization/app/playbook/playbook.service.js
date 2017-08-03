@@ -164,6 +164,7 @@ angular.module('lp.playbook')
     }
 
     this.getSavedSegment = function() {
+        console.log('get savedSegment');
         return this.savedSegment;
     }
 
