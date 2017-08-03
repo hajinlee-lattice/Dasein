@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class InternalResource {
+public class TestInternalResource {
 
     @RequestMapping(value = "/internal/resource", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
