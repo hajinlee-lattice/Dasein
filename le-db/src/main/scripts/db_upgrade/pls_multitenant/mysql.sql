@@ -26,17 +26,17 @@ ALTER TABLE `PLS_MultiTenant`.`PLAY` ADD CREATED_BY varchar(255) DEFAULT "lattic
 
 ALTER TABLE `PLS_MultiTenant`.`OAUTH2_ACCESS_TOKEN` ADD LAST_MODIFIED_TIME BIGINT(20) DEFAULT 946656000000 NOT NULL;
 
-create table `TALKINGPOINT` (
+CREATE TABLE `PLS_MultiTenant`.`TALKINGPOINT` (
   `PID` bigint not null auto_increment unique,
-  `CONTENT` longtext not null,
+  `CONTENT` longtext,
   `CREATED` datetime not null,
   `NAME` varchar(255) not null unique,
-  `OFFSET` integer not null,
-  `TITLE` varchar(255) not null,
+  `OFFSET` integer,
+  `TITLE` varchar(255),
   `UPDATED` datetime not null,
   `PLAY_ID` bigint not null,
   primary key (`PID`)) ENGINE=InnoDB;
 
-ALTER TABLE `PLS_MultiTenant`.`TALKINGPOINT` add index FK85460B9AB11F603 (PLAY_ID), add constraint FK85460B9AB11F603 foreign key (PLAY_ID) references `PLAY` (`PID`);
-ALTER TABLE `PLS_MultiTenant`.`TALKINGPOINT` MODIFY COLUMN TITLE varchar(255) null;
-ALTER TABLE `PLS_MultiTenant`.`TALKINGPOINT` MODIFY COLUMN CONTENT longtext null;
+ALTER TABLE `PLS_MultiTenant`.`TALKINGPOINT` add index FK85460B9AB11F603 (PLAY_ID), add constraint FK85460B9AB11F603 foreign key (PLAY_ID) references `PLAY` (`PID`) on delete cascade;
+
+ALTER TABLE oauth2.oauth_access_token ADD CONSTRAINT UNIQUE(authentication_id);
