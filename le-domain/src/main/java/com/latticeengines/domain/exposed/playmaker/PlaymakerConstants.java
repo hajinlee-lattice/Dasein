@@ -45,6 +45,6 @@ public class PlaymakerConstants {
     public static final String CdlKeyTotalMonetaryValue = "TotalMonetaryValue";
     public static final String CdlKeyCrmAccount_External_ID = "CrmAccount_External_ID";
     public static final String CdlKeyDisplayName = "DisplayName";
-    public static final String SFDC = null;
+    public static final String SFDC = "SFDC";
 
 }
