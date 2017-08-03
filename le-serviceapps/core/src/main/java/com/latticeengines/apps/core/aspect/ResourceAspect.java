@@ -1,11 +1,11 @@
 package com.latticeengines.apps.core.aspect;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -18,8 +18,12 @@ public class ResourceAspect {
 
     private InternalResourceBase internalResourceBase = new InternalResourceBase();
 
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
+    private final TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    public ResourceAspect(TenantEntityMgr tenantEntityMgr) {
+        this.tenantEntityMgr = tenantEntityMgr;
+    }
 
     @Before("execution(* com.latticeengines.apps.*.controller.*.*(..)) && !execution(* com.latticeengines.apps.*.controller.HealthResource.*(..))")
     public void allControllerMethods(JoinPoint joinPoint) {
@@ -39,7 +43,6 @@ public class ResourceAspect {
 
     private void checkHeader(JoinPoint joinPoint) {
         Object[] args = joinPoint.getArgs();
-
         for (Object arg : args) {
             if (arg instanceof HttpServletRequest) {
                 internalResourceBase.checkHeader((HttpServletRequest) arg);

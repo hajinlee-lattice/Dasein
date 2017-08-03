@@ -39,7 +39,6 @@ public class DataFeedController extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Invoke data feed consolidate workflow. Returns the job id.")
     public ResponseDocument<String> consolidate(@PathVariable String customerSpace, HttpServletRequest request) {
-        checkHeader(request);
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         ApplicationId appId = consolidateAndPublishWorkflowSubmitter.submit(customerSpace);
         return ResponseDocument.successResponse(appId.toString());
@@ -49,7 +48,6 @@ public class DataFeedController extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Restart a previous failed consolidate execution")
     public ResponseDocument<String> restart(@PathVariable String customerSpace, HttpServletRequest request) {
-        checkHeader(request);
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         ApplicationId appId = consolidateAndPublishWorkflowSubmitter.retryLatestFailed(customerSpace);
         return ResponseDocument.successResponse(appId.toString());
@@ -59,7 +57,6 @@ public class DataFeedController extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> profile(@PathVariable String customerSpace, HttpServletRequest request) {
-        checkHeader(request);
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         ApplicationId appId = profileAndPublishWorkflowSubmitter.submit(customerSpace);
         return ResponseDocument.successResponse(appId.toString());

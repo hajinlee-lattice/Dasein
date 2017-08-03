@@ -38,7 +38,6 @@ public class VdbImportResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Start load VisiDB table job")
     public String submitLoadTableJob(@RequestBody VdbLoadTableConfig config, HttpServletRequest request) {
-        checkHeader(request);
         return JsonUtils.serialize(ImmutableMap.of("application_id", vdbImportService.submitLoadTableJob(config)));
     }
 
@@ -47,7 +46,6 @@ public class VdbImportResource extends InternalResourceBase {
     @ApiOperation(value = "Cancel load table job")
     public String cancelLoadTableJob(@PathVariable String applicationId, @RequestBody VdbLoadTableCancel cancelConfig,
             HttpServletRequest request) {
-        checkHeader(request);
         return JsonUtils.serialize(ImmutableMap.of("success", vdbImportService.cancelLoadTableJob(applicationId,
                 cancelConfig)));
     }
@@ -56,7 +54,6 @@ public class VdbImportResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Check load VisiDB table job")
     public VdbLoadTableStatus getLoadTableStatus(@RequestBody VdbGetLoadStatusConfig config, HttpServletRequest request) {
-        checkHeader(request);
         return vdbImportService.getLoadTableStatus(config);
     }
 }

@@ -41,7 +41,6 @@ public class DataFeedTaskController extends InternalResourceBase {
                                                             @RequestParam(value = "feedtype") String feedtype,
                                                             @RequestParam(value = "entity") String entity,
                                                             @RequestBody String metadata, HttpServletRequest request) {
-        checkHeader(request);
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return ImmutableMap.of("task_id",
                 dataFeedTaskManagerService.createDataFeedTask(customerSpace, feedtype, entity, source, metadata));
@@ -54,7 +53,6 @@ public class DataFeedTaskController extends InternalResourceBase {
     public Map<String, String>  startImportJobDeprecated(@PathVariable String customerSpace,
                                                          @PathVariable String taskIdentifier,
                                                          @RequestBody String metadata, HttpServletRequest request) {
-        checkHeader(request);
         return ImmutableMap.of("application_id",
                 dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier, metadata));
     }
