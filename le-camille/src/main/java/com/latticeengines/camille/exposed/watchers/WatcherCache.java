@@ -12,8 +12,8 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher;
 
@@ -80,7 +80,7 @@ public class WatcherCache<K, V> {
                 log.info("ZK watcher " + watcherName + " changed, updating " + cacheName + " ...");
                 refresh();
             });
-            cache = CacheBuilder.newBuilder().maximumSize(capacity).build();
+            cache = Caffeine.newBuilder().maximumSize(capacity).build();
             if (initKeysCallable != null) {
                 try {
                     Object[] keys = initKeysCallable.call();

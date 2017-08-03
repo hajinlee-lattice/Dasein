@@ -17,7 +17,7 @@ import com.querydsl.sql.SQLQuery;
 public class QueryEvaluatorService {
 
     @Autowired
-    private DataCollectionProxy dataCollectionProxy;
+    private DataCollectionProxy dataCollectionProxy; // attr repo cached in this proxy
 
     @Autowired
     private QueryEvaluator queryEvaluator;

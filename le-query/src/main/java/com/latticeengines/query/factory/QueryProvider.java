@@ -2,8 +2,8 @@ package com.latticeengines.query.factory;
 
 import javax.annotation.PostConstruct;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
@@ -15,7 +15,7 @@ public abstract class QueryProvider {
 
     @PostConstruct
     private void init() {
-        factoryCache = CacheBuilder.newBuilder().maximumSize(MAX_CACHE_SIZE).build();
+        factoryCache = Caffeine.newBuilder().maximumSize(MAX_CACHE_SIZE).build();
     }
 
     public abstract boolean providesQueryAgainst(AttributeRepository repository);
