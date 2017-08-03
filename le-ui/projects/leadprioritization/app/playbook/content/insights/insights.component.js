@@ -29,6 +29,7 @@ angular.module('lp.playbook.wizard.insights', [])
             });
         talkingPoint.IsNew = true;
         vm.talkingPoints.push(talkingPoint);
+        CgTalkingPointStore.setEditedTalkingPoint(talkingPoint);
     };
 
     vm.saveTalkingPoints = function() {

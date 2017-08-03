@@ -98,7 +98,7 @@ angular.module('lp.playbook')
     }
 
     this.nextSaveInsight = function(nextState) {
-        if(PlaybookWizardStore.savedTalkingPoints) {
+        if(PlaybookWizardStore.savedTalkingPoints && PlaybookWizardStore.savedTalkingPoints.length) {
             CgTalkingPointStore.saveTalkingPoints(PlaybookWizardStore.savedTalkingPoints).then(function(){
                 $state.go(nextState, {play_name: PlaybookWizardStore.currentPlay.name});
             });
@@ -109,8 +109,8 @@ angular.module('lp.playbook')
 
     this.nextLaunch = function() {
         var play = PlaybookWizardStore.currentPlay;
-        PlaybookWizardStore.launchPlay(PlaybookWizardStore.currentPlay).then(function(data) {
-            $state.go('home.playbook.dashboard', {play_name: play.name});
+        PlaybookWizardStore.launchPlay(play).then(function(data) {
+            $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
         });
     }
 

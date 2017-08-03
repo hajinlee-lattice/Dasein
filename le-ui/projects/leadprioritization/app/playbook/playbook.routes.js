@@ -167,7 +167,7 @@ angular
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
                     var CreateOrUpdateSegment = function() {
                         var segment = QueryStore.getSegment(),
-                            ts = new Date().getTime();
+                        ts = new Date().getTime();
 
                         if (segment === null) {
                             segment = {
@@ -197,6 +197,28 @@ angular
                     return {
                         CreateOrUpdateSegment: CreateOrUpdateSegment
                     };
+                }],
+                AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
+                    var deferred = $q.defer(),
+                        query = { 
+                            'free_form_text_search': '',
+                            'frontend_restriction': null,
+                            'page_filter': {
+                                'num_rows': 10,
+                                'row_offset': 0
+                            }
+                        };
+                    deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
+                    return deferred.promise;
+                }],
+                Accounts: ['$q', 'QueryStore', function($q, QueryStore) {
+                    var deferred = $q.defer();
+
+                    QueryStore.GetDataByQuery('accounts').then(function(data){ 
+                        deferred.resolve(data);
+                    });
+
+                    return deferred.promise;
                 }]
             },
             views: {

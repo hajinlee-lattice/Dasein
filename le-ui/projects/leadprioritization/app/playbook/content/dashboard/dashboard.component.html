@@ -54,21 +54,18 @@
                     <div class="dashboard-section-content">
                         <div class="dashboard-section-content-subsection talking-points has-icon">
                             <h5>{{vm.play.talkingPoints.length||'No'}} talking points have been created</h5>
+                            <!--
                             <ul class="controls">
                                 <li ng-if="!vm.play.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create</a></li>
                                 <li ng-if="vm.play.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Edit</a></li>
                             </ul>
-                        </div>
-
-                        <div>
-                            <a href="#" ng-click="showTalkingPointsData = !showTalkingPointsData">debugging: {{!showTalkingPointsData ? "show" : "hide"}} talking points data</a>
-                            <div ng-show="showTalkingPointsData">
-                                <pre>vm.play.talkingPoints: {{vm.play.talkingPoints|json}}</pre>
-                            </div>
+                            -->
                         </div>
                     </div>
                     <div class="dashboard-section-footer">
                         <!-- <span ng-if="vm.play.timeStamp">Published {{vm.TimestampIntervalUtility.timeAgo(vm.play.timeStamp)}} <i class="fa fa-check"></i></span> -->
+                        <button class="preview button blue-button" ng-if="!vm.play.talkingPoints.length" ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create Talking Points</button>
+                        <button class="preview button blue-button" ng-if="vm.play.talkingPoints.length" ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Edit Talking Points</button>
                     </div>
                 </div>
             </div>
@@ -118,7 +115,7 @@
                         </div>
                     </div>
                     <div class="dashboard-section-footer">
-                        <span ng-if="vm.play.timeStamp && vm.launchedState == 'Launched'">Launched {{vm.TimestampIntervalUtility.timeAgo(vm.play.timeStamp)}} <i class="fa fa-check"></i></span>
+                        <span ng-if="vm.launchedState == 'Launched' && vm.play.launchHistory.playLaunch.lastUpdatedTimestamp">Launched {{vm.TimestampIntervalUtility.timeAgo(vm.play.launchHistory.playLaunch.lastUpdatedTimestamp)}} <i class="fa fa-check"></i></span>
                         <button class="launch button blue-button" ng-click="vm.launchPlay()" ng-disabled="vm.invalid.length">
                             <span ng-if="vm.launchedState != 'Launched'">Launch now</span>
                             <span ng-if="vm.launchedState == 'Launched'">Re-Launch now</span>

@@ -226,7 +226,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         talkingPoint.playname = opts.playExternalID; // play_name (which is the play id)
         talkingPoint.pid = opts.pid;
         talkingPoint.offset = opts.offset;
-        talkingPoint.title = opts.oitle;
+        talkingPoint.title = opts.title;
         talkingPoint.content = opts.content;
 
         return talkingPoint;
