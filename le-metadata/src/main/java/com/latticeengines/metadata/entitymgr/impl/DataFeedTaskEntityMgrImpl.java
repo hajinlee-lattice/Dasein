@@ -173,30 +173,42 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void registerExtract(DataFeedTask datafeedTask, String tableName, Extract extract) {
-        if (extract != null) {
-            registerExtracts(datafeedTask, tableName, Arrays.asList(extract));
-        }
+        Table templateTable = getTemplate(tableName);
+        registerExtractTable(templateTable, extract, datafeedTask);
+        updateDataFeedTaskAfterRegister(datafeedTask);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts) {
-        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
-        Table extractTable = tableEntityMgr.findByName(tableName);
-        tableTypeHolder.setTableType(TableType.DATATABLE);
-        extractTable.getExtracts().clear();
+        Table templateTable = getTemplate(tableName);
         for (int i = 0; i < extracts.size(); i++) {
             Extract extract = extracts.get(i);
-            Table cloneTable = TableUtils.clone(extractTable, NamingUtils.uuid("DataTable"));
-            cloneTable.setTenant(MultiTenantContext.getTenant());
-            cloneTable.addExtract(extract);
-            cloneTable.setTableType(TableType.DATATABLE);
-            log.info(String.format("Adding extract to new data table %s", extractTable.getName()));
-            tableEntityMgr.create(cloneTable);
-            addTableToQueue(datafeedTask, cloneTable);
+            registerExtractTable(templateTable, extract, datafeedTask);
         }
-        datafeedTask.setLastImported(new Date());
+        updateDataFeedTaskAfterRegister(datafeedTask);
+    }
 
+    private Table getTemplate(String tableName) {
+        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+        Table templateTable = tableEntityMgr.findByName(tableName);
+        tableTypeHolder.setTableType(TableType.DATATABLE);
+        templateTable.getExtracts().clear();
+        return templateTable;
+    }
+
+    private void registerExtractTable(Table template, Extract extract, DataFeedTask datafeedTask) {
+        Table cloneTable = TableUtils.clone(template, NamingUtils.uuid("DataTable"));
+        cloneTable.setTenant(MultiTenantContext.getTenant());
+        cloneTable.addExtract(extract);
+        cloneTable.setTableType(TableType.DATATABLE);
+        log.info(String.format("Adding extract to new data table %s", template.getName()));
+        tableEntityMgr.create(cloneTable);
+        addTableToQueue(datafeedTask, cloneTable);
+    }
+
+    private void updateDataFeedTaskAfterRegister(DataFeedTask datafeedTask) {
+        datafeedTask.setLastImported(new Date());
         boolean templateTableChanged = Status.Updated.equals(datafeedTask.getStatus());
         if (templateTableChanged) {
             datafeedTask.setStatus(Status.Active);
@@ -204,7 +216,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
                     datafeedTask));
         }
         update(datafeedTask, datafeedTask.getImportData(), datafeedTask.getStatus(), datafeedTask.getLastImported());
-
     }
 
     @Override
