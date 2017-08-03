@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,11 +31,13 @@ public class ActiveDirectoryLoginResource {
 
     private static final Logger log = LoggerFactory.getLogger(ActiveDirectoryLoginResource.class);
 
-    @Autowired
     private final ActiveDirectoryLdapAuthenticationProvider activeDirectoryProvider;
 
-    public ActiveDirectoryLoginResource(ActiveDirectoryLdapAuthenticationProvider activeDirectoryProvider) {
-        this.activeDirectoryProvider = activeDirectoryProvider;
+    public ActiveDirectoryLoginResource(@Value("${security.ldap.domain}") String domain,
+            @Value("${security.ldap.url}") String url) {
+        activeDirectoryProvider = new ActiveDirectoryLdapAuthenticationProvider(domain, url);
+        activeDirectoryProvider.setConvertSubErrorCodesToExceptions(true);
+        activeDirectoryProvider.setUseAuthenticationRequestCredentials(true);
     }
 
     @RequestMapping(value = "/adlogin", method = RequestMethod.POST, headers = "Accept=application/json")
