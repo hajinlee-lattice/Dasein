@@ -162,6 +162,11 @@ angular
         })
         .state('home.models.pmml.job', {
             url: '/:applicationId/job',
+            resolve:  {
+                BuildProgressConfig: function() {
+                    return null;
+                }
+            },
             params: {
                 pageIcon: 'ico-model',
                 pageTitle: 'Create Model - PMML'

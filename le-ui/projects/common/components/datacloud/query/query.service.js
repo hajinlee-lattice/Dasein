@@ -62,8 +62,13 @@ angular.module('common.datacloud.query.service',[
         return this.counts;
     };
     
-    this.setAccounts = function(query, segment){
-        this.accounts = this.GetDataByQuery('accounts', query, segment);
+    this.setAccounts = function(query, segment) {
+        var deferred = $q.defer();
+        this.GetDataByQuery('accounts', query, segment).then(function(response) {
+            this.accounts = response;
+            deferred.resolve(response);
+        });
+        return deferred.promise;
     };
 
     this.getAccounts = function(){ 

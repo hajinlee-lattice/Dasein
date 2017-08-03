@@ -27,23 +27,21 @@
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
                 <th>
-                    <span ng-class="{'sort': vm.sortBy === col.key}">Account Name</span>
+                    <span ng-class="{'sort': vm.sortBy === col.key}">Name</span>
                 </th>
-                <th>Domain</th>
+                <th>Website</th>
                 <th>City</th>
                 <th>State</th>
                 <th>Country</th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-if="vm.loadingAccounts && !vm.accounts.data">
+            <tr ng-if="!vm.accounts.data">
                 <td colspan="5"><i class="fa fa-spinner fa-pulse fw"></i> Loading Accounts</td>
             </tr>
-            <tr ng-if="!vm.loadingAccounts && vm.accounts.data" ng-repeat="account in vm.accounts.data">
-                <td>
-                    {{account.LDC_Name}}
-                </td>
-                <td>{{account.LDC_Domain}}</td>
+            <tr ng-if="vm.accounts.data" ng-repeat="account in vm.accounts.data">
+                <td><span class="blue-text">{{account.LDC_Name}}</span></td>
+                <td><span class="blue-text">{{account.LDC_Domain}}</span></td>
                 <td>{{account.LDC_City}}</td>
                 <td>{{account.LDC_State}}</td>
                 <td>{{account.LDC_Country}}</td>
@@ -51,7 +49,7 @@
         </tbody>
     </table>
 
-    <p ng-if="!vm.accounts.data">No Records Found<p>
+    <!-- <p ng-if="!vm.accounts.data">No Records Found<p> -->
 
     <ul class="filters">
         <li>
