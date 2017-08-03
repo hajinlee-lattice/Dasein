@@ -352,7 +352,7 @@ public class ProcessorContext {
             groupSize = actorsGroupSize;
             numThreads = actorsThreadPool;
             if (useRemoteDnB) {
-                groupSize = 10_000;
+                groupSize = 128;
             }
         } else {
             if (groupSize == null || groupSize < 1) {
