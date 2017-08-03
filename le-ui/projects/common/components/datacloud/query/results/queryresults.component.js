@@ -23,7 +23,7 @@ angular.module('common.datacloud.query.results', [
 
     vm.init = function() {
 
-        console.log(vm.accountsCount, vm.accounts);
+        // console.log(vm.accountsCount, vm.accounts);
 
     };
     vm.init();

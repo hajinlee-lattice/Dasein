@@ -31,6 +31,48 @@ angular.module('common.datacloud.query.service',[
             }
         }
     };
+    this.counts = {
+        accounts: {
+            value: 0,
+            loading: false
+        },
+        contacts: {
+            value: 0,
+            loading: false
+        }
+    };
+    this.getCounts = function() {
+        return this.counts;
+    };
+
+    this.setResourceTypeCount = function(resourceType, loading, value) {
+
+        var resourceTypeCount = this.getCounts()[resourceType];
+
+        if (resourceTypeCount) {
+            if (typeof value  !== 'undefined') {
+                resourceTypeCount.value = value;
+            }
+            if (typeof loading !== 'undefined') {
+                resourceTypeCount.loading = loading;
+            }
+        }
+
+    };
+
+    this.accounts = [];
+    this.getAccounts = function(){        
+        return this.accounts;
+    };
+    this.setAccounts = function(resourceType, query, segment){
+        this.accounts = this.GetDataByQuery('accounts', query, segment);
+    };
+
+    var self = this;
+    this.validResourceTypes.forEach(function(resourceType) {
+        self.setResourceTypeCount(resourceType, true);
+    });
+
 
     this.setRestriction = function(restriction) {
         this.restriction = restriction;
@@ -83,8 +125,6 @@ angular.module('common.datacloud.query.service',[
 
     this.addRestriction = function(attribute) {
 
-        console.log(attribute);
-
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
@@ -92,10 +132,7 @@ angular.module('common.datacloud.query.service',[
             bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
 
-        this.GetCountByQuery('accounts');
-        $stateParams.loadingData = true;
-
-        console.log(allRestrictions);
+        this.setResourceTypeCount('accounts', false, attribute.bkt.Cnt);
 
     };
 
@@ -115,6 +152,7 @@ angular.module('common.datacloud.query.service',[
         }
 
         allRestrictions.splice(index, 1);
+        this.setResourceTypeCount('accounts', false, attribute.bkt.Cnt);
 
     };
 
@@ -155,7 +193,10 @@ angular.module('common.datacloud.query.service',[
             return deferred.promise;
         } else {
 
-            if(query === undefined){
+            var deferred = $q.defer();
+
+            if(query === undefined || query === ''){
+                
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
                     'frontend_restriction': this.restriction,
@@ -164,6 +205,7 @@ angular.module('common.datacloud.query.service',[
                         'row_offset': 0
                     }
                 };
+
             } else {
                 var queryWithRestriction = { 
                     'free_form_text_search': query.free_form_text_search,
@@ -175,9 +217,8 @@ angular.module('common.datacloud.query.service',[
                 };
             };
 
-            console.log(queryWithRestriction);
-
-            return QueryService.GetCountByQuery(resourceType, queryWithRestriction);
+            deferred.resolve(QueryService.GetCountByQuery(resourceType, queryWithRestriction));
+            return deferred.promise;
         }
     };
 
@@ -187,6 +228,9 @@ angular.module('common.datacloud.query.service',[
             deferred.resolve({error: {errMsg:'Invalid resourceType: ' + resourceType} });
             return deferred.promise;
         } else {
+
+            console.log(query);
+
             if(query === undefined){
                 var queryWithRestriction = { 
                     'free_form_text_search': '',

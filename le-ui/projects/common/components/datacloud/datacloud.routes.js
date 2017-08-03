@@ -308,8 +308,6 @@ angular
                         var segment = QueryStore.getSegment(),
                             ts = new Date().getTime();
 
-                        console.log(segment);
-
                         if (segment === null) {
                             segment = {
                                 'name': 'segment' + ts,
@@ -322,8 +320,6 @@ angular
                             };
                         } else {
 
-                            console.log(segment.name);
-
                             segment = {
                                 'name': segment.name,
                                 'display_name': segment.display_name,
@@ -334,8 +330,6 @@ angular
                                 }
                             };
                         }
-
-                        console.log(segment);
 
                         return SegmentService.CreateOrUpdateSegment(segment);
                     };
@@ -432,7 +426,7 @@ angular
                         AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
                             var deferred = $q.defer();
                             
-                            QueryStore.GetCountByQuery('accounts').then(function(data){ 
+                            QueryStore.setCounts('accounts').then(function(data){ 
                                 deferred.resolve(data);
                             });
 
@@ -441,7 +435,7 @@ angular
                         Accounts: ['$q', 'QueryStore', function($q, QueryStore) {
                             var deferred = $q.defer();
                             
-                            QueryStore.GetDataByQuery('accounts').then(function(data){ 
+                            QueryStore.setAccounts('accounts').then(function(data){ 
                                 deferred.resolve(data.data);
                             });
 

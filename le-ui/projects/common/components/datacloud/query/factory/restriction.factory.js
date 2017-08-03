@@ -2,7 +2,7 @@ angular.module('common.datacloud.query.factory.restriction', [])
 .factory('BucketRestriction', function() {
     function BucketRestriction(columnName, objectType, range, attr, bkt) {
 
-        console.log(columnName, objectType, range, attr, bkt);
+        // console.log(columnName, objectType, range, attr, bkt);
 
 
         if (attr === null || attr === undefined) {
