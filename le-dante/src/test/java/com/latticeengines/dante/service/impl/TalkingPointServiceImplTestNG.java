@@ -68,10 +68,6 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         tp.setContent("PLS Deployment Test Talking Point no 1");
         tps.add(tp);
 
-        TalkingPointDTO testtp = new TalkingPointDTO();
-        testtp.setPlayName(testPlay.getName());
-        tps.add(testtp);
-
         tps = talkingPointService.createOrUpdate(tps, mainTestTenant.getId());
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 1);
@@ -198,6 +194,10 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
 
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(testtp.getName());
+        talkingPointService.publish(tp.getPlayName(), mainTestCustomerSpace.toString());
+
+        dtps = danteTalkingPointEntityMgr.findAllByPlayID(testPlay.getName());
+        Assert.assertEquals(dtps.size(), 0);
     }
 
     @AfterClass
