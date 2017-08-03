@@ -144,7 +144,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void vacuumTable(String tableName) {
         log.info("Vacuum table " + tableName);
-        redshiftJdbcTemplate.execute(String.format("VACUUM FULL %s", tableName));
+        redshiftJdbcTemplate.execute(String.format("SET wlm_query_slot_count to 4; VACUUM FULL %s; SET wlm_query_slot_count to 1;", tableName));
     }
 
     @Override
