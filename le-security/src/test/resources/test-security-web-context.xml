@@ -12,11 +12,12 @@
 
     <mvc:annotation-driven/>
 
-    <security:global-method-security
-            secured-annotations="enabled"
-            jsr250-annotations="enabled"
-            pre-post-annotations="enabled"
-            proxy-target-class="true" />
+    <security:http use-expressions="true"
+                   pattern="/*/users/**"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+    </security:http>
 
     <security:http auto-config="false"
                    use-expressions="true" 

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "health", description = "REST resource for checking health of service app")
 @RestController
 @RequestMapping("/health")
-public class HealthCheckResource {
+public class HealthResource {
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

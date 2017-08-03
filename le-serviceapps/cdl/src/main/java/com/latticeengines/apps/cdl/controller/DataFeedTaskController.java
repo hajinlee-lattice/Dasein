@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.controller;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,7 +39,7 @@ public class DataFeedTaskController extends InternalResourceBase {
                                                             @RequestParam(value = "source") String source,
                                                             @RequestParam(value = "feedtype") String feedtype,
                                                             @RequestParam(value = "entity") String entity,
-                                                            @RequestBody String metadata, HttpServletRequest request) {
+                                                            @RequestBody String metadata) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return ImmutableMap.of("task_id",
                 dataFeedTaskManagerService.createDataFeedTask(customerSpace, feedtype, entity, source, metadata));
@@ -52,7 +51,7 @@ public class DataFeedTaskController extends InternalResourceBase {
     @ApiOperation(value = "Create a data feed task")
     public Map<String, String>  startImportJobDeprecated(@PathVariable String customerSpace,
                                                          @PathVariable String taskIdentifier,
-                                                         @RequestBody String metadata, HttpServletRequest request) {
+                                                         @RequestBody String metadata) {
         return ImmutableMap.of("application_id",
                 dataFeedTaskManagerService.submitImportJob(customerSpace, taskIdentifier, metadata));
     }

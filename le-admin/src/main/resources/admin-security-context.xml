@@ -6,12 +6,6 @@
 
     <import resource="classpath:security-provider-context.xml"/>
 
-    <security:global-method-security
-            secured-annotations="enabled"
-            jsr250-annotations="enabled"
-            pre-post-annotations="enabled"
-            proxy-target-class="true" />
-
     <security:http use-expressions="true"
                    pattern="/admin/tenants/**"
                    authentication-manager-ref="authenticationManager"

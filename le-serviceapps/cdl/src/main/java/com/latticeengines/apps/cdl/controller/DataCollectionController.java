@@ -36,7 +36,6 @@ public class DataCollectionController {
            @RequestParam(value = "entity", required = false) BusinessEntity entity) {
         String customerSpaceString = CustomerSpace.parse(customerSpace).toString();
         Boolean status;
-
         if (entity == null) {
             status = collectionMgrSvc.resetAll(customerSpaceString);
         } else {

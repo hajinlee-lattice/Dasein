@@ -38,7 +38,7 @@ public class DataFeedController extends InternalResourceBase {
     @RequestMapping(value = "/consolidate", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke data feed consolidate workflow. Returns the job id.")
-    public ResponseDocument<String> consolidate(@PathVariable String customerSpace, HttpServletRequest request) {
+    public ResponseDocument<String> consolidate(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         ApplicationId appId = consolidateAndPublishWorkflowSubmitter.submit(customerSpace);
         return ResponseDocument.successResponse(appId.toString());
@@ -47,7 +47,7 @@ public class DataFeedController extends InternalResourceBase {
     @RequestMapping(value = "/consolidate/restart", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Restart a previous failed consolidate execution")
-    public ResponseDocument<String> restart(@PathVariable String customerSpace, HttpServletRequest request) {
+    public ResponseDocument<String> restart(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         ApplicationId appId = consolidateAndPublishWorkflowSubmitter.retryLatestFailed(customerSpace);
         return ResponseDocument.successResponse(appId.toString());
@@ -56,7 +56,7 @@ public class DataFeedController extends InternalResourceBase {
     @RequestMapping(value = "/profile", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
-    public ResponseDocument<String> profile(@PathVariable String customerSpace, HttpServletRequest request) {
+    public ResponseDocument<String> profile(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         ApplicationId appId = profileAndPublishWorkflowSubmitter.submit(customerSpace);
         return ResponseDocument.successResponse(appId.toString());

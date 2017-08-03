@@ -6,22 +6,21 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <context:component-scan base-package="com.latticeengines.security" />
+    <context:component-scan base-package="com.latticeengines.security"/>
 
-    <security:authentication-manager alias="authenticationManager" >
-        <security:authentication-provider ref="globalAuthProvider" />
-        <security:authentication-provider ref="activeDirectoryProvider" />
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="globalAuthProvider"/>
+        <security:authentication-provider ref="activeDirectoryProvider"/>
     </security:authentication-manager>
 
     <import resource="classpath:security-activedirectory-provider-context.xml"/>
     <import resource="classpath:security-globalauth-provider-context.xml"/>
-    <import resource="classpath:security-internal-provider-context.xml" />
+    <import resource="classpath:security-internal-provider-context.xml"/>
 
-    <security:http use-expressions="true"
-                   pattern="/*/users/**"
-                   entry-point-ref="restAuthenticationEntryPoint"
-                   create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
-    </security:http>
+    <security:global-method-security
+            secured-annotations="enabled"
+            jsr250-annotations="enabled"
+            pre-post-annotations="enabled"
+            proxy-target-class="true"/>
 
 </beans>

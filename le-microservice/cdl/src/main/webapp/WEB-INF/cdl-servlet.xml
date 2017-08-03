@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
     <import resource="classpath:microservice-cdl-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
     <bean class="com.latticeengines.microservice.swagger.SwaggerConfig" />
+
+    <security:http auto-config="false"
+                   use-expressions="true"
+                   pattern="/cdl/*"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:intercept-url pattern="/cdl/health" access="permitAll" />
+        <security:intercept-url pattern="/cdl/*" access="hasRole('ROLE_INTERNAL_USER')" />
+        <security:custom-filter ref="internalRestServicesFilter" before="PRE_AUTH_FILTER" />
+    </security:http>
 
 </beans>
