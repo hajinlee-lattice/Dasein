@@ -1,15 +1,15 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore, AccountsCount, Accounts) {
+.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore) {
 
     var vm = this;
     angular.extend(vm, {
         resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
         modelId: $stateParams.modelId,
         inModel: $state.current.name.split('.')[1] === 'model',
-        accountsCount: AccountsCount,
-        accounts: Accounts,
+        accounts: QueryStore.getAccounts(),
+        loadingAccounts: true,
         restriction: QueryStore.getRestriction(),
         current: 1,
         pagesize: 20,
@@ -23,7 +23,20 @@ angular.module('common.datacloud.query.results', [
 
     vm.init = function() {
 
-        // console.log(vm.accountsCount, vm.accounts);
+        console.log(vm.accounts);
+
+        if(vm.accounts = []){
+            vm.loadingAccounts = true;
+        } else {
+            vm.loadingAccounts = false;
+        };
+
+        console.log(vm.loadingAccounts);
+
+        QueryStore.setAccounts();
+        QueryStore.getAccounts().then(function(data){
+            vm.accounts = data;
+        });
 
     };
     vm.init();
@@ -88,8 +101,7 @@ angular.module('common.datacloud.query.results', [
             }
         };
 
-        QueryStore.GetDataByQuery('accounts').then(function(data){ 
-            vm.accounts = data;
-        });
+        QueryStore.setAccounts(query);
+
     };
 });

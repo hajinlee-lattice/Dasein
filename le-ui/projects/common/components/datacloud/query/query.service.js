@@ -41,9 +41,7 @@ angular.module('common.datacloud.query.service',[
             loading: false
         }
     };
-    this.getCounts = function() {
-        return this.counts;
-    };
+    this.accounts = [];
 
     this.setResourceTypeCount = function(resourceType, loading, value) {
 
@@ -60,19 +58,22 @@ angular.module('common.datacloud.query.service',[
 
     };
 
-    this.accounts = [];
-    this.getAccounts = function(){        
-        return this.accounts;
+    this.getCounts = function() {
+        return this.counts;
     };
-    this.setAccounts = function(resourceType, query, segment){
+    
+    this.setAccounts = function(query, segment){
         this.accounts = this.GetDataByQuery('accounts', query, segment);
     };
+
+    this.getAccounts = function(){ 
+        return this.accounts;
+    };    
 
     var self = this;
     this.validResourceTypes.forEach(function(resourceType) {
         self.setResourceTypeCount(resourceType, true);
     });
-
 
     this.setRestriction = function(restriction) {
         this.restriction = restriction;
@@ -229,7 +230,7 @@ angular.module('common.datacloud.query.service',[
             return deferred.promise;
         } else {
 
-            console.log(query);
+            console.log(query, this.restriction);
 
             if(query === undefined){
                 var queryWithRestriction = { 
@@ -251,7 +252,7 @@ angular.module('common.datacloud.query.service',[
                 };
             };
 
-            console.log(queryWithRestriction, segment);
+            // console.log(queryWithRestriction, segment);
 
             return QueryService.GetDataByQuery(resourceType, queryWithRestriction, segment);
         }

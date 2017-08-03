@@ -36,10 +36,10 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-if="!vm.accounts">
+            <tr ng-if="vm.loadingAccounts && !vm.accounts.data">
                 <td colspan="5"><i class="fa fa-spinner fa-pulse fw"></i> Loading Accounts</td>
             </tr>
-            <tr ng-repeat="account in vm.accounts">
+            <tr ng-if="!vm.loadingAccounts && vm.accounts.data" ng-repeat="account in vm.accounts.data">
                 <td>
                     {{account.LDC_Name}}
                 </td>
@@ -51,9 +51,7 @@
         </tbody>
     </table>
 
-    <p ng-if="!vm.accountsCount">
-        No Records Found
-    <p>
+    <p ng-if="!vm.accounts.data">No Records Found<p>
 
     <ul class="filters">
         <li>

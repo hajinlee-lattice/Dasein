@@ -422,26 +422,6 @@ angular
             },
             views: {
                 "main@": {
-                    resolve: {
-                        AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
-                            var deferred = $q.defer();
-                            
-                            QueryStore.setCounts('accounts').then(function(data){ 
-                                deferred.resolve(data);
-                            });
-
-                            return deferred.promise;
-                        }],
-                        Accounts: ['$q', 'QueryStore', function($q, QueryStore) {
-                            var deferred = $q.defer();
-                            
-                            QueryStore.setAccounts('accounts').then(function(data){ 
-                                deferred.resolve(data.data);
-                            });
-
-                            return deferred.promise;
-                        }]
-                    },
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
