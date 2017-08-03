@@ -23,7 +23,7 @@ public class QueryEvaluatorService {
     private QueryEvaluator queryEvaluator;
 
     public long getCount(String customerSpace, Query query) {
-        return getCount(dataCollectionProxy.getDefaultAttributeRepository(customerSpace), query);
+        return getCount(dataCollectionProxy.getAttrRepo(customerSpace), query);
     }
 
     public long getCount(AttributeRepository attrRepo, Query query) {
@@ -36,7 +36,7 @@ public class QueryEvaluatorService {
     }
 
     public DataPage getData(String customerSpace, Query query) {
-        return getData(dataCollectionProxy.getDefaultAttributeRepository(customerSpace), query);
+        return getData(dataCollectionProxy.getAttrRepo(customerSpace), query);
     }
 
     public DataPage getData(AttributeRepository attrRepo, Query query) {

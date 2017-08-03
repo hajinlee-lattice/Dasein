@@ -22,18 +22,16 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         super("metadata");
     }
 
-    // default collection apis
-
     public DataCollection getDefaultDataCollection(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection",
                 shortenCustomerSpace(customerSpace));
         return get("get default dataCollection", url, DataCollection.class);
     }
 
-    public AttributeRepository getDefaultAttributeRepository(String customerSpace) {
+    public AttributeRepository getAttrRepo(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo",
                 shortenCustomerSpace(customerSpace));
-        return get("get default attributeRepository", url, AttributeRepository.class);
+        return get("get default attribute repo", url, AttributeRepository.class);
     }
 
     public StatisticsContainer getStats(String customerSpace) {
