@@ -2,6 +2,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <import resource="classpath:test-security-web-context.xml"/>
+    <bean id="internalRestServicesFilter" class="com.latticeengines.security.provider.internal.RestInternalFilter">
+        <property name="authenticationManager" ref="authenticationManager" />
+        <property name="authenticationSuccessHandler" ref="restAuthenticationSuccessHandler" />
+    </bean>
     
 </beans>

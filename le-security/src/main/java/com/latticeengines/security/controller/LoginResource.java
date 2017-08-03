@@ -11,12 +11,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -91,7 +91,7 @@ public class LoginResource {
             List<Tenant> tenants = tenantService.getAllTenants();
             List<Tenant> gaTenants = new ArrayList<>(ticket.getTenants());
             tenants.retainAll(gaTenants);
-            Collections.sort(tenants, new TenantNameSorter());
+            tenants.sort(new TenantNameSorter());
             result.setTenants(tenants);
             doc.setResult(result);
         } catch (LedpException e) {

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ActiveDirectoryAccessResource {
 
     @PreAuthorize("hasRole('Platform Operations')")
-    @RequestMapping(value = "/adhasaccess", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/adresource/hasaccess", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     public Map<String, String> getSomethingWithAccess() {
         Map<String, String> returnVal = new HashMap<>();
@@ -22,7 +22,7 @@ public class ActiveDirectoryAccessResource {
     }
     
     @PreAuthorize("hasRole('Enterprise Admins1')")
-    @RequestMapping(value = "/adnoaccess", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/adresource/noaccess", method = RequestMethod.GET, headers = "Accept=application/json")
     public Map<String, String> getSomethingWithoutAccess() {
         Map<String, String> returnVal = new HashMap<>();
         returnVal.put("SomeReturnValue", "ABCD");

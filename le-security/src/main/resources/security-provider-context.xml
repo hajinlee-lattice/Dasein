@@ -1,38 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context" xmlns:mvc="http://www.springframework.org/schema/mvc"
-    xmlns:security="http://www.springframework.org/schema/security"
-    xsi:schemaLocation="
-  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
-  http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
     <context:component-scan base-package="com.latticeengines.security" />
+
+    <security:authentication-manager alias="authenticationManager" >
+        <security:authentication-provider ref="globalAuthProvider" />
+        <security:authentication-provider ref="activeDirectoryProvider" />
+    </security:authentication-manager>
+
     <import resource="classpath:security-activedirectory-provider-context.xml"/>
     <import resource="classpath:security-globalauth-provider-context.xml"/>
-
-    <bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
-        <property name="providers">
-            <list>
-                <ref bean="activeDirectoryProvider"/>
-                <ref bean="globalAuthProvider"/>
-            </list>
-        </property>
-    </bean>
-
-    <security:http auto-config="false"
-                   use-expressions="true" 
-                   pattern="/*/adlogin/**" 
-                   authentication-manager-ref="authenticationManager"
-                   entry-point-ref="restAuthenticationEntryPoint" 
-                   create-session="stateless">
-        <security:custom-filter ref="restActiveDirectoryServicesFilter" before="PRE_AUTH_FILTER" />
-    </security:http>
+    <import resource="classpath:security-internal-provider-context.xml" />
 
     <security:http use-expressions="true"
                    pattern="/*/users/**"
-                   authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />

@@ -7,7 +7,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,7 +20,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -30,8 +28,9 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.provider.AbstractAuthenticationTokenFilter;
 
-public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFilter {
+public class RestActiveDirectoryFilter extends AbstractAuthenticationTokenFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
@@ -62,8 +61,6 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
 
             UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username.trim(),
                     password);
-
-            setDetails(request, authRequest);
 
             UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) getAuthenticationManager()
                     .authenticate(authRequest);
@@ -129,48 +126,6 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
         today.setTimeInMillis(currentTime);
 
         return ticketDay.get(Calendar.DATE) == today.get(Calendar.DATE);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
-        boolean retVal = false;
-
-        Authentication authResult = null;
-        try {
-            try {
-                authResult = attemptAuthentication(request, response);
-            } catch (Exception e) {
-                logger.error(e);
-                throw new AuthenticationServiceException(e.getMessage(), e);
-            }
-            if (authResult == null) {
-                retVal = false;
-            }
-        } catch (AuthenticationException failed) {
-            try {
-                unsuccessfulAuthentication(request, response, failed);
-            } catch (IOException e) {
-                logger.error(e);
-                retVal = false;
-            } catch (ServletException e) {
-                logger.error(e);
-                retVal = false;
-            }
-            retVal = false;
-        }
-        if (authResult != null) {
-            try {
-                successfulAuthentication(request, response, authResult);
-            } catch (IOException e) {
-                logger.error(e);
-                retVal = false;
-            } catch (ServletException e) {
-                logger.error(e);
-                retVal = false;
-            }
-        }
-        return retVal;
     }
 
 }

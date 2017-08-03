@@ -48,6 +48,7 @@ alias swlibdpllibs='bin/deployToSwlib.sh -o install -n prospectdiscovery -g com.
 alias swlibdpl='dirs -c && pushd $WSHOME/le-swlib && hadoop fs -rm -r /app/swlib || true && swlibdpllibs && popd'
 alias sfbld='dirs -c && pushd $WSHOME/le-serviceflows && mvn -T6 -DskipTests clean install && popd'
 alias sfdpl='sfbld && swlibdpl'
+alias sabld='dirs -c && pushd $WSHOME/le-serviceapps && mvn -T4 -DskipTests clean install && popd'
 
 alias cfgdplnobld='hdfs dfs -rm -r -f /app/conf || true; hdfs dfs -mkdir -p /app/conf; hdfs dfs -put $WSHOME/le-config/conf/env/dev/latticeengines.properties /app/conf; hdfs dfs -put $WSHOME/le-config/conf/env/dev/log4j.properties /app/conf; hdfs dfs -rm -r -f /app/lib || true; hdfs dfs -mkdir -p /app/lib; hdfs dfs -put $WSHOME/le-config/src/main/resources/jacocoagent.jar /app/lib;'
 alias cfgbld='bash $WSHOME/le-dev/scripts/cfgbld.sh'
