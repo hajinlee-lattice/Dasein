@@ -52,7 +52,7 @@ angular.module('lp.models.segments', [
         }
     };
 
-    vm.tileClick = function ($event, segment) {
+    vm.tileClick = function ($event, segmentName) {
         $event.preventDefault();
 
         if ($state.current.name == 'home.segments') {
