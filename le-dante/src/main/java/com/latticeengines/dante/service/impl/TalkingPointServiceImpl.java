@@ -70,6 +70,10 @@ public class TalkingPointServiceImpl implements TalkingPointService {
             return new ArrayList<>();
         }
 
+        if (tps.stream().anyMatch(tp -> tp.getPlayName() == null || tp.getPlayName().isEmpty())) {
+            throw new LedpException(LedpCode.LEDP_38018);
+        }
+
         if (tps.stream().anyMatch(x -> !x.getPlayName().equals(tps.get(0).getPlayName()))) {
             throw new LedpException(LedpCode.LEDP_38011);
         }

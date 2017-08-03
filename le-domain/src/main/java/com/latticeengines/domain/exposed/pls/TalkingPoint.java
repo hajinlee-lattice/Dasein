@@ -50,16 +50,16 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     private Play play;
 
     @JsonProperty("title")
-    @Column(name = "TITLE", nullable = false)
+    @Column(name = "TITLE", nullable = true)
     private String title;
 
     @JsonProperty("content")
-    @Column(name = "CONTENT", nullable = false)
+    @Column(name = "CONTENT", nullable = true)
     @Type(type = "text")
     private String content;
 
     @JsonProperty("offset")
-    @Column(name = "OFFSET", nullable = false)
+    @Column(name = "OFFSET", nullable = true)
     private int offset;
 
     @JsonProperty("created")

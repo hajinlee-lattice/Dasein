@@ -37,4 +37,6 @@ create table `TALKINGPOINT` (
   `PLAY_ID` bigint not null,
   primary key (`PID`)) ENGINE=InnoDB;
 
-ALTER TABLE `TALKINGPOINT` add index FK85460B9AB11F603 (PLAY_ID), add constraint FK85460B9AB11F603 foreign key (PLAY_ID) references `PLAY` (`PID`);
+ALTER TABLE `PLS_MultiTenant`.`TALKINGPOINT` add index FK85460B9AB11F603 (PLAY_ID), add constraint FK85460B9AB11F603 foreign key (PLAY_ID) references `PLAY` (`PID`);
+ALTER TABLE `PLS_MultiTenant`.`TALKINGPOINT` MODIFY COLUMN TITLE varchar(255) null;
+ALTER TABLE `PLS_MultiTenant`.`TALKINGPOINT` MODIFY COLUMN CONTENT longtext null;

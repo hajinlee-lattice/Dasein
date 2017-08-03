@@ -574,7 +574,8 @@ public enum LedpCode {
 
     // le-app
     LEDP_36001("Invalid attribute name: {0}"), //
-    LEDP_36002("Failed to execute a query. Please make sure your data collection has been properly initialized, or contact our service for further assist."), //
+    LEDP_36002(
+            "Failed to execute a query. Please make sure your data collection has been properly initialized, or contact our service for further assist."), //
 
     // le-query
     LEDP_37000("Lookup must have range specified"), //
@@ -611,7 +612,8 @@ public enum LedpCode {
     LEDP_38014("Failed to publish Talkingpoints for the play {0}, CustomerSpace {1}"), //
     LEDP_38015("Failed to populate TalkingPoint preview for the play {0}, CustomerSpace {1}"), //
     LEDP_38016("Failed to retrieve Talkingpoints for the play {0}"), //
-    LEDP_38017("Unable to delete Talkingpoints {0} due to an internal error");
+    LEDP_38017("Unable to delete Talkingpoints {0} due to an internal error"), //
+    LEDP_38018("Talking point not associated with any Play");
 
     private String message;
 
