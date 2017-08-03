@@ -43,7 +43,9 @@ angular.module('lp.playbook.wizard.insights', [])
 
     vm.onDelete = function(pos) {
         var remove_talkingpoint_name = vm.talkingPoints[pos].name;
-        CgTalkingPointStore.deleteTalkingPoint(remove_talkingpoint_name);
+        if(vm.talkingPoints[pos].pid) {
+            CgTalkingPointStore.deleteTalkingPoint(remove_talkingpoint_name);
+        }
         vm.talkingPoints.splice(pos, 1);
         for (var i = pos; i < vm.talkingPoints.length; i++) {
             vm.talkingPoints[i].Offset--;
@@ -64,15 +66,32 @@ angular.module('lp.playbook.wizard.insights', [])
     };
 
     function validateTalkingPoints() {
-        var valid = false;
-        for (var i = 0; i < vm.talkingPoints.length; i++) {
-            if (!vm.talkingPoints[i].content || !vm.talkingPoints[i].title) {
+        var valid = false,
+            errors = 0;
+        if(vm.talkingPoints.length) {
+            for (var i = 0; i < vm.talkingPoints.length; i++) {
+                vm.talkingPoints[i].uiError = null;
+                if (!vm.talkingPoints[i].content || !vm.talkingPoints[i].title) {
+                    vm.talkingPoints[i].uiError = {};
+                    if(!vm.talkingPoints[i].title) {
+                        vm.talkingPoints[i].uiError.title = 'Missing Title';
+                    }
+                    if(!vm.talkingPoints[i].content) {
+                        vm.talkingPoints[i].uiError.content = 'Missing Content';
+                    }
+                    errors++;
+                }
+            }
+            if (errors) {
                 PlaybookWizardStore.setValidation('insights', false);
                 valid = false;
-                break;
+            } else {
+                valid = true;
             }
-            valid = true;
+        } else {
+            valid = false;
         }
+        //valid = true;
         vm.valid = valid;
         if(valid) {
             PlaybookWizardStore.setTalkingPoints(vm.talkingPoints);

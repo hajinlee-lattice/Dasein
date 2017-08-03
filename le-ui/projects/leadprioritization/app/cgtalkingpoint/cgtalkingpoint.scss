@@ -51,6 +51,19 @@
                         transform: translateY(-50%);
                     }
                 }
+                &.tp-error {
+                    .tp-errors {
+                        color: #d22128;
+                        font-size: .9em;
+                        display: block;
+                        position: relative;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        em {
+                            display: block;
+                        }
+                    }
+                }
             }
         }
 
@@ -78,7 +91,6 @@
     padding: 3px;
     position: relative;
     background-color: white;
-
     .tinymce-container {
         margin-top: 3px;
         display: none;
@@ -143,6 +155,10 @@
             box-shadow: inset 0 1px 1px rgba(0,0,0,0.075)
         }
     }
+}
+
+.tp-entry.has-errors .talking-point-editor {
+    border-color: #d22128;
 }
 
 .tp-attribute-pane {

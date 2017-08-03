@@ -60,6 +60,7 @@ angular
                     controller: function($scope, $stateParams, $state, $rootScope, Play) {
                         $scope.play_name = $stateParams.play_name || '';
                         $scope.segment = Play.segment;
+                        $scope.targetsDisabled = (Play.segment ? false : true);
                         $scope.stateName = function() {
                             return $state.current.name;
                         }
