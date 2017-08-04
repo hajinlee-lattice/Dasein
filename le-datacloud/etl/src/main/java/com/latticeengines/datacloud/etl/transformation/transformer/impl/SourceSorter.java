@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -35,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.Sort;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
@@ -185,7 +185,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
     private void splitAvros(int numThreads, long chunkSize, boolean compress) throws IOException {
         String avroGlob = out + (out.endsWith("/") ? "*.avro" : "/*.avro");
         List<String> avroFiles = HdfsUtils.getFilesByGlob(yarnConfiguration, avroGlob);
-        ExecutorService executors = Executors.newFixedThreadPool(numThreads);
+        ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("file-splitter", numThreads);
         Map<String, Future<Boolean>> futures = new HashMap<>();
         for (String avroFile : avroFiles) {
             Future<Boolean> future = executors.submit(new AvroSplitCallable(avroFile, chunkSize, compress));

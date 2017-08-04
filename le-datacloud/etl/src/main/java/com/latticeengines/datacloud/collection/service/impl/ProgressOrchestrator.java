@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -82,7 +83,7 @@ public class ProgressOrchestrator {
     }
 
     public synchronized void executeRefresh() {
-        executorService = Executors.newFixedThreadPool(executorMap.size());
+        executorService = ThreadPoolUtils.getFixedSizeThreadPool("refresh-exec", executorMap.size());
         for (Source source : sourceService.getSources()) {
             if ((!dryrun) && serviceFlowsZkConfigService.refreshJobEnabled(source)) {
                 try {

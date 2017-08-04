@@ -12,6 +12,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -29,7 +30,8 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
     @Override
     public void execute(ProcessorContext processorContext) {
 
-        ExecutorService executor = Executors.newFixedThreadPool(processorContext.getNumThreads());
+        ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool("bulk-match",
+                processorContext.getNumThreads());
         processorContext.getDataCloudProcessor().setProgress(0.07f);
         Long startTime = System.currentTimeMillis();
         Set<Future<MatchContext>> futures = new HashSet<>();

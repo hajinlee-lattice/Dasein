@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,7 @@ public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase imple
 
             log.info("Initialize dynamo fetcher executors.");
             Integer num = isBatchMode() ? batchFetcherNum : fetcherNum;
-            ExecutorService executor = Executors.newFixedThreadPool(num);
+            ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-fetcher", num);
 
             for (int i = 0; i < num; i++) {
                 executor.submit(new Fetcher());

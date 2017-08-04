@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -538,7 +539,7 @@ public class SqlServerHelper implements DbHelper {
         }
 
         log.info("Initialize propdata fetcher executors.");
-        executor = Executors.newFixedThreadPool(numFetchers);
+        executor = ThreadPoolUtils.getFixedSizeThreadPool("sql-fetcher", numFetchers);
         for (int i = 0; i < numFetchers; i++) {
             executor.submit(new Fetcher());
         }
