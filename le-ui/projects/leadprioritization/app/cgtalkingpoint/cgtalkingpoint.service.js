@@ -41,9 +41,20 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     };
 
     this.isTalkingPointDirty = function(talkingPoint) {
+        var talkingPoint = angular.copy(talkingPoint),
+            dirty = false,
+            check = [
+                'content',
+                'title',
+                'offset'
+            ];
         if(!talkingPoint.pid) { // this means it's a new talking point
-            return true;
+            if(!talkingPoint.title) {
+                return false; // hack to not let it pass this test if it's new and doesn't have a title
+            }
+            return true; // "dirty"
         }
+        // get the current talking point from the reference of saved talking points (i.e. not talking points from the mutable object)
         for(var i in this.savedTalkingPoints) {
             var currentTalkingPoint = this.savedTalkingPoints[i];
             if(currentTalkingPoint.name === talkingPoint.name) {
@@ -52,7 +63,15 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
                 break;
             }
         }
-        return !_.isEqual(foundCurrentTalkingPoint, newTalkingPoint);
+        // just check from a whitelist to see if the properties are equal
+        for(var i in check) {
+            property = check[i];
+            if(foundCurrentTalkingPoint[property] !== newTalkingPoint[property]) {
+                dirty = true;
+                break;
+            }
+        };
+        return dirty;
     }
 
     this.setTalkingPoints = function(talkingPoints) {
@@ -107,6 +126,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         var deferred = $q.defer();
         CgTalkingPointService.saveTalkingPoints(opts).then(function(data){
             CgTalkingPointStore.setTalkingPoints(data);
+            CgTalkingPointStore.savedTalkingPoints = angular.copy(data);
             deferred.resolve(data);
         });
         return deferred.promise;

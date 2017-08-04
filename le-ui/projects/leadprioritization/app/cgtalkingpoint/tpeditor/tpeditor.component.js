@@ -38,9 +38,9 @@ angular.module('lp.cg.talkingpoint.editor', [])
                 }
                 var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint();
                     content = ed.contentDocument.body.innerHTML;
-                $rootScope.$broadcast('sync:talkingPoints:lock', true);
                 CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
                 if(CgTalkingPointStore.isTalkingPointDirty(talkingPoint)) {
+                    $rootScope.$broadcast('sync:talkingPoints:lock', true);
                     CgTalkingPointStore.saveTalkingPoints([talkingPoint]).then(function(results){
                         if(talkingPoint.IsNew) {
                             $rootScope.$broadcast('sync:talkingPoints');
@@ -94,9 +94,9 @@ angular.module('lp.cg.talkingpoint.editor', [])
         if(!CgTalkingPointStore.saveOnBlur) {
             return false;
         }
-        vm.lockTalkingPoints = true;
         CgTalkingPointStore.setEditedTalkingPoint($scope.tp, 'title');
         if(CgTalkingPointStore.isTalkingPointDirty($scope.tp)) {
+            vm.lockTalkingPoints = true;
             CgTalkingPointStore.saveTalkingPoints([$scope.tp]).then(function(data){
                 if($scope.tp.IsNew) {
                     $rootScope.$broadcast('sync:talkingPoints');

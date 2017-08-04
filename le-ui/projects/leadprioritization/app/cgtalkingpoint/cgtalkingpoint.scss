@@ -26,6 +26,7 @@
             left: 340px;
             top: 0;
             height: 45px;
+            pointer-events: none;
             & > li {
                 @include flex-item(0 1 auto);
                 margin: 0 10px;
@@ -40,6 +41,9 @@
                             }
                         }
                     }
+                }
+                &.tp-entry-sort {
+                    pointer-events: auto;
                 }
                 &.tp-created {
                     time {
