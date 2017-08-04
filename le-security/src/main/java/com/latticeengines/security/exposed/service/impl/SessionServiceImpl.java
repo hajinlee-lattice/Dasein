@@ -65,8 +65,8 @@ public class SessionServiceImpl implements SessionService {
                     break;
                 }
             } catch (Exception e) {
-                LOGGER.warn("Failed to attach tenent " + ticket.getTenants().get(0) + " session " + ticket.getData()
-                        + " from GA - retried " + retries + " out of " + MAX_RETRY + " times");
+                LOGGER.error("Failed to attach tenent " + ticket.getTenants().get(0) + " session " + ticket.getData()
+                        + " from GA - retried " + retries + " out of " + MAX_RETRY + " times", e);
             }
             try {
                 retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
