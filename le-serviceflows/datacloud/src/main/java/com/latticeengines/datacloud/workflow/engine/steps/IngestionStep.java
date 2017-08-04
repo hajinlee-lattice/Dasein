@@ -16,8 +16,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -26,6 +24,8 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.hsqldb.lib.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -97,10 +97,11 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
     @Autowired
     protected JobService jobService;
 
-    private static final Integer WORKFLOW_WAIT_TIME_IN_SECOND = (int) TimeUnit.HOURS.toSeconds(6);
+    private static final Integer WORKFLOW_WAIT_TIME_IN_SECOND = (int) TimeUnit.HOURS.toSeconds(24);
 
     private static final String sqoopPrefix = "part-m-";
     private static final String SQOOP_OPTION_WHERE = "--where";
+    private static final String TMP_PREFIX = "TMP_";
 
     @Override
     public void execute() {
@@ -199,7 +200,7 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
         // folder.
         // To avoid violation, download file to unique tmp folder first.
         Path tmpDestDir = new Path(new Path(progress.getDestination()).getParent(),
-                "TMP_" + UUID.randomUUID().toString());
+                TMP_PREFIX + UUID.randomUUID().toString());
         Path tmpDestFile = new Path(tmpDestDir, new Path(progress.getDestination()).getName());
         progress.setDestination(tmpDestFile.toString());
         CamelRouteConfiguration camelRouteConfig = ingestionProgressService.createCamelRouteConfiguration(progress);
@@ -256,11 +257,13 @@ public class IngestionStep extends BaseWorkflowStep<IngestionStepConfiguration> 
 
         try {
             HdfsUtils.writeToFile(yarnConfiguration, success.toString(), "");
-            emailNotify(sftpConfig, ingestion.getIngestionName(), version, hdfsDir.toString());
+            Path tmpDestDir = new Path(new Path(progress.getDestination()).getParent(), TMP_PREFIX + "*");
+            HdfsUtils.rmdir(yarnConfiguration, tmpDestDir.toString());
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Failed to create %s in HDFS dir %s", hdfsPathBuilder.SUCCESS_FILE,
-                    hdfsDir.toString()), e);
+            throw new RuntimeException(String.format("Failed to create %s in HDFS dir %s and delete all tmp dirs",
+                    hdfsPathBuilder.SUCCESS_FILE, hdfsDir.toString()), e);
         }
+        emailNotify(sftpConfig, ingestion.getIngestionName(), version, hdfsDir.toString());
         ingestionVersionService.updateCurrentVersion(ingestion, version);
     }
 
