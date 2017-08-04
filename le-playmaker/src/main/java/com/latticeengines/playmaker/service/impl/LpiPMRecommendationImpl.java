@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("lpiPMRecommendation")
 public class LpiPMRecommendationImpl implements LpiPMRecommendation {
+
+    private Random rand = new Random(System.currentTimeMillis());
 
     @Autowired
     private RecommendationEntityMgr recommendationEntityMgr;
@@ -84,8 +88,10 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                 accExtRec.put(PlaymakerConstants.PriorityID, 25);
                 accExtRec.put(PlaymakerConstants.SfdcContactID, "");
                 accExtRec.put(PlaymakerConstants.Contacts,
+                        createContacts((String) accExtRec.get(PlaymakerConstants.CompanyName)));
 
-                        createContacts());
+                // TODO - remove this line after release end demo
+                accExtRec.put(PlaymakerConstants.SfdcAccountID, null);
 
                 accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
 
@@ -96,21 +102,41 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
         return data;
     }
 
-    private List<Map<String, String>> createContacts() {
+    private List<Map<String, String>> createContacts(String companyName) {
         List<Map<String, String>> contacts = new ArrayList<>();
+        int randNum = rand.nextInt(10000);
+        String firstName = "FirstName" + randNum;
+        String lastName = "LastName" + randNum;
+
         Map<String, String> contact = new HashMap<>();
-        contact.put(PlaymakerConstants.Email, "tom.james@C2education.com");
-        contact.put(PlaymakerConstants.Address, "5725 Delphi Drive");
+        String domain = createDummyDomain(companyName);
+
+        contact.put(PlaymakerConstants.Email, firstName + "@" + domain);
+        contact.put(PlaymakerConstants.Address, companyName + " Dr");
         contact.put(PlaymakerConstants.Phone, "248.813.2000");
         contact.put(PlaymakerConstants.State, "MI");
         contact.put(PlaymakerConstants.ZipCode, "48098-2815");
         contact.put(PlaymakerConstants.Country, "USA");
         contact.put(PlaymakerConstants.SfdcContactID, "");
         contact.put(PlaymakerConstants.City, "Troy");
-        contact.put(PlaymakerConstants.ContactID, "17");
-        contact.put(PlaymakerConstants.Name, "Tom James");
+        contact.put(PlaymakerConstants.ContactID, "" + randNum);
+        contact.put(PlaymakerConstants.Name, firstName + " " + lastName);
         contacts.add(contact);
         return contacts;
+    }
+
+    private String createDummyDomain(String companyName) {
+        String dot = ".";
+
+        String domain = "";
+        if (companyName != null) {
+            domain = companyName.trim();
+            domain = StringUtils.replace(domain, " ", dot);
+            if (!domain.endsWith(dot)) {
+                domain += dot;
+            }
+        }
+        return domain + "com";
     }
 
     @Override
