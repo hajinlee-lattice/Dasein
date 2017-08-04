@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.insights', [])
 .controller('PlaybookWizardInsights', function(
-    $scope, $state, $stateParams, $document,
+    $scope, $state, $stateParams, $document, $rootScope,
     PlaybookWizardStore, CgTalkingPointStore, TalkingPointPreviewResources, TalkingPointAttributes, TalkingPoints, BrowserStorageUtility
 ) {
     var vm = this;
@@ -9,7 +9,15 @@ angular.module('lp.playbook.wizard.insights', [])
         previewResources: TalkingPointPreviewResources,
         attributes: TalkingPointAttributes,
         talkingPoints: TalkingPoints,
+        saveOnBlur: CgTalkingPointStore.saveOnBlur,
         stateParams: $stateParams
+    });
+
+    $rootScope.$on('sync:talkingPoints', function(e){
+        CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
+            vm.talkingPoints = talkingPoints;
+            $rootScope.$broadcast('sync:talkingPoints:complete');
+        });
     });
 
     CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
@@ -33,7 +41,6 @@ angular.module('lp.playbook.wizard.insights', [])
     };
 
     vm.saveTalkingPoints = function() {
-        // I was going to check to confirm there was a change first but offset always changes, so you can't compare ojects as it currently is so just always save
         CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints).then(function(results){
             CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
                 $state.go('home.playbook.dashboard.insights.preview', {play_name: $stateParams.play_name});
@@ -59,9 +66,11 @@ angular.module('lp.playbook.wizard.insights', [])
         vm.talkingPoints.forEach(function(tp, i) {
             tp.offset = i;
         });
-        CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints).then(function(results){
-            CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true);
-        });
+        if(CgTalkingPointStore.saveOnBlur) {
+            CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints).then(function(results){
+                CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true);
+            });
+        }
         
     };
 

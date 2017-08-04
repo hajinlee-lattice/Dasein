@@ -91,6 +91,20 @@
     padding: 3px;
     position: relative;
     background-color: white;
+    &[disabled] {
+        pointer-events: none;
+        .row {
+            opacity: .2;
+        }
+        .saving-spinner {
+            opacity: 1;
+        }
+    }
+    .saving-spinner {
+        position: absolute;
+        top: 14px;
+        left: 60px;
+    }
     .tinymce-container {
         margin-top: 3px;
         display: none;
@@ -185,6 +199,7 @@
         position: absolute;
         width: 100%;
         overflow: auto;
+        overflow-x: hidden;
         top: 120px;
         bottom: 0;
         cursor: pointer;

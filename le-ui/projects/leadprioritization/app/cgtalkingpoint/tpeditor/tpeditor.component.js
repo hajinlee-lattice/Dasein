@@ -12,7 +12,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
         controllerAs: 'vm'
     }
 })
-.service('CgTinyMceConfig', function($stateParams, CgTalkingPointStore) {
+.service('CgTinyMceConfig', function($stateParams, $rootScope, CgTalkingPointStore) {
     this.config = {
         branding: false,
         plugins: 'textcolor lists link table legacyoutput paste code',
@@ -33,24 +33,32 @@ angular.module('lp.cg.talkingpoint.editor', [])
         target_list: false,
         setup : function(ed) {
             ed.on('blur', function(e) {
+                if(!CgTalkingPointStore.saveOnBlur) {
+                    return false;
+                }
                 var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint();
                     content = ed.contentDocument.body.innerHTML;
+                $rootScope.$broadcast('sync:talkingPoints:lock', true);
                 CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
                 if(CgTalkingPointStore.isTalkingPointDirty(talkingPoint)) {
                     CgTalkingPointStore.saveTalkingPoints([talkingPoint]).then(function(results){
-                        CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true);
+                        if(talkingPoint.IsNew) {
+                            $rootScope.$broadcast('sync:talkingPoints');
+                        }
+                        $rootScope.$broadcast('sync:talkingPoints:lock', false);
                     });
                 }
             });
         }
     };
 })
-.controller('CgTalkingPointEditorController', function($scope, $stateParams, $element, $document, $timeout, $q, CgTinyMceConfig, CgTalkingPointStore) {
+.controller('CgTalkingPointEditorController', function($scope, $stateParams, $rootScope, $element, $document, $timeout, $q, CgTinyMceConfig, CgTalkingPointStore) {
     var vm = this;
     angular.extend(this, {
         tinyMceConfig: CgTinyMceConfig.config,
         expanded: false,
-        deleteClicked: false
+        deleteClicked: false,
+        lockTalkingPoints: false
     });
 
     if ($scope.tp.IsNew === true) {
@@ -78,11 +86,26 @@ angular.module('lp.cg.talkingpoint.editor', [])
         }
     };
 
+    $rootScope.$on('sync:talkingPoints:lock', function(e, bool){
+        vm.lockTalkingPoints = bool;
+    });
+
     vm.saveTitle = function() {
+        if(!CgTalkingPointStore.saveOnBlur) {
+            return false;
+        }
+        vm.lockTalkingPoints = true;
         CgTalkingPointStore.setEditedTalkingPoint($scope.tp, 'title');
         if(CgTalkingPointStore.isTalkingPointDirty($scope.tp)) {
-            CgTalkingPointStore.saveTalkingPoints([$scope.tp]).then(function(results){
-                CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true);
+            CgTalkingPointStore.saveTalkingPoints([$scope.tp]).then(function(data){
+                if($scope.tp.IsNew) {
+                    $rootScope.$broadcast('sync:talkingPoints');
+                    $rootScope.$on('sync:talkingPoints:complete', function(e){
+                        vm.lockTalkingPoints = false;
+                    });
+                } else {
+                    vm.lockTalkingPoints = false;
+                }
             });
         };
     }

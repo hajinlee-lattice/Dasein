@@ -10,6 +10,8 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     this.talkingPointsPreviewResources = null;
     this.editedTalkingPoint = {};
 
+    this.saveOnBlur = true;
+
     this.savedTalkingPoints = null;
 
     this.clear = function() {
@@ -104,7 +106,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     this.saveTalkingPoints = function(opts) {
         var deferred = $q.defer();
         CgTalkingPointService.saveTalkingPoints(opts).then(function(data){
-            CgTalkingPointStore.setTalkingPoints(opts);
+            CgTalkingPointStore.setTalkingPoints(data);
             deferred.resolve(data);
         });
         return deferred.promise;
@@ -178,17 +180,51 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return QueryStore.GetDataByQuery('accounts', query, PlaybookWizardStore.currentPlay.segment);
     };
 
+    makeAttributesArray = function(attributes) {
+        array = [];
+        for(var i in attributes) {
+            var key = i,
+                value = attributes[i],
+                attribute = {
+                    name: key,
+                    value: value
+                };
+
+            array.push(attribute);
+        }
+        return array;
+    }
+
     this.getAttributes = function() {
+        var stub = false;
         var deferred = $q.defer();
 
         if (this.attributes !== null) {
             deferred.resolve(this.attributes);
         } else {
             var self = this;
-            CgTalkingPointService.getAttributes().then(function(response) {
-                self.attributes = response.data;
-                deferred.resolve(self.attributes);
-            });
+            if(stub) {
+                CgTalkingPointService.getStubAttributes().then(function(response) {
+                    CgTalkingPointStore.attributes = response;
+                    console.log(response);
+                    deferred.resolve(self.attributes);
+                });
+            } else {
+                var attributes = {
+                    Company: [],
+                    Recommendation: []
+                };
+                CgTalkingPointService.getAttributes().then(function(company) {
+                    attributes.Company = makeAttributesArray(company);
+                    CgTalkingPointStore.attributes = attributes;
+                    CgTalkingPointService.getRecommendationAttributes().then(function(recommendation) {
+                        _recommendation = makeAttributesArray(recommendation);
+                        CgTalkingPointStore.attributes.Recommendation = _recommendation;
+                        deferred.resolve(attributes);
+                    });
+                });
+            }
+ 
         }
         return deferred.promise;
     };
@@ -327,18 +363,40 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
             count = count || 20;
         $http({
             method: 'GET',
-            url: this.host + '/dante/accounts/' + count,
+            url: this.host + '/dante/accounts/' + count
         }).then(function(response){
             deferred.resolve(response.data);
         });
         return deferred.promise;
     };
 
+    this.getStubAttributes = function() {
+        var deferred = $q.defer();
+        var data = {"data":{"Company":[{"value":"Account.Address1","name":"Address1"},{"value":"Account.Address2","name":"Address2"},{"value":"Account.City","name":"City"},{"value":"Account.Country","name":"Country"},{"value":"Account.DisplayName","name":"Company Name"},{"value":"Account.EstimatedRevenue","name":"Estimated Revenue"},{"value":"Account.LastModified","name":"Last Modification Date"},{"value":"Account.NAICSCode","name":"NAICS Code"},{"value":"Account.OwnerDisplayName","name":"Sales Rep"},{"value":"Account.SICCode","name":"SIC Code"},{"value":"Account.StateProvince","name":"StateProvince"},{"value":"Account.Territory","name":"Territory"},{"value":"Account.Vertical","name":"Industry"},{"value":"Account.Zip","name":"Zip"}],"Recommendation":[{"name":"Expected Value","value":"ExpectedValue"},{"name":"Likelihood","value":"LikelihoodBucketOffset"},{"name":"Play Name","value":"PlayDisplayName"},{"name":"Solution Name","value":"PlaySolutionName"},{"name":"Solution Type","value":"PlaySolutionType"},{"name":"Play Owner","value":"UserRoleDisplayName"},{"name":"Target Product","value":"PlayTargetProductName"},{"name":"Theme","value":"Theme"}]}};
+        deferred.resolve(data.data);
+        return deferred.promise;
+    };
+
     this.getAttributes = function() {
         var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/dante/attributes/accountattributes'
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
 
-        var data = {"data":{"Company":[{"value":"Account.Address1","name":"Address1"},{"value":"Account.Address2","name":"Address2"},{"value":"Account.City","name":"City"},{"value":"Account.Country","name":"Country"},{"value":"Account.DisplayName","name":"Company Name"},{"value":"Account.EstimatedRevenue","name":"Estimated Revenue"},{"value":"Account.LastModified","name":"Last Modification Date"},{"value":"Account.NAICSCode","name":"NAICS Code"},{"value":"Account.OwnerDisplayName","name":"Sales Rep"},{"value":"Account.SICCode","name":"SIC Code"},{"value":"Account.StateProvince","name":"StateProvince"},{"value":"Account.Territory","name":"Territory"},{"value":"Account.Vertical","name":"Industry"},{"value":"Account.Zip","name":"Zip"}],"Recommendation":[{"name":"Expected Value","value":"ExpectedValue"},{"name":"Likelihood","value":"LikelihoodBucketOffset"},{"name":"Play Name","value":"PlayDisplayName"},{"name":"Solution Name","value":"PlaySolutionName"},{"name":"Solution Type","value":"PlaySolutionType"},{"name":"Play Owner","value":"UserRoleDisplayName"},{"name":"Target Product","value":"PlayTargetProductName"},{"name":"Theme","value":"Theme"}]}};
-        deferred.resolve(data);
+        return deferred.promise;
+    };
+
+    this.getRecommendationAttributes = function() {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/dante/attributes/recommendationattributes'
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
 
         return deferred.promise;
     };

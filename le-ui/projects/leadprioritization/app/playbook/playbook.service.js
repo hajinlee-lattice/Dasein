@@ -9,51 +9,43 @@ angular.module('lp.playbook')
     this.playLaunches = this.playLaunches || null;
     this.savedTalkingPoints = this.savedTalkingPoints || null;
 
+    this.init = function() {
+        PlaybookWizardStore.settings = {};
+        PlaybookWizardStore.rating = {};
+        PlaybookWizardStore.savedSegment = null;
+        PlaybookWizardStore.currentPlay = null;
+        PlaybookWizardStore.playLaunches = null;
+        PlaybookWizardStore.savedTalkingPoints = null;
 
-    this.clear = function() {
-        this.settings = {};
-        this.rating = {};
-        this.savedSegment = null;
-        this.currentPlay = null;
-        this.playLaunches = null;
-        this.savedTalkingPoints = null;
-
-        this.settings_form = {
+        PlaybookWizardStore.settings_form = {
             play_display_name: '',
             play_description: ''
         }
 
-        this.segment_form = {
+        PlaybookWizardStore.segment_form = {
             segment_selection: ''
         }
 
-        this.rating_form = {
+        PlaybookWizardStore.rating_form = {
             rating_selection: ''
         }
+
+        PlaybookWizardStore.validation = {
+            settings: false,
+            segment: false,
+            rating: false,
+            targets: true,
+            insights: false,
+            preview: true,
+            launch: true
+        }
+    }
+
+    this.init();
+    
+    this.clear = function() {
+        this.init();
         CgTalkingPointStore.clear();
-    }
-
-    this.validation = {
-        settings: false,
-        segment: false,
-        rating: false,
-        targets: true,
-        insights: true,
-        preview: true,
-        launch: true
-    };
-
-    this.settings_form = {
-        play_display_name: '',
-        play_description: ''
-    }
-
-    this.segment_form = {
-        segment_selection: ''
-    }
-
-    this.rating_form = {
-        rating_selection: ''
     }
 
     this.setSettings = function(obj) {
