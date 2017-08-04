@@ -15,4 +15,8 @@ public abstract class BaseTransformationWrapper<T extends BaseTransformWrapperSt
         return transformationWorkflow;
     }
 
+    protected void setTransformationStepBeanName(String transformationStepBeanName) {
+        transformationWorkflow.getTransformationStep().setBeanName(transformationStepBeanName);
+    }
+
 }

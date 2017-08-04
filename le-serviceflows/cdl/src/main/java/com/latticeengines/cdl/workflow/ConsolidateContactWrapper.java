@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,11 @@ public class ConsolidateContactWrapper extends BaseTransformationWrapper<Consoli
 
     @Autowired
     private ConsolidateContactData consolidateContactData;
+
+    @PostConstruct
+    public void overrideTransformationStepBeanName() {
+        setTransformationStepBeanName("consolidateContactDataTransformStep");
+    }
 
     @Override
     protected ConsolidateContactData getWrapperStep() {
