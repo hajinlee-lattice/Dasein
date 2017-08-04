@@ -451,12 +451,13 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("State") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "BILLING STATE", "BILLING PROVINCE" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "STATE_PROVINCE", "PROVINCE",
+                        "STATE OR PROVINCE", "BILLING STATE", "BILLING PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("Country") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY", "BILLING COUNTRY" })) //
@@ -467,12 +468,13 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PostalCode") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "POSTALCODE", "BILLING ZIP", "POSTAL CODE" })) //
+                .allowedDisplayNames(Sets
+                        .newHashSet(new String[] { "POSTAL_CODE", "POSTALCODE", "ZIP", "POSTAL CODE", "BILLING ZIP" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("DUNS") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "DUNS", "DUNS NUMBER" })) //

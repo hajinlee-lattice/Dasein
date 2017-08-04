@@ -126,12 +126,12 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .accountIdField(InterfaceName.LEAccountIDLong.name()) //
                 .contactIdField(InterfaceName.LEContactIDLong.name()) //
                 .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder() //
-                        .put(MatchKey.Domain, Collections.singletonList("URL")) //
+                        .put(MatchKey.Domain, Collections.singletonList(InterfaceName.Website.name())) //
                         .put(MatchKey.Name, Collections.singletonList("DisplayName")) //
                         .put(MatchKey.City, Collections.singletonList(InterfaceName.City.name())) //
-                        .put(MatchKey.State, Collections.singletonList("StateProvince")) //
+                        .put(MatchKey.State, Collections.singletonList(InterfaceName.State.name())) //
                         .put(MatchKey.Country, Collections.singletonList(InterfaceName.Country.name())) //
-                        .put(MatchKey.Zipcode, Collections.singletonList("Zip")) //
+                        .put(MatchKey.Zipcode, Collections.singletonList(InterfaceName.PostalCode.name())) //
                         .build()) //
                 .workflowContainerMem(workflowMemMb) //
                 .build();
