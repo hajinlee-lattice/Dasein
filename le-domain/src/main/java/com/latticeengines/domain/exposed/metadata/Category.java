@@ -57,7 +57,7 @@ public enum Category {
         }
         if (values.contains(name)) {
             return valueOf(name);
-        } if (nameMap.containsKey(name)) {
+        } else if (nameMap.containsKey(name)) {
             return nameMap.get(name);
         } else {
             throw new IllegalArgumentException("Cannot find a Category with name " + name);
