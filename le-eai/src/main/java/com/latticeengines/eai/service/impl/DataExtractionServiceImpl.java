@@ -22,6 +22,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
@@ -142,7 +143,9 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
             importService.validate(sourceImportConfig, importContext);
             if (!sourceImportConfig.getSourceType().willSubmitEaiJob()) {
-                hasNonEaiJobSourceType = true;
+                if (!importConfig.getClass().equals(CSVToHdfsConfiguration.class)) {
+                    hasNonEaiJobSourceType = true;
+                }
             }
         }
         if (hasNonEaiJobSourceType) {
@@ -152,6 +155,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             return importContext.getProperty(ImportProperty.APPID, ApplicationId.class);
         } else {
             List<EaiImportJobDetail> jobDetails = initailImportJobDetail(importConfig);
+            log.info(String.format("Job configuration class before create job: %s", importConfig.getClass().getName()));
             appId = eaiYarnService.submitSingleYarnContainerJob(importConfig);
             if (jobDetails != null) {
                 for (EaiImportJobDetail eaiImportJobDetail : jobDetails) {

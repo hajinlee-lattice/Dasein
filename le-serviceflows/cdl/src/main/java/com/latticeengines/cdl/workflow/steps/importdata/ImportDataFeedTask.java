@@ -12,8 +12,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportConfigurationFactory;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
-import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
@@ -21,7 +21,7 @@ import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
-@Component("importDataFeed")
+@Component("importDataFeedTask")
 public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ImportDataFeedTask.class);
@@ -50,26 +50,21 @@ public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfi
     }
 
     private ImportConfiguration setupConfiguration(String taskUniqueId, DataFeedTask dataFeedTask) {
-        ImportConfiguration importConfig = new ImportConfiguration();
+        ImportConfiguration importConfig;
         if (dataFeedTask == null) {
             throw new RuntimeException(String.format("Cannot find data feed task for id %s", taskUniqueId));
         }
         String source = dataFeedTask.getSource();
-        if (source.equals(SourceType.VISIDB.getName())) {
-            importConfig.setCustomerSpace(configuration.getCustomerSpace());
-            importConfig.setProperty(ImportProperty.IMPORT_CONFIG_STR, configuration.getImportConfig());
-            List<String> identifiers = new ArrayList<>();
-            identifiers.add(taskUniqueId);
-            importConfig.setProperty(ImportProperty.COLLECTION_IDENTIFIERS, JsonUtils.serialize(identifiers));
+        SourceType sourceType = SourceType.getByName(source);
+        List<String> identifiers = new ArrayList<>();
+        importConfig = ImportConfigurationFactory.getImportConfiguration(sourceType, configuration.getImportConfig());
 
-            SourceImportConfiguration sourceImportConfig = new SourceImportConfiguration();
-            sourceImportConfig.setSourceType(SourceType.VISIDB);
-            importConfig.addSourceConfiguration(sourceImportConfig);
+        importConfig.setCustomerSpace(configuration.getCustomerSpace());
+        importConfig.setProperty(ImportProperty.IMPORT_CONFIG_STR, configuration.getImportConfig());
 
-        } else {
-            //todo other type
-            throw new RuntimeException(String.format("Source %s not supported!", source));
-        }
+        identifiers.add(taskUniqueId);
+        importConfig.setProperty(ImportProperty.COLLECTION_IDENTIFIERS, JsonUtils.serialize(identifiers));
+
         return importConfig;
     }
 }

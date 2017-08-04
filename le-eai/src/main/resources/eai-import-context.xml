@@ -10,6 +10,7 @@
     <context:component-scan base-package="com.latticeengines.eai.dao" />
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
+    <import resource="classpath:eai-mapreduce-context.xml"/>
 
     <import resource="classpath:aws-context.xml" />
     <import resource="classpath:redshiftdb-context.xml" />

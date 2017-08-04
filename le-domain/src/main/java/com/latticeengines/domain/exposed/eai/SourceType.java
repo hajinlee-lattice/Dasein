@@ -24,4 +24,8 @@ public enum SourceType {
         return willSubmitEaiJob;
     }
 
+    public static SourceType getByName(String sourceName) {
+        return SourceType.valueOf(sourceName.toUpperCase());
+    }
+
 }

@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 
 public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
@@ -23,7 +26,11 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
         return map.get(clz);
     }
 
+    //public abstract void initailize(T config);
+
     public abstract void invoke(T config);
+
+    //public abstract void finalize(T config);
 
     public void setProgressReporter(Function<Float, Void> progressReporter) {
         this.progressReporter = progressReporter;

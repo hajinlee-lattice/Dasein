@@ -416,13 +416,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setSourceAttrName(String sourceAttrName) {
-        setListPropertyFromString("SourceAttrName", sourceAttrName);
+        setPropertyValue("SourceAttrName", sourceAttrName);
     }
 
     @Transient
     @JsonIgnore
     public String getSourceAttrName() {
-        return (String) properties.get("SourceAttrName");
+        return getPropertyValue("SourceAttrName") != null ? getPropertyValue("SourceAttrName").toString() : null;
     }
 
     @Transient

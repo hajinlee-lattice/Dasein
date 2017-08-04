@@ -479,7 +479,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                 try {
                     HashMap<String, Attribute> attributeMap = new HashMap<>();
                     for (Attribute attr : table.getAttributes()) {
-                        attributeMap.put(attr.getDisplayName(), attr);
+                        attributeMap.put(attr.getSourceAttrName(), attr);
                     }
                     long getDLDataResultTime = 0;
                     while (!error) {
@@ -575,6 +575,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                     eaiImportJobDetailService.updateImportJobDetail(importJobDetail);
                     log.info(String.format("Total load data from DL takes %d ms", System.currentTimeMillis() - startTime));
                 } else {
+                    reportStatus(statusUrl, vdbLoadTableStatus);
                     throw new LedpException(LedpCode.LEDP_17015, new String[] {vdbLoadTableStatus.getMessage()});
                 }
             } catch (RuntimeException e) {

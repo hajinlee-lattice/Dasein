@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.datacloud.manage.LatticeIdStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.EntityExternalType;
@@ -95,6 +96,33 @@ public class ModelingFileUploadResource {
         }
     }
 
+    @RequestMapping(value = "/cdl", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Upload a file. (Template file or data file)")
+    public ResponseDocument<SourceFile> uploadFile(@RequestParam("fileName") String fileName, //
+                                                   @RequestParam(value = "compressed", required = false) boolean compressed, //
+                                                   @RequestParam(value = "displayName") String csvFileName, //
+                                                   @RequestParam(value = "entity") String entity, //
+                                                   @RequestParam("file") MultipartFile file) {
+        try {
+            log.info(String.format("Uploading file %s (csvFileName=%s, compressed=%s)", fileName,
+                    csvFileName, compressed));
+
+            InputStream stream = file.getInputStream();
+
+            if (compressed) {
+                stream = GzipUtils.decompressStream(stream);
+            }
+            EntityExternalType entityExternalType = EntityExternalType.getByName(entity);
+            SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
+
+            return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName,
+                    schemaInterpretation, entityExternalType, csvFileName, stream));
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
+        }
+    }
+
     @RequestMapping(value = "/unnamed", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload a file. The server will create a unique name for the file")
@@ -118,6 +146,17 @@ public class ModelingFileUploadResource {
         return ResponseDocument.successResponse(
                 modelingFileMetadataService.getFieldMappingDocumentBestEffort(sourceFileName,
                         schemaInterpretation, parameters));
+    }
+
+    @RequestMapping(value = "{sourceFileName}/fieldmappings/cdl", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Get field mappings for a source file.")
+    public ResponseDocument<FieldMappingDocument> getFieldMappings(@PathVariable String sourceFileName,
+                                                                   @RequestParam(value = "entity") String entity) {
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
+        return ResponseDocument.successResponse(
+                modelingFileMetadataService.getFieldMappingDocumentBestEffort(sourceFileName,
+                        schemaInterpretation, null));
     }
 
     @RequestMapping(value = "fieldmappings", method = RequestMethod.POST)

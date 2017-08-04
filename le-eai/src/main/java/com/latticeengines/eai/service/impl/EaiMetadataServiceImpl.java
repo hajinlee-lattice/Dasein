@@ -136,7 +136,7 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, List<Extract>> getExtractsForTable(List<Table> tableMetaData, ImportContext importContext) {
-        Map<String, Boolean> mutipleExtractMap = importContext.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class);
+        Map<String, Boolean> multipleExtractMap = importContext.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class);
         Map<String, String> targetPathsMap = importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
         Map<String, Long> processedRecordsMap = importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
         Map<String, List<String>> multipleTargets = importContext.getProperty(ImportProperty.EXTRACT_PATH_LIST,
@@ -147,7 +147,7 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         HashMap<String, List<Extract>> extracts = new HashMap<>();
         for (Table table : tableMetaData) {
             extracts.put(table.getName(), new ArrayList<Extract>());
-            if (mutipleExtractMap.get(table.getName())) {
+            if (multipleExtractMap.get(table.getName())) {
                 for (int i = 0; i < multipleTargets.get(table.getName()).size(); i++) {
                     extracts.get(table.getName()).add(createExtract(multipleTargets.get(table.getName()).get(i),
                             multipleRecords.get(table.getName()).get(i)));

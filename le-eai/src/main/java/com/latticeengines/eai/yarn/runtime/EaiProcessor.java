@@ -21,16 +21,19 @@ public class EaiProcessor extends SingleContainerYarnProcessor<EaiJobConfigurati
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public String process(EaiJobConfiguration eaiJobConfig) throws Exception {
-        if (eaiJobConfig instanceof ImportConfiguration) {
-            log.info("Directing import job to " + importProcessor.getClass().getSimpleName());
-            return importProcessor.process((ImportConfiguration) eaiJobConfig);
-        }
+        log.info(String.format("Job configuration class: %s", eaiJobConfig.getClass().getName()));
         EaiRuntimeService eaiRuntimeService = EaiRuntimeService.getRunTimeService(eaiJobConfig.getClass());
+        if (eaiRuntimeService == null) {
+            throw new RuntimeException(String.format("Cannot find the eai job service for job config class: %s",
+                    eaiJobConfig.getClass()));
+        }
         eaiRuntimeService.setProgressReporter(progress -> {
             setProgress((Float) progress);
             return null;
         });
+        //eaiRuntimeService.initailize(eaiJobConfig);
         eaiRuntimeService.invoke(eaiJobConfig);
+        //eaiRuntimeService.finalize(eaiJobConfig);
         return null;
     }
 }

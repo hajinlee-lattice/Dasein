@@ -17,6 +17,7 @@ import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
@@ -48,7 +49,8 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         for (VdbSpecMetadata metadata : vdbLoadTableConfig.getMetadataList()) {
             Attribute attr = new Attribute();
             attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()));
-            attr.setDisplayName(metadata.getColumnName());
+            attr.setSourceAttrName(metadata.getColumnName());
+            attr.setDisplayName(metadata.getDisplayName());
             attr.setSourceLogicalDataType(metadata.getDataType());
             attr.setPhysicalDataType(metadata.getDataType());
             attr.setApprovedUsage(metadata.getApprovedUsage());

@@ -9,6 +9,9 @@ public interface DataFeedTaskService {
 
     void createDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
 
+    void createOrUpdateDataFeedTask(String customerSpace, String source, String dataFeedType, String entity,
+                                    String tableName);
+
     DataFeedTask getDataFeedTask(String customerSpace, String source, String dataFeedType, String entity);
 
     DataFeedTask getDataFeedTask(String customerSpace, Long taskId);

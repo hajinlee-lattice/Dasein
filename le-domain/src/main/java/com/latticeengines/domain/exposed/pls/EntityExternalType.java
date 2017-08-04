@@ -7,5 +7,14 @@ public enum EntityExternalType {
     Opportunity, //
     Engagement, //
     Product, //
-    Activity
+    Activity;
+
+    public static EntityExternalType getByName(String entity) {
+        for (EntityExternalType type : values()) {
+            if (type.name().equalsIgnoreCase(entity)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException(String.format("There is no entity name %s in EntityExternalType", entity));
+    }
 }

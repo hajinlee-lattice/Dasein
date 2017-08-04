@@ -29,4 +29,14 @@ public enum SchemaInterpretation {
         }
         function.actOnSchemaInterpretation(name);
     }
+
+    public static SchemaInterpretation getByName(String interpretationName) {
+        for (SchemaInterpretation interpretation : values()) {
+            if (interpretation.name().equalsIgnoreCase(interpretationName)) {
+                return interpretation;
+            }
+        }
+        throw new IllegalArgumentException(String.format("There is no interpretation name %s in SchemaInterpretation",
+                interpretationName));
+    }
 }

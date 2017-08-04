@@ -1,0 +1,132 @@
+package com.latticeengines.pls.service.impl;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.service.CDLImportService;
+import com.latticeengines.pls.service.FileUploadService;
+import com.latticeengines.pls.service.ModelingFileMetadataService;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
+
+public class CDLImportServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
+
+    private final static Logger log = LoggerFactory.getLogger(CDLImportServiceImplDeploymentTestNG.class);
+
+    public static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    @Autowired
+    private FileUploadService fileUploadService;
+
+    @Autowired
+    private CDLImportService cdlImportService;
+
+    @Autowired
+    private ModelingFileMetadataService modelingFileMetadataService;
+
+    @Autowired
+    private WorkflowProxy workflowProxy;
+
+    private SourceFile template;
+
+    private SourceFile data;
+
+    private Tenant tenant;
+
+    @BeforeClass(groups = "deployment")
+    public void setup() throws Exception {
+        String featureFlag = LatticeFeatureFlag.LATTICE_INSIGHTS.getName();
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(featureFlag, true);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3, flags);
+        tenant = testBed.getMainTestTenant();
+        testBed.loginAndAttach(TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN), TestFrameworkUtils
+                .GENERAL_PASSWORD, tenant);
+        MultiTenantContext.setTenant(tenant);
+        File templateFile = new File(ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/cdlImportCSV_template.csv").getPath());
+
+        File dataFile = new File(ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/cdlImportCSV_data.csv").getPath());
+
+        template = fileUploadService.uploadFile("cdlImportCSV_template.csv", SchemaInterpretation.Account,
+                null, null, new FileInputStream(templateFile));
+        data = fileUploadService.uploadFile("cdlImportCSV_data.csv", SchemaInterpretation.Account,
+                null, null, new FileInputStream(dataFile));
+
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService.getFieldMappingDocumentBestEffort(
+                template.getName(), SchemaInterpretation.Account, null);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(true);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(template.getName(), fieldMappingDocument);
+    }
+
+    @Test(groups = "deployment", enabled = false )
+    public void testImportJob() throws Exception {
+        long startMillis = System.currentTimeMillis();
+        ApplicationId appId = cdlImportService.submitCSVImport(CustomerSpace.parse(tenant.getName()).toString(),
+                template.getName(), data.getName(), "File", "Account", "test");
+        Assert.assertNotNull(appId);
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+        long endMillis = System.currentTimeMillis();
+        checkExtractFolderExist(startMillis, endMillis);
+    }
+
+    private void checkExtractFolderExist(long startMillis, long endMillis) throws Exception {
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant.getId())).toString(),
+                SourceType.FILE.getName());
+        assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, targetPath);
+        for (String file : files) {
+            String filename = file.substring(file.lastIndexOf("/") + 1);
+            Date folderTime = new SimpleDateFormat(COLLECTION_DATE_FORMAT).parse(filename);
+            if (folderTime.getTime() > startMillis && folderTime.getTime() < endMillis) {
+                log.info("Find matched file: " + filename);
+                return;
+            }
+        }
+        assertTrue(false, "No data collection folder was created!");
+    }
+}

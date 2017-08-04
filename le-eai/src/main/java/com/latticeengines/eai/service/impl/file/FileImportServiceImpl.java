@@ -2,6 +2,7 @@ package com.latticeengines.eai.service.impl.file;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -51,6 +52,7 @@ public class FileImportServiceImpl extends ImportService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext context,
                                          ConnectorConfiguration connectorConfiguration) {
         context.setProperty(ImportProperty.HDFSFILE, //
@@ -61,6 +63,9 @@ public class FileImportServiceImpl extends ImportService {
                 srcImportConfig.getProperties().get(ImportProperty.METADATA));
         context.setProperty(ImportProperty.FILEURLPROPERTIES, //
                 srcImportConfig.getProperties().get(ImportProperty.FILEURLPROPERTIES));
+        for (Table table : srcImportConfig.getTables()) {
+            context.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class).put(table.getName(), Boolean.FALSE);
+        }
 
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.FILE, "EventTable");
         List<Table> tables = srcImportConfig.getTables();
@@ -70,12 +75,12 @@ public class FileImportServiceImpl extends ImportService {
 
     }
 
-    @Override
-    public void validate(SourceImportConfiguration extractionConfig, ImportContext context) {
-        super.validate(extractionConfig, context);
-
-        if (extractionConfig.getTables().size() > 1) {
-            throw new LedpException(LedpCode.LEDP_17001);
-        }
-    }
+//    @Override
+//    public void validate(SourceImportConfiguration extractionConfig, ImportContext context) {
+//        super.validate(extractionConfig, context);l
+//
+//        if (extractionConfig.getTables().size() > 1) {
+//            throw new LedpException(LedpCode.LEDP_17001);
+//        }
+//    }
 }

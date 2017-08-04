@@ -34,6 +34,17 @@ public class DataFeedTaskResource {
         dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedTask);
     }
 
+    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}/{tableName}", method = RequestMethod.POST, headers =
+            "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create data feed task")
+    public void createOrUpdateDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
+                                           @PathVariable String dataFeedType, @PathVariable String entity,
+                                           @PathVariable String tableName) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataFeedTaskService.createOrUpdateDataFeedTask(customerSpace, source, dataFeedType, entity, tableName);
+    }
+
     @RequestMapping(value = "", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
