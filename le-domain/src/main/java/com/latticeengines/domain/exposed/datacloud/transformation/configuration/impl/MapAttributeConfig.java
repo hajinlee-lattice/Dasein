@@ -7,7 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MapAttributeConfig extends TblDrivenTransformerConfig {
 
     @JsonProperty("DataCloudVersion")
-    private String dataCloudVersion;
+    private String dataCloudVersion; // For AccountMaster rebuild/refresh
+
+    @JsonProperty("IsMiniDataCloud")
+    private Boolean isMiniDataCloud; // For AccountMaster rebuild/refresh
 
     @JsonProperty("Seed")
     private String seed;
@@ -24,6 +27,14 @@ public class MapAttributeConfig extends TblDrivenTransformerConfig {
 
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
+    }
+
+    public Boolean isMiniDataCloud() {
+        return isMiniDataCloud;
+    }
+
+    public void setIsMiniDataCloud(Boolean isMiniDataCloud) {
+        this.isMiniDataCloud = isMiniDataCloud;
     }
 
     public String getSeed() {

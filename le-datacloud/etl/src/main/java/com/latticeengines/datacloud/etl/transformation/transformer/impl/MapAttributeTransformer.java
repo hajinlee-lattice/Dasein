@@ -23,6 +23,7 @@ public class MapAttributeTransformer
 
     public static final String DATA_CLOUD_VERSION = "DataCloudVersion";
     public static final String ACCOUNT_MASTER = "AccountMaster";
+    public static final String MINI_PREFIX = "MINI_";
 
     @Autowired
     private DataCloudVersionService dataCloudVersionService;
@@ -48,10 +49,17 @@ public class MapAttributeTransformer
         } else {
             DataCloudVersion currentVersion = dataCloudVersionService.currentApprovedVersion();
             if (MapAttributeFlow.MAP_STAGE.equals(config.getStage())) {
-                String nextVersion = dataCloudVersionService.nextMinorVersion(currentVersion.getVersion());
-                parsed.addProp(DATA_CLOUD_VERSION, nextVersion);
+                String version = dataCloudVersionService.nextMinorVersion(currentVersion.getVersion());
+                if (Boolean.TRUE.equals(config.isMiniDataCloud())) {
+                    version = MINI_PREFIX + version;
+                }
+                parsed.addProp(DATA_CLOUD_VERSION, version);
             } else if (MapAttributeFlow.REFRESH_STAGE.equals(config.getStage())) {
-                parsed.addProp(DATA_CLOUD_VERSION, currentVersion.getVersion());
+                String version = currentVersion.getVersion();
+                if (Boolean.TRUE.equals(config.isMiniDataCloud())) {
+                    version = MINI_PREFIX + version;
+                }
+                parsed.addProp(DATA_CLOUD_VERSION, version);
             }
         }
         return parsed;
