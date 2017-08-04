@@ -11,10 +11,11 @@ import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@Deprecated
 @Api(value = "health", description = "REST resource for checking health")
 @RestController
-@RequestMapping("/playmaker/health")
-public class HealthResource {
+@RequestMapping("/health")
+public class DeprecatedHealthResource {
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

@@ -48,13 +48,21 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
         http.requestMatchers()
                 .antMatchers("/playmaker/**", "/tenants/**", "/v2/api-docs", "/swagger-ui.html", "/webjars/**",
-                        "/**/favicon.ico", "/swagger-resources", "/configuration/**")
-                .and().authorizeRequests().antMatchers("/playmaker/**")
-                .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_CLIENT'))")
-                .antMatchers(HttpMethod.POST, "/tenants").permitAll().antMatchers("/tenants/**")
-                .access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))")
+                        "/**/favicon.ico", "/swagger-resources", "/configuration/**", "/playmaker/v2/api-docs",
+                        "/playmaker/swagger-ui.html", "/playmaker/webjars/**", "/playmaker/swagger-resources",
+                        "/playmaker/configuration/**")
+                .and().authorizeRequests()
+                .antMatchers("/playmaker/health", "/health").permitAll() //
+                .antMatchers("/playmaker/**")
+                .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_CLIENT'))") //
+                .antMatchers(HttpMethod.POST, "/tenants", "/playmaker/tenants").permitAll() //
+                .antMatchers("/tenants/**", "/playmaker/tenants/**")
+                .access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))") //
                 .antMatchers("/v2/api-docs", "/swagger-ui.html", "/webjars/**", "/**/favicon.ico", "/swagger-resources",
                         "/configuration/**")
+                .permitAll() //
+                .antMatchers("/playmaker/v2/api-docs", "/playmaker/swagger-ui.html", "/playmaker/webjars/**",
+                        "/playmaker/**/favicon.ico", "/playmaker/swagger-resources", "/playmaker/configuration/**")
                 .permitAll();
     }
 
