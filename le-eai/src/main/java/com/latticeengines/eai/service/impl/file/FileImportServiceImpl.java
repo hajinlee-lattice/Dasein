@@ -2,7 +2,6 @@ package com.latticeengines.eai.service.impl.file;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -11,8 +10,6 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.eai.service.impl.ImportStrategy;
@@ -31,7 +28,7 @@ public class FileImportServiceImpl extends ImportService {
 
     @Override
     public List<Table> importMetadata(SourceImportConfiguration srcImportConfig, ImportContext context,
-                                      ConnectorConfiguration connectorConfiguration) {
+            ConnectorConfiguration connectorConfiguration) {
         List<Table> newTables = new ArrayList<>();
         List<Table> tables = srcImportConfig.getTables();
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.FILE, "EventTable");
@@ -52,9 +49,8 @@ public class FileImportServiceImpl extends ImportService {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext context,
-                                         ConnectorConfiguration connectorConfiguration) {
+            ConnectorConfiguration connectorConfiguration) {
         context.setProperty(ImportProperty.HDFSFILE, //
                 srcImportConfig.getProperties().get(ImportProperty.HDFSFILE));
         context.setProperty(ImportProperty.METADATAFILE, //
@@ -63,9 +59,6 @@ public class FileImportServiceImpl extends ImportService {
                 srcImportConfig.getProperties().get(ImportProperty.METADATA));
         context.setProperty(ImportProperty.FILEURLPROPERTIES, //
                 srcImportConfig.getProperties().get(ImportProperty.FILEURLPROPERTIES));
-        for (Table table : srcImportConfig.getTables()) {
-            context.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class).put(table.getName(), Boolean.FALSE);
-        }
 
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.FILE, "EventTable");
         List<Table> tables = srcImportConfig.getTables();
@@ -75,12 +68,13 @@ public class FileImportServiceImpl extends ImportService {
 
     }
 
-//    @Override
-//    public void validate(SourceImportConfiguration extractionConfig, ImportContext context) {
-//        super.validate(extractionConfig, context);l
-//
-//        if (extractionConfig.getTables().size() > 1) {
-//            throw new LedpException(LedpCode.LEDP_17001);
-//        }
-//    }
+    // @Override
+    // public void validate(SourceImportConfiguration extractionConfig,
+    // ImportContext context) {
+    // super.validate(extractionConfig, context);l
+    //
+    // if (extractionConfig.getTables().size() > 1) {
+    // throw new LedpException(LedpCode.LEDP_17001);
+    // }
+    // }
 }

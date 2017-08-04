@@ -55,8 +55,6 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
 
         ImportContext context = new ImportContext(yarnConfiguration);
         context.setProperty(ImportProperty.CUSTOMER, customerSpace);
-        context.setProperty(ImportProperty.CUSTOMER, customerSpace);
-
         context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
         context.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
         context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
@@ -69,8 +67,8 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             throw new RuntimeException("Cannot find the dataFeed task for import!");
         }
         Table template = dataFeedTask.getImportTemplate();
-        log.info(String.format("Modeling metadata for template: %s", JsonUtils.serialize(template.getModelingMetadata
-                ())));
+        log.info(String.format("Modeling metadata for template: %s",
+                JsonUtils.serialize(template.getModelingMetadata())));
         context.setProperty(ImportProperty.METADATA, JsonUtils.serialize(template.getModelingMetadata()));
         String targetPath = createTargetPath(config.getCustomerSpace());
         List<Table> tableMetadata = new ArrayList<>();
@@ -84,7 +82,8 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
                 log.info("Property " + entry.getKey() + " = " + entry.getValue());
                 context.setProperty(entry.getKey(), entry.getValue());
             }
-            sourceImportConfig.getProperties().put(ImportProperty.METADATA, JsonUtils.serialize(template.getModelingMetadata()));
+            sourceImportConfig.getProperties().put(ImportProperty.METADATA,
+                    JsonUtils.serialize(template.getModelingMetadata()));
             sourceImportConfig.getProperties().put(ImportProperty.HDFSFILE, config.getFilePath());
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
             ConnectorConfiguration connectorConfiguration = importService.generateConnectorConfiguration("", context);
@@ -99,8 +98,8 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             String taskId = config.getJobIdentifier();
             List<Extract> extract = extracts.get(template.getName());
             if (extract != null && extract.size() > 0) {
-                dataFeedProxy.registerExtract(config.getCustomerSpace().toString(),
-                        taskId, template.getName(), extract.get(0));
+                dataFeedProxy.registerExtract(config.getCustomerSpace().toString(), taskId, template.getName(),
+                        extract.get(0));
             }
 
         }
@@ -112,6 +111,5 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
                 SourceType.FILE.getName(), new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date()));
         return targetPath;
     }
-
 
 }
