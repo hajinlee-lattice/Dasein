@@ -75,6 +75,25 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         importTable.addAttribute(a1);
         importTable.setTableType(TableType.IMPORTTABLE);
 
+        DataFeedTask task = new DataFeedTask();
+        task.setDataFeed(datafeed);
+        task.setActiveJob("Not specified");
+        task.setFeedType("VisiDB");
+        task.setEntity(SchemaInterpretation.Account.name());
+        task.setSource("SFDC");
+        task.setStatus(DataFeedTask.Status.Active);
+        task.setSourceConfig("config");
+        task.setImportTemplate(importTable);
+        task.setStartTime(new Date());
+        task.setLastImported(new Date());
+        task.setUniqueId(NamingUtils.uuid("DataFeedTask"));
+        datafeed.addTask(task);
+
+        datafeedEntityMgr.create(datafeed);
+        DataFeed dataFeed = datafeedEntityMgr.findByName(DATA_FEED_NAME);
+        dataFeed.setStatus(Status.Active);
+        datafeedEntityMgr.update(dataFeed);
+
         Table dataTable = new Table();
         dataTable.setName("dataTable");
         dataTable.setDisplayName(dataTable.getName());
@@ -91,26 +110,7 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         extract1.setExtractionTimestamp(DateTime.now().getMillis());
         extract1.setProcessedRecords(1L);
         dataTable.addExtract(extract1);
-
-        DataFeedTask task = new DataFeedTask();
-        task.setDataFeed(datafeed);
-        task.setActiveJob("Not specified");
-        task.setFeedType("VisiDB");
-        task.setEntity(SchemaInterpretation.Account.name());
-        task.setSource("SFDC");
-        task.setStatus(DataFeedTask.Status.Active);
-        task.setSourceConfig("config");
-        task.setImportTemplate(importTable);
-        task.setImportData(dataTable);
-        task.setStartTime(new Date());
-        task.setLastImported(new Date());
-        task.setUniqueId(NamingUtils.uuid("DataFeedTask"));
-        datafeed.addTask(task);
-
-        datafeedEntityMgr.create(datafeed);
-        DataFeed dataFeed = datafeedEntityMgr.findByName(DATA_FEED_NAME);
-        dataFeed.setStatus(Status.Active);
-        datafeedEntityMgr.update(dataFeed);
+        datafeedTaskEntityMgr.addTableToQueue(task, dataTable);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
@@ -123,8 +123,6 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         assertEquals(retrieved.getTasks().size(), 1);
         assertEquals(retrieved.getTasks().get(0).getImportTemplate().getTableType(), TableType.IMPORTTABLE);
         assertNotNull(retrieved.getTasks().get(0).getImportTemplate().getPid());
-        assertEquals(retrieved.getTasks().get(0).getImportData().getTableType(), TableType.DATATABLE);
-        assertNotNull(retrieved.getTasks().get(0).getImportData().getPid());
         JsonUtils.deserialize(JsonUtils.serialize(retrieved), DataFeed.class);
     }
 
