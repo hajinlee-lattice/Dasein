@@ -8,7 +8,6 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <import resource="classpath:serviceapps-core-context.xml"/>
-    <import resource="classpath:security-no-controller-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.apps.cdl">
         <context:exclude-filter type="aspectj" expression="com.latticeengines.apps.cdl.controller.*" />
