@@ -45,6 +45,8 @@ angular.module('common.datacloud.query.service',[
 
     this.setResourceTypeCount = function(resourceType, loading, value) {
 
+        console.log("set");
+
         var resourceTypeCount = this.getCounts()[resourceType];
 
         if (resourceTypeCount) {
@@ -80,6 +82,8 @@ angular.module('common.datacloud.query.service',[
         self.setResourceTypeCount(resourceType, true);
     });
 
+
+
     this.setRestriction = function(restriction) {
         this.restriction = restriction;
     };
@@ -108,11 +112,9 @@ angular.module('common.datacloud.query.service',[
 
         this.setSegment(segment);
         if (segment !== null) {
-            this.setRestriction(segment.frontend_restriction);
-            deferred.resolve();
+            deferred.resolve( this.setRestriction(segment.frontend_restriction) );
         } else {
-            this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
-            deferred.resolve();
+            deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );
         }
         return deferred.promise;
 
@@ -138,8 +140,11 @@ angular.module('common.datacloud.query.service',[
             bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
 
-        this.setResourceTypeCount('accounts', false, attribute.bkt.Cnt);
-
+        var self = this;
+        this.GetCountByQuery('accounts').then(function(data){
+            self.setResourceTypeCount('accounts', false, data);
+        });            
+        
     };
 
     this.removeRestriction = function(attribute) {
@@ -158,7 +163,11 @@ angular.module('common.datacloud.query.service',[
         }
 
         allRestrictions.splice(index, 1);
-        this.setResourceTypeCount('accounts', false, attribute.bkt.Cnt);
+        
+        var self = this;
+        this.GetCountByQuery('accounts').then(function(data){
+            self.setResourceTypeCount('accounts', false, data);
+        });     
 
     };
 

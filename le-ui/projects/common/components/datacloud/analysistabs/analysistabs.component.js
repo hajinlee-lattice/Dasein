@@ -22,12 +22,13 @@ angular.module('common.datacloud.analysistabs', [
 
     vm.init = function() {
 
+
+        $timeout(function(){
+            QueryStore.setResourceTypeCount('accounts', false, vm.accountsCount);
+        }, 2000);
         QueryStore.GetCountByQuery('accounts').then(function(data){ 
             vm.accountsCount = data; 
         });
-        $timeout(function(){
-            QueryStore.setResourceTypeCount('accounts', false, vm.accountsCount);
-        }, 3000);
 
         vm.attributes = vm.inModel()
             ? 'home.model.analysis.explorer'

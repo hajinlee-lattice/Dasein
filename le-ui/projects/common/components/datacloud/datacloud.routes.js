@@ -278,7 +278,7 @@ angular
                     var deferred = $q.defer();
 
                     var segmentName = $stateParams.segment;
-                    var isCreateNew = segmentName === 'Create';
+                    var isCreateNew = segmentName === '';
                     var modelId = $stateParams.modelId;
                     var tenantName = $stateParams.tenantName;
 
@@ -306,13 +306,17 @@ angular
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
                     var CreateOrUpdateSegment = function() {
                         var segment = QueryStore.getSegment(),
-                            ts = new Date().getTime();
+                            ts = new Date().getTime(),
+                            restriction = QueryStore.getRestriction();
+
+
+                            console.log(segment, restriction);
 
                         if (segment === null) {
                             segment = {
                                 'name': 'segment' + ts,
                                 'display_name': 'segment' + ts,
-                                'frontend_restriction': QueryStore.getRestriction(),
+                                'frontend_restriction': restriction,
                                 'page_filter': {
                                     'row_offset': 0,
                                     'num_rows': 10
@@ -323,7 +327,7 @@ angular
                             segment = {
                                 'name': segment.name,
                                 'display_name': segment.display_name,
-                                'frontend_restriction': QueryStore.getRestriction(),
+                                'frontend_restriction': restriction,
                                 'page_filter': {
                                     'row_offset': 0,
                                     'num_rows': 10

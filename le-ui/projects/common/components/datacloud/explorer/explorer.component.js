@@ -1416,7 +1416,10 @@ angular.module('common.datacloud.explorer', [
         vm.saveSegmentEnabled = true;
 
         if (vm.segmentAttributeInput[attributeKey] === true) {
-            QueryStore.addRestriction({columnName: attributeKey, bkt: stat});
+            QueryStore.counts.accounts.loading = true;
+            $timeout(function(){
+                QueryStore.addRestriction({columnName: attributeKey, bkt: stat});
+            }, 1000);
         } else {
             QueryStore.removeRestriction({columnName: attributeKey, bkt: stat});
         }
