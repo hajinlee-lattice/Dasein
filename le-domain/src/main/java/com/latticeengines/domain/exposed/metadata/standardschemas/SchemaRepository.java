@@ -425,7 +425,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("Website") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "WEBSITE" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "WEBSITE", "URL" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Website) //
