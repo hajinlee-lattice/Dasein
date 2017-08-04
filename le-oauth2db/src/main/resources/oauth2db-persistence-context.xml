@@ -28,11 +28,11 @@
         <property name="sessionFactory" ref="sessionFactoryOauth2"/>
     </bean>
 
-    <bean id="transactionManager"
+    <bean id="transactionManagerOauth2"
           class="org.springframework.orm.hibernate4.HibernateTransactionManager"
           p:sessionFactory-ref="sessionFactoryOauth2">
         <qualifier value="oauth2"/>
     </bean>
 
-    <tx:annotation-driven/>
+    <tx:annotation-driven transaction-manager="transactionManagerOauth2" />
 </beans>
