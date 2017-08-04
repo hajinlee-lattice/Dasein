@@ -15,13 +15,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -38,6 +36,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.datasource.DataSourceService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
@@ -284,10 +283,16 @@ public class SqlServerHelper implements DbHelper {
     private Pair<String, List<String>> constructSqlQuery(Set<String> involvedPartitions, Set<String> targetColumns,
             Collection<String> domains, Collection<NameLocation> nameLocations) {
         boolean hasDomains = domains != null && !domains.isEmpty();
+        boolean hasNameLocaitons = nameLocations != null && !nameLocations.isEmpty();
         List<String> args = new ArrayList<>();
         String sql = String.format("SELECT p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s]",
                 MatchConstants.LID_FIELD, MatchConstants.DOMAIN_FIELD, MatchConstants.NAME_FIELD,
                 MatchConstants.COUNTRY_FIELD, MatchConstants.STATE_FIELD, MatchConstants.CITY_FIELD);
+        if (!hasDomains && !hasNameLocaitons) {
+            sql = String.format("SELECT TOP 0 p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s], p1.[%s]",
+                    MatchConstants.LID_FIELD, MatchConstants.DOMAIN_FIELD, MatchConstants.NAME_FIELD,
+                    MatchConstants.COUNTRY_FIELD, MatchConstants.STATE_FIELD, MatchConstants.CITY_FIELD);
+        }
         sql += (targetColumns.isEmpty() ? "" : ", [" + StringUtils.join(targetColumns, "], [") + "]");
         sql += "\nFROM " + fromJoinClause(involvedPartitions);
         if (hasDomains) {
@@ -296,37 +301,37 @@ public class SqlServerHelper implements DbHelper {
             sql += " )\n";
             args.addAll(domains);
         }
-
-        boolean firstNameLoc = true;
-        for (NameLocation nameLocation : nameLocations) {
-            if (StringUtils.isEmpty(nameLocation.getCountry())) {
-                nameLocation.setCountry(LocationUtils.USA);
+        if (hasNameLocaitons) {
+            boolean firstNameLoc = true;
+            for (NameLocation nameLocation : nameLocations) {
+                if (StringUtils.isEmpty(nameLocation.getCountry())) {
+                    nameLocation.setCountry(LocationUtils.USA);
+                }
+                if (StringUtils.isNotEmpty(nameLocation.getName()) && StringUtils.isNotEmpty(nameLocation.getState())) {
+                    if (!hasDomains && firstNameLoc) {
+                        sql += " WHERE ( ";
+                    } else {
+                        sql += " OR ( ";
+                    }
+                    sql += String.format("p1.[%s] = ? ", MatchConstants.NAME_FIELD);
+                    args.add(nameLocation.getName());
+                    if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
+                        sql += String.format(" AND p1.[%s] = ? ", MatchConstants.COUNTRY_FIELD);
+                        args.add(nameLocation.getCountry());
+                    }
+                    if (StringUtils.isNotEmpty(nameLocation.getState())) {
+                        sql += String.format(" AND p1.[%s] = ? ", MatchConstants.STATE_FIELD);
+                        args.add(nameLocation.getState());
+                    }
+                    if (StringUtils.isNotEmpty(nameLocation.getCity())) {
+                        sql += String.format(" AND p1.[%s] = ? ", MatchConstants.CITY_FIELD);
+                        args.add(nameLocation.getCity());
+                    }
+                    sql += ")\n";
+                }
+                firstNameLoc = false;
             }
-            if (StringUtils.isNotEmpty(nameLocation.getName()) && StringUtils.isNotEmpty(nameLocation.getState())) {
-                if (!hasDomains && firstNameLoc) {
-                    sql += " WHERE ( ";
-                } else {
-                    sql += " OR ( ";
-                }
-                sql += String.format("p1.[%s] = ? ", MatchConstants.NAME_FIELD);
-                args.add(nameLocation.getName());
-                if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
-                    sql += String.format(" AND p1.[%s] = ? ", MatchConstants.COUNTRY_FIELD);
-                    args.add(nameLocation.getCountry());
-                }
-                if (StringUtils.isNotEmpty(nameLocation.getState())) {
-                    sql += String.format(" AND p1.[%s] = ? ", MatchConstants.STATE_FIELD);
-                    args.add(nameLocation.getState());
-                }
-                if (StringUtils.isNotEmpty(nameLocation.getCity())) {
-                    sql += String.format(" AND p1.[%s] = ? ", MatchConstants.CITY_FIELD);
-                    args.add(nameLocation.getCity());
-                }
-                sql += ")\n";
-            }
-            firstNameLoc = false;
         }
-
         return Pair.of(sql, args);
     }
 
