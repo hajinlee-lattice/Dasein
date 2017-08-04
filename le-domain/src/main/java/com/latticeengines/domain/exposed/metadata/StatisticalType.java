@@ -1,7 +1,11 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public enum StatisticalType {
 
@@ -9,12 +13,14 @@ public enum StatisticalType {
 
     private final String name;
     private static Map<String, StatisticalType> nameMap;
+    private static Set<String> values;
 
     static {
         nameMap = new HashMap<>();
         for (StatisticalType statisticalType: StatisticalType.values()) {
             nameMap.put(statisticalType.getName(), statisticalType);
         }
+        values = new HashSet<>(Arrays.stream(values()).map(StatisticalType::name).collect(Collectors.toSet()));
     }
 
     StatisticalType(String name) {
@@ -29,7 +35,13 @@ public enum StatisticalType {
         if (name == null) {
             return null;
         }
-        return nameMap.get(name);
+        if (values.contains(name)) {
+            return valueOf(name);
+        } if (nameMap.containsKey(name)) {
+            return nameMap.get(name);
+        } else {
+            throw new IllegalArgumentException("Cannot find a StatisticalType with name " + name);
+        }
     }
 
 }

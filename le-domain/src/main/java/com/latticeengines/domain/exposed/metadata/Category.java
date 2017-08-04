@@ -1,14 +1,18 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public enum Category {
     FIRMOGRAPHICS("Firmographics"), //
@@ -25,12 +29,14 @@ public enum Category {
 
     private final String name;
     private static Map<String, Category> nameMap;
+    private static Set<String> values;
 
     static {
         nameMap = new HashMap<>();
         for (Category category : Category.values()) {
             nameMap.put(category.getName(), category);
         }
+        values = new HashSet<>(Arrays.stream(values()).map(Category::name).collect(Collectors.toSet()));
     }
 
     Category(String name) {
@@ -49,7 +55,9 @@ public enum Category {
         if (name == null) {
             return null;
         }
-        if (nameMap.containsKey(name)) {
+        if (values.contains(name)) {
+            return valueOf(name);
+        } if (nameMap.containsKey(name)) {
             return nameMap.get(name);
         } else {
             throw new IllegalArgumentException("Cannot find a Category with name " + name);

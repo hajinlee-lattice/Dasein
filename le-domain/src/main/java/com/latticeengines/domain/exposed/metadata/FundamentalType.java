@@ -1,7 +1,11 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public enum FundamentalType {
 
@@ -21,12 +25,14 @@ public enum FundamentalType {
 
     private final String name;
     private static Map<String, FundamentalType> nameMap;
+    private static Set<String> values;
 
     static {
         nameMap = new HashMap<>();
         for (FundamentalType fundamentalType: FundamentalType.values()) {
             nameMap.put(fundamentalType.getName(), fundamentalType);
         }
+        values = new HashSet<>(Arrays.stream(values()).map(FundamentalType::name).collect(Collectors.toSet()));
     }
 
     FundamentalType(String name) {
@@ -41,9 +47,11 @@ public enum FundamentalType {
         if (name == null) {
             return null;
         }
-        if (nameMap.containsKey(name)) {
+        if (values.contains(name)) {
+            return valueOf(name);
+        } else if (nameMap.containsKey(name)) {
             return nameMap.get(name);
-        } else  {
+        } else {
             throw new IllegalArgumentException("Cannot find a FundamentalType with name " + name);
         }
     }
