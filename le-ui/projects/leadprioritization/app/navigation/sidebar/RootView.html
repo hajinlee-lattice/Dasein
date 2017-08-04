@@ -6,7 +6,7 @@
     </div>
     <ul class="menu">
         <li ng-if="showAnalysisPage" role="presentation" ui-sref-active="active">
-            <a ui-sref="home.segment" analytics-on="click" analytics-event="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MYDATA')}}">
+            <a ui-sref="home.segment.explorer.attributes({segment:'Create'})" analytics-on="click" analytics-event="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MYDATA')}}">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MYDATA')}}">
                     <span class="ico ico-analysis ico-light-gray"></span>
                 </span>

@@ -275,23 +275,16 @@ angular
             },
             resolve: angular.extend({}, DataCloudResolve, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
-                    
-                    console.log("here");
-
                     var deferred = $q.defer(),
-                        segment = QueryStore.getSegment(),
-                        segmentName = segment.name,
-                        isCreateNew = segmentName === 'Create',
-                        modelId = $stateParams.modelId,
-                        tenantName = $stateParams.tenantName;
+                        segment = QueryStore.getSegment();
 
-                    console.log(segment, isCreateNew);
+                    console.log("[resolve] QueryRestriction", $stateParams, segment);
 
-                    if (isCreateNew) {
-                        console.log("new");
+                    if (!segment) {
+                        console.log("[resolve] new segment");
                         deferred.resolve( QueryStore.setupStore(null) );
                     } else {
-                        console.log("existing");
+                        console.log("[resolve] existing segment");
                         deferred.resolve( QueryStore.setupStore(segment) );
                     };
 
@@ -304,8 +297,8 @@ angular
                             ts = new Date().getTime(),
                             restriction = QueryStore.getRestriction();
 
-                            console.log(segment);
-
+                        console.log("[resolve] SegmentServiceProxy",segment);
+                        
                         if (segment === null) {
                             segment = {
                                 'name': 'segment' + ts,
@@ -339,10 +332,9 @@ angular
                 AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
                     var deferred = $q.defer(),
                         segment = QueryStore.getSegment(),
-                        segmentName = segment.name,
                         restriction = QueryStore.getRestriction();
 
-                        console.log(segment);
+                        console.log("[resolve] AccountsCount",segment);
 
                         if (segment === null) {                     
                             query = { 

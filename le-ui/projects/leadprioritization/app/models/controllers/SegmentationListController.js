@@ -58,7 +58,7 @@ angular.module('lp.models.segments', [
         QueryStore.setSegment(segment);
 
         if ($state.current.name == 'home.segments') {
-            $state.go('home.segment', {segment: segment.name}, { reload: true } );
+            $state.go('home.segment.explorer.attributes', {segment: segment.name}, { reload: true } );
         } else {
             $state.go('home.model.analysis', {segment: segment.name}, { reload: true } );
         };
