@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -22,6 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
@@ -40,7 +40,8 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Test(groups = "functional")
     public void testSimpleMatchRTSCache() {
         Object[][] data = new Object[][] {
-                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
+                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" },
+                { 456, "abc@gmail.com", "TestPublicDomainNoState", null, null, "USA" } };
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
