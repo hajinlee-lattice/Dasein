@@ -156,13 +156,10 @@ public class PlayResource {
             @PathVariable("launchId") String launchId, //
             @PathVariable("action") LaunchState action) {
         PlayLaunch existingPlayLaunch = playLaunchService.findByLaunchId(launchId);
-
-        if (action != null && action != LaunchState.Launching) {
-            if (existingPlayLaunch != null) {
-                if (existingPlayLaunch.getLaunchState() == LaunchState.Launching) {
-                    existingPlayLaunch.setLaunchState(action);
-                    return playLaunchService.update(existingPlayLaunch);
-                }
+        if (existingPlayLaunch != null) {
+            if (LaunchState.canTransit(existingPlayLaunch.getLaunchState(), action)) {
+                existingPlayLaunch.setLaunchState(action);
+                return playLaunchService.update(existingPlayLaunch);
             }
         }
         return existingPlayLaunch;
