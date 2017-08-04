@@ -8,7 +8,7 @@ angular.module('common.datacloud.query.results', [
         resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
         modelId: $stateParams.modelId,
         inModel: $state.current.name.split('.')[1] === 'model',
-        accounts: QueryStore.getAccounts(),
+        accounts: [],
         loadingAccounts: true,
         restriction: QueryStore.getRestriction(),
         current: 1,
@@ -24,25 +24,15 @@ angular.module('common.datacloud.query.results', [
 
     vm.init = function() {
 
-        console.log(vm.accounts);
+        console.log($stateParams.segment, vm.section);
 
-        if(vm.accounts = []){
-            vm.loadingAccounts = true;
-        } else {
-            vm.loadingAccounts = false;
-        };
-
-        console.log(vm.loadingAccounts);
-        
-        if($stateParams.segment != null){
+        if($stateParams.segment != null || $stateParams.segment != undefined){
+            console.log("with segment");
             QueryStore.setAccounts('', $stateParams.segment);
         } else {
+            console.log("without segment");
             QueryStore.setAccounts();
         };
-        //QueryStore.setAccounts();
-        QueryStore.getAccounts().then(function(data){
-            vm.accounts = data;
-        });
 
     };
     vm.init();

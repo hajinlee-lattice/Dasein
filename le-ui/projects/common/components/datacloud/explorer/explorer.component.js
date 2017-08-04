@@ -9,7 +9,7 @@ angular.module('common.datacloud.explorer', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('DataCloudController', function(
-    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams,
+    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, $routeParams,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentServiceProxy, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse
@@ -157,7 +157,7 @@ angular.module('common.datacloud.explorer', [
 
         if (vm.lookupMode && vm.LookupResponse.errorCode) {
             $state.go('home.datacloud.explorer');
-        }
+        };
 
         getEnrichmentCategories();
         getEnrichmentData();
@@ -1264,8 +1264,6 @@ angular.module('common.datacloud.explorer', [
                         category = enrichment.Category,
                         index = vm.enrichmentsMap[fieldName];
 
-                        console.log(entity);
-
                         if(index || index === 0) {
                             vm.enrichments[index].SegmentChecked = true;
                             vm.enrichments[index].SegmentRangesChecked = {};
@@ -1421,7 +1419,10 @@ angular.module('common.datacloud.explorer', [
                 QueryStore.addRestriction({columnName: attributeKey, bkt: stat});
             }, 1000);
         } else {
-            QueryStore.removeRestriction({columnName: attributeKey, bkt: stat});
+            QueryStore.counts.accounts.loading = true;
+            $timeout(function(){
+                QueryStore.removeRestriction({columnName: attributeKey, bkt: stat});
+            }, 1000);
         }
 
     }
@@ -1440,7 +1441,7 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         vm.saveSegmentEnabled = true;
 
-        //vm.enrichments[index].SegmentChecked = true;
+        vm.enrichments[index].SegmentChecked = true;
 
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
             QueryStore.addRestriction({columnName: fieldName, bkt: stat});

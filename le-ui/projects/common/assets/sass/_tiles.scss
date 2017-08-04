@@ -136,8 +136,7 @@ Should be incorporated across PD and LP (models list, campaigns list).
         background-color: #fff;
         border-style: solid;
         border-color: #d0d0d0;
-        border-top-color: #457eba;
-        border-width: 8px 1px 1px;
+        border-width: 1px;
         border-top-right-radius: 4px;
         border-top-left-radius: 4px;
         border-bottom-right-radius: 6px;
@@ -145,7 +144,9 @@ Should be incorporated across PD and LP (models list, campaigns list).
         &:hover {
             transition: all 0ms ease 0s;
             border-color: #457eba;
-            border-top-color: #457eba;
+            -webkit-box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.2);
+            -moz-box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.2);
+            box-shadow: 0px 2px 5px 0px rgba(0,0,0,0.2);
             cursor: pointer;
         }
         &.no-style {
@@ -154,11 +155,11 @@ Should be incorporated across PD and LP (models list, campaigns list).
           padding: 0;
         }
         &.create-tile {
-          border-top-color: #4cae4f;
+          background: transparent;
+          border: #7b7b7b dashed 1px;
           &:hover {
-              border-color: #d0d0d0;
-              border-top-color: #4cae4f;
-              cursor: default;
+              border-color: #457eba;
+              border-style: solid;
           }
           .form-group {
               margin-bottom: 10px;
@@ -418,7 +419,7 @@ Should be incorporated across PD and LP (models list, campaigns list).
 @media (min-width: 640px) and (max-width: 799px) {
     .tiles > li {
         display: inline-block;
-        width: 48%;
+        width: 49%;
         margin: 0 1% 6px;
 		&:nth-child(2n+1) {
 			margin-left: 0;
@@ -432,7 +433,7 @@ Should be incorporated across PD and LP (models list, campaigns list).
 @media (min-width: 800px) {
     .tiles > li {
       display: inline-block;
-      width: 31%;
+      width: 31.85%;
       margin: 0 1% 16px;
       &:nth-child(3n+1) {
         margin-left: 0;

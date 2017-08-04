@@ -45,8 +45,6 @@ angular.module('common.datacloud.query.service',[
 
     this.setResourceTypeCount = function(resourceType, loading, value) {
 
-        console.log("set");
-
         var resourceTypeCount = this.getCounts()[resourceType];
 
         if (resourceTypeCount) {
@@ -110,8 +108,8 @@ angular.module('common.datacloud.query.service',[
         var self = this;
         var deferred = $q.defer();
 
-        this.setSegment(segment);
-        if (segment !== null) {
+        if (segment != null) {
+            this.setSegment(segment);
             deferred.resolve( this.setRestriction(segment.frontend_restriction) );
         } else {
             deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );

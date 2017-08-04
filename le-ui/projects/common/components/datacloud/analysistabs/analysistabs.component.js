@@ -22,7 +22,6 @@ angular.module('common.datacloud.analysistabs', [
 
     vm.init = function() {
 
-
         $timeout(function(){
             QueryStore.setResourceTypeCount('accounts', false, vm.accountsCount);
         }, 2000);

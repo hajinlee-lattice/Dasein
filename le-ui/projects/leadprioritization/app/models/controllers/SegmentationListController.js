@@ -52,15 +52,16 @@ angular.module('lp.models.segments', [
         }
     };
 
-    vm.tileClick = function ($event, segmentName) {
+    vm.tileClick = function ($event, segment) {
         $event.preventDefault();
 
-        if ($state.current.name == 'home.segments') {
-            $state.go('home.segment', {segment: segmentName}, { reload: true } );
-        } else {
-            $state.go('home.model.analysis', {segment: segmentName}, { reload: true } );
-        }
+        QueryStore.setSegment(segment);
 
+        if ($state.current.name == 'home.segments') {
+            $state.go('home.segment', {segment: segment.name}, { reload: true } );
+        } else {
+            $state.go('home.model.analysis', {segment: segment.name}, { reload: true } );
+        };
     };
 
     var oldSegmentDisplayName = '';
@@ -103,7 +104,7 @@ angular.module('lp.models.segments', [
         if (vm.modelId) {
             $state.go('home.model.analysis');
         } else {
-            $state.go('home.segment');
+            $state.go('home.segment', {segment: 'Create'});
         }
     };
 

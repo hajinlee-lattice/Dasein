@@ -35,7 +35,7 @@
 
                 <li
                     ng-repeat="segment in vm.segments | orderBy: '-updated' | filter: vm.query"
-                    ng-click="vm.tileClick($event, segment.name)"
+                    ng-click="vm.tileClick($event, segment)"
                     ng-mouseleave="vm.tileStates[segment.name].showCustomMenu ? vm.customMenuClick($event, segment) : null"
                 >
                     <div class="tile-header" ng-if="!vm.tileStates[segment.name].editSegment">
@@ -120,7 +120,7 @@
                     </div>
                 </li>
 
-                <li class="no-style">
+                <li class="create-tile">
                     <a
                         class="button new-tile-button"
                         ng-click="vm.addSegment()">

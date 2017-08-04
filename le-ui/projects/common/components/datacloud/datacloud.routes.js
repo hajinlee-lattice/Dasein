@@ -275,33 +275,28 @@ angular
             },
             resolve: angular.extend({}, DataCloudResolve, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
-                    var deferred = $q.defer();
+                    
+                    console.log("here");
 
-                    var segmentName = $stateParams.segment;
-                    var isCreateNew = segmentName === '';
-                    var modelId = $stateParams.modelId;
-                    var tenantName = $stateParams.tenantName;
+                    var deferred = $q.defer(),
+                        segment = QueryStore.getSegment(),
+                        segmentName = segment.name,
+                        isCreateNew = segmentName === 'Create',
+                        modelId = $stateParams.modelId,
+                        tenantName = $stateParams.tenantName;
+
+                    console.log(segment, isCreateNew);
 
                     if (isCreateNew) {
-                        QueryStore.setupStore(null);
-                        deferred.resolve(QueryStore.getRestriction());
+                        console.log("new");
+                        deferred.resolve( QueryStore.setupStore(null) );
                     } else {
-                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                            if (segmentName && !result) {
-                                if (modelId) {
-                                    $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
-                                } else {
-                                    $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
-                                }
-                            } else {
-                                return QueryStore.setupStore(result);
-                            }
-                        }).then(function() {
-                            deferred.resolve(QueryStore.getRestriction());
-                        });
-                    }
+                        console.log("existing");
+                        deferred.resolve( QueryStore.setupStore(segment) );
+                    };
 
                     return deferred.promise;
+                    
                 }],
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
                     var CreateOrUpdateSegment = function() {
@@ -309,8 +304,7 @@ angular
                             ts = new Date().getTime(),
                             restriction = QueryStore.getRestriction();
 
-
-                            console.log(segment, restriction);
+                            console.log(segment);
 
                         if (segment === null) {
                             segment = {
@@ -327,7 +321,7 @@ angular
                             segment = {
                                 'name': segment.name,
                                 'display_name': segment.display_name,
-                                'frontend_restriction': restriction,
+                                'frontend_restriction': segment.frontend_restriction,
                                 'page_filter': {
                                     'row_offset': 0,
                                     'num_rows': 10
@@ -344,13 +338,30 @@ angular
                 }],
                 AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
                     var deferred = $q.defer(),
-                        query = { 
-                            'free_form_text_search': '',
-                            'frontend_restriction': null,
-                            'page_filter': {
-                                'num_rows': 10,
-                                'row_offset': 0
-                            }
+                        segment = QueryStore.getSegment(),
+                        segmentName = segment.name,
+                        restriction = QueryStore.getRestriction();
+
+                        console.log(segment);
+
+                        if (segment === null) {                     
+                            query = { 
+                                'free_form_text_search': '',
+                                'frontend_restriction': restriction,
+                                'page_filter': {
+                                    'num_rows': 10,
+                                    'row_offset': 0
+                                }
+                            };
+                        } else {
+                            query = { 
+                                'free_form_text_search': '',
+                                'frontend_restriction': segment.frontend_restriction,
+                                'page_filter': {
+                                    'num_rows': 10,
+                                    'row_offset': 0
+                                }
+                            };
                         };
                     deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
                     return deferred.promise;
@@ -481,7 +492,6 @@ angular
         .state('home.model.analysis.explorer.query', getState('query'))
         .state('home.model.analysis.accounts', getState('accounts'))
         .state('home.model.analysis.contacts', getState('contacts'))
-
         .state('home.segment', getState('main', {
             url: '/segment/:segment',
             params: {
@@ -497,10 +507,10 @@ angular
         }))
         .state('home.segment.explorer.attributes', getState('attributes', {
             params: {
+                segment: 'segment.name',
                 pageTitle: 'My Data',
                 pageIcon: 'ico-analysis',
                 section: 'segment.analysis',
-                segment: 'segment.name',
                 category: { value: null, squash: true },
                 subcategory: { value: null, squash: true }
             },
