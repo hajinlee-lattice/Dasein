@@ -117,14 +117,10 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void importData() throws Exception {
-        // TODO: after we make change to enforce single extract per table, we
-        // can simplify the test and remove third consolidate
         dataFeedProxy.updateDataFeedStatus(mainTenant.getId(), DataFeed.Status.Initialized.getName());
         mockAvroData(0, 300);
         Thread.sleep(2000);
         mockAvroData(300, 200);
-        Thread.sleep(2000);
-        mockAvroData(500, 200);
         dataFeedProxy.updateDataFeedStatus(mainTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
@@ -176,7 +172,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void importSecondData() throws Exception {
-        mockAvroData(700, 300);
+        mockAvroData(500, 500);
     }
 
     private void secondConsolidate() {
@@ -186,9 +182,9 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         assertEquals(completedStatus, JobStatus.COMPLETED);
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
-        Assert.assertEquals(numAccounts, 700);
+        Assert.assertEquals(numAccounts, 500);
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
-        Assert.assertEquals(numContacts, 700);
+        Assert.assertEquals(numContacts, 500);
     }
 
     private void secondProfile() {
