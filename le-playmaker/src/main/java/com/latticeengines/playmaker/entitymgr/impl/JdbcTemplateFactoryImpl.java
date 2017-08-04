@@ -39,10 +39,10 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
     @Value("${playmaker.jdbc.pool.max.checkout}")
     private int maxPoolCheckoutTime;
 
-    @Value("${playmaker.datasource.user}")
+    @Value("${playmaker.datasource.mssql.user}")
     private String dataSouceUser;
 
-    @Value("${playmaker.datasource.password.encrypted}")
+    @Value("${playmaker.datasource.mssql.password.encrypted}")
     private String dataSoucePassword;
 
     @Override
