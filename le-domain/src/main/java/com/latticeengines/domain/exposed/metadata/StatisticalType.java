@@ -37,7 +37,7 @@ public enum StatisticalType {
         }
         if (values.contains(name)) {
             return valueOf(name);
-        } if (nameMap.containsKey(name)) {
+        } else if (nameMap.containsKey(name)) {
             return nameMap.get(name);
         } else {
             throw new IllegalArgumentException("Cannot find a StatisticalType with name " + name);
