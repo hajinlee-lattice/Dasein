@@ -1,3 +1,4 @@
+
 <div class="container query-results">
 
     <ul class="filters">
@@ -36,10 +37,10 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-if="!vm.accounts.data">
+            <tr ng-show="vm.loading">
                 <td colspan="5"><i class="fa fa-spinner fa-pulse fw"></i> Loading Accounts</td>
             </tr>
-            <tr ng-if="vm.accounts.data" ng-repeat="account in vm.accounts.data">
+            <tr ng-repeat="account in vm.accounts">
                 <td><span class="blue-text">{{account.LDC_Name}}</span></td>
                 <td><span class="blue-text">{{account.LDC_Domain}}</span></td>
                 <td>{{account.LDC_City}}</td>
@@ -49,9 +50,9 @@
         </tbody>
     </table>
 
-    <!-- <p ng-if="!vm.accounts.data">No Records Found<p> -->
+    <p ng-show="!vm.loading && !vm.accounts">No Records Found<p>
 
-    <ul class="filters">
+    <ul class="filters" ng-show="!vm.loading">
         <li>
             <pd-pagination-controls
                 current="vm.current"

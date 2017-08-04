@@ -427,6 +427,36 @@ angular
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Accounts'
             },
+            resolve: {
+                AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
+                    var deferred = $q.defer(),
+                        segment = QueryStore.getSegment(),
+                        restriction = QueryStore.getRestriction();
+
+                        if (segment === null) {                     
+                            query = { 
+                                'free_form_text_search': '',
+                                'frontend_restriction': restriction,
+                                'page_filter': {
+                                    'num_rows': 10,
+                                    'row_offset': 0
+                                }
+                            };
+                        } else {
+                            query = { 
+                                'free_form_text_search': '',
+                                'frontend_restriction': segment.frontend_restriction,
+                                'page_filter': {
+                                    'num_rows': 10,
+                                    'row_offset': 0
+                                }
+                            };
+                        };
+
+                    deferred.resolve( QueryStore.GetCountByQuery('accounts', query, segment).then(function(data){ return data; }));
+                    return deferred.promise;
+                }]
+            },
             views: {
                 "main@": {
                     controller: 'QueryResultsCtrl',

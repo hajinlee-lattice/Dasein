@@ -1,7 +1,7 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore) {
+.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore, AccountsCount) {
 
     var vm = this;
     angular.extend(vm, {
@@ -9,7 +9,8 @@ angular.module('common.datacloud.query.results', [
         modelId: $stateParams.modelId,
         inModel: $state.current.name.split('.')[1] === 'model',
         accounts: [],
-        loadingAccounts: true,
+        accountsCount: AccountsCount,
+        loading: true,
         restriction: QueryStore.getRestriction(),
         current: 1,
         pagesize: 20,
@@ -23,16 +24,13 @@ angular.module('common.datacloud.query.results', [
 
 
     vm.init = function() {
+        
+        QueryStore.setAccounts('', $stateParams.segment).then(function(response){
+            vm.accounts = response.data;
+            vm.loading = false;
+        });
 
-        console.log($stateParams.segment, vm.section);
-
-        if($stateParams.segment != null || $stateParams.segment != undefined){
-            console.log("with segment");
-            QueryStore.setAccounts('', $stateParams.segment);
-        } else {
-            console.log("without segment");
-            QueryStore.setAccounts();
-        };
+        console.log(vm.accountsCount);
 
     };
     vm.init();
@@ -82,9 +80,9 @@ angular.module('common.datacloud.query.results', [
         });
     };
 
-    $scope.$watch('vm.current', function(newValue, oldValue) {
-        updatePage();
-    });
+    // $scope.$watch('vm.current', function(newValue, oldValue) {
+    //     updatePage();
+    // });
 
     function updatePage() {
         var offset = (vm.current - 1) * vm.pagesize;
