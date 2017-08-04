@@ -138,7 +138,10 @@
                                 <copy file="${project.basedir}/../le-microservice/cdl/target/le-cdl-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/cdl.war"
                                       overwrite="true" />
-                                
+                                <copy file="${project.basedir}/../le-microservice/lp/target/le-lp-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/lp.war"
+                                      overwrite="true" />
+
                                 <copy file="${project.basedir}/../le-workflowapi/target/le-workflowapi-${project.version}-shaded.jar"
                                       tofile="${project.basedir}/${workflowapp.docker.context}/workflowapp.jar"
                                       overwrite="true" />
