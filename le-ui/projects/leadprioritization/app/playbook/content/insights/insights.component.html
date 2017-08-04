@@ -14,7 +14,7 @@
                         tp="tp"
                         on-delete="vm.onDelete($index)">
                     </cg-talking-point-editor>
-                    <ul class="controls">
+                    <ul class="controls" ng-if="!tp.IsNew">
                         <li class="tp-entry-sort" ng-if="vm.talkingPoints.length > 1">
                              <div class="arrow">
                                 <i class="fa fa-arrow-up" ng-if="$index > 0" ng-click="vm.reorder($index, $index - 1)"></i>
