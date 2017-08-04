@@ -1,7 +1,7 @@
 package com.latticeengines.app.exposed.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,7 +15,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.query.frontend.QueryDecorator;
+import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +26,10 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/contacts")
 public class ContactResource extends BaseFrontEndEntityResource {
 
-    private static Logger logger = LoggerFactory.getLogger(ContactResource.class);
+    @Inject
+    public ContactResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
+        super(entityProxy, segmentProxy);
+    }
 
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
@@ -62,42 +66,6 @@ public class ContactResource extends BaseFrontEndEntityResource {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }
-    }
-
-    @Override
-    public QueryDecorator getQueryDecorator(boolean addSelects) {
-        return new QueryDecorator() {
-
-            @Override
-            public BusinessEntity getLookupEntity() {
-                return BusinessEntity.Contact;
-            }
-
-            @Override
-            public String[] getEntityLookups() {
-                return new String[] { "SalesforceAccountID" };
-            }
-
-            @Override
-            public String[] getLDCLookups() {
-                return new String[] {};
-            }
-
-            @Override
-            public BusinessEntity getFreeTextSearchEntity() {
-                return BusinessEntity.Contact;
-            }
-
-            @Override
-            public String[] getFreeTextSearchAttrs() {
-                return new String[] { "" };
-            }
-
-            @Override
-            public boolean addSelects() {
-                return addSelects;
-            }
-        };
     }
 
     @Override

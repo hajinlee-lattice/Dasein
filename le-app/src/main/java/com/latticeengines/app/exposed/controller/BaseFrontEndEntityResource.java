@@ -1,40 +1,31 @@
 package com.latticeengines.app.exposed.controller;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.EntityLookup;
-import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.query.frontend.QueryDecorator;
-import com.latticeengines.domain.exposed.util.QueryTranslator;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public abstract class BaseFrontEndEntityResource {
 
-    @Autowired
-    protected EntityProxy entityProxy;
+    private final EntityProxy entityProxy;
 
-    @Autowired
-    private SegmentProxy segmentProxy;
+    private final SegmentProxy segmentProxy;
 
-    protected abstract QueryDecorator getQueryDecorator(boolean addSelects);
+    BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
+        this.entityProxy = entityProxy;
+        this.segmentProxy = segmentProxy;
+    }
 
     public long getCount(FrontEndQuery frontEndQuery, String segment) {
-        Restriction segmentRestriction = null;
-        if (StringUtils.isNotBlank(segment)) {
-            segmentRestriction = getSegmentRestriction(segment);
-        }
-        Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(false), segmentRestriction);
-        query.addLookup(new EntityLookup(getMainEntity()));
-        return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), query);
+        appendSegmentRestriction(frontEndQuery, segment);
+        return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), getMainEntity(), frontEndQuery);
     }
 
     public long getCountForRestriction(FrontEndRestriction restriction) {
@@ -42,19 +33,29 @@ public abstract class BaseFrontEndEntityResource {
         if (restriction != null) {
             frontEndQuery.setFrontEndRestriction(restriction);
         }
-        Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(false));
-        query.addLookup(new EntityLookup(getMainEntity()));
-        return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), query);
+        return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), getMainEntity(), frontEndQuery);
     }
 
     public DataPage getData(FrontEndQuery frontEndQuery, String segment) {
+        appendSegmentRestriction(frontEndQuery, segment);
+        return entityProxy.getData(MultiTenantContext.getCustomerSpace().toString(), getMainEntity(), frontEndQuery);
+    }
+
+    private void appendSegmentRestriction(FrontEndQuery frontEndQuery, String segment) {
         Restriction segmentRestriction = null;
         if (StringUtils.isNotBlank(segment)) {
             segmentRestriction = getSegmentRestriction(segment);
         }
-        Query query = QueryTranslator.translate(frontEndQuery, getQueryDecorator(true), segmentRestriction);
-        query.setMainEntity(getMainEntity());
-        return entityProxy.getData(MultiTenantContext.getCustomerSpace().toString(), query);
+        Restriction frontEndRestriction = null;
+        if (frontEndQuery.getFrontEndRestriction() != null) {
+            frontEndRestriction = frontEndQuery.getFrontEndRestriction().getRestriction();
+        }
+        if (segmentRestriction != null && frontEndRestriction != null) {
+            Restriction totalRestriction = Restriction.builder().and(frontEndRestriction, segmentRestriction).build();
+            frontEndQuery.getFrontEndRestriction().setRestriction(totalRestriction);
+        } else if (segmentRestriction != null) {
+            frontEndQuery.getFrontEndRestriction().setRestriction(segmentRestriction);
+        }
     }
 
     private Restriction getSegmentRestriction(String segmentName) {

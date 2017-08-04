@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.query.frontend;
+package com.latticeengines.objectapi.util;
 
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 

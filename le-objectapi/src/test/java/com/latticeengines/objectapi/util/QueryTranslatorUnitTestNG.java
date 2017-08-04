@@ -1,4 +1,4 @@
-package com.latticeengines.app.util;
+package com.latticeengines.objectapi.util;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -7,7 +7,6 @@ import static org.testng.Assert.assertTrue;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.testng.annotations.Test;
 
-import com.latticeengines.app.exposed.controller.AccountResource;
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -21,7 +20,6 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.util.QueryTranslator;
 import com.latticeengines.domain.exposed.util.ReverseQueryTranslator;
 
 public class QueryTranslatorUnitTestNG {
@@ -33,7 +31,7 @@ public class QueryTranslatorUnitTestNG {
         frontEndRestriction.setRestriction(createRestriction(Level.Simple));
         query.setFrontEndRestriction(frontEndRestriction);
 
-        Query translated = QueryTranslator.translate(query, new AccountResource().getQueryDecorator(false));
+        Query translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         LogicalRestriction parent = (LogicalRestriction) translated.getRestriction();
         assertEquals(parent.getRestrictions().size(), 2);
@@ -49,7 +47,7 @@ public class QueryTranslatorUnitTestNG {
         validateReverseTranslated(reverseTranslated.getRestriction(), 4, 7);
 
         frontEndRestriction.setRestriction(createRestriction(Level.Advanced));
-        translated = QueryTranslator.translate(query, new AccountResource().getQueryDecorator(false));
+        translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
         validateTranslated(translated.getRestriction(), 5, 9);
 
         reverseTranslated = ReverseQueryTranslator.translateRestriction(translated.getRestriction());
@@ -100,7 +98,7 @@ public class QueryTranslatorUnitTestNG {
         frontEndRestriction.setRestriction(createRestriction(Level.Simple));
         query.setFrontEndRestriction(frontEndRestriction);
 
-        Query result = QueryTranslator.translate(query, new AccountResource().getQueryDecorator(true));
+        Query result = QueryTranslator.translate(query, AccountQueryDecorator.WITH_SELECTS);
         assertTrue(result.getLookups().size() > 0);
         assertTrue(result.getFreeFormTextSearchAttributes().size() > 0);
     }

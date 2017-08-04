@@ -4,9 +4,17 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -32,6 +40,9 @@ public class FrontEndQuery {
     @JsonProperty("restrict_with_sfdcid")
     @ApiModelProperty("Restrict to accounts with Salesforce id.")
     private boolean restrictNotNullSalesforceId = false;
+
+    @JsonProperty("lookups")
+    private List<Lookup> lookups = new ArrayList<>();
 
     public FrontEndRestriction getFrontEndRestriction() {
         return frontEndRestriction;
@@ -81,4 +92,18 @@ public class FrontEndQuery {
         this.restrictNotNullSalesforceId = restrictNotNullSalesforceId;
     }
 
+    public List<Lookup> getLookups() {
+        return lookups;
+    }
+
+    public void setLookups(List<Lookup> lookups) {
+        this.lookups = lookups;
+    }
+
+    public void addLookups(BusinessEntity businessEntity, String... attrNames) {
+        List<Lookup> moreLookups = new ArrayList<>(Arrays.asList(attrNames)).stream() //
+                .map((attrName) -> new AttributeLookup(businessEntity, attrName)) //
+                .collect(Collectors.toList());
+        lookups.addAll(moreLookups);
+    }
 }

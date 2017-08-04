@@ -108,12 +108,12 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     private void executeLaunchActivity(Tenant tenant, PlayLaunch playLauch, PlayLaunchInitStepConfiguration config,
-            Restriction segmentRestrictionQuery) {
+            Restriction segmentRestriction) {
         // add processing logic
 
         // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
 
-        long segmentAccountsCount = accountProxy.getAccountsCount(tenant.getId(), segmentRestrictionQuery);
+        long segmentAccountsCount = accountProxy.getAccountsCount(tenant.getId(), segmentRestriction);
         log.info("Total records in segment: " + segmentAccountsCount);
 
         if (segmentAccountsCount > 0) {
@@ -139,8 +139,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                 log.info("Loop #" + loopId);
 
                 int expectedPageSize = (int) Math.min(pageSize * 1L, (segmentAccountsCount - alreadyReadAccounts));
-                DataPage accountPage = accountProxy.getAccounts(tenant.getId(), segmentRestrictionQuery,
-                        (int) alreadyReadAccounts, expectedPageSize, dataRequest, BusinessEntity.Account, fields);
+                DataPage accountPage = accountProxy.getAccounts(tenant.getId(), segmentRestriction,
+                        (int) alreadyReadAccounts, expectedPageSize, fields);
 
                 log.info("Got #" + accountPage.getData().size() + " elements in this loop");
 

@@ -9,13 +9,10 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
-import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
-import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.util.QueryTranslator;
-import com.latticeengines.domain.exposed.util.ReverseQueryTranslator;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.network.exposed.objectapi.AccountInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -46,21 +43,18 @@ public class AccountProxy extends MicroserviceRestApiProxy implements AccountInt
     public long getAccountsCount(String customerSpace, Restriction restriction) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setFrontEndRestriction(ReverseQueryTranslator.translateRestriction(restriction));
-        Query query = QueryTranslator.translate(frontEndQuery, null);
-        query.addLookup(new EntityLookup(BusinessEntity.Account));
-        return entityProxy.getCount(customerSpace, query);
+        frontEndQuery.setFrontEndRestriction(new FrontEndRestriction(restriction));
+        return entityProxy.getCount(customerSpace, BusinessEntity.Account, frontEndQuery);
     }
 
     public DataPage getAccounts(String customerSpace, Restriction restriction, Integer offset, Integer pageSize,
-            DataRequest dataRequest, BusinessEntity businessEntiity, String[] fields) {
+                                String[] fields) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         PageFilter pageFilter = new PageFilter(offset, pageSize);
         FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setFrontEndRestriction(ReverseQueryTranslator.translateRestriction(restriction));
+        frontEndQuery.setFrontEndRestriction(new FrontEndRestriction(restriction));
         frontEndQuery.setPageFilter(pageFilter);
-        Query query = QueryTranslator.translate(frontEndQuery, null);
-        query.addLookups(businessEntiity, fields);
-        return entityProxy.getData(customerSpace, query);
+        frontEndQuery.addLookups(BusinessEntity.Account, fields);
+        return entityProxy.getData(customerSpace, BusinessEntity.Account, frontEndQuery);
     }
 }

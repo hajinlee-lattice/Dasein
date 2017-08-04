@@ -1,5 +1,7 @@
 package com.latticeengines.app.exposed.controller;
 
+import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,15 +15,21 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.query.frontend.QueryDecorator;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
+import javax.inject.Inject;
 
 @Api(value = "accounts", description = "REST resource for serving data about accounts")
 @RestController
 @RequestMapping("/accounts")
 public class AccountResource extends BaseFrontEndEntityResource {
+
+    @Inject
+    public AccountResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
+        super(entityProxy, segmentProxy);
+    }
 
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
@@ -35,7 +43,6 @@ public class AccountResource extends BaseFrontEndEntityResource {
         }
     }
 
-    @Deprecated
     @RequestMapping(value = "/count/restriction", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified restriction")
@@ -58,42 +65,6 @@ public class AccountResource extends BaseFrontEndEntityResource {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }
-    }
-
-    @Override
-    public QueryDecorator getQueryDecorator(boolean addSelects) {
-        return new QueryDecorator() {
-
-            @Override
-            public BusinessEntity getLookupEntity() {
-                return BusinessEntity.Account;
-            }
-
-            @Override
-            public String[] getEntityLookups() {
-                return new String[] { "SalesforceAccountID" };
-            }
-
-            @Override
-            public String[] getLDCLookups() {
-                return new String[] { "LDC_Domain", "LDC_Name", "LDC_Country", "LDC_City", "LDC_State" };
-            }
-
-            @Override
-            public BusinessEntity getFreeTextSearchEntity() {
-                return BusinessEntity.LatticeAccount;
-            }
-
-            @Override
-            public String[] getFreeTextSearchAttrs() {
-                return new String[] { "LDC_Domain", "LDC_Name" };
-            }
-
-            @Override
-            public boolean addSelects() {
-                return addSelects;
-            }
-        };
     }
 
     @Override

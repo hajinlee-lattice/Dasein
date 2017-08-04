@@ -101,7 +101,6 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         assertEquals(retrieved.getProperties().size(), 2);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumAccounts), 100);
         assertEquals(retrieved.getSegmentPropertyBag().getInt(MetadataSegmentPropertyName.NumContacts), 200);
-        assertEquals(retrieved.getAttributeDependencies().size(), 1);
         assertFalse(retrieved.getMasterSegment());
     }
 

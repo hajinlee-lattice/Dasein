@@ -4,26 +4,26 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.network.exposed.objectapi.EntityInterface;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("entityProxy")
-public class EntityProxy extends MicroserviceRestApiProxy implements EntityInterface {
+public class EntityProxy extends MicroserviceRestApiProxy {
     public EntityProxy() {
         super("objectapi/customerspaces");
     }
 
-    @Override
-    public long getCount(String customerSpace, Query query) {
-        String url = constructUrl("/{customerSpace}/entities/count", shortenCustomerSpace(customerSpace));
-        return post("getCount", url, query, Long.class);
+    public long getCount(String customerSpace, BusinessEntity entity, FrontEndQuery frontEndQuery) {
+        String url = constructUrl("/{customerSpace}/entities/{entity}/count", shortenCustomerSpace(customerSpace),
+                entity);
+        return post("getCount", url, frontEndQuery, Long.class);
     }
 
-    @Override
-    public DataPage getData(String customerSpace, Query query) {
-        String url = constructUrl("/{customerSpace}/entities/data", shortenCustomerSpace(customerSpace));
-        return post("getData", url, query, DataPage.class);
+    public DataPage getData(String customerSpace, BusinessEntity entity, FrontEndQuery frontEndQuery) {
+        String url = constructUrl("/{customerSpace}/entities/{entity}/data", shortenCustomerSpace(customerSpace),
+                entity);
+        return post("getData", url, frontEndQuery, DataPage.class);
     }
 }

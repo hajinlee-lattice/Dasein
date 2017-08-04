@@ -1,30 +1,31 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.metadata.MetadataSegmentPropertyName;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.util.QueryTranslator;
-import com.latticeengines.domain.exposed.util.ReverseQueryTranslator;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-@Component("metadataSegmentService")
+@Service("metadataSegmentService")
 public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private static final Logger log = LoggerFactory.getLogger(MetadataSegmentServiceImpl.class);
 
-    @Autowired
-    private SegmentProxy segmentProxy;
+    private final SegmentProxy segmentProxy;
+
+    @Inject
+    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy) {
+        this.segmentProxy = segmentProxy;
+    }
 
     @Override
     public List<MetadataSegment> getSegments() {
@@ -47,7 +48,6 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     public MetadataSegment getSegmentByName(String name, boolean shouldTransateForFrontend) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace, name);
-
         if (shouldTransateForFrontend) {
             segment = translateForFrontend(segment);
         }
@@ -58,7 +58,6 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         translateForBackend(segment);
-        updateStatistics(segment);
         return translateForFrontend(segmentProxy.createOrUpdateSegment(customerSpace, segment));
     }
 
@@ -71,7 +70,8 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private MetadataSegment translateForBackend(MetadataSegment segment) {
         try {
             FrontEndRestriction frontEndRestriction = segment.getFrontEndRestriction();
-            segment.setRestriction(QueryTranslator.translateFrontEndRestriction(frontEndRestriction));
+            segment.setRestriction(frontEndRestriction.getRestriction());
+            segment.setFrontEndRestriction(null);
         } catch (Exception e) {
             log.error("Encountered error translating frontend restriction for segment with name %s", e);
         }
@@ -81,29 +81,17 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private MetadataSegment translateForFrontend(MetadataSegment segment) {
         try {
             Restriction restriction = segment.getRestriction();
-            segment.setFrontEndRestriction(ReverseQueryTranslator.translateRestriction(restriction));
+            FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+            frontEndRestriction.setRestriction(restriction);
+            segment.setFrontEndRestriction(frontEndRestriction);
             segment.setRestriction(null);
+            if (Boolean.FALSE.equals(segment.getMasterSegment())) {
+                segment.setMasterSegment(null);
+            }
         } catch (Exception e) {
             log.error("Encountered error translating backend restriction for segment with name %s", e);
         }
         return segment;
     }
 
-    private void updateStatistics(MetadataSegment segment) {
-        // TODO: put random count there, before we have data in redshift.
-        Random random = new Random(System.currentTimeMillis());
-        segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts, random.nextInt(1000));
-
-        // Query query =
-        // Query.builder().where(segment.getRestriction()).build();
-        // try {
-        // long count =
-        // accountProxy.getCount(MultiTenantContext.getTenant().getId(), query);
-        // segment.getSegmentPropertyBag().set(MetadataSegmentPropertyName.NumAccounts,
-        // count);
-        // } catch (Exception e) {
-        // log.error(String.format("Failed to update statistics for segment %s",
-        // segment.getName()), e);
-        // }
-    }
 }

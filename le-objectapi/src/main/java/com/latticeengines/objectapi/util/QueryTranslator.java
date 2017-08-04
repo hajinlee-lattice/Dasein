@@ -1,9 +1,10 @@
-package com.latticeengines.domain.exposed.util;
+package com.latticeengines.objectapi.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -16,7 +17,6 @@ import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
-import com.latticeengines.domain.exposed.query.frontend.QueryDecorator;
 
 public class QueryTranslator {
     private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
@@ -62,7 +62,12 @@ public class QueryTranslator {
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
                 .page(frontEndQuery.getPageFilter());
 
-        if (decorator != null) {
+        if (frontEndQuery.getLookups() != null && !frontEndQuery.getLookups().isEmpty()) {
+            frontEndQuery.getLookups().forEach(lookup -> {
+                AttributeLookup attributeLookup = (AttributeLookup) lookup;
+                queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
+            });
+        } else if (decorator != null) {
             if (decorator.addSelects()) {
                 queryBuilder.select(BusinessEntity.LatticeAccount, decorator.getLDCLookups());
                 queryBuilder.select(decorator.getLookupEntity(), decorator.getEntityLookups());

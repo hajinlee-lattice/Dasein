@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
-import com.latticeengines.domain.exposed.util.QueryTranslator;
+import com.latticeengines.objectapi.util.QueryTranslator;
 import com.latticeengines.objectapi.service.AccountQueryService;
 
 @Component("accountQueryService")

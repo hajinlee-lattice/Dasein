@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.query.frontend;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.query.Restriction;
 
@@ -18,6 +17,11 @@ public class FrontEndRestriction {
     @ApiModelProperty("This restriction can represent both simple and advanced queries.")
     private Restriction restriction;
 
+    public FrontEndRestriction() {}
+
+    public FrontEndRestriction(Restriction restriction) {
+        setRestriction(restriction);
+    }
 
     public Restriction getRestriction() {
         return restriction;

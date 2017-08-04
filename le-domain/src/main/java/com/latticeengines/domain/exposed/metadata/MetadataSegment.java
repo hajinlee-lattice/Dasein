@@ -18,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
@@ -26,6 +27,7 @@ import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
@@ -42,7 +44,9 @@ import io.swagger.annotations.ApiModelProperty;
 @javax.persistence.Table(name = "METADATA_SEGMENT", uniqueConstraints = @UniqueConstraint(columnNames = {
         "TENANT_ID", "NAME" }))
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentProperty> //
         implements HasName, HasPid, HasAuditingFields, HasTenantId, HasProperties<MetadataSegmentProperty> {
 
@@ -97,10 +101,6 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("segment_properties")
     private List<MetadataSegmentProperty> properties = new ArrayList<>();
-
-    @Transient
-    @JsonProperty("attributes")
-    private List<Attribute> attributeDependencies = new ArrayList<>();
 
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
@@ -231,14 +231,6 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
         if (tenant != null) {
             setTenantId(tenant.getPid());
         }
-    }
-
-    public List<Attribute> getAttributeDependencies() {
-        return attributeDependencies;
-    }
-
-    public void setAttributeDependencies(List<Attribute> attributeDependencies) {
-        this.attributeDependencies = attributeDependencies;
     }
 
     public Boolean getMasterSegment() {
