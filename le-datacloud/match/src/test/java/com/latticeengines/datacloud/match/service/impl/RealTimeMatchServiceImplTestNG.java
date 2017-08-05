@@ -151,7 +151,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     public void testExcludePublicDomain() {
         Object[][] data = new Object[][] { { 123, "my@gmail.com", null, null, null, null } };
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data);
-        input.setExcludeUnmatchedWithPublicDomain(true);
+        input.setExcludePublicDomain(true);
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertEquals(output.getResult().size(), 1);

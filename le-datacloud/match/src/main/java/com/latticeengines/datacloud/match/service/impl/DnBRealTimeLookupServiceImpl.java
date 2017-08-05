@@ -124,7 +124,9 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     protected void parseResponse(String response, DnBMatchContext context, DnBAPIType apiType) {
         switch (apiType) {
         case REALTIME_ENTITY:
-            context.setDuns((String) retrieveJsonValueFromResponse(entityDunsJsonPath, response, false));
+            String duns = (String) retrieveJsonValueFromResponse(entityDunsJsonPath, response, false);
+            context.setDuns(duns);
+            context.setOrigDuns(duns);
             context.setConfidenceCode(
                     (Integer) retrieveJsonValueFromResponse(entityConfidenceCodeJsonPath, response, false));
             context.setMatchGrade((String) retrieveJsonValueFromResponse(entityMatchGradeJsonPath, response, false));
@@ -152,7 +154,9 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             }
             break;
         case REALTIME_EMAIL:
-            context.setDuns((String) retrieveJsonValueFromResponse(emailDunsJsonPath, response, false));
+             duns = (String) retrieveJsonValueFromResponse(emailDunsJsonPath, response, false);
+            context.setDuns(duns);
+            context.setOrigDuns(duns);
             if (context.getDuns() == null) {
                 context.setDnbCode(DnBReturnCode.UNMATCH);
                 return;

@@ -155,7 +155,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             if (CollectionUtils.isNotEmpty(traveler.getDnBMatchContexts())) {
                 DnBMatchContext matchContext = traveler.getDnBMatchContexts().get(0);
                 if (matchContext != null) {
-                    String value = matchContext.getDuns() != null ? matchContext.getDuns() : "";
+                    String duns = matchContext.getDuns() != null ? matchContext.getDuns() : "";
+                    debugValues.add(duns);
+                    String value = matchContext.getOrigDuns() != null ? matchContext.getOrigDuns() : duns;
                     debugValues.add(value);
                     value = matchContext.getConfidenceCode() != null ? matchContext.getConfidenceCode() + "" : "";
                     debugValues.add(value);
@@ -163,6 +165,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                             .getMatchGrade().getRawCode() : "";
                     debugValues.add(value);
                     value = matchContext.getHitWhiteCache() != null ? matchContext.getHitWhiteCache() + "" : "";
+                    debugValues.add(value);
+                    value = matchContext.isPassAcceptanceCriteria() ? matchContext.isPassAcceptanceCriteria() + "" : "";
                     debugValues.add(value);
                     addNameLocationValues(debugValues, matchContext);
                     matchRecord.setDebugValues(debugValues);

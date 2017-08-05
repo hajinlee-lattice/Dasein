@@ -19,6 +19,8 @@ public class DnBMatchContext implements Fact, Dimension {
     private String inputEmail;
 
     private String duns;
+    
+    private String origDuns;
 
     private NameLocation matchedNameLocation;
 
@@ -99,6 +101,7 @@ public class DnBMatchContext implements Fact, Dimension {
     public void copyResultFromCache(DnBCache cache) {
         if (cache.isWhiteCache()) {
             duns = cache.getDuns();
+            origDuns = cache.getDuns();
             dnbCode = DnBReturnCode.OK;
             confidenceCode = cache.getConfidenceCode();
             matchGrade = cache.getMatchGrade();
@@ -110,6 +113,7 @@ public class DnBMatchContext implements Fact, Dimension {
             patched = cache.getPatched();
         } else {
             duns = null;
+            origDuns = cache.getDuns();
             dnbCode = DnBReturnCode.UNMATCH;
             cacheId = cache.getId();
             confidenceCode = null;
@@ -157,6 +161,14 @@ public class DnBMatchContext implements Fact, Dimension {
         } else {
             this.duns = null;
         }
+    }
+
+    public String getOrigDuns() {
+        return origDuns;
+    }
+
+    public void setOrigDuns(String origDuns) {
+        this.origDuns = origDuns;
     }
 
     public NameLocation getMatchedNameLocation() {

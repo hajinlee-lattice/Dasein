@@ -270,7 +270,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         matchInput.setPredefinedSelection(Predefined.ID);
         matchInput.setKeyMap(getKeyMap());
         matchInput.setDecisionGraph("DragonClaw");
-        matchInput.setExcludeUnmatchedWithPublicDomain(false);
+        matchInput.setExcludePublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(true);
         matchInput.setDataCloudVersion(getDataCloudVersion());
         matchInput.setSkipKeyResolution(true);

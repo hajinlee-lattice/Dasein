@@ -247,7 +247,7 @@ public class AccountMasterMatchDeploymentTestNG extends MatchapiDeploymentTestNG
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setDataCloudVersion(dataCloudVersionEntityMgr.currentApprovedVersionAsString());
-        matchInput.setExcludeUnmatchedWithPublicDomain(false);
+        matchInput.setExcludePublicDomain(false);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         if (useDir) {
             inputBuffer.setAvroDir(avroDir);

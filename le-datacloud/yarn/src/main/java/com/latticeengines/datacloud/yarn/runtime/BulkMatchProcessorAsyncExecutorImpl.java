@@ -7,8 +7,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import scala.concurrent.Future;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.service.RateLimitingService;
@@ -19,8 +20,6 @@ import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-
-import scala.concurrent.Future;
 
 @Component("bulkMatchProcessorAsyncExecutor")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {

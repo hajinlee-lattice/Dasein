@@ -176,7 +176,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         List<Column> columns = matchContext.getColumnSelection().getColumns();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
         boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput()
-                .getExcludeUnmatchedWithPublicDomain());
+                .getExcludePublicDomain());
 
         List<OutputRecord> outputRecords = new ArrayList<>();
         Integer[] columnMatchCount = new Integer[columns.size()];
@@ -269,7 +269,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             internalRecord.setResultsInPartition(null);
             OutputRecord outputRecord = new OutputRecord();
             if (returnUnmatched || matchedRecord) {
-                if (excludeUnmatchedPublicDomain && !matchedRecord && internalRecord.isPublicDomain()) {
+                if (excludeUnmatchedPublicDomain && internalRecord.isPublicDomain()) {
                     log.warn("Excluding the record, because it is using the public domain: "
                             + internalRecord.getParsedDomain());
                 } else {

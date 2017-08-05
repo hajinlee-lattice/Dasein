@@ -209,6 +209,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
                 return output;
             }
             String duns = StringUtils.strip(values[25]);
+            output.setOrigDuns(duns);
             duns = StringUtils.isNotEmpty(duns) ? duns : null;
             if (duns == null) {
                 output.setDnbCode(DnBReturnCode.UNMATCH);

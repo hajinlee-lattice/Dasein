@@ -180,7 +180,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
         }
 
         public Builder excludePublicDomains(boolean excludePublicDomains) {
-            match.setExcludeUnmatchedWithPublicDomain(excludePublicDomains);
+            match.setExcludePublicDomain(excludePublicDomains);
             model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
             return this;
         }

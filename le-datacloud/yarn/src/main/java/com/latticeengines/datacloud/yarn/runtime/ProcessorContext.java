@@ -110,7 +110,7 @@ public class ProcessorContext {
     private String podId;
     private String dataCloudVersion;
     private Boolean returnUnmatched;
-    private Boolean excludeUnmatchedWithPublicDomain;
+    private Boolean excludePublicDomain;
     private Boolean publicDomainAsNormalDomain;
     private boolean useProxy = false;
     private String decisionGraph;
@@ -212,8 +212,8 @@ public class ProcessorContext {
         return returnUnmatched;
     }
 
-    public Boolean getExcludeUnmatchedWithPublicDomain() {
-        return excludeUnmatchedWithPublicDomain;
+    public Boolean getExcludePublicDomain() {
+        return excludePublicDomain;
     }
 
     public Boolean getPublicDomainAsNormalDomain() {
@@ -284,7 +284,7 @@ public class ProcessorContext {
         originalInput = jobConfiguration.getMatchInput();
 
         returnUnmatched = true;
-        excludeUnmatchedWithPublicDomain = jobConfiguration.getMatchInput().getExcludeUnmatchedWithPublicDomain();
+        excludePublicDomain = jobConfiguration.getMatchInput().getExcludePublicDomain();
         publicDomainAsNormalDomain = jobConfiguration.getMatchInput().isPublicDomainAsNormalDomain();
         HdfsPodContext.changeHdfsPodId(podId);
         log.info("Use PodId=" + podId);

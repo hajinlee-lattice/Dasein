@@ -34,6 +34,7 @@ import com.latticeengines.datacloud.match.metric.MatchResponse;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
+import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
@@ -72,7 +73,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @Autowired
     private DomainCollectService domainCollectService;
-    
+
     @Autowired
     private DedupeHelper dedupeHelper;
 
@@ -102,7 +103,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         matchInput.setKeyMap(processorContext.getKeyMap());
         matchInput.setData(processorContext.getDivider().nextGroup());
         matchInput.setDecisionGraph(processorContext.getDecisionGraph());
-        matchInput.setExcludeUnmatchedWithPublicDomain(processorContext.getExcludeUnmatchedWithPublicDomain());
+        matchInput.setExcludePublicDomain(processorContext.getExcludePublicDomain());
         matchInput.setPublicDomainAsNormalDomain(processorContext.getPublicDomainAsNormalDomain());
         matchInput.setDataCloudVersion(processorContext.getDataCloudVersion());
 
@@ -189,7 +190,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             AvroUtils.writeToHdfsFile(yarnConfiguration, processorContext.getOutputSchema(),
                     processorContext.getOutputAvro(randomSplit), records, useSnappy);
         } else {
-            AvroUtils.appendToHdfsFile(yarnConfiguration, processorContext.getOutputAvro(randomSplit), records, useSnappy);
+            AvroUtils.appendToHdfsFile(yarnConfiguration, processorContext.getOutputAvro(randomSplit), records,
+                    useSnappy);
         }
         log.info("Write " + records.size() + " generic records to " + processorContext.getOutputAvro(randomSplit));
     }
@@ -198,7 +200,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         if (CollectionUtils.isNotEmpty(outputRecord.getDebugValues())) {
             allValues.addAll(outputRecord.getDebugValues());
         } else {
-            String[] values = new String[11];
+            String[] values = new String[MatchConstants.matchDebugFields.size()];
             Arrays.fill(values, "");
             allValues.addAll(Arrays.asList(values));
         }
@@ -258,7 +260,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         Long count = AvroUtils.count(yarnConfiguration, processorContext.getOutputAvroGlob());
         log.info("There are in total " + count + " records in the avros " + processorContext.getOutputAvroGlob());
         if (processorContext.getReturnUnmatched()) {
-            if (!processorContext.getExcludeUnmatchedWithPublicDomain()
+            if (!processorContext.getExcludePublicDomain()
                     && !processorContext.getBlockSize().equals(count.intValue())) {
                 throw new RuntimeException(String.format(
                         "Block size [%d] does not equal to the count of the avro [%d].",
@@ -273,7 +275,8 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             }
         }
         try {
-            matchCommandService.updateBlock(processorContext.getBlockOperationUid()).matchedRows(count.intValue()).commit();
+            matchCommandService.updateBlock(processorContext.getBlockOperationUid()).matchedRows(count.intValue())
+                    .commit();
         } catch (Exception e) {
             log.warn("Failed to update block matched rows.", e);
         }

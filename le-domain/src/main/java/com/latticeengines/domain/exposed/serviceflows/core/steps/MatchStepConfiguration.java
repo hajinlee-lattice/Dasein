@@ -38,7 +38,7 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean retainLatticeAccountId = false;
 
-    private boolean excludeUnmatchedWithPublicDomain = false;
+    private boolean excludePublicDomain = false;
     private boolean publicDomainAsNormalDomain = false;
 
     @NotNull
@@ -157,14 +157,14 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         this.retainMatchTables = retainMatchTables;
     }
 
-    @JsonProperty("exclude_unmatched_public_domain")
-    public boolean isExcludeUnmatchedWithPublicDomain() {
-        return excludeUnmatchedWithPublicDomain;
+    @JsonProperty("exclude_public_domain")
+    public boolean isExcludePublicDomain() {
+        return excludePublicDomain;
     }
 
-    @JsonProperty("exclude_unmatched_public_domain")
-    public void setExcludeUnmatchedWithPublicDomain(boolean excludeUnmatchedWithPublicDomain) {
-        this.excludeUnmatchedWithPublicDomain = excludeUnmatchedWithPublicDomain;
+    @JsonProperty("exclude_public_domain")
+    public void setExcludePublicDomain(boolean excludePublicDomain) {
+        this.excludePublicDomain = excludePublicDomain;
     }
 
     @JsonProperty("retain_lattice_account_id")

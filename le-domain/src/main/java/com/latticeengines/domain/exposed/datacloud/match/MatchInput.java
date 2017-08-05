@@ -109,8 +109,8 @@ public class MatchInput implements Fact, Dimension {
     // BEGIN FLAGS
     // ====================
 
-    @JsonProperty("ExcludeUnmatchedWithPublicDomain")
-    private Boolean excludeUnmatchedWithPublicDomain;
+    @JsonProperty("ExcludePublicDomain")
+    private Boolean excludePublicDomain;
 
     @JsonProperty("PublicDomainAsNormalDomain")
     private boolean publicDomainAsNormalDomain;
@@ -179,12 +179,12 @@ public class MatchInput implements Fact, Dimension {
         this.timeout = timeout;
     }
 
-    public Boolean getExcludeUnmatchedWithPublicDomain() {
-        return Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
+    public Boolean getExcludePublicDomain() {
+        return Boolean.TRUE.equals(excludePublicDomain);
     }
 
-    public void setExcludeUnmatchedWithPublicDomain(Boolean excludeUnmatchedWithPublicDomain) {
-        this.excludeUnmatchedWithPublicDomain = Boolean.TRUE.equals(excludeUnmatchedWithPublicDomain);
+    public void setExcludePublicDomain(Boolean excludePublicDomain) {
+        this.excludePublicDomain = Boolean.TRUE.equals(excludePublicDomain);
     }
 
     public boolean getFetchOnly() {

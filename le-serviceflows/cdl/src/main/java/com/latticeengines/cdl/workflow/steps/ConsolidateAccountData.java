@@ -220,7 +220,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         } else {
             matchInput.setKeyMap(keyMap);
         }
-        matchInput.setExcludeUnmatchedWithPublicDomain(false);
+        matchInput.setExcludePublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(true);
         matchInput.setDataCloudVersion(getDataCloudVersion());
         matchInput.setSkipKeyResolution(false);

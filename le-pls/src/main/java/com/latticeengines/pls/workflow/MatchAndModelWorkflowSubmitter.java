@@ -119,7 +119,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .dedupDataFlowBeanName("dedupEventTable") //
                 .dedupType(parameters.getDeduplicationType()) //
                 .matchClientDocument(matchClientDocument) //
-                .excludeUnmatchedWithPublicDomain(parameters.isExcludeUnmatchedWithPublicDomain()) //
+                .excludePublicDomain(parameters.isExcludePublicDomain()) //
                 .treatPublicDomainAsNormalDomain(false) // TODO: hook up to UI
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN)
                 .excludeDataCloudAttrs(parameters.isExcludePropDataAttributes()) //

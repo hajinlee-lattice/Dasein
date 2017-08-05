@@ -210,7 +210,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
 
         matchInput.setInputBuffer(inputBuffer);
 
-        matchInput.setExcludeUnmatchedWithPublicDomain(getConfiguration().isExcludeUnmatchedWithPublicDomain());
+        matchInput.setExcludePublicDomain(getConfiguration().isExcludePublicDomain());
 
         matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
 
