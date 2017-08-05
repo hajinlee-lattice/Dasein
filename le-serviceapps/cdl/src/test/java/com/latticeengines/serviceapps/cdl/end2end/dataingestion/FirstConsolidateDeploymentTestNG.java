@@ -29,6 +29,7 @@ public class FirstConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeploy
     }
 
     private void importData() throws Exception {
+        dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockAvroData(0, 300);
         Thread.sleep(2000);
         mockAvroData(300, 200);

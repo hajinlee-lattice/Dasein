@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -45,6 +46,7 @@ import com.latticeengines.serviceapps.cdl.testframework.CDLDeploymentTestNGBase;
 public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
+    private static final Logger logger = LoggerFactory.getLogger(DataIngestionEnd2EndDeploymentTestNGBase.class);
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
@@ -62,13 +64,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
-        getLogger().info("Bootstrapping test tenants using tenant console ...");
+        logger.info("Bootstrapping test tenants using tenant console ...");
 
         setupTestEnvironmentt();
         mainTenant = testBed.getMainTestTenant();
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTenant));
 
-        getLogger().info("Test environment setup finished.");
+        logger.info("Test environment setup finished.");
         createDataFeed();
     }
 
@@ -161,12 +163,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-" + entity + "/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.VISIDB.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
-        InputStream dataIs = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("end2end/Account.avro");
+        InputStream dataIs = Thread.currentThread().getContextClassLoader().getResourceAsStream("end2end/Account.avro");
         try {
             List<GenericRecord> records = AvroUtils.readFromInputStream(dataIs);
-            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro", records.subList(offset, offset + limit),
-                    true);
+            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro",
+                    records.subList(offset, offset + limit), true);
             getLogger().info("Uploaded " + limit + " records to " + targetPath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload avro for " + entity);
