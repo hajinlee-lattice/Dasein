@@ -68,7 +68,7 @@ public class StartExecution extends BaseReportStep<StartExecutionConfiguration> 
                             log.info("enabling consolidate step:" + e.getKey());
                             e.getValue().setSkipStep(false);
                             putObjectInContext(e.getKey(), e.getValue());
-                            getJson().put(e.getKey(), i.getDataTable().getExtracts().get(0).getProcessedRecords());
+                            getJson().put(entity.name(), i.getDataTable().getExtracts().get(0).getProcessedRecords());
                         });
             });
             putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);
