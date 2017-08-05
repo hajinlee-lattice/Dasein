@@ -2,9 +2,9 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 
-public class StartExecutionConfiguration extends MicroserviceStepConfiguration {
+public class StartExecutionConfiguration extends BaseReportStepConfiguration {
 
     @JsonProperty("data_feed_status")
     private Status datafeedStatus;

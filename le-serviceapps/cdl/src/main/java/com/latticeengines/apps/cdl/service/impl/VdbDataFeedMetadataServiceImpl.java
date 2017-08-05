@@ -81,7 +81,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         Set<String> findMatch = new HashSet<>();
         Set<String> originalAttrMatch = new HashSet<>();
-        //Match the DL metadata with table in SchemaRepository.
+        // Match the DL metadata with table in SchemaRepository.
         for (Map.Entry<String, Attribute> entry : originalAttrs.entrySet()) {
             Iterator<Attribute> attrIterator = attributes.iterator();
             while (attrIterator.hasNext()) {
@@ -103,8 +103,8 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                     findMatch.add(attribute.getName());
                     break;
                 }
-                //Remove nullable (not required) field in SchemaRepository.
-                if(attribute.isNullable()) {
+                // Remove nullable (not required) field in SchemaRepository.
+                if (attribute.isNullable()) {
                     attrIterator.remove();
                 }
             }
@@ -118,8 +118,8 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                 }
             }
             if (missingField.size() > 0) {
-                throw new RuntimeException(String.format("Missing the following required field: %s",
-                        String.join(",", missingField)));
+                throw new RuntimeException(
+                        String.format("Missing the following required field: %s", String.join(",", missingField)));
             }
         }
 
@@ -154,7 +154,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         result = true;
         HashMap<String, Attribute> srcAttrs = new HashMap<>();
         for (Attribute attr : srcTable.getAttributes()) {
-            srcAttrs.put(attr.getName(),attr);
+            srcAttrs.put(attr.getName(), attr);
         }
         for (Attribute attr : targetTable.getAttributes()) {
             if (srcAttrs.containsKey(attr.getName())) {
@@ -174,14 +174,14 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     private boolean validateAttribute(Table srcTable, Table targetTable) {
         HashMap<String, Attribute> srcAttrs = new HashMap<>();
         for (Attribute attr : srcTable.getAttributes()) {
-            srcAttrs.put(attr.getName(),attr);
+            srcAttrs.put(attr.getName(), attr);
         }
         for (Attribute attr : targetTable.getAttributes()) {
             if (srcAttrs.containsKey(attr.getName())) {
                 if (!StringUtils.equals(srcAttrs.get(attr.getName()).getSourceLogicalDataType(),
                         attr.getSourceLogicalDataType())) {
-                    log.error(String.format("Field %s should have the type %s, not %s",
-                            attr.getName(), srcAttrs.get(attr.getName()).getSourceLogicalDataType(), attr.getSourceLogicalDataType()));
+                    log.error(String.format("Field %s should have the type %s, not %s", attr.getName(),
+                            srcAttrs.get(attr.getName()).getSourceLogicalDataType(), attr.getSourceLogicalDataType()));
                     return false;
                 }
             }

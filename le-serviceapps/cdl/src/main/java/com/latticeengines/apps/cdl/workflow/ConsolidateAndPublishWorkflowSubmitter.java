@@ -119,6 +119,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .initialDataFeedStatus(initialDataFeedStatus) //
                 .customer(CustomerSpace.parse(customerSpace)) //
                 .microServiceHostPort(microserviceHostPort) //
+                .internalResourceHostPort(internalResourceHostPort)
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, initialDataFeedStatus.getName()) //

@@ -7,7 +7,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -47,11 +46,11 @@ public abstract class BaseDataFlowReportStep<T extends BaseDataFlowReportStepCon
         List<String> paths = ExtractUtils.getExtractPaths(yarnConfiguration, table);
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, paths);
 
-        ObjectNode json = new ObjectMapper().createObjectNode();
+        ObjectNode json = super.getJson();
 
         if (records.size() != 1) {
-            throw new RuntimeException(String.format(
-                    "Expected exactly 1 record from report data flow.  Instead found %d", records.size()));
+            throw new RuntimeException(String
+                    .format("Expected exactly 1 record from report data flow.  Instead found %d", records.size()));
         }
 
         GenericRecord record = records.get(0);

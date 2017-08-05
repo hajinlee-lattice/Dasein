@@ -10,20 +10,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ConsolidateAndPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataBaseConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 
 @Component("startExecution")
-public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration> {
+public class StartExecution extends BaseReportStep<StartExecutionConfiguration> {
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -67,10 +68,17 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
                             log.info("enabling consolidate step:" + e.getKey());
                             e.getValue().setSkipStep(false);
                             putObjectInContext(e.getKey(), e.getValue());
+                            getJson().put(e.getKey(), i.getDataTable().getExtracts().get(0).getProcessedRecords());
                         });
             });
             putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);
+            super.execute();
         }
+    }
+
+    @Override
+    protected ReportPurpose getPurpose() {
+        return ReportPurpose.IMPORT_DATA_SUMMARY;
     }
 
 }

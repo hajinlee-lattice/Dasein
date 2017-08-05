@@ -102,7 +102,7 @@ public class JsonUtils {
 
         T deserializedSchema;
         try {
-            deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), typeRef);
+            deserializedSchema = objectMapper.readValue(jsonStr, typeRef);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

@@ -1,7 +1,9 @@
 package com.latticeengines.serviceflows.workflow.report;
 
 import java.util.UUID;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -16,12 +18,16 @@ public abstract class BaseReportStep<T extends BaseReportStepConfiguration> exte
         return getConfiguration().getReportNamePrefix();
     }
 
+    private ObjectNode json = JsonUtils.createObjectNode();
+
     protected abstract ReportPurpose getPurpose();
 
-    protected abstract ObjectNode getJson();
+    protected ObjectNode getJson() {
+        return json;
+    }
 
     @Override
-    public final void execute() {
+    public void execute() {
         ObjectNode json = getJson();
         if (json != null) {
             Report report = createReport(json.toString());

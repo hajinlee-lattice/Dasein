@@ -24,7 +24,6 @@ public class TransformationWorkflowImpl extends AbstractWorkflow<TransformationW
     private TransformationStep transformationStep;
 
     @Bean
-    @Scope("prototype")
     public Job transformationWorkflowJob() throws Exception {
         return buildWorkflow();
     }

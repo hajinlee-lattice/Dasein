@@ -1,8 +1,10 @@
 package com.latticeengines.dataplatform.service.impl.watchdog;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
@@ -21,13 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.entitymanager.YarnMetricGeneratorInfoEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.metrics.YarnMetricGeneratorInfo;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStep;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.yarn.exposed.runtime.metric.CompletedJobByAppIdMeasurement;
@@ -259,7 +265,10 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
                 fieldMap.put(step.getJobStepType() + "Sec", elapsedSec);
             }
         }
-
+        List<Report> reports = job.getReports();
+        Optional.of(reports.stream().filter(r -> r.getPurpose().equals(ReportPurpose.IMPORT_DATA_SUMMARY))
+                .map(r -> JsonUtils.deserialize(r.getJson().getPayload(), new TypeReference<Map<String, Object>>() {
+                }))).ifPresent(map -> fieldMap.putAll(map.findFirst().orElse(Collections.emptyMap())));
         return fieldMap;
     }
 
