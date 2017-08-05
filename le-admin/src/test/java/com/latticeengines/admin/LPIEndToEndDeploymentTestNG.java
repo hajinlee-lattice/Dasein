@@ -10,11 +10,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.common.exposed.util.HdfsUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -31,6 +29,7 @@ import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
+import com.latticeengines.admin.tenant.batonadapter.datacloud.DataCloudComponent;
 import com.latticeengines.admin.tenant.batonadapter.eai.EaiComponent;
 import com.latticeengines.admin.tenant.batonadapter.metadata.MetadataComponent;
 import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
@@ -39,6 +38,8 @@ import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTe
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTemplateComponent;
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -77,7 +78,6 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     @Autowired
     private UserService userService;
-
 
     @Autowired
     private PLSComponentDeploymentTestNG plsComponentDeploymentTestNG;
@@ -188,34 +188,40 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
         spaceProperties.description = tenantProperties.description;
         spaceProperties.displayName = tenantProperties.displayName;
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, "{\"Dante\":true,\"EnableDataEncryption\":true}");
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties,
+                "{\"Dante\":true,\"EnableDataEncryption\":true}");
 
         // SpaceConfiguration
         SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
-        //spaceConfiguration.setDlAddress(dlUrl);
+        // spaceConfiguration.setDlAddress(dlUrl);
         spaceConfiguration.setTopology(CRMTopology.ELOQUA);
 
         // PLS
-        SerializableDocumentDirectory PLSconfig = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
-        for (SerializableDocumentDirectory.Node node : PLSconfig.getNodes()) {
+        SerializableDocumentDirectory plsConfig = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
+        for (SerializableDocumentDirectory.Node node : plsConfig.getNodes()) {
             if (node.getNode().contains("SuperAdminEmails")) {
                 node.setData("[\"bnguyen@lattice-engines.com\"]");
             } else if (node.getNode().contains("LatticeAdminEmails")) {
                 node.setData("[]");
             }
         }
-        PLSconfig.setRootPath("/" + PLSComponent.componentName);
-
+        plsConfig.setRootPath("/" + PLSComponent.componentName);
 
         // Modeling
         SerializableDocumentDirectory modelingConfig = serviceService
                 .getDefaultServiceConfig(ModelingComponent.componentName);
         modelingConfig.setRootPath("/" + ModelingComponent.componentName);
 
+        // DataCloud
+        SerializableDocumentDirectory dataCloudConfig = serviceService
+                .getDefaultServiceConfig(DataCloudComponent.componentName);
+        dataCloudConfig.setRootPath("/" + DataCloudComponent.componentName);
+
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
-        configDirs.add(PLSconfig);
+        configDirs.add(plsConfig);
         configDirs.add(modelingConfig);
+        configDirs.add(dataCloudConfig);
 
         // Orchestrate tenant
         TenantRegistration reg = new TenantRegistration();
@@ -246,8 +252,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         List<String> serviceNames = new ArrayList<>(serviceService.getRegisteredServices());
         List<String> lp3ServiceNames = new ArrayList<>();
         for (String serviceName : serviceNames) {
-            if (serviceName.toLowerCase().contains("test")
-                    || serviceName.equals(DanteComponent.componentName)
+            if (serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
                     || (plsSkipped && serviceName.equals(PLSComponent.componentName))
                     || serviceName.equals(VisiDBDLComponent.componentName)
                     || serviceName.equals(VisiDBTemplateComponent.componentName)
@@ -285,8 +290,8 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                 msg.append(String.format("Could not successfully get the bootstrap state of %s \n", serviceName));
             }
             boolean thisIsOK = (state != null && state.state.equals(BootstrapState.State.OK))
-                    || (BootstrapState.State.INITIAL.equals(state.state) && DanteComponent.componentName
-                            .equals(serviceName));
+                    || (BootstrapState.State.INITIAL.equals(state.state)
+                            && DanteComponent.componentName.equals(serviceName));
             if (!thisIsOK && state != null) {
                 msg.append(String.format("The bootstrap state of %s is not OK, but rather %s : %s.\n", serviceName,
                         state.state, state.errorMessage));
@@ -304,8 +309,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         List<String> serviceNames = new ArrayList<>(serviceService.getRegisteredServices());
         List<String> lp3ServiceNames = new ArrayList<>();
         for (String serviceName : serviceNames) {
-            if (serviceName.toLowerCase().contains("test")
-                    || serviceName.equals(DanteComponent.componentName)
+            if (serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
                     || serviceName.equals(VisiDBDLComponent.componentName)
                     || serviceName.equals(VisiDBTemplateComponent.componentName)
                     || serviceName.equals(DLTemplateComponent.componentName)
@@ -324,7 +328,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             Future<BootstrapState> future = executor.submit(new Callable<BootstrapState>() {
                 @Override
                 public BootstrapState call() throws Exception {
-                return waitUntilStateIsNotUninstalling(contractId, tenantId, component, 200);
+                    return waitUntilStateIsNotUninstalling(contractId, tenantId, component, 200);
                 }
             });
             futures.add(future);
@@ -344,8 +348,8 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             }
             boolean thisIsOK = (state != null && state.state.equals(BootstrapState.State.UNINSTALLED));
             if (!thisIsOK && state != null) {
-                msg.append(String.format("The bootstrap state of %s is not UNINSTALLED, but rather %s : %s.\n", serviceName,
-                        state.state, state.errorMessage));
+                msg.append(String.format("The bootstrap state of %s is not UNINSTALLED, but rather %s : %s.\n",
+                        serviceName, state.state, state.errorMessage));
             }
             allOK = allOK && thisIsOK;
         }
@@ -370,12 +374,11 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     private void verifyHDFSFolderExists() {
-        String modelingHdfsPoint = HDFS_MODELING_BASE_PATH + "/" + String.format("%s.%s.%s", contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        String modelingHdfsPoint = HDFS_MODELING_BASE_PATH + "/"
+                + String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         String podHdfsPoint = String.format(HDFS_POD_PATH, CamilleEnvironment.getPodId(), contractId);
         try {
-            Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelingHdfsPoint),
-                    "modeling path not exist!");
+            Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelingHdfsPoint), "modeling path not exist!");
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, podHdfsPoint), "Pod path not exist!");
         } catch (IOException e) {
 
@@ -383,8 +386,8 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     private void verifyHDFSFolderDeleted() {
-        String modelingHdfsPoint = HDFS_MODELING_BASE_PATH + "/" + String.format("%s.%s.%s", contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        String modelingHdfsPoint = HDFS_MODELING_BASE_PATH + "/"
+                + String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         String podHdfsPoint = String.format(HDFS_POD_PATH, CamilleEnvironment.getPodId(), contractId);
         try {
             Assert.assertFalse(HdfsUtils.fileExists(yarnConfiguration, modelingHdfsPoint),
