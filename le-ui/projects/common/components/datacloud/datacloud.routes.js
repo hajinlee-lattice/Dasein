@@ -275,20 +275,36 @@ angular
             },
             resolve: angular.extend({}, DataCloudResolve, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
+
                     var deferred = $q.defer(),
-                        segment = QueryStore.getSegment();
+                        segmentName = $stateParams.segment,
+                        modelId = $stateParams.modelId,
+                        tenantName = $stateParams.tenantName;
 
-                    console.log("[resolve] QueryRestriction", $stateParams, segment);
-
-                    if (!segment) {
-                        console.log("[resolve] new segment");
-                        deferred.resolve( QueryStore.setupStore(null) );
+                    if(segmentName === 'Create'){
+                        QueryStore.setupStore(null);
+                        deferred.resolve(QueryStore.getRestriction());
                     } else {
-                        console.log("[resolve] existing segment");
-                        deferred.resolve( QueryStore.setupStore(segment) );
-                    };
+                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                            if (segmentName && !result) {
+                                if (modelId) {
+                                    $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
+                                } else {
+                                    $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
+                                }
+                            } else {
+
+                                // console.log("[setup store]       ", result);
+
+                                return QueryStore.setupStore(result);
+                            }
+                        }).then(function() {
+                            deferred.resolve(QueryStore.getRestriction());
+                        });
+                    }
 
                     return deferred.promise;
+
                     
                 }],
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
@@ -329,33 +345,40 @@ angular
                         CreateOrUpdateSegment: CreateOrUpdateSegment
                     };
                 }],
-                AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
+                AccountsCount: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
                     var deferred = $q.defer(),
-                        segment = QueryStore.getSegment(),
+                        segmentName = $stateParams.segment,
                         restriction = QueryStore.getRestriction();
 
-                        console.log("[resolve] AccountsCount",segment);
+                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                            var segment = result;
 
-                        if (segment === null) {                     
-                            query = { 
-                                'free_form_text_search': '',
-                                'frontend_restriction': restriction,
-                                'page_filter': {
-                                    'num_rows': 10,
-                                    'row_offset': 0
-                                }
+                            // console.log("[resolve] AccountsCount", segment);
+
+                            if (segment === null) {                     
+                                query = { 
+                                    'free_form_text_search': '',
+                                    'frontend_restriction': restriction,
+                                    'page_filter': {
+                                        'num_rows': 10,
+                                        'row_offset': 0
+                                    }
+                                };
+                            } else {
+                                query = { 
+                                    'free_form_text_search': '',
+                                    'frontend_restriction': segment.frontend_restriction,
+                                    'page_filter': {
+                                        'num_rows': 10,
+                                        'row_offset': 0
+                                    }
+                                };
                             };
-                        } else {
-                            query = { 
-                                'free_form_text_search': '',
-                                'frontend_restriction': segment.frontend_restriction,
-                                'page_filter': {
-                                    'num_rows': 10,
-                                    'row_offset': 0
-                                }
-                            };
-                        };
-                    deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
+                            
+                            deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
+
+                        });
+
                     return deferred.promise;
                 }]
             }),

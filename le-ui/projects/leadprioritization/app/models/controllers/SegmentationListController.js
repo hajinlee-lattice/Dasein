@@ -9,6 +9,7 @@ angular.module('lp.models.segments', [
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
         segments: SegmentsList || [],
+        count: QueryStore.getCounts(),
         filteredItems: [],
         totalLength: SegmentsList.length,
         tileStates: {},

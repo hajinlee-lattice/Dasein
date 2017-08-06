@@ -119,6 +119,7 @@ angular.module('common.datacloud.explorer', [
          * Rebuild the tile table items
          */
         vm.TileTableItems = {};
+
         if(vm.metadataSegments || QueryRestriction) {
             getExplorerSegments(vm.enrichments);
         }
@@ -881,6 +882,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.getTileTableItems = function(category, subcategory, segment, limit, debug) {
+
         var items = [],
             limit = (limit === 0 ? 0 : null) || limit || null;
 
@@ -913,6 +915,7 @@ angular.module('common.datacloud.explorer', [
 
             if (items) {
                 items.forEach(function(item, itemKey) {
+
                     var index = vm.enrichmentsMap[item.Attribute],
                         enrichment = vm.enrichments[index],
                         map = [
@@ -1250,29 +1253,83 @@ angular.module('common.datacloud.explorer', [
     }
 
     var getExplorerSegments = function(enrichments) {
+        // vm.clearExplorerSegments();
+        // var metadataSegments = vm.metadataSegments || QueryRestriction;
+        // for(var i in metadataSegments) {
+        //     var restrictions = metadataSegments[i];
+        //     for(var i in restrictions) {
+        //         var item = restrictions[i];
+        //         if(item.bucketRestriction) {
+        //             var restriction = item.bucketRestriction,
+        //                     key = restriction.lhs.columnLookup.column_name,
+        //                 range = restriction.bkt.Rng,
+        //                 enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
+        //                 fieldName = enrichment.ColumnId,
+        //                 category = enrichment.Category,
+        //                 index = vm.enrichmentsMap[fieldName];
+
+        //                 console.log(range, enrichment, fieldName, category, index);
+
+        //                 if(index || index === 0) {
+
+        //                     vm.enrichments[index].SegmentChecked = true;
+        //                     vm.enrichments[index].SegmentRangesChecked = {};
+        //                     vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
+        //                     vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range)] = true;
+        //                 }
+        //         }
+        //     }
+        // }
+
+
+        // console.log(vm.metadataSegments, QueryRestriction);
+
         vm.clearExplorerSegments();
-        var metadataSegments = vm.metadataSegments || QueryRestriction;
+
+        if(vm.metadataSegment != undefined){
+            var metadataSegments = vm.metadataSegments.restriction.logicalRestriction.restrictions;
+        } else {
+            var metadataSegments = QueryRestriction.restriction.logicalRestriction.restrictions;
+        };
+
+        // console.log("!!!!!!!!!!!!!!!!!!", metadataSegments);
         for(var i in metadataSegments) {
             var restrictions = metadataSegments[i];
+
+
+            // console.log("Restrictions:", restrictions);
             for(var i in restrictions) {
-                var item = restrictions[i];
-                if(item.bucketRestriction) {
-                    var restriction = item.bucketRestriction,
-                        range = restriction.range,
-                        enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
-                        fieldName = enrichment.ColumnId,
-                        category = enrichment.Category,
-                        index = vm.enrichmentsMap[fieldName];
+                var item = restrictions[i].restrictions;
+
+
+                // console.log("Item:", item);
+                for(var i in item) {
+                    var bucketRestriction = item[i];
+
+
+                    // console.log("Bucket:", bucketRestriction);
+                    if(bucketRestriction.bucketRestriction) {
+                        var restriction = bucketRestriction.bucketRestriction,
+                            range = restriction.bkt.Rng,
+                            key = restriction.attr.split(".")[1],
+                            enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
+                            index = vm.enrichmentsMap[key];
+
+                        // console.log(restriction, range, key, index);
 
                         if(index || index === 0) {
+
                             vm.enrichments[index].SegmentChecked = true;
                             vm.enrichments[index].SegmentRangesChecked = {};
                             vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
                             vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range)] = true;
                         }
+                    }
                 }
             }
         }
+
+
     }
 
     vm.clearExplorerSegments = function() { 
@@ -1429,10 +1486,14 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
+
+
+        console.log(enrichment, stat, disable);
+
         var disable = disable || false,
-            attributeKey = enrichment.Attribute || enrichment.FieldName,
+            attributeKey = enrichment.Attribute || enrichment.ColumnName,
             attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng),
-            fieldName = enrichment.FieldName;
+            fieldName = enrichment.ColumnName;
         if(disable) {
             return false;
         }
@@ -1441,12 +1502,23 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         vm.saveSegmentEnabled = true;
 
-        vm.enrichments[index].SegmentChecked = true;
+        // vm.enrichments[index].SegmentChecked = true;
 
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-            QueryStore.addRestriction({columnName: fieldName, bkt: stat});
+            QueryStore.counts.accounts.loading = true;
+            $timeout(function(){
+                QueryStore.addRestriction({columnName: attributeKey, bkt: stat});
+            }, 1000);
+
+            // QueryStore.addRestriction({columnName: fieldName, bkt: stat});
         } else {
-            QueryStore.removeRestriction({columnName: fieldName, bkt: stat});
+            QueryStore.counts.accounts.loading = true;
+            $timeout(function(){
+                QueryStore.removeRestriction({columnName: attributeKey, bkt: stat});
+            }, 1000);
+
+
+            // QueryStore.removeRestriction({columnName: fieldName, bkt: stat});
         }
         /*
          * Rebuild the tile table items
@@ -1472,6 +1544,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentBucketInput = getSegmentBucketInputs();
     vm.selectBucketInput = function(id, bucket) {
+
         var bucketId = id + bucket,
             range = {min: bucket, max: bucket, is_null_only: false};
 

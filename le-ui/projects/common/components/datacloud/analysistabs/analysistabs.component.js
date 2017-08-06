@@ -22,16 +22,26 @@ angular.module('common.datacloud.analysistabs', [
 
     vm.init = function() {
 
+        vm.counts.accounts.loading = true;
+
         $timeout(function(){
             QueryStore.setResourceTypeCount('accounts', false, vm.accountsCount);
         }, 2000);
+
         QueryStore.GetCountByQuery('accounts').then(function(data){ 
-            vm.accountsCount = data; 
+            vm.accountsCount = data;
         });
+
+        if(vm.segment === 'Create'){
+            var attributesUrl = "home.segment.explorer.attributes({segment:'Create'})";
+        } else {
+            var attributesUrl = "home.segment.explorer.attributes({segment:'" + vm.segment + "'})";
+        }
+        
 
         vm.attributes = vm.inModel()
             ? 'home.model.analysis.explorer'
-            : 'home.segment.explorer';
+            : attributesUrl;
 
         vm.accounts = vm.inModel()
             ? 'home.model.analysis.accounts'

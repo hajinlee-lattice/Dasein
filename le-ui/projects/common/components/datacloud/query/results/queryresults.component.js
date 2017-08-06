@@ -24,13 +24,13 @@ angular.module('common.datacloud.query.results', [
 
 
     vm.init = function() {
+
+        // console.log($stateParams);
         
         QueryStore.setAccounts('', $stateParams.segment).then(function(response){
             vm.accounts = response.data;
             vm.loading = false;
         });
-
-        console.log(vm.accountsCount);
 
     };
     vm.init();

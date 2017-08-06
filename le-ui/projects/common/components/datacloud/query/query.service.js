@@ -107,12 +107,24 @@ angular.module('common.datacloud.query.service',[
 
         var self = this;
         var deferred = $q.defer();
-
+        
         if (segment != null) {
+
+            // set segment if clicking on a tile.
             this.setSegment(segment);
+
+            // Set variables so I can manipulate later when unchecking box.
+            allRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[0].logicalRestriction.restrictions;
+            anyRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[1].logicalRestriction.restrictions;
+
+            // Set restriction to get counts and data as part of the query.
             deferred.resolve( this.setRestriction(segment.frontend_restriction) );
+
         } else {
+
+            // default state. restriction is empty.
             deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );
+
         }
         return deferred.promise;
 
@@ -140,6 +152,7 @@ angular.module('common.datacloud.query.service',[
 
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
+            console.log();
             self.setResourceTypeCount('accounts', false, data);
         });            
         
@@ -153,6 +166,8 @@ angular.module('common.datacloud.query.service',[
         var searchTerm = attribute.attr,
             index = -1;
 
+        console.log(searchTerm, allRestrictions);
+
         for(var i = 0, len = allRestrictions.length; i < len; i++) {
             if (allRestrictions[i].bucketRestriction.attr === searchTerm) {
                 var index = i;
@@ -162,6 +177,10 @@ angular.module('common.datacloud.query.service',[
 
         allRestrictions.splice(index, 1);
         
+
+        console.log(index, allRestrictions);
+
+
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
             self.setResourceTypeCount('accounts', false, data);
@@ -242,8 +261,6 @@ angular.module('common.datacloud.query.service',[
             return deferred.promise;
         } else {
 
-            console.log(query, this.restriction);
-
             if(query === undefined || query === ''){
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
@@ -278,24 +295,14 @@ angular.module('common.datacloud.query.service',[
 })
 .service('QueryService', function($http, $q) {
 
-    this.GetCountByRestriction = function(resourceType, restriction) {
-        var deferred = $q.defer();
 
-        $http({
-            method: 'POST',
-            url: '/pls/' + resourceType + '/count/restriction',
-            data: restriction
-        }).success(function(result) {
-            deferred.resolve(result);
-        }).error(function(result) {
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
-    };
+    var canceler = $q.defer();
 
     this.GetCountByQuery = function(resourceType, query) {
-        var deferred = $q.defer();
+
+        canceler.resolve("cancelled");
+        var deferred = $q.defer(); 
+
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/count',
