@@ -3,6 +3,7 @@ package com.latticeengines.admin;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -16,14 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
@@ -40,7 +38,7 @@ import com.latticeengines.admin.tenant.batonadapter.template.visidb.VisiDBTempla
 import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
@@ -103,8 +101,6 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-
-        provisionEndToEndTestTenants();
     }
 
     @AfterClass(groups = "deployment")
@@ -117,47 +113,46 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
      * test tenant ==================================================
      */
 
+    @Test(groups = "deployment")
+    public void testEnd2End() throws Exception {
+        provisionEndToEndTestTenants();
+        log.info("Verify installation");
+        verifyInstall();
+
+        // uninstall
+        log.info("Uninstall without wiping out ZK.");
+        deleteTenant(contractId, tenantId, false);
+        log.info("Verify uninstallation");
+        verifyUninstall();
+
+        // uninstall again
+        log.info("Uninstall again with wiping out ZK.");
+        deleteTenant(contractId, tenantId);
+        //TODO: change this blind with to checking some condition
+        Thread.sleep(10000);
+        log.info("Uninstall again and again with wiping out ZK.");
+        deleteTenant(contractId, tenantId);
+    }
+
     // ==================================================
     // verify ZK states
     // ==================================================
 
-    @Test(groups = "deployment")
-    public void verifyZKStatesInMainTestTenant() {
+    private void verifyInstall() throws Exception {
         verifyZKState();
+        verifyPLSMainTestTenantExists();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
-    public void verifyPLSMainTestTenantExists() throws Exception {
-        verifyPLSTenantExists();
-        verifyHDFSFolderExists();
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "verifyPLSMainTestTenantExists")
-    public void verifyPLSTenantKnowsTopologyInMainTestTenant() throws Exception {
-        verifyPLSTenantKnowsTopology();
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "verifyPLSTenantKnowsTopologyInMainTestTenant", enabled = true)
-    public void uninstallComponents() throws Exception {
-        deleteTenant(contractId, tenantId, false);
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "uninstallComponents", enabled = true)
-    public void verifyUninstallStatus() throws Exception {
+    private void verifyUninstall() throws Exception {
         verifyZKUnistallState();
+        //TODO: change this blind with to checking some condition
         Thread.sleep(10000);
         verifyHDFSFolderDeleted();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyUninstallStatus", enabled = true)
-    public void uninstallComponentsAgain() throws Exception {
-        deleteTenant(contractId, tenantId);
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "uninstallComponentsAgain", enabled = true)
-    public void uninstallComponentsAfterSomeTime() throws Exception {
-        Thread.sleep(10000);
-        deleteTenant(contractId, tenantId);
+    private void verifyPLSMainTestTenantExists() throws Exception {
+        verifyPLSTenantExists();
+        verifyHDFSFolderExists();
     }
 
     /**
@@ -193,8 +188,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
         // SpaceConfiguration
         SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
-        // spaceConfiguration.setDlAddress(dlUrl);
-        spaceConfiguration.setTopology(CRMTopology.ELOQUA);
+        spaceConfiguration.setProducts(Collections.singletonList(LatticeProduct.LPA3));
 
         // PLS
         SerializableDocumentDirectory plsConfig = serviceService.getDefaultServiceConfig(PLSComponent.componentName);
@@ -395,24 +389,6 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             Assert.assertFalse(HdfsUtils.fileExists(yarnConfiguration, podHdfsPoint), "Pod path not deleted!");
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void verifyPLSTenantKnowsTopology() {
-        if (plsSkipped)
-            return;
-
-        String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-        RestTemplate plsRestTemplate = plsComponentDeploymentTestNG.plsRestTemplate;
-        String response = plsRestTemplate.getForObject(plsHostPort + "/pls/config/topology?tenantId=" + PLSTenantId,
-                String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            JsonNode json = mapper.readTree(response);
-            Assert.assertEquals(CRMTopology.fromName(json.get("Topology").asText()), CRMTopology.ELOQUA);
-        } catch (IOException e) {
-            Assert.fail("Failed to parse topology from PLS.", e);
         }
     }
 
