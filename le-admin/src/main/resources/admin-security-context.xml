@@ -7,6 +7,15 @@
     <import resource="classpath:security-provider-context.xml"/>
 
     <security:http use-expressions="true"
+                   pattern="/admin/internal/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:intercept-url pattern="/admin/internal/**" access="hasRole('ROLE_INTERNAL_USER')" />
+        <security:custom-filter ref="internalRestServicesFilter" before="PRE_AUTH_FILTER" />
+    </security:http>
+
+    <security:http use-expressions="true"
                    pattern="/admin/tenants/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"

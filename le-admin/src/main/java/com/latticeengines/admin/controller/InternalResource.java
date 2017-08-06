@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,15 +22,12 @@ import com.latticeengines.admin.dynamicopts.impl.PermStoreProvider;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.Constants;
-import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.service.UserService;
 
 import io.swagger.annotations.Api;
@@ -40,7 +36,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "internal_service_resource", description = "REST service resource for internal operations")
 @RestController
 @RequestMapping(value = "/internal")
-public class InternalResource extends InternalResourceBase {
+public class InternalResource {
 
     @Autowired
     private TenantService tenantService;
@@ -63,9 +59,7 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "services/options", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all configuration fields that are the type of option")
-    public SelectableConfigurationDocument getServiceOptionalConfigs(
-            @RequestParam(value = "component") String component, HttpServletRequest request) {
-        checkHeader(request);
+    public SelectableConfigurationDocument getServiceOptionalConfigs(@RequestParam(value = "component") String component) {
         final SelectableConfigurationDocument doc = serviceService.getSelectableConfigurationFields(component, false);
         if (doc == null) {
             throw new LedpException(LedpCode.LEDP_19102, new String[] { component });
@@ -77,8 +71,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Update dropdown options of a field")
     public Boolean patchServiceOptionalConfigs(@RequestParam(value = "component") String component,
-            @RequestBody SelectableConfigurationField patch, HttpServletRequest request) {
-        checkHeader(request);
+            @RequestBody SelectableConfigurationField patch) {
         if (patch.getDefaultOption() != null) {
             return serviceService.patchDefaultConfigWithOptions(component, patch);
         } else {
@@ -94,14 +87,14 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "tenants/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete tenant for a particular contract id")
-    public boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId,
-                    HttpServletRequest request) {
-        String ticket = request.getHeader(Constants.AUTHORIZATION);
-        String userName = "_defaultUser";
-        if (!StringUtils.isEmpty(ticket)) {
-            String decrypted = CipherUtils.decrypt(ticket);
-            String[] tokens = decrypted.split("\\|");
-            userName = tokens[0];
+    public boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
+        String userName = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal != null) {
+            userName = (String) principal;
+        }
+        if (StringUtils.isBlank(userName)) {
+            userName = "_defaultUser";
         }
         return tenantService.deleteTenant(userName, contractId, tenantId, true);
     }
@@ -109,9 +102,7 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "datastore/{option}/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get files of a tenant in datastore")
-    public List<String> getTenantFoldersInDatastore(@PathVariable String option, @PathVariable String tenantId,
-            HttpServletRequest request) {
-        checkHeader(request);
+    public List<String> getTenantFoldersInDatastore(@PathVariable String option, @PathVariable String tenantId) {
         File dir = dataStoreProvider.getTenantFolder(option, tenantId);
         if (dir.exists()) {
             return Arrays.asList(dir.list());
@@ -123,9 +114,7 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "datastore/{server}/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a tenant from datastore")
-    public Boolean deleteTenantInDatastore(@PathVariable String server, @PathVariable String tenantId,
-            HttpServletRequest request) {
-        checkHeader(request);
+    public Boolean deleteTenantInDatastore(@PathVariable String server, @PathVariable String tenantId) {
         dataStoreProvider.deleteTenantFolder(server, tenantId);
         return true;
     }
@@ -133,14 +122,14 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "services/deactiveUserStatus", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "set user status to inactive")
-    public Boolean deactiveUserStatusBasedOnEmails(@RequestBody String emails, HttpServletRequest request) {
-        checkHeader(request);
-        String ticket = request.getHeader(Constants.AUTHORIZATION);
-        String userName = "_defaultUser";
-        if (!StringUtils.isEmpty(ticket)) {
-            String decrypted = CipherUtils.decrypt(ticket);
-            String[] tokens = decrypted.split("\\|");
-            userName = tokens[0];
+    public Boolean deactiveUserStatusBasedOnEmails(@RequestBody String emails) {
+        String userName = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal != null) {
+            userName = (String) principal;
+        }
+        if (StringUtils.isBlank(userName)) {
+            userName = "_defaultUser";
         }
         userService.deactiveUserStatus(userName, emails);
         serviceService.reduceConfig(PLSComponent.componentName, emails);
@@ -150,9 +139,7 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "permstore/{option}/{server}/{tenant}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get file names in permstore")
-    public Boolean hasVDBInPermstore(@PathVariable String option, @PathVariable String server,
-            @PathVariable String tenant, HttpServletRequest request) {
-        checkHeader(request);
+    public Boolean hasVDBInPermstore(@PathVariable String option, @PathVariable String server, @PathVariable String tenant) {
         return permStoreProvider.getVDBFolder(option, server.toUpperCase(), tenant).exists();
     }
 
@@ -160,8 +147,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Delete file in permstore")
     public Boolean deleteVDBInPermstore(@PathVariable String option, @PathVariable String server,
-            @PathVariable String tenant, HttpServletRequest request) {
-        checkHeader(request);
+            @PathVariable String tenant) {
         permStoreProvider.deleteVDBFolder(option, server.toUpperCase(), tenant);
         return true;
     }
@@ -177,19 +163,16 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "services/addUserAccessLevel", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "add user Access level")
-    public Boolean addUserAccessLevel(@RequestBody String emails, @RequestParam(value = "right", required = false, defaultValue = "SUPER_ADMIN") String right,
-            HttpServletRequest request) {
+    public Boolean addUserAccessLevel(@RequestBody String emails,
+                                      @RequestParam(value = "right", required = false, defaultValue = "SUPER_ADMIN") String right) {
         AccessLevel level = AccessLevel.valueOf(right);
-        if (level == null) {
-            return false;
+        String userName = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal != null) {
+            userName = (String) principal;
         }
-        checkHeader(request);
-        String ticket = request.getHeader(Constants.AUTHORIZATION);
-        String userName = "_defaultUser";
-        if (!StringUtils.isEmpty(ticket)) {
-            String decrypted = CipherUtils.decrypt(ticket);
-            String[] tokens = decrypted.split("\\|");
-            userName = tokens[0];
+        if (StringUtils.isBlank(userName)) {
+            userName = "_defaultUser";
         }
         boolean  success = false;
         String filterEmails = userService.addUserAccessLevel(userName, emails, level);
