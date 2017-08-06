@@ -350,7 +350,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
         MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
         Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
-        Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(100));
+        Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(99));
     }
 
     @Test(groups = "deployment", enabled = true)
