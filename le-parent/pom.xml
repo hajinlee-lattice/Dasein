@@ -120,7 +120,7 @@
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
         <spring.batch.version>3.0.7.RELEASE</spring.batch.version>
         <spring.security.version>4.2.3.RELEASE</spring.security.version>
-        <spring.oauth2.version>2.1.1.RELEASE</spring.oauth2.version>
+        <spring.oauth2.version>2.2.0.RELEASE</spring.oauth2.version>
         <!-- Camel -->
         <camel.version>2.19.1</camel.version>
         <camel.jcifs.version>2.18.0</camel.jcifs.version>
