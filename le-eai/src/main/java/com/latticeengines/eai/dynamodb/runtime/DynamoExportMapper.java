@@ -10,14 +10,19 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.aws.dynamo.impl.DynamoServiceImpl;
 import com.latticeengines.common.exposed.util.CipherUtils;
@@ -41,7 +46,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     private DynamoDataStoreImpl dataStore;
     private Class<?> entityClass;
     private Map<String, Pair<GenericRecord, Map<String, Object>>> recordBuffer = new HashMap<>();
-    private AmazonDynamoDBClient client;
+    private AmazonDynamoDB client;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -63,16 +68,23 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
         log.info("repo=" + repo);
 
         String endpoint = config.get(DynamoExportJob.CONFIG_ENDPOINT);
+        String region = config.get(DynamoExportJob.CONFIG_AWS_REGION);
         if (StringUtils.isNotEmpty(endpoint)) {
             log.info("Instantiate AmazonDynamoDBClient using endpoint " + endpoint);
-            client = new AmazonDynamoDBClient().withEndpoint(endpoint);
+            client = AmazonDynamoDBClientBuilder.standard() //
+                    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region)) //
+                    .build();
         } else {
             String accessKey = CipherUtils.decrypt(config.get(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED))
                     .replace("\n", "");
             String secretKey = CipherUtils.decrypt(config.get(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED))
                     .replace("\n", "");
             log.info("Instantiate AmazonDynamoDBClient using BasicAWSCredentials");
-            client = new AmazonDynamoDBClient(new BasicAWSCredentials(accessKey, secretKey));
+            AWSCredentialsProvider credsProvider = new AWSStaticCredentialsProvider(
+                    new BasicAWSCredentials(accessKey, secretKey));
+            client = AmazonDynamoDBClientBuilder.standard().withCredentials(credsProvider) //
+                    .withRegion(Regions.fromName(region)) //
+                    .build();
         }
 
         resolveEntityClass();

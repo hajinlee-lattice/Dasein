@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 
 public interface PublishConfigurationParser {
 
-    PublishToSqlConfiguration parseSqlAlias(PublishToSqlConfiguration sqlConfiguration);
+    <T extends PublishToSqlConfiguration> T parseSqlAlias(T sqlConfiguration);
 
     SqoopExporter constructSqoopExporter(PublishToSqlConfiguration sqlConfiguration, String avroDir);
 

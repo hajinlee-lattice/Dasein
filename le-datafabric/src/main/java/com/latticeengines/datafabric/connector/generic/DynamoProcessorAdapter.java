@@ -6,9 +6,9 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.kafka.common.TopicPartition;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.latticeengines.aws.dynamo.impl.DynamoServiceImpl;
@@ -73,8 +73,8 @@ public class DynamoProcessorAdapter extends AbstractProcessorAdapter {
                     String secretKey = connectorConfig.getProperty(GenericSinkConnectorConfig.SECRET_KEY, String.class);
                     log.info("access key=" + accessKey + " secret key=" + secretKey);
                     BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-                    String endpoint = null;
-                    DynamoServiceImpl dynamoService = new DynamoServiceImpl(awsCredentials, endpoint);
+                    //TODO: region should come from sink configuration
+                    DynamoServiceImpl dynamoService = new DynamoServiceImpl(awsCredentials, null, "us-east-1");
 
                     dynamoProvider.setDynamoService(dynamoService);
                     FabricDataService dataService = new FabricDataServiceImpl();

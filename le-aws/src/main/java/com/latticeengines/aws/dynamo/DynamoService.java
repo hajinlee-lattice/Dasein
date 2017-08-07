@@ -1,7 +1,6 @@
 package com.latticeengines.aws.dynamo;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 
 public interface DynamoService {
@@ -11,9 +10,7 @@ public interface DynamoService {
 
     void deleteTable(String tableName);
 
-    AmazonDynamoDBClient getClient();
+    AmazonDynamoDB getClient();
 
-    AmazonDynamoDBClient getRemoteClient();
-
-    DynamoDB getDynamoDB();
+    AmazonDynamoDB getRemoteClient();
 }

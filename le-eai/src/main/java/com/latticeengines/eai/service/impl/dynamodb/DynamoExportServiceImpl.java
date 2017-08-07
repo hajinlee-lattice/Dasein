@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -50,6 +50,12 @@ public class DynamoExportServiceImpl extends ExportService {
 
     @Override
     public void exportDataFromHdfs(ExportConfiguration exportConfig, ExportContext context) {
+        Properties props = constructProperties(exportConfig, context);
+        ApplicationId appId = eaiYarnService.submitMRJob(DynamoExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
+        context.setProperty(ImportProperty.APPID, appId);
+    }
+
+    public Properties constructProperties(ExportConfiguration exportConfig, ExportContext context) {
         if (StringUtils.isNotEmpty(exportConfig.getExportTargetPath())) {
             context.setProperty(ExportProperty.TARGETPATH, exportConfig.getExportTargetPath());
         } else {
@@ -81,6 +87,8 @@ public class DynamoExportServiceImpl extends ExportService {
 
         context.setProperty(DynamoExportJob.CONFIG_ENDPOINT,
                 exportConfig.getProperties().get(DynamoExportJob.CONFIG_ENDPOINT));
+        context.setProperty(DynamoExportJob.CONFIG_AWS_REGION,
+                exportConfig.getProperties().get(DynamoExportJob.CONFIG_AWS_REGION));
         context.setProperty(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
                 exportConfig.getProperties().get(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED));
         context.setProperty(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED,
@@ -88,14 +96,10 @@ public class DynamoExportServiceImpl extends ExportService {
 
         log.info(String.format("Exporting data for table %s at input path %s", table,
                 context.getProperty(ExportProperty.INPUT_FILE_PATH, String.class)));
-        Properties props = getProperties(context, table);
-
-        ApplicationId appId = eaiYarnService.submitMRJob(DynamoExportJob.DYNAMO_EXPORT_JOB_TYPE, props);
-        context.setProperty(ImportProperty.APPID, appId);
+        return getProperties(context, table);
     }
 
     private Properties getProperties(ExportContext ctx, Table table) {
-
         Properties props = new Properties();
         props.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
 
@@ -124,6 +128,12 @@ public class DynamoExportServiceImpl extends ExportService {
                     ctx.getProperty(DynamoExportJob.CONFIG_ENDPOINT, String.class));
         } else {
             props.setProperty(DynamoExportJob.CONFIG_ENDPOINT, "");
+        }
+        if (ctx.getProperty(DynamoExportJob.CONFIG_AWS_REGION, String.class) != null) {
+            props.setProperty(DynamoExportJob.CONFIG_AWS_REGION,
+                    ctx.getProperty(DynamoExportJob.CONFIG_AWS_REGION, String.class));
+        } else {
+            props.setProperty(DynamoExportJob.CONFIG_AWS_REGION, "us-east-1");
         }
         if (ctx.getProperty(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, String.class) != null) {
             props.setProperty(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,

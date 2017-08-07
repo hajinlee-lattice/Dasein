@@ -13,7 +13,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.latticeengines.aws.dynamo.DynamoService;
@@ -51,8 +50,7 @@ public class TestDynamoGraphEntityMgrTestNG extends DataFabricFunctionalTestNGBa
         dynamoService.deleteTable(tableName);
 
         dynamoService.createTable(tableName, 10, 10, "parentKey", ScalarAttributeType.S.name(), "entityId",  ScalarAttributeType.S.name());
-        AmazonDynamoDBClient client = dynamoService.getClient();
-        ListTablesResult result = client.listTables();
+        ListTablesResult result = dynamoService.getClient().listTables();
         log.info("Tables: " + result.getTableNames());
 
 

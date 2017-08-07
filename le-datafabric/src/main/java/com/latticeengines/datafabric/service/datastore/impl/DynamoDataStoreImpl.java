@@ -113,7 +113,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             log.info("Switch dynamo store repo " + repository + " record " + recordType + " to remote mode.");
         } else {
             dynamoDB = new DynamoDB(dynamoService.getClient());
-            log.info("Switch dynamo store repo " + repository + " record " + recordType + " to default mode.");
+            log.info("Switch dynamo store repo " + repository + " record " + recordType + " to local mode.");
         }
         table = dynamoDB.getTable(tableName);
     }

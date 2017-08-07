@@ -15,19 +15,40 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class PublicationConfiguration {
 
+    @JsonProperty("SourceName")
+    private String sourceName;
+
+    @JsonProperty("Destination")
     protected PublicationDestination destination;
+
+    @JsonProperty("AvroDir")
+    private String avroDir;
 
     @JsonIgnore
     protected abstract String getConfigurationType();
 
-    @JsonProperty("Destination")
+    public String getSourceName() {
+        return sourceName;
+    }
+
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
+
     public PublicationDestination getDestination() {
         return destination;
     }
 
-    @JsonProperty("Destination")
     public void setDestination(PublicationDestination destination) {
         this.destination = destination;
+    }
+
+    public String getAvroDir() {
+        return avroDir;
+    }
+
+    public void setAvroDir(String avroDir) {
+        this.avroDir = avroDir;
     }
 
     @Override

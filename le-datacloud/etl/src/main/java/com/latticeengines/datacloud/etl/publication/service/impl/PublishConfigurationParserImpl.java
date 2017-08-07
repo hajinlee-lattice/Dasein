@@ -76,7 +76,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
     private SourceColumnService sourceColumnService;
 
     @Override
-    public PublishToSqlConfiguration parseSqlAlias(PublishToSqlConfiguration sqlConfiguration) {
+    public <T extends PublishToSqlConfiguration> T parseSqlAlias(T sqlConfiguration) {
         PublishToSqlConfiguration.Alias alias = sqlConfiguration.getAlias();
         if (alias != null) {
             switch (alias) {

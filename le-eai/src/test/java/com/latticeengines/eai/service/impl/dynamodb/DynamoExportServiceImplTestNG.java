@@ -1,8 +1,5 @@
 package com.latticeengines.eai.service.impl.dynamodb;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,14 +7,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +23,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.latticeengines.aws.dynamo.DynamoService;
@@ -41,32 +35,32 @@ import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
-import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
+import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
-import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
+import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
-public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
+public class DynamoExportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     private static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("DynamoTestCustomer");
-    private AmazonDynamoDBClient client;
 
     private static final String LATTICE_ACCOUNT = LatticeAccount.class.getSimpleName();
     private static final String ACCOUNT_LOOKUP_ENTRY = AccountLookupEntry.class.getSimpleName();
 
     @Autowired
-    private Configuration yarnConfiguration;
+    private DynamoService dynamoService;
 
     @Autowired
-    private DynamoService dynamoService;
+    private EaiYarnService eaiYarnService;
 
     @Autowired
     @Qualifier("dynamoExportService")
@@ -96,26 +90,24 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
     private Table table;
     private String repo;
 
-    @BeforeClass(groups = "aws")
+    @BeforeClass(groups = "dynamo")
     public void setup() throws Exception {
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);
+        super.setup();
     }
 
-    @AfterClass(groups = "aws")
+    @AfterClass(groups = "dynamo")
     public void cleanup() throws IOException {
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.INFO);
+        super.clear();
     }
 
-    @Test(groups = "aws")
+    @Test(groups = "dynamo")
     public void exportLatticeAccount() throws Exception {
         setupMethod(LATTICE_ACCOUNT);
 
         table = createLatticeAccountTable();
-        ExportContext ctx = submitExport(LatticeAccount.class, LATTICE_ACCOUNT);
-        ApplicationId appId = ctx.getProperty(ExportProperty.APPID, ApplicationId.class);
-        assertNotNull(appId);
-        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        submitExport(LatticeAccount.class, LATTICE_ACCOUNT);
 
         TestLatticeAccountEntityMgrImpl entityMgr = new TestLatticeAccountEntityMgrImpl();
         entityMgr.init();
@@ -126,19 +118,16 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
             Assert.assertNotNull(account);
             System.out.println(JsonUtils.serialize(account));
         }
+
+        teardownMethod(LATTICE_ACCOUNT);
     }
 
-    @Test(groups = "aws")
+    @Test(groups = "dynamo")
     public void exportAccountLookup() throws Exception {
         setupMethod(ACCOUNT_LOOKUP_ENTRY);
 
         table = createAccountLookupTable();
-        ExportContext ctx = submitExport(AccountLookupEntry.class, ACCOUNT_LOOKUP_ENTRY);
-
-        ApplicationId appId = ctx.getProperty(ExportProperty.APPID, ApplicationId.class);
-        assertNotNull(appId);
-        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        submitExport(AccountLookupEntry.class, ACCOUNT_LOOKUP_ENTRY);
 
         TestAccountLookupEntityMgrImpl entityMgr = new TestAccountLookupEntityMgrImpl();
         entityMgr.init();
@@ -152,27 +141,34 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
             Assert.assertEquals(account.getDuns(), String.format("%09d", idx));
             System.out.println(JsonUtils.serialize(account));
         }
+
+        teardownMethod(ACCOUNT_LOOKUP_ENTRY);
     }
 
     private void setupMethod(String recordType) throws Exception {
         repo = String.format("%s_%s_%s", leEnv, leStack, "testRepo");
         String tableName = DynamoDataStoreImpl.buildTableName(repo, recordType);
 
-        HdfsUtils.rmdir(yarnConfiguration, sourceDir);
-        HdfsUtils.rmdir(yarnConfiguration, targetDir);
-        HdfsUtils.mkdir(yarnConfiguration, sourceDir);
+        HdfsUtils.rmdir(miniclusterConfiguration, sourceDir);
+        HdfsUtils.rmdir(miniclusterConfiguration, targetDir);
+        HdfsUtils.mkdir(miniclusterConfiguration, sourceDir);
 
         dynamoService.deleteTable(tableName);
         dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
-        client = dynamoService.getClient();
-        ListTablesResult result = client.listTables();
+        ListTablesResult result = dynamoService.getClient().listTables();
         log.info("Tables: " + result.getTableNames());
     }
 
-    private ExportContext submitExport(Class<?> entityClz, String recordType) {
-        ExportContext ctx = new ExportContext(yarnConfiguration);
+    private void teardownMethod(String recordType) throws Exception {
+        repo = String.format("%s_%s_%s", leEnv, leStack, "testRepo");
+        String tableName = DynamoDataStoreImpl.buildTableName(repo, recordType);
+        dynamoService.deleteTable(tableName);
+        ListTablesResult result = dynamoService.getClient().listTables();
+        log.info("Tables: " + result.getTableNames());
+    }
 
-        ExportConfiguration fileExportConfig = new ExportConfiguration();
+    private void submitExport(Class<?> entityClz, String recordType) throws Exception {
+        HdfsToDynamoConfiguration fileExportConfig = new HdfsToDynamoConfiguration();
         fileExportConfig.setExportFormat(ExportFormat.AVRO);
         fileExportConfig.setExportDestination(ExportDestination.DYNAMO);
         fileExportConfig.setCustomerSpace(TEST_CUSTOMER);
@@ -193,8 +189,10 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         props.put(DynamoExportJob.CONFIG_ENDPOINT, endpoint);
 
         fileExportConfig.setProperties(props);
-        exportService.exportDataFromHdfs(fileExportConfig, ctx);
-        return ctx;
+
+        Properties properties = ((DynamoExportServiceImpl) exportService).constructProperties(fileExportConfig,
+                new ExportContext(miniclusterConfiguration));
+        testMRJob(DynamoExportJob.class, properties);
     }
 
     private Table createLatticeAccountTable() throws IOException {
@@ -222,7 +220,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
             builder.set("DUNS", tuple.get(2));
             recordList.add(builder.build());
         }
-        AvroUtils.writeToHdfsFile(yarnConfiguration, schema, sourceFilePath, recordList);
+        AvroUtils.writeToHdfsFile(miniclusterConfiguration, schema, sourceFilePath, recordList);
 
         Attribute attribute = new Attribute();
         attribute.setName(LatticeAccount.LATTICE_ACCOUNT_ID_HDFS);
@@ -266,7 +264,7 @@ public class DynamoExportServiceImplTestNG extends EaiFunctionalTestNGBase {
             builder.set("Key", tuple.get(1));
             recordList.add(builder.build());
         }
-        AvroUtils.writeToHdfsFile(yarnConfiguration, schema, sourceFilePath, recordList);
+        AvroUtils.writeToHdfsFile(miniclusterConfiguration, schema, sourceFilePath, recordList);
 
         Attribute attribute = new Attribute();
         attribute.setName(AccountLookupEntry.LATTICE_ACCOUNT_ID_HDFS);

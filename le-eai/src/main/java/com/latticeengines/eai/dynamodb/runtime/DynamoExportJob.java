@@ -19,6 +19,7 @@ public class DynamoExportJob extends AvroExportJob {
     public static final String CONFIG_ENTITY_CLASS_NAME = "eai.export.dynamo.entity.class";
 
     public static final String CONFIG_ENDPOINT = "eai.export.dynamo.endpoint";
+    public static final String CONFIG_AWS_REGION = "eai.export.aws.region";
     public static final String CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED = "eai.export.aws.access.key.id";
     public static final String CONFIG_AWS_SECRET_KEY_ENCRYPTED = "eai.export.aws.secret.key";
 
@@ -63,6 +64,7 @@ public class DynamoExportJob extends AvroExportJob {
         config.set(CONFIG_REPOSITORY, (String) properties.get(CONFIG_REPOSITORY));
         config.set(CONFIG_ENTITY_CLASS_NAME, (String) properties.get(CONFIG_ENTITY_CLASS_NAME));
         config.set(CONFIG_ENDPOINT, (String) properties.get(CONFIG_ENDPOINT));
+        config.set(CONFIG_AWS_REGION, (String) properties.get(CONFIG_AWS_REGION));
         config.set(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, (String) properties.get(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED));
         config.set(CONFIG_AWS_SECRET_KEY_ENCRYPTED, (String) properties.get(CONFIG_AWS_SECRET_KEY_ENCRYPTED));
     }
