@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -108,11 +107,6 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         cleanup();
     }
 
-    /**
-     * ================================================== BEGIN: Verify main
-     * test tenant ==================================================
-     */
-
     @Test(groups = "deployment")
     public void testEnd2End() throws Exception {
         provisionEndToEndTestTenants();
@@ -135,7 +129,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     // ==================================================
-    // verify ZK states
+    // BEGIN: Verify main test tenant
     // ==================================================
 
     private void verifyInstall() throws Exception {
@@ -155,15 +149,13 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         verifyHDFSFolderExists();
     }
 
-    /**
-     * ================================================== END: Verify main test
-     * tenant ==================================================
-     */
+    // ==================================================
+    // END: Verify main test tenant
+    // ==================================================
 
-    /**
-     * ================================================== BEGIN: Tenant creation
-     * methods ================`==================================
-     */
+    // ==================================================
+    // BEGIN: Tenant creation methods
+    // ==================================================
 
     private void provisionEndToEndTestTenants() {
         provisionEndToEndTestTenant1();
@@ -230,15 +222,13 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertTrue(created);
     }
 
-    /**
-     * ================================================== END: Tenant creation
-     * methods ==================================================
-     */
+    // ==================================================
+    // END: Tenant creation methods
+    // ==================================================
 
-    /**
-     * ================================================== BEGIN: Tenant
-     * verification methods ==================================================
-     */
+    // ==================================================
+    // BEGIN: Tenant verification methods
+    // ==================================================
     private void verifyZKState() {
         ExecutorService executor = Executors.newFixedThreadPool(6);
 
@@ -246,28 +236,22 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         List<String> serviceNames = new ArrayList<>(serviceService.getRegisteredServices());
         List<String> lp3ServiceNames = new ArrayList<>();
         for (String serviceName : serviceNames) {
-            if (serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
+            if (!(serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
                     || (plsSkipped && serviceName.equals(PLSComponent.componentName))
                     || serviceName.equals(VisiDBDLComponent.componentName)
                     || serviceName.equals(VisiDBTemplateComponent.componentName)
                     || serviceName.equals(DLTemplateComponent.componentName)
                     || serviceName.equals(BardJamsComponent.componentName)
                     || serviceName.equals(EaiComponent.componentName)
-                    || serviceName.equals(MetadataComponent.componentName)) {
-                continue;
-            } else {
+                    || serviceName.equals(MetadataComponent.componentName))) {
                 lp3ServiceNames.add(serviceName);
             }
         }
 
         for (String serviceName : lp3ServiceNames) {
             final String component = serviceName;
-            Future<BootstrapState> future = executor.submit(new Callable<BootstrapState>() {
-                @Override
-                public BootstrapState call() throws Exception {
-                    return waitUntilStateIsNotInitial(contractId, tenantId, component, 600);
-                }
-            });
+            Future<BootstrapState> future = executor.submit(() -> //
+                    waitUntilStateIsNotInitial(contractId, tenantId, component, 600));
             futures.add(future);
         }
 
@@ -283,12 +267,14 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             } catch (InterruptedException | ExecutionException e) {
                 msg.append(String.format("Could not successfully get the bootstrap state of %s \n", serviceName));
             }
-            boolean thisIsOK = (state != null && state.state.equals(BootstrapState.State.OK))
-                    || (BootstrapState.State.INITIAL.equals(state.state)
-                            && DanteComponent.componentName.equals(serviceName));
-            if (!thisIsOK && state != null) {
-                msg.append(String.format("The bootstrap state of %s is not OK, but rather %s : %s.\n", serviceName,
-                        state.state, state.errorMessage));
+            boolean thisIsOK = state != null && state.state.equals(BootstrapState.State.OK);
+            if (!thisIsOK) {
+                if (state != null) {
+                    msg.append(String.format("The bootstrap state of %s is not OK, but rather %s : %s.\n", serviceName,
+                            state.state, state.errorMessage));
+                } else {
+                    msg.append(String.format("The bootstrap state of %s is not OK, but rather null.\n", serviceName));
+                }
             }
             allOK = allOK && thisIsOK;
         }
@@ -303,28 +289,22 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         List<String> serviceNames = new ArrayList<>(serviceService.getRegisteredServices());
         List<String> lp3ServiceNames = new ArrayList<>();
         for (String serviceName : serviceNames) {
-            if (serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
+            if (!(serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
                     || serviceName.equals(VisiDBDLComponent.componentName)
                     || serviceName.equals(VisiDBTemplateComponent.componentName)
                     || serviceName.equals(DLTemplateComponent.componentName)
                     || serviceName.equals(BardJamsComponent.componentName)
                     || serviceName.equals(EaiComponent.componentName)
                     || serviceName.equals(MetadataComponent.componentName)
-                    || serviceName.equals(ModelingComponent.componentName)) {
-                continue;
-            } else {
+                    || serviceName.equals(ModelingComponent.componentName))) {
                 lp3ServiceNames.add(serviceName);
             }
         }
 
         for (String serviceName : lp3ServiceNames) {
             final String component = serviceName;
-            Future<BootstrapState> future = executor.submit(new Callable<BootstrapState>() {
-                @Override
-                public BootstrapState call() throws Exception {
-                    return waitUntilStateIsNotUninstalling(contractId, tenantId, component, 200);
-                }
-            });
+            Future<BootstrapState> future = executor.submit(() -> //
+                    waitUntilStateIsNotUninstalling(contractId, tenantId, component, 200));
             futures.add(future);
         }
 
@@ -351,8 +331,9 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     private void verifyPLSTenantExists() {
-        if (plsSkipped)
+        if (plsSkipped) {
             return;
+        }
 
         // check non-zero users
         final String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
@@ -375,7 +356,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelingHdfsPoint), "modeling path not exist!");
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, podHdfsPoint), "Pod path not exist!");
         } catch (IOException e) {
-
+            // pass
         }
     }
 
@@ -392,16 +373,14 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         }
     }
 
-    /**
-     * ================================================== END: Tenant
-     * verification methods ==================================================
-     */
+    // ==================================================
+    // NED: Tenant verification methods
+    // ==================================================
 
-    /**
-     * ================================================== BEGIN: Tenant clean up
-     * methods ==================================================
-     */
-    public void cleanup() throws Exception {
+    // ==================================================
+    // BEGIN: Tenant cleanup methods
+    // ==================================================
+    private void cleanup() throws Exception {
         try {
             deleteTenant(contractId, tenantId);
         } catch (Exception e) {
@@ -409,8 +388,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         }
     }
 
-    /**
-     * ================================================== END: Tenant clean up
-     * methods ==================================================
-     */
+    // ==================================================
+    // END: Tenant cleanup methods
+    // ==================================================
 }
