@@ -39,7 +39,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
                 var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint();
                     content = ed.contentDocument.body.innerHTML;
                 CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
-                if(CgTalkingPointStore.isTalkingPointDirty(talkingPoint)) {
+                if(CgTalkingPointStore.isTalkingPointDirty(talkingPoint) && !CgTalkingPointStore.saving) {
                     $rootScope.$broadcast('sync:talkingPoints:lock', true);
                     CgTalkingPointStore.saveTalkingPoints([talkingPoint]).then(function(results){
                         if(talkingPoint.IsNew) {
@@ -66,14 +66,18 @@ angular.module('lp.cg.talkingpoint.editor', [])
         //delete $scope.tp.IsNew;
     }
 
-    vm.expand = function() {
+    vm.expand = function(bool) {
         CgTalkingPointStore.setEditedTalkingPoint($scope.tp);
-        vm.expanded = !vm.expanded;
+        vm.expanded = (bool ? bool : !vm.expanded);
         var tmce = angular.element('iframe');
         tmce.on('focus',function(){
             console.log(focused);
         });
     };
+
+    if(!$scope.tp.content && (Date.now() - $scope.tp.updated) < 2000) {
+        vm.expand(true);
+    }
 
     vm.deleteClick = function($event, val) {
         $event.stopPropagation();

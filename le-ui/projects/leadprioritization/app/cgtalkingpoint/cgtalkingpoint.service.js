@@ -10,6 +10,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     this.talkingPointsPreviewResources = null;
     this.editedTalkingPoint = {};
 
+    this.saving = false;
     this.saveOnBlur = true;
 
     this.savedTalkingPoints = null;
@@ -124,9 +125,11 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
     this.saveTalkingPoints = function(opts) {
         var deferred = $q.defer();
+        this.saving = true;
         CgTalkingPointService.saveTalkingPoints(opts).then(function(data){
             CgTalkingPointStore.setTalkingPoints(data);
             CgTalkingPointStore.savedTalkingPoints = angular.copy(data);
+            CgTalkingPointStore.saving = false;
             deferred.resolve(data);
         });
         return deferred.promise;

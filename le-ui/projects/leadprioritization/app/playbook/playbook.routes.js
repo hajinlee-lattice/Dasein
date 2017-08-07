@@ -169,13 +169,16 @@ angular
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
                     var CreateOrUpdateSegment = function() {
                         var segment = QueryStore.getSegment(),
-                            ts = new Date().getTime();
+                            ts = new Date().getTime(),
+                            restriction = QueryStore.getRestriction();
 
+                        console.log("[resolve] SegmentServiceProxy",segment);
+                        
                         if (segment === null) {
                             segment = {
                                 'name': 'segment' + ts,
                                 'display_name': 'segment' + ts,
-                                'frontend_restriction': QueryStore.getRestriction(),
+                                'frontend_restriction': restriction,
                                 'page_filter': {
                                     'row_offset': 0,
                                     'num_rows': 10
@@ -186,7 +189,7 @@ angular
                             segment = {
                                 'name': segment.name,
                                 'display_name': segment.display_name,
-                                'frontend_restriction': QueryStore.getRestriction(),
+                                'frontend_restriction': segment.frontend_restriction,
                                 'page_filter': {
                                     'row_offset': 0,
                                     'num_rows': 10
@@ -200,34 +203,19 @@ angular
                     return {
                         CreateOrUpdateSegment: CreateOrUpdateSegment
                     };
-                }]
-                // AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
-                //     var deferred = $q.defer();
+                }],
+                AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
+                    var deferred = $q.defer();
 
-                //     QueryStore.GetCountByQuery('accounts').then(function(data){ 
-                //         deferred.resolve(data);
-                //     });
+                    QueryStore.GetCountByQuery('accounts').then(function(data){ 
+                        deferred.resolve(data);
+                    });
 
-                //     return deferred.promise;
-                // }],
-                // Accounts: ['$q', 'QueryStore', 'PlaybookWizardStore', function($q, QueryStore, PlaybookWizardStore) {
-                //     var deferred = $q.defer(),
-                //         segment = PlaybookWizardStore.getSavedSegment();
-                //     QueryStore.setAccounts('', segment);
-                //     QueryStore.getAccounts().then(function(){
-                //          deferred.resolve(data.data);
-                //     });
-                //     // QueryStore.GetDataByQuery('accounts', '', segment).then(function(data){ 
-                //     //     deferred.resolve(data.data);
-                //     // });
-                //     return deferred.promise;
-                // }]
+                    return deferred.promise;
+                }],
             },
             views: {
                 'main@': {
-                    // controller: 'PlaybookWizardTargets',
-                    // controllerAs: 'vm',
-                    // templateUrl: 'app/playbook/content/targets/targets.component.html'
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/queryresults.component.html'
@@ -350,6 +338,9 @@ angular
         })
         .state('home.playbook.wizard.settings', {
             url: '/settings',
+            params: {
+                section: 'wizard.targets'
+            },
             views: {
                 'wizard_content@home.playbook.wizard': {
                     templateUrl: 'app/playbook/content/settings/settings.component.html'
@@ -389,23 +380,62 @@ angular
         .state('home.playbook.wizard.settings.segment.rating.targets', {
             url: '/targets',
             resolve: {
-                DefaultSelectedObject: function() {
-                    return 'accounts';
-                },
-                SelectedSegment: function($q, PlaybookWizardStore, QueryStore) {
+                SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
+                    var CreateOrUpdateSegment = function() {
+                        var segment = QueryStore.getSegment(),
+                            ts = new Date().getTime(),
+                            restriction = QueryStore.getRestriction();
+
+                        console.log("[resolve] SegmentServiceProxy",segment);
+                        
+                        if (segment === null) {
+                            segment = {
+                                'name': 'segment' + ts,
+                                'display_name': 'segment' + ts,
+                                'frontend_restriction': restriction,
+                                'page_filter': {
+                                    'row_offset': 0,
+                                    'num_rows': 10
+                                }
+                            };
+                        } else {
+
+                            segment = {
+                                'name': segment.name,
+                                'display_name': segment.display_name,
+                                'frontend_restriction': segment.frontend_restriction,
+                                'page_filter': {
+                                    'row_offset': 0,
+                                    'num_rows': 10
+                                }
+                            };
+                        }
+
+                        return SegmentService.CreateOrUpdateSegment(segment);
+                    };
+
+                    return {
+                        CreateOrUpdateSegment: CreateOrUpdateSegment
+                    };
+                }],
+                AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
                     var deferred = $q.defer();
-                    var segment = PlaybookWizardStore.getSavedSegment();
-                    QueryStore.setupStore(segment).then(function() {
-                        deferred.resolve(segment);
+
+                    QueryStore.GetCountByQuery('accounts').then(function(data){ 
+                        deferred.resolve(data);
                     });
+
                     return deferred.promise;
-                }
+                }],
             },
             views: {
                 'wizard_content@home.playbook.wizard': {
-                    controller: 'PlaybookWizardTargets',
+                    // controller: 'PlaybookWizardTargets',
+                    // controllerAs: 'vm',
+                    // templateUrl: 'app/playbook/content/targets/targets.component.html'
+                    controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/targets/targets.component.html'
+                    templateUrl: '/components/datacloud/query/results/queryresults.component.html'
                 }
             }
         })

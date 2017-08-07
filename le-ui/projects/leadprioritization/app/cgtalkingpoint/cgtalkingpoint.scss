@@ -114,6 +114,9 @@
         display: none;
         width: 100%;
         max-width: 100%;
+        textarea.form-control {
+            min-height: 325px;
+        }
     }
 
     &.expanded .tinymce-container{
