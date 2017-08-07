@@ -216,7 +216,6 @@ def create_public_load_balancers(env, tg_map):
     lpi_lsnr = create_listener(app_lb, tg_map["lpi"])
     resources.append(lpi_lsnr)
     resources.append(create_listener_rule(lpi_lsnr, tg_map["pls"], "/pls/*"))
-    resources.append(create_listener_rule(lpi_lsnr, tg_map["pls"], "/lp2/*"))
 
     # api listeners
     api_lsnr = create_listener(api_lb, tg_map["playmaker"])
