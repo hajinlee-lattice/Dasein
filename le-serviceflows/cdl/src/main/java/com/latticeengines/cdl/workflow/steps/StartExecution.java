@@ -58,19 +58,23 @@ public class StartExecution extends BaseReportStep<StartExecutionConfiguration> 
                 log.info("stepConfigMap is Empty!!!");
             }
             Map<BusinessEntity, List<DataFeedImport>> entityImportsMap = new HashMap<>();
-            execution.getImports().stream().forEach(i -> {
+            for (DataFeedImport i : execution.getImports()) {
                 BusinessEntity entity = BusinessEntity.valueOf(i.getEntity());
                 entityImportsMap.putIfAbsent(entity, new ArrayList<>());
                 entityImportsMap.get(entity).add(i);
+                if (!getJson().has(entity.name())) {
+                    getJson().put(entity.name(), 0);
+                }
+                getJson().put(entity.name(), getJson().get(entity.name()).asLong()
+                        + i.getDataTable().getExtracts().get(0).getProcessedRecords());
                 stepConfigMap.entrySet().stream().filter(e -> (e.getValue() instanceof ConsolidateDataBaseConfiguration
                         && ((ConsolidateDataBaseConfiguration) e.getValue()).getBusinessEntity().equals(entity)))
                         .forEach(e -> {
                             log.info("enabling consolidate step:" + e.getKey());
                             e.getValue().setSkipStep(false);
                             putObjectInContext(e.getKey(), e.getValue());
-                            getJson().put(entity.name(), i.getDataTable().getExtracts().get(0).getProcessedRecords());
                         });
-            });
+            }
             putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);
             super.execute();
         }
