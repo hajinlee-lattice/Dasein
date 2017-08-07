@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -78,10 +77,6 @@ public class LatticeIdRefreshTransformer
             log.error("LatticeIdStrategy name is not provided");
             return false;
         }
-        if (CollectionUtils.isEmpty(sourceNames) || sourceNames.size() != 2) {
-            log.error("Number of base sources must be 2");
-            return false;
-        }
         if (config.getIdSrcIdx() == null || config.getEntitySrcIdx() == null) {
             log.error("Please provide index of ID source and Entity source in base source list");
             return false;
@@ -95,7 +90,7 @@ public class LatticeIdRefreshTransformer
         if (strategy == null) {
             throw new RuntimeException("Fail to find LatticeIdStrategy with name " + config.getStrategy());
         }
-        initLatticeId(strategy, sourceNames.get(config.getIdSrcIdx()));
+        initLatticeId(strategy, sourceNames.get(sourceNames.size() > 1 ? config.getIdSrcIdx() : 0));
     }
 
     private void initLatticeId(LatticeIdStrategy strategy, String sourceName) {
