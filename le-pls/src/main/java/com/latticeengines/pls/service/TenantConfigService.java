@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
+import com.latticeengines.domain.exposed.pls.TenantConfiguration;
 
 public interface TenantConfigService {
 
@@ -22,4 +23,6 @@ public interface TenantConfigService {
     List<LatticeProduct> getProducts(String tenantId);
 
     int getMaxPremiumLeadEnrichmentAttributes(String tenantId);
+
+    TenantConfiguration getTenantConfiguration();
 }

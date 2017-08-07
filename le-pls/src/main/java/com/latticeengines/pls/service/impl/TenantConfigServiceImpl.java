@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
+import com.latticeengines.domain.exposed.pls.TenantConfiguration;
 import com.latticeengines.domain.exposed.pls.TenantDeployment;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.DefaultFeatureFlagProvider;
@@ -150,6 +153,19 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     @Override
     public int getMaxPremiumLeadEnrichmentAttributes(String tenantId) {
         return commonTenantConfigService.getMaxPremiumLeadEnrichmentAttributes(tenantId);
+    }
+
+    @Override
+    public TenantConfiguration getTenantConfiguration() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        FeatureFlagValueMap featureFlagValueMap = getFeatureFlags(tenant.getId());
+        List<LatticeProduct> products = getProducts(tenant.getId());
+
+        TenantConfiguration tenantConfiguration = new TenantConfiguration();
+        tenantConfiguration.setFeatureFlagValueMap(featureFlagValueMap);
+        tenantConfiguration.setProducts(products);
+
+        return tenantConfiguration;
     }
 
     private FeatureFlagValueMap combineDefaultFeatureFlags(FeatureFlagValueMap flags) {
