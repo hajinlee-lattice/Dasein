@@ -79,7 +79,8 @@ public class UserResource {
             filter = new UserFilter() {
                 @Override
                 public boolean visible(User user) {
-                    if (StringUtils.isEmpty(user.getAccessLevel())) return false;
+                    if (StringUtils.isEmpty(user.getAccessLevel()))
+                        return false;
                     AccessLevel level = AccessLevel.valueOf(user.getAccessLevel());
                     return level.equals(AccessLevel.EXTERNAL_USER) || level.equals(AccessLevel.EXTERNAL_ADMIN);
                 }
@@ -99,7 +100,7 @@ public class UserResource {
     @ApiOperation(value = "Register or validate a new user in the current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg,
-                                                         HttpServletRequest request, HttpServletResponse httpResponse) {
+            HttpServletRequest request, HttpServletResponse httpResponse) {
         ResponseDocument<RegistrationResult> response = new ResponseDocument<>();
         response.setSuccess(false);
 
@@ -118,6 +119,9 @@ public class UserResource {
             targetLevel = AccessLevel.valueOf(userReg.getUser().getAccessLevel());
         }
         if (!userService.isSuperior(loginLevel, targetLevel)) {
+            LOGGER.warn(
+                    String.format("User %s at level %s attempts to create a user at level %s, which is not allowed.",
+                            loginUsername, loginLevel, targetLevel));
             httpResponse.setStatus(403);
             response.setErrors(Collections.singletonList("Cannot create a user with higher access level."));
             return response;
@@ -125,10 +129,11 @@ public class UserResource {
 
         RegistrationResult result = userService.registerUserToTenant(uRegTenant);
         response.setResult(result);
-        if (!result.isValid()) return response;
+        if (!result.isValid())
+            return response;
 
-        LOGGER.info(String.format("%s registered %s as a new user in tenant %s",
-                loginUsername, user.getUsername(), tenant.getId()));
+        LOGGER.info(String.format("%s registered %s as a new user in tenant %s", loginUsername, user.getUsername(),
+                tenant.getId()));
 
         String tempPass = result.getPassword();
         if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
@@ -147,12 +152,12 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Update password of user")
     public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data,
-                                                   HttpServletRequest request) {
+            HttpServletRequest request) {
         username = userService.getURLSafeUsername(username).toLowerCase();
         try {
             User user = SecurityUtils.getUserFromRequest(request, sessionService, userService);
             if (!user.getUsername().equals(username)) {
-                throw new LedpException(LedpCode.LEDP_18001, new String[]{username});
+                throw new LedpException(LedpCode.LEDP_18001, new String[] { username });
             }
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
@@ -179,10 +184,8 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Update users")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public SimpleBooleanResponse update(@PathVariable String username,
-                                        @RequestBody UserUpdateData data,
-                                        HttpServletRequest request,
-                                        HttpServletResponse response) {
+    public SimpleBooleanResponse update(@PathVariable String username, @RequestBody UserUpdateData data,
+            HttpServletRequest request, HttpServletResponse response) {
         username = userService.getURLSafeUsername(username).toLowerCase();
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
@@ -198,18 +201,16 @@ public class UserResource {
             if (!userService.isSuperior(loginLevel, targetLevel)) {
                 response.setStatus(403);
                 return SimpleBooleanResponse.failedResponse(
-                        Collections.singletonList("Cannot update to a level higher than that of the login user.")
-                );
+                        Collections.singletonList("Cannot update to a level higher than that of the login user."));
             }
 
             boolean newUser = !userService.inTenant(tenantId, username);
             userService.assignAccessLevel(targetLevel, tenantId, username);
-            LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s",
-                    loginUsername, targetLevel.name(), username, tenantId));
+            LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
+                    targetLevel.name(), username, tenantId));
             User user = userService.findByUsername(username);
             if (newUser && user != null) {
-                if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) ||
-                        targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
+                if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
                     emailService.sendPlsExistingExternalUserEmail(tenant, user, apiPublicUrl,
                             !tenantService.getTenantEmailFlag(tenant.getId()));
                     tenantService.updateTenantEmailFlag(tenant.getId(), true);
@@ -221,9 +222,8 @@ public class UserResource {
 
         // update other information
         if (!userService.inTenant(tenantId, username)) {
-            return SimpleBooleanResponse.failedResponse(
-                    Collections.singletonList("Cannot update users in another tenant.")
-            );
+            return SimpleBooleanResponse
+                    .failedResponse(Collections.singletonList("Cannot update users in another tenant."));
         }
 
         return SimpleBooleanResponse.successResponse();
@@ -234,7 +234,7 @@ public class UserResource {
     @ApiOperation(value = "Delete a user. The user must be in the tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public SimpleBooleanResponse deleteUser(@PathVariable String username, HttpServletRequest request,
-                                            HttpServletResponse response) {
+            HttpServletResponse response) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
 
@@ -246,12 +246,10 @@ public class UserResource {
 
         if (userService.inTenant(tenantId, username)) {
             AccessLevel targetLevel = userService.getAccessLevel(tenantId, username);
-            if (!userService.isSuperior(loginLevel,  targetLevel)) {
+            if (!userService.isSuperior(loginLevel, targetLevel)) {
                 response.setStatus(403);
-                return SimpleBooleanResponse.failedResponse(
-                        Collections.singletonList(
-                                String.format("Could not delete a %s user using a %s user.",
-                                        targetLevel.name(), loginLevel.name())));
+                return SimpleBooleanResponse.failedResponse(Collections.singletonList(String
+                        .format("Could not delete a %s user using a %s user.", targetLevel.name(), loginLevel.name())));
             }
             userService.deleteUser(tenantId, username);
             LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, username, tenantId));

@@ -97,7 +97,7 @@ public class RestActiveDirectoryFilter extends AbstractAuthenticationTokenFilter
         oNode.putArray("Roles");
         ArrayNode aNode = (ArrayNode) oNode.get("Roles");
         for (GrantedAuthority right : rights) {
-            aNode.add(right.getAuthority());
+            aNode.add(removeRolePrefix(right.getAuthority()));
         }
         return oNode.toString();
     }
@@ -113,7 +113,7 @@ public class RestActiveDirectoryFilter extends AbstractAuthenticationTokenFilter
         }
         List<GrantedAuthority> rights = new ArrayList<>();
         for (int i = 2; i < tokens.length; i++) {
-            rights.add(new SimpleGrantedAuthority(tokens[i]));
+            rights.add(new SimpleGrantedAuthority(addRolePrefix(tokens[i])));
         }
         return new UsernamePasswordAuthenticationToken(tokens[0], null, rights);
     }

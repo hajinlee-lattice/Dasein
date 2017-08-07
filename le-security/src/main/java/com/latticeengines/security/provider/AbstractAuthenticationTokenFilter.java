@@ -16,6 +16,8 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 
 public abstract class AbstractAuthenticationTokenFilter extends AbstractAuthenticationProcessingFilter {
 
+    private static final String ROLE_PREFIX = "ROLE_";
+
     protected AbstractAuthenticationTokenFilter() {
         super("/token_filter");
     }
@@ -40,6 +42,22 @@ public abstract class AbstractAuthenticationTokenFilter extends AbstractAuthenti
         }
         this.successfulAuthentication(request, response, chain, authResult);
         chain.doFilter(request, response);
+    }
+
+    public static String addRolePrefix(String authority) {
+        if (!authority.startsWith(ROLE_PREFIX)) {
+            return String.format("%s%s", ROLE_PREFIX, authority);
+        } else {
+            return authority;
+        }
+    }
+
+    protected static String removeRolePrefix(String role) {
+        if (role.startsWith(ROLE_PREFIX)) {
+            return role.substring(ROLE_PREFIX.length());
+        } else {
+            return role;
+        }
     }
 
 }

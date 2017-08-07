@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
@@ -32,7 +33,7 @@ public class GASessionCache {
                 .expireAfterWrite(cacheExpiration, TimeUnit.SECONDS).build(new CacheLoader<String, Session>() {
                     @Override
                     public Session load(String token) throws Exception {
-                        try {
+                        try (PerformanceTimer timer = new PerformanceTimer("Retrieve session from GA.")) {
                             log.info("Loading session from GA to cache for token " + token);
                             Ticket ticket = new Ticket(token);
                             Long retryInterval = retryIntervalMsec;

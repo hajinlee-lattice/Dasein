@@ -1,9 +1,11 @@
 package com.latticeengines.security.provider.globalauth;
 
+import static com.latticeengines.security.provider.AbstractAuthenticationTokenFilter.addRolePrefix;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +14,13 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -48,16 +50,11 @@ public class GlobalAuthProvider implements AuthenticationProvider {
                 }
 
             }
-            try {
-                if (StringUtils.isNotEmpty(session.getAccessLevel())) {
-                    rights.add(AccessLevel.valueOf(session.getAccessLevel()));
-                }
-            } catch (Exception e) {
-                throw new IllegalArgumentException(
-                        "Cannot understand access level " + session.getAccessLevel() + " in the session", e);
-            }
+            List<GrantedAuthority> authoritiesWithPrefix = rights.stream() //
+                    .map(auth -> new SimpleGrantedAuthority(addRolePrefix(auth.getAuthority()))) //
+                    .collect(Collectors.toList());
             TicketAuthenticationToken token = new TicketAuthenticationToken( //
-                    authentication.getPrincipal(), ticket, rights);
+                    authentication.getPrincipal(), ticket, authoritiesWithPrefix);
             token.setSession(session);
             token.setAuthenticated(true);
 

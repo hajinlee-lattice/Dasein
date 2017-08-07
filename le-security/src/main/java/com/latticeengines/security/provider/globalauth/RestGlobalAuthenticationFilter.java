@@ -11,7 +11,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -28,15 +27,13 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationTokenF
 
         String methodName = String.format("RestGlobalAuthenticationFilter.attemptAuthentication [%s]",
                 request.getRequestURI());
-        try (PerformanceTimer timer = new PerformanceTimer(methodName)) {
-            String ticket = request.getHeader(Constants.AUTHORIZATION);
-            detectSessionCacheDirtiness(request);
-            if (ticket == null) {
-                throw new BadCredentialsException("Unauthorized.");
-            }
-            TicketAuthenticationToken authRequest = new TicketAuthenticationToken(null, ticket);
-            return this.getAuthenticationManager().authenticate(authRequest);
+        String ticket = request.getHeader(Constants.AUTHORIZATION);
+        detectSessionCacheDirtiness(request);
+        if (ticket == null) {
+            throw new BadCredentialsException("Unauthorized.");
         }
+        TicketAuthenticationToken authRequest = new TicketAuthenticationToken(null, ticket);
+        return this.getAuthenticationManager().authenticate(authRequest);
     }
 
     @SuppressWarnings("deprecation")
