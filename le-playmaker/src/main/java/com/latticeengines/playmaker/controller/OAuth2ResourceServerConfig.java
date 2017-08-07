@@ -53,11 +53,11 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/playmaker/configuration/**")
                 .and().authorizeRequests()
                 .antMatchers("/playmaker/health", "/health").permitAll() //
-                .antMatchers("/playmaker/**")
-                .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_CLIENT'))") //
                 .antMatchers(HttpMethod.POST, "/tenants", "/playmaker/tenants").permitAll() //
                 .antMatchers("/tenants/**", "/playmaker/tenants/**")
                 .access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))") //
+                .antMatchers("/playmaker/**")
+                .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_CLIENT'))") //
                 .antMatchers("/v2/api-docs", "/swagger-ui.html", "/webjars/**", "/**/favicon.ico", "/swagger-resources",
                         "/configuration/**")
                 .permitAll() //
