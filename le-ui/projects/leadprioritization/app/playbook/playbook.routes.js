@@ -281,6 +281,7 @@ angular
                         },
                         button_goto_sref: 'home.playbook',
                         disable_create_button: true,
+                        disable_cancel_button: true,
                         disable_steps: true,
                         disable_view_report: true
                     };

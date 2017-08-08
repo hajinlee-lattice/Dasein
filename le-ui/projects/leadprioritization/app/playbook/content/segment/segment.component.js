@@ -14,6 +14,7 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
     vm.init = function() {
         PlaybookWizardStore.setValidation('segment', false);
         if($stateParams.play_name) {
+            PlaybookWizardStore.setValidation('settings', true);
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
                 vm.savedSegment = play.segment;
                 vm.stored.segment_selection = play.segment;

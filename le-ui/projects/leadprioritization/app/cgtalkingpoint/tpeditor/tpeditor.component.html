@@ -7,7 +7,9 @@
             <button class="button white-button delete-button" ng-click="vm.deleteClick($event,true)">&times;</button>
         </div>
         <div ng-if="vm.deleteClicked" class="tp-delete-confirm">
-            Delete Talking Point? <button class="button orange-button" ng-click="onDelete()">Delete</button><button class="button white-button" ng-click="vm.deleteClick($event,false)">Cancel</button>
+            Delete Talking Point? 
+            <button class="button orange-button" ng-click="onDelete()">Delete</button>
+            <button class="button white-button" ng-click="vm.deleteClick($event,false)">Cancel</button>
         </div>
         <div class="tinymce-container">
             <textarea class="form-control" ng-model="tp.content" ui-tinymce="vm.tinyMceConfig"></textarea>

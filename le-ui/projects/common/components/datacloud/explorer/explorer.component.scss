@@ -201,6 +201,9 @@
             -webkit-flex-wrap: wrap;
             -ms-flex-wrap: wrap;
             flex-wrap: wrap;
+            * {
+                transition: none;
+            }
             .category {
                 @include flex-item(0 0 auto);
                 width: $box-width;

@@ -2,20 +2,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 .service('CgTalkingPointStore', function($q, CgTalkingPointService) {
     var CgTalkingPointStore = this;
 
-    this.danteUrl = null;
-    this.accounts = null;
-    this.danteAccounts = null;
-    this.attributes = null;
-    this.talkingPoints = [];
-    this.talkingPointsPreviewResources = null;
-    this.editedTalkingPoint = {};
-
-    this.saving = false;
-    this.saveOnBlur = true;
-
-    this.savedTalkingPoints = null;
-
-    this.clear = function() {
+    this.init = function() {
         this.danteUrl = null;
         this.accounts = null;
         this.danteAccounts = null;
@@ -23,7 +10,17 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         this.talkingPoints = [];
         this.talkingPointsPreviewResources = null;
         this.editedTalkingPoint = {};
+
         this.savedTalkingPoints = null;
+        this.deleteClicked = false;
+    };
+    this.init();
+
+    this.saving = false;
+    this.saveOnBlur = true;
+
+    this.clear = function() {
+        this.init();
     }
 
     this.setEditedTalkingPoint = function(talkingPoint, propertyName) {
@@ -42,6 +39,9 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     };
 
     this.isTalkingPointDirty = function(talkingPoint) {
+        if(!talkingPoint) {
+            return false;
+        }
         var talkingPoint = angular.copy(talkingPoint),
             dirty = false,
             check = [
@@ -54,20 +54,22 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
                 return false; // hack to not let it pass this test if it's new and doesn't have a title
             }
             return true; // "dirty"
+
         }
+
         // get the current talking point from the reference of saved talking points (i.e. not talking points from the mutable object)
         for(var i in this.savedTalkingPoints) {
             var currentTalkingPoint = this.savedTalkingPoints[i];
             if(currentTalkingPoint.name === talkingPoint.name) {
-                var foundCurrentTalkingPoint = angular.copy(currentTalkingPoint),
-                    newTalkingPoint = angular.copy(talkingPoint);
+                var foundCurrentTalkingPoint = currentTalkingPoint;
                 break;
             }
         }
+
         // just check from a whitelist to see if the properties are equal
         for(var i in check) {
             property = check[i];
-            if(foundCurrentTalkingPoint[property] !== newTalkingPoint[property]) {
+            if(foundCurrentTalkingPoint[property] !== talkingPoint[property]) {
                 dirty = true;
                 break;
             }

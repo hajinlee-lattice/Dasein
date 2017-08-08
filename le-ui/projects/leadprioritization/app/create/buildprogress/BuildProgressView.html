@@ -135,7 +135,7 @@
 
             <div class="container section-actions">
                 <div class="pull-left section-actions-tertiary" ng-if="jobStatus === 'Running' && jobId">
-                    <button class="button white-button" type="button" ng-click="cancelJob($event, jobId)">
+                    <button class="button white-button" type="button" ng-click="cancelJob($event, jobId)" ng-if="!config.disable_cancel_button">
                         {{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}
                     </button>
                 </div>
