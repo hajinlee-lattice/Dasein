@@ -51,8 +51,10 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Test(groups = "functional")
     public void testSimpleRealTimeBulkMatchRTSCache() {
-        Object[][] data = new Object[][] {
-                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
+        Object[][] data = new Object[][] { //
+                { 123, null, "Chevron Corporation", null, null, "USA" },
+                { 456, null, "Chevron Corporation", "San Ramon", "California", "USA" },
+                { 789, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
         List<MatchInput> inputs = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
             MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
@@ -66,7 +68,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
 
         MatchOutput output = bulkMatchOutput.getOutputList().get(0);
         Assert.assertNotNull(output.getResult());
-        Assert.assertEquals(output.getResult().size(), 1);
+        Assert.assertEquals(output.getResult().size(), 3);
     }
 
     @Test(groups = "functional")
