@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +71,10 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private long launchTimestampMillis;
 
+    private long segmentAccountsCount = Long.MAX_VALUE;
+
+    private int processedSegmentAccountsCount = 0;
+
     @Override
     public void execute() {
         Tenant tenant = null;
@@ -117,7 +122,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
 
-        long segmentAccountsCount = accountProxy.getAccountsCount(tenant.getId(), segmentRestriction);
+        segmentAccountsCount = accountProxy.getAccountsCount(tenant.getId(), segmentRestriction);
         log.info("Total records in segment: " + segmentAccountsCount);
 
         if (segmentAccountsCount > 0) {
@@ -137,28 +142,34 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                     PlaymakerConstants.CdlKeyDisplayName, //
                     PlaymakerConstants.CdlKeyCrmAccount_External_ID };
 
-            long alreadyReadAccounts = 0;
-
             for (int loopId = 0; loopId < numberOfLoops; loopId++) {
                 log.info("Loop #" + loopId);
 
-                int expectedPageSize = (int) Math.min(pageSize * 1L, (segmentAccountsCount - alreadyReadAccounts));
+                int expectedPageSize = (int) Math.min(pageSize * 1L,
+                        (segmentAccountsCount - processedSegmentAccountsCount));
                 DataPage accountPage = accountProxy.getAccounts(tenant.getId(), segmentRestriction,
-                        (int) alreadyReadAccounts, expectedPageSize, fields);
+                        (int) processedSegmentAccountsCount, expectedPageSize, fields);
 
                 log.info("Got #" + accountPage.getData().size() + " elements in this loop");
 
                 List<Map<String, Object>> accountList = accountPage.getData();
-                alreadyReadAccounts += accountList.size();
 
-                for (Map<String, Object> account : accountList) {
-                    // Recommendation recommendation =
-                    // createDummyRecommendation(tenant, playLauch, config);
+                if (CollectionUtils.isNotEmpty(accountList)) {
 
-                    Recommendation recommendation = createRecommendation(tenant, playLauch, config, account);
-                    recommendationService.create(recommendation);
+                    Stream<Map<String, Object>> parallelStream = //
+                            accountList.stream() //
+                                    .parallel();
+
+                    parallelStream//
+                            .map(account -> {
+                                Recommendation recommendation = //
+                                        createRecommendation(tenant, playLauch, config, account);
+                                recommendationService.create(recommendation);
+                                return null;
+                            });
                 }
 
+                processedSegmentAccountsCount += accountList.size();
             }
         }
 
