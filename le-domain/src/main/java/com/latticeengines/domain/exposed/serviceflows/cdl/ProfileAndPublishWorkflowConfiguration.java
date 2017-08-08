@@ -22,11 +22,17 @@ public class ProfileAndPublishWorkflowConfiguration extends BaseCDLWorkflowConfi
         private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("profileAndPublishWorkflow", customerSpace, "profileAndPublishWorkflow");
+            configuration.setContainerConfiguration("profileAndPublishWorkflow", customerSpace,
+                    "profileAndPublishWorkflow");
             calculateStatsConfiguration.setCustomerSpace(customerSpace);
             sortContactConfiguration.setCustomerSpace(customerSpace);
             updateStatsObjectsConfiguration.setCustomerSpace(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
+            return this;
+        }
+
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 

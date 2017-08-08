@@ -1,8 +1,5 @@
 package com.latticeengines.apps.cdl.workflow;
 
-import java.util.Collections;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -14,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -126,14 +122,6 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .build()) //
                 .accountIdField(InterfaceName.LEAccountIDLong.name()) //
                 .contactIdField(InterfaceName.LEContactIDLong.name()) //
-                .matchKeyMap(ImmutableMap.<MatchKey, List<String>> builder() //
-                        .put(MatchKey.Domain, Collections.singletonList(InterfaceName.Website.name())) //
-                        .put(MatchKey.Name, Collections.singletonList("DisplayName")) //
-                        .put(MatchKey.City, Collections.singletonList(InterfaceName.City.name())) //
-                        .put(MatchKey.State, Collections.singletonList(InterfaceName.State.name())) //
-                        .put(MatchKey.Country, Collections.singletonList(InterfaceName.Country.name())) //
-                        .put(MatchKey.Zipcode, Collections.singletonList(InterfaceName.PostalCode.name())) //
-                        .build()) //
                 .workflowContainerMem(workflowMemMb) //
                 .build();
     }

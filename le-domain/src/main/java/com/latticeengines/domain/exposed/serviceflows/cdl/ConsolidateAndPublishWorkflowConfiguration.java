@@ -36,13 +36,13 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            startExecutionConfiguration.setMicroServiceHostPort(microServiceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             startExecutionConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 

@@ -61,6 +61,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         createNew = configuration.getHdfsToRedshiftConfiguration().isCreateNew();
         if (entityTableMap == null) {
             entityTableMap = configuration.getSourceTables();
+            putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
         }
         for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
             String targetName = renameTable(entry);

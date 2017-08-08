@@ -51,8 +51,8 @@ public class MetadataConverter {
         }
     }
 
-    public static Table getBucketedTableFromSchemaPath(Configuration configuration, String avroPath, String avscPath, String primaryKeyName,
-            String lastModifiedKeyName) {
+    public static Table getBucketedTableFromSchemaPath(Configuration configuration, String avroPath, String avscPath,
+            String primaryKeyName, String lastModifiedKeyName) {
         try {
             @SuppressWarnings("deprecation")
             Schema schema = Schema.parse(HdfsUtils.getInputStream(configuration, avscPath));
@@ -60,7 +60,8 @@ public class MetadataConverter {
             Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, true);
             return table;
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Failed to parse metadata for avro file located at %s, using avsc at %s", avroPath, avscPath), e);
+            throw new RuntimeException(String.format(
+                    "Failed to parse metadata for avro file located at %s, using avsc at %s", avroPath, avscPath), e);
         }
     }
 
@@ -81,6 +82,7 @@ public class MetadataConverter {
                 extract.setExtractionTimestamp(fs.getFileStatus(new Path(match)).getModificationTime());
             }
             extract.setName("extract");
+            extract.setProcessedRecords(AvroUtils.count(configuration, match));
             extracts.add(extract);
             if (isDirectory) {
                 extract.setPath(avroPath);

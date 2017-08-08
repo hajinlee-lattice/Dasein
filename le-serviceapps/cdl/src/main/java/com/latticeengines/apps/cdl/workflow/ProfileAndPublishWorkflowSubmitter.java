@@ -96,6 +96,7 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         return new ProfileAndPublishWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
+                .internalResourceHostPort(internalResourceHostPort) //
                 .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName()) //

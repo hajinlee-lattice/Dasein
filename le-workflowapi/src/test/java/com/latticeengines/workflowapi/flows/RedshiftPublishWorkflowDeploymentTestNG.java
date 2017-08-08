@@ -1,5 +1,8 @@
 package com.latticeengines.workflowapi.flows;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,14 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
@@ -24,6 +28,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RedshiftPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
@@ -73,11 +80,13 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         builder.enforceTargetTableName(targetTableName);
         builder.customer(mainTestCustomerSpace);
         builder.microServiceHostPort(microserviceHostPort);
+        builder.internalResourceHostPort(internalResourceHostPort);
         RedshiftPublishWorkflowConfiguration config = builder.build();
 
         WorkflowExecutionId workflowId = workflowService.start(config);
         waitForCompletion(workflowId);
         verify(targetTableName, 122);
+        verifyReport(workflowId, ReportPurpose.PUBLISH_DATA_SUMMARY, 122);
         HdfsUtils.rmdir(yarnConfiguration, dest);
         metadataProxy.deleteTable(mainTestCustomerSpace.toString(), targetTableName);
     }
@@ -100,12 +109,25 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         builder.enforceTargetTableName(targetTableName);
         builder.sourceTables(sourceTables);
         builder.customer(mainTestCustomerSpace);
+        builder.internalResourceHostPort(internalResourceHostPort);
         builder.microServiceHostPort(microserviceHostPort);
         RedshiftPublishWorkflowConfiguration config = builder.build();
         WorkflowExecutionId workflowId = workflowService.start(config);
         waitForCompletion(workflowId);
         verify(targetTableName, 239);
+        verifyReport(workflowId, ReportPurpose.PUBLISH_DATA_SUMMARY, 239);
         HdfsUtils.rmdir(yarnConfiguration, dest);
+    }
+
+    private void verifyReport(WorkflowExecutionId workflowId, ReportPurpose purpose, int count) {
+        Job job = workflowService.getJob(workflowId);
+        Report publishDataReport = job.getReports().stream()
+                .filter(r -> r.getPurpose().equals(ReportPurpose.PUBLISH_DATA_SUMMARY)).findFirst().orElse(null);
+        assertNotNull(publishDataReport);
+        Map<String, Integer> map = JsonUtils.deserialize(publishDataReport.getJson().getPayload(),
+                new TypeReference<Map<String, Integer>>() {
+                });
+        assertEquals(map.get("Published_Account").intValue(), count);
     }
 
     private HdfsToRedshiftConfiguration createExportBaseConfig() {
@@ -121,7 +143,8 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
     private void verify(String table, int size) {
         String sql = String.format("SELECT * FROM %s LIMIT 1000", table);
         List<Map<String, Object>> results = redshiftJdbcTemplate.queryForList(sql);
-        Assert.assertEquals(results.size(), size, "Got " + results.size() + " results in stead of " + size + " by querying [" + sql + "]");
+        assertEquals(results.size(), size,
+                "Got " + results.size() + " results in stead of " + size + " by querying [" + sql + "]");
     }
 
 }

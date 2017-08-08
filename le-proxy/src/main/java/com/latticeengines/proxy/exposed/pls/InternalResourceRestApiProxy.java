@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
 public class InternalResourceRestApiProxy extends BaseRestApiProxy {
@@ -513,5 +514,14 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public Restriction getSegmentRestrictionQuery(CustomerSpace customerSpace, String segmentName) {
         String url = constructUrl("pls/internal/segment/" + segmentName + "/restriction", customerSpace.toString());
         return restTemplate.getForObject(url, Restriction.class);
+    }
+
+    public Report findReportByName(CustomerSpace customerSpace, String reportName) {
+        try {
+            String url = constructUrl("pls/internal/reports/" + reportName + "/" + customerSpace.toString());
+            return restTemplate.getForObject(url, Report.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getReport: Remote call failure: " + e.getMessage(), e);
+        }
     }
 }

@@ -71,6 +71,10 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             "rtsBulkScoreWorkflow", //
             "scoreWorkflow");
 
+    private static Set<ReportPurpose> reports = Sets.newHashSet( //
+            ReportPurpose.IMPORT_DATA_SUMMARY, //
+            ReportPurpose.PUBLISH_DATA_SUMMARY);
+
     private static Splitter nameSplitter = Splitter.on(JobNameServiceImpl.JOBNAME_DELIMITER).trimResults()
             .omitEmptyStrings();
 
@@ -266,7 +270,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             }
         }
         List<Report> reports = job.getReports();
-        Optional.of(reports.stream().filter(r -> r.getPurpose().equals(ReportPurpose.IMPORT_DATA_SUMMARY))
+        Optional.of(reports.stream().filter(reports::contains)
                 .map(r -> JsonUtils.deserialize(r.getJson().getPayload(), new TypeReference<Map<String, Object>>() {
                 }))).ifPresent(map -> fieldMap.putAll(map.findFirst().orElse(Collections.emptyMap())));
         return fieldMap;
