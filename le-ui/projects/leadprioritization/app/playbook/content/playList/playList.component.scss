@@ -105,10 +105,12 @@
 				padding: 6px 10px;
 				text-transform: none;
 			}
-			// .launch-success {
-			// 	background: url('/assets/images/ico-insights.png') no-repeat right;
-			// 	padding-right: 20px;
-			// }
+			.launch-success i {
+				color: #70bf4a;
+				display: inline-block;
+				margin-left: 4px;
+				font-size: 17px;
+			}
 		}
 		&.editing {
 			&:hover {

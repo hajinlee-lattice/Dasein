@@ -10,9 +10,6 @@
                             class="fa fa-search" 
                             ng-show="!vm.search.length && !vm.loading"></span>
                         <span 
-                            class="fa fa-spinner fa-pulse fw"
-                            ng-show="vm.loading"></span>
-                        <span 
                             class="fa fa-times" 
                             ng-show="vm.search.length && !vm.loading"></span>
                     </a>
@@ -71,7 +68,8 @@
             <tr 
                 ng-repeat="     account in vm.accounts | 
                                 orderBy:sortType:sortReverse | 
-                                filter:vm.search">
+                                filter:vm.search"
+                 ng-show="!vm.loading">
 
                 <td><span class="blue-text">{{account.LDC_Name}}</span></td>
                 <td><span class="blue-text">{{account.LDC_Domain}}</span></td>

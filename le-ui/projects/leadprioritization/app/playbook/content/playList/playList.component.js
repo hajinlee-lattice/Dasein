@@ -62,7 +62,8 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
         angular.forEach(PlayList, function(play) {
             vm.tileStates[play.name] = {
                 showCustomMenu: false,
-                editSegment: false
+                editSegment: false,
+                launching: false
             };
 
             if(play.segment != null) {
@@ -70,8 +71,6 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
             }
 
         });
-        
-        //console.log(vm.plays);
 
     }
     vm.init();
@@ -130,7 +129,6 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
     };
 
     vm.savePlayClicked = function($event, play) {
-
         $event.stopPropagation();
 
         vm.saveInProgress = true;
@@ -144,6 +142,18 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
         updatePlay(updatedPlay);
     };
 
+    vm.launchPlay = function($event, play) {
+
+        $event.stopPropagation();
+
+        var tileState = vm.tileStates[play.name];
+        tileState.launching = !tileState.launching;
+
+        PlaybookWizardStore.launchPlay(play).then(function(data) {
+            $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
+        });
+
+    }
 
     vm.showDeletePlayModalClick = function($event, play){
 

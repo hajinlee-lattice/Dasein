@@ -122,6 +122,8 @@ angular.module('common.datacloud.query.service',[
 
         } else {
 
+            this.setSegment(segment);
+
             // default state. restriction is empty.
             deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );
 

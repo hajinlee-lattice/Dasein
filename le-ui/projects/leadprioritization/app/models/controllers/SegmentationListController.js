@@ -105,7 +105,7 @@ angular.module('lp.models.segments', [
         if (vm.modelId) {
             $state.go('home.model.analysis');
         } else {
-            $state.go('home.segment', {segment: 'Create'});
+            $state.go('home.segment.explorer.attributes', {segment: 'Create'});
         }
     };
 

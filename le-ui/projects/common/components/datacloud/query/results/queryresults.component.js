@@ -86,6 +86,11 @@ angular.module('common.datacloud.query.results', [
         });
     };
 
+    $scope.$watch('vm.current', function(newValue, oldValue) {
+        vm.loading = true;
+        updatePage();
+    });
+
     $scope.$watch('vm.search', function (tmpStr){
       console.log(tmpStr);
       if (!tmpStr || tmpStr.length == 0)
@@ -106,8 +111,9 @@ angular.module('common.datacloud.query.results', [
             }
         };
 
-        QueryStore.setAccounts(query).then(function(){
-            vm.loading = false;    
+        QueryStore.setAccounts(query, $stateParams.segment).then(function(response){
+            vm.accounts = response.data;
+            vm.loading = false;
         });
 
     };
