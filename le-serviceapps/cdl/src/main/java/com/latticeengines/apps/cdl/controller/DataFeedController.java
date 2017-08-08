@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "datafeeds", description = "Controller of data feed operations.")
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/datacollection/datafeed")
-public class DataFeedController extends InternalResourceBase {
+public class DataFeedController {
 
     private final ConsolidateAndPublishWorkflowSubmitter consolidateAndPublishWorkflowSubmitter;
 

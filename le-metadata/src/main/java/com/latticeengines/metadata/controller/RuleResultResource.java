@@ -1,11 +1,6 @@
 package com.latticeengines.metadata.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +15,9 @@ import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.metadata.service.ModelReviewService;
 import com.latticeengines.metadata.service.RuleResultService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "metadata", description = "REST resource for rule result artifacts")
 @RestController
@@ -37,8 +35,7 @@ public class RuleResultResource {
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create column rule results")
-    public Boolean createColumnResults(@RequestBody List<ColumnRuleResult> columnResults, //
-            HttpServletRequest request) {
+    public Boolean createColumnResults(@RequestBody List<ColumnRuleResult> columnResults) {
         ruleResultService.createColumnResults(columnResults);
         return true;
     }
@@ -48,8 +45,7 @@ public class RuleResultResource {
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create row rule results")
-    public Boolean createRowResults(@RequestBody List<RowRuleResult> rowResults, //
-            HttpServletRequest request) {
+    public Boolean createRowResults(@RequestBody List<RowRuleResult> rowResults) {
         ruleResultService.createRowResults(rowResults);
         return true;
     }
@@ -59,8 +55,7 @@ public class RuleResultResource {
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of column results")
-    public List<ColumnRuleResult> getColumnResults(@PathVariable String modelId, //
-            HttpServletRequest request) {
+    public List<ColumnRuleResult> getColumnResults(@PathVariable String modelId) {
         return ruleResultService.findColumnResults(modelId);
     }
 
@@ -69,8 +64,7 @@ public class RuleResultResource {
     headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of row results")
-    public List<RowRuleResult> getRowResults(@PathVariable String modelId, //
-            HttpServletRequest request) {
+    public List<RowRuleResult> getRowResults(@PathVariable String modelId) {
         return ruleResultService.findRowResults(modelId);
     }
 

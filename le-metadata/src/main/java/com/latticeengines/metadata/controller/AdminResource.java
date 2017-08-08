@@ -1,7 +1,5 @@
 package com.latticeengines.metadata.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +14,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.MetadataProvisioningService;
 import com.latticeengines.metadata.service.MetadataService;
-import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,7 +21,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "admin", description = "REST resource for provisioning metadata component")
 @RestController
 @RequestMapping(value = "/admin")
-public class AdminResource extends InternalResourceBase {
+public class AdminResource {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(AdminResource.class);
@@ -38,8 +35,7 @@ public class AdminResource extends InternalResourceBase {
     @RequestMapping(value = "/provision", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Provision Import Tables")
-    public Boolean provisionImportTables(@RequestBody Tenant tenant, HttpServletRequest request) {
-        checkHeader(request);
+    public Boolean provisionImportTables(@RequestBody Tenant tenant) {
         CustomerSpace space = CustomerSpace.parse(tenant.getId());
         if (CollectionUtils.isEmpty(mdService.getImportTables(space))) {
             metadataProvisioningService.provisionImportTables(space);

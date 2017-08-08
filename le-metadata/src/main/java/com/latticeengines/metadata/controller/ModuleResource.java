@@ -1,7 +1,5 @@
 package com.latticeengines.metadata.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +27,7 @@ public class ModuleResource {
     @ResponseBody
     @ApiOperation(value = "Get Module")
     public Module getModule(@PathVariable String customerSpace, //
-            @PathVariable String moduleName, //
-            HttpServletRequest request) {
+            @PathVariable String moduleName) {
         return moduleService.getModuleByName(customerSpace, moduleName);
     }
 }

@@ -2,8 +2,6 @@ package com.latticeengines.datacloudapi.api.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +17,7 @@ import com.latticeengines.datacloudapi.engine.transformation.service.SourceTrans
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.TransformationRequest;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
-import com.latticeengines.network.exposed.propdata.TransformationInterface;
-import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,39 +26,17 @@ import springfox.documentation.annotations.ApiIgnore;
 @Api(value = "transform", description = "REST resource for source transformation")
 @RestController
 @RequestMapping("/transformations")
-public class TransformationResource extends InternalResourceBase implements TransformationInterface {
+public class TransformationResource {
 
     @Autowired
     private SourceTransformationService sourceTransformationService;
-
-    @Override
-    public List<TransformationProgress> scan(String hdfsPod) {
-        throw new UnsupportedOperationException("This is a place holder of a proxy method.");
-    }
-
-    @Override
-    public TransformationProgress transform(TransformationRequest transformationRequest, String hdfsPod) {
-        throw new UnsupportedOperationException("This is a place holder of a proxy method.");
-    }
-
-    @Override
-    public TransformationProgress transform(PipelineTransformationRequest transformationRequest, String hdfsPod) {
-        throw new UnsupportedOperationException("This is a place holder of a proxy method.");
-    }
-
-    @Override
-    public TransformationProgress getProgress(String rootOperationUid) {
-        throw new UnsupportedOperationException("This is a place holder of a proxy method.");
-    }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Scan all transformation progresses that can be proceeded. "
             + "url parameter podid is for testing purpose.")
     public List<TransformationProgress> scan(
-            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
-            HttpServletRequest request) {
-        checkHeader(request);
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         if (StringUtils.isEmpty(hdfsPod)) {
             hdfsPod = HdfsPodContext.getHdfsPodId();
         }
@@ -79,9 +51,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
             + "url parameter submitter indicates what submitted this job: Quartz, Test, Cli, ..."
             + "url parameter podid is for testing purpose.")
     public TransformationProgress transform(@RequestBody TransformationRequest transformationRequest,
-            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
-            HttpServletRequest request) {
-        checkHeader(request);
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             if (StringUtils.isEmpty(hdfsPod)) {
                 hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
@@ -116,9 +86,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
     @ApiIgnore
     @ApiOperation(value = "Trigger a new transformation for a pipelined transformations. ")
     public TransformationProgress transform(@RequestBody PipelineTransformationRequest transformationRequest,
-            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
-            HttpServletRequest request) {
-        checkHeader(request);
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             if (StringUtils.isEmpty(hdfsPod)) {
                 hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
@@ -142,9 +110,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
     @ApiOperation(value = "Get workflow configuration for a pipelined transformations. ")
     public TransformationWorkflowConfiguration getWorkflowConf(
             @RequestBody PipelineTransformationRequest transformationRequest,
-            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
-            HttpServletRequest request) {
-        checkHeader(request);
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             if (StringUtils.isEmpty(hdfsPod)) {
                 hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
@@ -162,9 +128,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
     @ApiIgnore
     @ApiOperation(value = "Get the TransformationProgress.")
     public TransformationProgress getProgress(@RequestParam(value = "rootOperationUid") String rootOperationUid,
-            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
-            HttpServletRequest request) {
-        checkHeader(request);
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             if (StringUtils.isEmpty(hdfsPod)) {
                 hdfsPod = HdfsPodContext.getDefaultHdfsPodId();

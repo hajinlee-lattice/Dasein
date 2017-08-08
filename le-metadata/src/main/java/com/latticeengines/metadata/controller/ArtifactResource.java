@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.controller;
 
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,8 +13,8 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.metadata.service.ArtifactService;
-import com.latticeengines.metadata.validation.service.impl.ArtifactValidation;
 import com.latticeengines.metadata.service.ArtifactValidationService;
+import com.latticeengines.metadata.validation.service.impl.ArtifactValidation;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,8 +35,7 @@ public class ArtifactResource {
     public Boolean createArtifact(@PathVariable String customerSpace, //
             @PathVariable String moduleName, //
             @PathVariable String artifactName, //
-            @RequestBody Artifact artifact, //
-            HttpServletRequest request) {
+            @RequestBody Artifact artifact) {
         artifactService.createArtifact(customerSpace, moduleName, artifactName, artifact);
         return true;
     }
@@ -48,7 +46,7 @@ public class ArtifactResource {
     @ResponseBody
     @ApiOperation(value = "Validate artifact file")
     public ResponseDocument<String> validateArtifact(@PathVariable ArtifactType artifactType, //
-            @RequestParam("file") String artifactFilePath, HttpServletRequest request) {
+            @RequestParam("file") String artifactFilePath) {
         ArtifactValidationService artifactValidationService = ArtifactValidation
                 .getArtifactValidationService(artifactType);
         if (artifactValidationService == null) {
@@ -64,8 +62,7 @@ public class ArtifactResource {
     @ResponseBody
     @ApiOperation(value = "Get Artifact By Path")
     public Artifact getArtifactByPath(@PathVariable String customerSpace, //
-            @RequestParam("file") String artifactPath, //
-            HttpServletRequest request) {
+            @RequestParam("file") String artifactPath) {
         return artifactService.getArtifactByPath(customerSpace, artifactPath);
     }
 }

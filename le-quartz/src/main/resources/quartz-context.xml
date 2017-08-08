@@ -14,7 +14,6 @@
     <context:component-scan base-package="com.latticeengines.quartz">
         <context:exclude-filter type="aspectj" expression="com.latticeengines.quartz.controller.*" />
     </context:component-scan>
-    <import resource="classpath:quartz-aspects-context.xml"/>
     
     <bean id="scheduler"
         class="org.springframework.scheduling.quartz.SchedulerFactoryBean"

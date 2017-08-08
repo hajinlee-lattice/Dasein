@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.security.exposed.InternalResourceBase;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,7 +22,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "datafile", description = "REST resource for retrieving data files")
 @RestController
 @RequestMapping(value = "/customerspaces/{customerSpace}/datacollection/datafeed/tasks")
-public class DataFeedTaskController extends InternalResourceBase {
+public class DataFeedTaskController {
 
     private final DataFeedTaskManagerService dataFeedTaskManagerService;
 

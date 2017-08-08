@@ -15,6 +15,5 @@
     <import resource="classpath:yarn-context.xml"/>
     <import resource="classpath:dataflowapi-yarn-client-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
-    <import resource="classpath:dataflowapi-aspects-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
 </beans>

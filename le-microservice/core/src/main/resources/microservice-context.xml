@@ -2,17 +2,18 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xsi:schemaLocation="
   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
-  http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+  http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+  http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
     <import resource="classpath:network-context.xml"/>
     <import resource="classpath:common-component-context.xml"/>
 
-    <context:component-scan
-            base-package="com.latticeengines.microservice.exposed"/>
+    <context:component-scan base-package="com.latticeengines.microservice.exposed"/>
 
     <mvc:annotation-driven/>
 
@@ -24,5 +25,20 @@
     <import resource="classpath:monitor-aspects-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml"/>
+
+    <import resource="classpath:security-no-controller-context.xml"/>
+    <import resource="classpath:security-provider-context.xml"/>
+
+    <security:http auto-config="false"
+                   use-expressions="true"
+                   pattern="/**"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:intercept-url pattern="/health" access="permitAll" />
+        <security:intercept-url pattern="/v2/api-docs" access="permitAll" />
+        <security:intercept-url pattern="/**" access="hasRole('INTERNAL_USER')" />
+        <security:custom-filter ref="internalRestServicesFilter" before="PRE_AUTH_FILTER" />
+    </security:http>
 
 </beans>
