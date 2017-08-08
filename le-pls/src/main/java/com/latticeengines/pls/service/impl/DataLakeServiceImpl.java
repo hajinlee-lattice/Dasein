@@ -86,6 +86,9 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         String customerSpace = MultiTenantContext.getTenant().getId();
         TableRoleInCollection role = entity.getServingStore();
+        if (role == null) {
+            return Collections.emptyList();
+        }
         Table batchTable = dataCollectionProxy.getTable(customerSpace, role);
         if (batchTable == null) {
             return Collections.emptyList();
