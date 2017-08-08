@@ -309,6 +309,7 @@ public class SqlServerHelper implements DbHelper {
                 } else {
                     sql += " OR ( ";
                 }
+                firstNameLoc = false;
                 sql += String.format("p1.[%s] = ? ", MatchConstants.NAME_FIELD);
                 args.add(nameLocation.getName());
                 if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
@@ -325,7 +326,6 @@ public class SqlServerHelper implements DbHelper {
                 }
                 sql += ")\n";
             }
-            firstNameLoc = false;
         }
 
         if (!hasDomains && !hasNameLocaitons) {
