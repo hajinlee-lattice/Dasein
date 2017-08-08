@@ -16,7 +16,7 @@ import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
 
     @Autowired
-    private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTABulkScoreWorkflowSubmitter;
+    private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTSBulkScoreWorkflowSubmitter;
 
     private SourceFile sourceFile;
 
@@ -28,7 +28,7 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
     }
 
     @Override
-    @Test(groups = "workflow", enabled = true)
+    @Test(groups = "workflow", enabled = false)
     public void scoreAccount() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
@@ -36,10 +36,9 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
     }
 
     private void score(String modelId, String tableToScore) throws Exception {
-        ImportAndRTSBulkScoreWorkflowConfiguration configuration = importAndRTABulkScoreWorkflowSubmitter
+        ImportAndRTSBulkScoreWorkflowConfiguration configuration = importAndRTSBulkScoreWorkflowSubmitter
                 .generateConfiguration(modelId, sourceFile, "Testing RTS Bulk Score Data", false, false);
         WorkflowExecutionId workflowId = workflowService.start(configuration);
-
         waitForCompletion(workflowId);
     }
 }
