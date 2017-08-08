@@ -115,7 +115,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         WorkflowExecutionId workflowId = workflowService.start(config);
         waitForCompletion(workflowId);
         verify(targetTableName, 239);
-        verifyReport(workflowId, ReportPurpose.PUBLISH_DATA_SUMMARY, 239);
+        verifyReport(workflowId, ReportPurpose.PUBLISH_DATA_SUMMARY, 117);
         HdfsUtils.rmdir(yarnConfiguration, dest);
     }
 
