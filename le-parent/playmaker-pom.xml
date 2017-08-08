@@ -9,7 +9,8 @@
     <name>Lattice Playmaker Parent</name>
 
     <properties>
-        <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
+        <spring.oauth2.version>2.2.0.RELEASE</spring.oauth2.version>
+        <spring.security.version>4.2.3.RELEASE</spring.security.version>
         <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
         <maven.surefire.version>2.12.3</maven.surefire.version>
         <jetty.version>9.1.1.v20140108</jetty.version>
@@ -191,6 +192,17 @@
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
             <version>${spring.oauth2.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.security</groupId>
+                    <artifactId>spring-security-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
