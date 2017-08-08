@@ -45,21 +45,19 @@ public abstract class AbstractAuthenticationTokenFilter extends AbstractAuthenti
     }
 
     public static String addRolePrefix(String authority) {
-//        if (!authority.startsWith(ROLE_PREFIX)) {
-//            return String.format("%s%s", ROLE_PREFIX, authority);
-//        } else {
-//            return authority;
-//        }
-        return authority;
+        if (!authority.startsWith(ROLE_PREFIX)) {
+            return String.format("%s%s", ROLE_PREFIX, authority);
+        } else {
+            return authority;
+        }
     }
 
     protected static String removeRolePrefix(String role) {
-//        if (role.startsWith(ROLE_PREFIX)) {
-//            return role.substring(ROLE_PREFIX.length());
-//        } else {
-//            return role;
-//        }
-        return role;
+        if (role.startsWith(ROLE_PREFIX)) {
+            return role.substring(ROLE_PREFIX.length());
+        } else {
+            return role;
+        }
     }
 
 }
