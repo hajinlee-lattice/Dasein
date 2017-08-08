@@ -3,15 +3,15 @@ package com.latticeengines.datacloud.dataflow.transformation;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.utils.LatticeAccountIdUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDeltaTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 @Component("consolidateDeltaDataFlow")
 public class ConsolidateDeltaFlow extends ConfigurableFlowBase<ConsolidateDeltaTransformerConfig> {
@@ -28,6 +28,7 @@ public class ConsolidateDeltaFlow extends ConfigurableFlowBase<ConsolidateDeltaT
         for (int i = 0; i < parameters.getBaseTables().size(); i++) {
             String sourceName = parameters.getBaseTables().get(i);
             Node source = addSource(sourceName);
+            source = LatticeAccountIdUtils.convetLatticeAccountIdDataType(source);
             List<String> srcFields = source.getFieldNames();
             if (srcFields.contains(srcId) && !srcFields.contains(masterId)) {
                 source = source.rename(new FieldList(srcId), new FieldList(masterId));

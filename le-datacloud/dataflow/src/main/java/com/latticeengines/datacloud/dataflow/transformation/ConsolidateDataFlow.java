@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.datacloud.dataflow.utils.LatticeAccountIdUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
@@ -38,6 +39,7 @@ public class ConsolidateDataFlow extends ConfigurableFlowBase<ConsolidateDataTra
         for (int i = 0; i < parameters.getBaseTables().size(); i++) {
             String sourceName = parameters.getBaseTables().get(i);
             Node source = addSource(sourceName);
+            source = LatticeAccountIdUtils.convetLatticeAccountIdDataType(source);
             List<String> srcFields = source.getFieldNames();
             if (srcFields.contains(srcId) && !srcFields.contains(masterId)) {
                 source = source.rename(new FieldList(srcId), new FieldList(masterId));

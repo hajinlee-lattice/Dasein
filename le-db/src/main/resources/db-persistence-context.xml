@@ -14,7 +14,7 @@
         <property name="password" value="${db.datasource.password.encrypted}" />
         <property name="acquireIncrement" value="4"/>
         <property name="minPoolSize" value="4"/>
-        <property name="maxPoolSize" value="32"/>
+        <property name="maxPoolSize" value="16"/>
         <property name="checkoutTimeout" value="60000"/>
         <property name="idleConnectionTestPeriod" value="10"/>
         <property name="maxIdleTime" value="30"/>
