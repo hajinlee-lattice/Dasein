@@ -275,6 +275,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
+        <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -292,6 +293,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
+        <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -321,6 +323,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
+        <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="pls/companyprofiles/**" access="hasRole('View_PLS_Data')"/>
     </security:http>
