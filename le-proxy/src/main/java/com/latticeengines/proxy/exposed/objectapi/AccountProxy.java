@@ -75,7 +75,7 @@ public class AccountProxy extends MicroserviceRestApiProxy implements AccountInt
      * (give priority to lowest index matching bucket). This API needs to return
      * list of indexes of matching restrictions for each of the accountIds
      */
-    public List<Integer> getAccounts(String customerSpace, List<Restriction> orderedRestrictions,
+    public List<Integer> calculateMatchingRestrictionIdx(String customerSpace, List<Restriction> orderedRestrictions,
             List<Long> accountIds) {
         List<Integer> accountToMatchingRestrictionIndexList = //
                 accountIds.stream().//
