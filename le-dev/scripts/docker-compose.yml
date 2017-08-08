@@ -16,6 +16,7 @@ services:
       - '3306:3306'
     volumes:
       - $DOCKER_DATA_ROOT/mysql:/var/lib/mysql
+      - $WSHOME/le-dev/mysql:/etc/mysql/conf.d
 
   tez-ui:
     image: latticeengines/tez-ui
