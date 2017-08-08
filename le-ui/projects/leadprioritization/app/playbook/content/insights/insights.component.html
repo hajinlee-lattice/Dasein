@@ -37,6 +37,9 @@
                     <span ng-click="vm.addTalkingPoint()">
                         <button class="button white-button"><i class="fa fa-plus"></i></button><span>Add Talking Point</span>
                     </span>
+                    <div class="tp-syntax">
+                        <a ui-sref="home.playbook.dashboard.insights.syntax({play_name: vm.stateParams.play_name})" target="_syntax">Authoring Talking Points Guide</a>
+                    </div>
                 </div>
             </div>
             <div class="attributes">

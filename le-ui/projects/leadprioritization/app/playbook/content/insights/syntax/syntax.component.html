@@ -1,0 +1,317 @@
+<div class="playbook-insights container syntax-container" ng-class="{'dashboard-content': vm.stateParams.section.indexOf('dashboard.') !== -1}">
+    <div class="inner-container">
+
+    <h1>Authoring Talking Points</h1>
+    <p>
+        Talking points provide messages that enable sales reps to successfully engage with customers. Adding dynamic, customer-specific talking points gives your reps additional context.
+    </p>
+
+    <h2>Choosing a Language</h2>
+    <ul>
+        <li>
+            Click the dropdown menu for <strong>Viewing Language</strong> and select from the list.
+            <div>
+                <img src="/assets/images/talkingpoints/syntax/talkingPointsLanguageMenu.png" />
+            </div>
+            <h3>Note:</h3>
+            <p>
+                playMAKER groups talking points by language. You can add talking points for as many languages as needed. The number in parentheses next to the language name indicates the number of talking points that exist for this language.
+            </p>
+
+            <p>
+                If you add talking points in different languages, at runtime the system matches language-specific talking points with users' locales.
+            </p>
+            <p>
+                You cannot change the language if any talking point on the page has a validation error.
+            </p>
+        </li>
+    </ul>
+
+    <h2>Adding a Talking Point</h2>
+    <ul>
+        <li>
+            Click <strong>Add Talking Point</strong> to add a new talking point.
+        </li>
+    </ul>
+
+    <h2>Saving Talking Points</h2>
+    <ul>
+        <li>
+            Save talking points by doing any of the following:
+            <ul>
+                <li>
+                    Click <strong>I'm Finished</strong>.
+                </li>
+                <li>
+                    Click outside of the <strong>Content</strong> tab area (for example, select <strong>All Plays</strong>).
+                </li>
+                <li>
+                    Click any of the other play tabs.
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Pasting Text</h2>
+    <p>
+        Plain text mode is recommended for pasting talking point syntax examples. This mode converts unsupported newline symbols to &lt;p&gt; tags so that the text passes validation. To add text from Microsoft Word and preserve formatting (such as colors), paste directly into the editor (using CTRL+V). If your text contains both dynamic syntax and styling, you will need to paste as plain text to preserve the dynamic syntax and then re-add styling using the provided tools.
+    </p>
+    <ul>
+        <li>
+            Click the <img src="/assets/images/talkingpoints/syntax/talkingPointPastePlainTextIcon.png" /> icon to enter plain text mode.
+        </li>
+    </ul>
+
+    <h2>Checking Spelling</h2>
+    <ul>
+        <li>
+            Click the <img src="/assets/images/talkingpoints/syntax/talkingPointSpellCheckIcon.png" /> icon to check for spelling errors.
+            <h3>Note:</h3>
+            <ul>
+                <li>
+                    The spell checker does not validate attribute names. The editor shows a red outline if any syntax is incorrect.
+                </li>
+                <li>
+                    English is the only language that supports spell-checking.
+                </li>
+                <li>
+                    Microsoft Internet Explorer does not support this spell checker.
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <h2>Styling Text</h2>
+    <ul>
+        <li>
+            Click the <strong>Font Size</strong> menu to change the size of text.
+            <div>
+                <img src="/assets/images/talkingpoints/syntax/talkingPointMenuFontSize.png" />
+            </div>
+        </li>
+        <li>
+            Click the underlined 'A' to change the color of text.
+            <div>
+                <img src="/assets/images/talkingpoints/syntax/talkingPointMenuFontColor.png" />
+            </div>
+        </li>
+    </ul>
+
+    <h2>Editing HTML Source</h2>
+    <ul>
+        <li>
+            Click the <img src="/assets/images/talkingpoints/syntax/talkingPointsHTMLEditIcon.png" /> icon to edit any HTML source.
+            <div>
+                Talking points support the following tags:
+                <ul>
+                    <li>
+                        <samp>&lt;a[href]&gt;</samp> target
+                    </li>
+                    <li>
+                        <samp>&lt;b&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;br&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;font[color|face|size]&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;img[src|id|width|height|align|hspace|vspace]&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;i&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;li&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;p[align|class]&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;h1&gt;</samp> through <samp>&lt;h6&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;span[class]&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;textformat[blockindent|indent|leading|leftmargin|rightmargin|tabstops]&gt;</samp>
+                    </li>
+                    <li>
+                        <samp>&lt;u&gt;</samp>
+                    </li>
+                </ul>
+            </div>
+            <p>
+                The <strong>Title</strong> field does not support HTML markup. If this field contains HTML or tags that the editor interprets as such, the output will be encoded as in the following example: 
+            </p>
+            <ul>
+                <li>
+                    “&lt;p&gt;Competitive Differentiation&lt;/p&gt;”  -&gt;
+                    "&amp;lt;p&amp;gt;Competitive Differentiation&amp;lt;/p&amp;gt;"
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Adding Links</h2>
+    <ul>
+        <li>
+            You can add links to talking points, such as additional resources to help reps sell to accounts.
+            <ol>
+                <li>
+                   Type / paste and then highlight the text that you would like to make a link. This text may say anything, such as "Click here".
+                </li>
+                <li>
+                    Click the <img src="/assets/images/talkingpoints/syntax/talkingPointsLinkIcon.png" /> icon.
+                </li>
+                <li>
+                    In the Insert/Edit Link dialog:
+                    <ol>
+                        <li>
+                            Paste or type the web address into the <strong>Link URL</strong> field.
+                        </li>
+                        <li>
+                            Click the <strong>Target</strong> dropdown and choose whether clicking this link should <strong>Open Link in the Same Window</strong> or <strong>Open Link in a New Window</strong>.
+                        </li>
+                        <li>
+                            For <strong>Title</strong>, enter any text that should display as a tooltip when a user places the cursor over the link.
+                        </li>
+                        <li>
+                            Click <strong>Insert</strong> to add the link to your talking point, or <strong>Cancel</strong>.
+                        </li>
+                    </ol>
+                </li>
+                <li>
+                    To remove a link, highlight the linked text and click the <img src="/assets/images/talkingpoints/syntax/talkingPointUnlinkIcon.png" /> icon.
+                </li>
+            </ol>
+        </li>
+    </ul>
+
+    <h2>Adding Attributes</h2>
+    <ul>
+        <li>
+            Drag talking point attributes from the Attributes menu at the right onto the body text field.
+        </li>
+    </ul>
+
+    <h2>Collapsing a Talking Point</h2>
+    <ul>
+        <li>
+            Collapse and expand talking points as needed while you edit your play's messaging. You can collapse and expand talking points even if they are invalid.
+            <ol>
+                <li class="li substep">
+                    Click the <img src="/assets/images/talkingpoints/syntax/talkingPointMinimizeArrow.png" /> button next to an expanded talking point to collapse it.
+                </li>
+                <li class="li substep">
+                    Click the <img src="/assets/images/talkingpoints/syntax/talkingPointExpandArrow.png" /> button next to a collapsed talking point to expand it.
+                </li>
+            </ol>
+        </li>
+    </ul>
+
+    <h2>Reordering Talking Points</h2>
+    <ul>
+        <li>
+            <p>Click and drag talking points to reorder them.</p>
+            <p>You can drag talking points whether they are expanded or collapsed.</p>
+            <p>You can reorder talking points even if they are invalid.</p>
+            <p>All talking points on the page collapse and expand again when you drop the talking point.</p>
+        </li>
+    </ul>
+    
+    <h2>Validating a Talking Point</h2>
+    <ul>
+        <li>
+            <p>Be sure to resolve any invalid talking poiAnts.</p>
+            <p>playMAKER validates each talking point when you click outside of that talking point's editor.</p>
+            <p>If you have invalid talking points, you cannot save the play or make changes to any aspect of the play outside of the Content tab until you resolve the issues. You may continue to add and edit new talking points.</p>
+        </li>
+    </ul>
+
+    <h2>Deleting a Talking Point</h2>
+    <ul>
+        <li>
+            Click the <img src="/assets/images/talkingpoints/syntax/xButton.png" /> button beside a talking point to delete it.
+            <p>You can delete a talking point whether it is valid or invalid.</p>
+        </li>
+    </ul>
+
+    <h2>Displaying Dynamic Talking Points</h2>
+    <ul>
+        <li>
+            Dynamic talking points make use of variables and <dfn>conditional expressions</dfn>. These variables and expressions rely on special syntax to display the actual values correctly.
+            <ol>
+                <li>
+                    <p>
+                        Braces must enclose each attribute name. Attributes that you drag into the talking point editor automatically display this syntax. Within the braces, an exclamation point precedes the full attribute name. If it is an account attribute, a period separates the object name from the attribute (column) name.
+                    </p>
+                    <p>
+                        Reference extensions using the same syntax as described above. For example, you would reference an account's revenue growth using {!Account.RevenueGrowth}.
+                    </p>
+                </li>
+                <li>
+                    Compare values using the following operators:
+                    <ul>
+                        <li> = Equal to </li>
+                        <li>&gt; Greater than </li>
+                        <li>&lt; Less than </li>
+                        <li>&gt; = Greater than or equal to </li>
+                        <li>&lt;= Less than or equal to </li>
+                        <li>&lt; &gt; Not equal to </li>
+                    </ul>
+                    <p>
+                        Compare any string values by enclosing these in quotes: [{!Objecttype.Column} Operator 'Value']
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        Compare boolean attribute values using yes and no or true and false.
+                    </p>
+                </li>
+                <li>
+                    <p>Square brackets must enclose each conditional expression.</p>
+                    <p>
+                        Any text you wish to display when a conditional expression is true must appear on the line below the conditional expression. You cannot mix a conditional expression and display text on the same line. You can, however, include variables (embedded replacement tokens like {!Today}) on the same line as display text.
+                    </p>
+                    <p>The phrase [end] must appear after each conditional expression block.</p>
+
+                    <h3>Examples:</h3>
+                    <p>[{!Account.StorageBudget} &gt; 5000]</p>
+                    <p> This account's storage budget is ${!Account.StorageBudget}. This customer may consider purchasing  a SAN this quarter.</p>
+                    <p>[end]</p>
+                    <p>[{!Account.IsRecentCIOTransition} = yes]</p>
+                    <p>This account has a new CIO who is likely assessing the company's technology needs and may be looking for ways to improve the company's infrastructure. Consider starting a conversation about upgrades with  contacts at this account. If they have been purchasing storage solutions from another vendor until now,  they may be eligible for a special discount if they choose to switch to one of our solutions.</p>
+                    <p>[end]</p>
+                </li>
+                <li>
+                    Use 'AND' and 'OR' between statements to conditionally display talking points that meet multiple criteria.
+
+                    <h3>Examples:</h3>
+                    <p>[{!Account.JobPostings} &gt; 5 OR {!Account.Funding} &gt; 0]</p>
+                    <p>{!Space}</p>
+                    <p>Current data reveals that {!Account.DisplayName} is experiencing rapid growth.</p>
+                    <p>[end]</p>
+                    <p>[{!Account.JobPostings} &gt; 5]</p>
+                    <p>This customer currently lists {!Account.JobPostings} employment opportunities.</p>
+                    <p>[end]</p>
+                    <p>[{!Account.Funding} &gt; 0]</p>
+                    <p>This customer has recently received ${!Account.Funding} in private funding.</p>
+                    <p>[end]</p>
+                    <p>Companies at this stage of growth may need additional servers, or might want to consider virtualization.</p>
+                    <p>[end]</p>
+                </li>
+                <li>
+                    Use pairs of parentheses to express the order of operations.
+
+                    <h3>Example:</h3>
+                    <p>[({!Account.Vertical} = 'Health' OR {!Account.Vertical} = 'Financial') AND ({!Account.StorageBudget} &gt; 5000)]</p>
+                    <p>Current data shows that {!Account.DisplayName} has high likelihood of purchasing one of our storage products this quarter. Healthcare and financial services companies tend to require more robust backup and recovery solutions.</p>
+                    <p>[end]</p>
+                </li>
+            </ol>
+        </li>
+    </ul>
+
+    </div>
+</div>

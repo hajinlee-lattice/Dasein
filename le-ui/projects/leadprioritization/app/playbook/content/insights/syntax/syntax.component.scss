@@ -1,0 +1,42 @@
+.playbook-insights.syntax-container {
+  ul { 
+    list-style-type: disc; 
+    list-style-position: outside; 
+  }
+  ol { 
+    list-style-type: decimal; 
+    list-style-position: outside; 
+  }
+  ul ul, ol ul { 
+    list-style-type: circle; 
+    list-style-position: outside; 
+    margin-left: 30px; 
+  }
+  ol ol, ul ol { 
+    list-style-type: decimal; 
+    list-style-position: outside; 
+    margin-left: 15px; 
+  }
+  h1, h2, h3, strong {
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: none;
+  }
+  h1 {
+    font-size: 20px;
+  }
+  h1, h2, h3 {
+    margin: 20px 0;
+  }
+  img {
+    vertical-align: middle;
+  }
+  li {
+    padding-left: 5px;
+    p {
+      &:first-child {
+        display: inline;
+      }
+    }
+  }
+}
