@@ -153,7 +153,7 @@ def login_internal(environment):
 def login_nexus():
     username, password, url = 'deploy', 'welcome', NEXUS_DOCKER_REGISTRY
     print "logging in docker registry %s ..." % url
-    return 'docker login -u %s -p %s -e none %s' % (username, password, url)
+    return 'docker login -u %s -p %s %s' % (username, password, url)
 
 def login_aws(environment):
     config = AwsEnvironment(environment)
