@@ -2,7 +2,7 @@ angular.module('common.datacloud.query.factory.restriction', [])
 .factory('BucketRestriction', function() {
     function BucketRestriction(columnName, objectType, range, attr, bkt) {
 
-        // console.log(columnName, objectType, range, attr, bkt);
+        console.log(columnName, objectType, range, attr, bkt);
 
 
         if (attr === null || attr === undefined) {
@@ -52,6 +52,9 @@ angular.module('common.datacloud.query.factory.restriction', [])
     };
 
     BucketRestriction.getColumnName = function(bucketRestriction) {
+
+        console.log(bucketRestriction);
+
         if (bucketRestriction.attr === null || bucketRestriction.attr === undefined) {
             return bucketRestriction.lhs.columnLookup.column_name;
         } else {

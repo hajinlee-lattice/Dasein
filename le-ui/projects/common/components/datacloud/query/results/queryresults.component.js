@@ -15,8 +15,12 @@ angular.module('common.datacloud.query.results', [
         current: 1,
         pagesize: 20,
         search: '',
-        sortBy: null,
-        sortDesc: false,
+        searchOptions: {
+            updateOn: 'default blur',
+            debounce: 1500
+        },
+        sortType: 'LDC_Name',
+        sortReverse: false,
         authToken: BrowserStorageUtility.getTokenDocument(),
         saving: false,
         section: $stateParams.section
@@ -25,7 +29,7 @@ angular.module('common.datacloud.query.results', [
 
     vm.init = function() {
 
-        // console.log($stateParams);
+        console.log($stateParams);
         
         QueryStore.setAccounts('', $stateParams.segment).then(function(response){
             vm.accounts = response.data;
@@ -37,6 +41,8 @@ angular.module('common.datacloud.query.results', [
 
     var prevQuery = vm.search;
     vm.submitQuery = function() {
+        console.log("search");
+        vm.loading = true;
         if ((vm.search && prevQuery) && (vm.search.toUpperCase() === prevQuery.toUpperCase())) {
             return;
         }
@@ -80,9 +86,14 @@ angular.module('common.datacloud.query.results', [
         });
     };
 
-    // $scope.$watch('vm.current', function(newValue, oldValue) {
-    //     updatePage();
-    // });
+    $scope.$watch('vm.search', function (tmpStr){
+      console.log(tmpStr);
+      if (!tmpStr || tmpStr.length == 0)
+        return 0;
+        if (tmpStr === vm.search){
+          updatePage();
+        }
+    });
 
     function updatePage() {
         var offset = (vm.current - 1) * vm.pagesize;
@@ -95,7 +106,9 @@ angular.module('common.datacloud.query.results', [
             }
         };
 
-        QueryStore.setAccounts(query);
+        QueryStore.setAccounts(query).then(function(){
+            vm.loading = false;    
+        });
 
     };
 });
