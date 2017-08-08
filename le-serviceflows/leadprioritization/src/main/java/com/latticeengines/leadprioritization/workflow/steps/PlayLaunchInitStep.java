@@ -73,7 +73,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private long segmentAccountsCount = Long.MAX_VALUE;
 
-    private int processedSegmentAccountsCount = 0;
+    private long processedSegmentAccountsCount = 0;
 
     @Override
     public void execute() {
@@ -145,10 +145,11 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             for (int loopId = 0; loopId < numberOfLoops; loopId++) {
                 log.info("Loop #" + loopId);
 
-                int expectedPageSize = (int) Math.min(pageSize * 1L,
-                        (segmentAccountsCount - processedSegmentAccountsCount));
+                long expectedPageSize = //
+                        Math.min(pageSize * 1L, (segmentAccountsCount - processedSegmentAccountsCount));
+
                 DataPage accountPage = accountProxy.getAccounts(tenant.getId(), segmentRestriction,
-                        (int) processedSegmentAccountsCount, expectedPageSize, fields);
+                        processedSegmentAccountsCount, expectedPageSize, fields);
 
                 log.info("Got #" + accountPage.getData().size() + " elements in this loop");
 

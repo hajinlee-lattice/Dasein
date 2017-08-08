@@ -63,8 +63,8 @@ public class AccountResource implements AccountInterface {
     @Override
     public DataPage getAccounts(@PathVariable String customerSpace,
             @ApiParam(value = "The UTC timestamp of last modification in ISO8601 format", required = false) @RequestParam(value = "start", required = false) String start,
-            @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) Integer offset,
-            @ApiParam(value = "Number of records returned above offset (max is 250 records per request)", required = true) @RequestParam(value = "pageSize", required = true) Integer pageSize,
+            @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) Long offset,
+            @ApiParam(value = "Number of records returned above offset (max is 250 records per request)", required = true) @RequestParam(value = "pageSize", required = true) Long pageSize,
             @RequestBody DataRequest dataRequest) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         start = fixDateStringIfNeeded(start);

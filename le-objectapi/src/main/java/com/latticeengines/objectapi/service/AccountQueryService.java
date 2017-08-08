@@ -7,5 +7,5 @@ public interface AccountQueryService {
 
     Query generateAccountQuery(String start, DataRequest dataRequest);
 
-    Query generateAccountQuery(String start, Integer offset, Integer pageSize, DataRequest dataRequest);
+    Query generateAccountQuery(String start, Long offset, Long pageSize, DataRequest dataRequest);
 }

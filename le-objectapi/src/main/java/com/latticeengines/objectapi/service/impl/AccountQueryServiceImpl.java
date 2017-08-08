@@ -58,7 +58,7 @@ public class AccountQueryServiceImpl implements AccountQueryService {
     }
 
     @Override
-    public Query generateAccountQuery(String start, Integer offset, Integer pageSize, DataRequest dataRequest) {
+    public Query generateAccountQuery(String start, Long offset, Long pageSize, DataRequest dataRequest) {
         Query query = generateAccountQuery(start, dataRequest);
 
         offset = (offset == null) ? 0 : offset;

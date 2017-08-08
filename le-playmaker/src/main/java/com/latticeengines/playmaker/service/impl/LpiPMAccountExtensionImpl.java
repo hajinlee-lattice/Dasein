@@ -37,7 +37,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     private DataCollectionProxy dataCollectionProxy;
 
     @Override
-    public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<String> accountIds,
+    public List<Map<String, Object>> getAccountExtensions(long start, long offset, long maximum, List<String> accountIds,
             Long recStart, String columns, boolean hasSfdcContactId) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataRequest dataRequest = new DataRequest();
@@ -58,10 +58,10 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         return postProcess(dataPage.getData(), offset);
     }
 
-    private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, int offset) {
+    private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, long offset) {
 
         if (CollectionUtils.isNotEmpty(data)) {
-            int rowNum = offset + 1;
+            long rowNum = offset + 1;
 
             for (Map<String, Object> accExtRec : data) {
                 if (accExtRec.containsKey(PlaymakerConstants.AccountId)) {
