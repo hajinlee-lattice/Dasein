@@ -73,6 +73,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     @Value("${datacloud.etl.profile.attrs:1000}")
     private int maxAttrs;
 
+    @Value("${datacloud.etl.profile.category.max:2048}")
+    private int maxCats;
+
     private ObjectMapper om = new ObjectMapper();
 
     @Autowired
@@ -106,12 +109,13 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             ProfileConfig config) {
         List<String> idAttrs = new ArrayList<>();
         List<ProfileParameters.Attribute> numericAttrs = new ArrayList<>();
+        List<ProfileParameters.Attribute> catAttrs = new ArrayList<>();
         List<ProfileParameters.Attribute> attrsToRetain = new ArrayList<>();
         List<ProfileParameters.Attribute> amAttrsToEnc = new ArrayList<>();
         List<ProfileParameters.Attribute> exAttrsToEnc = new ArrayList<>();
         Map<String, BitCodeBook> codeBookMap = new HashMap<>();
         Map<String, String> codeBookLookup = new HashMap<>();
-        classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), config, idAttrs, numericAttrs,
+        classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), config, idAttrs, numericAttrs, catAttrs,
                 attrsToRetain, amAttrsToEnc, exAttrsToEnc, codeBookMap, codeBookLookup);
         if (CollectionUtils.isEmpty(idAttrs)) {
             log.warn("Cannot find ID field (LatticeAccountId, LatticeID).");
@@ -133,11 +137,11 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         paras.setCodeBookLookup(codeBookLookup);
     }
 
-    @SuppressWarnings("unchecked")
     private void classifyAttrs(Source baseSrc, String baseVer, ProfileConfig config, List<String> idAttrs,
-            List<ProfileParameters.Attribute> numericAttrs, List<ProfileParameters.Attribute> attrsToRetain,
-            List<ProfileParameters.Attribute> amAttrsToEnc, List<ProfileParameters.Attribute> exAttrsToEnc,
-            Map<String, BitCodeBook> codeBookMap, Map<String, String> codeBookLookup) {
+            List<ProfileParameters.Attribute> numericAttrs, List<ProfileParameters.Attribute> catAttrs,
+            List<ProfileParameters.Attribute> attrsToRetain, List<ProfileParameters.Attribute> amAttrsToEnc,
+            List<ProfileParameters.Attribute> exAttrsToEnc, Map<String, BitCodeBook> codeBookMap,
+            Map<String, String> codeBookLookup) {
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
                 config.getTransformer());
         Map<String, SourceAttribute> amAttrConfig = new HashMap<>();    // attr name -> srcAttr
@@ -150,8 +154,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
 
         log.info("Classifying attributes...");
-        Set<String> numTypes = new HashSet<>(Arrays.asList(new String[] { "int", "long", "float", "double" }));
-        Set<String> boolTypes = new HashSet<>(Arrays.asList(new String[] { "boolean" }));
+        Set<Schema.Type> numTypes = new HashSet<>(Arrays.asList(
+                new Schema.Type[] { Schema.Type.INT, Schema.Type.LONG, Schema.Type.FLOAT, Schema.Type.DOUBLE }));
+        Set<Schema.Type> boolTypes = new HashSet<>(Arrays.asList(new Schema.Type[] { Schema.Type.BOOLEAN }));
         try {
             // Attributes encoded in the profiled source which need to decode
             Map<String, List<ProfileParameters.Attribute>> encAttrMap = new HashMap<>(); // Encoded attr-> [decoded attrs] (Enabled in profiling)
@@ -256,14 +261,16 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     }
                     continue;
                 }
-                String type = field.schema().getTypes().get(0).getName();
+                Schema.Type type = field.schema().getTypes().get(0).getType();
                 if (numTypes.contains(type)) {
                     switch (config.getStage()) {
                     case DataCloudConstants.PROFILE_STAGE_SEGMENT:
-                        log.info(String.format("Interval bucketed attr %s (type %s unencode)", field.name(), type));
+                        log.info(String.format("Interval bucketed attr %s (type %s unencode)", field.name(),
+                                type.getName()));
                         break;
                     case DataCloudConstants.PROFILE_STAGE_ENRICH:
-                        log.info(String.format("Interval bucketed attr %s (type %s encode)", field.name(), type));
+                        log.info(String.format("Interval bucketed attr %s (type %s encode)", field.name(),
+                                type.getName()));
                         break;
                     default:
                         throw new RuntimeException("Unrecognized stage " + config.getStage());
@@ -273,7 +280,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 }
                 if (boolTypes.contains(type)
                         || FundamentalType.BOOLEAN.getName().equalsIgnoreCase(field.getProp(AVRO_PROP_KEY))) {
-                    log.info(String.format("Boolean bucketed attr %s (type %s encode)", field.name(), type));
+                    log.info(String.format("Boolean bucketed attr %s (type %s encode)", field.name(), type.getName()));
                     BucketAlgorithm algo = new BooleanBucket();
                     if (amAttrConfig.containsKey(field.name())) {
                         amAttrsToEnc.add(new ProfileParameters.Attribute(field.name(), 2, null, algo));

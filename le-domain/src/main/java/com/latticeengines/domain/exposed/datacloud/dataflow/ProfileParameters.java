@@ -28,6 +28,9 @@ public class ProfileParameters extends TransformationFlowParameters {
     private String encAttrPrefix; // used for testing purpose, leave it null for
                                   // real use case
 
+    @JsonProperty("MaxCats")
+    private int maxCats;
+
     @JsonProperty("IDAttr")
     private String idAttr;
 
