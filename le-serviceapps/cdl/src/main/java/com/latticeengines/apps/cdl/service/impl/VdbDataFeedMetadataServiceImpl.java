@@ -228,4 +228,9 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
         return vdbConnectorConfigurationStr;
     }
+
+    @Override
+    public boolean needUpdateDataFeedStatus() {
+        return true;
+    }
 }

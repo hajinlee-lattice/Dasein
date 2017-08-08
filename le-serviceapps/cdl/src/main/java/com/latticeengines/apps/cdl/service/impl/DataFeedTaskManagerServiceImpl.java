@@ -90,6 +90,12 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
+            if (dataFeedMetadataService.needUpdateDataFeedStatus()) {
+                DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
+                if (dataFeed.getStatus().equals(DataFeed.Status.Initing)) {
+                    dataFeedProxy.updateDataFeedStatus(customerSpace.toString(), DataFeed.Status.Initialized.getName());
+                }
+            }
             return dataFeedTask.getUniqueId();
         }
     }

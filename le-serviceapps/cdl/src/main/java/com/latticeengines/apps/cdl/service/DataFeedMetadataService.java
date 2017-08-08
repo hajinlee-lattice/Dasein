@@ -29,4 +29,8 @@ public abstract class DataFeedMetadataService {
 
     public abstract String getConnectorConfig(String metadataStr, String jobIdentifier);
 
+    public boolean needUpdateDataFeedStatus() {
+        return false;
+    }
+
 }
