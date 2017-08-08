@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -15,6 +16,9 @@ public class TopAttribute {
 
     @JsonProperty("Count")
     private Long count;
+
+    @JsonProperty("TopBkt")
+    private Bucket topBkt;
 
     // dummy constructor for jackson
     @SuppressWarnings("unused")
@@ -42,4 +46,11 @@ public class TopAttribute {
         this.count = count;
     }
 
+    public Bucket getTopBkt() {
+        return topBkt;
+    }
+
+    public void setTopBkt(Bucket topBkt) {
+        this.topBkt = topBkt;
+    }
 }

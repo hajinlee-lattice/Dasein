@@ -266,7 +266,17 @@ public class StatsCubeUtils {
     }
 
     private static TopAttribute toTopAttr(Map.Entry<AttributeLookup, AttributeStats> entry) {
-        return new TopAttribute(entry.getKey().getAttribute(), entry.getValue().getNonNullCount());
+        AttributeStats stats = entry.getValue();
+        TopAttribute topAttribute = new TopAttribute(entry.getKey().getAttribute(), stats.getNonNullCount());
+        if (stats.getBuckets() != null) {
+            Bucket topBkt = stats.getBuckets().getBucketList().stream() //
+                    .sorted(Comparator.comparing(bkt -> - bkt.getCount()))
+                    .findFirst().orElse(null);
+            if (topBkt != null) {
+                topAttribute.setTopBkt(topBkt);
+            }
+        }
+        return topAttribute;
     }
 
 }
