@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:security="http://www.springframework.org/schema/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
     <import resource="classpath:security-provider-context.xml"/>
 
@@ -10,7 +10,6 @@
                    pattern="/pls/users/**"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
     </security:http>
 
@@ -19,7 +18,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
@@ -34,7 +32,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
@@ -42,7 +39,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
@@ -50,7 +46,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
@@ -58,7 +53,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
@@ -66,7 +60,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -75,7 +68,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -84,7 +76,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -93,7 +84,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -102,7 +92,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -111,7 +100,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -128,7 +116,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -137,7 +124,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -146,7 +132,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -155,7 +140,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -164,7 +148,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -173,7 +156,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -182,7 +164,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -191,7 +172,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -200,7 +180,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -209,7 +188,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -218,7 +196,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -227,7 +204,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -236,7 +212,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -245,7 +220,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -254,7 +228,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -263,7 +236,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="pls/tenant/**" access="hasRole('VIEW_PLS_DATA')"/>
     </security:http>
@@ -273,7 +245,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="pls/play/**" access="hasRole('VIEW_PLS_DATA')"/>
     </security:http>
@@ -283,7 +254,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -292,7 +262,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -301,7 +270,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
@@ -311,7 +279,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="pls/accounts/**" access="hasRole('Edit_PLS_Configurations')"/>
     </security:http>
@@ -321,7 +288,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="pls/accounts/**" access="hasRole('View_PLS_CDL_Data')"/>
     </security:http>
@@ -331,7 +297,6 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:csrf disabled="true" />
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
         <security:intercept-url pattern="pls/companyprofiles/**" access="hasRole('View_PLS_Data')"/>
     </security:http>

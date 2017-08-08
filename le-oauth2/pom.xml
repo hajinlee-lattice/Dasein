@@ -20,6 +20,42 @@
         <jetty.port>8072</jetty.port>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.springframework.security.oauth</groupId>
+                                    <artifactId>spring-security-oauth2</artifactId>
+                                    <version>${spring.oauth2.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>target/classes</outputDirectory>
+                                    <includes>**/*.class,**/*.xml</includes>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>**/*.java</includes>
+                            <excludes>**/*.properties</excludes>
+                            <outputDirectory>target</outputDirectory>
+                            <overWriteReleases>true</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-playmaker-parent</artifactId>
