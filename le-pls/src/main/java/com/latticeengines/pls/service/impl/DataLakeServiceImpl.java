@@ -120,12 +120,12 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    public TopNTree getTopNTree() {
+    public TopNTree getTopNTree(boolean includeTopBkt) {
         Statistics statistics = getStatistics();
         if (statistics == null) {
             return null;
         }
-        return StatsCubeUtils.toTopNTree(statistics);
+        return StatsCubeUtils.toTopNTree(statistics, includeTopBkt);
     }
 
     private Statistics getStatistics() {

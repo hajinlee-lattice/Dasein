@@ -237,38 +237,38 @@ public class StatsCubeUtils {
         return cube;
     }
 
-    public static TopNTree toTopNTree(Statistics statistics) {
+    public static TopNTree toTopNTree(Statistics statistics, boolean includeTopBkt) {
         TopNTree topNTree = new TopNTree();
         Map<Category, CategoryTopNTree> catTrees = new HashMap<>();
         for (Map.Entry<Category, CategoryStatistics> entry: statistics.getCategories().entrySet()) {
-            catTrees.put(entry.getKey(), toCatTopTree(entry.getValue()));
+            catTrees.put(entry.getKey(), toCatTopTree(entry.getValue(), includeTopBkt));
         }
         topNTree.setCategories(catTrees);
         return topNTree;
     }
 
 
-    private static CategoryTopNTree toCatTopTree(CategoryStatistics catStats) {
+    private static CategoryTopNTree toCatTopTree(CategoryStatistics catStats, boolean includeTopBkt) {
         CategoryTopNTree topNTree = new CategoryTopNTree();
         Map<String, List<TopAttribute>> subCatTrees = new HashMap<>();
         for (Map.Entry<String, SubcategoryStatistics> entry: catStats.getSubcategories().entrySet()) {
-            subCatTrees.put(entry.getKey(), toSubcatTopTree(entry.getValue()));
+            subCatTrees.put(entry.getKey(), toSubcatTopTree(entry.getValue(), includeTopBkt));
         }
         topNTree.setSubcategories(subCatTrees);
         return topNTree;
     }
 
-    private static List<TopAttribute> toSubcatTopTree(SubcategoryStatistics catStats) {
+    private static List<TopAttribute> toSubcatTopTree(SubcategoryStatistics catStats, boolean includeTopBkt) {
         return catStats.getAttributes().entrySet().stream() //
                 .sorted(Comparator.comparing(entry -> - entry.getValue().getNonNullCount())) //
-                .map(StatsCubeUtils::toTopAttr) //
+                .map(entry -> toTopAttr(entry, includeTopBkt)) //
                 .collect(Collectors.toList());
     }
 
-    private static TopAttribute toTopAttr(Map.Entry<AttributeLookup, AttributeStats> entry) {
+    private static TopAttribute toTopAttr(Map.Entry<AttributeLookup, AttributeStats> entry, boolean includeTopBkt) {
         AttributeStats stats = entry.getValue();
         TopAttribute topAttribute = new TopAttribute(entry.getKey().getAttribute(), stats.getNonNullCount());
-        if (stats.getBuckets() != null) {
+        if (includeTopBkt && stats.getBuckets() != null) {
             Bucket topBkt = stats.getBuckets().getBucketList().stream() //
                     .sorted(Comparator.comparing(bkt -> - bkt.getCount()))
                     .findFirst().orElse(null);

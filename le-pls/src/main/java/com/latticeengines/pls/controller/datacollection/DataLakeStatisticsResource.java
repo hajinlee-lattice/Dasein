@@ -7,13 +7,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.pls.service.DataLakeService;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
+import com.latticeengines.pls.service.DataLakeService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 @Api(value = "statistics", description = "Statistics of entities in data collection")
 @RestController
@@ -33,7 +32,7 @@ public class DataLakeStatisticsResource {
     @RequestMapping(value = "/topn", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get statistics")
-    public TopNTree getTopNTree() {
-        return dataLakeService.getTopNTree();
+    public TopNTree getTopNTree(@RequestParam(value = "topbkt", required = false) Boolean includeTopBkt) {
+        return dataLakeService.getTopNTree(Boolean.TRUE.equals(includeTopBkt));
     }
 }
