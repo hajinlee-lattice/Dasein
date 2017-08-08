@@ -86,8 +86,10 @@ public class PlayServiceImpl implements PlayService {
         List<LaunchState> launchStates = new ArrayList<>();
         launchStates.add(LaunchState.Launched);
         PlayLaunch playLaunch = playLaunchService.findLatestByPlayId(play.getPid(), launchStates);
+        PlayLaunch mostRecentPlayLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
         LaunchHistory launchHistory = new LaunchHistory();
         launchHistory.setPlayLaunch(playLaunch);
+        launchHistory.setMostRecentLaunch(mostRecentPlayLaunch);
         play.setLaunchHistory(launchHistory);
         // ----------------------------------------------------------------------------------------------
         // TODO in M14, we will contact Redshift to get new contacts number and

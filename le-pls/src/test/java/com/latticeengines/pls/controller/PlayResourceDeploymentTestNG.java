@@ -132,6 +132,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(retrievedFullPlay);
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getPlayLaunch());
+        Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getMostRecentLaunch());
         System.out.println("retrievedPlayOverview is " + retrievedFullPlay);
 
         List<Play> retrievedFullPlayList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play", List.class);

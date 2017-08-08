@@ -140,6 +140,10 @@ public class PlayLaunchServiceImplTestNG extends PlsFunctionalTestNGBase {
         retreivedPlayLaunch = playLaunchService.findLatestByPlayId(play.getPid(), states);
         Assert.assertNotNull(retreivedPlayLaunch);
         Assert.assertEquals(retreivedPlayLaunch.getPid(), playLaunch2.getPid());
+
+        retreivedPlayLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
+        Assert.assertNotNull(retreivedPlayLaunch);
+        Assert.assertEquals(retreivedPlayLaunch.getPid(), playLaunch2.getPid());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })

@@ -14,6 +14,9 @@ public class LaunchHistory {
     @JsonProperty("newAccountsNum")
     private Long newAccountsNum;
 
+    @JsonProperty("mostRecentLaunch")
+    private PlayLaunch mostRecentLaunch;
+
     public void setNewContactsNum(Long newContactsNum) {
         this.newContactsNum = newContactsNum;
     }
@@ -36,6 +39,14 @@ public class LaunchHistory {
 
     public void setPlayLaunch(PlayLaunch playLaunch) {
         this.playLaunch = playLaunch;
+    }
+
+    public PlayLaunch getMostRecentLaunch() {
+        return this.mostRecentLaunch;
+    }
+
+    public void setMostRecentLaunch(PlayLaunch mostRecentLaunch) {
+        this.mostRecentLaunch = mostRecentLaunch;
     }
 
     @Override
