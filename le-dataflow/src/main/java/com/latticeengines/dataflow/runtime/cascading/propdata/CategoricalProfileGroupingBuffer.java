@@ -26,7 +26,7 @@ public class CategoricalProfileGroupingBuffer extends BaseOperation implements B
     private int catValueLoc;
     private String nonCatFlag;
     private int maxCat;
-    private Map<String, Set<String>> catDict; // Attr -> values
+    private List<String> catAttrs;
 
     private Map<String, Integer> namePositionMap;
 
@@ -38,22 +38,23 @@ public class CategoricalProfileGroupingBuffer extends BaseOperation implements B
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.catAttrLoc = this.namePositionMap.get(catAttrField);
         this.catValueLoc = this.namePositionMap.get(catValueField);
-        catDict = new HashMap<>();
-        catAttrs.forEach(catAttr -> catDict.put(catAttr, new HashSet<>()));
+        this.catAttrs = catAttrs;
     }
 
     @SuppressWarnings({ "unchecked" })
     @Override
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
+        Map<String, Set<String>> catDict = new HashMap<>();
+        catAttrs.forEach(catAttr -> catDict.put(catAttr, new HashSet<>()));
         Iterator<TupleEntry> iter = bufferCall.getArgumentsIterator();
         while (iter.hasNext()) {
             TupleEntry arguments = iter.next();
-            processData(arguments);
+            processData(arguments, catDict);
         }
-        outputResult(bufferCall);
+        outputResult(bufferCall, catDict);
     }
 
-    private void processData(TupleEntry arguments) {
+    private void processData(TupleEntry arguments, Map<String, Set<String>> catDict) {
         for (Map.Entry<String, Set<String>> ent : catDict.entrySet()) {
             Set<String> knownVals = ent.getValue();
             if (knownVals.contains(nonCatFlag)) {
@@ -72,13 +73,21 @@ public class CategoricalProfileGroupingBuffer extends BaseOperation implements B
         }
     }
 
-    private void outputResult(BufferCall bufferCall) {
+    private void outputResult(BufferCall bufferCall, Map<String, Set<String>> catDict) {
         for (Map.Entry<String, Set<String>> ent : catDict.entrySet()) {
             Set<String> knownVals = ent.getValue();
-            for (String val : knownVals) {
+            if (knownVals.size() > 0) {
+                for (String val : knownVals) {
+                    Tuple result = Tuple.size(getFieldDeclaration().size());
+                    result.set(catAttrLoc, ent.getKey());
+                    result.set(catValueLoc, val);
+                    bufferCall.getOutputCollector().add(result);
+                }
+            } else { // Output null in case we lost some attributes which only
+                     // have null value
                 Tuple result = Tuple.size(getFieldDeclaration().size());
                 result.set(catAttrLoc, ent.getKey());
-                result.set(catValueLoc, val);
+                result.set(catValueLoc, null);
                 bufferCall.getOutputCollector().add(result);
             }
         }

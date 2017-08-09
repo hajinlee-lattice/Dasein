@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,64 +29,64 @@ public class CategoricalProfileBuffer extends BaseOperation implements Buffer {
     private String nonCatFlag;
     private int maxCat;
 
-    private Map<String, Set<String>> catDict; // Attr -> values
-
     private Map<String, Integer> namePositionMap;
 
     public CategoricalProfileBuffer(Fields fieldDeclaration, String catAttrField, String catValueField,
-            String nonCatFlag, int maxCat, List<String> catAttrs) {
+            String nonCatFlag, int maxCat) {
         super(fieldDeclaration);
         this.catAttrField = catAttrField;
         this.catValueField = catValueField;
         this.nonCatFlag = nonCatFlag;
         this.maxCat = maxCat;
         this.namePositionMap = getPositionMap(fieldDeclaration);
-        this.catDict = new HashMap<>();
-        for (String catAttr : catAttrs) {
-            this.catDict.put(catAttr, new HashSet<>());
-        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
+        Set<String> dict = new HashSet<>();
         Iterator<TupleEntry> iter = bufferCall.getArgumentsIterator();
         while (iter.hasNext()) {
             TupleEntry arguments = iter.next();
-            processData(arguments);
+            processData(arguments, dict);
         }
-        outputResult(bufferCall);
+        outputResult(bufferCall, dict);
     }
 
-    private void processData(TupleEntry arguments) {
-        String attr = arguments.getString(catAttrField);
+    private void processData(TupleEntry arguments, Set<String> dict) {
         String val = arguments.getString(catValueField);
-        Set<String> knownVals = catDict.get(attr);
-        knownVals.add(val);
-        if (knownVals.size() > maxCat) {
-            knownVals.clear();
-            knownVals.add(nonCatFlag);
+        if (val == null || dict.contains(nonCatFlag)) {
+            return;
+        }
+        if (nonCatFlag.equals(val)) {
+            dict.clear();
+            dict.add(nonCatFlag);
+            return;
+        }
+        dict.add(val);
+        if (dict.size() > maxCat) {
+            dict.clear();
+            dict.add(nonCatFlag);
         }
     }
 
-    private void outputResult(BufferCall bufferCall) {
-        for (Map.Entry<String, Set<String>> ent : catDict.entrySet()) {
-            Tuple result = Tuple.size(getFieldDeclaration().size());
-            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME), ent.getKey());
-            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_SRCATTR), ent.getKey());
-            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT), null);
-            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ENCATTR), null);
-            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
-            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
-            if (ent.getValue().size() == 0 || ent.getValue().contains(nonCatFlag)) {
-                result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), null);
-            } else {
-                CategoricalBucket bucket = new CategoricalBucket();
-                bucket.setCategories(new ArrayList<>(ent.getValue()));
-                result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), JsonUtils.serialize(bucket));
-            }
-            bufferCall.getOutputCollector().add(result);
+    private void outputResult(BufferCall bufferCall, Set<String> dict) {
+        String attr = bufferCall.getGroup().getString(catAttrField);
+        Tuple result = Tuple.size(getFieldDeclaration().size());
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME), attr);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_SRCATTR), attr);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_DECSTRAT), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ENCATTR), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
+        if (dict.size() == 0 || dict.contains(nonCatFlag)) {
+            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), null);
+        } else {
+            CategoricalBucket bucket = new CategoricalBucket();
+            bucket.setCategories(new ArrayList<>(dict));
+            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), JsonUtils.serialize(bucket));
         }
+        bufferCall.getOutputCollector().add(result);
     }
 
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {

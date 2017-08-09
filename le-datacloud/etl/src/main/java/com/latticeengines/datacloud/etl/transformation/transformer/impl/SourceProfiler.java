@@ -536,8 +536,11 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
 
     private Map<String, List<ProfileParameters.Attribute>> groupAttrsToEnc(List<ProfileParameters.Attribute> attrs,
             String encAttrPrefix) {
-        attrs.sort((x, y) -> y.getEncodeBitUnit().compareTo(x.getEncodeBitUnit())); // descending order
         Map<String, List<ProfileParameters.Attribute>> encodedAttrs = new HashMap<>();
+        if (CollectionUtils.isEmpty(attrs)) {
+            return encodedAttrs;
+        }
+        attrs.sort((x, y) -> y.getEncodeBitUnit().compareTo(x.getEncodeBitUnit())); // descending order
         List<Map<String, List<ProfileParameters.Attribute>>> availableBits = new ArrayList<>(); // 0 - encodeBits-1
         for (int i = 0; i < encodeBits; i++) {
             availableBits.add(new HashMap<>());

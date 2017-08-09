@@ -128,8 +128,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
                         DataCloudConstants.PROFILE_ATTR_BKTALGO),
                 KVDepivotStrategy.KEY_ATTR, clsMap, decStrs, config.isNumBucketEqualSized(), config.getBucketNum(),
                 config.getMinBucketSize(), false);
-        num = num.groupByAndBuffer(new FieldList(KVDepivotStrategy.KEY_ATTR), new FieldList(num.getFieldNames()), buf,
-                fms);
+        num = num.groupByAndBuffer(new FieldList(KVDepivotStrategy.KEY_ATTR), buf, fms);
         return num;
     }
 
@@ -143,15 +142,14 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         fms.add(new FieldMetadata(CAT_VALUE, String.class));
         CategoricalProfileGroupingBuffer groupBuf = new CategoricalProfileGroupingBuffer(
                 new Fields(CAT_ATTR, CAT_VALUE), CAT_ATTR, CAT_VALUE, NONCAT_FLAG, config.getMaxCats(), catAttrs);
-        cat = cat.groupByAndBuffer(new FieldList(DUMMY_GROUP), new FieldList(cat.getFieldNames()),
-                groupBuf, fms);
+        cat = cat.groupByAndBuffer(new FieldList(DUMMY_GROUP), groupBuf, fms);
         fms = getFinalMetadata();
         CategoricalProfileBuffer buf = new CategoricalProfileBuffer(
                 new Fields(DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
                         DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
                         DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
                         DataCloudConstants.PROFILE_ATTR_BKTALGO),
-                CAT_ATTR, CAT_VALUE, NONCAT_FLAG, config.getMaxCats(), catAttrs);
+                CAT_ATTR, CAT_VALUE, NONCAT_FLAG, config.getMaxCats());
         cat = cat.groupByAndBuffer(new FieldList(CAT_ATTR), new FieldList(cat.getFieldNames()), buf, fms);
         return cat;
     }
