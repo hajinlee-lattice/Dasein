@@ -290,17 +290,14 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
         matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
         matchInput.setPredefinedSelection(Predefined.ID);
-        matchInput.setKeyMap(getKeyMap());
-        matchInput.setDecisionGraph("DragonClaw");
         matchInput.setExcludePublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(true);
         matchInput.setDataCloudVersion(getDataCloudVersion());
-        matchInput.setSkipKeyResolution(true);
+        matchInput.setSkipKeyResolution(false);
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(false);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(false);
-
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
     }
