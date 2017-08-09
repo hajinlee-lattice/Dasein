@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,8 +35,9 @@ public class Oauth2Resource {
     @ApiOperation(value = "Generate an Oauth2 Api Token for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
     public String createApiToken(@RequestParam(value = "tenantId") String tenantId) {
-        log.info("Generating api token for tenant " + tenantId);
-        return oauth2Service.createAPIToken(tenantId);
+        String targetTenantId = getTargetTenantId(tenantId);
+        log.info("Generating api token for tenant " + targetTenantId);
+        return oauth2Service.createAPIToken(targetTenantId);
     }
 
     @RequestMapping(value = "/accesstoken", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -52,9 +56,10 @@ public class Oauth2Resource {
                 log.info("Using the default OAuthClientType " + OauthClientType.LP.getValue());
             }
         }
-        log.info("Generating access token for tenant " + tenantId + ", app_id '" + appId + "', clientType "
+        String targetTenantId = getTargetTenantId(tenantId);
+        log.info("Generating access token for tenant " + targetTenantId + ", app_id '" + appId + "', clientType "
                 + client.getValue());
-        return oauth2Service.createOAuth2AccessToken(tenantId, appId, client).getValue();
+        return oauth2Service.createOAuth2AccessToken(targetTenantId, appId, client).getValue();
     }
 
     @RequestMapping(value = "/accesstoken/json", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -63,8 +68,22 @@ public class Oauth2Resource {
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
     public String createJsonOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId,
             @RequestParam(value = "app_id", required = false) String appId) {
-        log.info("Generating access token for tenant " + tenantId + ", app_id '" + appId + "'");
-        String token = oauth2Service.createOAuth2AccessToken(tenantId, appId).getValue();
+        String targetTenantId = getTargetTenantId(tenantId);
+        log.info("Generating access token for tenant " + targetTenantId + ", app_id '" + appId + "'");
+        String token = oauth2Service.createOAuth2AccessToken(targetTenantId, appId).getValue();
         return JsonUtils.serialize(ImmutableMap.of("token", token));
+    }
+
+    private String getTargetTenantId(String tenantIdInUrl) {
+        String tenantIdInContext = MultiTenantContext.getTenant().getId();
+        if (StringUtils.isBlank(tenantIdInUrl)) {
+            return tenantIdInContext;
+        } else {
+            if (!CustomerSpace.parse(tenantIdInUrl).toString().equals(tenantIdInContext)) {
+                log.warn(String.format("Cross tenant token generation: logged in %s, looking for %s", tenantIdInContext,
+                        tenantIdInUrl));
+            }
+            return tenantIdInUrl;
+        }
     }
 }
