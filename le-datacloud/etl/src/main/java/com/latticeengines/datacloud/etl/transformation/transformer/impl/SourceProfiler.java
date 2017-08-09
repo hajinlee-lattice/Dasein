@@ -441,7 +441,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             if (attr.getAlgo() == null) {
                 paras.getAttrsToRetain().add(attr);
                 iter.remove();
-                log.warn(String.format("Attribute %s is moved from encode numeric group to retained group (%s)",
+                log.warn(String.format(
+                        "Attribute %s is moved from encode numeric group to retained group due to all the values are null: %s",
                         attr.getAttr(), JsonUtils.serialize(attr)));
             }
         }

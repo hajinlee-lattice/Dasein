@@ -184,7 +184,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         if (source instanceof HasSqlPresence) {
             String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             return TableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
-                    path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
+                    path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
         } else {
             String path = null;
             if (source instanceof TableSource) {
@@ -195,7 +195,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             }
             return TableUtils.createTable(yarnConfiguration, source.getSourceName(),
-                    path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
+                    path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION, true);
         }
 
     }
@@ -222,10 +222,10 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
         if (source instanceof HasSqlPresence) {
             return TableUtils.createTable(yarnConfiguration, ((HasSqlPresence) source).getSqlTableName(),
-                    paths.toArray(new String[paths.size()]), source.getPrimaryKey());
+                    paths.toArray(new String[paths.size()]), source.getPrimaryKey(), true);
         } else {
             return TableUtils.createTable(yarnConfiguration, source.getSourceName(),
-                    paths.toArray(new String[paths.size()]), source.getPrimaryKey());
+                    paths.toArray(new String[paths.size()]), source.getPrimaryKey(), true);
         }
     }
 

@@ -16,7 +16,11 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 public class TableUtils {
 
     public static Table createTable(Configuration yarnConfiguration, String tableName, String avroPath) {
-        Table table = MetadataConverter.getTable(yarnConfiguration, avroPath);
+        return createTable(yarnConfiguration, tableName, avroPath, false);
+    }
+
+    public static Table createTable(Configuration yarnConfiguration, String tableName, String avroPath, boolean skipCount) {
+        Table table = MetadataConverter.getTable(yarnConfiguration, avroPath, null, null, skipCount);
         table.setName(tableName);
         Extract extract = new Extract();
         String folder = StringUtils.substringAfterLast(avroPath.replace("/*.avro", ""), "/");
@@ -27,7 +31,12 @@ public class TableUtils {
     }
 
     public static Table createTable(Configuration yarnConfiguration, String tableName, String[] avroPaths, String[] primaryKey) {
-        Table table = MetadataConverter.getTable(yarnConfiguration, avroPaths[0], null, null);
+        return createTable(yarnConfiguration, tableName, avroPaths, primaryKey, false);
+    }
+
+    public static Table createTable(Configuration yarnConfiguration, String tableName, String[] avroPaths,
+            String[] primaryKey, boolean skipCount) {
+        Table table = MetadataConverter.getTable(yarnConfiguration, avroPaths[0], null, null, skipCount);
         table.setName(tableName);
         List<Extract> extractList = new ArrayList<>();
         for (String avroPath: avroPaths) {

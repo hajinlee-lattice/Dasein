@@ -36,13 +36,18 @@ public class MetadataConverter {
     }
 
     public static Table getTable(Configuration configuration, String path) {
-        return getTable(configuration, path, null, null);
+        return getTable(configuration, path, null, null, false);
     }
 
     public static Table getTable(Configuration configuration, String path, String primaryKeyName,
             String lastModifiedKeyName) {
+        return getTable(configuration, path, primaryKeyName, lastModifiedKeyName, false);
+    }
+
+    public static Table getTable(Configuration configuration, String path, String primaryKeyName,
+            String lastModifiedKeyName, boolean skipCount) {
         try {
-            List<Extract> extracts = convertToExtracts(configuration, path);
+            List<Extract> extracts = convertToExtracts(configuration, path, skipCount);
             Schema schema = AvroUtils.getSchemaFromGlob(configuration, extracts.get(0).getPath());
             Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, false);
             return table;
@@ -56,7 +61,7 @@ public class MetadataConverter {
         try {
             @SuppressWarnings("deprecation")
             Schema schema = Schema.parse(HdfsUtils.getInputStream(configuration, avscPath));
-            List<Extract> extracts = convertToExtracts(configuration, avroPath);
+            List<Extract> extracts = convertToExtracts(configuration, avroPath, false);
             Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, true);
             return table;
         } catch (Exception e) {
@@ -65,7 +70,8 @@ public class MetadataConverter {
         }
     }
 
-    private static List<Extract> convertToExtracts(Configuration configuration, String avroPath) throws Exception {
+    private static List<Extract> convertToExtracts(Configuration configuration, String avroPath, boolean skipCount)
+            throws Exception {
         boolean isDirectory = false;
         if (HdfsUtils.isDirectory(configuration, avroPath)) {
             if (avroPath.endsWith("/")) {
@@ -82,7 +88,9 @@ public class MetadataConverter {
                 extract.setExtractionTimestamp(fs.getFileStatus(new Path(match)).getModificationTime());
             }
             extract.setName("extract");
-            extract.setProcessedRecords(AvroUtils.count(configuration, match));
+            if (!skipCount) {
+                extract.setProcessedRecords(AvroUtils.count(configuration, match));
+            }
             extracts.add(extract);
             if (isDirectory) {
                 extract.setPath(avroPath);
