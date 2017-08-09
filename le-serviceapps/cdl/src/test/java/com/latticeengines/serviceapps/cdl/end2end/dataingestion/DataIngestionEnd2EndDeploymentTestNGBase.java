@@ -51,7 +51,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private static final Logger logger = LoggerFactory.getLogger(DataIngestionEnd2EndDeploymentTestNGBase.class);
 
     @Autowired
-    private DataCollectionProxy dataCollectionProxy;
+    protected DataCollectionProxy dataCollectionProxy;
 
     @Autowired
     protected DataFeedProxy dataFeedProxy;
