@@ -161,18 +161,22 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                             accountList.stream() //
                                     .parallel();
 
-                    parallelStream//
+                    parallelStream //
                             .map(account -> {
                                 try {
+                                    log.info("Processing account: "
+                                            + account.get(PlaymakerConstants.AccountId).toString());
                                     Recommendation recommendation = //
-                                            createRecommendation(tenant, playLauch, config, account);
+                                            prepareRecommendation(tenant, playLauch, config, account);
                                     recommendationService.create(recommendation);
-                                } catch (Exception ex) {
-                                    log.error(ex.getMessage(), ex);
-                                    throw ex;
+                                    log.info("Saved recommendation: " + recommendation.getRecommendationId());
+                                    return recommendation.getRecommendationId();
+                                } catch (Throwable th) {
+                                    log.error(th.getMessage(), th);
+                                    throw th;
                                 }
-                                return null;
-                            });
+                            }) //
+                            .collect(Collectors.toList());
                 }
 
                 processedSegmentAccountsCount += accountList.size();
@@ -181,7 +185,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     }
 
-    private Recommendation createRecommendation(Tenant tenant, PlayLaunch playLauch,
+    private Recommendation prepareRecommendation(Tenant tenant, PlayLaunch playLauch,
             PlayLaunchInitStepConfiguration config, Map<String, Object> account) {
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
