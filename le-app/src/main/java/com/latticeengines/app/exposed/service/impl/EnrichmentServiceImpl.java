@@ -34,9 +34,9 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     public TopNTree getTopNTree(boolean excludeInternalEnrichment) {
         TopNTree topNTree = columnMetadataProxy.getTopNTree();
         List<ColumnMetadata> cms = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Enrichment, "");
-        Set<String> internalAttrs = cms.stream().filter(ColumnMetadata::isCanInternalEnrich)
-                .map(ColumnMetadata::getColumnId).collect(Collectors.toSet());
         if (excludeInternalEnrichment) {
+            Set<String> internalAttrs = cms.stream().filter(cm -> Boolean.TRUE.equals(cm.isCanInternalEnrich()))
+                    .map(ColumnMetadata::getColumnId).collect(Collectors.toSet());
             topNTree.getCategories().forEach((cat, catTree) -> catTree.getSubcategories()
                     .forEach((subCat, attrs) -> attrs.removeIf(attr -> internalAttrs.contains(attr.getAttribute()))));
         }
