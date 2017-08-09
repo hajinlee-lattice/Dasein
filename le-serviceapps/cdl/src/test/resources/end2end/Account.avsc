@@ -51,7 +51,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "3f80b52a-3a48-46fd-8983-a93b15408cf0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -69,7 +68,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d207ad2c-36a0-4ec1-819b-77d0ecb460ed",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -87,7 +85,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "8516313b-c801-46a5-8504-3b7d4e427dd1",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -105,7 +102,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "f1c1065e-41e2-4fb4-8e2c-87f15175ccfc",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -123,7 +119,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "01bca6e4-76ef-4920-bccf-a40cb8235ba0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -141,7 +136,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "fd76c6b2-7e5d-4b3c-9996-cf3f097c3ad6",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -159,7 +153,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "a201268f-88c1-428a-b113-5ba27da14493",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -177,7 +170,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "4e55af5f-a95f-4cad-917b-0be5b8149f05",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -195,7 +187,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "ab914650-056e-4f00-ba4a-3065ed3aad9a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -213,7 +204,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "27d9537b-d1b7-4f29-b3ca-c3b54b162b67",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -231,7 +221,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "86b55996-bb32-430a-a4a6-2c24ec0df7b3",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -249,7 +238,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "10561741-fd7c-492f-ad21-09b804066dc1",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -267,7 +255,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "5a42e9df-53d2-4503-993b-12542638a5a8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -285,7 +272,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Double",
       "uuid": "07b16d9c-8f65-4116-8300-ce87ffefd25c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -303,7 +289,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "65cb752d-d7d3-4eb6-b676-c2b8be68e84d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -321,7 +306,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "7a2629a7-b71f-40ea-a762-d5b56c76821f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -339,7 +323,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "e1d287a5-c87d-4dd7-9379-cf5f4caa2551",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -357,7 +340,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c9d00d1d-2ab1-4cdd-956b-c7218aa2d268",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -375,7 +357,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "2089c663-be04-4d4b-bd95-cd4a668b700c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -393,7 +374,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "ae5ce08a-0892-4b16-a199-7b873b90f5be",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -411,7 +391,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "fab24746-bc7b-4230-b31a-4a7932c87bf3",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -429,7 +408,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "7b4124b4-6162-4d7a-b3b5-2fd7c04c79f4",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -447,7 +425,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "3014811e-e953-4ef1-989f-a1aef64da8ea",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -465,7 +442,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "37cfc284-6b06-4c7e-a2de-9fb2a0818051",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -483,7 +459,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "2ba8c688-6a2e-4d59-aaf4-81e3010bbe11",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -501,7 +476,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "0a5927a3-6b7f-435c-b70f-652762f9b261",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -519,7 +493,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "89443ded-7ee3-4c14-8428-cec39abef8cd",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -537,7 +510,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "7c7b3ea2-5798-4ddf-be61-846cd6e04613",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -555,7 +527,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "10287e33-7b69-479f-ade9-71d083e6dbcb",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -573,7 +544,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "7c0172c2-3d33-4a71-b015-e604de34fa17",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -591,7 +561,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c2ce9e38-ced7-46e4-9ea6-19d263df1265",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -609,7 +578,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "bf0418fb-394a-4ea2-a814-cce83ee4272a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -627,7 +595,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "75c398a5-0d4c-47b2-bbfe-c212affc20fa",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -645,7 +612,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "51b93cd0-bb12-448e-8761-d2e28f7bd925",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -663,7 +629,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "3302430a-de34-4d8f-bbbf-6467f11cb79f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -681,7 +646,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "e55a98dd-8b8e-42b5-b9c0-e9623ffe40d3",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -699,7 +663,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "9f41fd49-26c1-4eb4-8bef-8d5d150a2104",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -717,7 +680,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "0c844c2a-6ab3-47c4-8882-fb8da644a9ea",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -735,7 +697,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "aede6e18-d19c-480d-b191-f36f358a4aa0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -753,7 +714,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "466e99d6-7626-404d-aef7-2ea7bf480bda",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -771,7 +731,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "062785e8-d393-4cbf-9105-645a06ad6c23",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -789,7 +748,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "25fd5541-962d-419b-9572-9c9f6f23f11f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -807,7 +765,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "98b3254b-9765-4122-a4f7-7a0b422927a9",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -825,7 +782,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "4165e655-85bd-4026-a6f1-fca61ab54b4f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -843,7 +799,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "8072d2a3-74e1-46ed-80ea-c974b87d6734",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -861,7 +816,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "ec6ed65d-42db-4fbb-9d65-f3a94c492db3",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -879,7 +833,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "479a5021-06f1-4623-a271-0784b2b24625",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -897,7 +850,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "58349da8-a6a8-48f8-82f9-2fe8b4f933dc",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -915,7 +867,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "613d6c93-5c7e-4176-a554-fafe7ccecb8e",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -933,7 +884,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "dbb34ff8-daf8-442c-9d1b-6e59e027fce2",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -951,7 +901,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "a58b391d-8c61-4c7f-a1c8-014df0b0a405",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -969,7 +918,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "86a4911b-a065-4561-b06e-26d14c883b59",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -987,7 +935,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "01858962-42c6-483d-b9f0-c70a748571c4",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1005,7 +952,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "12f5666a-ad4e-482f-b688-bf4cc75e8ad4",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1023,7 +969,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "64339c00-46cd-4b5d-ba5d-37e9865fba96",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1041,7 +986,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "f40336fa-7c67-4e24-acb2-5d5887a041f5",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1059,7 +1003,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "fd2db428-44aa-4c96-96cd-3f630aee1777",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1077,7 +1020,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "76851071-4227-4de1-a7df-e4e9339a473f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1095,7 +1037,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "69b415f7-6320-445f-a521-bf29567efdfa",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1113,7 +1054,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "78cac8a2-da55-4f54-bdde-79ac465a6daa",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1131,7 +1071,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "450dbad5-f834-4f6e-a0c8-07395f3a6abc",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1149,7 +1088,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "7b445f24-f2aa-49f2-aecb-20545019a60f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1167,7 +1105,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "23a20d0d-ede2-4392-a8b3-b8320cb9039a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1185,7 +1122,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "59d175d7-9d71-4dcc-93a0-f8b792fc2e62",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1203,7 +1139,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "92493042-7429-40dc-a406-e2cc191af594",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1221,7 +1156,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "0e6b2636-e906-4922-8f20-99b8739874d0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1239,7 +1173,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "18452cb5-5df6-4262-b092-fa2064254007",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1257,7 +1190,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "70a7973f-931a-4c81-b941-a83cf75df62c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1275,7 +1207,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "9575323b-7f6b-42bc-adf5-fe9a5b1bda6c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1293,7 +1224,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "6e7846e3-f2cf-44ba-b686-3dbbbea0cf02",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1311,7 +1241,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "21bf5602-fe3b-47ee-9fe8-b0b653ea7a32",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1329,7 +1258,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "1c39d456-34ba-45ac-ab64-cb0ff6c88082",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1347,7 +1275,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "45ee7e1e-3400-4348-944c-500349f87d37",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1365,7 +1292,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "2a91de22-fa22-4eb4-8e18-19c20bb72b72",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1383,7 +1309,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "646a5936-a805-4c9e-8006-014d2bd18861",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1401,7 +1326,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "bea129c1-de8c-4662-9ee6-23396c410526",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1419,7 +1343,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "4dfbd106-b015-4fa5-b2d0-e2eb0c5663e8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1437,7 +1360,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "8d9497c5-9387-4434-a287-299c1809b1d2",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1455,7 +1377,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "a1e2f0d5-be6f-40bc-9e8c-3abde1cb798a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1473,7 +1394,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "21454dc6-f274-4319-b69d-4d3b703a19c8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1491,7 +1411,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "02158e93-c3f5-411c-87d2-02a91cc0ad5a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1509,7 +1428,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d5a223a2-9852-4c26-af0f-3b1de79770f6",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1527,7 +1445,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "092c6e8a-fc5f-4408-a628-e4e2f64b4042",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1545,7 +1462,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "c99df935-a8f1-45d8-9ab2-6f51708c0ad0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1563,7 +1479,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "e7d8ff9f-8036-4d74-b6a5-39a90603a1dd",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1581,7 +1496,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "73ecd3a5-88a3-4f49-9a16-c96174e7b4d5",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1599,7 +1513,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "4878d315-f3dd-4bea-8331-ccf41fcae692",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1617,7 +1530,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "18b62906-0582-4089-ab03-f4bc572b5a61",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1635,7 +1547,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "128dbe80-7ba6-4874-937f-fc7912784f03",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1653,7 +1564,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Double",
       "uuid": "8e813571-25a4-4789-b232-b77cc3927dc0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1671,7 +1581,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "eb1fc7e4-ca37-49e5-b43e-e69b97125a50",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1689,7 +1598,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "d0501ae5-db68-411b-abef-da3e7be79b1f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1707,7 +1615,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "cf5b137e-20b7-4eef-91be-5b6fc1d85cb1",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1725,7 +1632,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "94482653-9e3a-4493-941d-e22c23d883ae",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1743,7 +1649,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "3177a87c-62a8-4e8e-af51-43d3ccb7a86b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1761,7 +1666,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "52517306-dded-4c04-b477-98cf93577de7",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1779,7 +1683,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "e1d5f2ae-9701-4986-a701-c294c4527fdb",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1797,7 +1700,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "75ed0865-20bb-4463-8ff7-cc2d7fe3f503",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1815,7 +1717,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "709afae3-98bc-4472-a4ae-9d461c8c9013",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1833,7 +1734,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "fbef8b19-0f22-4527-a999-92e36d657da4",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1851,7 +1751,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "144ea734-e362-4f80-90b7-b57d4e8d4e7f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1869,7 +1768,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "2b470ddc-3a47-4f6d-87cd-7596852462a9",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1887,7 +1785,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "763d1f45-a208-43f2-8325-cab65f1bfc15",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1905,7 +1802,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d9a3f30e-0c4b-40e4-918e-fe3622ffe126",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1923,7 +1819,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "f15aed4d-78a8-4091-baff-18583e8e4eff",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1941,7 +1836,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c3076d21-979c-4f7f-b2ee-f166a041b053",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1959,7 +1853,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d19ee0e4-7060-4889-879f-898a3a06869a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1977,7 +1870,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "8ae93ba0-166f-4b42-89ca-6d0be8070a57",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -1995,7 +1887,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "33f4374d-050e-4892-9329-0fc1676e055f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2013,7 +1904,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "4614f924-10f2-4082-a9e7-76c9d5a06258",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2031,7 +1921,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "6da63160-b801-4a64-bf5b-b21a975a131d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2049,7 +1938,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "29886fcf-d4da-4d09-b0ad-46b2b1b66fc1",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2067,7 +1955,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "568b4e43-58d9-4253-b4f9-ed3dba2b042c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2085,7 +1972,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "0851916f-f87c-4d27-828a-52f6c94ba893",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2103,7 +1989,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "bafe1e59-4708-465c-8d93-b3e98a797eab",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2121,7 +2006,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "de9ea9c1-bf9f-40c8-8b9d-7812b8213b52",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2139,7 +2023,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "0a7acf1d-25dd-4a95-9954-f3d1eee34e7c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2157,7 +2040,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "374cbe6b-818e-42d4-a491-cc3daa370b75",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2175,7 +2057,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c97734f9-44ce-473c-9ac0-2387be076d1b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2193,7 +2074,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "21b4737c-3d7e-4a18-99cd-e9e592da16dc",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2211,7 +2091,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "4994668b-1942-42db-b32b-ee567c49d5ad",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2229,7 +2108,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "cadcec3a-a478-4c61-ac24-d1a353d9dc85",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2247,7 +2125,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "44cd592c-f609-4c1a-80b9-406bf54dc8b7",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2265,7 +2142,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "00d00823-efd6-416d-8d9a-3e482b953c6a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2283,7 +2159,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "7dde60ca-6896-4b65-83ec-2552c3dd640c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2301,7 +2176,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "10d94754-1587-45d7-8ef5-7a8894aad0b8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2319,7 +2193,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "0999e31f-d316-473c-b480-87e19889b7bc",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2337,7 +2210,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "e60e49da-507b-4201-8ac3-eab61978865b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2355,7 +2227,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "2faf0e33-a822-490c-ba13-f60d5f1e9197",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2373,7 +2244,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "7395fcf1-c95f-4e0b-bd1b-baf50c4b4da0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2391,7 +2261,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "f74e8b44-5038-426c-b9ef-80730362fa71",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2409,7 +2278,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "90a328f0-b530-4ba3-bef9-f3d573465640",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2427,7 +2295,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "35c78561-aec7-4b72-b8dd-58349f20e7e5",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2445,7 +2312,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "84e89968-38e5-40cd-bef5-82d0ceb41993",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2463,7 +2329,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "10965f54-54f3-4340-b075-c0ca9ef5cd89",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2481,7 +2346,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c35a00e6-9294-4eee-8126-95f42a6a2255",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2499,7 +2363,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "62b2d898-b79e-4078-83bd-87388918c7d4",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2517,7 +2380,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "6a8446c8-3180-496c-85b7-5358347ef5d4",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2535,7 +2397,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "3863b3ce-0634-4ce2-b4f1-af7c4c41582f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2553,7 +2414,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "5601043d-2187-43c6-817c-d8bba9957272",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2571,7 +2431,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "649bc94b-f86f-421a-a8b2-e665fdfb2bed",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2589,7 +2448,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "573fbb5f-174e-41b0-90fb-a7b8c27f3494",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2607,7 +2465,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "3f8ecb9c-adcd-4d0d-842b-8f015d9f5e6b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2625,7 +2482,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "6227db5a-b51a-4a82-b845-f1908f1ee836",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2643,7 +2499,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "52fbc240-2180-4d75-a9d0-e9e001d5f099",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2661,7 +2516,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "029630b6-3a5d-4621-a2df-7125e3a4bc70",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2679,7 +2533,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "788722d3-ed8e-4c58-99e7-85c1ad37943a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2697,7 +2550,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "1d2dee32-575b-403d-ac2c-ad25b64b5cb7",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2715,7 +2567,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d957342b-cdba-4055-a4d0-7fdc0d1cd9b3",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2733,7 +2584,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "42ad0a93-b0b6-4e4a-b1e5-3eb47b3633cc",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2751,7 +2601,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "e791f21c-cbf1-4484-92b7-27a03571c4c0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2769,7 +2618,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "a5dc543c-e50b-4f8b-bdfe-e7849580d94a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2787,7 +2635,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "7bd2f6e0-95b9-46c4-b63b-24c72bb3b14a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2805,7 +2652,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "ee3f92ce-2b8a-468c-9818-45ddad47cf2e",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2823,7 +2669,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "4eaa8af4-6176-4fb9-a59e-63684118f121",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2841,7 +2686,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "c236730d-782d-4e0f-8658-c312a414210e",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2859,7 +2703,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "1e24ea12-6014-4c84-a935-0c8ccf833a65",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2877,7 +2720,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "02fb466d-4b07-4d26-a756-98c0dbf19edb",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2895,7 +2737,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "90c76781-7a6b-41c9-a3c4-2eec6dce1988",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2913,7 +2754,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "ae5e339f-2446-45cb-92c5-41c9913235c8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2931,7 +2771,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "6be7d7cd-f157-453c-90f3-83dfe6dc0f6d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2949,7 +2788,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "35ab6bac-f258-43f2-a0ba-16b2dd2ca599",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2967,7 +2805,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "f9b99853-69f9-4821-a5dd-09aeace83c32",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -2985,7 +2822,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "aff10e0c-5f5e-47a5-a3f3-3c888523f27c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3003,7 +2839,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c201385a-9e0f-4704-b963-198f8fb241b8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3021,7 +2856,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "be9b6ac8-4b01-45c9-9709-4f6fcac31af7",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3039,7 +2873,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "2d888655-93fd-4699-a252-94788d2771dd",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3057,7 +2890,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "3311d34c-bb49-4de8-99c9-f37240f5c1f4",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3075,7 +2907,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "c5bb5799-ed1a-4b94-abea-c0b60827f411",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3093,7 +2924,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "182b94cf-1f4d-4758-99e8-edbe5d03ab9a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3111,7 +2941,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "ec68858e-76d5-4996-a7c3-72a6f1b7b906",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3129,7 +2958,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c8cd4417-d172-465f-8146-8a926fd96d74",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3147,7 +2975,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "a0d10f75-384a-4a3a-9f07-0b43310494a1",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3165,7 +2992,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "d0d458a1-9054-4c53-afbf-9798f5ec813b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3183,7 +3009,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "03471c79-c2fd-42d9-8611-5d5a31bc0152",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3201,7 +3026,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "621f0c79-2b65-4cef-9b80-cf577e493d56",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3219,7 +3043,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "41c24464-6b90-402d-9ee9-04e439e8d9e1",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3237,7 +3060,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "f6838e4a-2620-4234-ad08-2c329d5a79d5",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3255,7 +3077,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "f2fd7d3d-337f-4ff7-9762-544f40fb304f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3273,7 +3094,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "cf9c9d96-a726-4314-baa4-c034ec7c0119",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3291,7 +3111,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "dbd4900e-cdb2-4236-adb2-95401c1f8e37",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3309,7 +3128,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "3fbc3216-c4ea-4aab-b196-e62ceb684ca9",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3327,7 +3145,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "2618a04e-ae81-4eb1-8237-623a877103f4",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3345,7 +3162,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Double",
       "uuid": "fb2274bf-9489-47d9-bcce-268062f437b6",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3363,7 +3179,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "f0b3c93f-c765-4b42-8820-7ea2a2e38890",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3381,7 +3196,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "791ccccf-4b25-4cc0-b4ab-991f7b85a93c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3399,7 +3213,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "7838475b-abfb-434e-86b1-00a24a24aa59",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3417,7 +3230,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "7257e625-19a9-4616-999f-d4cab0b7f9cc",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3435,7 +3247,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "f7b9d71b-a9dd-48d8-9076-35ea3e8ae581",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3453,7 +3264,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "fa6b4cf8-cf74-403c-9882-e1b6d643b69f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3471,7 +3281,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "ec328f75-a756-4b3e-90fd-60bb39050e8f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3489,7 +3298,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "dc4c8e52-d55b-49c9-8bd0-c32913be7b8d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3507,7 +3315,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "b243ff63-502a-4c0c-bd6f-719230aacbae",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3525,7 +3332,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "ad0a3ae4-1781-4e8a-9015-80bfb7c89333",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3543,7 +3349,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "90d57633-a8c2-4bc8-9f32-65eb4f3e810e",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3561,7 +3366,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "3b0bb440-11c1-46fb-b24c-d9d4e34a32bd",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3579,7 +3383,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "e4d080bd-af91-4bde-a1e6-be36ade99e76",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3597,7 +3400,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "94c0b485-dee9-4dc8-b8b4-5a4c4d4b0a4b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3615,7 +3417,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "32505a4e-f569-421b-a184-355fa395e014",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3633,7 +3434,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "df0e4e07-08cd-4d61-8900-4a9793f76eba",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3651,7 +3451,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "280c6afe-a1d8-44b3-a2c8-4e1585c875f9",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3669,7 +3468,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "4e872a29-35c0-4f72-8890-68d1fd6a276d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3687,7 +3485,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "8f0b9cd0-f21d-4112-a53b-30c03fbdbefb",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3705,7 +3502,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "e3979536-9a0e-40d8-8c3c-7ec96786b790",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3723,7 +3519,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "d0cd8d89-c872-467b-b0ef-f1da1284a6c7",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3741,7 +3536,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "c2f77f1a-7546-4a82-ace6-c3131812aaca",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3759,7 +3553,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "5e7b267c-6819-4ebd-b05f-b21946f0896d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3777,7 +3570,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "36c49022-9b0d-4ad9-b333-8186c02879eb",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3795,7 +3587,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d6951dc6-2c62-4e08-b904-6743bc621098",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3813,7 +3604,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "bb282d51-49c8-4c2d-939f-7fa79e785d6a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3831,7 +3621,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "8e6b72f8-42ea-4f84-812b-248b8e0de48b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3849,7 +3638,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "63bb336c-977d-4650-85c4-75acc633867b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3867,7 +3655,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c6259fff-53e4-40ea-abac-2e99c44c2557",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3885,7 +3672,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "06bf87c7-72e8-418c-89c8-0f079f769a6c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3903,7 +3689,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "1e0b760b-1861-4326-90f0-8224810596fa",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3921,7 +3706,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c6b6c4ff-dc8f-45b8-9982-60a4a6169bde",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3939,7 +3723,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "f410fd1d-92bf-4460-8b99-9ffa5387f14c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3957,7 +3740,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "bbeaed0b-a032-4f21-8abe-0ff486e24d04",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3975,7 +3757,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "2f2019a5-db05-48ac-bd25-1b2bca6b4357",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -3993,7 +3774,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "3c4dae5d-ae0b-47e4-92ae-6ab20e7903d5",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4011,7 +3791,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "9e66d7ee-8ff1-4d1f-b81d-7c2f1b8cda9d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4029,7 +3808,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Double",
       "uuid": "0401372d-7481-477a-9a61-59213273bf19",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4047,7 +3825,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "2ce5b322-b588-4ea7-9507-a69e03e076f1",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4065,7 +3842,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "ae7b0fb9-61ce-4200-93dd-e52100d6ed83",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4083,7 +3859,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "80cca372-3340-4832-99da-16ad1ade2f49",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4101,7 +3876,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "272dab18-b8f6-4c8b-a183-7f3805b63586",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4119,7 +3893,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "1bf3ed4b-e600-4cd7-96ae-eaca2964269a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4137,7 +3910,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "ed145726-bd6f-4574-a2a3-11c933ab55b2",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4155,7 +3927,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "5bb09221-742d-47bb-ae86-2194ae5848e0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4173,7 +3944,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "95a26d72-3602-4b28-a20a-9ff230ca3d32",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4191,7 +3961,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "94ad5fc0-2b21-4f8f-b9e4-fc0f177fbebc",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4209,7 +3978,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c3df31c1-3ac6-44b4-8a97-b89e80733992",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4227,7 +3995,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "267b66e3-643b-4e1f-8112-09f48e21a8ad",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4245,7 +4012,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c75bd7a2-66af-4a44-9fc9-464402ae5931",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4263,7 +4029,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "909613aa-05d9-4a63-8319-284dd15bad65",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4281,7 +4046,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "dc7c310c-c9fb-48ab-b93c-20cd3a917b2f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4299,7 +4063,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "1c2edbe9-d342-4ed5-947c-afef35898903",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4317,7 +4080,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "71bf5841-4de4-4764-a3c5-446eaa17cc68",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4335,7 +4097,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "993df801-9594-41f3-85c9-7218c1e68294",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4353,7 +4114,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "1fae4e8e-9d54-4d62-ab83-5b802a0741ef",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4371,7 +4131,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "3935ea75-7767-4bf3-80a5-eefedaeee7bb",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4389,7 +4148,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "b28b82a9-1aca-4b07-b118-531a0c3c4a0d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4407,7 +4165,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "fdb680ff-e3e0-47f1-93c9-79189ce903d8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4425,7 +4182,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "353a9da3-ca29-4abe-89f5-798860fb7af3",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4443,7 +4199,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "83670ea5-f748-426a-ae6e-41b0411fdd5b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4461,7 +4216,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "75814d81-1dfb-4370-aa27-ce06874a35c6",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4479,7 +4233,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "485c6b20-5779-4eb2-9978-237fdb62fb2a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4497,7 +4250,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "df7619a3-6269-4d4b-b172-39b156d42f4f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4515,7 +4267,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "df09332f-3bf0-48f0-9ba8-7d3aa1c22a59",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4533,7 +4284,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "2d9bfcf6-f956-4072-be85-af62dab7815d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4551,7 +4301,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "fd7caa8b-6ca3-4a35-9d5f-d9e92387433f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4569,7 +4318,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "aa8c2c9b-c925-4f8a-b47e-cf8ade841caa",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4587,7 +4335,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "3950e0bb-6ce5-4fc9-a269-dfe05f958bbf",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4605,7 +4352,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "812729fe-c69d-461d-9f48-62b30803160f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4623,7 +4369,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d962ed90-63ff-44f8-9e27-e6a8f6373872",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4641,7 +4386,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "87d1a897-3de7-44b2-8647-8009f169746b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4659,7 +4403,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "dbe30010-faa9-4425-b5d4-0208f582731d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4677,7 +4420,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "ff5a5e39-3f34-4598-b434-31aae1f02aba",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4695,7 +4437,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "39d17952-db16-4307-a3f8-bbd74ce134d8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4713,7 +4454,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "2f90cf17-00eb-494e-bc10-e62da519cf69",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4731,7 +4471,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "616f6dca-becf-47a9-beb2-e150fefe909d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4749,7 +4488,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "61a13e77-bfeb-4cd7-bde9-fffb016c0706",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4767,7 +4505,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "9d5ac104-6e54-464d-897d-03db5c1d3561",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4785,7 +4522,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "729b2dce-bf45-4b90-b550-6bf80fea889a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4803,7 +4539,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "6849e984-097f-4a1a-bb37-a6e731f1ccfd",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4821,7 +4556,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "b2e961b1-3823-45e4-b9d8-7b94a7430785",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4839,7 +4573,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "a3951150-49cb-44a3-bd66-dcbf279c12eb",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4857,7 +4590,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "4760728b-3403-4a8b-84a9-71cdc1e78c7e",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4875,7 +4607,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "515cfb8a-d0c0-4192-b9bb-a20b39443ffe",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4893,7 +4624,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "90894b20-31bc-4aaa-b52b-78c154f41fd5",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4911,7 +4641,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "76b06660-7449-476f-b0a9-4738ada172cd",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4929,7 +4658,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "9d8ebcf3-39bb-45b7-bbc8-d6e702bc51df",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4947,7 +4675,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "fc97dd1e-5865-4608-8f06-686fe7e5d083",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4965,7 +4692,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "18d2dd0e-9179-4c12-83b9-a77f206658ee",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -4983,7 +4709,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "5e99e04e-fe66-4ffb-bd45-cc4e75788a0d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5001,7 +4726,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "9296d5c1-1ed7-4d0e-b70f-4bd5790fcead",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5019,7 +4743,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "b80e47c9-1a3c-4f19-ae7d-4a0ee5e65501",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5037,7 +4760,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "b5d7ba3f-948e-4a5c-aa89-5a1becdb7382",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5055,7 +4777,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "6be24e45-b482-41a1-b36f-f52ecddf4cdf",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5073,7 +4794,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "a10ced31-13cb-4dce-b94b-8df62ca7514b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5091,7 +4811,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "037d83ee-adb3-4d98-8cca-540f19c2a2fc",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5109,7 +4828,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "4bd53729-38be-4c41-9b68-a191eb9543c8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5127,7 +4845,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "60921156-c430-405e-b5dd-511cdd763a72",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5145,7 +4862,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "ed86c9b1-b2a5-437a-a896-6acdf6d9309d",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5163,7 +4879,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "9d6d7ae5-ecd8-4e18-87d9-2ac38ba292df",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5181,7 +4896,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "0cc7e109-27e9-4494-9864-9b3e7165b847",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5199,7 +4913,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "ef0d7240-bf2f-4961-bd1d-a8258dbfba09",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5217,7 +4930,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "8b0a3105-d448-4b0e-81e8-ad80493e7fe9",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5235,7 +4947,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "a2ac837b-079b-4d63-b215-787ef97cfdff",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5253,7 +4964,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "0fd9199b-3f34-4d0f-bf12-561551ceac60",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5271,7 +4981,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "df85967b-4587-48a7-b6d9-3b739a151d18",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5289,7 +4998,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "e93779d2-10dd-43cf-8208-f848ef89eecb",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5307,7 +5015,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "8230f203-e3d1-4e4a-89be-fee827a41f57",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5325,7 +5032,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "e8a1b509-e16f-437c-8f7b-5ebb1fe2d320",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5343,7 +5049,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "97e375af-6d43-4a9c-abd6-adfbf681311f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5361,7 +5066,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "8f5ef43b-7636-4cd0-af6f-7551c6535542",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5379,7 +5083,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Double",
       "uuid": "119cdb79-0c76-4b16-84f2-c6eb5f3e50f2",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5397,7 +5100,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "b71f6894-ddb3-4fc6-af04-bb2a0ac10532",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5415,7 +5117,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "8243c96c-e7c0-4633-906c-bc18a101dbf2",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5433,7 +5134,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c5ba2169-6075-4b35-879b-a947f3db21b2",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5451,7 +5151,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "c55b6bb6-d402-4942-887e-22172ded2413",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5469,7 +5168,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "55e92b67-54bc-4a31-a790-487ae818bc07",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5487,7 +5185,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "35dd2ad8-be10-4c90-91f6-7e1081bd4c53",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5505,7 +5202,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "69981f13-a602-4522-80f6-61d04e034c3b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5523,7 +5219,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "13b339fb-c7fc-4c62-a1e8-dc98ed866b30",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5541,7 +5236,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "193eb1aa-479f-459d-a657-913575592678",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5559,7 +5253,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "d4453018-46f2-4664-abd7-3c532ac6aa99",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5577,7 +5270,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "191ca2c3-57e9-4e79-a384-8f1a92d3173c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5595,7 +5287,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "7b396187-34c3-4dc7-aec1-4128aebe4b8b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5613,7 +5304,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "764de6c7-bc60-4923-a014-6b748e9ba271",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5631,7 +5321,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "73631ec9-9f71-4397-a700-aa29b8aa4464",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5649,7 +5338,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "ae897e39-7328-41fe-88bd-eb26bde3ea40",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5667,7 +5355,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "f171a957-fbe5-4d69-8a2b-ce3dddf786c5",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5685,7 +5372,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "3754d75e-48c9-49d2-958e-1d1992d30d03",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5703,7 +5389,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Double",
       "uuid": "5f151957-0c12-4505-b180-29c85e30cdad",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5721,7 +5406,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "3a3b50f9-bec8-42e3-80e6-53fa48ebee5e",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5739,7 +5423,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "03b04a1b-3bf6-4635-a34e-5cd5bb3ef229",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5757,7 +5440,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "f94ea4c1-6be4-479f-8204-af9b7cba1ba5",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5775,7 +5457,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "c8cd05cd-80ef-4969-b378-d61b069e526b",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5793,7 +5474,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "ef1fe54a-b71c-4ffc-ba1b-84b439974732",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5811,7 +5491,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "27df23c3-e8be-46d2-b605-cc4edbb0fa41",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5829,7 +5508,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "51599dd6-0402-440b-97c6-f60dcffaa039",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5847,7 +5525,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "6e29f844-9b4c-4acc-8251-8ce62201cb62",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5865,7 +5542,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "bc0a3752-4933-473b-a33a-2ca15f6df67f",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5883,7 +5559,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "4862f688-d8dc-41ce-b4a9-42ff1a8317ce",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5901,7 +5576,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "3873fbdc-208e-497d-9245-23562eb398b6",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5919,7 +5593,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "d3e1818d-2348-4e77-bc09-145c85fb0705",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5937,7 +5610,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "526eb475-7a19-4dda-9988-20a8ee7d04b7",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5955,7 +5627,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "9a09fdc7-09eb-4a80-8fce-ef90593923a9",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5973,7 +5644,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Bit",
       "uuid": "b5e15a3e-3fef-4cb4-a9e3-54431d51e637",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -5991,7 +5661,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "f267f405-3e23-49be-93c2-af9f160a08f8",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6009,7 +5678,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "ba8b712c-d607-4e51-8c53-5948df6152f0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6027,7 +5695,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d1dbcd5b-467f-41e4-8955-b73fd23a1f77",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6045,7 +5712,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "ea020a70-8f10-4fb0-9276-3d1f92f29cf5",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6063,7 +5729,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "04874ad9-1c3c-4fb9-8d81-8a2d62b8459c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6081,7 +5746,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "0f6948bc-561c-417d-b710-2c3048a5cba0",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6099,7 +5763,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "69817952-ea76-40fb-b4d4-796abb71579a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6117,7 +5780,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "b3a4698f-7cef-496b-a39b-df0c7f34aa4a",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6135,7 +5797,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d8071bc5-52bf-47b0-94d2-94d17aca33c9",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6153,7 +5814,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "d4b0bb0f-7f7a-485e-a986-c074e7a39538",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6171,7 +5831,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "a64778ff-1397-4c4e-901e-a29f2a551557",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6189,7 +5848,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "958162e0-e527-47e4-a610-d822a89250b6",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6207,7 +5865,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "524a9389-a36c-4161-a1ef-3e47a715591c",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6225,7 +5882,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "NVarChar(256)",
       "uuid": "1d5edc0d-19cb-49f2-b73d-3f3924ff99b9",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
@@ -6243,7 +5899,6 @@
       "DisplayDiscretizationStrategy": "",
       "sourceLogicalType": "Long",
       "uuid": "00cd053f-f842-44b1-a0b6-39c9c53f60fa",
-      "StatisticalType": "",
       "Nullable": "false",
       "Tags": "",
       "DataSource": "[S_Data_For_Dante_Accounts_1000_Import]"
