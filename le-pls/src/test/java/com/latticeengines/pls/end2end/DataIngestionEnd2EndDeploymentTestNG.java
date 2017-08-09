@@ -273,7 +273,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
             String schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
             switch (entity) {
             case Contact:
-                schemaStr = schemaStr.replace("\"External_ID\"", "\"" + InterfaceName.LEContactIDLong.name() + "\"");
+                schemaStr = schemaStr.replace("\"Id\"", "\"" + InterfaceName.LEContactIDLong.name() + "\"");
                 schemaStr = schemaStr.replace("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
                 break;
             case Account:
