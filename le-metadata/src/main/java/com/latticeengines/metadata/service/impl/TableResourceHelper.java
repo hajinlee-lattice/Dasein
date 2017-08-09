@@ -6,11 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +31,7 @@ public class TableResourceHelper {
     @Autowired
     private MetadataService mdService;
 
-    public List<String> getTables(String customerSpace, HttpServletRequest request) {
+    public List<String> getTables(String customerSpace) {
         log.info(String.format("getTables(%s)", customerSpace));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         List<Table> tables = mdService.getTables(space);
@@ -44,13 +42,13 @@ public class TableResourceHelper {
         return tableNames;
     }
 
-    public Table getTable(String customerSpace, String tableName, HttpServletRequest request) {
+    public Table getTable(String customerSpace, String tableName) {
         log.info(String.format("getTable(%s, %s)", customerSpace, tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.getTable(space, tableName);
     }
 
-    public ModelingMetadata getTableMetadata(String customerSpace, String tableName, HttpServletRequest request) {
+    public ModelingMetadata getTableMetadata(String customerSpace, String tableName) {
         log.info(String.format("getTableMetadata(%s, %s)", customerSpace, tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         Table table = mdService.getTable(space, tableName);
@@ -59,8 +57,7 @@ public class TableResourceHelper {
 
     public Boolean createTable(String customerSpace, //
             String tableName, //
-            Table table, //
-            HttpServletRequest request) {
+            Table table) {
         log.info(String.format("createTable(%s)", table.getName()));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.createTable(space, table);
@@ -69,8 +66,7 @@ public class TableResourceHelper {
 
     public Boolean updateTable(String customerSpace, //
             String tableName, //
-            Table table, //
-            HttpServletRequest request) {
+            Table table) {
         log.info(String.format("updateTable(%s)", table.getName()));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         if (!tableName.equals(table.getName())) {
@@ -83,8 +79,7 @@ public class TableResourceHelper {
     }
 
     public Boolean deleteTableAndCleanup(String customerSpace, //
-            String tableName, //
-            HttpServletRequest request) {
+            String tableName) {
         log.info(String.format("deleteTableAndCleanup(%s)", tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.deleteTableAndCleanup(space, tableName);
@@ -92,8 +87,7 @@ public class TableResourceHelper {
     }
 
     public Boolean deleteImportTableAndCleanup(String customerSpace, //
-            String tableName, //
-            HttpServletRequest request) {
+            String tableName) {
         log.info(String.format("deleteImportTableAndCleanup(%s)", tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.deleteImportTableAndCleanup(space, tableName);
@@ -101,14 +95,14 @@ public class TableResourceHelper {
     }
 
     public Table cloneTable(String customerSpace, //
-            String tableName, HttpServletRequest request) {
+            String tableName) {
         log.info(String.format("cloneTable(%s(", tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.cloneTable(space, tableName);
     }
 
     public Table copyTable(String customerSpace, //
-            String targetCustomerSpace, String tableName, HttpServletRequest request) {
+            String targetCustomerSpace, String tableName) {
         log.info(String.format("copyTable(%s(", tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.copyTable(space, CustomerSpace.parse(targetCustomerSpace), tableName);
@@ -133,7 +127,7 @@ public class TableResourceHelper {
         return response;
     }
 
-    public Boolean resetTables(String customerSpace, HttpServletRequest request) {
+    public Boolean resetTables(String customerSpace) {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         List<Table> tables = mdService.getTables(space);
         for (Table table : tables) {

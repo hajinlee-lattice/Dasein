@@ -46,8 +46,8 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         Table table = createTable(null, TABLE2, tableLocation2.append(TABLE2).toString());
 
         log.info("Creating TABLE2 for " + customerSpace1 + " with url type " + urlType);
-        String url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(), customerSpace1,
-                urlType, table.getName());
+        String url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(), customerSpace1, urlType,
+                table.getName());
         restTemplate.postForLocation(url, table);
         log.info("Creating TABLE2 for " + customerSpace2 + " with url type " + urlType);
         url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(), customerSpace2, urlType,
@@ -60,7 +60,8 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(received.getNamespace(), table.getNamespace());
     }
 
-    @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "createTableWithResource" })
+    @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = {
+            "createTableWithResource" })
     public void updateTable(String urlType) {
         String url = String.format("%s/metadata/customerspaces/%s/%s/%s", //
                 getRestAPIHostPort(), customerSpace1, urlType, TABLE2);
@@ -188,8 +189,8 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "validateMetadata" })
     public void validateMetadataForInvalidPayload() throws Exception {
-        String metadataFile = ClassLoader.getSystemResource(
-                "com/latticeengines/metadata/controller/invalidmetadata.avsc").getPath();
+        String metadataFile = ClassLoader
+                .getSystemResource("com/latticeengines/metadata/controller/invalidmetadata.avsc").getPath();
 
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -237,15 +238,15 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(receivedImportTable.getName(), importTable.getName());
         assertEquals(receivedImportTable.getExtracts().size(), 0);
         assertEquals(receivedImportTable.getAttributes().size(), importTable.getAttributes().size());
-        assertNotEquals(receivedImportTable.getLastModifiedKey().getLastModifiedTimestamp(), importTable
-                .getLastModifiedKey().getLastModifiedTimestamp());
+        assertNotEquals(receivedImportTable.getLastModifiedKey().getLastModifiedTimestamp(),
+                importTable.getLastModifiedKey().getLastModifiedTimestamp());
     }
 
     @DataProvider(name = "urlTypes")
     public Object[][] getUrlTypes() {
         return new Object[][] { //
-            { "tables" }, //
-            { "importtables" } //
+                { "tables" }, //
+                { "importtables" } //
         };
     }
 }

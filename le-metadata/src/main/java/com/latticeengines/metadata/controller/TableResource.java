@@ -2,8 +2,6 @@ package com.latticeengines.metadata.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,23 +31,22 @@ public class TableResource {
     @RequestMapping(value = "/tables", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
-    public List<String> getTables(@PathVariable String customerSpace, HttpServletRequest request) {
-        return tableResourceHelper.getTables(customerSpace, request);
+    public List<String> getTables(@PathVariable String customerSpace) {
+        return tableResourceHelper.getTables(customerSpace);
     }
 
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
-    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName, HttpServletRequest request) {
-        return tableResourceHelper.getTable(customerSpace, tableName, request);
+    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName) {
+        return tableResourceHelper.getTable(customerSpace, tableName);
     }
 
     @RequestMapping(value = "/tables/{tableName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table metadata by name")
-    public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName,
-            HttpServletRequest request) {
-        return tableResourceHelper.getTableMetadata(customerSpace, tableName, request);
+    public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName) {
+        return tableResourceHelper.getTableMetadata(customerSpace, tableName);
     }
 
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -57,9 +54,8 @@ public class TableResource {
     @ApiOperation(value = "Create table")
     public Boolean createTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
-            @RequestBody Table table, //
-            HttpServletRequest request) {
-        return tableResourceHelper.createTable(customerSpace, tableName, table, request);
+            @RequestBody Table table) {
+        return tableResourceHelper.createTable(customerSpace, tableName, table);
     }
 
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -67,27 +63,24 @@ public class TableResource {
     @ApiOperation(value = "Update table")
     public Boolean updateTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
-            @RequestBody Table table, //
-            HttpServletRequest request) {
-        return tableResourceHelper.updateTable(customerSpace, tableName, table, request);
+            @RequestBody Table table) {
+        return tableResourceHelper.updateTable(customerSpace, tableName, table);
     }
 
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete table and cleanup data dir")
     public Boolean deleteTable(@PathVariable String customerSpace, //
-            @PathVariable String tableName, //
-            HttpServletRequest request) {
-        return tableResourceHelper.deleteTableAndCleanup(customerSpace, tableName, request);
+            @PathVariable String tableName) {
+        return tableResourceHelper.deleteTableAndCleanup(customerSpace, tableName);
     }
 
     @RequestMapping(value = "/tables/{tableName}/clone", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Clone table and underlying extracts")
     public Table cloneTable(@PathVariable String customerSpace, //
-            @PathVariable String tableName, //
-            HttpServletRequest request) {
-        return tableResourceHelper.cloneTable(customerSpace, tableName, request);
+            @PathVariable String tableName) {
+        return tableResourceHelper.cloneTable(customerSpace, tableName);
     }
 
     @RequestMapping(value = "/tables/{tableName}/copy", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -95,9 +88,8 @@ public class TableResource {
     @ApiOperation(value = "Copy table and underlying extracts")
     public Table copyTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
-            @RequestParam("targetcustomerspace") String targetCustomerSpace, //
-            HttpServletRequest request) {
-        return tableResourceHelper.copyTable(customerSpace, targetCustomerSpace, tableName, request);
+            @RequestParam("targetcustomerspace") String targetCustomerSpace) {
+        return tableResourceHelper.copyTable(customerSpace, targetCustomerSpace, tableName);
     }
 
     @RequestMapping(value = "/tables/{tableName}/storage", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -105,24 +97,22 @@ public class TableResource {
     @ApiOperation(value = "Add a storage mechanism")
     public Boolean addStorageMechanism(@PathVariable String customerSpace, //
             @PathVariable String tableName, @PathVariable String storageName, //
-            @RequestBody StorageMechanism storageMechanism, HttpServletRequest request) {
+            @RequestBody StorageMechanism storageMechanism) {
         return true;
     }
 
     @RequestMapping(value = "/tables/reset", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset tables")
-    public Boolean resetTables(@PathVariable String customerSpace, //
-            HttpServletRequest request) {
-        return tableResourceHelper.resetTables(customerSpace, request);
+    public Boolean resetTables(@PathVariable String customerSpace) {
+        return tableResourceHelper.resetTables(customerSpace);
     }
 
     @RequestMapping(value = "/validations", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Validate metadata")
     public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //
-            @RequestBody ModelingMetadata metadata, //
-            HttpServletRequest request) {
+            @RequestBody ModelingMetadata metadata) {
         return tableResourceHelper.validateMetadata(customerSpace, metadata);
     }
 }

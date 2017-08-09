@@ -2,8 +2,6 @@ package com.latticeengines.metadata.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,24 +32,22 @@ public class ImportTableResource {
     @RequestMapping(value = "/importtables", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
-    public List<String> getTables(@PathVariable String customerSpace, HttpServletRequest request) {
-        return tableResourceHelper.getTables(customerSpace, request);
+    public List<String> getTables(@PathVariable String customerSpace) {
+        return tableResourceHelper.getTables(customerSpace);
     }
 
     @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
-    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName,
-            HttpServletRequest request) {
-        return tableResourceHelper.getTable(customerSpace, tableName, request);
+    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName) {
+        return tableResourceHelper.getTable(customerSpace, tableName);
     }
 
     @RequestMapping(value = "/importtables/{tableName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get table metadata by name")
-    public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName,
-            HttpServletRequest request) {
-        return tableResourceHelper.getTableMetadata(customerSpace, tableName, request);
+    public ModelingMetadata getTableMetadata(@PathVariable String customerSpace, @PathVariable String tableName) {
+        return tableResourceHelper.getTableMetadata(customerSpace, tableName);
     }
 
     @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -59,9 +55,8 @@ public class ImportTableResource {
     @ApiOperation(value = "Create table")
     public Boolean createTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
-            @RequestBody Table table, //
-            HttpServletRequest request) {
-        return tableResourceHelper.createTable(customerSpace, tableName, table, request);
+            @RequestBody Table table) {
+        return tableResourceHelper.createTable(customerSpace, tableName, table);
     }
 
     @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -69,18 +64,16 @@ public class ImportTableResource {
     @ApiOperation(value = "Update table")
     public Boolean updateTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
-            @RequestBody Table table, //
-            HttpServletRequest request) {
-        return tableResourceHelper.updateTable(customerSpace, tableName, table, request);
+            @RequestBody Table table) {
+        return tableResourceHelper.updateTable(customerSpace, tableName, table);
     }
 
     @RequestMapping(value = "/importtables/{tableName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete table")
     public Boolean deleteTable(@PathVariable String customerSpace, //
-            @PathVariable String tableName, //
-            HttpServletRequest request) {
-        return tableResourceHelper.deleteImportTableAndCleanup(customerSpace, tableName, request);
+            @PathVariable String tableName) {
+        return tableResourceHelper.deleteImportTableAndCleanup(customerSpace, tableName);
     }
 
 }

@@ -7,6 +7,16 @@
     <display-name>LEDP Source REST API</display-name>
     <description>Lattice Engines Metadata REST API</description>
 
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <servlet>
         <servlet-name>metadata</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>

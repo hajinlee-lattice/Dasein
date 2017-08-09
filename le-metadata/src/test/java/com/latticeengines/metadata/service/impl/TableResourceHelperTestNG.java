@@ -39,11 +39,12 @@ public class TableResourceHelperTestNG extends MetadataFunctionalTestNGBase {
         metadataProvisioningServiceImplTestNG.provisionImportTables();
         List<Table> tables = mdService.getImportTables(space);
         assertEquals(tables.size(), 5);
-        assertTrue(tableResourceHelper.resetTables(space.toString(), null));
+        assertTrue(tableResourceHelper.resetTables(space.toString()));
         assertEquals(tables.size(), 5);
         List<Table> newTables = mdService.getImportTables(space);
-        for(int i = 0; i < tables.size(); i++){
-            assertTrue(tables.get(i).getLastModifiedKey().getLastModifiedTimestamp() < newTables.get(i).getLastModifiedKey().getLastModifiedTimestamp());
+        for (int i = 0; i < tables.size(); i++) {
+            assertTrue(tables.get(i).getLastModifiedKey().getLastModifiedTimestamp() < newTables.get(i)
+                    .getLastModifiedKey().getLastModifiedTimestamp());
         }
     }
 
