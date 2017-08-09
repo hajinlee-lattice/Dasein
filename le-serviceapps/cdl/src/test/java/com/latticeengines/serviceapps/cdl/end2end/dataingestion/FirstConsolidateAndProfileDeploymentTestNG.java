@@ -12,9 +12,9 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
-public class FirstConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
+public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(FirstConsolidateDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(FirstConsolidateAndProfileDeploymentTestNG.class);
 
     @Test(groups = "deployment")
     public void testFirstConsolidate() throws Exception {
