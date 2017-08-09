@@ -44,7 +44,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Vertical",
       "displayName": "Vertical",
@@ -63,7 +62,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMBILLINGADDRESS_8753A9B6A9",
       "displayName": "PD_DC_FEATURETERMBILLINGADDRESS_8753A9B6A9",
@@ -82,7 +80,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_ACCOUNTSTOSCORE_269134B7BD",
       "displayName": "ACCT_ACCOUNTSTOSCORE_269134B7BD",
@@ -101,7 +98,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TELESALES_ACQ_DT_67D841C5B9",
       "displayName": "CUSTOM_TELESALES_ACQ_DT_67D841C5B9",
@@ -120,7 +116,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_TWITTER_TWEETS_F1D1AFBCBF",
       "displayName": "PD_DC_TWITTER_TWEETS_F1D1AFBCBF",
@@ -139,7 +134,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "EstimatedRevenue",
       "displayName": "EstimatedRevenue",
@@ -158,7 +152,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMMYACCOUNT_A8F1F4E862",
       "displayName": "PD_DC_FEATURETERMMYACCOUNT_A8F1F4E862",
@@ -177,7 +170,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_ETOV2_C5836CBB17",
       "displayName": "ACCT_ETOV2_C5836CBB17",
@@ -196,7 +188,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_INTELLISCORE_BC64967AA9",
       "displayName": "ACCT_TP_INTELLISCORE_BC64967AA9",
@@ -215,7 +206,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_FACEBOOK_LIKES_2MONTHSA_8471388C40",
       "displayName": "ACCT_TP_FACEBOOK_LIKES_2MONTHSA_8471388C40",
@@ -234,7 +224,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_SIMULATION_ID_0ACF092E3F",
       "displayName": "ACCT_PL_SIMULATION_ID_0ACF092E3F",
@@ -253,7 +242,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMBILLINGSOLUTIO_5BC832F7F3",
       "displayName": "PD_DC_FEATURETERMBILLINGSOLUTIO_5BC832F7F3",
@@ -272,7 +260,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_CRMLEAD_EXTERNAL_ID_E9FF6DE801",
       "displayName": "ACCT_PL_CRMLEAD_EXTERNAL_ID_E9FF6DE801",
@@ -291,7 +278,6 @@
         "double",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXAVIEWSPERMILLION_DBCA5E56ED",
       "displayName": "PD_DC_ALEXAVIEWSPERMILLION_DBCA5E56ED",
@@ -310,7 +296,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FUNDINGAMOUNT_93F3A7DC87",
       "displayName": "PD_DC_FUNDINGAMOUNT_93F3A7DC87",
@@ -329,7 +314,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMWEBSITEBUILDER_36DF4C8869",
       "displayName": "PD_DC_FEATURETERMWEBSITEBUILDER_36DF4C8869",
@@ -348,7 +332,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_YEARSONLINE_ADCC1A1A87",
       "displayName": "ACCT_TP_YEARSONLINE_ADCC1A1A87",
@@ -367,7 +350,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_PRELEAD_ID_4EE180CF2A",
       "displayName": "ACCT_PL_PRELEAD_ID_4EE180CF2A",
@@ -386,7 +368,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMECOMMERCESOFTW_558DBD29BC",
       "displayName": "PD_DC_FEATURETERMECOMMERCESOFTW_558DBD29BC",
@@ -405,7 +386,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMPAYMENTMETHOD_69B21B83AF",
       "displayName": "PD_DC_FEATURETERMPAYMENTMETHOD_69B21B83AF",
@@ -424,7 +404,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_NUM_TRANS_L12M_BCA0C660C2",
       "displayName": "CUSTOM_NUM_TRANS_L12M_BCA0C660C2",
@@ -443,7 +422,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMRETAIL_4BFA113250",
       "displayName": "PD_DC_FEATURETERMRETAIL_4BFA113250",
@@ -462,7 +440,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMWEBBUILDER_C8E736387E",
       "displayName": "PD_DC_FEATURETERMWEBBUILDER_C8E736387E",
@@ -481,7 +458,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_BUSINESSTECHNOLOGIESSHOP_212C2F9F82",
       "displayName": "PD_DC_BUSINESSTECHNOLOGIESSHOP_212C2F9F82",
@@ -500,7 +476,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_ACTV_Y_N_L6M_FFC3AAA210",
       "displayName": "CUSTOM_ACTV_Y_N_L6M_FFC3AAA210",
@@ -519,7 +494,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMREVIEW_300F39E867",
       "displayName": "PD_DC_FEATURETERMREVIEW_300F39E867",
@@ -538,7 +512,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMMEMBERSHIPMANA_5F6BB5750B",
       "displayName": "PD_DC_FEATURETERMMEMBERSHIPMANA_5F6BB5750B",
@@ -557,7 +530,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_47F7B3B032",
       "displayName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_47F7B3B032",
@@ -576,7 +548,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSELLONLINE_B0AD32BA29",
       "displayName": "PD_DC_FEATURETERMSELLONLINE_B0AD32BA29",
@@ -595,7 +566,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_JOBSASOF_B6C9EBF2B6",
       "displayName": "PD_DC_JOBSASOF_B6C9EBF2B6",
@@ -614,7 +584,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "StateProvince",
       "displayName": "StateProvince",
@@ -633,7 +602,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Display_Name",
       "displayName": "Display_Name",
@@ -652,7 +620,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_DETAIL_1_81B18613D3",
       "displayName": "ACCT_SF_OPPTY_DETAIL_1_81B18613D3",
@@ -671,7 +638,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_47DD043941",
       "displayName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_47DD043941",
@@ -690,7 +656,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_INCOMING_LINKS_EA64999A6F",
       "displayName": "CUSTOM_DP_INCOMING_LINKS_EA64999A6F",
@@ -709,7 +674,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMPLUGINFORWORDP_B90B6EA567",
       "displayName": "PD_DC_FEATURETERMPLUGINFORWORDP_B90B6EA567",
@@ -728,7 +692,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSOFTWAREFORNON_E461FCB328",
       "displayName": "PD_DC_FEATURETERMSOFTWAREFORNON_E461FCB328",
@@ -747,7 +710,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_SFDC_OPPORTUNITY_ID_RECE_E0697215FD",
       "displayName": "CUSTOM_SFDC_OPPORTUNITY_ID_RECE_E0697215FD",
@@ -766,7 +728,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_HIS_ID_5_7E80088EA3",
       "displayName": "ACCT_SF_OPPTY_HIS_ID_5_7E80088EA3",
@@ -785,7 +746,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_SEMRUSHORGANICTRAFFIC_182F3ACEB1",
       "displayName": "PD_DC_SEMRUSHORGANICTRAFFIC_182F3ACEB1",
@@ -804,7 +764,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_D378281527",
       "displayName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_D378281527",
@@ -823,7 +782,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_28F5CB7D5C",
       "displayName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_28F5CB7D5C",
@@ -842,7 +800,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURECURRENCYEURO_6857DCA092",
       "displayName": "PD_DC_FEATURECURRENCYEURO_6857DCA092",
@@ -861,7 +818,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_SFDC_MEMBER_ID_76127986DD",
       "displayName": "CUSTOM_SFDC_MEMBER_ID_76127986DD",
@@ -880,7 +836,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREGLOBALBAG_931627B421",
       "displayName": "PD_DC_FEATUREGLOBALBAG_931627B421",
@@ -899,7 +854,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREREFSRCSHOP_BD1145229F",
       "displayName": "PD_DC_FEATUREREFSRCSHOP_BD1145229F",
@@ -918,7 +872,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_E3D6FA62C5",
       "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_E3D6FA62C5",
@@ -937,7 +890,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_PROSPECT_FILE_NAME_F58797B857",
       "displayName": "CUSTOM_PROSPECT_FILE_NAME_F58797B857",
@@ -956,7 +908,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_TWITTER_FOLLOWERS_3MAVG_74CFD72D61",
       "displayName": "ACCT_TP_TWITTER_FOLLOWERS_3MAVG_74CFD72D61",
@@ -975,7 +926,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_NUM_CONF_BANK_ACCOUNTS_2B6CC17D1F",
       "displayName": "CUSTOM_NUM_CONF_BANK_ACCOUNTS_2B6CC17D1F",
@@ -994,7 +944,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMFREEONLINESTOR_50814B3138",
       "displayName": "PD_DC_FEATURETERMFREEONLINESTOR_50814B3138",
@@ -1013,7 +962,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FUNDINGFISCALYEAR_F4000FBB88",
       "displayName": "PD_DC_FUNDINGFISCALYEAR_F4000FBB88",
@@ -1032,7 +980,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_HGDATA_PIVOTED_SOURCE_ISM_51E71A10D5",
       "displayName": "PD_DC_HGDATA_PIVOTED_SOURCE_ISM_51E71A10D5",
@@ -1051,7 +998,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_HIS_ID_4_00013C429C",
       "displayName": "ACCT_SF_OPPTY_HIS_ID_4_00013C429C",
@@ -1070,7 +1016,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_PAYPAL_DEBIT_CARD_1559FDB505",
       "displayName": "CUSTOM_HAS_PAYPAL_DEBIT_CARD_1559FDB505",
@@ -1089,7 +1034,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L12M_BCB0E4C2F5",
       "displayName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L12M_BCB0E4C2F5",
@@ -1108,7 +1052,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMADDTOBASKET_BD99188FFF",
       "displayName": "PD_DC_FEATURETERMADDTOBASKET_BD99188FFF",
@@ -1127,7 +1070,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_EB7F1E8A8E",
       "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_9M_EB7F1E8A8E",
@@ -1146,7 +1088,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_F6DFEF04D5",
       "displayName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_F6DFEF04D5",
@@ -1165,7 +1106,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREGLOBALSHOP_4D47CDAEC9",
       "displayName": "PD_DC_FEATUREGLOBALSHOP_4D47CDAEC9",
@@ -1184,7 +1124,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSHIPPINGPOLICY_F5C2A2BA3E",
       "displayName": "PD_DC_FEATURETERMSHIPPINGPOLICY_F5C2A2BA3E",
@@ -1203,7 +1142,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "NumberOfEmployees",
       "displayName": "NumberOfEmployees",
@@ -1222,7 +1160,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_CREDIT_RATING_0A26EF631F",
       "displayName": "ACCT_CREDIT_RATING_0A26EF631F",
@@ -1241,7 +1178,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_ETOV4_B50B4FCB97",
       "displayName": "ACCT_ETOV4_B50B4FCB97",
@@ -1260,7 +1196,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "LEAccountIDLong",
       "displayName": "LEAccountIDLong",
@@ -1279,7 +1214,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_SSL_ISSUER_COMMON_NAM_9EC692C60F",
       "displayName": "CUSTOM_DP_SSL_ISSUER_COMMON_NAM_9EC692C60F",
@@ -1298,7 +1232,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ISMATCHED_83FE702FD0",
       "displayName": "PD_DC_ISMATCHED_83FE702FD0",
@@ -1317,7 +1250,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_SEMRUSHADWORDSKEYWORDS_18930AA801",
       "displayName": "PD_DC_SEMRUSHADWORDSKEYWORDS_18930AA801",
@@ -1336,7 +1268,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_REFERRER_LOCATION_F9ACA70E7C",
       "displayName": "CUSTOM_REFERRER_LOCATION_F9ACA70E7C",
@@ -1355,7 +1286,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREJAVASCRIPTCART_E87B8A8779",
       "displayName": "PD_DC_FEATUREJAVASCRIPTCART_E87B8A8779",
@@ -1374,7 +1304,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMORDERSTATUS_9E0E44E0CF",
       "displayName": "PD_DC_FEATURETERMORDERSTATUS_9E0E44E0CF",
@@ -1393,7 +1322,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PHONE_12A8493365",
       "displayName": "ACCT_PHONE_12A8493365",
@@ -1412,7 +1340,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_ACCOUNT_ID_9A87DCB1FC",
       "displayName": "ACCT_PL_ACCOUNT_ID_9A87DCB1FC",
@@ -1431,7 +1358,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_ETOV5_74CB5B61D2",
       "displayName": "ACCT_ETOV5_74CB5B61D2",
@@ -1450,7 +1376,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMPHPECOMMERCEPL_D3FCA1D2A2",
       "displayName": "PD_DC_FEATURETERMPHPECOMMERCEPL_D3FCA1D2A2",
@@ -1469,7 +1394,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Account ID",
       "displayName": "Account ID",
@@ -1488,7 +1412,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMPAYMENTOPTION_38E62F3425",
       "displayName": "PD_DC_FEATURETERMPAYMENTOPTION_38E62F3425",
@@ -1507,7 +1430,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_FIRST_TRANSACTION_DATE_3D893F4277",
       "displayName": "CUSTOM_FIRST_TRANSACTION_DATE_3D893F4277",
@@ -1526,7 +1448,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMRECURRINGBILLI_9E9281BEF1",
       "displayName": "PD_DC_FEATURETERMRECURRINGBILLI_9E9281BEF1",
@@ -1545,7 +1466,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_DCC_L6M_83819D3348",
       "displayName": "CUSTOM_TOT_NTPV_MS_DCC_L6M_83819D3348",
@@ -1564,7 +1484,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_HIS_ID_2_0C35CC252E",
       "displayName": "ACCT_SF_OPPTY_HIS_ID_2_0C35CC252E",
@@ -1583,7 +1502,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_SEMRUSHADWORDSTRAFFIC_3C36F78623",
       "displayName": "PD_DC_SEMRUSHADWORDSTRAFFIC_3C36F78623",
@@ -1602,7 +1520,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMYOURSTORE_8F56F19E77",
       "displayName": "PD_DC_FEATURETERMYOURSTORE_8F56F19E77",
@@ -1621,7 +1538,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMMARKETPLACE_9A605A999A",
       "displayName": "PD_DC_FEATURETERMMARKETPLACE_9A605A999A",
@@ -1640,7 +1556,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_TWITTER_FOLLOWERS_466D79437B",
       "displayName": "PD_DC_TWITTER_FOLLOWERS_466D79437B",
@@ -1659,7 +1574,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_CUSTOMER_300B627A42",
       "displayName": "CUSTOM_IS_CUSTOMER_300B627A42",
@@ -1678,7 +1592,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMDEAL_A53AABFEE9",
       "displayName": "PD_DC_FEATURETERMDEAL_A53AABFEE9",
@@ -1697,7 +1610,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMFREESHIPPING_9B4AA18889",
       "displayName": "PD_DC_FEATURETERMFREESHIPPING_9B4AA18889",
@@ -1716,7 +1628,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_I_RANK_PCTCHANGE_3MONTH_8637BF23DD",
       "displayName": "ACCT_I_RANK_PCTCHANGE_3MONTH_8637BF23DD",
@@ -1735,7 +1646,6 @@
         "double",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXAUSPAGEVIEWS_E3C710BD68",
       "displayName": "PD_DC_ALEXAUSPAGEVIEWS_E3C710BD68",
@@ -1754,7 +1664,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_PAYPAL_PLUS_CE827950A6",
       "displayName": "CUSTOM_HAS_PAYPAL_PLUS_CE827950A6",
@@ -1773,7 +1682,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_PROSPECT_8EDA09BB26",
       "displayName": "CUSTOM_IS_PROSPECT_8EDA09BB26",
@@ -1792,7 +1700,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_4D33D54625",
       "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_4D33D54625",
@@ -1811,7 +1718,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_LE_JOBS_SOURCE_ISMATCHED_1ED27CBC84",
       "displayName": "PD_DC_LE_JOBS_SOURCE_ISMATCHED_1ED27CBC84",
@@ -1830,7 +1736,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_SITE_TRAFFIC_ESTIMATI_74D81C8579",
       "displayName": "CUSTOM_DP_SITE_TRAFFIC_ESTIMATI_74D81C8579",
@@ -1849,7 +1754,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DATAPROVIDER_LOAD_D99F23F18C",
       "displayName": "CUSTOM_DATAPROVIDER_LOAD_D99F23F18C",
@@ -1868,7 +1772,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_TWITTER_FOLLOWERS_CURRE_6D5EF2597D",
       "displayName": "ACCT_TP_TWITTER_FOLLOWERS_CURRE_6D5EF2597D",
@@ -1887,7 +1790,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREREFSRCCART_F179D7C31E",
       "displayName": "PD_DC_FEATUREREFSRCCART_F179D7C31E",
@@ -1906,7 +1808,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_ANTICIPATED_AVG_TRANS_SI_61156D4B7B",
       "displayName": "CUSTOM_ANTICIPATED_AVG_TRANS_SI_61156D4B7B",
@@ -1925,7 +1826,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMBUSINESSMANAGE_D4879C01B2",
       "displayName": "PD_DC_FEATURETERMBUSINESSMANAGE_D4879C01B2",
@@ -1944,7 +1844,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_HIS_ID_1_DDDF8029BC",
       "displayName": "ACCT_SF_OPPTY_HIS_ID_1_DDDF8029BC",
@@ -1963,7 +1862,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_9C600487DF",
       "displayName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_9C600487DF",
@@ -1982,7 +1880,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FACEBOOK_LIKES_E8567E4791",
       "displayName": "PD_DC_FACEBOOK_LIKES_E8567E4791",
@@ -2001,7 +1898,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSECUREORDER_E9AD304259",
       "displayName": "PD_DC_FEATURETERMSECUREORDER_E9AD304259",
@@ -2020,7 +1916,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREGLOBALBASKET_333797FBFF",
       "displayName": "PD_DC_FEATUREGLOBALBASKET_333797FBFF",
@@ -2039,7 +1934,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_F2285D90D2",
       "displayName": "CUSTOM_HAS_VIRTUAL_TERMINAL_APP_F2285D90D2",
@@ -2058,7 +1952,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSCHEDULINGANDA_3C7D12C705",
       "displayName": "PD_DC_FEATURETERMSCHEDULINGANDA_3C7D12C705",
@@ -2077,7 +1970,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Territory",
       "displayName": "Territory",
@@ -2096,7 +1988,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_ETOV3_4A360727E0",
       "displayName": "ACCT_ETOV3_4A360727E0",
@@ -2115,7 +2006,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMFORMBUILDER_0CB4131FE5",
       "displayName": "PD_DC_FEATURETERMFORMBUILDER_0CB4131FE5",
@@ -2134,7 +2024,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_SEMRUSHRANK_E4164C190E",
       "displayName": "PD_DC_SEMRUSHRANK_E4164C190E",
@@ -2153,7 +2042,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_FIT_SCORE_02308E850B",
       "displayName": "ACCT_FIT_SCORE_02308E850B",
@@ -2172,7 +2060,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_BUILTWITH_PIVOTED_SOURCE__3C36CD891A",
       "displayName": "PD_DC_BUILTWITH_PIVOTED_SOURCE__3C36CD891A",
@@ -2191,7 +2078,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Address_Street_1",
       "displayName": "Address_Street_1",
@@ -2210,7 +2096,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_B_BUSINESSVCFUNDED_CA24BC165E",
       "displayName": "ACCT_B_BUSINESSVCFUNDED_CA24BC165E",
@@ -2229,7 +2114,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L6M_0AAF3F1FB3",
       "displayName": "CUSTOM_TOT_NTPV_MS_WPS_UP_L6M_0AAF3F1FB3",
@@ -2248,7 +2132,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_JOBSTRENDSTRING_384036BEC4",
       "displayName": "PD_DC_JOBSTRENDSTRING_384036BEC4",
@@ -2267,7 +2150,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXA_SOURCE_ISMATCHED_E48CA67022",
       "displayName": "PD_DC_ALEXA_SOURCE_ISMATCHED_E48CA67022",
@@ -2286,7 +2168,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_DUNSNUMBER_C19195597A",
       "displayName": "ACCT_DUNSNUMBER_C19195597A",
@@ -2305,7 +2186,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_A71578B9E1",
       "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_3M_A71578B9E1",
@@ -2324,7 +2204,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_SFDC_PP_ACCOUNT_ID_8D2651B5AC",
       "displayName": "CUSTOM_SFDC_PP_ACCOUNT_ID_8D2651B5AC",
@@ -2343,7 +2222,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_0CAD2C2222",
       "displayName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_0CAD2C2222",
@@ -2362,7 +2240,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_SSL_TYPE_6C3DC792E0",
       "displayName": "CUSTOM_DP_SSL_TYPE_6C3DC792E0",
@@ -2381,7 +2258,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMADDTOCART_017C8F8F69",
       "displayName": "PD_DC_FEATURETERMADDTOCART_017C8F8F69",
@@ -2400,7 +2276,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_MONETARY_VALUE_30E0F3D241",
       "displayName": "ACCT_PL_MONETARY_VALUE_30E0F3D241",
@@ -2419,7 +2294,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMBARGAIN_C37466A6D6",
       "displayName": "PD_DC_FEATURETERMBARGAIN_C37466A6D6",
@@ -2438,7 +2312,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSHIPPINGINFO_05D852CDCE",
       "displayName": "PD_DC_FEATURETERMSHIPPINGINFO_05D852CDCE",
@@ -2457,7 +2330,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_ETOV_D0F5DC5D0E",
       "displayName": "ACCT_ETOV_D0F5DC5D0E",
@@ -2476,7 +2348,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DO_NOT_CALL_7ABC200B5F",
       "displayName": "CUSTOM_DO_NOT_CALL_7ABC200B5F",
@@ -2495,7 +2366,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPB_4_AC59614D56",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_4_AC59614D56",
@@ -2514,7 +2384,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_PAYPAL_ADVANCED_EA65B10125",
       "displayName": "CUSTOM_HAS_PAYPAL_ADVANCED_EA65B10125",
@@ -2533,7 +2402,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREINPUTVALUEADDTOBAG_9B872D2CA8",
       "displayName": "PD_DC_FEATUREINPUTVALUEADDTOBAG_9B872D2CA8",
@@ -2552,7 +2420,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_SSL_CERTIFICATE_B0D11E3744",
       "displayName": "CUSTOM_DP_SSL_CERTIFICATE_B0D11E3744",
@@ -2571,7 +2438,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMASSOCIATIONMAN_5C94FE8075",
       "displayName": "PD_DC_FEATURETERMASSOCIATIONMAN_5C94FE8075",
@@ -2590,7 +2456,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMPRICE_FFB3E2A887",
       "displayName": "PD_DC_FEATURETERMPRICE_FFB3E2A887",
@@ -2609,7 +2474,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_MATCHEDDOMAIN_CC3D72116D",
       "displayName": "PD_DC_MATCHEDDOMAIN_CC3D72116D",
@@ -2628,7 +2492,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "SalesforceAccountID",
       "displayName": "SalesforceAccountID",
@@ -2647,7 +2510,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_TWITTER_FOLLOWERS_LASTM_893764C2D0",
       "displayName": "ACCT_TP_TWITTER_FOLLOWERS_LASTM_893764C2D0",
@@ -2666,7 +2528,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_E4E243AC9B",
       "displayName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_E4E243AC9B",
@@ -2685,7 +2546,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_DCC_L12M_35F4FD859C",
       "displayName": "CUSTOM_TOT_NTPV_MS_DCC_L12M_35F4FD859C",
@@ -2704,7 +2564,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_AMOUNT_A1F8667141",
       "displayName": "CUSTOM_AMOUNT_A1F8667141",
@@ -2723,7 +2582,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_PRICING_CATEGORY_A923DD7C26",
       "displayName": "CUSTOM_PRICING_CATEGORY_A923DD7C26",
@@ -2742,7 +2600,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURECURRENCYJAPANYEN_8BB47AF6A7",
       "displayName": "PD_DC_FEATURECURRENCYJAPANYEN_8BB47AF6A7",
@@ -2761,7 +2618,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "State_Province",
       "displayName": "State_Province",
@@ -2780,7 +2636,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREREFSRCPRODUCT_7360050DE4",
       "displayName": "PD_DC_FEATUREREFSRCPRODUCT_7360050DE4",
@@ -2799,7 +2654,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_LARGE_ENTERPRISE_42B07659E1",
       "displayName": "CUSTOM_IS_LARGE_ENTERPRISE_42B07659E1",
@@ -2818,7 +2672,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_3FA45F1F09",
       "displayName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_3FA45F1F09",
@@ -2837,7 +2690,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXARANK_F6240F16C2",
       "displayName": "PD_DC_ALEXARANK_F6240F16C2",
@@ -2856,7 +2708,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXAUSRANK_EC8ACC67F5",
       "displayName": "PD_DC_ALEXAUSRANK_EC8ACC67F5",
@@ -2875,7 +2726,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSHIPPINGADDRES_4DDB79EF9E",
       "displayName": "PD_DC_FEATURETERMSHIPPINGADDRES_4DDB79EF9E",
@@ -2894,7 +2744,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREINPUTVALUEADDTOBAS_DE8208656F",
       "displayName": "PD_DC_FEATUREINPUTVALUEADDTOBAS_DE8208656F",
@@ -2913,7 +2762,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREJAVASCRIPTSTORE_BB9FDE3130",
       "displayName": "PD_DC_FEATUREJAVASCRIPTSTORE_BB9FDE3130",
@@ -2932,7 +2780,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_DISPLAY_NAME_E9E26FB9C7",
       "displayName": "ACCT_PL_DISPLAY_NAME_E9E26FB9C7",
@@ -2951,7 +2798,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DOMAIN_CREATION_DATE_2409DDFC3B",
       "displayName": "CUSTOM_DOMAIN_CREATION_DATE_2409DDFC3B",
@@ -2970,7 +2816,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_SEMRUSHADWORDSCOST_2D345AA19C",
       "displayName": "PD_DC_SEMRUSHADWORDSCOST_2D345AA19C",
@@ -2989,7 +2834,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_TWITTER_FOLLOWERS_2MONT_D12355AA81",
       "displayName": "ACCT_TP_TWITTER_FOLLOWERS_2MONT_D12355AA81",
@@ -3008,7 +2852,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSALE_6FADFF494E",
       "displayName": "PD_DC_FEATURETERMSALE_6FADFF494E",
@@ -3027,7 +2870,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_FACEBOOK_LIKES_CURRENTM_A7A9CF4321",
       "displayName": "ACCT_TP_FACEBOOK_LIKES_CURRENTM_A7A9CF4321",
@@ -3046,7 +2888,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_PAYPAL_PRO_APPLICATI_86B988891F",
       "displayName": "CUSTOM_HAS_PAYPAL_PRO_APPLICATI_86B988891F",
@@ -3065,7 +2906,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMONLINESTOREBUI_600B41EB86",
       "displayName": "PD_DC_FEATURETERMONLINESTOREBUI_600B41EB86",
@@ -3084,7 +2924,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURE_PIVOTED_SOURCE_IS_09AD69A29D",
       "displayName": "PD_DC_FEATURE_PIVOTED_SOURCE_IS_09AD69A29D",
@@ -3103,7 +2942,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSHIPPINGANDHAN_1D1D151554",
       "displayName": "PD_DC_FEATURETERMSHIPPINGANDHAN_1D1D151554",
@@ -3122,7 +2960,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_SSL_END_DATE_C7D6A92BED",
       "displayName": "CUSTOM_DP_SSL_END_DATE_C7D6A92BED",
@@ -3141,7 +2978,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A",
       "displayName": "ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A",
@@ -3160,7 +2996,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_FF_L6M_63DE168A06",
       "displayName": "CUSTOM_TOT_NTPV_MS_FF_L6M_63DE168A06",
@@ -3179,7 +3014,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMPAYMENTPROCESS_5AF36D2F81",
       "displayName": "PD_DC_FEATURETERMPAYMENTPROCESS_5AF36D2F81",
@@ -3198,7 +3032,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPB_3_CEEB4891C9",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_3_CEEB4891C9",
@@ -3217,7 +3050,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "BestLikelihood",
       "displayName": "BestLikelihood",
@@ -3236,7 +3068,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURECURRENCYUSDOLLAR_1F54F2F7DB",
       "displayName": "PD_DC_FEATURECURRENCYUSDOLLAR_1F54F2F7DB",
@@ -3255,7 +3086,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_BUSINESSTECHNOLOGIESFIRST_4FF8982B79",
       "displayName": "PD_DC_BUSINESSTECHNOLOGIESFIRST_4FF8982B79",
@@ -3274,7 +3104,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_NTPV_12M_PREINACTIVE_476EFF99A8",
       "displayName": "CUSTOM_NTPV_12M_PREINACTIVE_476EFF99A8",
@@ -3293,7 +3122,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_QUANTITY_73CA98C1C7",
       "displayName": "CUSTOM_QUANTITY_73CA98C1C7",
@@ -3312,7 +3140,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREGLOBALSTORE_080076D315",
       "displayName": "PD_DC_FEATUREGLOBALSTORE_080076D315",
@@ -3331,7 +3158,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_OWNERSHIP_110BD19C8A",
       "displayName": "ACCT_OWNERSHIP_110BD19C8A",
@@ -3350,7 +3176,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Zip",
       "displayName": "Zip",
@@ -3369,7 +3194,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_TELESALES_ACQ_Y_N_829B11D1B3",
       "displayName": "CUSTOM_IS_TELESALES_ACQ_Y_N_829B11D1B3",
@@ -3388,7 +3212,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMORDERHISTORY_ED7B4AC178",
       "displayName": "PD_DC_FEATURETERMORDERHISTORY_ED7B4AC178",
@@ -3407,7 +3230,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_SSL_START_DATE_1F118E40B7",
       "displayName": "CUSTOM_DP_SSL_START_DATE_1F118E40B7",
@@ -3426,7 +3248,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREGLOBALPRODUCT_D42DFA860E",
       "displayName": "PD_DC_FEATUREGLOBALPRODUCT_D42DFA860E",
@@ -3445,7 +3266,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREREFSRCBAG_56CDDE32AA",
       "displayName": "PD_DC_FEATUREREFSRCBAG_56CDDE32AA",
@@ -3464,7 +3284,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPB_2_AC97B1C928",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_2_AC97B1C928",
@@ -3483,7 +3302,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CrmAccount_External_ID",
       "displayName": "CrmAccount_External_ID",
@@ -3502,7 +3320,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_WEBSITEENGAGEMENT_D2BD84AB5A",
       "displayName": "ACCT_TP_WEBSITEENGAGEMENT_D2BD84AB5A",
@@ -3521,7 +3338,6 @@
         "double",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXAVIEWSPERUSER_6E7963331A",
       "displayName": "PD_DC_ALEXAVIEWSPERUSER_6E7963331A",
@@ -3540,7 +3356,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "LastModified",
       "displayName": "LastModified",
@@ -3559,7 +3374,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_PAYPAL_5BB4AB47D7",
       "displayName": "CUSTOM_PAYPAL_5BB4AB47D7",
@@ -3578,7 +3392,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_DDAAE3A3A9",
       "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_DDAAE3A3A9",
@@ -3597,7 +3410,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_HPA_SOURCE_ISMATCHED_022606F3A4",
       "displayName": "PD_DC_HPA_SOURCE_ISMATCHED_022606F3A4",
@@ -3616,7 +3428,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSHOPPINGCARTPL_8F997F8756",
       "displayName": "PD_DC_FEATURETERMSHOPPINGCARTPL_8F997F8756",
@@ -3635,7 +3446,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXAVIEWSRANK_FC0C796BE7",
       "displayName": "PD_DC_ALEXAVIEWSRANK_FC0C796BE7",
@@ -3654,7 +3464,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_PROSPECT_SHOPPING_CART_6D9374729A",
       "displayName": "CUSTOM_PROSPECT_SHOPPING_CART_6D9374729A",
@@ -3673,7 +3482,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_CUST_ID_257EDAAB4D",
       "displayName": "CUSTOM_CUST_ID_257EDAAB4D",
@@ -3692,7 +3500,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREJAVASCRIPTBASKET_E5E10E334C",
       "displayName": "PD_DC_FEATUREJAVASCRIPTBASKET_E5E10E334C",
@@ -3711,7 +3518,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSHOPBY_7989A99E2C",
       "displayName": "PD_DC_FEATURETERMSHOPBY_7989A99E2C",
@@ -3730,7 +3536,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_ECONOMIC_FOOTPRINT_4A39D727ED",
       "displayName": "CUSTOM_DP_ECONOMIC_FOOTPRINT_4A39D727ED",
@@ -3749,7 +3554,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_D665CC9024",
       "displayName": "ACCT_TP_TWITTER_FOLLOWERS_3MONT_D665CC9024",
@@ -3768,7 +3572,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "LeadCount",
       "displayName": "LeadCount",
@@ -3787,7 +3590,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_I_RANK_PCTCHANGE_9MONTH_A0AAF5CAEA",
       "displayName": "ACCT_I_RANK_PCTCHANGE_9MONTH_A0AAF5CAEA",
@@ -3806,7 +3608,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPA_2_A104F294D5",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_2_A104F294D5",
@@ -3825,7 +3626,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_1AB3078C3C",
       "displayName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_1AB3078C3C",
@@ -3844,7 +3644,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXAREACHRANK_5FA8818999",
       "displayName": "PD_DC_ALEXAREACHRANK_5FA8818999",
@@ -3863,7 +3662,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMEVENTMANAGEMEN_68D7F85E38",
       "displayName": "PD_DC_FEATURETERMEVENTMANAGEMEN_68D7F85E38",
@@ -3882,7 +3680,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCHECKOUT_16ED68E665",
       "displayName": "PD_DC_FEATURETERMCHECKOUT_16ED68E665",
@@ -3901,7 +3698,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_ACCOUNT_EMAIL_AA7FA7BEA3",
       "displayName": "CUSTOM_ACCOUNT_EMAIL_AA7FA7BEA3",
@@ -3920,7 +3716,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC__9C23580A26",
       "displayName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC__9C23580A26",
@@ -3939,7 +3734,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCREATEASTORE_62EFC56514",
       "displayName": "PD_DC_FEATURETERMCREATEASTORE_62EFC56514",
@@ -3958,7 +3752,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREJAVASCRIPTSHOP_C29FB799D6",
       "displayName": "PD_DC_FEATUREJAVASCRIPTSHOP_C29FB799D6",
@@ -3977,7 +3770,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_HPA_NEW_PIVOTED_SOURCE_IS_0323A7B3BB",
       "displayName": "PD_DC_HPA_NEW_PIVOTED_SOURCE_IS_0323A7B3BB",
@@ -3996,7 +3788,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREREFSRCBASKET_96A5841B62",
       "displayName": "PD_DC_FEATUREREFSRCBASKET_96A5841B62",
@@ -4015,7 +3806,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMPAYWALL_A6571B4551",
       "displayName": "PD_DC_FEATURETERMPAYWALL_A6571B4551",
@@ -4034,7 +3824,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_FULL_SHARE_CHECKOUT_D97C257C93",
       "displayName": "CUSTOM_FULL_SHARE_CHECKOUT_D97C257C93",
@@ -4053,7 +3842,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_PROSPECT_LOAD_DATE_942DC58E61",
       "displayName": "CUSTOM_PROSPECT_LOAD_DATE_942DC58E61",
@@ -4072,7 +3860,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPA_3_EF23C06A1D",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_3_EF23C06A1D",
@@ -4091,7 +3878,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Country",
       "displayName": "Country",
@@ -4110,7 +3896,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_DETAIL_5_0A3D5597A0",
       "displayName": "ACCT_SF_OPPTY_DETAIL_5_0A3D5597A0",
@@ -4129,7 +3914,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "SICCode",
       "displayName": "SICCode",
@@ -4148,7 +3932,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_MONEY_MARKET_FUND_0F02B31810",
       "displayName": "CUSTOM_HAS_MONEY_MARKET_FUND_0F02B31810",
@@ -4167,7 +3950,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L6M_3859A2D114",
       "displayName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L6M_3859A2D114",
@@ -4186,7 +3968,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Territory_External_ID",
       "displayName": "Territory_External_ID",
@@ -4205,7 +3986,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "NAICSCode",
       "displayName": "NAICSCode",
@@ -4224,7 +4004,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_TOTAL_AMOUNT_RAISED_5C025CC0C5",
       "displayName": "PD_DC_TOTAL_AMOUNT_RAISED_5C025CC0C5",
@@ -4243,7 +4022,6 @@
         "double",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXAVIEWSPERUSER_76B157D8CB",
       "displayName": "ACCT_TP_ALEXAVIEWSPERUSER_76B157D8CB",
@@ -4262,7 +4040,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_0C33F40A5D",
       "displayName": "ACCT_TP_SEMRUSHORGANICCOST_INDU_0C33F40A5D",
@@ -4281,7 +4058,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_FF_L12M_BE28941823",
       "displayName": "CUSTOM_TOT_NTPV_MS_FF_L12M_BE28941823",
@@ -4300,7 +4076,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCART_A332CA0D46",
       "displayName": "PD_DC_FEATURETERMCART_A332CA0D46",
@@ -4319,7 +4094,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_EC_L6M_F4C08E6D53",
       "displayName": "CUSTOM_TOT_NTPV_MS_EC_L6M_F4C08E6D53",
@@ -4338,7 +4112,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_DETAIL_3_CBCD6C0DDD",
       "displayName": "ACCT_SF_OPPTY_DETAIL_3_CBCD6C0DDD",
@@ -4357,7 +4130,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_EBAY_MEMBER_7FD5172EE2",
       "displayName": "CUSTOM_IS_EBAY_MEMBER_7FD5172EE2",
@@ -4376,7 +4148,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_BUSINESSINDUSTRY_C084181874",
       "displayName": "ACCT_TP_BUSINESSINDUSTRY_C084181874",
@@ -4395,7 +4166,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "TopLeads",
       "displayName": "TopLeads",
@@ -4414,7 +4184,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_791A0B64EF",
       "displayName": "ACCT_TP_SEMRUSHADWORDSTRAFFIC_I_791A0B64EF",
@@ -4433,7 +4202,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_NETNEW_PROSPECT_14D680508E",
       "displayName": "CUSTOM_IS_NETNEW_PROSPECT_14D680508E",
@@ -4452,7 +4220,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMYOURACCOUNT_6814729195",
       "displayName": "PD_DC_FEATURETERMYOURACCOUNT_6814729195",
@@ -4471,7 +4238,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_BUSINESSPRIMARYSIC4DIGI_86939C62B4",
       "displayName": "ACCT_TP_BUSINESSPRIMARYSIC4DIGI_86939C62B4",
@@ -4490,7 +4256,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_PCT_ONLINE_REVENUE_AB089ECAD5",
       "displayName": "CUSTOM_PCT_ONLINE_REVENUE_AB089ECAD5",
@@ -4509,7 +4274,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_HPANUMPAGES_F62070D93D",
       "displayName": "PD_DC_HPANUMPAGES_F62070D93D",
@@ -4528,7 +4292,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_SEMRUSH_ISMATCHED_17BCAB52B0",
       "displayName": "PD_DC_SEMRUSH_ISMATCHED_17BCAB52B0",
@@ -4547,7 +4310,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMBASKET_64285026C0",
       "displayName": "PD_DC_FEATURETERMBASKET_64285026C0",
@@ -4566,7 +4328,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_ECOMMERCE_CERTAINTY_14EA76A76E",
       "displayName": "CUSTOM_DP_ECOMMERCE_CERTAINTY_14EA76A76E",
@@ -4585,7 +4346,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_VERIFIED_62D5F05DD7",
       "displayName": "CUSTOM_IS_VERIFIED_62D5F05DD7",
@@ -4604,7 +4364,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSHOP_331151D1CF",
       "displayName": "PD_DC_FEATURETERMSHOP_331151D1CF",
@@ -4623,7 +4382,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_NORMALIZED_SCORE_2447FB15A9",
       "displayName": "ACCT_PL_NORMALIZED_SCORE_2447FB15A9",
@@ -4642,7 +4400,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_SEMRUSHORGANICCOST_42067622B2",
       "displayName": "PD_DC_SEMRUSHORGANICCOST_42067622B2",
@@ -4661,7 +4418,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_PLAY_ID_1D31C1D8C5",
       "displayName": "ACCT_PL_PLAY_ID_1D31C1D8C5",
@@ -4680,7 +4436,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_RESTRICTED_2B18E95E7F",
       "displayName": "CUSTOM_IS_RESTRICTED_2B18E95E7F",
@@ -4699,7 +4454,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_JOBSRECENTJOBS_7949D3FC95",
       "displayName": "PD_DC_JOBSRECENTJOBS_7949D3FC95",
@@ -4718,7 +4472,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCUSTOMERSUPPOR_74116EE72E",
       "displayName": "PD_DC_FEATURETERMCUSTOMERSUPPOR_74116EE72E",
@@ -4737,7 +4490,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "OwnerDisplayName",
       "displayName": "OwnerDisplayName",
@@ -4756,7 +4508,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_PAYPAL_PRO_APPROVED_8AA810356A",
       "displayName": "CUSTOM_HAS_PAYPAL_PRO_APPROVED_8AA810356A",
@@ -4775,7 +4526,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSELLTICKETS_0E0936B53D",
       "displayName": "PD_DC_FEATURETERMSELLTICKETS_0E0936B53D",
@@ -4794,7 +4544,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_REFERRER_LAST_NAME_311DF014EB",
       "displayName": "CUSTOM_REFERRER_LAST_NAME_311DF014EB",
@@ -4813,7 +4562,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_PARTNER_0F99469DCB",
       "displayName": "CUSTOM_IS_PARTNER_0F99469DCB",
@@ -4832,7 +4580,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCUSTOMERSERVIC_AFAA629156",
       "displayName": "PD_DC_FEATURETERMCUSTOMERSERVIC_AFAA629156",
@@ -4851,7 +4598,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMFREQUENTLYASKE_C1A71E3CF3",
       "displayName": "PD_DC_FEATURETERMFREQUENTLYASKE_C1A71E3CF3",
@@ -4870,7 +4616,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSEARCH_E3C0C3ABB5",
       "displayName": "PD_DC_FEATURETERMSEARCH_E3C0C3ABB5",
@@ -4889,7 +4634,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L12M_F8AE375F8C",
       "displayName": "CUSTOM_TOT_NTPV_MS_WPS_RM_L12M_F8AE375F8C",
@@ -4908,7 +4652,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPA_1_5AAEA9FAA9",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_1_5AAEA9FAA9",
@@ -4927,7 +4670,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCATALOG_24D8AA6480",
       "displayName": "PD_DC_FEATURETERMCATALOG_24D8AA6480",
@@ -4946,7 +4688,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMECOMMERCEPLATF_334CBC96A7",
       "displayName": "PD_DC_FEATURETERMECOMMERCEPLATF_334CBC96A7",
@@ -4965,7 +4706,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREJAVASCRIPTBAG_8C15013C08",
       "displayName": "PD_DC_FEATUREJAVASCRIPTBAG_8C15013C08",
@@ -4984,7 +4724,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPA_5_9FFF2C2D48",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_5_9FFF2C2D48",
@@ -5003,7 +4742,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPB_5_67BBC20975",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_5_67BBC20975",
@@ -5022,7 +4760,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_B_BUSINESSECOMMERCESITE_56E54259F3",
       "displayName": "ACCT_B_BUSINESSECOMMERCESITE_56E54259F3",
@@ -5041,7 +4778,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_CFG_TRAININGSET_US_E16FE9F723",
       "displayName": "CUSTOM_CFG_TRAININGSET_US_E16FE9F723",
@@ -5060,7 +4796,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TPV_MODEL_STAMP_9EE67E9CA0",
       "displayName": "ACCT_TPV_MODEL_STAMP_9EE67E9CA0",
@@ -5079,7 +4814,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_WEBSITE_TYPE_33EDCADC15",
       "displayName": "CUSTOM_DP_WEBSITE_TYPE_33EDCADC15",
@@ -5098,7 +4832,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_DETAIL_2_096DF24F75",
       "displayName": "ACCT_SF_OPPTY_DETAIL_2_096DF24F75",
@@ -5117,7 +4850,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_SEMRUSHORGANICKEYWORDS_819E898E8B",
       "displayName": "PD_DC_SEMRUSHORGANICKEYWORDS_819E898E8B",
@@ -5136,7 +4868,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_ISACTIVE_BD61462974",
       "displayName": "ACCT_PL_ISACTIVE_BD61462974",
@@ -5155,7 +4886,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREAVERAGEDOCUMENTSIZ_52178C9041",
       "displayName": "PD_DC_FEATUREAVERAGEDOCUMENTSIZ_52178C9041",
@@ -5174,7 +4904,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMBUY_ED68682A4D",
       "displayName": "PD_DC_FEATURETERMBUY_ED68682A4D",
@@ -5193,7 +4922,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_965B5E1AB6",
       "displayName": "ACCT_TP_SEMRUSHORGANICTRAFFIC_I_965B5E1AB6",
@@ -5212,7 +4940,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_PRODUCT_BUNDLES_AC2C1CED31",
       "displayName": "CUSTOM_PRODUCT_BUNDLES_AC2C1CED31",
@@ -5231,7 +4958,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_SYSTEMALERT_7652835FC6",
       "displayName": "PD_DC_SYSTEMALERT_7652835FC6",
@@ -5250,7 +4976,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCREATEACCOUNT_136A55CF29",
       "displayName": "PD_DC_FEATURETERMCREATEACCOUNT_136A55CF29",
@@ -5269,7 +4994,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_IS_CLOSED_418BD42888",
       "displayName": "CUSTOM_IS_CLOSED_418BD42888",
@@ -5288,7 +5012,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_CREATION_DATE_7088439623",
       "displayName": "ACCT_PL_CREATION_DATE_7088439623",
@@ -5307,7 +5030,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_PDINTELLISCORE_RATING_143793F7F0",
       "displayName": "ACCT_TP_PDINTELLISCORE_RATING_143793F7F0",
@@ -5326,7 +5048,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREJAVASCRIPTPRODUCT_E0749BDB07",
       "displayName": "PD_DC_FEATUREJAVASCRIPTPRODUCT_E0749BDB07",
@@ -5345,7 +5066,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMECOMMERCESOFTW_0DBE95CC65",
       "displayName": "PD_DC_FEATURETERMECOMMERCESOFTW_0DBE95CC65",
@@ -5364,7 +5084,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_SFDC_LEAD_ID_E65D8CA078",
       "displayName": "CUSTOM_SFDC_LEAD_ID_E65D8CA078",
@@ -5383,7 +5102,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREREFSRCSTORE_CEC5F567C7",
       "displayName": "PD_DC_FEATUREREFSRCSTORE_CEC5F567C7",
@@ -5402,7 +5120,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMPRODUCT_C24CBDA059",
       "displayName": "PD_DC_FEATURETERMPRODUCT_C24CBDA059",
@@ -5421,7 +5138,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PARENTID_C9795CBDCE",
       "displayName": "ACCT_PARENTID_C9795CBDCE",
@@ -5440,7 +5156,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_INDUSTRY_USER_PROVIDED_37A5FF05EB",
       "displayName": "CUSTOM_INDUSTRY_USER_PROVIDED_37A5FF05EB",
@@ -5459,7 +5174,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_808226D6CC",
       "displayName": "ACCT_TP_SEMRUSHADWORDSCOST_INDU_808226D6CC",
@@ -5478,7 +5192,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "City",
       "displayName": "City",
@@ -5497,7 +5210,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_ACCOUNT_CREATED_DATE_43013FC8F7",
       "displayName": "CUSTOM_ACCOUNT_CREATED_DATE_43013FC8F7",
@@ -5516,7 +5228,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_3204324CBE",
       "displayName": "ACCT_TP_ALEXA_RANK_PCTCHANGE_6M_3204324CBE",
@@ -5535,7 +5246,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_DETAIL_4_D2ECC83671",
       "displayName": "ACCT_SF_OPPTY_DETAIL_4_D2ECC83671",
@@ -5554,7 +5264,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_VIRTUAL_DEBIT_CARD_D1C72AE604",
       "displayName": "CUSTOM_HAS_VIRTUAL_DEBIT_CARD_D1C72AE604",
@@ -5573,7 +5282,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_L6M_TPV_MODELREADY_B07A71F485",
       "displayName": "CUSTOM_L6M_TPV_MODELREADY_B07A71F485",
@@ -5592,7 +5300,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSTORE_38A5985FE2",
       "displayName": "PD_DC_FEATURETERMSTORE_38A5985FE2",
@@ -5611,7 +5318,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_EXPERIAN_SOURCE_ISMATCHED_50699F172F",
       "displayName": "PD_DC_EXPERIAN_SOURCE_ISMATCHED_50699F172F",
@@ -5630,7 +5336,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURECURRENCYUKPOUND_9A5D64BE4B",
       "displayName": "PD_DC_FEATURECURRENCYUKPOUND_9A5D64BE4B",
@@ -5649,7 +5354,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_OWNERID_7F5ACED131",
       "displayName": "ACCT_OWNERID_7F5ACED131",
@@ -5668,7 +5372,6 @@
         "double",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXAREACHPERMILLION_229EA810CE",
       "displayName": "PD_DC_ALEXAREACHPERMILLION_229EA810CE",
@@ -5687,7 +5390,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "fnLEAccountIDLong",
       "displayName": "fnLEAccountIDLong",
@@ -5706,7 +5408,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_LIKELIHOOD_A5FBD72C39",
       "displayName": "ACCT_PL_LIKELIHOOD_A5FBD72C39",
@@ -5725,7 +5426,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPA_4_AF09A4531A",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPA_4_AF09A4531A",
@@ -5744,7 +5444,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_BUSINESSSICDESCRIPTION_24952FE74F",
       "displayName": "ACCT_TP_BUSINESSSICDESCRIPTION_24952FE74F",
@@ -5763,7 +5462,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_EBAY_MASTERCARD_EB4839AD60",
       "displayName": "CUSTOM_HAS_EBAY_MASTERCARD_EB4839AD60",
@@ -5782,7 +5480,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ECOMMERCETECHNOLOGIESTOPA_97B75F546C",
       "displayName": "PD_DC_ECOMMERCETECHNOLOGIESTOPA_97B75F546C",
@@ -5801,7 +5498,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307",
       "displayName": "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307",
@@ -5820,7 +5516,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_SHOPPING_CART_SYSTEM_20B9A6D4E6",
       "displayName": "CUSTOM_DP_SHOPPING_CART_SYSTEM_20B9A6D4E6",
@@ -5839,7 +5534,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHADWORDSCOST_FFC0C9C2D3",
       "displayName": "ACCT_TP_SEMRUSHADWORDSCOST_FFC0C9C2D3",
@@ -5858,7 +5552,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXAUSRANK_PERC_RATING_932182450A",
       "displayName": "ACCT_TP_ALEXAUSRANK_PERC_RATING_932182450A",
@@ -5877,7 +5570,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCROSSCHANNELCO_CDB20B600A",
       "displayName": "PD_DC_FEATURETERMCROSSCHANNELCO_CDB20B600A",
@@ -5896,7 +5588,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMWISHLIST_8A484DF7D1",
       "displayName": "PD_DC_FEATURETERMWISHLIST_8A484DF7D1",
@@ -5915,7 +5606,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_HAS_BUYER_CREDIT_ED1466A6DE",
       "displayName": "CUSTOM_HAS_BUYER_CREDIT_ED1466A6DE",
@@ -5934,7 +5624,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PLAY_DISPLAY_NAME_F75C86D01F",
       "displayName": "ACCT_PLAY_DISPLAY_NAME_F75C86D01F",
@@ -5953,7 +5642,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_NEXTSTEPB_1_250C26F0B0",
       "displayName": "ACCT_SF_OPPTY_NEXTSTEPB_1_250C26F0B0",
@@ -5972,7 +5660,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_FD2AC62470",
       "displayName": "ACCT_TP_FACEBOOK_LIKES_3MONTHSA_FD2AC62470",
@@ -5991,7 +5678,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_SF_OPPTY_HIS_ID_3_6FB7BC5B4C",
       "displayName": "ACCT_SF_OPPTY_HIS_ID_3_6FB7BC5B4C",
@@ -6010,7 +5696,6 @@
         "double",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXAUSUSERS_481783B737",
       "displayName": "PD_DC_ALEXAUSUSERS_481783B737",
@@ -6029,7 +5714,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_TOT_NTPV_MS_EC_L12M_D399B5814D",
       "displayName": "CUSTOM_TOT_NTPV_MS_EC_L12M_D399B5814D",
@@ -6048,7 +5732,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC_DCA8A825F3",
       "displayName": "ACCT_TP_ALEXAVIEWSPERUSER_PERC_DCA8A825F3",
@@ -6067,7 +5750,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_SEMRUSHORGANICCOST_DF3664D040",
       "displayName": "ACCT_TP_SEMRUSHORGANICCOST_DF3664D040",
@@ -6086,7 +5768,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMBAG_6091C4A343",
       "displayName": "PD_DC_FEATURETERMBAG_6091C4A343",
@@ -6105,7 +5786,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMRETURNPOLICY_242DC935FA",
       "displayName": "PD_DC_FEATURETERMRETURNPOLICY_242DC935FA",
@@ -6124,7 +5804,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSHOPPINGCARTSO_A0D77067DF",
       "displayName": "PD_DC_FEATURETERMSHOPPINGCARTSO_A0D77067DF",
@@ -6143,7 +5822,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_ALEXALINKSIN_36DEAA30E9",
       "displayName": "PD_DC_ALEXALINKSIN_36DEAA30E9",
@@ -6162,7 +5840,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREGLOBALCART_D09AED4E1F",
       "displayName": "PD_DC_FEATUREGLOBALCART_D09AED4E1F",
@@ -6181,7 +5858,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "DisplayName",
       "displayName": "DisplayName",
@@ -6200,7 +5876,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREINPUTVALUEADDTOCAR_7C91B22555",
       "displayName": "PD_DC_FEATUREINPUTVALUEADDTOCAR_7C91B22555",
@@ -6219,7 +5894,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMFUNDRAISING_74655FC552",
       "displayName": "PD_DC_FEATURETERMFUNDRAISING_74655FC552",
@@ -6238,7 +5912,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "TotalMonetaryValue",
       "displayName": "TotalMonetaryValue",
@@ -6257,7 +5930,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCOMMERCESOLUTI_1DCAFA6186",
       "displayName": "PD_DC_FEATURETERMCOMMERCESOLUTI_1DCAFA6186",
@@ -6276,7 +5948,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCROWDFUNDING_FFFB4236F7",
       "displayName": "PD_DC_FEATURETERMCROWDFUNDING_FFFB4236F7",
@@ -6295,7 +5966,6 @@
         "boolean",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_EXPERIANPARENT_SOURCE_ISM_E071211F92",
       "displayName": "PD_DC_EXPERIANPARENT_SOURCE_ISM_E071211F92",
@@ -6314,7 +5984,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Address2",
       "displayName": "Address2",
@@ -6333,7 +6002,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMADDTOBAG_F6A71AF160",
       "displayName": "PD_DC_FEATURETERMADDTOBAG_F6A71AF160",
@@ -6352,7 +6020,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMSELLDIGITALDOW_1D661847F4",
       "displayName": "PD_DC_FEATURETERMSELLDIGITALDOW_1D661847F4",
@@ -6371,7 +6038,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_ALEXARANK_PERCENTILE_RA_7E915F082C",
       "displayName": "ACCT_TP_ALEXARANK_PERCENTILE_RA_7E915F082C",
@@ -6390,7 +6056,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "Address1",
       "displayName": "Address1",
@@ -6409,7 +6074,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATUREINTLCOMMERCE_EFE348969B",
       "displayName": "PD_DC_FEATUREINTLCOMMERCE_EFE348969B",
@@ -6428,7 +6092,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "CUSTOM_DP_PAGES_26D0C36EDF",
       "displayName": "CUSTOM_DP_PAGES_26D0C36EDF",
@@ -6447,7 +6110,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURECURRENCYSWISSFRANC_95B2ABBAEE",
       "displayName": "PD_DC_FEATURECURRENCYSWISSFRANC_95B2ABBAEE",
@@ -6466,7 +6128,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_TP_FACEBOOK_LIKES_LASTMONT_B6932AF338",
       "displayName": "ACCT_TP_FACEBOOK_LIKES_LASTMONT_B6932AF338",
@@ -6485,7 +6146,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMADDITEM_3A678867C2",
       "displayName": "PD_DC_FEATURETERMADDITEM_3A678867C2",
@@ -6504,7 +6164,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMPAYMENTSOLUTIO_10E8BC8DCD",
       "displayName": "PD_DC_FEATURETERMPAYMENTSOLUTIO_10E8BC8DCD",
@@ -6523,7 +6182,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_BUSINESSTECHNOLOGIESPAYME_8795EB9414",
       "displayName": "PD_DC_BUSINESSTECHNOLOGIESPAYME_8795EB9414",
@@ -6542,7 +6200,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMFUNDRAISINGSOF_2088658937",
       "displayName": "PD_DC_FEATURETERMFUNDRAISINGSOF_2088658937",
@@ -6561,7 +6218,6 @@
         "string",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "ACCT_PL_CONTACT_ID_676A7A86BC",
       "displayName": "ACCT_PL_CONTACT_ID_676A7A86BC",
@@ -6580,7 +6236,6 @@
         "long",
         "null"
       ],
-      "FundamentalType": "Unknown",
       "Description": "",
       "SourceAttrName": "PD_DC_FEATURETERMCONTINUESHOPPI_D0C8063380",
       "displayName": "PD_DC_FEATURETERMCONTINUESHOPPI_D0C8063380",
