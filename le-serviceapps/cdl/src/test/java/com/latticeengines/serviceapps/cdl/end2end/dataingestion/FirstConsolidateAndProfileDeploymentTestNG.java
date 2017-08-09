@@ -52,6 +52,9 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     }
 
     private void verifyConsolidate() {
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
+        Assert.assertEquals(DataFeed.Status.InitialConsolidated, dataFeed.getStatus());
+        
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
         Assert.assertEquals(numAccounts, 300);
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
@@ -66,6 +69,9 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     }
 
     private void verifyProfile() throws IOException {
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
+        Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
+
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         Table bucketedAccountTable = dataCollectionProxy.getTable(customerSpace,
                 BusinessEntity.Account.getServingStore());
