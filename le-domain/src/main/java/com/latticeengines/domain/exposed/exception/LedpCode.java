@@ -615,7 +615,8 @@ public enum LedpCode {
     LEDP_38015("Failed to populate TalkingPoint preview for the play {0}, CustomerSpace {1}"), //
     LEDP_38016("Failed to retrieve Talkingpoints for the play {0}"), //
     LEDP_38017("Unable to delete Talkingpoints {0} due to an internal error"), //
-    LEDP_38018("Talking point not associated with any Play");
+    LEDP_38018("Talking point not associated with any Play"), //
+    LEDP_38019("Failed to revert Talkingpoints for the play {0}, CustomerSpace {1}");
 
     private String message;
 
