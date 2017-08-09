@@ -159,7 +159,6 @@ public class CipherUtils {
         options.addOption(generate);
         try {
             byte[] bytes = generateSalt();
-            System.out.println(Base64.encodeBase64String(Arrays.copyOfRange(bytes, 0, 16)));
             CommandLine cmd = parser.parse(options, args);
             if (cmd.hasOption("encrypt")) {
                 String strToEncrypt = cmd.getOptionValue("encrypt");
