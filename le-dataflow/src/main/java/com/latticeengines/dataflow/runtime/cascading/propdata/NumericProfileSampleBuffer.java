@@ -16,6 +16,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 public class NumericProfileSampleBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = -4518166131558866707L;
@@ -40,7 +41,7 @@ public class NumericProfileSampleBuffer extends BaseOperation implements Buffer 
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
     @Override
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
         elems = new HashMap<>();
@@ -80,7 +81,6 @@ public class NumericProfileSampleBuffer extends BaseOperation implements Buffer 
         }
     }
 
-    @SuppressWarnings("rawtypes")
     private void outputResult(BufferCall bufferCall, String attr) {
         Tuple result = Tuple.size(getFieldDeclaration().size());
         int keyLoc = namePositionMap.get(KVDepivotStrategy.KEY_ATTR);

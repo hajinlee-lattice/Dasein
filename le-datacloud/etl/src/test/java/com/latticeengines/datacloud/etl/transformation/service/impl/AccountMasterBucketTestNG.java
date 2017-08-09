@@ -29,7 +29,6 @@ import com.latticeengines.datacloud.dataflow.transformation.CalculateStats;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceBucketer;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceSorter;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
@@ -80,7 +79,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
             configuration.setName("AccountMasterBucket");
             configuration.setVersion(targetVersion);
             // -----------
-            TransformationStepConfig profile = profile(DataCloudConstants.PROFILE_STAGE_SEGMENT);
+            TransformationStepConfig profile = profile();
             TransformationStepConfig sortProfile = sortProfile();
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig calcStats = calcStats();
@@ -123,13 +122,17 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         Assert.assertEquals(rowCount, expectedCount.intValue());
     }
 
-    protected TransformationStepConfig profile(String stage) {
+    protected TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
         List<String> baseSources = Collections.singletonList(accountMaster.getSourceName());
         step.setBaseSources(baseSources);
         step.setTransformer(SourceProfiler.TRANSFORMER_NAME);
-        step.setConfiguration(JsonUtils.serialize(new ProfileConfig(stage)));
+        step.setConfiguration(JsonUtils.serialize(constructProfileConfig()));
         return step;
+    }
+
+    protected ProfileConfig constructProfileConfig() {
+        return new ProfileConfig();
     }
 
     private TransformationStepConfig sortProfile() {

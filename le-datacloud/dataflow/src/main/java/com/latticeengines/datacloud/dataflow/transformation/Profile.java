@@ -17,6 +17,8 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AddRandomIntFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.CategoricalProfileBuffer;
+import com.latticeengines.dataflow.runtime.cascading.propdata.CategoricalProfileGroupingBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.NumericProfileBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.NumericProfileSampleBuffer;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -38,6 +40,9 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
 
     private static final String DUMMY_GROUP = "_Dummy_Group_";
     private static final int SAMPLE_SIZE = 100000;
+    private static final String NONCAT_FLAG = "__LATTICE_NONCAT_FLAG_F167B732-D33b-40D0-8288-87605A82650C__";
+    private static final String CAT_ATTR = "CatAttr";
+    private static final String CAT_VALUE = "CatValue";
 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -49,14 +54,25 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         this.config = para;
         Node src = addSource(para.getBaseTables().get(0));
 
-        // Numeric profiling
+        // Preparation
         List<String> numAttrs = new ArrayList<>();
         Map<String, List<String>> numAttrsToDecode = new HashMap<>();// encoded attr -> {decoded attrs}
         Map<String, String> decStrs = new HashMap<>(); // decode attr -> decode strategy str
         parseNumAttrs(numAttrs, numAttrsToDecode, decStrs);
+        List<String> catAttrs = new ArrayList<>();
+        parseCatAttrs(catAttrs);
+
+        // Add dummy group
+        src = src.apply(new AddRandomIntFunction(DUMMY_GROUP, 1, SAMPLE_SIZE, config.getRandSeed()),
+                new FieldList(src.getFieldNames()), new FieldMetadata(DUMMY_GROUP, Integer.class));
+
+        // Numeric profiling
         Node numProfile = profileNumAttrs(src, numAttrs, numAttrsToDecode, decStrs);
 
-        return numProfile;
+        // Categorical profiling
+        Node catProfile = profileCatAttrs(src, catAttrs);
+
+        return numProfile.merge(catProfile);
     }
 
     private void parseNumAttrs(List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
@@ -76,15 +92,19 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         }
     }
 
+    private void parseCatAttrs(List<String> catAttrs) {
+        for (ProfileParameters.Attribute attr : config.getCatAttrs()) {
+            catAttrs.add(attr.getAttr());
+        }
+    }
+
     private Node profileNumAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
             Map<String, String> decStrs) {
         List<String> retainAttrs = new ArrayList<>();
         retainAttrs.addAll(numAttrs);
         retainAttrs.addAll(numAttrsToDecode.keySet());
+        retainAttrs.add(DUMMY_GROUP);
         Node num = src.renamePipe("_NUM_PROFILE_").retain(new FieldList(retainAttrs));
-        // Add dummy group
-        num = num.apply(new AddRandomIntFunction(DUMMY_GROUP, 1, SAMPLE_SIZE, config.getRandSeed()),
-                new FieldList(num.getFieldNames()), new FieldMetadata(DUMMY_GROUP, Integer.class));
         // Sampling + Depivoting
         Map<String, Class<?>> clsMap = getNumAttrClsMap(num.getSchema(), numAttrsToDecode);
         List<FieldMetadata> fms = new ArrayList<>();
@@ -111,6 +131,29 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         num = num.groupByAndBuffer(new FieldList(KVDepivotStrategy.KEY_ATTR), new FieldList(num.getFieldNames()), buf,
                 fms);
         return num;
+    }
+
+    private Node profileCatAttrs(Node src, List<String> catAttrs) {
+        List<String> retainAttrs = new ArrayList<>();
+        retainAttrs.addAll(catAttrs);
+        retainAttrs.add(DUMMY_GROUP);
+        Node cat = src.renamePipe("_CAT_PROFILE_").retain(new FieldList(retainAttrs));
+        List<FieldMetadata> fms = new ArrayList<>();
+        fms.add(new FieldMetadata(CAT_ATTR, String.class));
+        fms.add(new FieldMetadata(CAT_VALUE, String.class));
+        CategoricalProfileGroupingBuffer groupBuf = new CategoricalProfileGroupingBuffer(
+                new Fields(CAT_ATTR, CAT_VALUE), CAT_ATTR, CAT_VALUE, NONCAT_FLAG, config.getMaxCats(), catAttrs);
+        cat = cat.groupByAndBuffer(new FieldList(DUMMY_GROUP), new FieldList(cat.getFieldNames()),
+                groupBuf, fms);
+        fms = getFinalMetadata();
+        CategoricalProfileBuffer buf = new CategoricalProfileBuffer(
+                new Fields(DataCloudConstants.PROFILE_ATTR_ATTRNAME, DataCloudConstants.PROFILE_ATTR_SRCATTR,
+                        DataCloudConstants.PROFILE_ATTR_DECSTRAT, DataCloudConstants.PROFILE_ATTR_ENCATTR,
+                        DataCloudConstants.PROFILE_ATTR_LOWESTBIT, DataCloudConstants.PROFILE_ATTR_NUMBITS,
+                        DataCloudConstants.PROFILE_ATTR_BKTALGO),
+                CAT_ATTR, CAT_VALUE, NONCAT_FLAG, config.getMaxCats(), catAttrs);
+        cat = cat.groupByAndBuffer(new FieldList(CAT_ATTR), new FieldList(cat.getFieldNames()), buf, fms);
+        return cat;
     }
 
     private Map<String, Class<?>> getNumAttrClsMap(List<FieldMetadata> schema,

@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
@@ -81,7 +82,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             configuration.setName("AccountMasterStatistics");
             configuration.setVersion(targetVersion);
             // -----------
-            TransformationStepConfig profile = profile(DataCloudConstants.PROFILE_STAGE_ENRICH);
+            TransformationStepConfig profile = profile();
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig hqduns = hqduns();
             TransformationStepConfig calcStats = calcStats();
@@ -103,10 +104,18 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
     }
 
     @Override
-    protected TransformationStepConfig profile(String stage) {
-        TransformationStepConfig step = super.profile(stage);
+    protected TransformationStepConfig profile() {
+        TransformationStepConfig step = super.profile();
         step.setTargetSource("AccountMasterProfile");
         return step;
+    }
+
+    @Override
+    protected ProfileConfig constructProfileConfig() {
+        ProfileConfig conf = new ProfileConfig();
+        conf.setStage(DataCloudConstants.PROFILE_STAGE_ENRICH);
+        conf.setCatAttrsNotEnc(dimensions.toArray(new String[dimensions.size()]));
+        return conf;
     }
 
     @Override

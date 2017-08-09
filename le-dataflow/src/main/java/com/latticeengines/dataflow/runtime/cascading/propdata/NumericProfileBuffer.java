@@ -12,11 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
@@ -32,8 +29,6 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class NumericProfileBuffer extends BaseOperation implements Buffer {
 
-    private static final Logger log = LoggerFactory.getLogger(NumericProfileBuffer.class);
-
     private static final long serialVersionUID = -4591759360012525636L;
 
     private boolean equalSized;
@@ -46,7 +41,6 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
     private Map<String, Integer> namePositionMap;
     private double[] dVals;
     private double[] dValsRounded;
-    private ObjectMapper om;
 
     public NumericProfileBuffer(Fields fieldDecl, String keyAttr, Map<String, Class<?>> classes,
             Map<String, String> decStrs, boolean equalSized, int buckets, int minBucketSize, boolean sorted) {
@@ -59,7 +53,6 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         this.minBucketSize = minBucketSize;
         this.sorted = sorted;
         this.namePositionMap = getPositionMap(fieldDeclaration);
-        this.om = new ObjectMapper();
     }
 
     @SuppressWarnings("unchecked")
@@ -119,11 +112,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_ENCATTR), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT), null);
         result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_NUMBITS), null);
-        try {
-            result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), om.writeValueAsString(bucket));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Fail to format IntervalBucket object to json", e);
-        }
+        result.set(namePositionMap.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), JsonUtils.serialize(bucket));
         return result;
     }
 

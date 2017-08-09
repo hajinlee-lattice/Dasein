@@ -31,11 +31,18 @@ public class ProfileParameters extends TransformationFlowParameters {
     @JsonProperty("MaxCats")
     private int maxCats;
 
+    @JsonProperty("CatAttrsNotEnc")
+    private String[] catAttrsNotEnc; // Dimensional attributes for stats should
+                                     // not be encoded
+
     @JsonProperty("IDAttr")
     private String idAttr;
 
     @JsonProperty("NumericAttrs")
     private List<Attribute> numericAttrs;
+
+    @JsonProperty("CatAttrs")
+    private List<Attribute> catAttrs;
 
     @JsonProperty("AMAttrsToEnc")
     private List<Attribute> amAttrsToEnc;
@@ -92,6 +99,22 @@ public class ProfileParameters extends TransformationFlowParameters {
         this.encAttrPrefix = encAttrPrefix;
     }
 
+    public int getMaxCats() {
+        return maxCats;
+    }
+
+    public void setMaxCats(int maxCats) {
+        this.maxCats = maxCats;
+    }
+
+    public String[] getCatAttrsNotEnc() {
+        return catAttrsNotEnc;
+    }
+
+    public void setCatAttrsNotEnc(String[] catAttrsNotEnc) {
+        this.catAttrsNotEnc = catAttrsNotEnc;
+    }
+
     public String getIdAttr() {
         return idAttr;
     }
@@ -102,6 +125,14 @@ public class ProfileParameters extends TransformationFlowParameters {
 
     public List<Attribute> getNumericAttrs() {
         return numericAttrs;
+    }
+
+    public List<Attribute> getCatAttrs() {
+        return catAttrs;
+    }
+
+    public void setCatAttrs(List<Attribute> catAttrs) {
+        this.catAttrs = catAttrs;
     }
 
     public void setNumericAttrs(List<Attribute> numericAttrs) {

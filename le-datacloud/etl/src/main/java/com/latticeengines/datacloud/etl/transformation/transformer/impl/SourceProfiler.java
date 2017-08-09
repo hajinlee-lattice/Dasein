@@ -73,9 +73,6 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     @Value("${datacloud.etl.profile.attrs:1000}")
     private int maxAttrs;
 
-    @Value("${datacloud.etl.profile.category.max:2048}")
-    private int maxCats;
-
     private ObjectMapper om = new ObjectMapper();
 
     @Autowired
@@ -128,8 +125,11 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         paras.setMinBucketSize(config.getMinBucketSize());
         paras.setRandSeed(config.getRandSeed());
         paras.setEncAttrPrefix(config.getEncAttrPrefix());
+        paras.setMaxCats(config.getMaxCat());
+        paras.setCatAttrsNotEnc(config.getCatAttrsNotEnc());
         paras.setIdAttr(idAttrs.get(0));
         paras.setNumericAttrs(numericAttrs);
+        paras.setCatAttrs(catAttrs);
         paras.setAttrsToRetain(attrsToRetain);
         paras.setAmAttrsToEnc(amAttrsToEnc);
         paras.setExAttrsToEnc(exAttrsToEnc);
@@ -157,6 +157,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         Set<Schema.Type> numTypes = new HashSet<>(Arrays.asList(
                 new Schema.Type[] { Schema.Type.INT, Schema.Type.LONG, Schema.Type.FLOAT, Schema.Type.DOUBLE }));
         Set<Schema.Type> boolTypes = new HashSet<>(Arrays.asList(new Schema.Type[] { Schema.Type.BOOLEAN }));
+        Set<Schema.Type> catTypes = new HashSet<>(Arrays.asList(new Schema.Type[] { Schema.Type.STRING }));
         try {
             // Attributes encoded in the profiled source which need to decode
             Map<String, List<ProfileParameters.Attribute>> encAttrMap = new HashMap<>(); // Encoded attr-> [decoded attrs] (Enabled in profiling)
@@ -293,6 +294,22 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     log.info(String.format("Existing encoded attr: %s", field.name()));
                     continue;
                 }
+                if (catTypes.contains(type)) {
+                    switch (config.getStage()) {
+                    case DataCloudConstants.PROFILE_STAGE_SEGMENT:
+                        log.info(String.format("Categorical bucketed attr %s (type %s unencode)", field.name(),
+                                type.getName()));
+                        break;
+                    case DataCloudConstants.PROFILE_STAGE_ENRICH:
+                        log.info(String.format("Categorical bucketed attr %s (type %s encode)", field.name(),
+                                type.getName()));
+                        break;
+                    default:
+                        throw new RuntimeException("Unrecognized stage " + config.getStage());
+                    }
+                    catAttrs.add(new ProfileParameters.Attribute(field.name(), null, null, new CategoricalBucket()));
+                    continue;
+                }
                 log.info(String.format("Retained attr: %s (unencode)", field.name()));
                 attrsToRetain.add(new ProfileParameters.Attribute(field.name(), null, null, null));
             }
@@ -329,7 +346,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     @Override
     protected void postDataFlowProcessing(String workflowDir, ProfileParameters paras, ProfileConfig config) {
         if (config.getStage().equals(DataCloudConstants.PROFILE_STAGE_ENRICH)) {
-            postProcessNumericAttrs(workflowDir, paras);
+            postProcessProfiledAttrs(workflowDir, paras);
         }
         List<Object[]> result = new ArrayList<>();
         result.add(profileIdAttr(paras.getIdAttr()));
@@ -385,20 +402,38 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         uploadAvro(workflowDir, columns, data);
     }
 
-    private void postProcessNumericAttrs(String avroDir, ProfileParameters paras) {
+    private void postProcessProfiledAttrs(String avroDir, ProfileParameters paras) {
         List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
         List<Attribute> numericAttrs = paras.getNumericAttrs();
         Map<String, Attribute> numericAttrMap = new HashMap<>(); // attr name -> attr
         numericAttrs.forEach(numericAttr -> numericAttrMap.put(numericAttr.getAttr(), numericAttr));
+        List<Attribute> catAttrs = paras.getCatAttrs();
+        Map<String, Attribute> catAttrMap = new HashMap<>();    // attr name -> attr
+        catAttrs.forEach(catAttr -> catAttrMap.put(catAttr.getAttr(), catAttr));
+        Set<String> catAttrsNotEnc = paras.getCatAttrsNotEnc() != null
+                ? new HashSet<>(Arrays.asList(paras.getCatAttrsNotEnc())) : new HashSet<>();
         for (GenericRecord record : records) {
             String attrName = record.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME).toString();
-            IntervalBucket algo = record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO) == null ? null
-                    : JsonUtils.deserialize(record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString(),
-                            IntervalBucket.class);
-            numericAttrMap.get(attrName).setAlgo(algo);
-            Integer numBits = algo == null ? null
-                    : Math.max((int) Math.ceil(Math.log((algo.getBoundaries().size() + 2)) / Math.log(2)), 1);
-            numericAttrMap.get(attrName).setEncodeBitUnit(numBits);
+            if (numericAttrMap.containsKey(attrName)) {
+                IntervalBucket algo = record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO) == null ? null
+                        : JsonUtils.deserialize(record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString(),
+                                IntervalBucket.class);
+                numericAttrMap.get(attrName).setAlgo(algo);
+                // boundary+2: 1 for catNum = boundNum + 1; 1 for null
+                Integer numBits = algo == null ? null
+                        : Math.max((int) Math.ceil(Math.log((algo.getBoundaries().size() + 2)) / Math.log(2)), 1);
+                numericAttrMap.get(attrName).setEncodeBitUnit(numBits);
+            } else if (catAttrMap.containsKey(attrName)) {
+                CategoricalBucket algo = record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO) == null ? null
+                        : JsonUtils.deserialize(record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO).toString(),
+                                CategoricalBucket.class);
+                catAttrMap.get(attrName).setAlgo(algo);
+                Integer numBits = algo == null ? null
+                        : Math.max((int) Math.ceil(Math.log((algo.getCategories().size() + 1)) / Math.log(2)), 1);
+                catAttrMap.get(attrName).setEncodeBitUnit(numBits);
+            } else {
+                throw new RuntimeException("Unknown attribute: " + attrName);
+            }
         }
         Iterator<Attribute> iter = numericAttrs.iterator();
         while (iter.hasNext()) {
@@ -411,6 +446,18 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             }
         }
         paras.getAmAttrsToEnc().addAll(paras.getNumericAttrs());
+        iter = catAttrs.iterator();
+        while (iter.hasNext()) {
+            Attribute attr = iter.next();
+            if (attr.getAlgo() == null || catAttrsNotEnc.contains(attr.getAttr())) {
+                paras.getAttrsToRetain().add(attr);
+                iter.remove();
+                log.warn(String.format(
+                        "Attribute %s is moved from encode categorical group to retained group due to there is no buckets or it is a dimensional attribute for stats calculation: (%s) ",
+                        attr.getAttr(), JsonUtils.serialize(attr)));
+            }
+        }
+        paras.getAmAttrsToEnc().addAll(paras.getCatAttrs());
         try {
             List<String> avros = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*\\.avro$");
             for (String path : avros) {

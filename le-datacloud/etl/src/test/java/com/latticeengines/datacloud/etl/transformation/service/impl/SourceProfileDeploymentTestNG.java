@@ -294,7 +294,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         map.put("AlexaAUUsers", intBuck);
         intBuck = new IntervalBucket();
         map.put("AlexaCAPageViews", intBuck);
-        map.put("AlexaRank", null);
+        map.put("AlexaRank", new CategoricalBucket());
         map.put("AlexaCARank", null);
         boolBuck = new BooleanBucket();
         map.put("AlexaCAUsers", boolBuck);

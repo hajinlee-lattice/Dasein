@@ -10,10 +10,6 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
 
     }
 
-    public ProfileConfig(String stage) {
-        super.setStage(stage);
-    }
-
     @JsonProperty("NumBucketEqualSized")
     private boolean numBucketEqualSized;// true: bucket size is roughly equal
                                         // false: decide bucket upon distribution
@@ -30,6 +26,13 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
 
     @JsonProperty("EncAttrPrefix")
     private String encAttrPrefix; // used for testing purpose, leave it null for real use case
+
+    @JsonProperty("MaxCat")
+    private int maxCat = 2048; // Maximum allowed category number
+
+    @JsonProperty("CatAttrsNotEnc")
+    private String[] catAttrsNotEnc; // Dimensional attributes for stats should
+                                     // not be encoded
 
     @Override
     public String getStage() {
@@ -83,4 +86,22 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
     public void setEncAttrPrefix(String encAttrPrefix) {
         this.encAttrPrefix = encAttrPrefix;
     }
+
+    public int getMaxCat() {
+        return maxCat;
+    }
+
+    public void setMaxCat(int maxCat) {
+        this.maxCat = maxCat;
+    }
+
+    public String[] getCatAttrsNotEnc() {
+        return catAttrsNotEnc;
+    }
+
+    public void setCatAttrsNotEnc(String[] catAttrsNotEnc) {
+        this.catAttrsNotEnc = catAttrsNotEnc;
+    }
+
+
 }
