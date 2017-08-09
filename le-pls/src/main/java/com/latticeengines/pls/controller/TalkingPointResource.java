@@ -103,7 +103,7 @@ public class TalkingPointResource {
         talkingPointProxy.publish(playName, customerSpace.toString());
     }
 
-    @RequestMapping(value = "/publish", method = RequestMethod.POST)
+    @RequestMapping(value = "/revert", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Revert the given play's talking points to the version last published to dante")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
