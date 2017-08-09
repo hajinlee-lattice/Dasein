@@ -103,6 +103,18 @@ public class TalkingPointResource {
         talkingPointProxy.publish(playName, customerSpace.toString());
     }
 
+    @RequestMapping(value = "/publish", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Revert the given play's talking points to the version last published to dante")
+    @PreAuthorize("hasRole('Edit_PLS_Plays')")
+    public List<TalkingPointDTO> revert(@RequestParam("playName") String playName) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_38008);
+        }
+        return talkingPointProxy.revert(playName, customerSpace.toString());
+    }
+
     @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete a Dante Talking Point ")

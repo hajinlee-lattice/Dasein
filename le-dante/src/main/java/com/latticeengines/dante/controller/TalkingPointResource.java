@@ -79,6 +79,14 @@ public class TalkingPointResource implements TalkingPointInterface {
         talkingPointService.publish(playName, customerSpace);
     }
 
+    @RequestMapping(value = "/revert", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Revert the given play's talking points to the version last published to dante")
+    public List<TalkingPointDTO> revert(@RequestParam("playName") String playName,
+            @RequestParam("customerSpace") String customerSpace) {
+        return talkingPointService.revertToLastPublished(playName, customerSpace);
+    }
+
     @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete a Talking Point ")

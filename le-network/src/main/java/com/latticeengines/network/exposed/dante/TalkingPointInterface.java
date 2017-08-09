@@ -21,4 +21,6 @@ public interface TalkingPointInterface {
     DantePreviewResources getPreviewResources(String customerSpace);
 
     void publish(String playName, String customerSpace);
+
+    List<TalkingPointDTO> revert(String playName, String customerSpace);
 }

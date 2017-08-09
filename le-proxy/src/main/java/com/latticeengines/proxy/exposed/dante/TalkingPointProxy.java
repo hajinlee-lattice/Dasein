@@ -55,6 +55,12 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
     }
 
     @SuppressWarnings("unchecked")
+    public List<TalkingPointDTO> revert(String playName, String customerSpace) {
+        String url = constructUrl("/revert" + "?playName=" + playName + "&customerSpace=" + customerSpace);
+        return post("revert", url, null, List.class);
+    }
+
+    @SuppressWarnings("unchecked")
     public TalkingPointDTO findByName(String name) {
         String url = constructUrl("/" + name);
         return get("findByName", url, TalkingPointDTO.class);

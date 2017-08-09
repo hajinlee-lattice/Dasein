@@ -85,7 +85,7 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     }
 
     public void setName(String name) {
-        if (pid == null || pid < 1) {
+        if ((pid == null || pid < 1) && created == null) {
             this.name = generateNameStr();
         } else {
             this.name = name;

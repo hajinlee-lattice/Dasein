@@ -21,4 +21,6 @@ public interface TalkingPointService {
     void publish(String playName, String customerSpace);
 
     TalkingPointPreview getPreview(String playName, String customerSpace);
+
+    List<TalkingPointDTO> revertToLastPublished(String playName, String customerSpace);
 }
