@@ -17,7 +17,7 @@
         <le.monitor.version>3.8.0-SNAPSHOT</le.monitor.version>
         <start-class>com.latticeengines.oauth2.authserver.OAuthServer</start-class>
         <java.version>1.7</java.version>
-        <jetty.port>8072</jetty.port>
+        <jetty.port>8079</jetty.port>
     </properties>
 
     <parent>
@@ -145,6 +145,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-oauth2db</artifactId>
             <version>${le.oauth2.db.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.security</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -154,6 +160,17 @@
                 <exclusion>
                     <groupId>javax.servlet</groupId>
                     <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security.oauth</groupId>
+            <artifactId>spring-security-oauth2</artifactId>
+            <version>${spring.oauth2.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.security</groupId>
+                    <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

@@ -963,7 +963,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (StringUtils.isBlank(getCategory())) {
             metadata.setCategory(Category.DEFAULT);
         } else {
-            metadata.setCategory(Category.fromName(getCategory()));
+            try {
+                metadata.setCategory(Category.fromName(getCategory()));
+            } catch (Exception e) {
+                throw new IllegalArgumentException(
+                        "Cannot parse category " + getCategory() + " for attribute " + getName());
+            }
+
         }
         if (StringUtils.isBlank(getSubcategory())) {
             metadata.setSubcategory("Other");
@@ -974,7 +980,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (StringUtils.isBlank(getFundamentalType())) {
             metadata.setFundamentalType(FundamentalType.ALPHA);
         } else {
-            metadata.setFundamentalType(FundamentalType.fromName(getFundamentalType()));
+            try {
+                metadata.setFundamentalType(FundamentalType.fromName(getFundamentalType()));
+            } catch (Exception e) {
+                throw new IllegalArgumentException(
+                        "Cannot parse fundamental type " + getFundamentalType() + " for attribute " + getName());
+            }
         }
         metadata.setStatisticalType(StatisticalType.fromName(getStatisticalType()));
         metadata.setDiscretizationStrategy(getDisplayDiscretizationStrategy());
