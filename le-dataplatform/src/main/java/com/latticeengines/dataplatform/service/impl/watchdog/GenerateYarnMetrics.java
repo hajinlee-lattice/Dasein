@@ -1,10 +1,9 @@
 package com.latticeengines.dataplatform.service.impl.watchdog;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
@@ -270,9 +269,9 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             }
         }
         List<Report> reports = job.getReports();
-        Optional.of(reports.stream().filter(reports::contains)
+        reports.stream().filter(reports::contains)
                 .map(r -> JsonUtils.deserialize(r.getJson().getPayload(), new TypeReference<Map<String, Object>>() {
-                }))).ifPresent(map -> fieldMap.putAll(map.findFirst().orElse(Collections.emptyMap())));
+                })).filter(Objects::nonNull).forEach(fieldMap::putAll);
         return fieldMap;
     }
 

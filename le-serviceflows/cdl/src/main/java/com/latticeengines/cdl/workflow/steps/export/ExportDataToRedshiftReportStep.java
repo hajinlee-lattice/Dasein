@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
@@ -17,9 +18,9 @@ public class ExportDataToRedshiftReportStep extends BaseReportStep<BaseReportSte
     public void execute() {
         Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
                 BusinessEntity.class, Table.class);
-        entityTableMap.forEach((k, v) -> {
+        Optional.ofNullable(entityTableMap).ifPresent(map -> map.forEach((k, v) -> {
             getJson().put("Published_" + k.name(), v.getExtracts().get(0).getProcessedRecords());
-        });
+        }));
         super.execute();
     }
 

@@ -29,10 +29,8 @@ public abstract class BaseReportStep<T extends BaseReportStepConfiguration> exte
     @Override
     public void execute() {
         ObjectNode json = getJson();
-        if (json != null) {
-            Report report = createReport(json.toString());
-            registerReport(getConfiguration().getCustomerSpace(), report);
-        }
+        Report report = createReport(json.toString());
+        registerReport(getConfiguration().getCustomerSpace(), report);
     }
 
     private Report createReport(String json) {
