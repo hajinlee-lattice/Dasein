@@ -1,5 +1,5 @@
 # leave the comments for now until we are sure the services will not be put back in
-FROM centos:centos6.8
+FROM centos:centos6.9
 RUN yum update -y && yum clean all
 RUN yum install -y epel-release initscripts && yum clean all
 RUN yum install -y postfix && yum clean all && mkfifo /var/spool/postfix/public/pickup ps aux && chkconfig postfix on
