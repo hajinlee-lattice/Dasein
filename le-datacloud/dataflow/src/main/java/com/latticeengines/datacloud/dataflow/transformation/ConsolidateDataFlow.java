@@ -9,7 +9,9 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.dataflow.utils.LatticeAccountIdUtils;
+import cascading.operation.Function;
+import cascading.tuple.Fields;
+
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
@@ -19,35 +21,18 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-import cascading.operation.Function;
-import cascading.tuple.Fields;
-
 @Component("consolidateDataFlow")
-public class ConsolidateDataFlow extends ConfigurableFlowBase<ConsolidateDataTransformerConfig> {
+public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTransformerConfig> {
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
 
         ConsolidateDataTransformerConfig config = getTransformerConfig(parameters);
 
-        String srcId = config.getSrcIdField();
-        String masterId = config.getMasterIdField();
-
         List<Node> sources = new ArrayList<>();
         List<Table> sourceTables = new ArrayList<>();
         List<String> sourceNames = new ArrayList<>();
-        for (int i = 0; i < parameters.getBaseTables().size(); i++) {
-            String sourceName = parameters.getBaseTables().get(i);
-            Node source = addSource(sourceName);
-            source = LatticeAccountIdUtils.convetLatticeAccountIdDataType(source);
-            List<String> srcFields = source.getFieldNames();
-            if (srcFields.contains(srcId) && !srcFields.contains(masterId)) {
-                source = source.rename(new FieldList(srcId), new FieldList(masterId));
-            }
-            sources.add(source);
-            sourceTables.add(getSourceMetadata(sourceName));
-            sourceNames.add(sourceName);
-        }
+        String masterId = processIdColumns(parameters, config, sources, sourceTables, sourceNames);
         if (sources.size() <= 1) {
             return sources.get(0);
         }
