@@ -1,5 +1,7 @@
 package com.latticeengines.serviceapps.cdl.end2end.dataingestion;
 
+import static org.testng.Assert.assertEquals;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -74,6 +76,12 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         createDataFeed();
     }
 
+    protected void resetCollection() {
+        logger.info("Start reset collection data ...");
+        boolean resetStatus = cdlProxy.reset(mainTenant.getId());
+        assertEquals(resetStatus, true);
+    }
+
     protected void mockAvroData(int offset, int limit) throws IOException {
         mockAvroDataInternal(BusinessEntity.Account, offset, limit);
         mockAvroDataInternal(BusinessEntity.Contact, offset, limit);
@@ -126,30 +134,30 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                     .getResourceAsStream("end2end/Account.avsc");
             String schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
             switch (entity) {
-            case Contact:
-                schemaStr = schemaStr.replace("\"External_ID\"", "\"" + InterfaceName.LEContactIDLong.name() + "\"");
-                schemaStr = schemaStr.replace("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
-                break;
-            case Account:
-            default:
+                case Contact:
+                    schemaStr = schemaStr.replace("\"Id\"", "\"" + InterfaceName.LEContactIDLong.name() + "\"");
+                    schemaStr = schemaStr.replace("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
+                    break;
+                case Account:
+                default:
             }
 
             schema = new Schema.Parser().parse(schemaStr);
             switch (entity) {
-            case Contact:
-                boolean hasLEContactIDLong = schema.getFields().stream().map(Schema.Field::name)
-                        .anyMatch(n -> InterfaceName.LEContactIDLong.name().equals(n));
-                boolean hasAccountId = schema.getFields().stream().map(Schema.Field::name)
-                        .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
-                Assert.assertTrue(hasLEContactIDLong);
-                Assert.assertTrue(hasAccountId);
-                break;
-            case Account:
-                boolean hasLEAccountIDLong = schema.getFields().stream().map(Schema.Field::name)
-                        .anyMatch(n -> InterfaceName.LEAccountIDLong.name().equals(n));
-                Assert.assertTrue(hasLEAccountIDLong);
-                break;
-            default:
+                case Contact:
+                    boolean hasLEContactIDLong = schema.getFields().stream().map(Schema.Field::name)
+                            .anyMatch(n -> InterfaceName.LEContactIDLong.name().equals(n));
+                    boolean hasAccountId = schema.getFields().stream().map(Schema.Field::name)
+                            .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
+                    Assert.assertTrue(hasLEContactIDLong);
+                    Assert.assertTrue(hasAccountId);
+                    break;
+                case Account:
+                    boolean hasLEAccountIDLong = schema.getFields().stream().map(Schema.Field::name)
+                            .anyMatch(n -> InterfaceName.LEAccountIDLong.name().equals(n));
+                    Assert.assertTrue(hasLEAccountIDLong);
+                    break;
+                default:
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to prepare avro schema for " + entity);
@@ -163,12 +171,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-" + entity + "/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.VISIDB.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
-        InputStream dataIs = Thread.currentThread().getContextClassLoader().getResourceAsStream("end2end/Account.avro");
+        InputStream dataIs = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("end2end/Account.avro");
         try {
             List<GenericRecord> records = AvroUtils.readFromInputStream(dataIs);
             AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro",
                     records.subList(offset, offset + limit), true);
-            getLogger().info("Uploaded " + limit + " records to " + targetPath);
+            logger.info("Uploaded " + limit + " records to " + targetPath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload avro for " + entity);
         }
@@ -210,6 +219,4 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
         return table.getExtracts().get(0).getProcessedRecords();
     }
-
-    abstract Logger getLogger();
 }

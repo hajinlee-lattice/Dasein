@@ -16,11 +16,6 @@ public class FirstConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeploy
 
     private static final Logger log = LoggerFactory.getLogger(FirstConsolidateDeploymentTestNG.class);
 
-    @Override
-    Logger getLogger() {
-        return log;
-    }
-
     @Test(groups = "deployment")
     public void testFirstConsolidate() throws Exception {
         importData();
