@@ -2,6 +2,7 @@ package com.latticeengines.pls.end2end;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -28,6 +30,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -50,7 +53,9 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
@@ -134,6 +139,8 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(numAccounts, 300);
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
         Assert.assertEquals(numContacts, 300);
+
+        verifyReport(appId.toString(), 0, 0);
     }
 
     private void firstProfile() throws IOException {
@@ -141,6 +148,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         ApplicationId appId = cdlProxy.profile(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifyReport(appId.toString(), 2, 300);
         verifyFirstProfile();
     }
 
@@ -185,6 +193,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(numAccounts, 500);
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
         Assert.assertEquals(numContacts, 500);
+        verifyReport(appId.toString(), 2, 500);
     }
 
     private void secondProfile() {
@@ -192,6 +201,7 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         ApplicationId appId = cdlProxy.profile(mainTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifyReport(appId.toString(), 2, 500);
         verifySecondProfile();
     }
 
@@ -215,6 +225,30 @@ public class DataIngestionEnd2EndDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(numAccounts, 1000);
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
         Assert.assertEquals(numContacts, 1000);
+        verifyReport(appId.toString(), 2, 1000);
+    }
+
+    private Report retrieveReport(String appId) {
+        log.info("Retrieving report for modeling ...");
+        Job job = restTemplate.getForObject( //
+                String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), appId), //
+                Job.class);
+        assertNotNull(job);
+        List<Report> reports = job.getReports();
+        assertEquals(reports.size(), 1);
+        return reports.get(0);
+    }
+
+    private void verifyReport(String appId, int reportSize, int count) {
+        Report report = retrieveReport(appId);
+        Map<String, Integer> map = JsonUtils.deserialize(report.getJson().getPayload(),
+                new TypeReference<Map<String, Integer>>() {
+                });
+        assertEquals(map.entrySet().size(), reportSize);
+        if (reportSize != 0) {
+            assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).intValue(), count);
+            assertEquals(map.get(TableRoleInCollection.SortedContact.name()).intValue(), count);
+        }
     }
 
     private void querySegment() {

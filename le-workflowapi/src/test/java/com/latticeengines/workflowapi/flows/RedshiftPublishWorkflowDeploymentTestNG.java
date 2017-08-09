@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RedshiftPublishWorkflowConfiguration;
@@ -127,7 +128,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         Map<String, Integer> map = JsonUtils.deserialize(publishDataReport.getJson().getPayload(),
                 new TypeReference<Map<String, Integer>>() {
                 });
-        assertEquals(map.get("Published_Account").intValue(), count);
+        assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).intValue(), count);
     }
 
     private HdfsToRedshiftConfiguration createExportBaseConfig() {
