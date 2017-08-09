@@ -29,7 +29,7 @@
         <le.testframework.version>3.8.0-SNAPSHOT</le.testframework.version>
         <le.transform.version>3.8.0-SNAPSHOT</le.transform.version>
         <le.hadoop.version>3.8.0-SNAPSHOT</le.hadoop.version>
-        <jetty.port>8079</jetty.port>
+        <jetty.port>8073</jetty.port>
         <jett.stop.port>10973</jett.stop.port>
     </properties>
 
