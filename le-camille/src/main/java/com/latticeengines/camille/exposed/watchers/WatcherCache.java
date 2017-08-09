@@ -1,6 +1,7 @@
 package com.latticeengines.camille.exposed.watchers;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -28,6 +29,7 @@ public class WatcherCache<K, V> {
     private final String watcherName;
     private final Object[] initKeys;
     private final Callable<Object[]> initKeysCallable;
+    private Function<String, Collection<K>> refreshKeyResolver;
     private final int capacity;
     private Cache<K, V> cache;
 
@@ -38,6 +40,7 @@ public class WatcherCache<K, V> {
         this.initKeys = initKeys;
         this.capacity = capacity;
         this.initKeysCallable = null;
+        this.refreshKeyResolver = s -> cache.asMap().keySet();
     }
 
     WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity, Callable<Object[]> initKeysCallable) {
@@ -47,6 +50,7 @@ public class WatcherCache<K, V> {
         this.initKeys = null;
         this.initKeysCallable = initKeysCallable;
         this.capacity = capacity;
+        this.refreshKeyResolver = s -> cache.asMap().keySet();
     }
 
     public static <K, V> Builder<K, V> builder() {
@@ -78,7 +82,7 @@ public class WatcherCache<K, V> {
             NodeWatcher.registerWatcher(watcherName);
             NodeWatcher.registerListener(watcherName, () -> {
                 log.info("ZK watcher " + watcherName + " changed, updating " + cacheName + " ...");
-                refresh();
+                refresh(NodeWatcher.getWatchedData(watcherName));
             });
             cache = Caffeine.newBuilder().maximumSize(capacity).build();
             if (initKeysCallable != null) {
@@ -109,11 +113,14 @@ public class WatcherCache<K, V> {
         }
     }
 
-    private void refresh() {
+    private void refresh(String watchedData) {
         if (cache != null) {
             long startTime = System.currentTimeMillis();
             log.info("Start refreshing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
-            cache.asMap().keySet().forEach(this::loadKey);
+            Collection<K> keys = refreshKeyResolver.apply(watchedData);
+            keys.retainAll(cache.asMap().keySet());
+            log.info("Going to refresh " + keys.size() + " keys.");
+            keys.forEach(this::loadKey);
             double duration = new Long(System.currentTimeMillis() - startTime).doubleValue() / 1000.0;
             log.info(String.format("Finished refreshing the WatcherCache %s after %.3f secs.", cacheName, duration));
         }
@@ -137,6 +144,10 @@ public class WatcherCache<K, V> {
         } catch (Exception e) {
             log.error("Failed to load WatcherCache " + cacheName + " using key " + key, e);
         }
+    }
+
+    public void setRefreshKeyResolver(Function<String, Collection<K>> refreshKeyResolver) {
+        this.refreshKeyResolver = refreshKeyResolver;
     }
 
     public static class Builder<K, V> {

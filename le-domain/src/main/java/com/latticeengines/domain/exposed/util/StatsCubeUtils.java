@@ -99,8 +99,13 @@ public class StatsCubeUtils {
             }
         }
         bktCounts.forEach((bktId, bktCnt) -> updateBucket(bucketList.get(bktId - 1), algorithm, bktId, bktCnt));
-        buckets.setBucketList(bucketList);
-        return buckets;
+        // remove buckets with 0 count
+        bucketList.removeIf(bucket -> bucket.getCount() == 0L);
+        if (bucketList.isEmpty()) {
+            return null;
+        } else {
+            return buckets;
+        }
     }
 
     private static List<Bucket> initializeBucketList(BucketAlgorithm algorithm) {

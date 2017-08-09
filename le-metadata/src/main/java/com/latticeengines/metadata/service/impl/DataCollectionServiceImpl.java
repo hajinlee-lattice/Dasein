@@ -1,5 +1,8 @@
 package com.latticeengines.metadata.service.impl;
 
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CustomerMetadata;
+import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CustomerStats;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.watchers.NodeWatcher;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -71,6 +75,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role);
+        NodeWatcher.updateWatchedData(CustomerMetadata.name(), String.format("%s|%s", customerSpace, role.name()));
     }
 
     @Override
@@ -101,6 +106,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                     "Cannot find data collection named " + collectionName + " for customer " + customerSpace);
         }
         dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container);
+        NodeWatcher.updateWatchedData(CustomerStats.name(), customerSpace);
     }
 
     @Override

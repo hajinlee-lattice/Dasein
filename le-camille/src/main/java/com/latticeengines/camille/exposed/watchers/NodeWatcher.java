@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.apache.zookeeper.ZooDefs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -72,6 +72,18 @@ public class NodeWatcher {
                 throw new RuntimeException("Failed up update watcher " + watcherName);
             }
         }
+    }
+
+    public static synchronized String getWatchedData(String watcherName) {
+        Path path = getWatcherPath(watcherName);
+        if (path != null) {
+            try {
+                return CamilleEnvironment.getCamille().get(path).getData();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed get data at watcher " + watcherName);
+            }
+        }
+        return null;
     }
 
 }

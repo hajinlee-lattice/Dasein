@@ -24,7 +24,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     private static final Logger log = LoggerFactory.getLogger(DataCollectionProxy.class);
 
     private LoadingCache<String, AttributeRepository> attrRepoCache = null;
-    private LoadingCache<String, StatisticsContainer> statsCache = null;
 
     protected DataCollectionProxy() {
         super("metadata");
@@ -44,10 +43,9 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public StatisticsContainer getStats(String customerSpace) {
-        if (statsCache == null) {
-            initializeStatsCache();
-        }
-        return statsCache.get(customerSpace);
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
+                shortenCustomerSpace(customerSpace));
+        return get("get stats", url, StatisticsContainer.class);
     }
 
     public Table getTable(String customerSpace, TableRoleInCollection tableRole) {
@@ -74,18 +72,8 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     public void upsertStats(String customerSpace, StatisticsContainer container) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
                 shortenCustomerSpace(customerSpace));
-        evictStatsCache(customerSpace);
         evictAttrRepoCache(customerSpace);
         post("upsertStats", url, container, SimpleBooleanResponse.class);
-    }
-
-    private void initializeStatsCache() {
-        statsCache = Caffeine.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(5, TimeUnit.MINUTES)
-                .refreshAfterWrite(1, TimeUnit.MINUTES)
-                .build(this::getStatsViaRestCall);
-        log.info("Initialized loading cache statsCache.");
     }
 
     private void initializeAttrRepoCache() {
@@ -104,23 +92,10 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    private void evictStatsCache(String customerSpace) {
-        if (statsCache != null) {
-            statsCache.invalidate(customerSpace);
-            log.info("Invalidated stats cache for customer " + shortenCustomerSpace(customerSpace));
-        }
-    }
-
     private AttributeRepository getAttrRepoViaRestCall(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo",
                 shortenCustomerSpace(customerSpace));
         return get("get default attribute repo", url, AttributeRepository.class);
-    }
-
-    private StatisticsContainer getStatsViaRestCall(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
-                shortenCustomerSpace(customerSpace));
-        return get("get stats", url, StatisticsContainer.class);
     }
 
 }
