@@ -163,9 +163,14 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
                     parallelStream//
                             .map(account -> {
-                                Recommendation recommendation = //
-                                        createRecommendation(tenant, playLauch, config, account);
-                                recommendationService.create(recommendation);
+                                try {
+                                    Recommendation recommendation = //
+                                            createRecommendation(tenant, playLauch, config, account);
+                                    recommendationService.create(recommendation);
+                                } catch (Exception ex) {
+                                    log.error(ex.getMessage(), ex);
+                                    throw ex;
+                                }
                                 return null;
                             });
                 }
