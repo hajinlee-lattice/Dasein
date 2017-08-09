@@ -136,6 +136,21 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
         tps = JsonUtils.convertList(raw, TalkingPointDTO.class);
         Assert.assertEquals(tps.size(), 0);
 
+        // revert
+        raw = talkingPointProxy.revert(testPlay.getName(), mainTestCustomerSpace.toString());
+        tps = JsonUtils.convertList(raw, TalkingPointDTO.class);
+        Assert.assertEquals(tps.size(), 2);
+        Assert.assertEquals(dtps.get(0).getExternalID(), tps.get(0).getName());
+        Assert.assertEquals(dtps.get(1).getExternalID(), tps.get(1).getName());
+
+        // delete
+        talkingPointProxy.delete(tps.get(0).getName());
+        talkingPointProxy.delete(tps.get(1).getName());
+
+        raw = talkingPointProxy.findAllByPlayName(testPlay.getName());
+        tps = JsonUtils.convertList(raw, TalkingPointDTO.class);
+        Assert.assertEquals(tps.size(), 0);
+
         // preview
         tpPreview = talkingPointProxy.getTalkingPointPreview(testPlay.getName(), mainTestCustomerSpace.toString());
         Assert.assertNotNull(tpPreview);

@@ -121,6 +121,20 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(tp2.getName());
 
+        tps = talkingPointService.findAllByPlayName(testPlay.getName());
+        Assert.assertNotNull(tps);
+        Assert.assertEquals(tps.size(), 0);
+
+        talkingPointService.revertToLastPublished(testPlay.getName(), mainTestCustomerSpace.toString());
+        tps = talkingPointService.findAllByPlayName(testPlay.getName());
+        Assert.assertNotNull(tps);
+        Assert.assertEquals(tps.size(), 2);
+        Assert.assertEquals(tps.get(0).getName(), dtps.get(0).getExternalID());
+        Assert.assertEquals(tps.get(1).getName(), dtps.get(1).getExternalID());
+
+        talkingPointService.delete(tp.getName());
+        talkingPointService.delete(tp2.getName());
+
         tps = talkingPointService.findAllByPlayName(tp.getPlayName());
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 0);

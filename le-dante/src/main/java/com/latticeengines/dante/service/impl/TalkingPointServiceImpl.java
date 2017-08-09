@@ -85,7 +85,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
             play = internalResourceRestApiProxy.findPlayByName(CustomerSpace.parse(customerSpace),
                     tps.get(0).getPlayName());
             if (play == null) {
-                throw new LedpException(LedpCode.LEDP_38012, new String[]{tps.get(0).getPlayName()});
+                throw new LedpException(LedpCode.LEDP_38012, new String[] { tps.get(0).getPlayName() });
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38013, e);
@@ -111,7 +111,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         if (tp != null)
             return new TalkingPointDTO(tp);
         else
-            throw new LedpException(LedpCode.LEDP_38001, new String[]{name});
+            throw new LedpException(LedpCode.LEDP_38001, new String[] { name });
     }
 
     public List<TalkingPointDTO> findAllByPlayName(String playName) {
@@ -119,7 +119,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
             return talkingPointEntityMgr.findAllByPlayName(playName).stream().map(TalkingPointDTO::new)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38016, e, new String[]{playName});
+            throw new LedpException(LedpCode.LEDP_38016, e, new String[] { playName });
         }
     }
 
@@ -141,13 +141,13 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         try {
             TalkingPoint tp = talkingPointEntityMgr.findByName(name);
             if (tp == null) {
-                throw new LedpException(LedpCode.LEDP_38001, new String[]{name});
+                throw new LedpException(LedpCode.LEDP_38001, new String[] { name });
             }
             talkingPointEntityMgr.delete(tp);
         } catch (LedpException e) {
             throw e;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38017, e, new String[]{name});
+            throw new LedpException(LedpCode.LEDP_38017, e, new String[] { name });
         }
     }
 
@@ -167,7 +167,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
                         .createOrUpdate(convertForDante(tp, CustomerSpace.parse(customerSpace).getTenantId()));
             }
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38014, e, new String[]{playName, customerSpace});
+            throw new LedpException(LedpCode.LEDP_38014, e, new String[] { playName, customerSpace });
         }
     }
 
@@ -178,7 +178,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
                     .map(DanteTalkingPointValue::new).collect(Collectors.toList());
             return new TalkingPointPreview(dtps);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38015, e, new String[]{playName, customerSpace});
+            throw new LedpException(LedpCode.LEDP_38015, e, new String[] { playName, customerSpace });
         }
     }
 
@@ -195,7 +195,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
                 talkingPointEntityMgr.create(convertFromDante(dtp, play));
             }
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38019, e, new String[]{playName, customerSpace});
+            throw new LedpException(LedpCode.LEDP_38019, e, new String[] { playName, customerSpace });
         }
 
         return findAllByPlayName(playName);
@@ -204,8 +204,9 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     private TalkingPoint convertFromDante(DanteTalkingPoint dtp, Play play) {
         TalkingPoint tp = new TalkingPoint();
         tp.setPlay(play);
-        tp.setName(dtp.getExternalID());
+        // set created first to ensure a new unique name is not generated
         tp.setCreated(dtp.getCreationDate());
+        tp.setName(dtp.getExternalID());
         tp.setUpdated(dtp.getLastModificationDate());
         DanteTalkingPointValue dtpv = JsonUtils.deserialize(dtp.getValue(), DanteTalkingPointValue.class);
         tp.setTitle(dtpv.getTitle());

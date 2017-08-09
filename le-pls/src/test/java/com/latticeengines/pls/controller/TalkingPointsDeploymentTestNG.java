@@ -150,6 +150,32 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(playTpsResponse);
         Assert.assertEquals(playTpsResponse.size(), 0);
 
+        List<TalkingPointDTO> rawList = restTemplate.postForObject( //
+                getRestAPIHostPort() + "/pls/dante/talkingpoints/revert?playName=" + play.getName() //
+                        + "&customerSpace=" + mainTestTenant.getId(), //
+                null, List.class);
+
+        playTpsResponse = JsonUtils.convertList(rawList, TalkingPointDTO.class);
+
+        Assert.assertNotNull(playTpsResponse);
+        Assert.assertEquals(playTpsResponse.size(), 2);
+        Assert.assertEquals(playTpsResponse.get(0).getName(),
+                tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID());
+        Assert.assertEquals(playTpsResponse.get(1).getName(),
+                tpPreview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID());
+
+        restTemplate.delete(getRestAPIHostPort() + "/pls/dante/talkingpoints/"
+                + tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID());
+        restTemplate.delete(getRestAPIHostPort() + "/pls/dante/talkingpoints/"
+                + tpPreview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID());
+
+        playTpsResponse = restTemplate.getForObject( //
+                getRestAPIHostPort() + "/pls/dante/talkingpoints/play/" + play.getName(), //
+                List.class);
+
+        Assert.assertNotNull(playTpsResponse);
+        Assert.assertEquals(playTpsResponse.size(), 0);
+
         raw = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/preview?playName=" + play.getName(), //
                 String.class);
