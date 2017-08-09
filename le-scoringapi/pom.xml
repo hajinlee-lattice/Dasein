@@ -29,8 +29,7 @@
         <le.testframework.version>3.8.0-SNAPSHOT</le.testframework.version>
         <le.transform.version>3.8.0-SNAPSHOT</le.transform.version>
         <le.hadoop.version>3.8.0-SNAPSHOT</le.hadoop.version>
-        <guava.version>19.0</guava.version>
-        <jetty.port>8073</jetty.port>
+        <jetty.port>8079</jetty.port>
         <jett.stop.port>10973</jett.stop.port>
     </properties>
 
@@ -229,7 +228,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.security</groupId>
-                    <artifactId>spring-security-core</artifactId>
+                    <artifactId>spring-security-web</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
