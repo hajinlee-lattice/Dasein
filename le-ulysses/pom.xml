@@ -58,10 +58,23 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${project.version}</version>
+            <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.security</groupId>
-                    <artifactId>spring-security-core</artifactId>
+                    <artifactId>spring-security-web</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.security</groupId>
+                    <artifactId>spring-security-web</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -70,12 +83,24 @@
             <artifactId>le-security</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.security</groupId>
+                    <artifactId>spring-security-web</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.security</groupId>
+                    <artifactId>spring-security-web</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
