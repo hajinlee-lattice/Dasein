@@ -17,6 +17,18 @@ function build_docker() {
 	TGT_WAR=$3
 	WORKSPACE=tmp/${SRC_WAR}
 
+    UNAME=`uname`
+
+    if [[ "${UNAME}" == 'Darwin' ]]; then
+        echo "You are on Mac"
+        # Remove alter table drop foreign key statements from the script
+        sed -i '' 's/alter table .* drop foreign key .*;//g' $WSHOME/le-datadb/ddl_data_multitenant_mysql5innodb.sql
+    else
+        echo "You are on ${UNAME}"
+        # Remove alter table drop foreign key statements from the script
+        sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-datadb/ddl_data_multitenant_mysql5innodb.sql
+    fi
+
     DIR="${PWD}"
 	rm -rf ${WORKSPACE}
 	mkdir -p ${WORKSPACE}/webapps/${TGT_WAR}
@@ -28,7 +40,12 @@ function build_docker() {
 	else
 	    cp -f ${DIR}/log4j.properties WEB-INF/classes/log4j.properties
 	fi
-	sed -i "s|{{APP}}|${SRC_WAR}|g" WEB-INF/classes/log4j.properties
+	if [[ "${UNAME}" == 'Darwin' ]]; then
+        sed -i '' "s|{{APP}}|${SRC_WAR}|g" WEB-INF/classes/log4j.properties
+    else
+        sed -i "s|{{APP}}|${SRC_WAR}|g" WEB-INF/classes/log4j.properties
+    fi
+
 	# add context.xml
 	cp -f ${DIR}/context.xml META-INF/context.xml
 	# replace web.xml
@@ -49,8 +66,13 @@ function build_docker() {
 	cp ${DIR}/Dockerfile ${WORKSPACE}
 
 	pushd ${WORKSPACE}
-    sed -i "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
-    sed -i "s|{{WAR}}|${TGT_WAR}|g" Dockerfile
+	if [[ "${UNAME}" == 'Darwin' ]]; then
+	    sed -i '' "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
+        sed -i '' "s|{{WAR}}|${TGT_WAR}|g" Dockerfile
+    else
+	    sed -i "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
+        sed -i "s|{{WAR}}|${TGT_WAR}|g" Dockerfile
+    fi
     docker build -t ${IMAGE} . 2>/tmp/${IMAGE}-errors.txt
     process_error ${IMAGE}
     popd
