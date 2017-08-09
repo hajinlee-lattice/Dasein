@@ -15,6 +15,7 @@
         <jetty.port>8080</jetty.port>
         <jett.stop.port>10980</jett.stop.port>
         <jetty.dir>test</jetty.dir>
+        <jetty.use.test.cp>true</jetty.use.test.cp>
     </properties>
 
     <parent>

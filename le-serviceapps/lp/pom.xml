@@ -9,7 +9,6 @@
 
     <properties>
         <component-name>lp</component-name>
-        <jetty.dir>test</jetty.dir>
     </properties>
 
     <parent>

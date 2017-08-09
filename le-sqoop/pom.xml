@@ -12,7 +12,6 @@
         <component-name>sqoop</component-name>
         <jetty.port>8080</jetty.port>
         <jetty.stop.port>10980</jetty.stop.port>
-        <jetty.dir>test</jetty.dir>
     </properties>
 
     <parent>

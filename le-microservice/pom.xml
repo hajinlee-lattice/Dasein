@@ -16,6 +16,7 @@
         <le.quartz.version>3.8.0-SNAPSHOT</le.quartz.version>
         <le.modelquality.version>3.8.0-SNAPSHOT</le.modelquality.version>
         <jetty.dir>test</jetty.dir>
+        <jetty.use.test.cp>true</jetty.use.test.cp>
     </properties>
 
     <parent>

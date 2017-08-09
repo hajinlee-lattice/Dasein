@@ -19,7 +19,7 @@
     <properties>
         <jetty.dir>main</jetty.dir>
         <jetty.stop.port>10999</jetty.stop.port>
-        <jetty.use.test.cp>true</jetty.use.test.cp>
+        <jetty.use.test.cp>false</jetty.use.test.cp>
     </properties>
 
     <profiles>

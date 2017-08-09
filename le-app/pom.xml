@@ -10,6 +10,7 @@
     <properties>
         <component-name>app</component-name>
         <jetty.dir>test</jetty.dir>
+        <jetty.use.test.cp>true</jetty.use.test.cp>
     </properties>
 
     <parent>
