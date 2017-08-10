@@ -3,7 +3,9 @@ package com.latticeengines.dante.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -16,13 +18,14 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dante.metadata.BaseObjectMetadata;
 import com.latticeengines.dante.metadata.MetadataDocument;
 import com.latticeengines.dante.metadata.NotionMetadata;
 import com.latticeengines.dante.service.DanteAttributeService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.dante.DanteAttribute;
+import com.latticeengines.domain.exposed.dante.DanteNotionAttributes;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -33,9 +36,13 @@ public class DanteAttributeServiceImpl implements DanteAttributeService {
     private final Path metadataDocumentPath = new Path("/MetadataDocument.json");
     private final String danteAccountKey = "DanteAccount";
     private final String recomendationAttributesFilePath = "com/latticeengines/dante/metadata/RecommendationAttributes.json";
+    private final String accountNotion = "account";
+    private final String recommendationNotion = "recommendation";
 
     @SuppressWarnings("unchecked")
-    public Map<String, String> getAccountAttributes(String customerSpace) {
+    @Override
+    public List<DanteAttribute> getAccountAttributes(String customerSpace) {
+        log.info("Attempting to find Account attributes for customerspace : " + customerSpace);
         try {
             Document doc = getMetadataDocument(CustomerSpace.parse(customerSpace));
             return getAccountAttributesFromMetadataDocument(doc.getData());
@@ -47,15 +54,44 @@ public class DanteAttributeServiceImpl implements DanteAttributeService {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, String> getRecommendationAttributes(String customerSpace) {
+    @Override
+    public List<DanteAttribute> getRecommendationAttributes(String customerSpace) {
         try {
+            log.info("Attempting to find Recommendation attributes for customerspace : " + customerSpace);
             ClassLoader classLoader = getClass().getClassLoader();
             InputStream tableRegistryStream = classLoader.getResourceAsStream(recomendationAttributesFilePath);
             String attributesDoc = StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
-            return JsonUtils.deserialize(attributesDoc, Map.class);
+            List<Object> raw = JsonUtils.deserialize(attributesDoc, List.class);
+            return JsonUtils.convertList(raw, DanteAttribute.class);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_10011, e, new String[] { recomendationAttributesFilePath });
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public DanteNotionAttributes getAttributesForNotions(List<String> notions, String customerSpace) {
+        Set<String> uniqueNotions = new HashSet<>(notions.stream() //
+                .map(String::toLowerCase) //
+                .collect(Collectors.toList()));
+
+        DanteNotionAttributes toReturn = new DanteNotionAttributes();
+
+        for (String notion : uniqueNotions) {
+            switch (notion) {
+            case accountNotion:
+                toReturn.addNotion(notion, getAccountAttributes(customerSpace));
+                break;
+            case recommendationNotion:
+                toReturn.addNotion(notion, getRecommendationAttributes(customerSpace));
+                break;
+            default:
+                toReturn.addInvalidNotion(notion);
+                log.error("Attempted to find attributes for invalid notion " + notion);
+            }
+        }
+
+        return toReturn;
     }
 
     private Document getMetadataDocument(CustomerSpace customerSpace) {
@@ -76,13 +112,14 @@ public class DanteAttributeServiceImpl implements DanteAttributeService {
 
     }
 
-    private Map<String, String> getAccountAttributesFromMetadataDocument(String data) {
+    private List<DanteAttribute> getAccountAttributesFromMetadataDocument(String data) {
         try {
             MetadataDocument metadataDoc = JsonUtils.deserialize(data, MetadataDocument.class);
             NotionMetadata danteAccountmetadata = metadataDoc.getNotions().stream()
                     .filter(a -> a.getKey().equals(danteAccountKey)).findFirst().get().getValue();
             return danteAccountmetadata.getProperties().stream()
-                    .collect(Collectors.toMap(BaseObjectMetadata::getName, p -> "Account." + p.getName()));
+                    .map(acc -> new DanteAttribute(acc.getName(), "Account." + acc.getName()))
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38006, e);
         }

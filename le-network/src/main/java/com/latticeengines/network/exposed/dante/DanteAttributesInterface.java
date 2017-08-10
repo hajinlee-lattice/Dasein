@@ -1,9 +1,14 @@
 package com.latticeengines.network.exposed.dante;
 
-import java.util.Map;
+import java.util.List;
+
+import com.latticeengines.domain.exposed.dante.DanteAttribute;
+import com.latticeengines.domain.exposed.dante.DanteNotionAttributes;
 
 public interface DanteAttributesInterface {
-    Map<String, String> getAccountAttributes(String customerSpace);
+    List<DanteAttribute> getAccountAttributes(String customerSpace);
 
-    Map<String, String> getRecommendationAttributes(String customerSpace);
+    List<DanteAttribute> getRecommendationAttributes(String customerSpace);
+
+    DanteNotionAttributes getAttributesByNotions(List<String> notions, String customerSpace);
 }
