@@ -267,11 +267,11 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
                 }
                 fieldMap.put(step.getJobStepType() + "Sec", elapsedSec);
             }
+            List<Report> reports = job.getReports();
+            reports.stream().filter(reports::contains)
+                    .map(r -> JsonUtils.deserialize(r.getJson().getPayload(), new TypeReference<Map<String, Object>>() {
+                    })).filter(Objects::nonNull).forEach(fieldMap::putAll);
         }
-        List<Report> reports = job.getReports();
-        reports.stream().filter(reports::contains)
-                .map(r -> JsonUtils.deserialize(r.getJson().getPayload(), new TypeReference<Map<String, Object>>() {
-                })).filter(Objects::nonNull).forEach(fieldMap::putAll);
         return fieldMap;
     }
 
