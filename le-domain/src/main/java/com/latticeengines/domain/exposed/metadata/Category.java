@@ -25,6 +25,8 @@ public enum Category {
     WEBSITE_KEYWORDS("Website Keywords"), //
     WEBSITE_PROFILE("Website Profile"), //
     ACCOUNT_ATTRIBUTES("My Attributes"), //
+    CONTACT_ATTRIBUTES("Contact Attributes"), //
+    PRODUCT_SPEND("Product Spend Profile"), //
     DEFAULT("Default");
 
     private final String name;
