@@ -56,7 +56,7 @@ public class DanteAttributesResource {
         return danteAttributesProxy.getRecommendationAttributes(customerSpace.toString());
     }
 
-    @RequestMapping(value = "/attributes", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Get attributes for given notions")
     public DanteNotionAttributes getAttributesByNotions(@RequestBody List<String> notions) {

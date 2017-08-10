@@ -102,6 +102,12 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
         Assert.assertEquals(playTpsResponse.size(), 2);
         Assert.assertEquals(playTpsResponse.get(0).getOffset(), 2);
         Assert.assertEquals(playTpsResponse.get(1).getOffset(), 1);
+
+        TalkingPointPreview rawPreview = talkingPointProxy.getTalkingPointPreview(testPlay.getName(),
+                mainTestCustomerSpace.toString());
+        Assert.assertEquals(rawPreview.getNotionObject().getTalkingPoints().get(0).getOffset(), 1);
+        Assert.assertEquals(rawPreview.getNotionObject().getTalkingPoints().get(1).getOffset(), 2);
+
     }
 
     @SuppressWarnings({ "unchecked" })

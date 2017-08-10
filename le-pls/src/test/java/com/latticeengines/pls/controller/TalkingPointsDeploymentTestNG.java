@@ -133,6 +133,8 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         Assert.assertNotNull(tpPreview);
         Assert.assertEquals(tpPreview.getNotionObject().getTalkingPoints().size(), 2);
+        Assert.assertEquals(tpPreview.getNotionObject().getTalkingPoints().get(0).getOffset(), 1);
+        Assert.assertEquals(tpPreview.getNotionObject().getTalkingPoints().get(1).getOffset(), 2);
 
         restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
@@ -160,9 +162,9 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(playTpsResponse);
         Assert.assertEquals(playTpsResponse.size(), 2);
         Assert.assertEquals(playTpsResponse.get(0).getName(),
-                tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID());
-        Assert.assertEquals(playTpsResponse.get(1).getName(),
                 tpPreview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID());
+        Assert.assertEquals(playTpsResponse.get(1).getName(),
+                tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID());
 
         restTemplate.delete(getRestAPIHostPort() + "/pls/dante/talkingpoints/"
                 + tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID());

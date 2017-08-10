@@ -30,7 +30,7 @@ public class DanteAttributesProxy extends MicroserviceRestApiProxy implements Da
 
     @SuppressWarnings("unchecked")
     public DanteNotionAttributes getAttributesByNotions(List<String> notions, String customerSpace) {
-        String url = constructUrl("/attributes?customerSpace=" + customerSpace);
+        String url = constructUrl("?customerSpace=" + customerSpace);
         return post("getAttributesByNotions", url, notions, DanteNotionAttributes.class);
     }
 }

@@ -175,6 +175,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     public TalkingPointPreview getPreview(String playName, String customerSpace) {
         try {
             List<DanteTalkingPointValue> dtps = talkingPointEntityMgr.findAllByPlayName(playName).stream()
+                    .sorted((tp1, tp2) -> Integer.compare(tp1.getOffset(), tp2.getOffset()))
                     .map(DanteTalkingPointValue::new).collect(Collectors.toList());
             return new TalkingPointPreview(dtps);
         } catch (Exception e) {
