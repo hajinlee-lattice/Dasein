@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +16,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dante.DanteAttribute;
@@ -55,18 +53,11 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     @SuppressWarnings({ "unchecked" })
     @Test(groups = { "deployment" })
     public void testGetRecommendationAttributes() {
-        String rawResponse = restTemplate.getForObject( //
+        List<DanteAttribute> rawResponse = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/attributes/recommendationattributes", //
-                String.class);
-        ObjectMapper om = new ObjectMapper();
-        List<DanteAttribute> recResponse = null;
-        try {
-            recResponse = om.readValue(rawResponse, new TypeReference<List<DanteAttribute>>() {});
-        } catch (IOException e) {
-            Assert.fail("Failed to parse response " + rawResponse, e);
-        }
+                List.class);
+        List<DanteAttribute> recResponse = JsonUtils.convertList(rawResponse, DanteAttribute.class);
         Assert.assertNotNull(recResponse);
-
     }
 
     @SuppressWarnings({ "unchecked" })
