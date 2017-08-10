@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -20,6 +21,8 @@ import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
+import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 
 @Component("bulkMatchProcessorAsyncExecutor")
 public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
@@ -58,10 +61,16 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
             log.info("a block " + block + " of " + input.getData().size() + " records to Async match.");
             MatchContext matchContext = matchPlanner.plan(input);
-            matchContext = matchExecutor.executeAsync(matchContext);
             if (combinedContext == null) {
                 combinedContext = matchContext;
             }
+            if (processorContext.isPartialMatch()) {
+                processPartialMatch(processorContext, internalRecords, internalCompletedRecords, futures,
+                        completedFutures, matchContext, combinedContext);
+                block++;
+                continue;
+            }
+            matchContext = matchExecutor.executeAsync(matchContext);
 
             if (CollectionUtils.isNotEmpty(matchContext.getFuturesResult())) {
                 log.info("Returned block " + block + " of " + matchContext.getFuturesResult().size()
@@ -75,6 +84,11 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         while (futures.size() > 0 || completedFutures.size() > 0) {
             log.info("Last batch, futures size=" + futures.size() + " completed futures size="
                     + completedFutures.size());
+            if (processorContext.isPartialMatch()) {
+                processPartialMatch(processorContext, internalRecords, internalCompletedRecords, futures,
+                        completedFutures, null, combinedContext);
+                continue;
+            }
             processRecords(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
                     completedFutures, combinedContext, 0, 0);
         }
@@ -85,6 +99,49 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 (System.currentTimeMillis() - startTime) / 60000.0));
 
         matchMonitorService.monitor();
+    }
+
+    private void processPartialMatch(ProcessorContext processorContext, List<InternalOutputRecord> internalRecords,
+            List<InternalOutputRecord> internalCompletedRecords, List<Future<Object>> futures,
+            List<Future<Object>> completedFutures, MatchContext matchContext, MatchContext combinedContext) {
+        if (internalCompletedRecords.size() > 0)
+            flushMatchOutput(processorContext, internalCompletedRecords, completedFutures, combinedContext);
+        if (internalRecords.size() > 0)
+            flushMatchOutput(processorContext, internalRecords, futures, combinedContext);
+        if (matchContext != null)
+            flushMatchOutput(processorContext, matchContext.getInternalResults(), new ArrayList<Future<Object>>(),
+                    combinedContext);
+    }
+
+    private void flushMatchOutput(ProcessorContext processorContext, List<InternalOutputRecord> records,
+            List<Future<Object>> futures, MatchContext combinedContext) {
+        combinedContext.setInternalResults(records);
+        combinedContext.setFuturesResult(futures);
+        log.info("Flushing " + records.size() + " records.");
+
+        populateMatchOutput(processorContext, records, combinedContext);
+        processorContext.getRowsProcessed().addAndGet(records.size());
+        processMatchOutput(processorContext, combinedContext.getOutput());
+        int rows = processorContext.getRowsProcessed().get();
+        processorContext.getDataCloudProcessor().setProgress(0.07f + 0.9f * rows / processorContext.getBlockSize());
+        log.info("Processed " + rows + " out of " + processorContext.getBlockSize() + " rows.");
+        futures.clear();
+        records.clear();
+    }
+
+    private void populateMatchOutput(ProcessorContext processorContext, List<InternalOutputRecord> records,
+            MatchContext combinedContext) {
+        MatchOutput matchOutput = combinedContext.getOutput();
+        List<OutputRecord> outputRecords = new ArrayList<>();
+        for (InternalOutputRecord record : records) {
+            OutputRecord outputRecord = new OutputRecord();
+            outputRecords.add(outputRecord);
+            List<Object> output = new ArrayList<>(Collections.nCopies(matchOutput.getOutputFields().size(), null));
+            outputRecord.setOutput(output);
+            outputRecord.setInput(record.getInput());
+        }
+        matchOutput.setResult(outputRecords);
+
     }
 
     private void processFutures(ProcessorContext processorContext, Long startTime,
@@ -102,6 +159,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
         do {
             processRecords(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
                     completedFutures, combinedContext, 100, NUM_10K * 2);
+            if (processorContext.isPartialMatch()) {
+                return;
+            }
         } while (futures.size() > NUM_10K * 4);
     }
 
@@ -140,6 +200,11 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
     private void checkTimeout(ProcessorContext processorContext, Long startTime) {
         if (System.currentTimeMillis() - startTime > processorContext.getTimeOut()) {
+            if (processorContext.getOriginalInput().isPartialMatchEnabled()) {
+                processorContext.setPartialMatch(true);
+                log.warn("Set partial match!");
+                return;
+            }
             throw new RuntimeException(String.format("Did not finish matching %d rows in %.2f minutes.",
                     processorContext.getBlockSize(), processorContext.getTimeOut() / 60000.0));
         }
@@ -188,9 +253,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
     private void checkMatchCode(ProcessorContext processorContext, MatchContext combinedContext) {
         for (InternalOutputRecord outputRecord : combinedContext.getInternalResults()) {
             if (DnBReturnCode.UNMATCH_TIMEOUT.equals(outputRecord.getDnbCode())) {
-                throw new RuntimeException(
-                        String.format("Did not finish matching in %.2f minutes due to DnB limits, please try later!",
-                                processorContext.getRecordTimeOut() / 60000.0));
+                throw new RuntimeException(String.format(
+                        "Did not finish matching in %.2f minutes due to DnB limits, please try later!",
+                        processorContext.getRecordTimeOut() / 60000.0));
             }
         }
     }
@@ -231,9 +296,9 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 return;
             }
             try {
-                log.info(String.format(
-                        "DnB bulk match quota is not available. Wait for 4 mins. Have waited for %d mins up to now. Plan to wait for %d mins for total.",
-                        (System.currentTimeMillis() - startTime) / 60000, timeout / 60000));
+                log.info(String
+                        .format("DnB bulk match quota is not available. Wait for 4 mins. Have waited for %d mins up to now. Plan to wait for %d mins for total.",
+                                (System.currentTimeMillis() - startTime) / 60000, timeout / 60000));
                 Thread.sleep(240_000L);
             } catch (Exception ex) {
                 log.warn("Failed to sleep!");
@@ -253,8 +318,8 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
                 return true;
             }
             try {
-                log.info(String.format("Wait for 15 seconds to ensure DnB bulk match quota is available. Try times: %d",
-                        i + 1));
+                log.info(String.format(
+                        "Wait for 15 seconds to ensure DnB bulk match quota is available. Try times: %d", i + 1));
                 Thread.sleep(15_000L);
             } catch (Exception ex) {
                 log.warn("Failed to sleep!");

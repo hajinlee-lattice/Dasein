@@ -150,6 +150,10 @@ public class MatchInput implements Fact, Dimension {
     // use cascading bulk match
     @JsonProperty("BulkOnly")
     private boolean bulkOnly;
+    
+    @JsonProperty("PartialMatchEnabled")
+    private boolean partialMatchEnabled;
+
 
     // ====================
     // END FLAGS
@@ -399,6 +403,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setBulkOnly(boolean bulkOnly) {
         this.bulkOnly = bulkOnly;
+    }
+
+    public boolean isPartialMatchEnabled() {
+        return partialMatchEnabled;
+    }
+
+    public void setPartialMatchEnabled(boolean partialMatchEnabled) {
+        this.partialMatchEnabled = partialMatchEnabled;
     }
 
     public Boolean getUseRealTimeProxy() {

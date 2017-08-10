@@ -120,6 +120,8 @@ public class ProcessorContext {
     private String blockRootDir;
     private Integer numThreads;
 
+    private boolean partialMatch;
+
     private AtomicInteger rowsProcessed = new AtomicInteger(0);
 
     private long timeOut;
@@ -272,6 +274,14 @@ public class ProcessorContext {
         return splits;
     }
 
+    public boolean isPartialMatch() {
+        return partialMatch;
+    }
+
+    public void setPartialMatch(boolean partialMatch) {
+        this.partialMatch = partialMatch;
+    }
+
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
             throws Exception {
         this.jobConfiguration = jobConfiguration;
@@ -375,8 +385,7 @@ public class ProcessorContext {
         // am output attr -> dedupe -> debug
         // the same sequence will be used in writeDataToAvro
         log.info("Need to prepare for dedupe: " + originalInput.isPrepareForDedupe());
-        if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource())
-                && originalInput.isPrepareForDedupe()) {
+        if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource()) && originalInput.isPrepareForDedupe()) {
             outputSchema = appendDedupeHelpers(outputSchema);
         }
 
@@ -392,6 +401,8 @@ public class ProcessorContext {
                 && jobConfiguration.getMatchInput().isDisableDunsValidation();
         log.info(String.format("Duns validation is disabled: %b", disableDunsValidation));
         cleanup();
+
+        log.info("Partial match enabled=" + originalInput.isPartialMatchEnabled() + " partial match=" + partialMatch);
     }
 
     private Schema appendDebugSchema(Schema schema) {

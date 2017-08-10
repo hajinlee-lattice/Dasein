@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.avro.generic.GenericRecord;
@@ -27,7 +26,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -298,20 +296,9 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         matchInput.setUseRemoteDnB(false);
         matchInput.setLogDnBBulkResult(false);
         matchInput.setMatchDebugEnabled(false);
+        matchInput.setPartialMatchEnabled(false);
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
-    }
-
-    private Map<MatchKey, List<String>> getKeyMap() {
-        Map<MatchKey, List<String>> keyMap = new TreeMap<>();
-        keyMap.put(MatchKey.Domain, Arrays.asList("Domain"));
-        // keyMap.put(MatchKey.Name, Arrays.asList("Name"));
-        // keyMap.put(MatchKey.Country, Arrays.asList("Country"));
-        // keyMap.put(MatchKey.State, Arrays.asList("State"));
-        // keyMap.put(MatchKey.City, Arrays.asList("City"));
-        // // keyMap.put(MatchKey.Zipcode, Arrays.asList("Zipcode"));
-        // keyMap.put(MatchKey.PhoneNumber, Arrays.asList("PhoneNumber"));
-        return keyMap;
     }
 
     private String getDataCloudVersion() {
