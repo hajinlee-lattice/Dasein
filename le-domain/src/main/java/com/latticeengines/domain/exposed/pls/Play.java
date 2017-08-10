@@ -118,11 +118,11 @@ public class Play implements HasName, HasPid, HasTenantId {
     private String createdBy;
 
     @JsonProperty("excludeAccountsWithoutSalesforceId")
-    @Column(name = "EXCLUDE_ACCOUNTS_WITHOUT_SFID", nullable = false)
+    @Column(name = "EXCLUDE_ACCOUNTS_WITHOUT_SFID", nullable = true)
     private Boolean excludeAccountsWithoutSalesforceId = Boolean.FALSE;
 
     @JsonProperty("excludeContactsWithoutSalesforceId")
-    @Column(name = "EXCLUDE_CONTACTS_WITHOUT_SFID", nullable = false)
+    @Column(name = "EXCLUDE_CONTACTS_WITHOUT_SFID", nullable = true)
     private Boolean excludeContactsWithoutSalesforceId = Boolean.FALSE;
 
     @Override
