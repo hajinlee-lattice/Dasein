@@ -68,7 +68,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     public void setup() throws Exception {
         logger.info("Bootstrapping test tenants using tenant console ...");
 
-        setupTestEnvironmentt();
+        setupTestEnvironment();
         mainTenant = testBed.getMainTestTenant();
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTenant));
 

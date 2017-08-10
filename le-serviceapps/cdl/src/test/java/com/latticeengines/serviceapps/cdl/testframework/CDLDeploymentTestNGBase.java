@@ -39,7 +39,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     protected Tenant mainTestTenant;
 
-    protected void setupTestEnvironmentt() throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
         SSLUtils.turnOffSSL();
         testBed.bootstrapForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
