@@ -545,7 +545,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public String getFundamentalType() {
-        return (String) properties.get("FundamentalType");
+        return getPropertyValue("FundamentalType") != null ? getPropertyValue("FundamentalType").toString() : null;
     }
 
     /**

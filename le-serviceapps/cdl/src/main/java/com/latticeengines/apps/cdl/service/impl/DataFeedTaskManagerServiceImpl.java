@@ -17,10 +17,13 @@ import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -56,6 +59,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         Table newMeta = dataFeedMetadataService.getMetadata(metadata);
         newMeta = dataFeedMetadataService.resolveMetadata(newMeta, SchemaInterpretation.valueOf(entity));
+        setCategoryForTable(newMeta, entity);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(metadata);
         if (dlTenantMappingEnabled) {
             log.info("DL tenant mapping is enabled");
@@ -97,6 +101,25 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 }
             }
             return dataFeedTask.getUniqueId();
+        }
+    }
+
+    private void setCategoryForTable(Table table, String entity) {
+        BusinessEntity businessEntity = BusinessEntity.valueOf(entity);
+        if (businessEntity == null) {
+            throw new RuntimeException(String.format("Cannot recognize entity: %s", entity));
+        }
+        String category;
+        switch (businessEntity) {
+            case Account:
+                category = Category.ACCOUNT_ATTRIBUTES.getName();
+                break;
+            //todo other entity
+            default:
+                category = Category.DEFAULT.getName();
+        }
+        for (Attribute attr : table.getAttributes()) {
+            attr.setCategory(category);
         }
     }
 

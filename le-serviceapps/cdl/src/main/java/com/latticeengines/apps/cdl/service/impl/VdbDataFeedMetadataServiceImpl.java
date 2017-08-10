@@ -17,11 +17,11 @@ import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -48,27 +48,37 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         Table metaTable = new Table();
         for (VdbSpecMetadata metadata : vdbLoadTableConfig.getMetadataList()) {
             Attribute attr = new Attribute();
-            attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()));
-            attr.setSourceAttrName(metadata.getColumnName());
-            attr.setDisplayName(metadata.getDisplayName());
-            attr.setSourceLogicalDataType(metadata.getDataType());
-            attr.setPhysicalDataType(metadata.getDataType());
-            attr.setApprovedUsage(metadata.getApprovedUsage());
-            attr.setDescription(metadata.getDescription());
-            attr.setDataSource(metadata.getDataSource());
-            attr.setFundamentalType(metadata.getFundamentalType());
-            attr.setStatisticalType(metadata.getStatisticalType());
-            attr.setTags(metadata.getTags());
-            attr.setDisplayDiscretizationStrategy(metadata.getDisplayDiscretizationStrategy());
-            if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
-                attr.setDataQuality(metadata.getDataQuality().get(0));
-            }
+            setAttributeProperty(attr, metadata);
             metaTable.addAttribute(attr);
         }
         metaTable.setPrimaryKey(null);
         metaTable.setName(vdbLoadTableConfig.getTableName());
         metaTable.setDisplayName(vdbLoadTableConfig.getTableName());
         return metaTable;
+    }
+
+    private void setAttributeProperty(Attribute attr, VdbSpecMetadata metadata) {
+        attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()));
+        attr.setSourceAttrName(metadata.getColumnName());
+        attr.setDisplayName(metadata.getDisplayName());
+        attr.setSourceLogicalDataType(metadata.getDataType());
+        attr.setPhysicalDataType(metadata.getDataType());
+        attr.setApprovedUsage(metadata.getApprovedUsage());
+        attr.setDescription(metadata.getDescription());
+        attr.setDataSource(metadata.getDataSource());
+        if (!StringUtils.isBlank(metadata.getFundamentalType()) &&
+                !metadata.getFundamentalType().equalsIgnoreCase("Unknown")) {
+            FundamentalType type = FundamentalType.fromName(metadata.getFundamentalType().toUpperCase());
+            attr.setFundamentalType(type);
+        }
+        if (!StringUtils.isBlank(metadata.getStatisticalType())) {
+            attr.setStatisticalType(metadata.getStatisticalType());
+        }
+        attr.setTags(metadata.getTags());
+        attr.setDisplayDiscretizationStrategy(metadata.getDisplayDiscretizationStrategy());
+        if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
+            attr.setDataQuality(metadata.getDataQuality().get(0));
+        }
     }
 
     @Override
@@ -87,18 +97,14 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             while (attrIterator.hasNext()) {
                 Attribute attribute = attrIterator.next();
                 if (entry.getKey().equalsIgnoreCase(attribute.getName())) {
-                    attribute.setDisplayName(entry.getValue().getName());
-                    attribute.setSourceLogicalDataType(entry.getValue().getSourceLogicalDataType());
-                    attribute.setPhysicalDataType(entry.getValue().getPhysicalDataType());
+                    copyAttribute(attribute, entry.getValue());
                     originalAttrMatch.add(entry.getKey());
                     findMatch.add(attribute.getName());
                     break;
                 }
                 if (attribute.getAllowedDisplayNames().contains(entry.getKey().toUpperCase())) {
                     log.info(String.format("Matched column : %s", entry.getKey()));
-                    attribute.setDisplayName(entry.getValue().getName());
-                    attribute.setSourceLogicalDataType(entry.getValue().getSourceLogicalDataType());
-                    attribute.setPhysicalDataType(entry.getValue().getPhysicalDataType());
+                    copyAttribute(attribute, entry.getValue());
                     originalAttrMatch.add(entry.getKey());
                     findMatch.add(attribute.getName());
                     break;
@@ -132,6 +138,25 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         table.setName(original.getName());
         table.setDisplayName(original.getDisplayName());
         return table;
+    }
+
+    private void copyAttribute(Attribute dest, Attribute source) {
+        dest.setSourceAttrName(source.getSourceAttrName());
+        dest.setDisplayName(source.getDisplayName());
+        dest.setSourceLogicalDataType(source.getSourceLogicalDataType());
+        dest.setPhysicalDataType(source.getPhysicalDataType());
+        dest.setApprovedUsage(source.getApprovedUsage());
+        dest.setDescription(source.getDescription());
+        dest.setDataSource(source.getDataSource());
+        if (source.getFundamentalType() != null) {
+            dest.setFundamentalType(source.getFundamentalType());
+        }
+        if (source.getStatisticalType() != null) {
+            dest.setStatisticalType(source.getStatisticalType());
+        }
+        dest.setTags(source.getTags());
+        dest.setDisplayDiscretizationStrategy(source.getDisplayDiscretizationStrategy());
+        dest.setDataQuality(source.getDataQuality());
     }
 
     @Override
