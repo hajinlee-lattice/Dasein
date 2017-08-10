@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.List;
 
-import com.latticeengines.datacloud.dataflow.utils.LatticeAccountIdUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -23,7 +22,6 @@ public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends C
         for (int i = 0; i < parameters.getBaseTables().size(); i++) {
             String sourceName = parameters.getBaseTables().get(i);
             Node source = addSource(sourceName);
-            source = LatticeAccountIdUtils.convetLatticeAccountIdDataType(source);
             List<String> srcFields = source.getFieldNames();
             if (srcFields.contains(srcId) && !srcFields.contains(masterId)) {
                 source = source.rename(new FieldList(srcId), new FieldList(masterId));
