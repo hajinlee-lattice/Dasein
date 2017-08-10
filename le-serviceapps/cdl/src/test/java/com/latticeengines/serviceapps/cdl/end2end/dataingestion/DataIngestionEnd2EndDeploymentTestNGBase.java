@@ -64,7 +64,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     private Tenant mainTenant;
 
-    @BeforeClass(groups = { "deployment" })
+    @BeforeClass(groups = { "end2end" })
     public void setup() throws Exception {
         logger.info("Bootstrapping test tenants using tenant console ...");
 

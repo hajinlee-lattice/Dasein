@@ -29,7 +29,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
     private static final Logger log = LoggerFactory.getLogger(FirstConsolidateAndProfileDeploymentTestNG.class);
 
-    @Test(groups = "deployment")
+    @Test(groups = "end2end")
     public void testFirstConsolidate() throws Exception {
         importData();
         consolidate();
