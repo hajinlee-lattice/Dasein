@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -39,18 +42,20 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
+
 @Component("playLaunchInitStep")
 public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStep.class);
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
     @Value("${playmaker.workflow.segment.pagesize:100}")
-    private int pageSize;
+    private long pageSize;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -75,6 +80,21 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private long processedSegmentAccountsCount = 0;
 
+    @SuppressWarnings("unchecked")
+    List<String> fields = Arrays.asList(new String[] { //
+            PlaymakerConstants.CdlKeyZip, //
+            PlaymakerConstants.AccountId, //
+            PlaymakerConstants.CdlKeyExternal_ID, //
+            PlaymakerConstants.SalesforceAccountID, //
+            PlaymakerConstants.CdlKeyTotalMonetaryValue, //
+            PlaymakerConstants.CdlKeyDisplayName, //
+            PlaymakerConstants.CdlKeyCrmAccount_External_ID });
+
+    @PostConstruct
+    public void init() {
+        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    }
+
     @Override
     public void execute() {
         Tenant tenant = null;
@@ -82,7 +102,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         CustomerSpace customerSpace = config.getCustomerSpace();
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         launchTimestampMillis = System.currentTimeMillis();
 
         try {
@@ -113,14 +132,10 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.error(ex.getMessage(), ex);
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
         }
-
     }
-
+    
     private void executeLaunchActivity(Tenant tenant, PlayLaunch playLauch, PlayLaunchInitStepConfiguration config,
             Restriction segmentRestriction) {
-        // add processing logic
-
-        // DUMMY LOGIC TO TEST INTEGRATION WITH recommendationService
 
         segmentAccountsCount = accountProxy.getAccountsCount(tenant.getId(), segmentRestriction);
         log.info("Total records in segment: " + segmentAccountsCount);
@@ -133,14 +148,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             int numberOfLoops = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
 
             log.info("Number of required loops: " + numberOfLoops + ", with pageSize: " + pageSize);
-
-            String[] fields = new String[] { PlaymakerConstants.CdlKeyZip, //
-                    PlaymakerConstants.AccountId, //
-                    PlaymakerConstants.CdlKeyExternal_ID, //
-                    PlaymakerConstants.SalesforceAccountID, //
-                    PlaymakerConstants.CdlKeyTotalMonetaryValue, //
-                    PlaymakerConstants.CdlKeyDisplayName, //
-                    PlaymakerConstants.CdlKeyCrmAccount_External_ID };
 
             for (int loopId = 0; loopId < numberOfLoops; loopId++) {
                 log.info("Loop #" + loopId);
@@ -164,12 +171,9 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                     parallelStream //
                             .map(account -> {
                                 try {
-                                    log.info("Processing account: "
-                                            + account.get(PlaymakerConstants.AccountId).toString());
                                     Recommendation recommendation = //
                                             prepareRecommendation(tenant, playLauch, config, account);
                                     recommendationService.create(recommendation);
-                                    log.info("Saved recommendation: " + recommendation.getRecommendationId());
                                     return recommendation.getRecommendationId();
                                 } catch (Throwable th) {
                                     log.error(th.getMessage(), th);
@@ -236,5 +240,40 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         Table schemaTable = dataCollectionProxy.getTable(customerSpace, role);
         List<Attribute> schemaAttributes = schemaTable.getAttributes();
         return schemaAttributes;
+    }
+
+    @VisibleForTesting
+    void setTenantEntityMgr(TenantEntityMgr tenantEntityMgr) {
+        this.tenantEntityMgr = tenantEntityMgr;
+    }
+
+    @VisibleForTesting
+    void setPageSize(long pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    @VisibleForTesting
+    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
+        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    }
+
+    @VisibleForTesting
+    void setRecommendationService(RecommendationService recommendationService) {
+        this.recommendationService = recommendationService;
+    }
+
+    @VisibleForTesting
+    void setAccountProxy(AccountProxy accountProxy) {
+        this.accountProxy = accountProxy;
+    }
+
+    @VisibleForTesting
+    void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
+        this.dataCollectionProxy = dataCollectionProxy;
+    }
+
+    @VisibleForTesting
+    void setTalkingPointProxy(TalkingPointProxy talkingPointProxy) {
+        this.talkingPointProxy = talkingPointProxy;
     }
 }
