@@ -201,6 +201,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
         config.setMatchInput(matchInput);
 
+        step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }
 
@@ -208,19 +209,19 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         if (!isBucketing()) {
             return null;
         }
-        TransformationStepConfig step6 = new TransformationStepConfig();
+        TransformationStepConfig step = new TransformationStepConfig();
         String tableSourceName = "CustomerProfile";
         SourceTable sourceTable = new SourceTable(profileTableName, customerSpace);
         List<String> baseSources = Collections.singletonList(tableSourceName);
-        step6.setBaseSources(baseSources);
+        step.setBaseSources(baseSources);
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
-        step6.setBaseTables(baseTables);
+        step.setBaseTables(baseTables);
         // consolidate diff
-        step6.setInputSteps(Collections.singletonList(matchDiffStep));
-        step6.setTransformer(TRANSFORMER_BUCKETER);
-        step6.setConfiguration(emptyStepConfig(lightEngineConfig()));
-        return step6;
+        step.setInputSteps(Collections.singletonList(matchDiffStep));
+        step.setTransformer(TRANSFORMER_BUCKETER);
+        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
+        return step;
     }
 
     private TransformationStepConfig sortBucketedDiff() {

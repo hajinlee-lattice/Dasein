@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
+import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 import io.swagger.annotations.Api;
@@ -18,6 +19,7 @@ public class HealthResource {
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog
+    @NoCustomerSpace
     public StatusDocument healthCheck() {
         return StatusDocument.online();
     }

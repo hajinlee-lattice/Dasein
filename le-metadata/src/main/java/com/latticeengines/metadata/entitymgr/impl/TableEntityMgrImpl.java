@@ -36,6 +36,7 @@ import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -73,6 +74,9 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private RedshiftService redshiftService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -142,7 +146,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 try {
                     HdfsUtils.rmdir(yarnConfiguration, avroDir);
                 } catch (IOException e) {
-                    log.error(String.format("Failed to delete extract %s", avroDir));
+                    log.error(String.format("Failed to delete extract %s", avroDir), e);
                 }
                 String schemaPath = avroDir.replace("/Tables", "/TableSchemas");
                 try {
@@ -150,7 +154,13 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                         HdfsUtils.rmdir(yarnConfiguration, schemaPath);
                     }
                 } catch (IOException e) {
-                    log.error(String.format("Failed to delete extract schema %s", schemaPath));
+                    log.error(String.format("Failed to delete extract schema %s", schemaPath), e);
+                }
+                //TODO: delete redshift table
+                try {
+                    redshiftService.dropTable(name);
+                } catch (Exception e) {
+                    log.error(String.format("Failed to drop table %s from redshift", name), e);
                 }
             });
         }

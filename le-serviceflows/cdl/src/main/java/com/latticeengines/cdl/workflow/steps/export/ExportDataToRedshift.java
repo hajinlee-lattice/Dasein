@@ -127,7 +127,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,
             TableRoleInCollection tableRole) {
         // all distributed on account id
-        String distKey = TableRoleInCollection.BucketedAccount.getPrimaryKey().name();
+        String distKey = tableRole.getPrimaryKey().name();
         List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
         if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
             sortKeys.add(tableRole.getPrimaryKey().name());

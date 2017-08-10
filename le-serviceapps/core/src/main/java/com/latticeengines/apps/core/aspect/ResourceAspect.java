@@ -22,7 +22,6 @@ public class ResourceAspect {
     }
 
     @Before("execution(* com.latticeengines.apps.*.controller.*.*(..)) " +
-            "&& !execution(* com.latticeengines.apps.*.controller.HealthResource.*(..)) " +
             "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allControllerMethods(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];

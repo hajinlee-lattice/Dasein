@@ -1,4 +1,4 @@
-package com.latticeengines.serviceapps.cdl.end2end.dataingestion;
+package com.latticeengines.apps.cdl.end2end.dataingestion;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static org.testng.Assert.assertEquals;
@@ -13,15 +13,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
-import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
@@ -36,6 +30,8 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         verifyConsolidate();
         profile();
         verifyProfile();
+
+        verifyFirstProfileCheckpoint();
     }
 
     private void importData() throws Exception {
@@ -83,11 +79,6 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
             Assert.assertFalse(attribute.getName().contains(CEAttr),
                     "Should not have encoded attr " + attribute.getName() + " in expanded table.");
         }
-        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(customerSpace);
-        Assert.assertNotNull(statisticsContainer);
-
-        Statistics statistics = statisticsContainer.getStatistics();
-        verifyStatistics(statistics);
 
         Table bucketedContactTable = dataCollectionProxy.getTable(customerSpace,
                 BusinessEntity.Contact.getServingStore());
@@ -96,26 +87,6 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         for (Attribute attribute : attributes) {
             Assert.assertFalse(attribute.getName().contains(CEAttr),
                     "Should not have encoded attr " + attribute.getName() + " in expanded table.");
-        }
-    }
-
-    private void verifyStatistics(Statistics statistics) {
-        statistics.getCategories().values().forEach(catStats -> //
-        catStats.getSubcategories().values().forEach(subCatStats -> {
-            subCatStats.getAttributes().forEach(this::verifyAttrStats);
-        }));
-    }
-
-    private void verifyAttrStats(AttributeLookup lookup, AttributeStats attributeStats) {
-        Assert.assertNotNull(attributeStats.getNonNullCount());
-        Assert.assertTrue(attributeStats.getNonNullCount() >= 0);
-        Buckets buckets = attributeStats.getBuckets();
-        if (buckets != null) {
-            Assert.assertNotNull(buckets.getType());
-            Assert.assertFalse(buckets.getBucketList() == null || buckets.getBucketList().isEmpty(),
-                    "Bucket list for " + lookup + " is empty.");
-            Long sum = buckets.getBucketList().stream().mapToLong(Bucket::getCount).sum();
-            Assert.assertEquals(sum, attributeStats.getNonNullCount());
         }
     }
 
