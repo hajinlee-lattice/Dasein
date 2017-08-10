@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -140,7 +143,19 @@ public class OAuth2Utils {
 
     public static OAuth2AccessToken getAccessToken(OAuth2RestTemplate oAuth2RestTemplate) {
         SSLUtils.turnOffSSL();
-        return oAuth2RestTemplate.getAccessToken();
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        if (securityContext.getAuthentication() instanceof AnonymousAuthenticationToken) {
+            synchronized (OAuth2Utils.class) {
+                try {
+                    SecurityContextHolder.clearContext();
+                    return oAuth2RestTemplate.getAccessToken();
+                } finally {
+                    SecurityContextHolder.setContext(securityContext);
+                }
+            }
+        } else {
+            return oAuth2RestTemplate.getAccessToken();
+        }
     }
 
     public static String generatePassword() {

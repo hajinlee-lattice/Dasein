@@ -3,6 +3,7 @@ package com.latticeengines.testframework.exposed.utils;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -108,6 +109,10 @@ public class TestFrameworkUtils {
             }
         }
         return -1L;
+    }
+
+    public static String generateTenantName() {
+        return TENANTID_PREFIX + String.valueOf(System.currentTimeMillis());
     }
 
 }

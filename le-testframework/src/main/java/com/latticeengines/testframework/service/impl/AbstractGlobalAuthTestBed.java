@@ -229,7 +229,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     protected Tenant addBuiltInTestTenant() {
-        String fullTenantId = TestFrameworkUtils.TENANTID_PREFIX + String.valueOf(System.currentTimeMillis());
+        String fullTenantId = TestFrameworkUtils.generateTenantName();
         return addTestTenant(fullTenantId);
     }
 

@@ -141,6 +141,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                     .construct(new CustomerSpaceScope(CustomerSpace.parse(tenant.getId())));
             assertTrue(controller.exists(new com.latticeengines.domain.exposed.camille.Path("/EncryptionKey")));
         } else {
+            // TODO: convert to TestFrameworkUtils.generateTenantName()
             String TenantName = TestFrameworkUtils.TENANTID_PREFIX + UUID.randomUUID();
             tenant.setName(String.format("%s.%s.Production", TenantName, TenantName));
             tenant.setId(tenant.getName());

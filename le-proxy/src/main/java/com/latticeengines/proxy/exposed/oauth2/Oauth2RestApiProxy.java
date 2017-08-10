@@ -2,15 +2,13 @@ package com.latticeengines.proxy.exposed.oauth2;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
-import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -21,24 +19,22 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
     @Value("${common.oauth.url}")
     protected String oauth2AuthHostPort;
 
-    protected OAuth2RestTemplate oAuth2RestTemplate = null;
+    protected ThreadLocal<OAuth2RestTemplate> oAuth2RestTemplate = new ThreadLocal<>();
 
     public Oauth2RestApiProxy() {
-        super(PropertyUtils.getProperty("common.playmaker.url"));
+        super(PropertyUtils.getProperty("common.microservice.url"), "/lp/oauthotps");
     }
 
     @Override
-    public String createAPIToken(String tenantId) {
-        PlaymakerTenant tenant = new PlaymakerTenant();
-        tenant.setTenantName(tenantId);
-        tenant.setJdbcDriver("dummy");
-        tenant.setJdbcUrl("dummy");
-        String url = constructUrl("/tenants");
-        PlaymakerTenant outputTenant = post("create-api-token", url, tenant, PlaymakerTenant.class);
-        if (outputTenant == null || StringUtils.isEmpty(outputTenant.getTenantPassword())) {
-            throw new RuntimeException("Failed to get api password from playmaker api");
+    public String createAPIToken(String userId) {
+        String url = constructUrl("/?user={userId}", userId);
+        ResponseDocument responseDocument = get("generate-otp", url, ResponseDocument.class);
+        if (!responseDocument.isSuccess()) {
+            throw new RuntimeException("Failed to generate one time password for userId=" + userId //
+                    + ":" + StringUtils.join(responseDocument.getErrors(), ","));
+        } else {
+            return (String) responseDocument.getResult();
         }
-        return outputTenant.getTenantPassword();
     }
 
     @Override
@@ -49,14 +45,8 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
     @Override
     public OAuth2AccessToken createOAuth2AccessToken(String tenantId, String appId, OauthClientType type) {
         String apiToken = createAPIToken(tenantId);
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        try {
-            SecurityContextHolder.clearContext();
-            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2AuthHostPort, tenantId, apiToken, type.getValue(),
-                    appId);
-            return OAuth2Utils.getAccessToken(oAuth2RestTemplate);
-        } finally {
-            SecurityContextHolder.setContext(securityContext);
-        }
+        oAuth2RestTemplate.set(OAuth2Utils.getOauthTemplate(oauth2AuthHostPort, tenantId, apiToken, type.getValue(),
+                appId));
+        return OAuth2Utils.getAccessToken(oAuth2RestTemplate.get());
     }
 }

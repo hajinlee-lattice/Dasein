@@ -21,7 +21,9 @@ public class ResourceAspect {
         this.tenantEntityMgr = tenantEntityMgr;
     }
 
-    @Before("execution(* com.latticeengines.apps.*.controller.*.*(..)) && !execution(* com.latticeengines.apps.*.controller.HealthResource.*(..))")
+    @Before("execution(* com.latticeengines.apps.*.controller.*.*(..)) " +
+            "&& !execution(* com.latticeengines.apps.*.controller.HealthResource.*(..)) " +
+            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allControllerMethods(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         customerSpace = CustomerSpace.parse(customerSpace).toString();
