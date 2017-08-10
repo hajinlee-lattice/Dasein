@@ -127,25 +127,54 @@ angular.module('common.datacloud')
         this.subcategories[category] = item;
     }
 
-    this.getEnrichments = function(opts){
+    this.getAllEnrichmentsConcurrently = function(count){
+        var deferred = $q.defer(),
+            max = Math.ceil(count / 5), // six concurrent connections (IE only supports two)
+            iterations = Math.ceil(count / max);
+        
+        this.concurrent = 0;
+
+        if (this.enrichments && this.enrichments.length == count) {
+            deferred.resolve(this.enrichments, true);
+        } else {
+            for (var j=0; j<iterations; j++) {
+                this.getEnrichments({ max: max, offset: j * max }, true).then(function(result) {
+                    DataCloudStore.concurrent++;
+
+                    if (DataCloudStore.concurrent == iterations) {
+                        deferred.resolve(DataCloudStore.enrichments);
+                    }
+                });
+            }
+        }
+
+        return deferred.promise;
+    }
+
+    this.getEnrichments = function(opts, concatEnrichments){
         var deferred = $q.defer();
         if (this.enrichments) {
             deferred.resolve(this.enrichments);
         } else {
             DataCloudService.getEnrichments(opts).then(function(response){
-                DataCloudStore.setEnrichments(response);
+                DataCloudStore.setEnrichments(response, concatEnrichments || false);
+                
                 deferred.resolve(response);
             });
         }
         return deferred.promise;
     }
 
-    this.setEnrichments = function(item){
-        this.enrichments = item;
+    this.setEnrichments = function(enrichments, concatEnrichments) {
+        if (concatEnrichments) {
+            this.enrichments = (this.enrichments || []).concat(enrichments.data);
+        } else {
+            this.enrichments = enrichments;
+        }
     }
 
     this.updateEnrichments = function(enrichments){
-        this.enrichments.data = enrichments;
+        this.enrichments = enrichments;
     }
 
     this.getCount = function(){

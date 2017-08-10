@@ -38,7 +38,7 @@
     </div>
 </div>
 
-<div class="query-section-item noselect-children category-{{ data.category.replace(' ','_') | lowercase }}" ng-if="vm.tree.item" ng-init="data = vm.items[vm.tree.item]">
+<div class="query-section-item noselect-children category-{{ data.Category.replace(' ','_') | lowercase }}" ng-if="vm.tree.item" ng-init="data = vm.items[vm.tree.item]">
     <div class="query-section-operator item-operator">{{ vm.operator }}</div>
 
     <div class="query-section-item-label">
@@ -46,17 +46,17 @@
     </div>
 
     <div class="query-section-item-content">
-        <span class="query-section-item-category">{{data.category}}{{data.subcategory != 'Other' ? ' - ' + data.subcategory : ''}}</span>
+        <span class="query-section-item-category">{{data.Category}}{{data.Subcategory != 'Other' ? ' - ' + data.Subcategory : ''}}</span>
         <span class="query-section-item-displayname">
-            <span class="query-section-item-name"><strong>{{data.displayname}}</strong></span>
+            <span class="query-section-item-name"><strong>{{data.DisplayName}}</strong></span>
             <span class="query-section-item-operation">has a value of</span>
-            <span class="query-section-item-value"><strong>{{data.value}}</strong></span>
+            <span class="query-section-item-value"><strong>{{data.Value}}</strong></span>
         </span>
     </div>
 
     <div class="query-section-item-records">
         <span class="query-section-item-records-label">RECORDS</span>
-        <span class="query-section-item-records-number">{{data.records}}</span>
+        <span class="query-section-item-records-number">{{data.RecordsCount}}</span>
         <i class="fa fa-close"></i>
     </div>
 </div>

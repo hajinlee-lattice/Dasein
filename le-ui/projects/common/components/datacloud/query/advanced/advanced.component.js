@@ -4,7 +4,7 @@ angular.module('common.datacloud.query.advanced', [
 ])
 .controller('AdvancedQueryCtrl', function($scope, $state, $stateParams, 
     QueryRestriction, QueryStore, DataCloudStore, SegmentServiceProxy, 
-    BucketRestriction, CurrentConfiguration, BrowserStorageUtility
+    BucketRestriction, CurrentConfiguration, BrowserStorageUtility, QueryStore
 ) {
     var vm = this;
 
@@ -13,123 +13,123 @@ angular.module('common.datacloud.query.advanced', [
         items: {
             '1': {
                 label: '1',
-                fieldname: 'poweredge_t330_tower_server_has_purchased',
-                category: 'Product',
-                subcategory: 'PowerEdge T330 Tower Server',
-                displayname: 'Has Purchased',
-                value: 'Yes',
-                operator: 'equals',
-                records: 7982
+                ColumnId: 'poweredge_t330_tower_server_has_purchased',
+                Category: 'Product',
+                Subcategory: 'PowerEdge T330 Tower Server',
+                DisplayName: 'Has Purchased',
+                Value: 'Yes',
+                Operator: 'equals',
+                RecordsCount: 7982
             },
             '2': {
                 label: '2',
-                fieldname: 'poweredge_t330_tower_server_spent',
-                category: 'Product',
-                subcategory: 'PowerEdge T330 Tower Server',
-                displayname: 'Has Spent',
-                value: '$10K - $50K',
-                operator: 'equals',
-                records: 712
+                ColumnId: 'poweredge_t330_tower_server_spent',
+                Category: 'Product',
+                Subcategory: 'PowerEdge T330 Tower Server',
+                DisplayName: 'Has Spent',
+                Value: '$10K - $50K',
+                Operator: 'equals',
+                RecordsCount: 712
             },
             '3': {
                 label: '3',
-                fieldname: 'poweredge_t330_tower_server_spent',
-                category: 'Product',
-                subcategory: 'PowerEdge T330 Tower Server',
-                displayname: 'Has Spent',
-                value: '$50K - $100K',
-                operator: 'equals',
-                records: 471
+                ColumnId: 'poweredge_t330_tower_server_spent',
+                Category: 'Product',
+                Subcategory: 'PowerEdge T330 Tower Server',
+                DisplayName: 'Has Spent',
+                Value: '$50K - $100K',
+                Operator: 'equals',
+                RecordsCount: 471
             },
             '4': {
                 label: '4',
-                fieldname: 'firmographics_finance',
-                category: 'Firmographics',
-                subcategory: 'Other',
-                displayname: 'Finance',
-                value: 'Yes',
-                operator: 'equals',
-                records: 3231
+                ColumnId: 'firmographics_finance',
+                Category: 'Firmographics',
+                Subcategory: 'Other',
+                DisplayName: 'Finance',
+                Value: 'Yes',
+                Operator: 'equals',
+                RecordsCount: 3231
             },
             '5': {
                 label: '5',
-                fieldname: 'poweredge_t330_tower_server_spent',
-                category: 'Product',
-                subcategory: 'PowerEdge T330 Tower Server',
-                displayname: 'Has Spent',
-                value: '$100K - $200K',
-                operator: 'equals',
-                records: 7374
+                ColumnId: 'poweredge_t330_tower_server_spent',
+                Category: 'Product',
+                Subcategory: 'PowerEdge T330 Tower Server',
+                DisplayName: 'Has Spent',
+                Value: '$100K - $200K',
+                Operator: 'equals',
+                RecordsCount: 7374
             },
             '6': {
                 label: '6',
-                fieldname: 'intent_multi-currency_accounting',
-                category: 'Intent',
-                subcategory: 'Other',
-                displayname: 'Multi-Currency Accounting',
-                value: 'No',
-                operator: 'equals',
-                records: 8476
+                ColumnId: 'intent_multi-currency_accounting',
+                Category: 'Intent',
+                Subcategory: 'Other',
+                DisplayName: 'Multi-Currency Accounting',
+                Value: 'No',
+                Operator: 'equals',
+                RecordsCount: 8476
             },
             '7': {
                 label: '7',
-                fieldname: 'technology_profile_has_3scale',
-                category: 'Technology Profile',
-                subcategory: 'Application Development & Management',
-                displayname: 'Has 3Scale',
-                value: 'Yes',
-                operator: 'equals',
-                records: 5657
+                ColumnId: 'technology_profile_has_3scale',
+                Category: 'Technology Profile',
+                Subcategory: 'Application Development & Management',
+                DisplayName: 'Has 3Scale',
+                Value: 'Yes',
+                Operator: 'equals',
+                RecordsCount: 5657
             },
             '8': {
                 label: '8',
-                fieldname: 'contact_department',
-                category: 'Contact',
-                subcategory: 'Other',
-                displayname: 'Department',
-                value: 'IT',
-                operator: 'equals',
-                records: 843
+                ColumnId: 'contact_department',
+                Category: 'Contact',
+                Subcategory: 'Other',
+                DisplayName: 'Department',
+                Value: 'IT',
+                Operator: 'equals',
+                RecordsCount: 843
             },
             '9': {
                 label: '9',
-                fieldname: 'growth_trends_credit_risk_rank',
-                category: 'Growth Trends',
-                subcategory: 'Other',
-                displayname: 'Credit Risk Rank',
-                value: '1-Promote',
-                operator: 'equals',
-                records: 4765
+                ColumnId: 'growth_trends_credit_risk_rank',
+                Category: 'Growth Trends',
+                Subcategory: 'Other',
+                DisplayName: 'Credit Risk Rank',
+                Value: '1-Promote',
+                Operator: 'equals',
+                RecordsCount: 4765
             },
             '10': {
                 label: '10',
-                fieldname: 'growth_trends_credit_risk_rank',
-                category: 'Growth Trends',
-                subcategory: 'Other',
-                displayname: 'Credit Risk Rank',
-                value: '2-Viable',
-                operator: 'equals',
-                records: 8233
+                ColumnId: 'growth_trends_credit_risk_rank',
+                Category: 'Growth Trends',
+                Subcategory: 'Other',
+                DisplayName: 'Credit Risk Rank',
+                Value: '2-Viable',
+                Operator: 'equals',
+                RecordsCount: 8233
             },
             '11': {
                 label: '11',
-                fieldname: 'growth_trends_credit_risk_rank',
-                category: 'Growth Trends',
-                subcategory: 'Other',
-                displayname: 'Credit Risk Rank',
-                value: '5-Avoid',
-                operator: 'equals',
-                records: 56565
+                ColumnId: 'growth_trends_credit_risk_rank',
+                Category: 'Growth Trends',
+                Subcategory: 'Other',
+                DisplayName: 'Credit Risk Rank',
+                Value: '5-Avoid',
+                Operator: 'equals',
+                RecordsCount: 56565
             },
             '12': {
                 label: '12',
-                fieldname: 'website_profile_credit_risk_rank',
-                category: 'Website Profile',
-                subcategory: 'Abandonment Ads',
-                displayname: 'Has Realtime Targeting',
-                value: 'Yes',
-                operator: 'equals',
-                records: 2476
+                ColumnId: 'website_profile_credit_risk_rank',
+                Category: 'Website Profile',
+                Subcategory: 'Abandonment Ads',
+                DisplayName: 'Has Realtime Targeting',
+                Value: 'Yes',
+                Operator: 'equals',
+                RecordsCount: 2476
             }
         },
         tree3: { 
@@ -254,11 +254,19 @@ angular.module('common.datacloud.query.advanced', [
             }
         },
         state: $stateParams.state,
-        operator: 'and'
+        operator: 'and',
+        enrichments: [],
+        restriction: QueryStore.restriction
     });
 
     vm.init = function () {
+        console.log('QueryStore',QueryStore);
+        vm.buildFlatAttributesArray();
     };
+
+    vm.buildFlatAttributesArray = function() {
+console.log(vm.restriction.restriction.logicalRestriction.restrictions[0].logicalRestriction.restrictions)
+    }
 
     vm.click = function () {
         vm.state = vm.state == 'tree1' 

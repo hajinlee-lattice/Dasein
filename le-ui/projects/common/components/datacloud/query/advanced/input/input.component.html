@@ -1,7 +1,7 @@
-<span   class="query-input-number category-{{ data.category.replace(' ','_') | lowercase }} noselect-children" 
+<span   class="query-input-number category-{{ data.Category.replace(' ','_') | lowercase }} noselect-children" 
         ng-if="vm.tree.item" 
         ng-init="data = vm.items[vm.tree.item]"
-        title="{{ data.category }} - {{ data.subcategory }} - {{ data.displayname }}">
+        title="{{ data.Category }} - {{ data.Subcategory }} - {{ data.DisplayName }}">
 
     {{ vm.tree.item }}
 </span>

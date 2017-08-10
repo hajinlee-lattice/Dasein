@@ -39,6 +39,17 @@ angular
 
             DataCloudStore.getCount().then(function(result) {
                 DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                deferred.resolve(result.data);
+            });
+
+            return deferred.promise;
+        }],
+        Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function($q, DataCloudStore, ApiHost, EnrichmentCount) {
+            var deferred = $q.defer();
+
+            DataCloudStore.setHost(ApiHost);
+
+            DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function(result) {
                 deferred.resolve(result);
             });
 
@@ -54,7 +65,7 @@ angular
             });
 
             return deferred.promise;
-        }],
+        }], 
         EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
             var deferred = $q.defer();
 
@@ -186,6 +197,7 @@ angular
             url: '/attr/:category/:subcategory',
             params: {
                 section: 'lookup',
+                LoadingText: 'Looking up Company Profile data',
                 category: {value: null, squash: true},
                 subcategory: {value: null, squash: true}
             },
@@ -233,6 +245,7 @@ angular
             params: {
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Data Cloud Explorer',
+                LoadingText: 'Loading DataCloud Attributes',
                 section: 'insights'
             },
             views: {
@@ -313,8 +326,6 @@ angular
                             ts = new Date().getTime(),
                             restriction = QueryStore.getRestriction();
 
-                        console.log("[resolve] SegmentServiceProxy",segment);
-                        
                         if (segment === null) {
                             segment = {
                                 'name': 'segment' + ts,
@@ -352,8 +363,6 @@ angular
 
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
                             var segment = result;
-
-                            // console.log("[resolve] AccountsCount", segment);
 
                             if (segment === null) {                     
                                 query = { 

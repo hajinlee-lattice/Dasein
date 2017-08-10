@@ -20,7 +20,7 @@ angular
             });
 
             vm.init = function (type, value) {
-                console.log('queryTreeDirective', vm.tree, vm.items, vm.operator);
+                //console.log('queryTreeDirective', vm.tree, vm.items, vm.operator);
             }
 
             vm.init();

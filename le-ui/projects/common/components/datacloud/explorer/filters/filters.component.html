@@ -9,7 +9,7 @@
             <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
         </div>
     </li>
-    <li class="filter dropdown-container" ng-disabled="!vm.enrichments_completed" ng-if="vm.section != 'segment.analysis'">
+    <li class="filter dropdown-container" ng-if="vm.section != 'segment.analysis'">
         <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal || (vm.section != 'insights' && vm.metadata.toggle.show.enabled) || vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted  || vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls}">
             <i class="fa fa-filter"></i>
         </h2>
@@ -56,9 +56,6 @@
     </li>
     <li class="refine-query" ng-if="!vm.inModel() && vm.section == 'segment.analysis'">
         <button class="save button white-button" ui-sref="home.import.entry">{{vm.label.button_import_data}}</button>
-    </li>
-    <li class="refine-query" ng-if="vm.section == 'segment.analysis'">
-        <button class="save button white-button" ng-disabled="vm.refineQueryDisabled" ng-click="vm.advancedRefineQuery()">{{vm.label.button_advanced_refine_query}}</button>
     </li>
     <li class="refine-query" ng-if="vm.section == 'segment.analysis'">
         <button class="save button white-button" ng-disabled="vm.refineQueryDisabled" ng-click="vm.refineQuery()">{{vm.label.button_refine_query}}</button>

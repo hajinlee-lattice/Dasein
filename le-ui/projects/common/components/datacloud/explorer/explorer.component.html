@@ -7,14 +7,6 @@
     </div>
     <div ng-if="!vm.hidePage()">
         <explorer-filters class="filters-container" vm="vm"></explorer-filters>
-
-        <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="!vm.enrichments_completed" ng-if="loading_image" ng-init="loading_image">
-            <li class="load-status">
-                <div>
-                    <div class="loader"></div>
-                </div>
-            </li>
-        </ul>
         
         <div class="carousel-container">
             <div class="row enrichment-wizard-category-pagination noselect-children" ng-init="vm.metadata.currentCategory = 1" ng-if="vm.categoriesMenu.length > (vm.category ? vm.categorySize : vm.pagesize)">
@@ -27,7 +19,7 @@
                 </div>
             </div>
             
-            <ul class="categories" ng-class="{'has-category': vm.category}" ng-if="vm.enrichments_completed">
+            <ul class="categories" ng-class="{'has-category': vm.category}">
                 <li explorer-lattice-rating-card
                     ng-if="!vm.category && vm.section == 'segment.analysis' && vm.inModel() && vm.workingBuckets.length"
                     class="category lattice-rating-card first-spot-info-card"

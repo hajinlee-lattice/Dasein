@@ -8,8 +8,7 @@
         </h2>
 
         <span class="count">
-            <strong ng-if="vm.enrichments_completed">{{ count|number }}</strong>
-            <strong ng-if="!vm.enrichments_completed"><em><!-- ?? --></em><i class="fa fa-spinner fa-spin fa-fw"></i></strong>
+            <strong>{{ count|number }}</strong>
         </span>
 
         <div class="attributes-container" ng-if="!vm.category">
