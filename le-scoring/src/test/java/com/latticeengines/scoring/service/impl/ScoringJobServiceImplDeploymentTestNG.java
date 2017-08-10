@@ -1,28 +1,29 @@
 package com.latticeengines.scoring.service.impl;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
+import com.latticeengines.proxy.exposed.scoring.ScoringProxy;
 
 public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImplTestNG {
 
     @Value("${common.test.microservice.url}")
     private String microserviceUrl;
 
-    protected static String customer = "Mulesoft_Relaunch_Deployment";
+    @Autowired
+    private ScoringProxy scoringProxy;
 
-    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    protected static String customer = "Mulesoft_Relaunch_Deployment";
 
     @Override
     @BeforeClass(groups = "deployment")
@@ -47,10 +48,9 @@ public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImpl
         scoringConfig.setCustomer(tenant);
         scoringConfig.setSourceDataDir(dataPath);
         scoringConfig.setTargetResultDir(scorePath);
-        scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
+        scoringConfig.setModelGuids(Collections.singletonList("ms__" + uuid + "-PLS_model"));
         scoringConfig.setUniqueKeyColumn("ModelingID");
-        AppSubmission submission = restTemplate.postForObject(microserviceUrl + "/scoring/scoringjobs", scoringConfig,
-                AppSubmission.class, new Object[] {});
+        AppSubmission submission = scoringProxy.createScoringJob(scoringConfig);
         ApplicationId appId = getApplicationId(submission.getApplicationIds().get(0));
         waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
     }
