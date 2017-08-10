@@ -439,7 +439,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("City") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CITY", "BILLING CITY" })) //
@@ -447,7 +447,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.City) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("State") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "STATE_PROVINCE", "PROVINCE",
@@ -456,7 +456,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.State) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("Country") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY", "BILLING COUNTRY" })) //
@@ -464,7 +464,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Country) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PostalCode") //
                 .allowedDisplayNames(Sets
@@ -473,7 +473,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.NUMERIC.name()) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("DUNS") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "DUNS", "DUNS NUMBER" })) //
@@ -481,7 +481,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.DUNS) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.NUMERIC.name()) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("Industry") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "INDUSTRY" })) //
@@ -489,7 +489,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Industry) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("AnnualRevenue") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ANNUALREVENUE", "ANNUAL REVENUE" })) //
@@ -498,7 +498,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.NUMERIC.name()) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
                 .allowedDisplayNames(
@@ -508,7 +508,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.NUMERIC.name()) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("CreatedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CREATEDDATE", "CREATED DATE" })) //
@@ -517,7 +517,7 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.YEAR.name()) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("LastModifiedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE" })) //
@@ -526,7 +526,7 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.YEAR.name()) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("YearStarted") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "YEARSTARTED", "YEAR STARTED" })) //
@@ -535,7 +535,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.YEAR.name()) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
@@ -543,7 +543,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
-                .category(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
 
         return table;
@@ -759,7 +759,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.FirstName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("LastName") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTNAME", "LAST NAME" })) //
@@ -767,7 +767,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.LastName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("AccountId") //
                 .allowedDisplayNames(Sets
@@ -785,7 +785,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Title) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("Email") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "EMAIL", "EMAIL_ADDRESS" })) //
@@ -795,7 +795,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_EMAIL) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("City") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CITY" })) //
@@ -803,7 +803,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.City) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("State") //
                 .allowedDisplayNames(
@@ -812,7 +812,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.State) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("Country") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COUNTRY" })) //
@@ -820,7 +820,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Country) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("PostalCode") //
                 .allowedDisplayNames(
@@ -829,7 +829,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
 
         table.addAttribute(attr("CompanyName") //
@@ -837,7 +837,7 @@ public class SchemaRepository {
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr("DUNS") //
@@ -846,7 +846,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.DUNS) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("CreatedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CREATEDDATE", "CREATED DATE" })) //
@@ -855,7 +855,7 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("LastModifiedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE" })) //
@@ -865,7 +865,7 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("Salutation") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "SALUTATION" })) //
@@ -873,7 +873,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Salutation) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("BirthDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "BIRTHDATE", "BIRTH DATE" })) //
@@ -883,7 +883,7 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("LeadSource") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LEADSOURCE", "LEAD SOURCE" })) //
@@ -892,7 +892,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "PHONE", "PHONE NUMBER" })) //
@@ -900,7 +900,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("AnnualRevenue") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ANNUALREVENUE", "ANNUAL REVENUE" })) //
@@ -909,7 +909,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
                 .allowedDisplayNames(Sets
@@ -919,7 +919,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("Industry") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "INDUSTRY" })) //
@@ -927,7 +927,7 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.Industry) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("CRMId") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "CRMID", "CRMLINK_ID", "CRM ID", "CRM_ID" })) //
@@ -1146,6 +1146,11 @@ public class SchemaRepository {
 
         public AttributeBuilder category(String category) {
             attribute.setCategory(category);
+            return this;
+        }
+
+        public AttributeBuilder subcategory(String subcategory) {
+            attribute.setSubcategory(subcategory);
             return this;
         }
 
