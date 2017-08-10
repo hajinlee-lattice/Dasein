@@ -16,6 +16,9 @@ public class Buckets {
     @JsonProperty("List")
     private List<Bucket> bucketList;
 
+    @JsonProperty("HasMore")
+    private Boolean hasMore;
+
     public Buckets() {
     }
 
@@ -48,4 +51,11 @@ public class Buckets {
         this.bucketList = bucketList;
     }
 
+    public Boolean getHasMore() {
+        return hasMore;
+    }
+
+    public void setHasMore(Boolean hasMore) {
+        this.hasMore = hasMore;
+    }
 }

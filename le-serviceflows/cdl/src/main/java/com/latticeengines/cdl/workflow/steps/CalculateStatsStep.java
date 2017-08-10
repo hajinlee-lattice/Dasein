@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETED_FILTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
@@ -14,7 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,6 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BucketedFilterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
@@ -34,6 +34,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -44,6 +48,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CalculateStatsSt
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
@@ -56,13 +61,11 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
     private static final String PROFILE_TABLE_PREFIX = "Profile";
     private static final String STATS_TABLE_PREFIX = "Stats";
     private static final String SORTED_TABLE_PREFIX = TableRoleInCollection.BucketedAccount.name();
-    private static final List<String> masterTableSortKeys = TableRoleInCollection.BucketedAccount
-            .getForeignKeysAsStringList();
+    private static final String MASTER_TABLE_SORT_KEY = TableRoleInCollection.BucketedAccount.getPrimaryKey().name();
 
     private static int matchStep;
     private static int profileStep;
     private static int bucketStep;
-    private static int filterStep;
 
     @Autowired
     private TransformationProxy transformationProxy;
@@ -72,6 +75,9 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -94,6 +100,8 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
         upsertTables(configuration.getCustomerSpace().toString(), profileTableName);
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
+        enrichTableSchema(sortedTable);
+        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), sortedTableName, sortedTable);
         Map<BusinessEntity, Table> entityTableMap = new HashMap<>();
         entityTableMap.put(BusinessEntity.Account, sortedTable);
         putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
@@ -108,7 +116,6 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
 
     private PipelineTransformationRequest generateRequest(CustomerSpace customerSpace, Table masterTable) {
         String masterTableName = masterTable.getName();
-        List<String> originalAttrs = Arrays.asList(masterTable.getAttributeNames());
         try {
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("CalculateStatsStep");
@@ -118,13 +125,11 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
             matchStep = 0;
             profileStep = 1;
             bucketStep = 2;
-            filterStep = 4;
             // -----------
             TransformationStepConfig match = match(customerSpace, masterTableName);
             TransformationStepConfig profile = profile();
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig calc = calcStats(customerSpace, STATS_TABLE_PREFIX);
-            TransformationStepConfig filter = filter(originalAttrs);
             TransformationStepConfig sort = sort(customerSpace);
             TransformationStepConfig sortProfile = sortProfile(customerSpace, PROFILE_TABLE_PREFIX);
             // -----------
@@ -133,7 +138,6 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
                     profile, //
                     bucket, //
                     calc, //
-                    filter, //
                     sort, //
                     sortProfile //
             );
@@ -206,20 +210,9 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         return step;
     }
 
-    private TransformationStepConfig filter(List<String> originalAttrs) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(bucketStep));
-        step.setTransformer(TRANSFORMER_BUCKETED_FILTER);
-        BucketedFilterConfig conf = new BucketedFilterConfig();
-        conf.setOriginalAttrs(originalAttrs);
-        String confStr = appendEngineConf(conf, heavyEngineConfig());
-        step.setConfiguration(confStr);
-        return step;
-    }
-
     private TransformationStepConfig sort(CustomerSpace customerSpace) {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(filterStep);
+        List<Integer> inputSteps = Collections.singletonList(bucketStep);
         step.setInputSteps(inputSteps);
         step.setTransformer(TRANSFORMER_SORTER);
 
@@ -233,8 +226,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         conf.setPartitions(500);
         conf.setSplittingThreads(maxSplitThreads);
         conf.setCompressResult(true);
-        conf.setSortingField(masterTableSortKeys.get(0)); // TODO: only support
-                                                          // single sort key now
+        conf.setSortingField(MASTER_TABLE_SORT_KEY);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);
         return step;
@@ -276,6 +268,45 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         profileTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile);
         if (profileTable == null) {
             throw new IllegalStateException("Cannot find the upserted profile table in data collection.");
+        }
+    }
+
+    private void enrichTableSchema(Table table) {
+        String dataCloudVersion = columnMetadataProxy.latestVersion("").getVersion();
+        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment, dataCloudVersion);
+        Map<String, ColumnMetadata> amColMap = new HashMap<>();
+        amCols.forEach(cm -> amColMap.put(cm.getColumnId(), cm));
+        ColumnMetadata latticeIdCm = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
+        List<Attribute> attrs = table.getAttributes();
+        final AtomicLong count = new AtomicLong(0);
+        attrs.forEach(attr -> {
+            if (InterfaceName.LatticeAccountId.name().equals(attr.getName())) {
+                attr.setInterfaceName(InterfaceName.LatticeAccountId);
+                attr.setDisplayName(latticeIdCm.getDisplayName());
+                attr.setDescription(latticeIdCm.getDescription());
+                attr.setFundamentalType(FundamentalType.NUMERIC);
+                attr.setCategory(latticeIdCm.getCategory());
+                count.incrementAndGet();
+            } else if (amColMap.containsKey(attr.getName())) {
+                ColumnMetadata cm = amColMap.get(attr.getName());
+                attr.setDisplayName(removeNonAscII(cm.getDisplayName()));
+                attr.setDescription(removeNonAscII(cm.getDescription()));
+                attr.setSubcategory(removeNonAscII(cm.getSubcategory()));
+                attr.setFundamentalType(cm.getFundamentalType());
+                attr.setCategory(cm.getCategory());
+                count.incrementAndGet();
+            } else if (StringUtils.isBlank(attr.getCategory())) {
+                attr.setCategory(Category.ACCOUNT_ATTRIBUTES);
+            }
+        });
+        log.info("Enriched " + count.get() + " attributes using data cloud metadata.");
+    }
+
+    private String removeNonAscII(String str) {
+        if (StringUtils.isNotBlank(str)) {
+            return str.replaceAll("\\P{Print}", "");
+        } else {
+            return str;
         }
     }
 

@@ -1,6 +1,9 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,5 +37,13 @@ public class DataLakeStatisticsResource {
     @ApiOperation(value = "Get statistics")
     public TopNTree getTopNTree(@RequestParam(value = "topbkt", required = false) Boolean includeTopBkt) {
         return dataLakeService.getTopNTree(Boolean.TRUE.equals(includeTopBkt));
+    }
+
+    @RequestMapping(value = "/attrs/{entity}/{attribute}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get statistics")
+    public AttributeStats getAttributeStats(@PathVariable("entity") BusinessEntity entity,
+            @PathVariable("attribute") String attribute) {
+        return dataLakeService.getAttributeStats(entity, attribute);
     }
 }

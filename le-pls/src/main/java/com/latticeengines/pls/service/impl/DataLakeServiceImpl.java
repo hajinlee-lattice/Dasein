@@ -104,7 +104,19 @@ public class DataLakeServiceImpl implements DataLakeService {
         String customerSpace = MultiTenantContext.getTenant().getId();
         List<ColumnMetadata> cms = new ArrayList<>();
         for (BusinessEntity entity : BusinessEntity.values()) {
-            cms.addAll(getAttributesInEntity(customerSpace, entity));
+            if (!BusinessEntity.LatticeAccount.equals(entity)) {
+                cms.addAll(getAttributesInEntity(customerSpace, entity));
+            }
+        }
+        // TODO: backward compatible with old account table
+        if (cms.size() < 10_000) {
+            Set<String> includedAttrs = getAttrsInStats(customerSpace);
+            String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
+            List<ColumnMetadata> amCms = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
+                    currentDataCloudVersion);
+            amCms.forEach(cm -> cm.setEntity(BusinessEntity.LatticeAccount));
+            amCms.removeIf(cm -> !includedAttrs.contains(cm.getColumnId()));
+            cms.addAll(amCms);
         }
         return cms;
     }
@@ -127,27 +139,31 @@ public class DataLakeServiceImpl implements DataLakeService {
         return StatsCubeUtils.toTopNTree(statistics, includeTopBkt);
     }
 
-    private List<ColumnMetadata> getAttributesInEntity(String customerSpace, BusinessEntity entity) {
-        if (BusinessEntity.LatticeAccount.equals(entity)) {
-            // it is cached in the proxy
-            Set<String> includedAttrs = getAttrsInStats(customerSpace);
-            String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-            List<ColumnMetadata> cms = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
-                    currentDataCloudVersion);
-            cms.forEach(cm -> cm.setEntity(entity));
-            cms.removeIf(cm -> !includedAttrs.contains(cm.getColumnId()));
-            return cms;
+    @Override
+    public AttributeStats getAttributeStats(BusinessEntity entity, String attribute) {
+        Statistics statistics = getStatistics();
+        if (statistics == null) {
+            return null;
         }
+        AttributeLookup lookup = new AttributeLookup(entity, attribute);
+        for (CategoryStatistics catStats: statistics.getCategories().values()) {
+            for (SubcategoryStatistics subCatStats: catStats.getSubcategories().values()) {
+                if (subCatStats.getAttributes() != null && subCatStats.getAttributes().containsKey(lookup)) {
+                    return subCatStats.getAttrStats(lookup);
+                }
+            }
+        }
+        log.warn("Did not find attribute stats for " + lookup);
+        return null;
+    }
+
+    private List<ColumnMetadata> getAttributesInEntity(String customerSpace, BusinessEntity entity) {
         TableRoleInCollection role = entity.getServingStore();
         if (role == null) {
             return Collections.emptyList();
         }
         List<ColumnMetadata> cms = cmCache.get(String.format("%s|%s", customerSpace, role.name()));
         cms.forEach(cm -> cm.setEntity(entity));
-        // TODO: should set category in metadata table
-        if (BusinessEntity.Account.equals(entity)) {
-            cms.forEach(cm -> cm.setCategory(Category.ACCOUNT_ATTRIBUTES));
-        }
         return cms;
     }
 

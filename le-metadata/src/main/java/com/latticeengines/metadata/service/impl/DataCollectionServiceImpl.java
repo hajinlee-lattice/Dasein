@@ -70,8 +70,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         for (Table existingTable : existingTables) {
             log.info("There are already table(s) of role " + role + " in data collection " + collectionName
                     + ". Remove it from collection and delete it.");
-            dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTable.getName());
-            tableEntityMgr.deleteTableAndCleanupByName(existingTable.getName());
+            if (!existingTable.getName().equals(tableName)) {
+                log.info("Remove it from collection and delete it.");
+                dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTable.getName());
+                tableEntityMgr.deleteTableAndCleanupByName(existingTable.getName());
+            }
         }
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role);

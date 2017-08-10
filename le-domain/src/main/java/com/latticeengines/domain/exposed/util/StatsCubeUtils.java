@@ -232,7 +232,7 @@ public class StatsCubeUtils {
         for (CategoryStatistics catStats: statistics.getCategories().values()) {
             for (SubcategoryStatistics subCatStats: catStats.getSubcategories().values()) {
                 for (Map.Entry<AttributeLookup, AttributeStats> entry: subCatStats.getAttributes().entrySet()) {
-                    stats.put(entry.getKey().getAttribute(), entry.getValue());
+                    stats.put(entry.getKey().getAttribute(), retainTop5Bkts(entry.getValue()));
                 }
             }
         }
@@ -242,6 +242,21 @@ public class StatsCubeUtils {
         }
         return cube;
     }
+
+    private static AttributeStats retainTop5Bkts(AttributeStats attributeStats) {
+        if (attributeStats.getBuckets() != null && attributeStats.getBuckets().getBucketList() != null) {
+            Buckets buckets = attributeStats.getBuckets();
+            List<Bucket> top5Bkts = buckets.getBucketList().stream() //
+                    .sorted(Comparator.comparing(bkt -> - bkt.getCount()))
+                    .limit(5).collect(Collectors.toList());
+            if (attributeStats.getBuckets().getBucketList().size() > top5Bkts.size()) {
+                buckets.setHasMore(true);
+            }
+            buckets.setBucketList(top5Bkts);
+        }
+        return attributeStats;
+    }
+
 
     public static TopNTree toTopNTree(Statistics statistics, boolean includeTopBkt) {
         TopNTree topNTree = new TopNTree();

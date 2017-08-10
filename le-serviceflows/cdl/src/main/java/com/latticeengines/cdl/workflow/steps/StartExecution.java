@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.cdl.workflow.steps.export.ExportDataToRedshiftReportStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,7 +58,7 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
                 log.info("stepConfigMap is Empty!!!");
             }
             Map<BusinessEntity, List<DataFeedImport>> entityImportsMap = new HashMap<>();
-            execution.getImports().stream().forEach(i -> {
+            execution.getImports().forEach(i -> {
                 BusinessEntity entity = BusinessEntity.valueOf(i.getEntity());
                 entityImportsMap.putIfAbsent(entity, new ArrayList<>());
                 entityImportsMap.get(entity).add(i);

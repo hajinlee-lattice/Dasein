@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ public enum TableRoleInCollection {
 
     static {
         ConsolidatedAccount.primaryKey = InterfaceName.AccountId;
-        ConsolidatedAccount.foreignKeys = ImmutableList.of(InterfaceName.LatticeAccountId);
+        ConsolidatedAccount.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
         BucketedAccount.primaryKey = ConsolidatedAccount.primaryKey;
         BucketedAccount.foreignKeys = ConsolidatedAccount.foreignKeys;
 

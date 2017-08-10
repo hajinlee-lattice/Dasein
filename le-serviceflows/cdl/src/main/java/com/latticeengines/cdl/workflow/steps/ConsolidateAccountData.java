@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +28,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateAccountDataStepConfiguration;
@@ -45,7 +48,8 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
     private int mergeNewStep;
     private int matchStep;
     private int upsertMasterStep;
-    private int consolidatedStep;
+    private int diffStep;
+    private int matchDiffStep;
     private int bucketStep;
     private int sortStep;
 
@@ -66,15 +70,17 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
             mergeNewStep = 1;
             matchStep = 2;
             upsertMasterStep = 3;
-            consolidatedStep = 4;
-            bucketStep = 5;
-            sortStep = 6;
+            diffStep = 4;
+            matchDiffStep = 5;
+            bucketStep = 6;
+            sortStep = 7;
 
             TransformationStepConfig merge = mergeInputs();
             TransformationStepConfig mergeNew = mergeNew();
             TransformationStepConfig match = match();
             TransformationStepConfig upsertMaster = mergeMaster();
             TransformationStepConfig diff = diff();
+            TransformationStepConfig matchDiff = matchDiff();
             TransformationStepConfig bucket = bucketDiff();
             TransformationStepConfig sort = sortBucketedDiff();
 
@@ -85,6 +91,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
             steps.add(upsertMaster);
             if (isBucketing()) {
                 steps.add(diff);
+                steps.add(matchDiff);
                 steps.add(bucket);
                 steps.add(sort);
             }
@@ -173,6 +180,30 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         return step5;
     }
 
+    private TransformationStepConfig matchDiff() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_MATCH);
+        step.setInputSteps(Collections.singletonList(diffStep));
+
+        // Match Input
+        MatchTransformerConfig config = new MatchTransformerConfig();
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(new Tenant(customerSpace.toString()));
+        matchInput.setPredefinedSelection(ColumnSelection.Predefined.Segment);
+
+        Map<MatchKey, List<String>> keyMap = new TreeMap<>();
+        keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
+        matchInput.setKeyMap(keyMap);
+
+        matchInput.setDataCloudVersion(getDataCloudVersion());
+        matchInput.setSkipKeyResolution(true);
+        matchInput.setFetchOnly(true);
+        matchInput.setSplitsPerBlock(cascadingPartitions * 10);
+        config.setMatchInput(matchInput);
+
+        return step;
+    }
+
     private TransformationStepConfig bucketDiff() {
         if (!isBucketing()) {
             return null;
@@ -186,7 +217,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         baseTables.put(tableSourceName, sourceTable);
         step6.setBaseTables(baseTables);
         // consolidate diff
-        step6.setInputSteps(Collections.singletonList(consolidatedStep));
+        step6.setInputSteps(Collections.singletonList(matchDiffStep));
         step6.setTransformer(TRANSFORMER_BUCKETER);
         step6.setConfiguration(emptyStepConfig(lightEngineConfig()));
         return step6;
@@ -209,7 +240,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
 
         SorterConfig config = new SorterConfig();
         config.setPartitions(100);
-        config.setSortingField(servingStoreSortKeys.get(0));
+        config.setSortingField(servingStorePrimaryKey);
         config.setCompressResult(true);
         step7.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
