@@ -1,8 +1,8 @@
 package com.latticeengines.pls.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +17,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.dante.DanteAttribute;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -53,11 +55,18 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     @SuppressWarnings({ "unchecked" })
     @Test(groups = { "deployment" })
     public void testGetRecommendationAttributes() {
-        Map<String, String> recResponse = restTemplate.getForObject( //
+        String rawResponse = restTemplate.getForObject( //
                 getRestAPIHostPort() + "/pls/dante/attributes/recommendationattributes", //
-                Map.class);
-
+                String.class);
+        ObjectMapper om = new ObjectMapper();
+        List<DanteAttribute> recResponse = null;
+        try {
+            recResponse = om.readValue(rawResponse, new TypeReference<List<DanteAttribute>>() {});
+        } catch (IOException e) {
+            Assert.fail("Failed to parse response " + rawResponse, e);
+        }
         Assert.assertNotNull(recResponse);
+
     }
 
     @SuppressWarnings({ "unchecked" })

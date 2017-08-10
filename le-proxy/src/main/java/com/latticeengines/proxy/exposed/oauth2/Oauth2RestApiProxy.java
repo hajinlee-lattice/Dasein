@@ -2,6 +2,8 @@ package com.latticeengines.proxy.exposed.oauth2;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
@@ -15,8 +17,6 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("oauth2RestApiProxy")
 public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interface {
-
-    private static final String CLIENT_ID_LP = OauthClientType.LP.getValue();
 
     @Value("${common.oauth.url}")
     protected String oauth2AuthHostPort;
@@ -43,16 +43,20 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
 
     @Override
     public OAuth2AccessToken createOAuth2AccessToken(String tenantId, String appId) {
-        String apiToken = createAPIToken(tenantId);
-        oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2AuthHostPort, tenantId, apiToken, CLIENT_ID_LP, appId);
-        return OAuth2Utils.getAccessToken(oAuth2RestTemplate);
+        return createOAuth2AccessToken(tenantId, appId, OauthClientType.LP);
     }
 
     @Override
     public OAuth2AccessToken createOAuth2AccessToken(String tenantId, String appId, OauthClientType type) {
         String apiToken = createAPIToken(tenantId);
-        oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2AuthHostPort, tenantId, apiToken, type.getValue(),
-                appId);
-        return OAuth2Utils.getAccessToken(oAuth2RestTemplate);
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        try {
+            SecurityContextHolder.clearContext();
+            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(oauth2AuthHostPort, tenantId, apiToken, type.getValue(),
+                    appId);
+            return OAuth2Utils.getAccessToken(oAuth2RestTemplate);
+        } finally {
+            SecurityContextHolder.setContext(securityContext);
+        }
     }
 }
