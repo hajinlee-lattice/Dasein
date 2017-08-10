@@ -222,7 +222,7 @@ public class ScoreCorrectnessService {
                 continue;
             }
             double difference = Math.abs(expectedScores.get(id) - response.getProbability());
-            if (difference > THRESHOLD) {
+            if (difference > THRESHOLD || "58889695".equals(id)) {  // Log this id is only for debug purpose. Will remove later
                 Map<String, Object> expectedMatchedRecord = matchedRecords.get(id);
                 Map<String, Object> scoreMatchedRecord = response.getMatchedRecord();
                 log.warn(String.format("Record %s has API score inconsistency; checking individual fields:", id));
