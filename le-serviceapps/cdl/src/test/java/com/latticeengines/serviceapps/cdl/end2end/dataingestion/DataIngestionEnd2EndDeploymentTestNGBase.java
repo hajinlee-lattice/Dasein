@@ -150,8 +150,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                             .anyMatch(n -> InterfaceName.LEContactIDLong.name().equals(n));
                     boolean hasAccountId = schema.getFields().stream().map(Schema.Field::name)
                             .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
-                    schema.getFields().forEach(field -> //
-                            field.addProp("Category", Category.ACCOUNT_ATTRIBUTES.name()));
                     Assert.assertTrue(hasLEContactIDLong);
                     Assert.assertTrue(hasAccountId);
                     break;
@@ -159,8 +157,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                     boolean hasLEAccountIDLong = schema.getFields().stream().map(Schema.Field::name)
                             .anyMatch(n -> InterfaceName.LEAccountIDLong.name().equals(n));
                     Assert.assertTrue(hasLEAccountIDLong);
-                    schema.getFields().forEach(field -> //
-                            field.addProp("Category", Category.CONTACT_ATTRIBUTES.name()));
                     break;
                 default:
             }
