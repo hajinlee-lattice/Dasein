@@ -104,6 +104,7 @@ public class StatsCubeUtils {
         if (bucketList.isEmpty()) {
             return null;
         } else {
+            buckets.setBucketList(bucketList);
             return buckets;
         }
     }
