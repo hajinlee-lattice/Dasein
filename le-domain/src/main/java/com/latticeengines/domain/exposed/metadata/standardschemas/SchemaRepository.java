@@ -432,6 +432,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("CompanyName") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME", "ACCOUNT NAME" })) //
