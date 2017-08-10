@@ -104,17 +104,13 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.setupStore = function(segment) {
-
         var self = this;
         var deferred = $q.defer();
         
-        console.log(segment);
+        // console.log(segment);
+        this.setSegment(segment);
 
-        if (segment != null) {
-
-            // set segment if clicking on a tile.
-            this.setSegment(segment);
-
+        if (segment != null) {            
             // Set variables so I can manipulate later when unchecking box.
             allRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[0].logicalRestriction.restrictions;
             anyRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[1].logicalRestriction.restrictions;
@@ -123,12 +119,8 @@ angular.module('common.datacloud.query.service',[
             deferred.resolve( this.setRestriction(segment.frontend_restriction) );
 
         } else {
-
-            this.setSegment(null);
-
             // default state. restriction is empty.
             deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );
-
         }
         return deferred.promise;
 

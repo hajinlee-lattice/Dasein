@@ -55,17 +55,17 @@
                         ng-click="vm.selectSegmentAttribute(attribute)">
 
                     <div class="column label" title="{{attribute.DisplayName}}">
-                        <input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !vm.cube.Stats" ng-disabled="true" />
+                        <input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" />
                         <input  type="checkbox" 
                                 ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]"
                                 ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
                                 name="{{attribute.Attribute || attribute.ColumnId}}" 
                                 id="{{attribute.Attribute || attribute.ColumnId}}" 
-                                ng-if="vm.section == 'segment.analysis' && vm.cube.Stats" />
+                                ng-if="vm.section == 'segment.analysis' && attribute.TopBkt" />
                         {{ attribute.DisplayName }}
                     </div>
-                    <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !vm.cube.Stats"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
-                    <div class="column data value" ng-if="vm.section == 'segment.analysis' && vm.cube.Stats">{{ attribute.TopBkt.Lbl }}</div>
+                    <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
+                    <div class="column data value" ng-if="vm.section == 'segment.analysis' && attribute.TopBkt">{{ attribute.TopBkt.Lbl }}</div>
                     <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>
                     <div class="column data records" ng-if="!vm.lookupMode && !vm.inModel()">{{ attribute.TopBkt.Cnt|number }}</div>
                     <div class="column data values" ng-if="vm.lookupMode && vm.section != 'segment.analysis'">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
