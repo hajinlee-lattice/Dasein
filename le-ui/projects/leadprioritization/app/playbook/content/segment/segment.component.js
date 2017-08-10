@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.SegmentsUtility'])
 .controller('PlaybookWizardSegment', function(
-    $state, $stateParams, ResourceUtility, PlaybookWizardStore, SegmentsUtility, Segments
+    $scope, $state, $stateParams, ResourceUtility, PlaybookWizardStore, SegmentsUtility, Segments
 ) {
     var vm = this;
 
@@ -8,7 +8,15 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
         stored: PlaybookWizardStore.segment_form,
         SegmentsUtility: SegmentsUtility,
         segments: Segments,
-        stateParams: $stateParams
+        stateParams: $stateParams,
+        currentPage: 1,
+        pageSize: 20
+    });
+
+    $scope.$watch('vm.search', function(newValue, oldValue) {
+        if(vm.search) {
+            vm.current = 1;
+        }
     });
 
     vm.init = function() {

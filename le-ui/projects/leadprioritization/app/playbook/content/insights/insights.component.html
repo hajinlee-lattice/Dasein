@@ -9,7 +9,7 @@
                         <em ng-if="vm.stateParams.section === 'dashboard.insights'">Keep in mind changes you make will overwrite changes made by other users.</em>
                     </p>
                 </div>
-                <div ng-if="vm.talkingPoints" ng-repeat="tp in vm.talkingPoints | orderBy:'offset'" class="tp-entry" ng-class="{'has-errors': tp.uiError}">
+                <div ng-if="vm.talkingPoints" ng-repeat="tp in vm.talkingPoints | orderBy:'offset' | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" class="tp-entry" ng-class="{'has-errors': tp.uiError}">
                     <cg-talking-point-editor
                         tp="tp"
                         on-delete="vm.onDelete($index)">
@@ -33,13 +33,17 @@
                         </li>
                     </ul>
                 </div>
-                <div class="row add-tp-button">
+                <div class="row tp-footer">
                     <span ng-click="vm.addTalkingPoint()">
-                        <button class="button white-button"><i class="fa fa-plus"></i></button><span>Add Talking Point</span>
+                        <button class="add-tp-button button white-button"><i class="fa fa-plus"></i></button><span>Add Talking Point</span>
                     </span>
                     <div class="tp-syntax">
                         <a ui-sref="home.playbook.dashboard.insights.syntax({play_name: vm.stateParams.play_name})" target="_syntax">Authoring Talking Points Guide</a>
                     </div>
+                    <pd-pagination-controls
+                        current="vm.currentPage"
+                        max="vm.maxPage">
+                    </pd-pagination-controls>
                 </div>
             </div>
             <div class="attributes">

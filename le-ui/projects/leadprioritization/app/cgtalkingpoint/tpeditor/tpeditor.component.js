@@ -34,12 +34,11 @@ angular.module('lp.cg.talkingpoint.editor', [])
         setup : function(ed) {
             ed.on('blur', function(e) {
                 $timeout(function(){
-                    console.log(CgTalkingPointStore.deleteClicked);
                     if(!CgTalkingPointStore.saveOnBlur || CgTalkingPointStore.deleteClicked) {
                         return false;
                     }
                     var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint();
-                        content = ed.contentDocument.body.innerHTML;
+                        content = (ed.contentDocument && ed.contentDocument.body && ed.contentDocument.body.innerHTML ? ed.contentDocument.body.innerHTML : '');
                     CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
                     talkingPoint.content = content;
                     

@@ -2,7 +2,7 @@ angular.module('lp.playbook.dashboard', [
     'mainApp.appCommon.utilities.TimestampIntervalUtility'
 ])
 .controller('PlaybookDashboard', function(
-    $q, $stateParams, $state, 
+    $q, $stateParams, $state, $interval,
     PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore
 ) {
     var vm = this,
@@ -135,12 +135,28 @@ angular.module('lp.playbook.dashboard', [
     var getPlay = function() {
         PlaybookWizardStore.getPlay(play_name).then(function(play){
             vm.play = play;
-            vm.launchedState = (vm.play.launchHistory && vm.play.launchHistory.playLaunch && vm.play.launchHistory.playLaunch.launchState ? vm.play.launchHistory.playLaunch.launchState : '');
+            vm.launchedState = (vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
             vm.ratingsGraph = makeSimpleGraph(vm.play.rating && vm.play.rating.bucketInformation, 'bucketCount');
             vm.launchGraph = makeLaunchGraph(vm.play.launchHistory);
             vm.launchValidate(play);
+
+            if(vm.launchedState === 'Launching') { // if it's in a launching state check every 10 seconds so we can update the button, then stop checking
+                vm.showLaunchSpinner = true;
+                var checkLaunchState = $interval(function(){
+                    PlaybookWizardStore.getPlayLaunches(play_name).then(function(results){
+                        var result = results[0];
+                        vm.launchHistory = results;
+                        vm.launchedState = (result && result.launchState ? result.launchState : null);
+                        if(vm.launchedState === 'Launched') {
+                            $interval.cancel(checkLaunchState);
+                            vm.showLaunchSpinner = false;
+                        }
+                    });
+                }, 10000);
+            }
         });
     }
+
 
     //PlaybookWizardStore.clear();
     if(play_name) {

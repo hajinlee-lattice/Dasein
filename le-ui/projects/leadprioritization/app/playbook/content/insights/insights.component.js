@@ -10,8 +10,11 @@ angular.module('lp.playbook.wizard.insights', [])
         attributes: TalkingPointAttributes,
         talkingPoints: TalkingPoints,
         saveOnBlur: CgTalkingPointStore.saveOnBlur,
-        stateParams: $stateParams
+        stateParams: $stateParams,
+        currentPage: 1,
+        pageSize: 20
     });
+
 
     $rootScope.$on('sync:talkingPoints', function(e){
         CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
@@ -22,6 +25,7 @@ angular.module('lp.playbook.wizard.insights', [])
 
     CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
         vm.talkingPoints = talkingPoints;
+        vm.maxPage = vm.talkingPoints.length / vm.pageSize;
     });
 
     var cachedTalkingPoints = angular.copy(TalkingPoints);
@@ -33,11 +37,13 @@ angular.module('lp.playbook.wizard.insights', [])
                 playExternalID: $stateParams.play_name,
                 title: null, 
                 content: null, 
-                offset: vm.talkingPoints.length,
+                offset: vm.talkingPoints.length
             });
         talkingPoint.IsNew = true;
         vm.talkingPoints.push(talkingPoint);
         CgTalkingPointStore.setEditedTalkingPoint(talkingPoint);
+        vm.maxPage = vm.talkingPoints.length / vm.pageSize;
+        vm.currentPage = Math.ceil(vm.maxPage);
     };
 
     vm.saveTalkingPoints = function() {
@@ -51,7 +57,10 @@ angular.module('lp.playbook.wizard.insights', [])
     vm.onDelete = function(pos) {
         var remove_talkingpoint_name = vm.talkingPoints[pos].name;
         if(vm.talkingPoints[pos].pid) {
-            CgTalkingPointStore.deleteTalkingPoint(remove_talkingpoint_name);
+            CgTalkingPointStore.deleteTalkingPoint(remove_talkingpoint_name).then(function(response){
+                vm.maxPage = vm.talkingPoints.length / vm.pageSize;
+                vm.currentPage = 1;
+            });
         }
         vm.talkingPoints.splice(pos, 1);
         for (var i = pos; i < vm.talkingPoints.length; i++) {

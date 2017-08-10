@@ -71,10 +71,10 @@
             }
         }
 
-        .add-tp-button {
+        .tp-footer {
             margin: 0 2px;
             margin-bottom: 5px;
-            button {
+            button.add-tp-button {
                 border-radius: 50%;
                 border: 0;
                 background: transparent;
@@ -226,6 +226,7 @@
         padding: 8px;
         select {
             margin-bottom: 5px;
+            text-transform: capitalize;
         }
     }
 

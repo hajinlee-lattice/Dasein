@@ -109,10 +109,11 @@
                     </div>
                     <div class="dashboard-section-footer">
                         <span ng-if="vm.launchedState == 'Launched' && vm.play.launchHistory.playLaunch.lastUpdatedTimestamp">Launched {{vm.TimestampIntervalUtility.timeAgo(vm.play.launchHistory.playLaunch.lastUpdatedTimestamp)}} <i class="fa fa-check"></i></span>
-                        <button class="launch button blue-button" ng-click="vm.launchPlay()" ng-disabled="vm.invalid.length">
-                            <span ng-if="vm.launchedState != 'Launched'">Launch now</span>
-                            <span ng-if="vm.launchedState == 'Launched'">Re-Launch now</span>
+                        <button class="launch button blue-button" ng-click="vm.launchPlay()" ng-disabled="vm.invalid.length || vm.launchedState == 'Launching'">
                             <span ng-if="vm.showLaunchSpinner"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+                            <span ng-if="vm.launchedState == 'Launching'">Launching</span>
+                            <span ng-if="vm.launchedState == 'Launched'">Re-Launch now</span>
+                            <span ng-if="!vm.launchedState">Launch now</span>
                         </button>
                     </div>
                 </div>

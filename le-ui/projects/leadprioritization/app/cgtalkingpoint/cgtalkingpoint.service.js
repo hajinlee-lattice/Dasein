@@ -227,26 +227,16 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         if (this.attributes !== null) {
             deferred.resolve(this.attributes);
         } else {
-            var self = this;
             if(stub) {
                 CgTalkingPointService.getStubAttributes().then(function(response) {
                     CgTalkingPointStore.attributes = response;
-                    console.log(response);
-                    deferred.resolve(self.attributes);
+                    deferred.resolve(CgTalkingPointStore.attributes);
                 });
             } else {
-                var attributes = {
-                    Company: [],
-                    Recommendation: []
-                };
-                CgTalkingPointService.getAttributes().then(function(company) {
-                    attributes.Company = makeAttributesArray(company);
-                    CgTalkingPointStore.attributes = attributes;
-                    CgTalkingPointService.getRecommendationAttributes().then(function(recommendation) {
-                        _recommendation = makeAttributesArray(recommendation);
-                        CgTalkingPointStore.attributes.Recommendation = _recommendation;
-                        deferred.resolve(attributes);
-                    });
+                var entities = ['account','recommendation'];
+                CgTalkingPointService.getAttributes(entities).then(function(response) {
+                    CgTalkingPointStore.attributes = response.notionAttributes;
+                    deferred.resolve(CgTalkingPointStore.attributes);
                 });
             }
  
@@ -402,7 +392,20 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     };
 
-    this.getAttributes = function() {
+    this.getAttributes = function(entities) {
+        var deferred = $q.defer();
+        $http({
+            method: 'POST',
+            url: this.host + '/dante/attributes/attributes',
+            data: entities
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+
+        return deferred.promise;
+    };
+
+    this.getAccountAttributes = function() {
         var deferred = $q.defer();
         $http({
             method: 'GET',
