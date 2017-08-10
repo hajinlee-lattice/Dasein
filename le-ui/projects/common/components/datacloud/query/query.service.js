@@ -104,13 +104,14 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.setupStore = function(segment) {
-        var self = this;
-        var deferred = $q.defer();
+        var self = this,
+            deferred = $q.defer(),
+            allRestrictions = [],
+            anyRestrictions = [];
         
-        // console.log(segment);
         this.setSegment(segment);
 
-        if (segment != null) {            
+        if (segment != null) {
             // Set variables so I can manipulate later when unchecking box.
             allRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[0].logicalRestriction.restrictions;
             anyRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[1].logicalRestriction.restrictions;

@@ -1425,7 +1425,7 @@ angular.module('common.datacloud.explorer', [
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
 
-        // console.log(enrichment, stat, disable);
+        console.log(enrichment, stat, disable);
 
         var disable = disable || false,
             attributeKey = enrichment.Attribute || enrichment.ColumnName,

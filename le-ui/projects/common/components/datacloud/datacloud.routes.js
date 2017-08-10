@@ -284,7 +284,8 @@ angular
         main: {
             url: '/analysis/:segment',
             params: {
-                segment: 'Create'
+                segment: 'Create',
+                reload: true
             },
             resolve: angular.extend({}, DataCloudResolve, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
@@ -294,26 +295,31 @@ angular
                         modelId = $stateParams.modelId,
                         tenantName = $stateParams.tenantName;
 
-                    QueryStore.setupStore(null);
+                    console.log("[resolve]     Restriction");
 
-                    if(segmentName === 'Create'){
-                        deferred.resolve(QueryStore.getRestriction());
-                    } else {
-                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                            if (segmentName && !result) {
-                                if (modelId) {
-                                    $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
-                                } else {
-                                    $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
-                                }
-                            } else {
-                                console.log("[setup store]       ", result);
-                                return QueryStore.setupStore(result);
-                            }
-                        }).then(function() {
+                    QueryStore.setupStore(null).then(function(){
+
+                        if(segmentName === 'Create'){
                             deferred.resolve(QueryStore.getRestriction());
-                        });
-                    }
+                        } else {
+                            SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                                if (segmentName && !result) {
+                                    if (modelId) {
+                                        $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
+                                    } else {
+                                        $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
+                                    }
+                                } else {
+                                    console.log("[setup store]       ", result);
+                                    return QueryStore.setupStore(result);
+                                }
+                            }).then(function() {
+                                deferred.resolve(QueryStore.getRestriction());
+                            });
+                        }
+
+                    });
+
                     return deferred.promise;                    
                 }],
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {

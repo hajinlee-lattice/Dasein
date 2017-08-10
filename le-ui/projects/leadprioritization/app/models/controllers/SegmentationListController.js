@@ -58,12 +58,14 @@ angular.module('lp.models.segments', [
     };
 
     vm.tileClick = function ($event, segment) {
+
         $event.preventDefault();
         if ($state.current.name == 'home.segments') {
             $state.go('home.segment.explorer.attributes', {segment: segment.name}, { reload: true } );
         } else {
             $state.go('home.model.analysis', {segment: segment.name}, { reload: true } );
         };
+
     };
 
     var oldSegmentDisplayName = '';
