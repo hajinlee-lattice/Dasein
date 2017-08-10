@@ -844,6 +844,8 @@ angular.module('common.datacloud.explorer', [
             if (items) {
                 items.forEach(function(item, itemKey) {
 
+                    // console.log(item);
+
                     var index = vm.enrichmentsMap[item.Attribute],
                         enrichment = vm.enrichments[index],
                         map = [
@@ -1260,15 +1262,15 @@ angular.module('common.datacloud.explorer', [
 
     vm.clearExplorerSegments = function() { 
         var _enrichments = vm.filter(vm.enrichments, 'SegmentChecked', true);
+
         vm.segmentAttributeInput = {};
         _enrichments.forEach(function(enrichment){
-            index = vm.enrichmentsMap[enrichment.ColumnId];
-            if(index || index === 0) {
-                delete vm.enrichments[index].SegmentChecked;
-            }
+            delete enrichment.SegmentChecked;
         });
-    }
 
+        // console.log(_enrichments);
+
+    }
 
     var textSearch = function(haystack, needle, case_insensitive) {
         var case_insensitive = (case_insensitive === false ? false : true);
@@ -1389,7 +1391,11 @@ angular.module('common.datacloud.explorer', [
             attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : ''),
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
-            entity = enrichment.Entity;
+            entity = enrichment.Entity,
+            topBkt = attribute.TopBkt;
+
+
+        console.log(attribute);
 
         if(entity === 'Transaction'){
             var entity = 'Account';
@@ -1406,12 +1412,12 @@ angular.module('common.datacloud.explorer', [
         if (vm.segmentAttributeInput[attributeKey] === true) {
             QueryStore.counts.accounts.loading = true;
             $timeout(function(){
-                QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+                QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
             }, 1000);
         } else {
             QueryStore.counts.accounts.loading = true;
             $timeout(function(){
-                QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+                QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
             }, 1000);
         }
 
@@ -1428,12 +1434,12 @@ angular.module('common.datacloud.explorer', [
             fieldName = enrichment.ColumnName,
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
-            entity = enrichment.Entity;
+            entity = enrichment.Entity,
+            topBkt = attribute.TopBkt;
 
         if(disable) {
             return false;
         }
-
         if(entity === 'Transaction'){
             var entity = 'Account';
         }
@@ -1441,24 +1447,18 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         vm.saveSegmentEnabled = true;
-
-        // vm.enrichments[index].SegmentChecked = true;
-
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
             QueryStore.counts.accounts.loading = true;
             $timeout(function(){
-                QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+                QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
             }, 1000);
 
-            // QueryStore.addRestriction({columnName: fieldName, bkt: stat});
         } else {
             QueryStore.counts.accounts.loading = true;
             $timeout(function(){
-                QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+                QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
             }, 1000);
 
-
-            // QueryStore.removeRestriction({columnName: fieldName, bkt: stat});
         }
         /*
          * Rebuild the tile table items

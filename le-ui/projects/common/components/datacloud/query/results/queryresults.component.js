@@ -28,8 +28,6 @@ angular.module('common.datacloud.query.results', [
 
 
     vm.init = function() {
-
-        console.log($stateParams);
         
         QueryStore.setAccounts('', $stateParams.segment).then(function(response){
             vm.accounts = response.data;
@@ -114,6 +112,8 @@ angular.module('common.datacloud.query.results', [
         QueryStore.setAccounts(query, $stateParams.segment).then(function(response){
             vm.accounts = response.data;
             vm.loading = false;
+
+            console.log(vm.accounts);
         });
 
     };

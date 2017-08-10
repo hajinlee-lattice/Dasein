@@ -4,7 +4,6 @@ angular.module('common.datacloud.query.factory.restriction', [])
 
         console.log(columnName, objectType, range, attr, bkt);
 
-
         if (attr === null || attr === undefined) {
             this.attr = objectType + '.' + columnName;
         } else {

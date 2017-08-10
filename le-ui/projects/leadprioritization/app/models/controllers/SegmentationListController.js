@@ -18,9 +18,6 @@ angular.module('lp.models.segments', [
 
 
     SegmentsList.forEach(function(segment) {
-
-        console.log(segment);
-
         vm.tileStates[segment.name] = {
             showCustomMenu: false,
             editSegment: false
@@ -55,9 +52,6 @@ angular.module('lp.models.segments', [
 
     vm.tileClick = function ($event, segment) {
         $event.preventDefault();
-
-        QueryStore.setSegment(segment);
-
         if ($state.current.name == 'home.segments') {
             $state.go('home.segment.explorer.attributes', {segment: segment.name}, { reload: true } );
         } else {

@@ -51,17 +51,17 @@
                 class="attribute-stat"
                 ng-class="{
                             'select-range': vm.section == 'segment.analysis', 
-                            'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)]
+                            'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng)]
                           }"
                 ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))">
 <!--'disable-bar': (vm.section != 'segment.analysis' && vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean')-->
                 <ul class="graph">
                     <li class="label" title="{{stat.Lbl}}">
                         <input  type="checkbox"
-                                ng-model="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)]" 
-                                ng-checked="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Range)]" 
-                                name="{{vm.makeSegmentsRangeKey(enrichment,stat.Range)}}" 
-                                id="{{vm.makeSegmentsRangeKey(enrichment,stat.Range)}}"
+                                ng-model="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng)]" 
+                                ng-checked="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng)]" 
+                                name="{{vm.makeSegmentsRangeKey(enrichment,stat.Rng)}}" 
+                                id="{{vm.makeSegmentsRangeKey(enrichment,stat.Rng)}}"
                                 ng-if="vm.section == 'segment.analysis'" />
                         {{stat.Lbl}}
                     </li>

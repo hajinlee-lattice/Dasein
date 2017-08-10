@@ -36,7 +36,7 @@
                     {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}
                 </div>
                 <div class="column data records" ng-if="!vm.lookupMode">
-                    {{ attribute.Count|number }}
+                    {{ attribute.TopBkt.Cnt|number }}
                 </div>
             </li>
         </ul>

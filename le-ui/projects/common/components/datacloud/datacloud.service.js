@@ -407,7 +407,7 @@ angular.module('common.datacloud')
 
     this.getAllTopAttributes = function(opts) {
         var deferred = $q.defer(),
-            url = this.url('/statistics/topn','/stats/topn');
+            url = this.url('/statistics/topn?topbkt=true','/stats/topn');
         
         $http({
             method: 'get',

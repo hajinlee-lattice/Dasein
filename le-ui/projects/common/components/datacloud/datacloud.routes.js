@@ -294,8 +294,9 @@ angular
                         modelId = $stateParams.modelId,
                         tenantName = $stateParams.tenantName;
 
+                    QueryStore.setupStore(null);
+
                     if(segmentName === 'Create'){
-                        QueryStore.setupStore(null);
                         deferred.resolve(QueryStore.getRestriction());
                     } else {
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
@@ -306,19 +307,14 @@ angular
                                     $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
                                 }
                             } else {
-
-                                // console.log("[setup store]       ", result);
-
+                                console.log("[setup store]       ", result);
                                 return QueryStore.setupStore(result);
                             }
                         }).then(function() {
                             deferred.resolve(QueryStore.getRestriction());
                         });
                     }
-
-                    return deferred.promise;
-
-                    
+                    return deferred.promise;                    
                 }],
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
                     var CreateOrUpdateSegment = function() {
@@ -357,37 +353,37 @@ angular
                     };
                 }],
                 AccountsCount: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
+                    
                     var deferred = $q.defer(),
                         segmentName = $stateParams.segment,
                         restriction = QueryStore.getRestriction();
 
+                    if(segmentName === "Create"){
+                        query = { 
+                            'free_form_text_search': '',
+                            'frontend_restriction': restriction,
+                            'page_filter': {
+                                'num_rows': 10,
+                                'row_offset': 0
+                            }
+                        };
+                        deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
+                    } else {
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
                             var segment = result;
-
-                            if (segment === null) {                     
-                                query = { 
-                                    'free_form_text_search': '',
-                                    'frontend_restriction': restriction,
-                                    'page_filter': {
-                                        'num_rows': 10,
-                                        'row_offset': 0
-                                    }
-                                };
-                            } else {
-                                query = { 
-                                    'free_form_text_search': '',
-                                    'frontend_restriction': segment.frontend_restriction,
-                                    'page_filter': {
-                                        'num_rows': 10,
-                                        'row_offset': 0
-                                    }
-                                };
+                            console.log("[resolve] AccountsCount", segment);
+                            query = { 
+                                'free_form_text_search': '',
+                                'frontend_restriction': segment.frontend_restriction,
+                                'page_filter': {
+                                    'num_rows': 10,
+                                    'row_offset': 0
+                                }
                             };
-                            
                             deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
-
                         });
-
+                    };
+                        
                     return deferred.promise;
                 }]
             }),

@@ -108,6 +108,8 @@ angular.module('common.datacloud.query.service',[
         var self = this;
         var deferred = $q.defer();
         
+        console.log(segment);
+
         if (segment != null) {
 
             // set segment if clicking on a tile.
@@ -122,7 +124,7 @@ angular.module('common.datacloud.query.service',[
 
         } else {
 
-            this.setSegment(segment);
+            this.setSegment(null);
 
             // default state. restriction is empty.
             deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );
