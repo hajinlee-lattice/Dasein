@@ -164,6 +164,14 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         List<ColumnMetadata> cms = cmCache.get(String.format("%s|%s", customerSpace, role.name()));
         cms.forEach(cm -> cm.setEntity(entity));
+        switch (entity) {
+            case Account:
+                cms.forEach(cm -> cm.setCategory(Category.ACCOUNT_ATTRIBUTES));
+                break;
+            case Contact:
+                cms.forEach(cm -> cm.setCategory(Category.CONTACT_ATTRIBUTES));
+                break;
+        }
         return cms;
     }
 

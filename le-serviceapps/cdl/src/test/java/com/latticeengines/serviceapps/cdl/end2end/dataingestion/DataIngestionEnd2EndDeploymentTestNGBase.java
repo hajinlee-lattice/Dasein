@@ -30,6 +30,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -149,6 +150,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                             .anyMatch(n -> InterfaceName.LEContactIDLong.name().equals(n));
                     boolean hasAccountId = schema.getFields().stream().map(Schema.Field::name)
                             .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
+                    schema.getFields().forEach(field -> //
+                            field.addProp("Category", Category.ACCOUNT_ATTRIBUTES.name()));
                     Assert.assertTrue(hasLEContactIDLong);
                     Assert.assertTrue(hasAccountId);
                     break;
@@ -156,6 +159,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                     boolean hasLEAccountIDLong = schema.getFields().stream().map(Schema.Field::name)
                             .anyMatch(n -> InterfaceName.LEAccountIDLong.name().equals(n));
                     Assert.assertTrue(hasLEAccountIDLong);
+                    schema.getFields().forEach(field -> //
+                            field.addProp("Category", Category.CONTACT_ATTRIBUTES.name()));
                     break;
                 default:
             }
