@@ -6,5 +6,6 @@
     <import resource="classpath:common-properties-context.xml" />
     <import resource="classpath:serviceapps-cdl-context.xml" />
     <import resource="classpath:testframework-context.xml" />
+    <import resource="classpath:yarn-context.xml" />
 
 </beans>

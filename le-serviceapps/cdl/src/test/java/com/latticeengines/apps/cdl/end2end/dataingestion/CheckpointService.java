@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
-import static org.testng.Assert.assertEquals;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,15 +7,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +25,6 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.apps.cdl.testframework.WorkflowUtils;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -38,6 +36,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -52,7 +51,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
@@ -61,6 +59,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
+import com.latticeengines.yarn.exposed.service.JobService;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -94,6 +93,9 @@ public class CheckpointService {
     @Inject
     private WorkflowProxy workflowProxy;
 
+    @Inject
+    private JobService jobService;
+
     @Value("${camille.zk.pod.id}")
     private String podId;
 
@@ -104,14 +106,7 @@ public class CheckpointService {
 
     private Tenant mainTestTenant;
 
-    private WorkflowUtils workflowUtils;
-
     private String checkpointDir;
-
-    @PostConstruct
-    private void postConstruct() {
-        workflowUtils = new WorkflowUtils(workflowProxy);
-    }
 
     public void setMaintestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
@@ -281,9 +276,9 @@ public class CheckpointService {
             Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role);
             ExportConfiguration exportConfiguration = setupExportConfig(table, table.getName(), role);
             AppSubmission submission = eaiProxy.submitEaiJob(exportConfiguration);
-            JobStatus completedStatus = workflowUtils.waitForWorkflowStatus(submission.getApplicationIds().get(0),
-                    false);
-            assertEquals(completedStatus, JobStatus.COMPLETED);
+            int timeout = new Long(TimeUnit.MINUTES.toSeconds(30)).intValue();
+            JobStatus completedStatus = jobService.waitFinalJobStatus(submission.getApplicationIds().get(0), timeout);
+            Assert.assertEquals(completedStatus.getStatus(), FinalApplicationStatus.SUCCEEDED);
             logger.info("Finished exporting " + role + " to redshift.");
         }
     }
