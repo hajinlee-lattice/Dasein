@@ -1382,20 +1382,19 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
-        if(!vm.cube.Stats) {
-            return false;
-        }
+        // if(!vm.cube.Stats) {
+        //     return false;
+        // }
+
+        console.log(attribute);
 
         var attributeKey = attribute.Attribute || attribute.FieldName,
-            stat = vm.getAttributeStat(attribute) || {},
-            attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : ''),
+            // stat = vm.getAttributeStat(attribute) || {},
+            // attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : ''),
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
             entity = enrichment.Entity,
             topBkt = attribute.TopBkt;
-
-
-        console.log(attribute);
 
         if(entity === 'Transaction'){
             var entity = 'Account';
@@ -1404,9 +1403,9 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
 
-        if(attributeRangeKey) {
-            vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
-        }
+        // if(attributeRangeKey) {
+        //     vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
+        // }
         vm.saveSegmentEnabled = true;
 
         if (vm.segmentAttributeInput[attributeKey] === true) {

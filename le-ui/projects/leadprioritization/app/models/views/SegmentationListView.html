@@ -53,9 +53,20 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="tile-body" ng-if="!vm.tileStates[segment.name].editSegment">
-                        <p title="{{segment.description}}" ng-if="segment.description != null">{{segment.description | limitTo: 250 }}{{segment.description.length > 250 ? '&hellip;' : ''}}</p>
-                        <p ng-if="segment.description === null || segment.description === ''"><button class="button link-button" data-ng-click="vm.editSegmentClick($event, segment)">Add description</button></p>
+                    <div class="tile-body wrap-body" ng-if="!vm.tileStates[segment.name].editSegment">
+                        <p 
+                            title="{{segment.description}}" 
+                            ng-if="segment.description">
+                            {{segment.description | limitTo: 250 }}{{segment.description.length > 250 ? '&hellip;' : ''}}
+                        </p>
+                        <p 
+                            ng-if="!segment.description">
+                            <button 
+                                class="button link-button" 
+                                data-ng-click="vm.editSegmentClick($event, segment)">
+                                Add description
+                            </button>
+                        </p>
                     </div>
 
                     <form

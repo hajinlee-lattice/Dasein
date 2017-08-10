@@ -17,12 +17,19 @@ angular.module('lp.models.segments', [
     });
 
 
-    SegmentsList.forEach(function(segment) {
-        vm.tileStates[segment.name] = {
-            showCustomMenu: false,
-            editSegment: false
-        };
-    });
+    vm.init = function($q) {
+        
+        // console.log(vm.segments);
+
+        SegmentsList.forEach(function(segment) {
+            vm.tileStates[segment.name] = {
+                showCustomMenu: false,
+                editSegment: false
+            };
+        });
+
+    }
+    vm.init();
 
     vm.customMenuClick = function ($event, segment) {
 

@@ -33,6 +33,12 @@ This is the tile system used in PD
 }
 .tile-body {
   overflow: hidden;
+  &.wrap-body {
+    overflow: auto;
+    font-size: 16px;
+    word-wrap: break-word;
+    line-height: 1.5;
+  }
 }
 .list-item {
     -webkit-order: 0;
