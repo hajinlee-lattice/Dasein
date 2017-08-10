@@ -117,6 +117,14 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 
+    @JsonProperty("excludeAccountsWithoutSalesforceId")
+    @Column(name = "EXCLUDE_ACCOUNTS_WITHOUT_SFID", nullable = false)
+    private Boolean excludeAccountsWithoutSalesforceId = Boolean.FALSE;
+
+    @JsonProperty("excludeContactsWithoutSalesforceId")
+    @Column(name = "EXCLUDE_CONTACTS_WITHOUT_SFID", nullable = false)
+    private Boolean excludeContactsWithoutSalesforceId = Boolean.FALSE;
+
     @Override
     public Long getPid() {
         return pid;
@@ -243,6 +251,22 @@ public class Play implements HasName, HasPid, HasTenantId {
 
     public void setLaunchHistory(LaunchHistory launchHistory) {
         this.launchHistory = launchHistory;
+    }
+
+    public Boolean getExcludeAccountsWithoutSalesforceId() {
+        return this.excludeAccountsWithoutSalesforceId;
+    }
+
+    public void setExcludeAccountsWithoutSalesforceId(boolean value) {
+        this.excludeAccountsWithoutSalesforceId = value;
+    }
+
+    public Boolean getExcludeContactsWithoutSalesforceId() {
+        return this.excludeContactsWithoutSalesforceId;
+    }
+
+    public void setExcludeContactsWithoutSalesforceId(boolean value) {
+        this.excludeContactsWithoutSalesforceId = value;
     }
 
     @Override

@@ -70,10 +70,14 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(retrievedPlay.getName(), play1.getName());
         Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
         Assert.assertEquals(retrievedPlay.getDisplayName(), DISPLAY_NAME);
+        Assert.assertFalse(retrievedPlay.getExcludeAccountsWithoutSalesforceId());
+        Assert.assertFalse(retrievedPlay.getExcludeContactsWithoutSalesforceId());
 
         retrievedPlay.setDescription(null);
         retrievedPlay.setDisplayName(NEW_DISPLAY_NAME);
         retrievedPlay.setSegmentName(SEGMENT_NAME);
+        retrievedPlay.setExcludeAccountsWithoutSalesforceId(true);
+        retrievedPlay.setExcludeContactsWithoutSalesforceId(true);
         playEntityMgr.createOrUpdatePlay(retrievedPlay);
         retrievedPlay = playEntityMgr.findByName(playName);
         Assert.assertNotNull(retrievedPlay);
@@ -81,6 +85,8 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
         Assert.assertEquals(retrievedPlay.getDisplayName(), NEW_DISPLAY_NAME);
         Assert.assertEquals(retrievedPlay.getSegmentName(), SEGMENT_NAME);
+        Assert.assertTrue(retrievedPlay.getExcludeAccountsWithoutSalesforceId());
+        Assert.assertTrue(retrievedPlay.getExcludeContactsWithoutSalesforceId());
 
         playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);

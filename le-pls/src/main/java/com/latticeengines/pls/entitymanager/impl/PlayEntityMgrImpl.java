@@ -71,6 +71,12 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
         if (play.getSegment() != null) {
             existingPlay.setSegment(play.getSegment());
         }
+        if (play.getExcludeAccountsWithoutSalesforceId() != null) {
+            existingPlay.setExcludeAccountsWithoutSalesforceId(play.getExcludeAccountsWithoutSalesforceId());
+        }
+        if (play.getExcludeContactsWithoutSalesforceId() != null) {
+            existingPlay.setExcludeContactsWithoutSalesforceId(play.getExcludeContactsWithoutSalesforceId());
+        }
     }
 
     @Override
