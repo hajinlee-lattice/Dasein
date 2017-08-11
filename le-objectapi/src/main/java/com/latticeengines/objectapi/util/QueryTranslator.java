@@ -74,16 +74,18 @@ public class QueryTranslator {
 
         Restriction restriction = frontEndRestriction.getRestriction();
 
-        BreadthFirstSearch search = new BreadthFirstSearch();
-        search.run(restriction, (object, ctx) -> {
-            if (object instanceof BucketRestriction) {
-                BucketRestriction bucket = (BucketRestriction) object;
-                ConcreteRestriction concrete = bucket.convert();
-                LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
-                parent.getRestrictions().remove(bucket);
-                parent.getRestrictions().add(concrete);
-            }
-        });
+        if (restriction instanceof LogicalRestriction) {
+            BreadthFirstSearch search = new BreadthFirstSearch();
+            search.run(restriction, (object, ctx) -> {
+                if (object instanceof BucketRestriction) {
+                    BucketRestriction bucket = (BucketRestriction) object;
+                    ConcreteRestriction concrete = bucket.convert();
+                    LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
+                    parent.getRestrictions().remove(bucket);
+                    parent.getRestrictions().add(concrete);
+                }
+            });
+        }
 
         return restriction;
     }
