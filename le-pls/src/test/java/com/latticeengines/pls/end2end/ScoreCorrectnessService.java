@@ -83,6 +83,8 @@ public class ScoreCorrectnessService {
 
     private Set<String> notPredictorFields = new HashSet<>();
 
+    private String[] investigateRecordIds = { "58889695", "53536866" }; // add ids which need to log detailed information
+
     @PostConstruct
     public void init() {
         notPredictorFields.add(InterfaceName.Id.name());
@@ -122,9 +124,10 @@ public class ScoreCorrectnessService {
         Map<String, Map<String, Object>> inputRecords = getInputRecordsFromInputCsv(artifacts, pathToModelInputCsv,
                 expectedScores, fieldsFromScoreApi.getFields());
         Map<String, DebugScoreResponse> scoreResponses = scoreRecords(modelId, inputRecords);
+        Map<String, ComparedRecord> investigateRecords = new HashMap<>();
         Map<String, ComparedRecord> differentRecords = compareExpectedVsScoredRecords(schema, expectedScores,
-                expectedRecords, matchedRecords, scoreResponses);
-        outputResults(scoreResponses.size(), differentRecords);
+                expectedRecords, matchedRecords, scoreResponses, investigateRecords);
+        outputResults(scoreResponses.size(), differentRecords, investigateRecords);
 
         double percentDifference = (double) differentRecords.size() / (double) scoreResponses.size() * 100.0;
         System.out.println("PercentDifference:" + percentDifference);
@@ -138,7 +141,8 @@ public class ScoreCorrectnessService {
         return differentRecords;
     }
 
-    private void outputResults(int totalCompared, Map<String, ComparedRecord> result) {
+    private void outputResults(int totalCompared, Map<String, ComparedRecord> result,
+            Map<String, ComparedRecord> investigateRecords) {
         System.out.println("***** Details of Delta Records *****");
         for (String id : result.keySet()) {
             ComparedRecord compared = result.get(id);
@@ -184,6 +188,16 @@ public class ScoreCorrectnessService {
                     JsonUtils.serialize(compared.getWarnings())));
         }
 
+        if (investigateRecords != null && investigateRecords.size() > 0) {
+            System.out.println("***** Details of Investigate Records *****");
+            for (String id : investigateRecords.keySet()) {
+                ComparedRecord compared = investigateRecords.get(id);
+                System.out.println(String.format("ID:%s Expected:%s ScoreApi:%s Delta:%s", id,
+                        compared.getExpectedScore(), compared.getScoreApiScore(), compared.getScoreDifference()));
+                System.out.println(JsonUtils.serialize(compared));
+            }
+        }
+
         System.out.println("***** Overall Summary *****");
         System.out
                 .println(generateThresholdSummary(totalCompared, result.size(), THRESHOLD, numRecordsWithMatchConflicts,
@@ -213,8 +227,10 @@ public class ScoreCorrectnessService {
 
     private Map<String, ComparedRecord> compareExpectedVsScoredRecords(Map<String, FieldSchema> schema,
             Map<String, Double> expectedScores, Map<String, Map<String, Object>> expectedRecords,
-            Map<String, Map<String, Object>> matchedRecords, Map<String, DebugScoreResponse> scoredResponses) {
+            Map<String, Map<String, Object>> matchedRecords, Map<String, DebugScoreResponse> scoredResponses,
+            Map<String, ComparedRecord> investigateRecords) {
         Map<String, ComparedRecord> deltas = new HashMap<>();
+        Set<String> investigateIds = new HashSet<>(Arrays.asList(investigateRecordIds));
         for (String id : expectedScores.keySet()) {
             DebugScoreResponse response = scoredResponses.get(id);
             if (response == null) {
@@ -222,7 +238,7 @@ public class ScoreCorrectnessService {
                 continue;
             }
             double difference = Math.abs(expectedScores.get(id) - response.getProbability());
-            if (difference > THRESHOLD) {
+            if (difference > THRESHOLD || investigateIds.contains(id)) {
                 Map<String, Object> expectedMatchedRecord = matchedRecords.get(id);
                 Map<String, Object> scoreMatchedRecord = response.getMatchedRecord();
                 log.warn(String.format("Record %s has API score inconsistency; checking individual fields:", id));
@@ -256,7 +272,12 @@ public class ScoreCorrectnessService {
                 comparedRecord.setScoreApiTransformExtraFields(transformDiffs.getMiddle());
                 comparedRecord.setScoreApiTransformMissingFields(transformDiffs.getRight());
 
-                deltas.put(id, comparedRecord);
+                if (difference > THRESHOLD) {
+                    deltas.put(id, comparedRecord);
+                } else {
+                    investigateRecords.put(id, comparedRecord);
+                }
+
             }
         }
 
