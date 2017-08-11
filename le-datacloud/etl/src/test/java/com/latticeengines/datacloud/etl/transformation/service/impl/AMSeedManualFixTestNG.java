@@ -8,8 +8,6 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -26,8 +24,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 
 public class AMSeedManualFixTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-
-    private static final Logger log = LoggerFactory.getLogger(AMSeedManualFixTestNG.class);
 
     GeneralSource source = new GeneralSource("ManualSeedMergedData");
 
@@ -100,7 +96,6 @@ public class AMSeedManualFixTestNG
         conf.setAmSeedDomain("Domain");
         conf.setAmSeedLeIsPrimDom("LE_IS_PRIMARY_DOMAIN");
         conf.setIsPrimaryAccount("IsPrimaryAccount");
-        conf.setDomainSource("DomainSource");
         String[][] fieldsArray = { { "MAN_SEED_EMPLOYEES", "EMPLOYEES_TOTAL" },
                 { "MAN_SEED_SALES", "SALES_VOLUME_US_DOLLARS" }, { "Manual_LE_EMPLOYEE_RANGE", "LE_EMPLOYEE_RANGE" },
                 { "Manual_LE_REVENUE_RANGE", "LE_REVENUE_RANGE" } };
@@ -216,9 +211,9 @@ public class AMSeedManualFixTestNG
                     "Orb" },
             { 15, 11110, null, "DUNS87", 1922222223L, "Y", null, "San Carlos", "N", ">10,000", "1-5B", "DnB" },
             { 3, 6031, "citrix.com", "DUNS36", 3930031100L, "Y", "DUNS11", "Sunnyvale", "N", "5001-10,000", "1-5B",
-                    "RTS", "Manual" },
+                    "RTS" },
             { 12, 8000, "microsoft.com", "DUNS11", 88887203333L, "Y", "DUNS11", "Foster City", "N", "5001-10,000",
-                    ">10B", "RTS", "Manual" },
+                    ">10B", "RTS" },
             { 21, 2600, "sbi.com", "DUNS63", 1000000L, "Y", "DUNS63", "Tahoe", "Y", "2501-5000", "0-1M", "DnB" },
             { 18, 90872, "intel.com", "DUNS56", 18160000000L, "Y", "DUNS14", "Union City", "N", ">10,000", ">10B",
                     "Hg" },
