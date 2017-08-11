@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.commons.collections.Closure;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -156,9 +157,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 } catch (IOException e) {
                     log.error(String.format("Failed to delete extract schema %s", schemaPath), e);
                 }
-                //TODO: delete redshift table
                 try {
-                    redshiftService.dropTable(name);
+                    redshiftService.dropTable(AvroUtils.getAvroFriendlyString(name));
                 } catch (Exception e) {
                     log.error(String.format("Failed to drop table %s from redshift", name), e);
                 }
