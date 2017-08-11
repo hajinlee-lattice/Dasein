@@ -85,9 +85,11 @@ public class QueryTranslator {
                     parent.getRestrictions().add(concrete);
                 }
             });
+            return restriction;
+        } else {
+            BucketRestriction bucket = (BucketRestriction) restriction;
+            return bucket.convert();
         }
-
-        return restriction;
     }
 
     private static Sort translateFrontEndSort(FrontEndSort frontEndSort) {
