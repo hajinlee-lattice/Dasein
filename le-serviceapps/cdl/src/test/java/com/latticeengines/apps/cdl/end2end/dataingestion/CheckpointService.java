@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -244,8 +245,10 @@ public class CheckpointService {
         return statisticsContainer;
     }
 
-    public void cleanup() {
-        FileUtils.deleteQuietly(new File(checkpointDir));
+    void cleanup() {
+        if (StringUtils.isNotBlank(checkpointDir)) {
+            FileUtils.deleteQuietly(new File(checkpointDir));
+        }
     }
 
 }
