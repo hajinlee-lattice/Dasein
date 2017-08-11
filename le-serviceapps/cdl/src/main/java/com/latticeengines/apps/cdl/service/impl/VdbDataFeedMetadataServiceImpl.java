@@ -20,8 +20,10 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -58,26 +60,25 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     private void setAttributeProperty(Attribute attr, VdbSpecMetadata metadata) {
-        attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()));
-        attr.setSourceAttrName(metadata.getColumnName());
-        attr.setDisplayName(metadata.getDisplayName());
-        attr.setSourceLogicalDataType(metadata.getDataType());
-        attr.setPhysicalDataType(metadata.getDataType());
-        attr.setApprovedUsage(metadata.getApprovedUsage());
-        attr.setDescription(metadata.getDescription());
-        attr.setDataSource(metadata.getDataSource());
-        if (!StringUtils.isBlank(metadata.getFundamentalType()) &&
-                !metadata.getFundamentalType().equalsIgnoreCase("Unknown")) {
-            FundamentalType type = FundamentalType.fromName(metadata.getFundamentalType().toUpperCase());
-            attr.setFundamentalType(type);
-        }
-        if (!StringUtils.isBlank(metadata.getStatisticalType())) {
-            attr.setStatisticalType(metadata.getStatisticalType());
-        }
-        attr.setTags(metadata.getTags());
-        attr.setDisplayDiscretizationStrategy(metadata.getDisplayDiscretizationStrategy());
-        if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
-            attr.setDataQuality(metadata.getDataQuality().get(0));
+        try {
+            attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()));
+            attr.setSourceAttrName(metadata.getColumnName());
+            attr.setDisplayName(metadata.getDisplayName());
+            attr.setSourceLogicalDataType(metadata.getDataType());
+            attr.setPhysicalDataType(metadata.getDataType());
+            attr.setApprovedUsage(metadata.getApprovedUsage());
+            attr.setDescription(metadata.getDescription());
+            attr.setDataSource(metadata.getDataSource());
+            attr.setFundamentalType(resolveFundamentalType(metadata));
+            attr.setStatisticalType(resolveStatisticalType(metadata));
+            attr.setTags(metadata.getTags());
+            attr.setDisplayDiscretizationStrategy(metadata.getDisplayDiscretizationStrategy());
+            if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
+                attr.setDataQuality(metadata.getDataQuality().get(0));
+            }
+        } catch (Exception e) {
+            // see the log to add unit test
+            throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.pprint(metadata)), e);
         }
     }
 
@@ -258,4 +259,33 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     public boolean needUpdateDataFeedStatus() {
         return true;
     }
+
+
+    private FundamentalType resolveFundamentalType(VdbSpecMetadata metadata) {
+        String vdbFundamentalType = metadata.getFundamentalType();
+        if (StringUtils.isBlank(vdbFundamentalType) || vdbFundamentalType.equalsIgnoreCase("Unknown")) {
+            return null;
+        }
+        if (vdbFundamentalType.equals("BIT")) {
+            vdbFundamentalType = "boolean";
+        }
+        return FundamentalType.fromName(vdbFundamentalType);
+    }
+
+    private StatisticalType resolveStatisticalType(VdbSpecMetadata metadata) {
+        String vdbStatisticalType = metadata.getStatisticalType();
+        if (StringUtils.isBlank(vdbStatisticalType)) {
+            return null;
+        }
+        try {
+            return StatisticalType.fromName(vdbStatisticalType);
+        } catch (IllegalArgumentException e) {
+            if (metadata.getApprovedUsage().contains(ApprovedUsage.NONE.getName())) {
+                return null;
+            } else {
+                throw e;
+            }
+        }
+    }
+
 }

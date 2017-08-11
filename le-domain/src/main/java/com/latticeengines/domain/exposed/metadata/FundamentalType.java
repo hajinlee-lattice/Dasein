@@ -47,8 +47,8 @@ public enum FundamentalType {
         if (name == null) {
             return null;
         }
-        if (values.contains(name)) {
-            return valueOf(name);
+        if (values.contains(name.toUpperCase())) {
+            return valueOf(name.toUpperCase());
         } else if (nameMap.containsKey(name)) {
             return nameMap.get(name);
         } else {
