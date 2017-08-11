@@ -90,9 +90,6 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                 accExtRec.put(PlaymakerConstants.Contacts,
                         createContacts((String) accExtRec.get(PlaymakerConstants.CompanyName)));
 
-                // TODO - remove this line after release end demo
-                accExtRec.put(PlaymakerConstants.SfdcAccountID, null);
-
                 accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
 
             }
@@ -127,16 +124,40 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
     private String createDummyDomain(String companyName) {
         String dot = ".";
+        int maxDomainLength = 7;
+        String com = "com";
 
         String domain = "";
+
         if (companyName != null) {
             domain = companyName.trim();
+            domain = StringUtils.replace(domain, dot + dot, dot);
+            if (domain.endsWith(dot)) {
+                domain = domain.substring(0, domain.length() - 1);
+            }
             domain = StringUtils.replace(domain, " ", dot);
-            if (!domain.endsWith(dot)) {
+            domain = domain.replaceAll("[^A-Za-z0-9]", dot);
+            domain = StringUtils.replace(domain, " ", dot);
+            if (domain.endsWith(dot + com)) {
+                if (domain.length() > maxDomainLength) {
+                    domain = domain.substring(domain.length() - maxDomainLength, domain.length());
+                }
+                if (domain.startsWith(dot)) {
+                    domain = domain.substring(dot.length());
+                }
+                return domain;
+            } else if (!domain.endsWith(dot)) {
                 domain += dot;
             }
         }
-        return domain + "com";
+        domain = domain + com;
+        if (domain.length() > maxDomainLength) {
+            domain = domain.substring(domain.length() - maxDomainLength, domain.length());
+        }
+        if (domain.startsWith(dot)) {
+            domain = domain.substring(dot.length());
+        }
+        return domain;
     }
 
     @Override
