@@ -44,6 +44,7 @@
                 }
                 &.tp-entry-sort {
                     pointer-events: auto;
+                    margin-top: 6px;
                 }
                 &.tp-created {
                     time {
@@ -85,7 +86,7 @@
                 cursor: pointer;
             }
             .tp-syntax {
-                font-size: 10px;
+                font-size: 11px;
                 float: right;
             }
         }

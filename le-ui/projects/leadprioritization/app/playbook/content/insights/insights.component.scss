@@ -5,35 +5,46 @@
             background-image: url('/assets/images/ico-insights.png');
         }
         p {
+            strong {
+                font-weight: bold;
+            }
             em {
                 color: #d22128;
             }
         }
     }
-    .saved {
-        float: left;
-    }
-    .revert-button {
-        position: relative;
-        text-align: right;
-        margin-bottom: 10px;
-        font-size: 10px;
-        button {
-            font-size: 10px;
-        }
-        .revert-confirm {
-            position: absolute;
-            top: 0;
-            right: 0;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-            background-color: white;
-            padding: 5px;
-            z-index: 7;
-            button {
-                &:first-child {
-                    margin-left: 10px;
+    .talkingpoints-top-controls {
+        @include flex-container;
+        min-height: 42px;
+        & > li {
+            @include flex-item(0 1 auto);
+            &.saved {
+                @include flex-item(1 1 auto);
+            }
+            &.revert {
+                position: relative;
+                margin-bottom: 10px;
+                font-size: 11px;
+                button {
+                    font-size: 11px;
+                    padding: 8px 14px;
+                }
+                .revert-confirm {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    border: 1px solid #ccc;
+                    border-radius: 3px;
+                    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+                    background-color: white;
+                    padding: 8px 14px;
+                    white-space: nowrap;
+                    z-index: 7;
+                    button {
+                        &:first-child {
+                            margin-left: 10px;
+                        }
+                    }
                 }
             }
         }

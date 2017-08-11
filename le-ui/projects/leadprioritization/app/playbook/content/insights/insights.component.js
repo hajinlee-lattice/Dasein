@@ -12,9 +12,8 @@ angular.module('lp.playbook.wizard.insights', [])
         saveOnBlur: CgTalkingPointStore.saveOnBlur,
         stateParams: $stateParams,
         revertClicked: false,
-        saved: false,
-        currentPage: 1,
-        pageSize: 20
+        saving: false,
+        saved: false
     });
 
     $rootScope.$on('talkingPoints:sync', function(e){
@@ -24,16 +23,24 @@ angular.module('lp.playbook.wizard.insights', [])
         });
     });
 
+    var savedTimeout;
+    $rootScope.$on('talkingPoints:saving', function(e){
+        vm.saving = true;
+        vm.saved = false;
+        $timeout.cancel(savedTimeout);
+    });
     $rootScope.$on('talkingPoints:saved', function(e){
+        vm.saving = false;
         vm.saved = true;
-        $timeout(function(){
+        $timeout.cancel(savedTimeout);
+        savedTimeout = $timeout(function(){
+            vm.saving = false;
             vm.saved = false;
         }, 5*1000);
     });
 
     CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
         vm.talkingPoints = talkingPoints;
-        vm.maxPage = vm.talkingPoints.length / vm.pageSize;
     });
 
     var cachedTalkingPoints = angular.copy(TalkingPoints);
@@ -50,8 +57,6 @@ angular.module('lp.playbook.wizard.insights', [])
         talkingPoint.IsNew = true;
         vm.talkingPoints.push(talkingPoint);
         CgTalkingPointStore.setEditedTalkingPoint(talkingPoint);
-        vm.maxPage = vm.talkingPoints.length / vm.pageSize;
-        vm.currentPage = Math.ceil(vm.maxPage);
     };
 
     vm.saveTalkingPoints = function() {
@@ -66,8 +71,6 @@ angular.module('lp.playbook.wizard.insights', [])
         var remove_talkingpoint_name = vm.talkingPoints[pos].name;
         if(vm.talkingPoints[pos].pid) {
             CgTalkingPointStore.deleteTalkingPoint(remove_talkingpoint_name).then(function(response){
-                vm.maxPage = vm.talkingPoints.length / vm.pageSize;
-                vm.currentPage = 1;
             });
         }
         vm.talkingPoints.splice(pos, 1);
@@ -95,7 +98,6 @@ angular.module('lp.playbook.wizard.insights', [])
         CgTalkingPointStore.revertTalkingPoints($stateParams.play_name).then(function(response){
             CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
                 vm.talkingPoints = talkingPoints;
-                vm.maxPage = vm.talkingPoints.length / vm.pageSize;
             });
         });
     }
