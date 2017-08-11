@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.apps.cdl.util.VdbMetadataUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,37 +50,13 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         Table metaTable = new Table();
         for (VdbSpecMetadata metadata : vdbLoadTableConfig.getMetadataList()) {
-            Attribute attr = new Attribute();
-            setAttributeProperty(attr, metadata);
+            Attribute attr = VdbMetadataUtils.convertToAttribute(metadata);
             metaTable.addAttribute(attr);
         }
         metaTable.setPrimaryKey(null);
         metaTable.setName(vdbLoadTableConfig.getTableName());
         metaTable.setDisplayName(vdbLoadTableConfig.getTableName());
         return metaTable;
-    }
-
-    private void setAttributeProperty(Attribute attr, VdbSpecMetadata metadata) {
-        try {
-            attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()));
-            attr.setSourceAttrName(metadata.getColumnName());
-            attr.setDisplayName(metadata.getDisplayName());
-            attr.setSourceLogicalDataType(metadata.getDataType());
-            attr.setPhysicalDataType(metadata.getDataType());
-            attr.setApprovedUsage(metadata.getApprovedUsage());
-            attr.setDescription(metadata.getDescription());
-            attr.setDataSource(metadata.getDataSource());
-            attr.setFundamentalType(resolveFundamentalType(metadata));
-            attr.setStatisticalType(resolveStatisticalType(metadata));
-            attr.setTags(metadata.getTags());
-            attr.setDisplayDiscretizationStrategy(metadata.getDisplayDiscretizationStrategy());
-            if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
-                attr.setDataQuality(metadata.getDataQuality().get(0));
-            }
-        } catch (Exception e) {
-            // see the log to add unit test
-            throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.serialize(metadata)), e);
-        }
     }
 
     @Override
@@ -258,34 +235,6 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     @Override
     public boolean needUpdateDataFeedStatus() {
         return true;
-    }
-
-
-    private FundamentalType resolveFundamentalType(VdbSpecMetadata metadata) {
-        String vdbFundamentalType = metadata.getFundamentalType();
-        if (StringUtils.isBlank(vdbFundamentalType) || vdbFundamentalType.equalsIgnoreCase("Unknown")) {
-            return null;
-        }
-        if (vdbFundamentalType.equalsIgnoreCase("bit")) {
-            vdbFundamentalType = "boolean";
-        }
-        return FundamentalType.fromName(vdbFundamentalType);
-    }
-
-    private StatisticalType resolveStatisticalType(VdbSpecMetadata metadata) {
-        String vdbStatisticalType = metadata.getStatisticalType();
-        if (StringUtils.isBlank(vdbStatisticalType)) {
-            return null;
-        }
-        try {
-            return StatisticalType.fromName(vdbStatisticalType);
-        } catch (IllegalArgumentException e) {
-            if (metadata.getApprovedUsage().contains(ApprovedUsage.NONE.getName())) {
-                return null;
-            } else {
-                throw e;
-            }
-        }
     }
 
 }
