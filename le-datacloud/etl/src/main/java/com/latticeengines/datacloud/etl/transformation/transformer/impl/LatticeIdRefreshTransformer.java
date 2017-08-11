@@ -57,12 +57,12 @@ public class LatticeIdRefreshTransformer
             Source targetTemplate, LatticeIdRefreshConfig config, List<String> baseVersions) {
         parameters.setStrategy(latticeIdStrategyEntityMgr.getStrategyByName(config.getStrategy()));
         if (config.getCurrentCount() == null) {
-            // 0th base source should be source of LatticeId
-            Long currentCount = hdfsSourceEntityMgr.count(baseTemplates[0],
-                    hdfsSourceEntityMgr.getCurrentVersion(baseTemplates[0]));
+            String currentVersion = hdfsSourceEntityMgr.getCurrentVersion(baseTemplates[config.getIdSrcIdx()]);
+            Long currentCount = hdfsSourceEntityMgr.count(baseTemplates[config.getIdSrcIdx()], currentVersion);
             if (currentCount == null) {
-                throw new RuntimeException("Fail to get current count of LatticeId source");
+                throw new RuntimeException("Fail to get current count of ID source");
             }
+            log.info(String.format("ID source @%s count: %d", currentVersion, currentCount));
             parameters.setCurrentCount(currentCount);
         } else {
             parameters.setCurrentCount(config.getCurrentCount());

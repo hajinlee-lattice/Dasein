@@ -55,22 +55,22 @@ public class LatticeIdRefreshFlow
         finalFields.addAll(ids.getFieldNames());
 
         Node joined = ids.join(new FieldList(idsKeys), entity, new FieldList(entityKeys), JoinType.OUTER);
-        Node matched = matched(joined, idsKeys, entityKeys);
-        matched = processMatched(matched, finalFields, strategy);
-        Node onlyIds = onlyIds(joined, idsKeys, entityKeys);
-        onlyIds = processOnlyIds(onlyIds, finalFields, strategy);
-        Node onlyEntity = onlyEntity(joined, idsKeys, entityKeys);
-        onlyEntity = processOnlyEntity(onlyEntity, finalFields, idsKeys, entityKeys, strategy,
+        Node consistentAccounts = findConsistentAccounts(joined, idsKeys, entityKeys);
+        consistentAccounts = processConsistentAccounts(consistentAccounts, finalFields, strategy);
+        Node obsoleteAccounts = findObsoleteAccounts(joined, idsKeys, entityKeys);
+        obsoleteAccounts = processObsoleteAccounts(obsoleteAccounts, finalFields, strategy);
+        Node newAccounts = findNewAccounts(joined, idsKeys, entityKeys);
+        newAccounts = processNewAccounts(newAccounts, finalFields, idsKeys, entityKeys, strategy,
                 parameters.getCurrentCount());
 
-        Node res = matched.merge(onlyIds).merge(onlyEntity);
+        Node res = consistentAccounts.merge(obsoleteAccounts).merge(newAccounts);
 
         if (strategy.isMergeDup()) {
             // TODO: Implement merge duplicate records for CDL use case
         }
 
         if (strategy.getEntity() == LatticeIdStrategy.Entity.ACCOUNT) {
-            res = processObsoleteAccount(res, finalFields, idsKeys, strategy);
+            res = postProcessObsoleteAccounts(res, finalFields, idsKeys, strategy);
         }
 
         return res;
@@ -84,19 +84,33 @@ public class LatticeIdRefreshFlow
      *      If Duns exists, set status to ACTIVE and set redirectedID to duns-only ID.
      *      Otherwise, set status to OBSOLETE
      */
-    private Node processObsoleteAccount(Node node, List<String> finalFields, List<String> idsKeys,
+    private Node postProcessObsoleteAccounts(Node node, List<String> finalFields, List<String> idsKeys,
             LatticeIdStrategy strategy) {
-        Node active = node
-                .filter(String.format("\"%s\".equalsIgnoreCase(%s)", ACTIVE, STATUS_FIELD), new FieldList(STATUS_FIELD))
-                .renamePipe("Active");
-        active = renameColumns(active, "Active_");
         StringBuilder sb = new StringBuilder();
         List<String> fields = new ArrayList<>();
+        fields.addAll(idsKeys);
+        fields.add(STATUS_FIELD);
+
+        for (String notNullKey : idsKeys) {
+            sb.append("(" + notNullKey + " != null ");
+            for (String idsKey : idsKeys) {
+                if (idsKey.equals(notNullKey)) {
+                    continue;
+                }
+                sb.append(" && " + idsKey + " == null");
+            }
+            sb.append(") || ");
+        }
+        Node active = node
+                .filter(String.format("%s && \"%s\".equalsIgnoreCase(%s)", "(" + sb.substring(0, sb.length() - 4) + ")",
+                        ACTIVE, STATUS_FIELD), new FieldList(fields))
+                .renamePipe("Active");
+        active = renameColumns(active, "Active_");
+
+        sb = new StringBuilder();
         for (String idsKey : idsKeys) {
             sb.append(idsKey + " != null && ");
-            fields.add(idsKey);
         }
-        fields.add(STATUS_FIELD);
         Node obsolete = node
                 .filter(String.format("%s \"%s\".equalsIgnoreCase(%s)", sb.toString(), OBSOLETE, STATUS_FIELD),
                         new FieldList(fields))
@@ -139,7 +153,7 @@ public class LatticeIdRefreshFlow
         return node;
     }
 
-    private Node processMatched(Node node, List<String> finalFields, LatticeIdStrategy strategy) {
+    private Node processConsistentAccounts(Node node, List<String> finalFields, LatticeIdStrategy strategy) {
         node = node.retain(new FieldList(finalFields));
         node = node.apply(
                 new LatticeIdUpdateFuction(
@@ -150,7 +164,7 @@ public class LatticeIdRefreshFlow
         return node;
     }
 
-    private Node processOnlyIds(Node node, List<String> finalFields, LatticeIdStrategy strategy) {
+    private Node processObsoleteAccounts(Node node, List<String> finalFields, LatticeIdStrategy strategy) {
         node = node.retain(new FieldList(finalFields));
         if (strategy.isCheckObsolete()) {
             node = node.apply(
@@ -163,7 +177,7 @@ public class LatticeIdRefreshFlow
         return node;
     }
 
-    private Node processOnlyEntity(Node node, List<String> finalFields, List<String> idsKeys, List<String> entityKeys,
+    private Node processNewAccounts(Node node, List<String> finalFields, List<String> idsKeys, List<String> entityKeys,
             LatticeIdStrategy strategy, Long currentCount) {
         String newId = "_NEW_" + strategy.getIdName();
         switch (strategy.getIdType()) {
@@ -194,7 +208,7 @@ public class LatticeIdRefreshFlow
         return node;
     }
 
-    private Node matched(Node joined, List<String> idsKeys, List<String> entityKeys) {
+    private Node findConsistentAccounts(Node joined, List<String> idsKeys, List<String> entityKeys) {
         StringBuilder sb = new StringBuilder();
         sb.append("(");
         for (String idsKey : idsKeys) {
@@ -210,11 +224,11 @@ public class LatticeIdRefreshFlow
         List<String> filterFields = new ArrayList<>();
         filterFields.addAll(idsKeys);
         filterFields.addAll(entityKeys);
-        log.info("Filter expression to find matched accounts: " + sb.toString());
+        log.info("Filter expression to find consistent accounts: " + sb.toString());
         return joined.filter(sb.toString(), new FieldList(filterFields));
     }
 
-    private Node onlyIds(Node joined, List<String> idsKeys, List<String> entityKeys) {
+    private Node findObsoleteAccounts(Node joined, List<String> idsKeys, List<String> entityKeys) {
         StringBuilder sb = new StringBuilder();
         sb.append("(");
         for (String idsKey : idsKeys) {
@@ -230,11 +244,11 @@ public class LatticeIdRefreshFlow
         List<String> filterFields = new ArrayList<>();
         filterFields.addAll(idsKeys);
         filterFields.addAll(entityKeys);
-        log.info("Filter expression to find accounts from LatticeId source: " + sb.toString());
+        log.info("Filter expression to find obsolete accounts: " + sb.toString());
         return joined.filter(sb.toString(), new FieldList(filterFields));
     }
 
-    private Node onlyEntity(Node joined, List<String> idsKeys, List<String> entityKeys) {
+    private Node findNewAccounts(Node joined, List<String> idsKeys, List<String> entityKeys) {
         StringBuilder sb = new StringBuilder();
         sb.append("(");
         for (String idsKey : idsKeys) {
@@ -250,7 +264,7 @@ public class LatticeIdRefreshFlow
         List<String> filterFields = new ArrayList<>();
         filterFields.addAll(idsKeys);
         filterFields.addAll(entityKeys);
-        log.info("Filter expression to find accounts from entity source: " + sb.toString());
+        log.info("Filter expression to find new Accounts: " + sb.toString());
         return joined.filter(sb.toString(), new FieldList(filterFields));
     }
 

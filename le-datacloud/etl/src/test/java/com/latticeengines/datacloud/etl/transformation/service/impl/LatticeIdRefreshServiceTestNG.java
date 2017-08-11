@@ -32,15 +32,17 @@ public class LatticeIdRefreshServiceTestNG
     private static final Logger log = LoggerFactory.getLogger(LatticeIdRefreshServiceTestNG.class);
 
     private GeneralSource source = new GeneralSource("AccountMasterId");
-
     private GeneralSource amsInit = new GeneralSource("AccountMasterSeedInit");
-
     private GeneralSource amsRefresh = new GeneralSource("AccountMasterSeedRefresh");
 
     private static final String STRATEGY = "AccountMasterSeedRebuild";
 
+    private static final String AMID_VERSION_EMPTY = "2017-06-01_00-00-00_UTC";
+    private static final String AMID_VERSION_INIT = "2017-07-01_00-00-00_UTC";
+
     @Test(groups = "pipeline1")
     public void testTransformation() {
+        prepareAMIDEmpty();
         prepareAMSeedInit();
         prepareAMSeedRefresh();
         TransformationProgress progress = createNewProgress();
@@ -62,6 +64,8 @@ public class LatticeIdRefreshServiceTestNG
             baseSources.add(source.getSourceName());
             baseSources.add(amsInit.getSourceName());
             step1.setBaseSources(baseSources);
+            step1.setTargetSource(source.getSourceName());
+            step1.setTargetVersion(AMID_VERSION_INIT);
             step1.setTransformer(LatticeIdRefreshTransformer.TRANSFORMER_NAME);
             String confParamStr1 = getTransformerConfigForInit();
             step1.setConfiguration(confParamStr1);
@@ -103,7 +107,6 @@ public class LatticeIdRefreshServiceTestNG
     private String getTransformerConfigForRefresh() throws JsonProcessingException {
         LatticeIdRefreshConfig config = new LatticeIdRefreshConfig();
         config.setStrategy(STRATEGY);
-        config.setCurrentCount(16L);
         config.setIdSrcIdx(0);
         config.setEntitySrcIdx(1);
         return JsonUtils.serialize(config);
@@ -131,6 +134,18 @@ public class LatticeIdRefreshServiceTestNG
         return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
+    private void prepareAMIDEmpty() {
+        Object[][] data = new Object[0][0];
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        columns.add(Pair.of("Domain", String.class));
+        columns.add(Pair.of("DUNS", String.class));
+        columns.add(Pair.of("LatticeID", Long.class));
+        columns.add(Pair.of("RedirectFromId", Long.class));
+        columns.add(Pair.of("Status", String.class));
+        columns.add(Pair.of("LE_Last_Update_Date", Long.class));
+        uploadBaseSourceData(source.getSourceName(), AMID_VERSION_EMPTY, columns, data);
+    }
+
     private Object[][] amsInitData = new Object[][] { //
             { "dom1.com", "DUNS1" }, // Not refreshed
             { "dom1.com", "DUNS2" }, // Not refreshed
@@ -151,6 +166,7 @@ public class LatticeIdRefreshServiceTestNG
             { "dom1111.com", "DUNS1111" }, // Redirected
             { "dom2222.com", "DUNS2222" }, // Redirected
             { "dom3333.com", "DUNS3333" }, // Redirected
+            { "dom11111.com", "DUNS11111" }, // Obsolete
     };
 
     private void prepareAMSeedInit() {
@@ -181,6 +197,8 @@ public class LatticeIdRefreshServiceTestNG
             { null, "DUNS1111" }, // New
             { "dom2222.com", null }, // New
             { null, "DUNS3333" }, // New
+            { "dom11111.comNew", "DUNS11111" }, // New
+            { "dom11111.com", "DUNS11111New" }, // New
     };
 
     private void prepareAMSeedRefresh() {
@@ -225,6 +243,9 @@ public class LatticeIdRefreshServiceTestNG
                 { null, "DUNS1111", "ACTIVE" }, //
                 { "dom2222.com", null, "ACTIVE" }, //
                 { null, "DUNS3333", "ACTIVE" }, //
+                { "dom11111.com", "DUNS11111", "OBSOLETE" }, //
+                { "dom11111.com", "DUNS11111New", "ACTIVE" }, //
+                { "dom11111.comNew", "DUNS11111", "ACTIVE" }, //
         };
         Map<String, String> expected = new HashMap<>();
         for (Object[] data : expectedData) {
@@ -254,7 +275,7 @@ public class LatticeIdRefreshServiceTestNG
             }
             rowNum++;
         }
-        Assert.assertEquals(31L, rowNum);
+        Assert.assertEquals(34L, rowNum);
     }
 
 }
