@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import cascading.tuple.Fields;
 
 @Component(AMSeedManualFixFlow.DATAFLOW_BEAN_NAME)
-public class AMSeedManualFixFlow extends ConfigurableFlowBase<ManualSeedTransformerConfig> {
+public class AMSeedManualFixFlow extends AccountMasterBase<ManualSeedTransformerConfig> {
 
     public final static String DATAFLOW_BEAN_NAME = "AMSeedManualFixFlow";
     public final static String TRANSFORMER_NAME = "AMSeedManualFixTransformer";
@@ -179,7 +179,7 @@ public class AMSeedManualFixFlow extends ConfigurableFlowBase<ManualSeedTransfor
         // call aggregator
         ManualDomainEnrichAggregator aggregator = new ManualDomainEnrichAggregator(
                 new Fields(enrichDomain.getFieldNamesArray()), config.getManualSeedDomain(), config.getAmSeedDomain(),
-                config.getAmSeedLeIsPrimDom());
+                config.getAmSeedLeIsPrimDom(), DOMAIN_SOURCE);
 
         // list of domains to be added
         enrichDomain = enrichDomain //

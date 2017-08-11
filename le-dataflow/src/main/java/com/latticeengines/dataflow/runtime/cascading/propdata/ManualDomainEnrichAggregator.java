@@ -16,7 +16,9 @@ public class ManualDomainEnrichAggregator extends BaseAggregator<ManualDomainEnr
     private String manSeedDomain;
     private String amSeedDomain;
     private int domainLoc;
+    private int domainSourceLoc;
     private String isPrimaryDomain;
+    private final static String MANUAL_DOMAIN_SOURCE = "Manual";
 
     public static class Context extends BaseAggregator.Context {
         Set<String> manSeedDomainSet = new HashSet<String>();
@@ -25,12 +27,13 @@ public class ManualDomainEnrichAggregator extends BaseAggregator<ManualDomainEnr
     }
 
     public ManualDomainEnrichAggregator(Fields fieldDeclaration, String manSeedDomain,
-            String amSeedDomain, String isPrimaryDomain) {
+            String amSeedDomain, String isPrimaryDomain, String domainSource) {
         super(fieldDeclaration);
         this.manSeedDomain = manSeedDomain;
         this.amSeedDomain = amSeedDomain;
         this.isPrimaryDomain = isPrimaryDomain;
         this.domainLoc = namePositionMap.get(amSeedDomain);
+        this.domainSourceLoc = namePositionMap.get(domainSource);
     }
 
     @Override
@@ -77,6 +80,7 @@ public class ManualDomainEnrichAggregator extends BaseAggregator<ManualDomainEnr
                 // setting flag to indicate new domain was found
                 checkFlag = true;
                 context.result.set(domainLoc, obj);
+                context.result.set(domainSourceLoc, MANUAL_DOMAIN_SOURCE);
             }
         }
         if (checkFlag == false) {

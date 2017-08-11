@@ -8,6 +8,9 @@ public class ManualSeedTransformerConfig extends TransformerConfig {
     @JsonProperty("OverwriteFields")
     private String[][] overwriteFields;
 
+    @JsonProperty("DomainSource")
+    private String domainSource;
+
     @JsonProperty("FixTreeFlag")
     private String fixTreeFlag;
 
@@ -102,6 +105,14 @@ public class ManualSeedTransformerConfig extends TransformerConfig {
 
     public void setOverwriteFieldsArray(String[][] overwriteFields) {
         this.overwriteFields = overwriteFields;
+    }
+
+    public String getDomainSource() {
+        return domainSource;
+    }
+
+    public void setDomainSource(String domainSource) {
+        this.domainSource = domainSource;
     }
 
 }
