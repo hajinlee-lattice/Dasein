@@ -7,9 +7,9 @@ import java.security.NoSuchAlgorithmException;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -39,6 +39,9 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     protected WorkflowProxy workflowProxy;
 
     protected Tenant mainTestTenant;
+
+    @Value("${common.test.pls.url}")
+    protected String deployedHostPort;
 
     protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
         SSLUtils.turnOffSSL();

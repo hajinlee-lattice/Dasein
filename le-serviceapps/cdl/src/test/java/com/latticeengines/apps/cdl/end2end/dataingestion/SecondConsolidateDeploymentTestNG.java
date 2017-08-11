@@ -31,7 +31,8 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         exportEntityToRedshift(BusinessEntity.Account);
         exportEntityToRedshift(BusinessEntity.Contact);
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
-        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
+        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact),
+        // CONTACT_IMPORT_SIZE_1);
 
         preConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());
 
@@ -53,6 +54,7 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         ApplicationId appId = cdlProxy.consolidate(mainTestTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifyReport(appId.toString(), 2, ACCOUNT_IMPORT_SIZE_2);
     }
 
     private void verifyConsolidate() {
@@ -64,7 +66,8 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
         Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
+        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact),
+        // numContacts);
 
         StatisticsContainer postConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertEquals(preConsolidateStats.getName(), postConsolidateStats.getName());

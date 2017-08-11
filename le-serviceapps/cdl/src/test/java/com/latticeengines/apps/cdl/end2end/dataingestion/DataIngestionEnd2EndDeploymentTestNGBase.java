@@ -1,15 +1,16 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -31,10 +32,12 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -55,6 +58,8 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
@@ -166,30 +171,30 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                     .getResourceAsStream("end2end/Account.avsc");
             String schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
             switch (entity) {
-                case Contact:
-                    schemaStr = schemaStr.replace("\"Id\"", "\"" + InterfaceName.LEContactIDLong.name() + "\"");
-                    schemaStr = schemaStr.replace("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
-                    break;
-                case Account:
-                default:
+            case Contact:
+                schemaStr = schemaStr.replace("\"Id\"", "\"" + InterfaceName.LEContactIDLong.name() + "\"");
+                schemaStr = schemaStr.replace("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
+                break;
+            case Account:
+            default:
             }
 
             schema = new Schema.Parser().parse(schemaStr);
             switch (entity) {
-                case Contact:
-                    boolean hasLEContactIDLong = schema.getFields().stream().map(Schema.Field::name)
-                            .anyMatch(n -> InterfaceName.LEContactIDLong.name().equals(n));
-                    boolean hasAccountId = schema.getFields().stream().map(Schema.Field::name)
-                            .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
-                    Assert.assertTrue(hasLEContactIDLong);
-                    Assert.assertTrue(hasAccountId);
-                    break;
-                case Account:
-                    boolean hasLEAccountIDLong = schema.getFields().stream().map(Schema.Field::name)
-                            .anyMatch(n -> InterfaceName.LEAccountIDLong.name().equals(n));
-                    Assert.assertTrue(hasLEAccountIDLong);
-                    break;
-                default:
+            case Contact:
+                boolean hasLEContactIDLong = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.LEContactIDLong.name().equals(n));
+                boolean hasAccountId = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
+                Assert.assertTrue(hasLEContactIDLong);
+                Assert.assertTrue(hasAccountId);
+                break;
+            case Account:
+                boolean hasLEAccountIDLong = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.LEAccountIDLong.name().equals(n));
+                Assert.assertTrue(hasLEAccountIDLong);
+                break;
+            default:
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to prepare avro schema for " + entity);
@@ -203,8 +208,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-" + entity + "/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
                 SourceType.VISIDB.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(new Date()));
-        InputStream dataIs = Thread.currentThread().getContextClassLoader()
-                .getResourceAsStream("end2end/Account.avro");
+        InputStream dataIs = Thread.currentThread().getContextClassLoader().getResourceAsStream("end2end/Account.avro");
         try {
             List<GenericRecord> records = AvroUtils.readFromInputStream(dataIs);
             AvroUtils.writeToHdfsFile(yarnConfiguration, schema, targetPath + "/part-00000.avro",
@@ -281,7 +285,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     // Copied from ExportDataToRedshift
     private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,
-                                                  TableRoleInCollection tableRole) {
+            TableRoleInCollection tableRole) {
         HdfsToRedshiftConfiguration exportConfig = new HdfsToRedshiftConfiguration();
         exportConfig.setExportFormat(ExportFormat.AVRO);
         exportConfig.setCleanupS3(true);
@@ -314,6 +318,28 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
 
         return exportConfig;
+    }
+
+    protected Report retrieveReport(String appId) {
+        Job job = testBed.getRestTemplate().getForObject( //
+                String.format("%s/pls/jobs/yarnapps/%s", deployedHostPort, appId), //
+                Job.class);
+        assertNotNull(job);
+        List<Report> reports = job.getReports();
+        assertEquals(reports.size(), 1);
+        return reports.get(0);
+    }
+
+    protected void verifyReport(String appId, int reportSize, int count) {
+        Report report = retrieveReport(appId);
+        Map<String, Integer> map = JsonUtils.deserialize(report.getJson().getPayload(),
+                new TypeReference<Map<String, Integer>>() {
+                });
+        assertEquals(map.entrySet().size(), reportSize);
+        if (reportSize != 0) {
+            assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).intValue(), count);
+            assertEquals(map.get(TableRoleInCollection.SortedContact.name()).intValue(), count);
+        }
     }
 
 }
