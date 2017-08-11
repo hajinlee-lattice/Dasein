@@ -1,11 +1,17 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
+import java.util.Set;
+
 
 public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     private String srcIdField;
     private String masterIdField;
 
+    private boolean createTimestampColumn;
+    
+    private Set<String> columnsFromRight;
+    
     public String getSrcIdField() {
         return srcIdField;
     }
@@ -21,4 +27,22 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
     public void setMasterIdField(String masterIdField) {
         this.masterIdField = masterIdField;
     }
+
+    public boolean isCreateTimestampColumn() {
+        return createTimestampColumn;
+    }
+
+    public void setCreateTimestampColumn(boolean createTimestampColumn) {
+        this.createTimestampColumn = createTimestampColumn;
+    }
+
+    public Set<String> getColumnsFromRight() {
+        return columnsFromRight;
+    }
+
+    public void setColumnsFromRight(Set<String> columnsFromRight) {
+        this.columnsFromRight = columnsFromRight;
+    }
+    
+    
 }

@@ -11,6 +11,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends ConfigurableFlowBase<T> {
+    public static String CREATE_DATE = "CREATION_DATE";
+    public static String UPDATE_DATE = "UPDATE_DATE";
 
     protected String processIdColumns(TransformationFlowParameters parameters, ConsolidateDataTransformerConfig config,
             List<Node> sources, List<Table> sourceTables, List<String> sourceNames) {
@@ -34,5 +36,19 @@ public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends C
                 sourceNames.add(sourceName);
         }
         return masterId;
+    }
+
+    protected void createTimestampColumns(ConsolidateDataTransformerConfig config, List<Node> sources) {
+        long currentTime = System.currentTimeMillis() / 1000;
+        for (int i = 0; i < sources.size(); i++) {
+            Node source = sources.get(i);
+            if (!source.getFieldNames().contains(CREATE_DATE)) {
+                source = source.addColumnWithFixedValue(CREATE_DATE, currentTime, Long.class);
+            }
+            if (!source.getFieldNames().contains(UPDATE_DATE)) {
+                source = source.addColumnWithFixedValue(UPDATE_DATE, currentTime, Long.class);
+            }
+            sources.set(i, source);
+        }
     }
 }

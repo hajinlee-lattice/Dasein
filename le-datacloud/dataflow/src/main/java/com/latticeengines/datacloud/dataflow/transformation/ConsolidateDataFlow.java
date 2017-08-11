@@ -33,6 +33,9 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         List<Table> sourceTables = new ArrayList<>();
         List<String> sourceNames = new ArrayList<>();
         String masterId = processIdColumns(parameters, config, sources, sourceTables, sourceNames);
+        if (config.isCreateTimestampColumn()) {
+            createTimestampColumns(config, sources);
+        }
         if (sources.size() <= 1) {
             return sources.get(0);
         }
@@ -50,7 +53,8 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
                 groupFieldLists.subList(1, groupFieldLists.size()), JoinType.OUTER);
 
         List<String> allFieldNames = result.getFieldNames();
-        Function<?> function = new ConsolidateDataFuction(allFieldNames, commonFields, dupeFieldMap);
+        Function<?> function = new ConsolidateDataFuction(allFieldNames, commonFields, dupeFieldMap,
+                config.getColumnsFromRight());
         result = result.apply(function, new FieldList(allFieldNames), getMetadata(result.getIdentifier()),
                 new FieldList(allFieldNames), Fields.REPLACE);
 

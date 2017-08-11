@@ -19,14 +19,16 @@ public class ConsolidateDataFuction extends BaseOperation implements Function {
     private List<String> allFieldNames;
     private Set<String> commonFields;
     private Map<String, Map<String, String>> dupeFieldMap;
+    private Set<String> columnsFromRight;
 
     public ConsolidateDataFuction(List<String> allFieldNames, Set<String> commonFields,
-            Map<String, Map<String, String>> dupeFieldMap) {
+            Map<String, Map<String, String>> dupeFieldMap, Set<String> columnsFromRight) {
         super(new Fields(allFieldNames.toArray(new String[0])));
         this.allFieldNames = allFieldNames;
         this.commonFields = commonFields;
         this.namePositionMap = getPositionMap(allFieldNames);
         this.dupeFieldMap = dupeFieldMap;
+        this.columnsFromRight = columnsFromRight;
     }
 
     @Override
@@ -45,6 +47,29 @@ public class ConsolidateDataFuction extends BaseOperation implements Function {
     }
 
     private Object chooseDupeFieldValue(String fieldName, TupleEntry arguments, Integer fieldLoc) {
+        if (columnsFromRight != null && columnsFromRight.contains(fieldName)) {
+            return getValueFromRight(fieldName, arguments, fieldLoc);
+        } else {
+            return getValueFromLeft(fieldName, arguments, fieldLoc);
+        }
+    }
+
+    private Object getValueFromRight(String fieldName, TupleEntry arguments, Integer fieldLoc) {
+        Object value = arguments.getObject(fieldLoc);
+        for (Map.Entry<String, Map<String, String>> entry : dupeFieldMap.entrySet()) {
+            Map<String, String> dupeFieldMapPerTable = entry.getValue();
+            if (dupeFieldMapPerTable.containsKey(fieldName)) {
+                String dupeFieldName = dupeFieldMapPerTable.get(fieldName);
+                Object newValue = arguments.getObject(namePositionMap.get(dupeFieldName));
+                if (newValue != null) {
+                    value = newValue;
+                }
+            }
+        }
+        return value;
+    }
+
+    private Object getValueFromLeft(String fieldName, TupleEntry arguments, Integer fieldLoc) {
         Object value = arguments.getObject(fieldLoc);
         if (value != null) {
             return value;

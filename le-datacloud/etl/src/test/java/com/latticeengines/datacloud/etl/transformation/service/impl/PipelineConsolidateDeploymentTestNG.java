@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +105,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     private void verifyDeltaTable() {
         targetTableSource = convertTargetTableSource(deltaTableName);
         String deltaTableFullName = TableSource.getFullTableName(deltaTableName, targetVersion);
-        verifyRegisteredTable(deltaTableFullName, 6);
+        verifyRegisteredTable(deltaTableFullName, 8);
     }
 
     private void verifyMergedTable() {
@@ -213,18 +214,18 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
             step2.setInputSteps(Collections.singletonList(0));
             step2.setTransformer("consolidateDeltaNewTransformer");
             step2.setConfiguration(getConsolidateDeltaConfig());
-            
+
             targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
             targetTable.setNamePrefix(deltaNewTableName);
             step2.setTargetTable(targetTable);
-            
+
             /* Step 3: Match */
             TransformationStepConfig step3 = new TransformationStepConfig();
             step3.setInputSteps(Collections.singletonList(1));
             step3.setTransformer("bulkMatchTransformer");
             step3.setConfiguration(getMatchConfig());
-            
+
             /* Step 4: Upsert to Master table */
             TransformationStepConfig step4 = new TransformationStepConfig();
             if (masterTable != null) {
@@ -238,7 +239,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
             // step 2 output
             step4.setInputSteps(Arrays.asList(0, 2));
             step4.setTransformer("consolidateDataTransformer");
-            step4.setConfiguration(getConsolidateDataConfig());
+            step4.setConfiguration(getConsolidateDataMasterConfig());
 
             targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
@@ -272,6 +273,15 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField("ID");
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        return JsonUtils.serialize(config);
+    }
+
+    private String getConsolidateDataMasterConfig() {
+        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
+        config.setSrcIdField("ID");
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        config.setCreateTimestampColumn(true);
+        config.setColumnsFromRight(new HashSet<String>(Arrays.asList("CREATION_DATE")));
         return JsonUtils.serialize(config);
     }
 
@@ -335,6 +345,8 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         Assert.assertEquals(record.get("FirstName").toString(), "John");
         Assert.assertEquals(record.get("LastName"), null);
         Assert.assertEquals(record.get("LatticeAccountId").toString(), "320001703404");
+        Assert.assertNotNull(record.get("CREATION_DATE"));
+        Assert.assertNotNull(record.get("UPDATE_DATE"));
 
         record = recordMap.get("2");
         Assert.assertEquals(record.get("Domain").toString(), "oracle.com");

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -159,7 +160,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         setupMasterTable(step4);
         step4.setInputSteps(Arrays.asList(mergeStep, matchStep));
         step4.setTransformer("consolidateDataTransformer");
-        step4.setConfiguration(getConsolidateDataConfig());
+        step4.setConfiguration(getConsolidateDataMasterConfig());
 
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -252,6 +253,15 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        return appendEngineConf(config, lightEngineConfig());
+    }
+
+    private String getConsolidateDataMasterConfig() {
+        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
+        config.setSrcIdField(srcIdField);
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        config.setCreateTimestampColumn(true);
+        config.setColumnsFromRight(new HashSet<String>(Arrays.asList("CREATION_DATE")));
         return appendEngineConf(config, lightEngineConfig());
     }
 
