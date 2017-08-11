@@ -266,7 +266,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         if (StringUtils.isBlank(vdbFundamentalType) || vdbFundamentalType.equalsIgnoreCase("Unknown")) {
             return null;
         }
-        if (vdbFundamentalType.equals("BIT")) {
+        if (vdbFundamentalType.equalsIgnoreCase("bit")) {
             vdbFundamentalType = "boolean";
         }
         return FundamentalType.fromName(vdbFundamentalType);
