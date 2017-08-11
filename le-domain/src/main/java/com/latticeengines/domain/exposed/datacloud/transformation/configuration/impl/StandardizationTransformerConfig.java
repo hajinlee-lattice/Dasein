@@ -103,8 +103,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("DunsFields")
     private String[] dunsFields;
 
+    @JsonProperty("IDFields")
+    private String[] idFields;
+
+    @JsonProperty("IDStrategies")
+    private IDStrategy[] idStrategies;
+
     public enum StandardizationStrategy {
-        DOMAIN, DUNS, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
+        ADD_ID, DOMAIN, DUNS, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
     }
 
     public enum FieldType {
@@ -117,6 +123,10 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public enum ConsolidateRangeStrategy {
         MAP_RANGE, MAP_VALUE
+    }
+
+    public enum IDStrategy {
+        ROWID, UUID
     }
 
     public String[] getDomainFields() {
@@ -382,7 +392,21 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     public void setDiscardFields(String[] discardFields) {
         this.discardFields = discardFields;
     }
-    
-    
+
+    public String[] getIdFields() {
+        return idFields;
+    }
+
+    public void setIdFields(String[] idFields) {
+        this.idFields = idFields;
+    }
+
+    public IDStrategy[] getIdStrategies() {
+        return idStrategies;
+    }
+
+    public void setIdStrategies(IDStrategy[] idStrategies) {
+        this.idStrategies = idStrategies;
+    }
 
 }

@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.IDStrategy;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
@@ -119,14 +120,35 @@ public class SourceStandardizationFlow
             case DISCARD:
                 source = discard(source, parameters.getDiscardFields());
                 break;
-            default:
+            case ADD_ID:
+                source = addId(source, parameters.getIdFields(), parameters.getIdStrategies());
                 break;
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("Standardization strategy %s is not supported", strategy.name()));
             }
         }
 
         return source;
     }
     
+    private Node addId(Node source, String[] idFields, IDStrategy[] idStrategies) {
+        for (int i = 0; i < idFields.length; i++) {
+            switch (idStrategies[i]) {
+            case ROWID:
+                source = source.addRowID(new FieldMetadata(idFields[i], Long.class));
+                break;
+            case UUID:
+                source = source.addUUID(idFields[i]);
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        String.format("ID strategy %s is not supported", idStrategies[i].name()));
+            }
+        }
+        return source;
+    }
+
     private Node discard(Node source, String[] discardFields) {
         if (discardFields != null && discardFields.length != 0) {
             source = source.discard(new FieldList(discardFields));

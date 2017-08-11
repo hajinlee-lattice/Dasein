@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateIndustryStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.ConsolidateRangeStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.FieldType;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.IDStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 
 public class StandardizationFlowParameter extends TransformationFlowParameters {
@@ -107,6 +108,12 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     @JsonProperty("DunsFields")
     private String[] dunsFields;
+
+    @JsonProperty("IDFields")
+    private String[] idFields;
+
+    @JsonProperty("IDStrategies")
+    private IDStrategy[] idStrategies;
 
     @JsonProperty("StandardCountries")
     private Map<String, String> standardCountries;
@@ -381,6 +388,22 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setDiscardFields(String[] discardFields) {
         this.discardFields = discardFields;
+    }
+
+    public String[] getIdFields() {
+        return idFields;
+    }
+
+    public void setIdFields(String[] idFields) {
+        this.idFields = idFields;
+    }
+
+    public IDStrategy[] getIdStrategies() {
+        return idStrategies;
+    }
+
+    public void setIdStrategies(IDStrategy[] idStrategies) {
+        this.idStrategies = idStrategies;
     }
 
 }

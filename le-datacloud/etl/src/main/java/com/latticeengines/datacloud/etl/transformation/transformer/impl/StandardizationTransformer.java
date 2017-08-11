@@ -314,6 +314,27 @@ public class StandardizationTransformer
                     }
                 }
                 break;
+            case ADD_ID:
+                if (config.getIdFields() == null || config.getIdFields().length == 0 || config.getIdStrategies() == null
+                        || config.getIdStrategies().length == 0) {
+                    log.error("ID fields and ID strategies cannot be empty");
+                    return false;
+                }
+                if (config.getIdFields().length != config.getIdFields().length) {
+                    log.error("ID fields and ID strategies are not equal in size");
+                    return false;
+                }
+                for (int i = 0; i < config.getIdFields().length; i++) {
+                    if (StringUtils.isBlank(config.getIdFields()[i])) {
+                        log.error(String.format("%dth ID field is empty", i));
+                        return false;
+                    }
+                    if (config.getIdStrategies()[i] == null) {
+                        log.error(String.format("%dth ID strategy field is empty", i));
+                        return false;
+                    }
+                }
+                break;
             default:
                 log.error(String.format("Standardization strategy %s is not supported", strategy.name()));
                 return false;
@@ -369,6 +390,8 @@ public class StandardizationTransformer
         parameters.setRangeMapFileNames(config.getRangeMapFileNames());
         parameters.setDiscardFields(config.getDiscardFields());
         parameters.setDunsFields(config.getDunsFields());
+        parameters.setIdFields(config.getIdFields());
+        parameters.setIdStrategies(config.getIdStrategies());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 

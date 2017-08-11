@@ -2,9 +2,11 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,6 +24,7 @@ import com.latticeengines.datacloud.etl.transformation.service.TransformationSer
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.IDStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
@@ -84,8 +87,13 @@ public class LocationStandardizationServiceTestNG
         conf.setStringFields(zipcodeFields);
         String[] dunsFields = { "DUNS" };
         conf.setDunsFields(dunsFields);
+        String[] idFields = {"RowId", "UUID"};
+        conf.setIdFields(idFields);
+        IDStrategy[] idStrategies = { IDStrategy.ROWID, IDStrategy.UUID };
+        conf.setIdStrategies(idStrategies);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.COUNTRY,
-                StandardizationStrategy.STATE, StandardizationStrategy.STRING, StandardizationStrategy.DUNS };
+                StandardizationStrategy.STATE, StandardizationStrategy.STRING, StandardizationStrategy.DUNS,
+                StandardizationStrategy.ADD_ID };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
     }
@@ -145,6 +153,8 @@ public class LocationStandardizationServiceTestNG
             expectedMap.put((Integer) data[0], data);
         }
         int rowNum = 0;
+        Set<Long> rowIdSet = new HashSet<>();
+        Set<String> uuidSet = new HashSet<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
@@ -154,6 +164,10 @@ public class LocationStandardizationServiceTestNG
             Assert.assertTrue(equals(record.get("State"), expectedResult[3]));
             Assert.assertTrue(equals(record.get("ZipCode"), expectedResult[4]));
             Assert.assertTrue(equals(record.get("DUNS"), expectedResult[5]));
+            Assert.assertFalse(rowIdSet.contains((Long) record.get("RowId")));
+            rowIdSet.add((Long) record.get("RowId"));
+            Assert.assertFalse(uuidSet.contains(record.get("UUID").toString()));
+            uuidSet.add(record.get("UUID").toString());
             rowNum++;
         }
         Assert.assertEquals(rowNum, 4);
