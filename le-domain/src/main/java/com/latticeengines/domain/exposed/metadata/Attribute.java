@@ -24,10 +24,10 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
@@ -520,7 +520,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setStatisticalType(StatisticalType statisticalType) {
-        properties.put("StatisticalType", statisticalType.getName());
+        if (statisticalType != null) {
+            properties.put("StatisticalType", statisticalType.getName());
+        }
     }
 
     @Transient
@@ -541,7 +543,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setFundamentalType(FundamentalType fundamentalType) {
-        properties.put("FundamentalType", fundamentalType.getName());
+        if (fundamentalType != null) {
+            properties.put("FundamentalType", fundamentalType.getName());
+        }
     }
 
     @Transient

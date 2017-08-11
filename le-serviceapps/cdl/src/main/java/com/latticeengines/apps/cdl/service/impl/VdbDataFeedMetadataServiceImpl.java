@@ -78,7 +78,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             }
         } catch (Exception e) {
             // see the log to add unit test
-            throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.pprint(metadata)), e);
+            throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.serialize(metadata)), e);
         }
     }
 
