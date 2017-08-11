@@ -13,6 +13,14 @@
             }
         }
     }
+    &.dashboard-content.container {
+        .inner-container {
+            padding-right: 0;
+            .tp-attribute-pane {
+                right: -1px;
+            }
+        }
+    }
     .talkingpoints-top-controls {
         @include flex-container;
         min-height: 42px;
