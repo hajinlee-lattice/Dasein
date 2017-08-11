@@ -160,7 +160,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 try {
                     redshiftService.dropTable(AvroUtils.getAvroFriendlyString(name));
                 } catch (Exception e) {
-                    log.error(String.format("Failed to drop table %s from redshift", name), e);
+                    log.error(String.format("Failed to drop table %s from redshift", AvroUtils.getAvroFriendlyString(name)), e);
                 }
             });
         }
