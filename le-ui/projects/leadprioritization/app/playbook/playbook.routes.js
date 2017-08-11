@@ -240,7 +240,7 @@ angular
                             excludeContactsWithoutSalesforceId: play.excludeContactsWithoutSalesforceId,
                             onClick: function(property, bool) {
                                 play[property] = bool;
-                                PlaybookWizardStore.savePlay(play;
+                                PlaybookWizardStore.savePlay(play);
                             }
                         }
                         deferred.resolve(config);
