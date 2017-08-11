@@ -36,6 +36,7 @@ public class DanteAttributesResourceDeploymentTestNG extends PlsDeploymentTestNG
     @BeforeClass
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
+        switchToExternalUser();
         CamilleConfiguration config = new CamilleConfiguration();
         config.setConnectionString(zkConnectionString);
         CamilleEnvironment.start(CamilleEnvironment.Mode.RUNTIME, config);
@@ -80,7 +81,7 @@ public class DanteAttributesResourceDeploymentTestNG extends PlsDeploymentTestNG
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testAttributes() {
         List<String> notions = Arrays
                 .asList(new String[] { "RecoMMendation", "accOUNT", "something", "invalid", "account", "account" });
