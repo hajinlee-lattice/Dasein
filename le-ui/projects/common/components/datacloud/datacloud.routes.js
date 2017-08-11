@@ -489,7 +489,10 @@ angular
 
                     deferred.resolve( QueryStore.GetCountByQuery('accounts', query, segment).then(function(data){ return data; }));
                     return deferred.promise;
-                }]
+                }],
+                Config: [function(){
+                    return null;
+                }],
             },
             views: {
                 "main@": {
@@ -512,7 +515,10 @@ angular
                             var deferred = $q.defer();
                             deferred.resolve(QueryStore.getCounts().contacts);
                             return deferred.promise;
-                        }]
+                        }],
+                        Config: [function(){
+                            return null;
+                        }],
                     },
                     controller: 'QueryResultsCtrl',
                     controllerAs: 'vm',

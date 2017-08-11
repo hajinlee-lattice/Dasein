@@ -1,5 +1,5 @@
 angular.module('lp.cg.talkingpoint.talkingpointservice', [])
-.service('CgTalkingPointStore', function($q, CgTalkingPointService) {
+.service('CgTalkingPointStore', function($q, $rootScope, CgTalkingPointService) {
     var CgTalkingPointStore = this;
 
     this.init = function() {
@@ -125,22 +125,33 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     }
 
+    this.setSavingFlag = function(bool) {
+        this.saving = bool;
+    }
+
+    this.getSavingFlag = function() {
+        return this.saving;
+    }
+
     this.saveTalkingPoints = function(opts) {
+        $rootScope.$broadcast('talkingPoints:saving');
         var deferred = $q.defer();
-        this.saving = true;
+        CgTalkingPointStore.setSavingFlag(true);
         CgTalkingPointService.saveTalkingPoints(opts).then(function(data){
+            $rootScope.$broadcast('talkingPoints:saved');
             CgTalkingPointStore.setTalkingPoints(data);
             CgTalkingPointStore.savedTalkingPoints = angular.copy(data);
-            CgTalkingPointStore.saving = false;
+            CgTalkingPointStore.setSavingFlag(false);
             deferred.resolve(data);
         });
         return deferred.promise;
     }
 
     this.deleteTalkingPoint = function(name) {
+        $rootScope.$broadcast('talkingPoints:saving');
         var deferred = $q.defer();
         CgTalkingPointService.deleteTalkingPoint(name).then(function(data){
-            //this.talkingPoints = opts;
+            $rootScope.$broadcast('talkingPoints:saved');
             deferred.resolve(data);
         });
         return deferred.promise;

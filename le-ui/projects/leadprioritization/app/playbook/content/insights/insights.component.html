@@ -10,6 +10,7 @@
                     </p>
                 </div>
                 
+                <div class="saved" ng-if="vm.saved"><i class="fa fa-check"></i> Saved</div>
                 <div class="revert-button" ng-if="vm.stateParams.section.indexOf('dashboard.') !== -1 && vm.talkingPoints.length">
                     <button class="button white-button" ng-click="vm.revertClicked = !vm.revertClicked">Revert Talking Points</button>
                     <div ng-if="vm.revertClicked" class="revert-confirm">

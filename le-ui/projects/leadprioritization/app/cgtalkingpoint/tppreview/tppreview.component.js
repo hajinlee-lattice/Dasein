@@ -60,14 +60,13 @@ angular.module('lp.cg.talkingpoint.preview', [])
     }
 
     function emitLeadObject() {
-        iframe.contentWindow.postMessage(vm.leadPreviewObject,'*')
+        iframe.contentWindow.postMessage(vm.leadPreviewObject,'*');
     }
 
     vm.onAccountChange = function() {
         vm.leadPreviewObject.notionObject.SalesforceAccountID = vm.selected.id;
         emitLeadObject();
     };
-
 
     $scope.$on('$destroy', function () {
         window.removeEventListener('message', handleLpiPreviewInit);

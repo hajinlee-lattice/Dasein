@@ -12,15 +12,23 @@ angular.module('lp.playbook.wizard.insights', [])
         saveOnBlur: CgTalkingPointStore.saveOnBlur,
         stateParams: $stateParams,
         revertClicked: false,
+        saved: false,
         currentPage: 1,
         pageSize: 20
     });
 
-    $rootScope.$on('sync:talkingPoints', function(e){
+    $rootScope.$on('talkingPoints:sync', function(e){
         CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
             vm.talkingPoints = talkingPoints;
-            $rootScope.$broadcast('sync:talkingPoints:complete');
+            $rootScope.$broadcast('talkingPoints:sync:complete');
         });
+    });
+
+    $rootScope.$on('talkingPoints:saved', function(e){
+        vm.saved = true;
+        $timeout(function(){
+            vm.saved = false;
+        }, 5*1000);
     });
 
     CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {

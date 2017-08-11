@@ -42,13 +42,13 @@ angular.module('lp.cg.talkingpoint.editor', [])
                     CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
                     talkingPoint.content = content;
                     
-                    if(CgTalkingPointStore.isTalkingPointDirty(talkingPoint) && !CgTalkingPointStore.saving) {
-                        $rootScope.$broadcast('sync:talkingPoints:lock', true);
+                    if(CgTalkingPointStore.isTalkingPointDirty(talkingPoint) && !CgTalkingPointStore.getSavingFlag()) {
+                        $rootScope.$broadcast('talkingPoints:lock', true);
                         CgTalkingPointStore.saveTalkingPoints([talkingPoint]).then(function(results){
                             if(talkingPoint.IsNew) {
-                                $rootScope.$broadcast('sync:talkingPoints');
+                                $rootScope.$broadcast('talkingPoints:sync');
                             }
-                            $rootScope.$broadcast('sync:talkingPoints:lock', false);
+                            $rootScope.$broadcast('talkingPoints:lock', false);
                         });
                     }
                 }, 100);
@@ -98,7 +98,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
         }
     };
 
-    $rootScope.$on('sync:talkingPoints:lock', function(e, bool){
+    $rootScope.$on('talkingPoints:lock', function(e, bool){
         vm.lockTalkingPoints = bool;
     });
 
@@ -112,8 +112,8 @@ angular.module('lp.cg.talkingpoint.editor', [])
                 vm.lockTalkingPoints = true;
                 CgTalkingPointStore.saveTalkingPoints([$scope.tp]).then(function(data){
                     if($scope.tp.IsNew) {
-                        $rootScope.$broadcast('sync:talkingPoints');
-                        $rootScope.$on('sync:talkingPoints:complete', function(e){
+                        $rootScope.$broadcast('talkingPoints:sync');
+                        $rootScope.$on('talkingPoints:sync:complete', function(e){
                             vm.lockTalkingPoints = false;
                         });
                     } else {

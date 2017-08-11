@@ -1,7 +1,8 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, $stateParams, BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore, AccountsCount) {
+.controller('QueryResultsCtrl', function($scope, $state, $stateParams, 
+    BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore, AccountsCount, Config) {
 
     var vm = this;
     angular.extend(vm, {
@@ -25,7 +26,8 @@ angular.module('common.datacloud.query.results', [
         sortReverse: false,
         authToken: BrowserStorageUtility.getTokenDocument(),
         saving: false,
-        section: $stateParams.section
+        section: $stateParams.section,
+        config: Config
     });
 
 

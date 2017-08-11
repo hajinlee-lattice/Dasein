@@ -230,6 +230,23 @@ angular
 
                     return deferred.promise;
                 }],
+                Config: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
+                    var deferred = $q.defer();
+                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+                        var play = play;
+                        var config = {
+                            play: play,
+                            excludeAccountsWithoutSalesforceId: play.excludeAccountsWithoutSalesforceId,
+                            excludeContactsWithoutSalesforceId: play.excludeContactsWithoutSalesforceId,
+                            onClick: function(property, bool) {
+                                play[property] = bool;
+                                PlaybookWizardStore.savePlay(play;
+                            }
+                        }
+                        deferred.resolve(config);
+                    });
+                    return deferred.promise;
+                }]
             },
             views: {
                 'main@': {
@@ -445,6 +462,9 @@ angular
 
                     return deferred.promise;
                 }],
+                Config: [function() {
+                    return null;
+                }]
             },
             views: {
                 'wizard_content@home.playbook.wizard': {
