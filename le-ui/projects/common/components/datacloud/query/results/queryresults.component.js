@@ -10,6 +10,7 @@ angular.module('common.datacloud.query.results', [
         inModel: $state.current.name.split('.')[1] === 'model',
         accounts: [],
         accountsCount: AccountsCount,
+        accountsWithoutSfId: 0,
         loading: true,
         restriction: QueryStore.getRestriction(),
         current: 1,
@@ -19,6 +20,7 @@ angular.module('common.datacloud.query.results', [
             updateOn: 'default blur',
             debounce: 1500
         },
+        excludeNonSalesForce: false,
         sortType: 'LDC_Name',
         sortReverse: false,
         authToken: BrowserStorageUtility.getTokenDocument(),
@@ -32,15 +34,46 @@ angular.module('common.datacloud.query.results', [
         QueryStore.setAccounts('', $stateParams.segment).then(function(response){
             vm.accounts = response.data;
             vm.loading = false;
+            console.log(vm.accounts);
         });
+
+
+        vm.getCountWithoutSfId = function() {
+            var count = 0;
+            angular.forEach(vm.accounts, function(account){
+                count += account.SalesforceAccountID ? 1 : 0;
+            });
+            
+            vm.accountsWithoutSfId = count;
+
+            console.log(vm.accountsWithoutSfId);
+        }
+
+
 
     };
     vm.init();
 
+
+    vm.excludeNonSalesForceCheckbox = function(excludeAccounts){
+        excludeAccounts = !excludeAccounts;
+
+        console.log(excludeAccounts);
+
+        if(excludeAccounts = false){
+            vm.excludeNonSalesForce = true;
+            updatePage();
+        } else {
+            vm.excludeNonSalesForce = false;
+            updatePage();
+        }
+        
+    };
+
     var prevQuery = vm.search;
     vm.submitQuery = function() {
-        console.log("search");
         vm.loading = true;
+        vm.current = 1;
         if ((vm.search && prevQuery) && (vm.search.toUpperCase() === prevQuery.toUpperCase())) {
             return;
         }
@@ -99,6 +132,9 @@ angular.module('common.datacloud.query.results', [
     });
 
     function updatePage() {
+
+        vm.loading = true;
+
         var offset = (vm.current - 1) * vm.pagesize;
         var query = {
             free_form_text_search: vm.search,
@@ -106,7 +142,8 @@ angular.module('common.datacloud.query.results', [
             page_filter: {
                 num_rows: vm.pagesize,
                 row_offset: offset
-            }
+            },
+            restrict_without_sfdcid: vm.excludeNonSalesForce
         };
 
         QueryStore.setAccounts(query, $stateParams.segment).then(function(response){

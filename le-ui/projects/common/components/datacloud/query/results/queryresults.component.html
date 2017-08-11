@@ -1,6 +1,20 @@
 
 <div class="container query-results">
 
+
+    <div 
+        class="exclude-filter"
+        ng-if="vm.section === 'dashboard.targets' && vm.section === 'wizard.targets'">
+        <label>
+            <input 
+                type="checkbox" 
+                class=""
+                ng-model="excludeAccounts"
+                ng-change="vm.excludeNonSalesForceCheckbox(excludeAccounts)" />
+            Exclude accounts without SalesForceID (<span class="orange-text">{{vm.accountsWithoutSfId}}</span>)
+        </label>
+    </div>
+
     <ul class="filters">
         <li class="query">
             <div class="ng-search">
@@ -8,10 +22,10 @@
                     <a class="button icon-button white-button" ng-click="vm.clearSearch()">
                         <span 
                             class="fa fa-search" 
-                            ng-show="!vm.search.length && !vm.loading"></span>
+                            ng-show="!vm.search.length"></span>
                         <span 
                             class="fa fa-times" 
-                            ng-show="vm.search.length && !vm.loading"></span>
+                            ng-show="vm.search.length"></span>
                     </a>
                     <input 
                         type="text" 
@@ -38,51 +52,64 @@
     <table class="list-table">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
-                <th ng-click="sortType = 'LDC_Name'; sortReverse = !sortReverse">
+                <th class="sortable" ng-click="sortType = 'LDC_Name'; sortReverse = !sortReverse">
                     Name
                     <span ng-show="sortType == 'LDC_Name' && !sortReverse" class="fa fa-caret-down"></span>
                     <span ng-show="sortType == 'LDC_Name' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <th>Website</th>
-                <th ng-click="sortType = 'LDC_City'; sortReverse = !sortReverse">
+                <th class="sortable" ng-click="sortType = 'LDC_City'; sortReverse = !sortReverse">
                     City
                     <span ng-show="sortType == 'LDC_City' && !sortReverse" class="fa fa-caret-down"></span>
                     <span ng-show="sortType == 'LDC_City' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
-                <th ng-click="sortType = 'LDC_State'; sortReverse = !sortReverse">
+                <th class="sortable" ng-click="sortType = 'LDC_State'; sortReverse = !sortReverse">
                     State
                     <span ng-show="sortType == 'LDC_State' && !sortReverse" class="fa fa-caret-down"></span>
                     <span ng-show="sortType == 'LDC_State' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
-                <th ng-click="sortType = 'LDC_Country'; sortReverse = !sortReverse">
+                <th class="sortable" ng-click="sortType = 'LDC_Country'; sortReverse = !sortReverse">
                     Country
                     <span ng-show="sortType == 'LDC_Country' && !sortReverse" class="fa fa-caret-down"></span>
                     <span ng-show="sortType == 'LDC_Country' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
+                <th>SalesForce ID</th>
+
             </tr>
         </thead>
-        <tbody>
-            <tr ng-show="vm.loading">
-                <td colspan="5"><i class="fa fa-spinner fa-pulse fw"></i> Loading Accounts</td>
-            </tr>
+        <tbody ng-if="!vm.loading">
             <tr 
-                ng-repeat="     account in vm.accounts | 
-                                orderBy:sortType:sortReverse | 
-                                filter:vm.search"
-                 ng-show="!vm.loading">
+                ng-repeat=" account in vm.accounts | 
+                            orderBy:sortType:sortReverse | 
+                            filter:vm.search">
 
-                <td><span class="blue-text">{{account.LDC_Name}}</span></td>
-                <td><span class="blue-text">{{account.LDC_Domain}}</span></td>
+                <td>{{account.LDC_Name}}</td>
+                <td>{{account.LDC_Domain}}</td>
                 <td>{{account.LDC_City}}</td>
                 <td>{{account.LDC_State}}</td>
                 <td>{{account.LDC_Country}}</td>
+                <td>
+                    <span 
+                        class="gray-text"
+                        ng-if="!account.SalesforceAccountID">
+                        None
+                    </span>
+                    <span
+                        ng-if="account.SalesforceAccountID">
+                        {{account.SalesforceAccountID}}
+                    </span>
+                </td>
             </tr>
         </tbody>
     </table>
 
-    <p ng-show="!vm.loading && !vm.accounts">No Records Found<p>
+    <div class="loading" ng-if="vm.loading">
+         Loading Accounts...
+    </div>
 
-    <ul class="filters" ng-show="!vm.loading">
+    <p ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts === []">No Records Found<p>
+
+    <ul class="filters" ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts !== []">
         <li>
             <pd-pagination-controls
                 current="vm.current"

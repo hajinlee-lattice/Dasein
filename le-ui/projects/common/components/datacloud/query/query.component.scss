@@ -2,6 +2,17 @@
     min-width: 680px;
     margin-top: 1.5em;
 
+    .loading {
+        background: url('/assets/images/spinners/spinner-lattice-dots-100x100.gif') no-repeat center top;
+        padding-top: 115px;
+        text-align: center;
+        width: 100%;
+        margin: 60px auto 0;
+        font-size: 18px;
+    }
+
+
+
     .pd-pagination {
         float: right;
         display: inline-block;
@@ -35,14 +46,27 @@
         font-weight: bold;
 
         thead {
-            border: 1px solid #d0d2d3;
+            border-bottom: 1px solid #d0d2d3;
             border-width: 2px 0;
+        }
+        tbody tr {
+            border-bottom: none;
+        }
+        tbody td {
+            font-weight: normal;
         }
 
         th {
+            text-transform: uppercase;
             border: none;
-            cursor: pointer;
+            background: transparent;
+            &.sortable {
+                &:hover {
+                    cursor: pointer;
+                }   
+            }
         }
+
 
         .results-table-item-company,
         .results-table-item-website {

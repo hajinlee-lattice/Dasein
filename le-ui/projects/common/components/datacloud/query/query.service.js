@@ -64,8 +64,15 @@ angular.module('common.datacloud.query.service',[
     
     this.setAccounts = function(query, segment) {
         var deferred = $q.defer();
+
+        console.log(query);
+
         this.GetDataByQuery('accounts', query, segment).then(function(response) {
             this.accounts = response;
+
+
+            console.log(response);
+
             deferred.resolve(response);
         });
         return deferred.promise;
@@ -275,7 +282,8 @@ angular.module('common.datacloud.query.service',[
                     'page_filter': {
                         'num_rows': query.page_filter.num_rows,
                         'row_offset': query.page_filter.row_offset
-                    }
+                    },
+                    'restrict_without_sfdcid': query.restrict_without_sfdcid
                 };
             };
 
