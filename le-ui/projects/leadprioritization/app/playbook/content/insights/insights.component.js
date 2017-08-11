@@ -1,6 +1,6 @@
 angular.module('lp.playbook.wizard.insights', [])
 .controller('PlaybookWizardInsights', function(
-    $scope, $state, $stateParams, $document, $rootScope,
+    $scope, $state, $stateParams, $document, $rootScope, $timeout,
     PlaybookWizardStore, CgTalkingPointStore, TalkingPointPreviewResources, TalkingPointAttributes, TalkingPoints, BrowserStorageUtility
 ) {
     var vm = this;
@@ -11,10 +11,10 @@ angular.module('lp.playbook.wizard.insights', [])
         talkingPoints: TalkingPoints,
         saveOnBlur: CgTalkingPointStore.saveOnBlur,
         stateParams: $stateParams,
+        revertClicked: false,
         currentPage: 1,
         pageSize: 20
     });
-
 
     $rootScope.$on('sync:talkingPoints', function(e){
         CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
@@ -82,6 +82,16 @@ angular.module('lp.playbook.wizard.insights', [])
         }
         
     };
+
+    vm.revertTalkingPoints = function() {
+        CgTalkingPointStore.revertTalkingPoints($stateParams.play_name).then(function(response){
+            CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
+                vm.talkingPoints = talkingPoints;
+                vm.maxPage = vm.talkingPoints.length / vm.pageSize;
+            });
+        });
+    }
+
 
     function validateTalkingPoints() {
         var valid = false,

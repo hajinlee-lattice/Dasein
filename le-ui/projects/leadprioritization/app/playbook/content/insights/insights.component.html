@@ -9,6 +9,16 @@
                         <em ng-if="vm.stateParams.section === 'dashboard.insights'">Keep in mind changes you make will overwrite changes made by other users.</em>
                     </p>
                 </div>
+                
+                <div class="revert-button" ng-if="vm.stateParams.section.indexOf('dashboard.') !== -1 && vm.talkingPoints.length">
+                    <button class="button white-button" ng-click="vm.revertClicked = !vm.revertClicked">Revert Talking Points</button>
+                    <div ng-if="vm.revertClicked" class="revert-confirm">
+                        Revert Talking Points? 
+                        <button class="button orange-button" ng-click="vm.revertTalkingPoints()">Revert</button>
+                        <button class="button white-button" ng-click="vm.revertClicked = !vm.revertClicked">Cancel</button>
+                    </div> 
+                </div>
+
                 <div ng-if="vm.talkingPoints" ng-repeat="tp in vm.talkingPoints | orderBy:'offset' | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" class="tp-entry" ng-class="{'has-errors': tp.uiError}">
                     <cg-talking-point-editor
                         tp="tp"

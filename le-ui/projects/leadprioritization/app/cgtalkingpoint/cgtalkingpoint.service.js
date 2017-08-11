@@ -290,6 +290,14 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         });
         return deferred.promise;
     }
+
+    this.revertTalkingPoints = function(play_name) {
+        var deferred = $q.defer();
+        CgTalkingPointService.revertTalkingPoints(play_name).then(function(data){
+            deferred.resolve(data);
+        });
+        return deferred.promise;
+    }
 })
 .service('CgTalkingPointService', function($q, $http, $state) {
     this.host = '/pls'; //default
@@ -396,7 +404,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         var deferred = $q.defer();
         $http({
             method: 'POST',
-            url: this.host + '/dante/attributes/attributes',
+            url: this.host + '/dante/attributes',
             data: entities
         }).then(function(response){
             deferred.resolve(response.data);
@@ -434,6 +442,20 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         $http({
             method: 'POST',
             url: this.host + '/dante/talkingpoints/publish',
+            params: {
+                playName: play_name
+            }
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.revertTalkingPoints = function(play_name) {
+        var deferred = $q.defer();
+        $http({
+            method: 'POST',
+            url: this.host + '/dante/talkingpoints/revert',
             params: {
                 playName: play_name
             }

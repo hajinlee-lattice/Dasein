@@ -70,6 +70,8 @@ angular.module('lp.cg.talkingpoint.editor', [])
         //delete $scope.tp.IsNew;
     }
 
+    vm.CgTalkingPointStore = CgTalkingPointStore;
+
     vm.expand = function(bool) {
         CgTalkingPointStore.setEditedTalkingPoint($scope.tp);
         vm.expanded = (bool ? bool : !vm.expanded);
