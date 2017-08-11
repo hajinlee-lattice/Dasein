@@ -21,8 +21,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportM
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
-import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -57,6 +57,9 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private ModelSummaryService modelSummaryService;
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
@@ -110,13 +113,18 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         waitForCompletion(workflowId);
     }
 
+    void createModelSummary(ModelSummary model, String tenantId) {
+        modelSummaryService.createModelSummary(model, tenantId);
+    }
+
     String getModelSummary(String name) {
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
         String lookupId = null;
         for (ModelSummary summary : summaries) {
             if (summary.getName().startsWith(name)) {
                 lookupId = summary.getLookupId();
-                // assertEquals(summary.getStatus(), ModelSummaryStatus.INACTIVE);
+                // assertEquals(summary.getStatus(),
+                // ModelSummaryStatus.INACTIVE);
             }
         }
 

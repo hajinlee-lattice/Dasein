@@ -2,6 +2,8 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertNotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -14,6 +16,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
 
 public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ImportAndRTSBulkScoreWorkflowDeploymentTestNG.class);
 
     @Autowired
     private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTSBulkScoreWorkflowSubmitter;
@@ -28,10 +32,12 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
     }
 
     @Override
-    @Test(groups = "workflow", enabled = false)
+    @Test(groups = "workflow", enabled = true)
     public void scoreAccount() throws Exception {
         ModelSummary summary = locateModelSummary("testWorkflowAccount", mainTestCustomerSpace);
         assertNotNull(summary);
+        createModelSummary(summary, mainTestTenant.getId());
+        log.info("summry id is " + summary.getId());
         score(summary.getId(), sourceFile.getName());
     }
 
