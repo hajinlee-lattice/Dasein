@@ -2,8 +2,6 @@ angular.module('common.datacloud.query.factory.restriction', [])
 .factory('BucketRestriction', function() {
     function BucketRestriction(columnName, objectType, range, attr, bkt) {
 
-        console.log(columnName, objectType, range, attr, bkt);
-
         if (attr === null || attr === undefined) {
             this.attr = objectType + '.' + columnName;
         } else {
@@ -15,7 +13,9 @@ angular.module('common.datacloud.query.factory.restriction', [])
         } else {
             this.bkt = bkt;
         }
-    }
+
+    };
+
 
     // // used to convert bucket range in old data object
     // function oldFormatRangeToBkt(range) {
@@ -51,9 +51,6 @@ angular.module('common.datacloud.query.factory.restriction', [])
     };
 
     BucketRestriction.getColumnName = function(bucketRestriction) {
-
-        console.log(bucketRestriction);
-
         if (bucketRestriction.attr === null || bucketRestriction.attr === undefined) {
             return bucketRestriction.lhs.columnLookup.column_name;
         } else {
@@ -62,11 +59,6 @@ angular.module('common.datacloud.query.factory.restriction', [])
     };
 
     BucketRestriction.getObjectType = function(bucketRestriction) {
-
-
-        console.log(bucketRestriction);
-
-
         if (bucketRestriction.attr === null || bucketRestriction.attr === undefined) {
             if (bucketRestriction.lhs.columnLookup.object_type === 'BucketedAccountMaster') {
                 bucketRestriction.lhs.columnLookup.object_type = 'LatticeAccount'

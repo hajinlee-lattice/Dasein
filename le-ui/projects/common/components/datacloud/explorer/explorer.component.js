@@ -1386,8 +1386,6 @@ angular.module('common.datacloud.explorer', [
             return false;
         }
 
-        console.log(attribute);
-
         var attributeKey = attribute.Attribute || attribute.FieldName,
             stat = vm.getAttributeStat(attribute) || {},
             attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : ''),
@@ -1395,8 +1393,6 @@ angular.module('common.datacloud.explorer', [
             enrichment = vm.enrichments[index],
             entity = enrichment.Entity,
             topBkt = attribute.TopBkt;
-
-        console.log(stat, attributeRangeKey);
 
         if(entity === 'Transaction'){
             var entity = 'Account';

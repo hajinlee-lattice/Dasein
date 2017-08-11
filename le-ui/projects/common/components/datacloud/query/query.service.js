@@ -147,9 +147,6 @@ angular.module('common.datacloud.query.service',[
 
     this.addRestriction = function(attribute) {
 
-
-        console.log(attribute);
-
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
@@ -157,11 +154,14 @@ angular.module('common.datacloud.query.service',[
             bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
 
+        this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
+
+        console.log(this.restriction);
+
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
-            console.log();
             self.setResourceTypeCount('accounts', false, data);
-        });            
+        });
         
     };
 
@@ -173,8 +173,6 @@ angular.module('common.datacloud.query.service',[
         var searchTerm = attribute.attr,
             index = -1;
 
-        console.log(searchTerm, allRestrictions);
-
         for(var i = 0, len = allRestrictions.length; i < len; i++) {
             if (allRestrictions[i].bucketRestriction.attr === searchTerm) {
                 var index = i;
@@ -183,16 +181,13 @@ angular.module('common.datacloud.query.service',[
         }
 
         allRestrictions.splice(index, 1);
-        
 
-        console.log(index, allRestrictions);
-
+        this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
 
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
             self.setResourceTypeCount('accounts', false, data);
-        });     
-
+        });
     };
 
     this.findAttributes = function(columnName) {
@@ -232,13 +227,15 @@ angular.module('common.datacloud.query.service',[
             return deferred.promise;
         } else {
 
-            var deferred = $q.defer();
+            var deferred = $q.defer(),
+                restriction = this.getRestriction();
+
 
             if(query === undefined || query === ''){
                 
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
-                    'frontend_restriction': this.restriction,
+                    'frontend_restriction': restriction,
                     'page_filter': {
                         'num_rows': 20,
                         'row_offset': 0
@@ -248,7 +245,7 @@ angular.module('common.datacloud.query.service',[
             } else {
                 var queryWithRestriction = { 
                     'free_form_text_search': query.free_form_text_search,
-                    'frontend_restriction': this.restriction,
+                    'frontend_restriction': restriction,
                     'page_filter': {
                         'num_rows': query.page_filter.num_rows,
                         'row_offset': query.page_filter.row_offset
@@ -268,10 +265,12 @@ angular.module('common.datacloud.query.service',[
             return deferred.promise;
         } else {
 
+            var restriction = this.getRestriction();
+
             if(query === undefined || query === ''){
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
-                    'frontend_restriction': this.restriction,
+                    'frontend_restriction': restriction,
                     'page_filter': {
                         'num_rows': 20,
                         'row_offset': 0
@@ -280,7 +279,7 @@ angular.module('common.datacloud.query.service',[
             } else {
                 var queryWithRestriction = { 
                     'free_form_text_search': query.free_form_text_search,
-                    'frontend_restriction': this.restriction,
+                    'frontend_restriction': restriction,
                     'page_filter': {
                         'num_rows': query.page_filter.num_rows,
                         'row_offset': query.page_filter.row_offset
