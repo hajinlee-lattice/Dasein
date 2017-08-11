@@ -1,27 +1,29 @@
 package com.latticeengines.quartz.service;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.SchedulerContext;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.quartz.JobHistory;
 import com.latticeengines.domain.exposed.quartz.QuartzJobArguments;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobInfo;
 import com.latticeengines.domain.exposed.quartz.TriggeredJobStatus;
 import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 public class CustomQuartzJob extends QuartzJobBean {
 
@@ -40,6 +42,7 @@ public class CustomQuartzJob extends QuartzJobBean {
 
     public void init(ApplicationContext appCtx) {
         jobHistoryEntityMgr = (JobHistoryEntityMgr) appCtx.getBean("jobHistoryEntityMgr");
+        restTemplate.setInterceptors(Collections.singletonList(new MagicAuthenticationHeaderHttpRequestInterceptor()));
     }
 
     @Override
