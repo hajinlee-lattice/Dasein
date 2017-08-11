@@ -109,7 +109,7 @@
 
     <p ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts === []">No Records Found<p>
 
-    <ul class="filters" ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts !== []">
+    <ul class="filters" ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts != []">
         <li>
             <pd-pagination-controls
                 current="vm.current"

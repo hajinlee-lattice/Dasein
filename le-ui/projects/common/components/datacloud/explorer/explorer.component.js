@@ -1382,19 +1382,21 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
-        // if(!vm.cube.Stats) {
-        //     return false;
-        // }
+        if(!vm.cube.data.Stats) {
+            return false;
+        }
 
         console.log(attribute);
 
         var attributeKey = attribute.Attribute || attribute.FieldName,
-            // stat = vm.getAttributeStat(attribute) || {},
-            // attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : ''),
+            stat = vm.getAttributeStat(attribute) || {},
+            attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : ''),
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
             entity = enrichment.Entity,
             topBkt = attribute.TopBkt;
+
+        console.log(stat, attributeRangeKey);
 
         if(entity === 'Transaction'){
             var entity = 'Account';
@@ -1403,9 +1405,9 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
 
-        // if(attributeRangeKey) {
-        //     vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
-        // }
+        if(attributeRangeKey) {
+            vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
+        }
         vm.saveSegmentEnabled = true;
 
         if (vm.segmentAttributeInput[attributeKey] === true) {
@@ -1425,7 +1427,7 @@ angular.module('common.datacloud.explorer', [
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
 
-        console.log(enrichment, stat, disable);
+        // console.log(enrichment, stat, disable);
 
         var disable = disable || false,
             attributeKey = enrichment.Attribute || enrichment.ColumnName,
@@ -1434,7 +1436,9 @@ angular.module('common.datacloud.explorer', [
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
             entity = enrichment.Entity,
-            topBkt = attribute.TopBkt;
+            topBkt = enrichment.TopBkt;
+
+        console.log(stat, topBkt);
 
         if(disable) {
             return false;
@@ -1449,13 +1453,13 @@ angular.module('common.datacloud.explorer', [
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
             QueryStore.counts.accounts.loading = true;
             $timeout(function(){
-                QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+                QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
             }, 1000);
 
         } else {
             QueryStore.counts.accounts.loading = true;
             $timeout(function(){
-                QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+                QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
             }, 1000);
 
         }

@@ -41,13 +41,13 @@
         </p>
     </div>
     -->
-    <div class="stats" ng-if="  vm.cube.Stats[enrichment.ColumnId].Bkts.List && 
-                                vm.cube.Stats[enrichment.ColumnId].Bkts.List.length && 
+    <div class="stats" ng-if="  vm.cube.data.Stats[enrichment.ColumnId].Bkts.List && 
+                                vm.cube.data.Stats[enrichment.ColumnId].Bkts.List.length && 
                                 !vm.lookupMode">
 <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
         <h5><label>Attribute range</label><label>Records</label></h5>
         <ul class="attribute-stats">
-            <li ng-repeat="stat in vm.cube.Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
+            <li ng-repeat="stat in vm.cube.data.Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
                 class="attribute-stat"
                 ng-class="{
                             'select-range': vm.section == 'segment.analysis', 
@@ -66,7 +66,7 @@
                         {{stat.Lbl}}
                     </li>
                     <li class="bar_">
-                        <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.ColumnId].Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.Stats[enrichment.ColumnId].Cnt, '%', 0)}}">
+                        <div style="width: 100%;" ng-style="{width:vm.percentage(stat.Cnt, vm.cube.data.Stats[enrichment.ColumnId].Cnt, '%', 0)}" title="{{vm.percentage(stat.Cnt, vm.cube.data.Stats[enrichment.ColumnId].Cnt, '%', 0)}}">
                             <span class="{{vm.categoryClass(enrichment.Category)}} background-color"></span>
                         </div>
                     </li>

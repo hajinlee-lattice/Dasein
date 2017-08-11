@@ -148,6 +148,8 @@ angular.module('common.datacloud.query.service',[
     this.addRestriction = function(attribute) {
 
 
+        console.log(attribute);
+
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 

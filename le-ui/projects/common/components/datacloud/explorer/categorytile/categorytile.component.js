@@ -107,11 +107,15 @@ angular
 
             vm.getAttributeStat = function(attribute) {
 
+                console.log(vm.cube, attribute);
+
                 var enrichmentKey = attribute.Attribute || attribute.ColumnId,
                     index = vm.enrichmentsMap[enrichmentKey],
                     enrichment = vm.enrichments[index],
                     stats = (vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey] && vm.cube.Stats[enrichmentKey].Bkts && vm.cube.Stats[enrichmentKey].Bkts.List ? vm.cube.Stats[enrichmentKey].Bkts.List : null),
                     segmentRangeKey = null;
+
+                // console.log(stats);
 
                 var stat = (stats && stats.length ? stats[0] : null);
 
