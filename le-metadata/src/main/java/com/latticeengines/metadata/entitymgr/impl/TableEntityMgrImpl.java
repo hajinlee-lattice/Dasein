@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.commons.collections.Closure;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -157,12 +157,12 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                 } catch (IOException e) {
                     log.error(String.format("Failed to delete extract schema %s", schemaPath), e);
                 }
-                try {
-                    redshiftService.dropTable(AvroUtils.getAvroFriendlyString(name));
-                } catch (Exception e) {
-                    log.error(String.format("Failed to drop table %s from redshift", AvroUtils.getAvroFriendlyString(name)), e);
-                }
             });
+            try {
+                redshiftService.dropTable(AvroUtils.getAvroFriendlyString(name));
+            } catch (Exception e) {
+                log.error(String.format("Failed to drop table %s from redshift", AvroUtils.getAvroFriendlyString(name)), e);
+            }
         }
     }
 

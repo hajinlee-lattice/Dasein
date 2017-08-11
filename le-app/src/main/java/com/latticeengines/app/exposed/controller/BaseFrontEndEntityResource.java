@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -44,6 +45,7 @@ public abstract class BaseFrontEndEntityResource {
 
     public long getCount(FrontEndQuery frontEndQuery, String segment) {
         appendSegmentRestriction(frontEndQuery, segment);
+        optimizeRestriction(frontEndQuery);
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return countCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
     }
@@ -60,11 +62,13 @@ public abstract class BaseFrontEndEntityResource {
         if (restriction != null) {
             frontEndQuery.setFrontEndRestriction(restriction);
         }
-        return entityProxy.getCount(MultiTenantContext.getCustomerSpace().toString(), getMainEntity(), frontEndQuery);
+        optimizeRestriction(frontEndQuery);
+        return getCount(frontEndQuery, null);
     }
 
     public DataPage getData(FrontEndQuery frontEndQuery, String segment) {
         appendSegmentRestriction(frontEndQuery, segment);
+        optimizeRestriction(frontEndQuery);
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return dataCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
     }
@@ -100,6 +104,15 @@ public abstract class BaseFrontEndEntityResource {
             return segment.getRestriction();
         } else {
             return null;
+        }
+    }
+
+    private void optimizeRestriction(FrontEndQuery frontEndQuery) {
+        if (frontEndQuery.getFrontEndRestriction() != null) {
+            Restriction restriction = frontEndQuery.getFrontEndRestriction().getRestriction();
+            if (restriction != null) {
+                frontEndQuery.getFrontEndRestriction().setRestriction(RestrictionOptimizer.flatten(restriction));
+            }
         }
     }
 

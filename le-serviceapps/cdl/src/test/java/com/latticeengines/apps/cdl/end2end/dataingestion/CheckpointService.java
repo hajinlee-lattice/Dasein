@@ -3,11 +3,9 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,9 +14,6 @@ import javax.inject.Inject;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,17 +27,11 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.eai.ExportConfiguration;
-import com.latticeengines.domain.exposed.eai.ExportDestination;
-import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -51,18 +40,12 @@ import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
-import com.latticeengines.yarn.exposed.service.JobService;
-import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -71,6 +54,12 @@ import net.lingala.zip4j.exception.ZipException;
 public class CheckpointService {
 
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
+
+    public static final int ACCOUNT_IMPORT_SIZE_1 = 200;
+    public static final int ACCOUNT_IMPORT_SIZE_2 = 100;
+
+    public static final int CONTACT_IMPORT_SIZE_1 = 200;
+    public static final int CONTACT_IMPORT_SIZE_2 = 100;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -89,15 +78,6 @@ public class CheckpointService {
 
     @Inject
     private EntityProxy entityProxy;
-
-    @Inject
-    private EaiProxy eaiProxy;
-
-    @Inject
-    private WorkflowProxy workflowProxy;
-
-    @Inject
-    private JobService jobService;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -122,10 +102,8 @@ public class CheckpointService {
 
         verifyStatistics();
 
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), 300);
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), 300);
-        //Assert.assertEquals(countInRedshift(BusinessEntity.Account), 300);
-        //Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 300);
+        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), ACCOUNT_IMPORT_SIZE_1);
+        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), CONTACT_IMPORT_SIZE_1);
     }
 
     public void verifySecondConsolidateCheckpoint() throws IOException {
@@ -135,10 +113,8 @@ public class CheckpointService {
 
         verifyStatistics();
 
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), 500);
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), 500);
-        //Assert.assertEquals(countInRedshift(BusinessEntity.Account), 500);
-        //Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 500);
+        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2);
+        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2);
     }
 
     public void resumeCheckpoint(String checkpoint) throws IOException {
@@ -162,7 +138,6 @@ public class CheckpointService {
         dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
 
         uploadCheckpointHdfs(checkpoint);
-        //exportCheckpointToRedshift();
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
     }
@@ -180,7 +155,7 @@ public class CheckpointService {
         logger.info(String.format("Unzip checkpoint archive %s to local dir %s", zipFilePath, checkpointDir));
     }
 
-    public long countTableRole(TableRoleInCollection role) {
+    long countTableRole(TableRoleInCollection role) {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         Table table = dataCollectionProxy.getTable(customerSpace.toString(), role);
         if (table == null) {
@@ -189,7 +164,7 @@ public class CheckpointService {
         return table.getExtracts().get(0).getProcessedRecords();
     }
 
-    private long countInRedshift(BusinessEntity entity) {
+    long countInRedshift(BusinessEntity entity) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         return entityProxy.getCount(mainTestTenant.getId(), entity, frontEndQuery);
     }
@@ -267,64 +242,6 @@ public class CheckpointService {
         StatisticsContainer statisticsContainer = JsonUtils.deserialize(new FileInputStream(statsFile), StatisticsContainer.class);
         statisticsContainer.setName(NamingUtils.timestamp("Stats"));
         return statisticsContainer;
-    }
-
-    private void exportCheckpointToRedshift() {
-        logger.info("Exporting checkpoint data to redshift. This may take more than 10 min ...");
-        List<TableRoleInCollection> tables = Arrays.asList( //
-                TableRoleInCollection.BucketedAccount, //
-                TableRoleInCollection.SortedContact);
-        for (TableRoleInCollection role : tables) {
-            logger.info("Started exporting " + role + " to redshift ...");
-            Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role);
-            ExportConfiguration exportConfiguration = setupExportConfig(table, table.getName(), role);
-            AppSubmission submission = eaiProxy.submitEaiJob(exportConfiguration);
-            int timeout = new Long(TimeUnit.MINUTES.toSeconds(30)).intValue();
-            logger.info("Waiting for " + submission.getApplicationIds().get(0));
-            Level jobServiceLogLevel = LogManager.getLogger(JobServiceImpl.class).getLevel();
-            LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);
-            JobStatus completedStatus = jobService.waitFinalJobStatus(submission.getApplicationIds().get(0), timeout);
-            LogManager.getLogger(JobServiceImpl.class).setLevel(jobServiceLogLevel);
-            Assert.assertEquals(completedStatus.getStatus(), FinalApplicationStatus.SUCCEEDED);
-            logger.info("Finished exporting " + role + " to redshift.");
-        }
-    }
-
-    // Copied from ExportDataToRedshift
-    private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,
-            TableRoleInCollection tableRole) {
-        HdfsToRedshiftConfiguration exportConfig = new HdfsToRedshiftConfiguration();
-        exportConfig.setExportFormat(ExportFormat.AVRO);
-        exportConfig.setCleanupS3(true);
-        exportConfig.setCreateNew(true);
-        exportConfig.setAppend(true);
-        exportConfig.setCustomerSpace(CustomerSpace.parse(mainTestTenant.getId()));
-        exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
-        exportConfig.setExportTargetPath(sourceTable.getName());
-        exportConfig.setNoSplit(true);
-        exportConfig.setExportDestination(ExportDestination.REDSHIFT);
-
-        // all distributed on account id
-        String distKey = tableRole.getPrimaryKey().name();
-        List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
-        if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
-            sortKeys.add(tableRole.getPrimaryKey().name());
-        }
-        RedshiftTableConfiguration.SortKeyType sortKeyType = sortKeys.size() == 1
-                ? RedshiftTableConfiguration.SortKeyType.Compound : RedshiftTableConfiguration.SortKeyType.Interleaved;
-
-        RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
-        redshiftTableConfig.setS3Bucket(s3Bucket);
-        redshiftTableConfig.setDistStyle(RedshiftTableConfiguration.DistStyle.Key);
-        redshiftTableConfig.setDistKey(distKey);
-        redshiftTableConfig.setSortKeyType(sortKeyType);
-        redshiftTableConfig.setSortKeys(sortKeys);
-        redshiftTableConfig.setTableName(targetTableName);
-        redshiftTableConfig
-                .setJsonPathPrefix(String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
-        exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
-
-        return exportConfig;
     }
 
     public void cleanup() {

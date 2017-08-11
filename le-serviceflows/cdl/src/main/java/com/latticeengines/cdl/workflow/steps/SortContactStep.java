@@ -18,6 +18,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -69,6 +71,7 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
         if (entityTableMap == null) {
             entityTableMap = new HashMap<>();
         }
+        enrichTableSchema(sortedTable);
         entityTableMap.put(BusinessEntity.Contact, sortedTable);
         putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
         Map<BusinessEntity, Boolean> appendTableMap = getMapObjectFromContext(APPEND_TO_REDSHIFT_TABLE,
@@ -127,6 +130,11 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
+    }
+
+    private void enrichTableSchema(Table table) {
+        List<Attribute> attrs = table.getAttributes();
+        attrs.forEach(attr -> attr.setCategory(Category.CONTACT_ATTRIBUTES));
     }
 
 }

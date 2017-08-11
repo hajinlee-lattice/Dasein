@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static org.testng.Assert.assertEquals;
 
@@ -36,9 +38,11 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
     private void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        mockAvroData(0, 300);
+        mockAvroData(BusinessEntity.Account, 0, ACCOUNT_IMPORT_SIZE_1);
+        mockAvroData(BusinessEntity.Contact, 0, CONTACT_IMPORT_SIZE_1);
         Thread.sleep(2000);
-        mockAvroData(300, 200);
+        mockAvroData(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, 100);
+        mockAvroData(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, 100);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
@@ -54,9 +58,9 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         Assert.assertEquals(DataFeed.Status.InitialConsolidated, dataFeed.getStatus());
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
-        Assert.assertEquals(numAccounts, 300);
+        Assert.assertEquals(numAccounts, ACCOUNT_IMPORT_SIZE_1);
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
-        Assert.assertEquals(numContacts, 300);
+        Assert.assertEquals(numContacts, CONTACT_IMPORT_SIZE_1);
     }
 
     private void profile() throws IOException {
@@ -88,6 +92,9 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
             Assert.assertFalse(attribute.getName().contains(CEAttr),
                     "Should not have encoded attr " + attribute.getName() + " in expanded table.");
         }
+
+        Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
+        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact), CONTACT_IMPORT_SIZE_1);
     }
 
 }

@@ -7,8 +7,10 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -18,6 +20,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +37,13 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.eai.ExportConfiguration;
+import com.latticeengines.domain.exposed.eai.ExportDestination;
+import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -42,10 +53,15 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
+import com.latticeengines.yarn.exposed.service.JobService;
+import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
 public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
@@ -60,6 +76,12 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @Inject
     CDLProxy cdlProxy;
+
+    @Inject
+    private EaiProxy eaiProxy;
+
+    @Inject
+    private JobService jobService;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -79,6 +101,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
         setupTestEnvironment();
         mainTestTenant = testBed.getMainTestTenant();
+        // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         checkpointService.setMaintestTenant(mainTestTenant);
 
         logger.info("Test environment setup finished.");
@@ -96,12 +119,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         assertEquals(resetStatus, true);
     }
 
-    protected void mockAvroData(int offset, int limit) throws IOException {
-        mockAvroDataInternal(BusinessEntity.Account, offset, limit);
-        mockAvroDataInternal(BusinessEntity.Contact, offset, limit);
-    }
-
-    private void mockAvroDataInternal(BusinessEntity entity, int offset, int limit) throws IOException {
+    protected void mockAvroData(BusinessEntity entity, int offset, int limit) throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
 
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
@@ -229,6 +247,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return checkpointService.countTableRole(role);
     }
 
+    protected long countInRedshift(BusinessEntity entity) {
+        return checkpointService.countInRedshift(entity);
+    }
+
     protected void verifyFirstProfileCheckpoint() throws IOException {
         checkpointService.verifyFirstProfileCheckpoint();
     }
@@ -239,6 +261,59 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     protected void resumeCheckpoint(String checkpoint) throws IOException {
         checkpointService.resumeCheckpoint(checkpoint);
+    }
+
+    protected void exportEntityToRedshift(BusinessEntity entity) {
+        TableRoleInCollection role = entity.getServingStore();
+        logger.info("Started exporting " + role + " to redshift ...");
+        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role);
+        ExportConfiguration exportConfiguration = setupExportConfig(table, table.getName(), role);
+        AppSubmission submission = eaiProxy.submitEaiJob(exportConfiguration);
+        int timeout = new Long(TimeUnit.MINUTES.toSeconds(30)).intValue();
+        logger.info("Waiting for " + submission.getApplicationIds().get(0));
+        Level jobServiceLogLevel = LogManager.getLogger(JobServiceImpl.class).getLevel();
+        LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);
+        JobStatus completedStatus = jobService.waitFinalJobStatus(submission.getApplicationIds().get(0), timeout);
+        LogManager.getLogger(JobServiceImpl.class).setLevel(jobServiceLogLevel);
+        Assert.assertEquals(completedStatus.getStatus(), FinalApplicationStatus.SUCCEEDED);
+        logger.info("Finished exporting " + role + " to redshift.");
+    }
+
+    // Copied from ExportDataToRedshift
+    private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,
+                                                  TableRoleInCollection tableRole) {
+        HdfsToRedshiftConfiguration exportConfig = new HdfsToRedshiftConfiguration();
+        exportConfig.setExportFormat(ExportFormat.AVRO);
+        exportConfig.setCleanupS3(true);
+        exportConfig.setCreateNew(true);
+        exportConfig.setAppend(true);
+        exportConfig.setCustomerSpace(CustomerSpace.parse(mainTestTenant.getId()));
+        exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
+        exportConfig.setExportTargetPath(sourceTable.getName());
+        exportConfig.setNoSplit(true);
+        exportConfig.setExportDestination(ExportDestination.REDSHIFT);
+
+        // all distributed on account id
+        String distKey = tableRole.getPrimaryKey().name();
+        List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
+        if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
+            sortKeys.add(tableRole.getPrimaryKey().name());
+        }
+        RedshiftTableConfiguration.SortKeyType sortKeyType = sortKeys.size() == 1
+                ? RedshiftTableConfiguration.SortKeyType.Compound : RedshiftTableConfiguration.SortKeyType.Interleaved;
+
+        RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
+        redshiftTableConfig.setS3Bucket(s3Bucket);
+        redshiftTableConfig.setDistStyle(RedshiftTableConfiguration.DistStyle.Key);
+        redshiftTableConfig.setDistKey(distKey);
+        redshiftTableConfig.setSortKeyType(sortKeyType);
+        redshiftTableConfig.setSortKeys(sortKeys);
+        redshiftTableConfig.setTableName(targetTableName);
+        redshiftTableConfig
+                .setJsonPathPrefix(String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
+        exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
+
+        return exportConfig;
     }
 
 }

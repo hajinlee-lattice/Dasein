@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,8 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     public void execute() {
         log.info("Inside UpdateStatsObjects execute()");
         String customerSpaceStr = configuration.getCustomerSpace().toString();
-        Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
+        Map<BusinessEntity, Table> entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
+                BusinessEntity.class, Table.class);
         Table masterTable = entityTableMap.get(BusinessEntity.Account);
         if (masterTable == null) {
             throw new NullPointerException("Master table for stats object calculation is not found.");
@@ -64,7 +64,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             throw new NullPointerException("Target table for Stats Object Calculation is not found.");
         }
 
-        StatisticsContainer statsContainer = constructStatsContainer(masterTable, statsTable);
+        StatisticsContainer statsContainer = constructStatsContainer(entityTableMap, statsTable);
         dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
     }
 
@@ -85,13 +85,13 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         return StatsCubeUtils.parseAvro(records);
     }
 
-    private StatisticsContainer constructStatsContainer(Table masterTable, Table statsTable) {
+    private StatisticsContainer constructStatsContainer(Map<BusinessEntity, Table> entityTableMap,
+                                                        Table statsTable) {
         log.info("Converting stats cube to statistics container.");
-        List<ColumnMetadata> masterCols = masterTable.getColumnMetadata();
         // hard code entity
-        List<Pair<BusinessEntity, List<ColumnMetadata>>> mdPairs = Collections.singletonList(
-                ImmutablePair.of(BusinessEntity.Account, masterCols)
-        );
+        List<Pair<BusinessEntity, List<ColumnMetadata>>> mdPairs = new ArrayList<>();
+        entityTableMap.forEach((entity, table) -> //
+                mdPairs.add(ImmutablePair.of(entity, table.getColumnMetadata())));
         // get StatsCube from statsTable
         StatsCube statsCube = getStatsCube(statsTable);
         Statistics statistics = StatsCubeUtils.constructStatistics(statsCube, mdPairs);

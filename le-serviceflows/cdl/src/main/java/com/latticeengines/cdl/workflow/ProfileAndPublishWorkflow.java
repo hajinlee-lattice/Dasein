@@ -44,8 +44,8 @@ public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublis
         return new WorkflowBuilder() //
                 .next(startProfile) //
                 .next(calculateStatsWrapper)//
-                .next(updateStatsObjects) //
                 .next(sortContactWrapper)//
+                .next(updateStatsObjects) //
                 .next(redshiftPublishWorkflow) //
                 .listener(calculateStatsListener) //
                 .build();

@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ContextConfiguration;
