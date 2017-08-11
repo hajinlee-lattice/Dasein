@@ -124,8 +124,8 @@ public class CheckpointService {
 
         Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), 300);
         Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), 300);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Account), 300);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 300);
+        //Assert.assertEquals(countInRedshift(BusinessEntity.Account), 300);
+        //Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 300);
     }
 
     public void verifySecondConsolidateCheckpoint() throws IOException {
@@ -137,8 +137,8 @@ public class CheckpointService {
 
         Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), 500);
         Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), 500);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Account), 500);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 500);
+        //Assert.assertEquals(countInRedshift(BusinessEntity.Account), 500);
+        //Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 500);
     }
 
     public void resumeCheckpoint(String checkpoint) throws IOException {
@@ -162,7 +162,7 @@ public class CheckpointService {
         dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
 
         uploadCheckpointHdfs(checkpoint);
-        exportCheckpointToRedshift();
+        //exportCheckpointToRedshift();
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
     }
