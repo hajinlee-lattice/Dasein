@@ -17,6 +17,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +62,7 @@ import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.yarn.exposed.service.JobService;
+import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -277,7 +280,11 @@ public class CheckpointService {
             ExportConfiguration exportConfiguration = setupExportConfig(table, table.getName(), role);
             AppSubmission submission = eaiProxy.submitEaiJob(exportConfiguration);
             int timeout = new Long(TimeUnit.MINUTES.toSeconds(30)).intValue();
+            logger.info("Waiting for " + submission.getApplicationIds().get(0));
+            Level jobServiceLogLevel = LogManager.getLogger(JobServiceImpl.class).getLevel();
+            LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);
             JobStatus completedStatus = jobService.waitFinalJobStatus(submission.getApplicationIds().get(0), timeout);
+            LogManager.getLogger(JobServiceImpl.class).setLevel(jobServiceLogLevel);
             Assert.assertEquals(completedStatus.getStatus(), FinalApplicationStatus.SUCCEEDED);
             logger.info("Finished exporting " + role + " to redshift.");
         }
@@ -289,8 +296,8 @@ public class CheckpointService {
         HdfsToRedshiftConfiguration exportConfig = new HdfsToRedshiftConfiguration();
         exportConfig.setExportFormat(ExportFormat.AVRO);
         exportConfig.setCleanupS3(true);
-        exportConfig.setCreateNew(false);
-        exportConfig.setAppend(false);
+        exportConfig.setCreateNew(true);
+        exportConfig.setAppend(true);
         exportConfig.setCustomerSpace(CustomerSpace.parse(mainTestTenant.getId()));
         exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
         exportConfig.setExportTargetPath(sourceTable.getName());
