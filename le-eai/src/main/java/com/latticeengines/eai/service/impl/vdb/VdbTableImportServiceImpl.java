@@ -13,10 +13,10 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -315,8 +315,16 @@ public class VdbTableImportServiceImpl extends ImportService {
                     log.warn(String.format("Empty attribute in table %s", table.getName()));
                     continue;
                 }
-                attribute.setPhysicalDataType(vdbTableToAvroTypeConverter.convertTypeToAvro(
-                        attribute.getSourceLogicalDataType().toLowerCase()).name());
+                if (StringUtils.isNotBlank(attribute.getPhysicalDataType())) {
+                    attribute.setPhysicalDataType(vdbTableToAvroTypeConverter.convertTypeToAvro(
+                            attribute.getPhysicalDataType().toLowerCase()).name());
+                } else if (StringUtils.isNotBlank(attribute.getSourceLogicalDataType())) {
+                    attribute.setPhysicalDataType(vdbTableToAvroTypeConverter.convertTypeToAvro(
+                            attribute.getSourceLogicalDataType().toLowerCase()).name());
+                } else {
+                    throw new RuntimeException("Attribute " + attribute.getName() //
+                            + " has neither physical data type nor source logical data type");
+                }
                 if (attribute.getSourceLogicalDataType().toLowerCase().equals("date")) {
                     attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }
