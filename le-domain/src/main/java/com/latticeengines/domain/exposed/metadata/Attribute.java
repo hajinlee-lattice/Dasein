@@ -523,7 +523,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (statisticalType == null) {
             properties.remove("StatisticalType");
         } else {
-            properties.put("StatisticalType", statisticalType.getName());
+            properties.put("StatisticalType", statisticalType.name());
         }
     }
 
@@ -548,7 +548,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (fundamentalType == null) {
             properties.remove("FundamentalType");
         } else {
-            properties.put("FundamentalType", fundamentalType.getName());
+            properties.put("FundamentalType", fundamentalType.name());
         }
     }
 
