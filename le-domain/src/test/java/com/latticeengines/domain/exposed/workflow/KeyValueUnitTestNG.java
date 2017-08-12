@@ -2,12 +2,14 @@ package com.latticeengines.domain.exposed.workflow;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class KeyValueUnitTestNG {
 
@@ -33,6 +35,19 @@ public class KeyValueUnitTestNG {
         report.setJson(keyValue);
 
         System.out.println(report.toString());
+    }
+
+    @Test(groups= {"unit"})
+    public void testReportWithEmptyPayload() throws IOException {
+        ObjectNode json = JsonUtils.createObjectNode();
+        Report report = new Report();
+        KeyValue kv = new KeyValue();
+        kv.setPayload(json.toString());
+        report.setJson(kv);
+        String jsonSrc = JsonUtils.serialize(report);
+        System.out.println(jsonSrc);
+        Report deserialized = JsonUtils.deserialize(jsonSrc, Report.class);
+        System.out.println(deserialized.toString());
     }
 
 }

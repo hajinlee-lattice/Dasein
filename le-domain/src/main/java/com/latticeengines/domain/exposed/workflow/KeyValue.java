@@ -13,10 +13,10 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -105,7 +105,7 @@ public class KeyValue implements HasTenantId, HasPid {
     @Transient
     public void setPayload(String payload) {
         byte[] payloadData = null;
-        if (payload == null) {
+        if (StringUtils.isBlank(payload) || "{}".equals(payload.replaceAll("\\s", ""))) {
             log.warn("Payload is null.");
             return;
         } else {

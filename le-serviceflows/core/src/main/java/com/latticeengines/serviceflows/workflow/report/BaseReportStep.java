@@ -29,7 +29,7 @@ public abstract class BaseReportStep<T extends BaseReportStepConfiguration> exte
     @Override
     public void execute() {
         ObjectNode json = getJson();
-        Report report = createReport(JsonUtils.serialize(json));
+        Report report = createReport(json.toString());
         registerReport(getConfiguration().getCustomerSpace(), report);
     }
 
