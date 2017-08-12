@@ -123,6 +123,9 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         dest.setDisplayName(source.getDisplayName());
         dest.setSourceLogicalDataType(source.getSourceLogicalDataType());
         dest.setPhysicalDataType(source.getPhysicalDataType());
+        if (StringUtils.isBlank(dest.getSourceLogicalDataType())) {
+            dest.setSourceLogicalDataType(source.getPhysicalDataType());
+        }
         dest.setApprovedUsage(source.getApprovedUsage());
         dest.setDescription(source.getDescription());
         dest.setDataSource(source.getDataSource());
