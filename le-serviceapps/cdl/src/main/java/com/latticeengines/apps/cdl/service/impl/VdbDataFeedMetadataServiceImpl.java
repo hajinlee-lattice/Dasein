@@ -3,9 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -65,27 +63,26 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         Set<String> findMatch = new HashSet<>();
         Set<String> originalAttrMatch = new HashSet<>();
+
         // Match the DL metadata with table in SchemaRepository.
-        for (Map.Entry<String, Attribute> entry : originalAttrs.entrySet()) {
-            Iterator<Attribute> attrIterator = attributes.iterator();
-            while (attrIterator.hasNext()) {
-                Attribute attribute = attrIterator.next();
-                if (entry.getKey().equalsIgnoreCase(attribute.getName())) {
-                    copyAttribute(attribute, entry.getValue());
-                    originalAttrMatch.add(entry.getKey());
-                    findMatch.add(attribute.getName());
-                    break;
+        for (Attribute vdbAttr: original.getAttributes()) {
+            String vdbAttrName = vdbAttr.getName();
+            for (Attribute interfaceAttr: attributes) {
+                String interfaceAttrName = interfaceAttr.getName();
+                boolean matched = false;
+                if (!findMatch.contains(interfaceAttrName)) {
+                    if (interfaceAttrName.equalsIgnoreCase(vdbAttrName)) {
+                        matched = true;
+                    } else if (interfaceAttr.getAllowedDisplayNames().contains(vdbAttrName.toUpperCase())) {
+                        matched = true;
+                    }
                 }
-                if (attribute.getAllowedDisplayNames().contains(entry.getKey().toUpperCase())) {
-                    log.info(String.format("Matched column : %s", entry.getKey()));
-                    copyAttribute(attribute, entry.getValue());
-                    originalAttrMatch.add(entry.getKey());
-                    findMatch.add(attribute.getName());
+                if (matched) {
+                    log.info(String.format("Matched column : %s -> %s", vdbAttrName, interfaceAttr));
+                    copyAttribute(interfaceAttr, vdbAttr);
+                    findMatch.add(interfaceAttrName);
+                    originalAttrMatch.add(vdbAttrName);
                     break;
-                }
-                // Remove nullable (not required) field in SchemaRepository.
-                if (attribute.isNullable()) {
-                    attrIterator.remove();
                 }
             }
         }
@@ -103,17 +100,17 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             }
         }
 
-        for (Map.Entry<String, Attribute> entry : originalAttrs.entrySet()) {
-            if (!originalAttrMatch.contains(entry.getKey())) {
-                attributes.add(entry.getValue());
+        originalAttrs.forEach((name, attr) -> {
+            if (!originalAttrMatch.contains(name)) {
+                attributes.add(attr);
             }
-        }
+        });
 
         table.setName(original.getName());
         table.setDisplayName(original.getDisplayName());
 
         String lastModifiedKey = table.getLastModifiedKey().getName();
-        if (!originalAttrs.containsKey(lastModifiedKey)) {
+        if (table.getAttribute(lastModifiedKey) == null) {
             log.warn("Cannot map any attribute to designated last modified key " + lastModifiedKey);
             table.setLastModifiedKey(null);
         }
