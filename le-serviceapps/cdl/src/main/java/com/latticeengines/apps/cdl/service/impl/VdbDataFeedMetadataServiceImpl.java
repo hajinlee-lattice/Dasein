@@ -8,23 +8,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.apps.cdl.util.VdbMetadataUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
-import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.apps.cdl.util.VdbMetadataUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
-import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.FundamentalType;
-import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -115,6 +111,13 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
         table.setName(original.getName());
         table.setDisplayName(original.getDisplayName());
+
+        String lastModifiedKey = table.getLastModifiedKey().getName();
+        if (!originalAttrs.containsKey(lastModifiedKey)) {
+            log.warn("Cannot map any attribute to designated last modified key " + lastModifiedKey);
+            table.setLastModifiedKey(null);
+        }
+
         return table;
     }
 
