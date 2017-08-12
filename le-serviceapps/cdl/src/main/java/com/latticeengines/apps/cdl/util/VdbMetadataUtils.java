@@ -52,23 +52,23 @@ public class VdbMetadataUtils {
 
     private static FundamentalType resolveFundamentalType(VdbSpecMetadata metadata) {
         String vdbFundamentalType = metadata.getFundamentalType();
+        if (StringUtils.isBlank(vdbFundamentalType)) {
+            return null;
+        }
+
         if ("Bit".equalsIgnoreCase(vdbFundamentalType)) {
             vdbFundamentalType = "boolean";
         } else if ("EpochTime".equalsIgnoreCase(vdbFundamentalType)) {
             vdbFundamentalType = "date";
         } else if (unparsableFundamentalTypes.contains(vdbFundamentalType.toLowerCase())) {
-            vdbFundamentalType = "";
+            return null;
         }
 
-        if (StringUtils.isBlank(vdbFundamentalType)) {
+        try {
+            return FundamentalType.fromName(vdbFundamentalType);
+        } catch (Exception e) {
+            log.warn("Found unknown VDB fundamental type: FundamentalType=" + vdbFundamentalType);
             return null;
-        } else {
-            try {
-                return FundamentalType.fromName(vdbFundamentalType);
-            } catch (Exception e) {
-                log.warn("Found unknown VDB fundamental type: FundamentalType=" + vdbFundamentalType);
-                return null;
-            }
         }
     }
 
