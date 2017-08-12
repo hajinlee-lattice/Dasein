@@ -42,6 +42,7 @@ if [ ! -z "${HOSTS}" ]; then
     MODELING_HOSTPORT=""
     DATAFLOWAPI_HOSTPORTS=""
     WORKFLOWAPI_HOSTPORTS=""
+    OBJECTAPI_HOSTPORTS=""
     QUATZ_HOSTPORTS=""
     MODELQUALITY_HOSTPORTS=""
     DATACLOUDAPI_HOSTPORTS=""
@@ -67,6 +68,7 @@ if [ ! -z "${HOSTS}" ]; then
             MODELING_HOSTPORT="${MODELING_HOSTPORT}${h}:9004,"
             DATAFLOWAPI_HOSTPORTS="${DATAFLOWAPI_HOSTPORTS}${h}:9005,"
             WORKFLOWAPI_HOSTPORTS="${WORKFLOWAPI_HOSTPORTS}${h}:9006,"
+            OBJECTAPI_HOSTPORTS="${OBJECTAPI_HOSTPORTS}${h}:9013,"
             QUATZ_HOSTPORTS="${QUATZ_HOSTPORTS}${h}:9007,"
             MODELQUALITY_HOSTPORTS="${MODELQUALITY_HOSTPORTS}${h}:9008,"
             DATACLOUDAPI_HOSTPORTS="${DATACLOUDAPI_HOSTPORTS}${h}:9009,"
@@ -92,6 +94,7 @@ replace_token scoring ${SCORING_HOSTPORTS} true
 replace_token modeling ${MODELING_HOSTPORT} true
 replace_token dataflowapi ${DATAFLOWAPI_HOSTPORTS} true
 replace_token workflowapi ${WORKFLOWAPI_HOSTPORTS} true
+replace_token objectapi ${OBJECTAPI_HOSTPORTS} true
 replace_token quartz ${QUATZ_HOSTPORTS} true
 replace_token modelquality ${MODELQUALITY_HOSTPORTS} true
 replace_token datacloudapi ${DATACLOUDAPI_HOSTPORTS} true
