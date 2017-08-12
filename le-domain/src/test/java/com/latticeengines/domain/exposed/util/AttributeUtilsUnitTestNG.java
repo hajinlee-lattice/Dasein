@@ -84,7 +84,7 @@ public class AttributeUtilsUnitTestNG {
         assertEquals(fm.getPropertyValue("DataQuality"), FieldType.INTEGER.type().getSimpleName());
         assertEquals(fm.getPropertyValue("InterfaceName"), InterfaceName.CompanyName.toString());
         assertEquals(fm.getPropertyValue("ApprovedUsage"), "[" + ApprovedUsage.MODEL.toString() + "]");
-        assertEquals(fm.getPropertyValue("FundamentalType"), FundamentalType.NUMERIC.toString());
+        assertEquals(fm.getPropertyValue("FundamentalType"), FundamentalType.NUMERIC.name());
         assertEquals(fm.getPropertyValue("StatisticalType"), StatisticalType.ORDINAL.toString());
         assertEquals(fm.getPropertyValue("Category"), Category.LEAD_INFORMATION.toString());
         assertEquals(fm.getPropertyValue("Nullable"), Boolean.TRUE.toString());

@@ -523,7 +523,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (statisticalType == null) {
             properties.remove("StatisticalType");
         } else {
-            properties.put("StatisticalType", statisticalType.name());
+            properties.put("StatisticalType", statisticalType.getName());
         }
     }
 
