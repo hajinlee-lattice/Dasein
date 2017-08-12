@@ -150,7 +150,7 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public void registerReport(Report report, String tenantId) {
         try {
             String url = constructUrl("pls/internal/reports", tenantId);
-            log.info(String.format("Posting to %s", url));
+            log.info(String.format("Posting to %s\n%s", url, JsonUtils.pprint(report)));
             restTemplate.postForObject(url, report, Void.class);
         } catch (Exception e) {
             throw new RuntimeException("registerReport: Remote call failure", e);
