@@ -23,6 +23,7 @@ public class VdbTableToAvroTypeConverter extends AvroTypeConverter {
         typeMap.put("date", Type.LONG);
         typeMap.put("datetime", Type.LONG);
         typeMap.put("datetimeoffset", Type.LONG);
+        typeMap.put("string", Type.STRING);
     }
 
     @Override
