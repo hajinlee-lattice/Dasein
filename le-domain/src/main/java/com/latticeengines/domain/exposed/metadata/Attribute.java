@@ -520,7 +520,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setStatisticalType(StatisticalType statisticalType) {
-        if (statisticalType != null) {
+        if (statisticalType == null) {
+            properties.remove("StatisticalType");
+        } else {
             properties.put("StatisticalType", statisticalType.getName());
         }
     }
@@ -543,7 +545,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setFundamentalType(FundamentalType fundamentalType) {
-        if (fundamentalType != null) {
+        if (fundamentalType == null) {
+            properties.remove("FundamentalType");
+        } else {
             properties.put("FundamentalType", fundamentalType.getName());
         }
     }
