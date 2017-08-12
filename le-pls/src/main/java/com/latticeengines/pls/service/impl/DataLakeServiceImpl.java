@@ -166,10 +166,18 @@ public class DataLakeServiceImpl implements DataLakeService {
         cms.forEach(cm -> cm.setEntity(entity));
         switch (entity) {
             case Account:
-                cms.forEach(cm -> cm.setCategory(Category.ACCOUNT_ATTRIBUTES));
+                cms.forEach(cm -> {
+                    if (cm.getCategory() == null) {
+                        cm.setCategory(Category.ACCOUNT_ATTRIBUTES);
+                    }
+                });
                 break;
             case Contact:
-                cms.forEach(cm -> cm.setCategory(Category.CONTACT_ATTRIBUTES));
+                cms.forEach(cm -> {
+                    if (cm.getCategory() == null) {
+                        cm.setCategory(Category.CONTACT_ATTRIBUTES);
+                    }
+                });
                 break;
         }
         return cms;

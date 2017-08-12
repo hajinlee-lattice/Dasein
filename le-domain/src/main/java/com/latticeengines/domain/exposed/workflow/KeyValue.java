@@ -106,7 +106,6 @@ public class KeyValue implements HasTenantId, HasPid {
             log.warn("Payload is null.");
             return;
         } else {
-            log.info("playload=[" + payload + "]");
             payloadData = payload.getBytes();
         }
 
