@@ -325,7 +325,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                     throw new RuntimeException("Attribute " + attribute.getName() //
                             + " has neither physical data type nor source logical data type");
                 }
-                if (attribute.getSourceLogicalDataType().toLowerCase().equals("date")) {
+                if (attribute.getPhysicalDataType().toLowerCase().equals("date")) {
                     attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }
             }
