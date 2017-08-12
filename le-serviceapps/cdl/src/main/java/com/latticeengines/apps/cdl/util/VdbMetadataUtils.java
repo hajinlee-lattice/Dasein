@@ -1,7 +1,13 @@
 package com.latticeengines.apps.cdl.util;
 
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -12,6 +18,12 @@ import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 
 public class VdbMetadataUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(VdbMetadataUtils.class);
+
+    static final Set<String> unparsableFundamentalTypes = new HashSet<>(Arrays.asList( //
+            "alert", "segment", "unknown"
+    ));
 
     public static Attribute convertToAttribute(VdbSpecMetadata metadata) {
         try {
@@ -40,13 +52,24 @@ public class VdbMetadataUtils {
 
     private static FundamentalType resolveFundamentalType(VdbSpecMetadata metadata) {
         String vdbFundamentalType = metadata.getFundamentalType();
-        if (StringUtils.isBlank(vdbFundamentalType) || vdbFundamentalType.equalsIgnoreCase("Unknown")) {
-            return null;
-        }
-        if (vdbFundamentalType.equalsIgnoreCase("bit")) {
+        if ("Bit".equalsIgnoreCase(vdbFundamentalType)) {
             vdbFundamentalType = "boolean";
+        } else if ("EpochTime".equalsIgnoreCase(vdbFundamentalType)) {
+            vdbFundamentalType = "date";
+        } else if (unparsableFundamentalTypes.contains(vdbFundamentalType.toLowerCase())) {
+            vdbFundamentalType = "";
         }
-        return FundamentalType.fromName(vdbFundamentalType);
+
+        if (StringUtils.isBlank(vdbFundamentalType)) {
+            return null;
+        } else {
+            try {
+                return FundamentalType.fromName(vdbFundamentalType);
+            } catch (Exception e) {
+                log.warn("Found unknown VDB fundamental type: FundamentalType=" + vdbFundamentalType);
+                return null;
+            }
+        }
     }
 
     private static StatisticalType resolveStatisticalType(VdbSpecMetadata metadata) {
