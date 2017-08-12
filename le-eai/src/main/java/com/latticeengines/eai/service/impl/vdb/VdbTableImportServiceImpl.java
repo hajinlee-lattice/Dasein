@@ -315,17 +315,17 @@ public class VdbTableImportServiceImpl extends ImportService {
                     log.warn(String.format("Empty attribute in table %s", table.getName()));
                     continue;
                 }
-                if (StringUtils.isNotBlank(attribute.getPhysicalDataType())) {
-                    attribute.setPhysicalDataType(vdbTableToAvroTypeConverter.convertTypeToAvro(
-                            attribute.getPhysicalDataType().toLowerCase()).name());
-                } else if (StringUtils.isNotBlank(attribute.getSourceLogicalDataType())) {
-                    attribute.setPhysicalDataType(vdbTableToAvroTypeConverter.convertTypeToAvro(
-                            attribute.getSourceLogicalDataType().toLowerCase()).name());
-                } else {
+
+                if (StringUtils.isBlank(attribute.getSourceLogicalDataType())) {
+                    attribute.setSourceLogicalDataType(attribute.getPhysicalDataType());
+                }
+                if (StringUtils.isBlank(attribute.getSourceLogicalDataType())) {
                     throw new RuntimeException("Attribute " + attribute.getName() //
                             + " has neither physical data type nor source logical data type");
                 }
-                if (attribute.getPhysicalDataType().toLowerCase().equals("date")) {
+                attribute.setPhysicalDataType(vdbTableToAvroTypeConverter.convertTypeToAvro(
+                        attribute.getSourceLogicalDataType().toLowerCase()).name());
+                if (attribute.getSourceLogicalDataType().toLowerCase().equals("date")) {
                     attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }
             }
