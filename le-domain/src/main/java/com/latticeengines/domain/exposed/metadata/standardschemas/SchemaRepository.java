@@ -451,7 +451,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("State") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "STATE_PROVINCE", "PROVINCE",
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "STATE", "STATE_PROVINCE", "STATEPROVINCE", "PROVINCE",
                         "STATE OR PROVINCE", "BILLING STATE", "BILLING PROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
