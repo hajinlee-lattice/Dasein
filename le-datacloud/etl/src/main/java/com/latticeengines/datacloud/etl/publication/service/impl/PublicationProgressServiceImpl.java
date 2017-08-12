@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -100,6 +101,10 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
     @Override
     public PublicationProgress publishVersion(Publication publication, PublicationDestination destination,
             String version, String creator) {
+        if (StringUtils.isBlank(version)) {
+            version = hdfsSourceEntityMgr.getCurrentVersion(publication.getSourceName());
+        }
+        log.info("Will publish source " + publication.getSourceName() +" at version " + version);
         PublicationProgress existingProgress = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
                 version);
         if (existingProgress != null) {
