@@ -82,9 +82,13 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
     }
 
     protected void uploadSourceAtVersion(Source source, String version) {
+        uploadSourceAtVersion(source.getSourceName(), version);
+    }
+
+    protected void uploadSourceAtVersion(String sourceName, String version) {
         InputStream baseAvroStream = ClassLoader
-                .getSystemResourceAsStream("sources/" + source.getSourceName() + ".avro");
-        String targetPath = hdfsPathBuilder.constructSnapshotDir(source, version).append("part-0000.avro")
+                .getSystemResourceAsStream("sources/" + sourceName + ".avro");
+        String targetPath = hdfsPathBuilder.constructSnapshotDir(sourceName, version).append("part-0000.avro")
                 .toString();
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
@@ -92,7 +96,7 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
             }
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseAvroStream, targetPath);
             InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
-            String successPath = hdfsPathBuilder.constructSnapshotDir(source, version).append("_SUCCESS")
+            String successPath = hdfsPathBuilder.constructSnapshotDir(sourceName, version).append("_SUCCESS")
                     .toString();
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
         } catch (Exception e) {

@@ -28,17 +28,15 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfig
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.PublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
 public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
-    public final String POD_ID = this.getClass().getSimpleName();
-    public static final String PUBLICATION_NAME = "TestPublication2";
-    public static final String CURRENT_VERSION = "version2";
-    public final String SUBMITTER = this.getClass().getSimpleName();
+    private static final String PUBLICATION_NAME = "TestPublication2";
+    private static final String CURRENT_VERSION = "version2";
+    private final String SUBMITTER = this.getClass().getSimpleName();
 
     @Autowired
     private PublicationProgressService publicationProgressService;
@@ -68,7 +66,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        prepareCleanPod(POD_ID);
+        prepareCleanPod(this.getClass().getSimpleName());
         hdfsSourceEntityMgr.setCurrentVersion(source, CURRENT_VERSION);
         publicationRequest = new PublicationRequest();
         publicationRequest.setSubmitter(SUBMITTER);
@@ -92,11 +90,11 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         List<PublicationProgress> progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 0, "Should have zero progress at beginning");
 
-        publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
+        publicationService.kickoff(PUBLICATION_NAME, publicationRequest);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 1, "Should have a new progress");
 
-        publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
+        publicationService.kickoff(PUBLICATION_NAME, publicationRequest);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 1, "Should still have one progress");
 
@@ -104,40 +102,37 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
                 CURRENT_VERSION);
         publicationProgressService.update(progress1).retry().retry().retry()
                 .status(ProgressStatus.FAILED).commit();
-        publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
+        publicationService.kickoff(PUBLICATION_NAME, publicationRequest);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 2, "Should have one more progress.");
         // test status of latest publication progress with required version
         ProgressStatus status = publicationService.findProgressAtVersion(PUBLICATION_NAME, CURRENT_VERSION);
-        Assert.assertTrue(status == ProgressStatus.NEW);
+        Assert.assertEquals(status, ProgressStatus.NEW);
     }
 
     @Test(groups = "functional", priority = 1)
     public void testScan() throws Exception {
-        startWorkFlowServer(new PublicationWorkflowServlet.PayloadVerifier() {
-            @Override
-            public void verify(PublishWorkflowConfiguration configuration) {
-                String json = configuration.getConfigRegistry().get(PublishConfiguration.class.getCanonicalName());
-                ObjectMapper mapper = new ObjectMapper();
-                try {
-                    JsonNode jsonNode = mapper.readTree(json).get("publication");
-                    Publication publication = mapper.treeToValue(jsonNode, Publication.class);
-                    PublicationConfiguration pubConfig = publication.getDestinationConfiguration();
-                    Assert.assertTrue(pubConfig instanceof PublishToSqlConfiguration);
+        startWorkFlowServer(configuration -> {
+            String json = configuration.getConfigRegistry().get(PublishConfiguration.class.getCanonicalName());
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                JsonNode jsonNode = mapper.readTree(json).get("publication");
+                Publication publication = mapper.treeToValue(jsonNode, Publication.class);
+                PublicationConfiguration pubConfig = publication.getDestinationConfiguration();
+                Assert.assertTrue(pubConfig instanceof PublishToSqlConfiguration);
 
-                    jsonNode = mapper.readTree(json).get("progress");
-                    PublicationProgress progress = mapper.treeToValue(jsonNode, PublicationProgress.class);
-                    Assert.assertNotNull(progress.getDestination());
-                    Assert.assertTrue(progress.getDestination() instanceof SqlDestination);
-                } catch (IOException e) {
-                    Assert.fail("Failed to parse publication configuration.", e);
-                }
+                jsonNode = mapper.readTree(json).get("progress");
+                PublicationProgress progress = mapper.treeToValue(jsonNode, PublicationProgress.class);
+                Assert.assertNotNull(progress.getDestination());
+                Assert.assertTrue(progress.getDestination() instanceof SqlDestination);
+            } catch (IOException e) {
+                Assert.fail("Failed to parse publication configuration.", e);
             }
         });
-        publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
+        publicationService.kickoff(PUBLICATION_NAME, publicationRequest);
         try {
             workflowProxy.setHostport("http://localhost:8234");
-            publicationService.scan(POD_ID);
+            publicationService.scan();
         } catch (Exception e) {
             Assert.fail("Error from workflow proxy.", e);
         }
@@ -154,7 +149,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
 
         PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();
         configuration.setDefaultTableName("DefaultTable");
-        configuration.setPublicationStrategy(PublishToSqlConfiguration.PublicationStrategy.VERSIONED);
+        configuration.setPublicationStrategy(PublicationConfiguration.PublicationStrategy.VERSIONED);
         publication.setDestinationConfiguration(configuration);
 
         return publicationEntityMgr.addPublication(publication);

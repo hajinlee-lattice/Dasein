@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.etl.publication.service;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.domain.exposed.datacloud.publication.PublishTextToSqlConfiguration;
+import com.latticeengines.domain.exposed.datacloud.publication.PublishToDynamoConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 
@@ -21,4 +22,6 @@ public interface PublishConfigurationParser {
     Long countPublishedTable(PublishToSqlConfiguration sqlConfiguration, JdbcTemplate jdbcTemplate);
 
     JdbcTemplate getJdbcTemplate(PublishToSqlConfiguration sqlConfiguration);
+
+    PublishToDynamoConfiguration parseDynamoAlias(PublishToDynamoConfiguration dynamoConfiguration);
 }

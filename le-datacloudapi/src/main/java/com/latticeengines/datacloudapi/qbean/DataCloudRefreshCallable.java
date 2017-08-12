@@ -33,7 +33,7 @@ public class DataCloudRefreshCallable implements Callable<Boolean> {
     public Boolean call() {
 
         try {
-            publicationService.scan("");
+            publicationService.scan();
         } catch (Exception e) {
             log.error("Failed to scan publication engine", e);
         }

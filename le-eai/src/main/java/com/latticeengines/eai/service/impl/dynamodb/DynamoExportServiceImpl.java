@@ -114,7 +114,9 @@ public class DynamoExportServiceImpl extends ExportService {
 
         props.setProperty(ExportProperty.NUM_MAPPERS, ctx.getProperty(ExportProperty.NUM_MAPPERS, String.class));
 
-        props.setProperty("eai.table.schema", JsonUtils.serialize(table));
+        if (table != null) {
+            props.setProperty("eai.table.schema", JsonUtils.serialize(table));
+        }
 
         props.setProperty(DynamoExportJob.CONFIG_RECORD_TYPE,
                 ctx.getProperty(DynamoExportJob.CONFIG_RECORD_TYPE, String.class));

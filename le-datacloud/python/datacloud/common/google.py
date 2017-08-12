@@ -87,5 +87,28 @@ def read_sheet(sheet_name, min_col='A', max_col='Z'):
 if __name__ == '__main__':
     from log import init_logging
     init_logging()
-    data = read_sheet('DnB Attributes')
-    print data
+    data = read_sheet('Existing Attributes')
+    whitelist = {}
+    sources = set()
+    for row in data:
+        if row['Add To New Account Master'] == 'Y':
+            print "%s: %s -> %s" % (row['Source'], row['SourceColumnName'], row['ExternalColumnID'])
+            sources.add(row['Source'])
+            if '{{ ' not in  row['ExternalColumnID']:
+                whitelist[row['SourceColumnName']] = row['ExternalColumnID']
+
+    columnset = set()
+    columnset |= set(whitelist.keys())
+    columnset |= set(whitelist.values())
+    with open('whitelist.csv', 'w') as file:
+        file.write("AMColumn\n")
+        for col in sorted(list(columnset)):
+            if len(col) > 0:
+                file.write(col + "\n")
+
+    pairs = sorted(whitelist.items(), key=lambda i: i[0])
+    with open('mapping.csv', 'w') as file:
+        file.write("PropDataColumn,AMColumn\n")
+        for pair in pairs:
+            if len(pair[0]) > 0:
+                file.write("%s,%s\n" % (pair[0], pair[1]))

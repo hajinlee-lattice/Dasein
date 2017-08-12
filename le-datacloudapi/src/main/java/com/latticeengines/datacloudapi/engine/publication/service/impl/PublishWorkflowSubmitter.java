@@ -33,11 +33,6 @@ public class PublishWorkflowSubmitter {
         return this;
     }
 
-    public PublishWorkflowSubmitter avroDir(String avroDir) {
-        builder = builder.avroDir(avroDir);
-        return this;
-    }
-
     public ApplicationId submit() {
         PublishWorkflowConfiguration configuration = builder.build();
         AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);

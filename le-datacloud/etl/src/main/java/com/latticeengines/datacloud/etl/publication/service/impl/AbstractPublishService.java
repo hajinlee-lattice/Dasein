@@ -2,6 +2,8 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -9,11 +11,11 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressService;
+import com.latticeengines.datacloud.etl.publication.service.PublishConfigurationParser;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 
 abstract class AbstractPublishService {
@@ -22,10 +24,13 @@ abstract class AbstractPublishService {
     private static final Integer HANGING_THRESHOLD_HOURS = 24;
     private static final Integer MAX_ERRORS = 100;
 
-    @Autowired
+    @Inject
     protected PublicationProgressService progressService;
 
-    @Autowired
+    @Inject
+    protected PublishConfigurationParser configurationParser;
+
+    @Inject
     private YarnClient yarnClient;
 
     protected FinalApplicationStatus waitForApplicationToFinish(ApplicationId appId, PublicationProgress progress) {

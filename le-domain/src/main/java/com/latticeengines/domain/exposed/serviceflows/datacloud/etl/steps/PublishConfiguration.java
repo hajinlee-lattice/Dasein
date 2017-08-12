@@ -19,9 +19,6 @@ public class PublishConfiguration extends BaseStepConfiguration {
     @NotNull
     private PublicationProgress progress;
 
-    @NotNull
-    private String avroDir;
-
     @JsonProperty("hdfs_pod_id")
     public String getHdfsPodId() {
         return hdfsPodId;
@@ -50,15 +47,5 @@ public class PublishConfiguration extends BaseStepConfiguration {
     @JsonProperty("progress")
     public void setProgress(PublicationProgress progress) {
         this.progress = progress;
-    }
-
-    @JsonProperty("avro_dir")
-    public String getAvroDir() {
-        return avroDir;
-    }
-
-    @JsonProperty("avro_dir")
-    public void setAvroDir(String avroDir) {
-        this.avroDir = avroDir;
     }
 }

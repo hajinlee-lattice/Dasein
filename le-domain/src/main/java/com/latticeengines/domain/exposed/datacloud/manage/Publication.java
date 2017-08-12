@@ -71,6 +71,7 @@ public class Publication implements HasPid {
     @Column(name = "NewJobMaxRetry")
     protected Integer newJobMaxRetry;
 
+    @JsonIgnore
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "publication")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @Fetch(FetchMode.SUBSELECT)
@@ -178,12 +179,12 @@ public class Publication implements HasPid {
         this.newJobMaxRetry = newJobMaxRetry;
     }
 
-    @JsonProperty("Progresses")
+    @JsonIgnore
     public List<PublicationProgress> getProgresses() {
         return progresses;
     }
 
-    @JsonProperty("Progresses")
+    @JsonIgnore
     public void setProgresses(List<PublicationProgress> progresses) {
         this.progresses = progresses;
     }
@@ -204,7 +205,7 @@ public class Publication implements HasPid {
     }
 
     public enum PublicationType {
-        SQL
+        SQL, DYNAMO
     }
 
     public enum MaterialType {

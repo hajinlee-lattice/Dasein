@@ -15,6 +15,9 @@ public interface PublicationProgressEntityMgr {
     PublicationProgress startNewProgress(Publication publication, PublicationDestination destination,
                                          String sourceVersion, String creator);
 
+    PublicationProgress runNewProgress(Publication publication, PublicationDestination destination,
+                                       String sourceVersion, String creator);
+
     PublicationProgress updateProgress(PublicationProgress progress);
 
     PublicationProgress findLatestNonTerminalProgress(Publication publication);

@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -21,10 +22,10 @@ import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
 
 public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctionalTestNGBase {
 
-    public static final String POD_ID = "PublicationServiceImplTestNG";
-    public static final String PUBLICATION_NAME = "TestPublication";
-    public static final String CURRENT_VERSION = "version1";
-    public static final String SUBMITTER = PublicationProgressServiceImplTestNG.class.getSimpleName();
+    private static final String POD_ID = "PublicationServiceImplTestNG";
+    private static final String PUBLICATION_NAME = "TestPublication";
+    private static final String CURRENT_VERSION = "version1";
+    private static final String SUBMITTER = PublicationProgressServiceImplTestNG.class.getSimpleName();
 
     @Autowired
     private PublicationProgressService publicationProgressService;
@@ -101,7 +102,7 @@ public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctional
         publication.setMaterialType(MaterialType.INGESTION);
         PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();
         configuration.setDefaultTableName("DefaultTable");
-        configuration.setPublicationStrategy(PublishToSqlConfiguration.PublicationStrategy.VERSIONED);
+        configuration.setPublicationStrategy(PublicationConfiguration.PublicationStrategy.VERSIONED);
         publication.setDestinationConfiguration(configuration);
 
         return publicationEntityMgr.addPublication(publication);

@@ -172,7 +172,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             String schemaStr = IOUtils.toString(schemaIs, Charset.forName("UTF-8"));
             switch (entity) {
             case Contact:
-                schemaStr = schemaStr.replace("\"Id\"", "\"" + InterfaceName.LEContactIDLong.name() + "\"");
                 schemaStr = schemaStr.replace("\"LEAccountIDLong\"", "\"" + InterfaceName.AccountId.name() + "\"");
                 break;
             case Account:
@@ -180,19 +179,21 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             }
 
             schema = new Schema.Parser().parse(schemaStr);
+            boolean hasId;
+            boolean hasAccountId;
             switch (entity) {
             case Contact:
-                boolean hasLEContactIDLong = schema.getFields().stream().map(Schema.Field::name)
-                        .anyMatch(n -> InterfaceName.LEContactIDLong.name().equals(n));
-                boolean hasAccountId = schema.getFields().stream().map(Schema.Field::name)
+                hasId = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.Id.name().equals(n));
+                hasAccountId = schema.getFields().stream().map(Schema.Field::name)
                         .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
-                Assert.assertTrue(hasLEContactIDLong);
+                Assert.assertTrue(hasId);
                 Assert.assertTrue(hasAccountId);
                 break;
             case Account:
-                boolean hasLEAccountIDLong = schema.getFields().stream().map(Schema.Field::name)
-                        .anyMatch(n -> InterfaceName.LEAccountIDLong.name().equals(n));
-                Assert.assertTrue(hasLEAccountIDLong);
+                hasId= schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.Id.name().equals(n));
+                Assert.assertTrue(hasId);
                 break;
             default:
             }

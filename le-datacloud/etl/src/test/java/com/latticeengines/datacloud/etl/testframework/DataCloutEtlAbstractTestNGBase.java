@@ -110,7 +110,10 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         InputStream baseSourceStream = null;
         String targetPath = null;
         String successPath = null;
-        baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSourceFile + ".avro");
+        if (!baseSourceFile.endsWith(".avro")) {
+            baseSourceFile += ".avro";
+        }
+        baseSourceStream = ClassLoader.getSystemResourceAsStream("sources/" +baseSourceFile);
         targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("part-0000.avro")
                 .toString();
         successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")

@@ -120,8 +120,8 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(ImmutableMap.<String, String> builder()
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, initialDataFeedStatus.getName()) //
                         .build()) //
-                .accountIdField(InterfaceName.LEAccountIDLong.name()) //
-                .contactIdField(InterfaceName.LEContactIDLong.name()) //
+                .accountIdField(InterfaceName.Id.name()) //
+                .contactIdField(InterfaceName.Id.name()) //
                 .workflowContainerMem(workflowMemMb) //
                 .build();
     }

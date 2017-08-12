@@ -1,6 +1,8 @@
 package com.latticeengines.aws.dynamo.impl;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -23,6 +25,9 @@ import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
+import com.amazonaws.services.dynamodbv2.model.Tag;
+import com.amazonaws.services.dynamodbv2.model.TagResourceRequest;
+import com.amazonaws.services.dynamodbv2.model.TagResourceResult;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import com.latticeengines.aws.dynamo.DynamoService;
 
@@ -33,24 +38,25 @@ public class DynamoServiceImpl implements DynamoService {
 
     private DynamoDB dynamoDB;
     private AmazonDynamoDB client;
-    private AmazonDynamoDB remoteClient;
+    private AmazonDynamoDB localClient;
 
     @Autowired
     public DynamoServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.dynamo.endpoint}") String endpoint,
             @Value("${aws.region}") String region) {
         log.info("Constructing DynamoDB client using BasicAWSCredentials.");
-        remoteClient = AmazonDynamoDBClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
+        client = AmazonDynamoDBClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
                 .withRegion(Regions.fromName(region)) //
                 .build();
         if (StringUtils.isNotEmpty(endpoint)) {
             log.info("Constructing DynamoDB client using endpoint " + endpoint);
-            client = AmazonDynamoDBClientBuilder.standard()
+            localClient = AmazonDynamoDBClientBuilder.standard()
                     .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region)) //
                     .build();
             dynamoDB = new DynamoDB(client);
         } else {
-            client = remoteClient;
-            dynamoDB = new DynamoDB(remoteClient);
+            localClient = client;
+            dynamoDB = new DynamoDB(client);
         }
     }
 
@@ -66,7 +72,12 @@ public class DynamoServiceImpl implements DynamoService {
 
     @Override
     public AmazonDynamoDB getRemoteClient() {
-        return remoteClient;
+        return client;
+    }
+
+    public void switchToLocal() {
+        this.client = localClient;
+        this.dynamoDB = new DynamoDB(client);
     }
 
     @Override
@@ -87,9 +98,13 @@ public class DynamoServiceImpl implements DynamoService {
                     .add(new AttributeDefinition().withAttributeName(sortKeyName).withAttributeType(sortKeyType));
         }
 
-        CreateTableRequest request = new CreateTableRequest().withTableName(tableName).withKeySchema(keySchema)
-                .withAttributeDefinitions(attributeDefinitions).withProvisionedThroughput(new ProvisionedThroughput()
-                        .withReadCapacityUnits(readCapacityUnits).withWriteCapacityUnits(writeCapacityUnits));
+        ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput()
+                .withReadCapacityUnits(readCapacityUnits).withWriteCapacityUnits(writeCapacityUnits);
+        CreateTableRequest request = new CreateTableRequest() //
+                .withTableName(tableName) //
+                .withKeySchema(keySchema) //
+                .withAttributeDefinitions(attributeDefinitions) //
+                .withProvisionedThroughput(provisionedThroughput);
 
         try {
             log.info("Creating table " + tableName);
@@ -109,8 +124,45 @@ public class DynamoServiceImpl implements DynamoService {
         request.setTableName(tableName);
         try {
             TableUtils.deleteTableIfExists(client, request);
+            while (hasTable(tableName)) {
+                log.info("Wait 1 sec for deleting " + tableName);
+                Thread.sleep(1000);
+            }
         } catch (Exception e) {
             throw new RuntimeException("Failed to delete dynamo table " + tableName, e);
         }
+    }
+
+    @Override
+    public boolean hasTable(String tableName) {
+        return client.listTables().getTableNames().contains(tableName);
+    }
+
+    @Override
+    public void updateTableThroughput(String tableName, long readCapacity, long writeCapacity) {
+        Table table = dynamoDB.getTable(tableName);
+        log.info(String.format("Modifying provisioned throughput for %s to read=%d and write=%d", tableName, readCapacity,
+                writeCapacity));
+        try {
+            table.updateTable(new ProvisionedThroughput().withReadCapacityUnits(readCapacity).withWriteCapacityUnits(writeCapacity));
+            table.waitForActive();
+        } catch (Exception e) {
+            throw new RuntimeException("UpdateTable request failed for " + tableName, e);
+        }
+    }
+
+    @Override
+    public void tagTable(String tableName, Map<String, String> tags) {
+        String tableArn = client.describeTable(tableName).getTable().getTableArn();
+        List<Tag> dynamoTags = new ArrayList<>();
+        tags.forEach((k, v) -> {
+            Tag dynamoTag = new Tag().withKey(k).withValue(v);
+            dynamoTags.add(dynamoTag);
+        });
+        TagResourceRequest request = new TagResourceRequest();
+        request.setTags(dynamoTags);
+        request.setResourceArn(tableArn);
+        TagResourceResult result = client.tagResource(request);
+        log.info("TagResourceResult: " + result.toString());
     }
 }

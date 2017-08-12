@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
@@ -19,8 +18,6 @@ import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.service.DataCloudTenantService;
-import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationEntityMgr;
@@ -28,8 +25,8 @@ import com.latticeengines.datacloud.etl.publication.entitymgr.PublicationProgres
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressService;
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressUpdater;
 import com.latticeengines.datacloud.etl.service.DataCloudEngineService;
-import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.datacloudapi.engine.publication.service.PublicationService;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
@@ -56,12 +53,6 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
     private PublicationProgressService publicationProgressService;
 
     @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    private SourceService sourceService;
-
-    @Autowired
     private DataCloudTenantService dataCloudTenantService;
 
     @Autowired
@@ -71,10 +62,7 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
     private YarnClient yarnClient;
 
     @Override
-    public List<PublicationProgress> scan(String hdfsPod) {
-        if (StringUtils.isNotEmpty(hdfsPod)) {
-            HdfsPodContext.changeHdfsPodId(hdfsPod);
-        }
+    public List<PublicationProgress> scan() {
         checkFailedProgresses();
         killHangingJobs();
         publishAll();
@@ -82,10 +70,7 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
     }
 
     @Override
-    public PublicationProgress publish(String publicationName, PublicationRequest request, String hdfsPod) {
-        if (StringUtils.isNotEmpty(hdfsPod)) {
-            HdfsPodContext.changeHdfsPodId(hdfsPod);
-        }
+    public PublicationProgress kickoff(String publicationName, PublicationRequest request) {
         Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
         PublicationProgress progress = publicationProgressService.publishVersion(publication,
                 request.getSourceVersion(), request.getSubmitter());
@@ -93,6 +78,18 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
             log.info("There is already a progress for version " + request.getSourceVersion());
         }
         return progress;
+    }
+
+    @Override
+    public AppSubmission publish(String publicationName, PublicationRequest request) {
+        Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
+        if (publication == null) {
+            throw new IllegalArgumentException("Cannot find publication named " + publicationName);
+        }
+        PublicationProgress progress = publicationProgressService.publishVersion(publication, request.getDestination(),
+                request.getSourceVersion(), request.getSubmitter());
+        ApplicationId appId = submitWorkflow(progress);
+        return new AppSubmission(appId);
     }
 
     private void publishAll() {
@@ -150,26 +147,13 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
                     dataCloudTenantService.bootstrapServiceTenant();
                     serviceTenantBootstrapped = true;
                 }
-                Publication publication = progress.getPublication();
-                String avroDir = null;
-                switch (publication.getMaterialType()) {
-                    case SOURCE:
-                        Source source = sourceService.findBySourceName(publication.getSourceName());
-                    avroDir = hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), progress.getSourceVersion())
-                            .toString();
-                        break;
-                    case INGESTION:
-                        avroDir = hdfsPathBuilder.constructIngestionDir(publication.getSourceName(),
-                            progress.getSourceVersion()).toString();
-                        break;
-                }
                 PublicationProgressUpdater updater = publicationProgressService.update(progress)
                         .status(ProgressStatus.PROCESSING);
                 if (ProgressStatus.FAILED.equals(progress.getStatus())) {
                     updater.retry();
                 }
                 updater.commit();
-                ApplicationId applicationId = submitWorkflow(progress, avroDir, HdfsPodContext.getHdfsPodId());
+                ApplicationId applicationId = submitWorkflow(progress);
                 PublicationProgress progress1 = publicationProgressService.update(progress).applicationId(applicationId)
                         .commit();
                 progresses.add(progress1);
@@ -183,12 +167,11 @@ public class PublicationServiceImpl implements PublicationService, DataCloudEngi
         return progresses;
     }
 
-    private ApplicationId submitWorkflow(PublicationProgress progress, String avroDir, String hdfsPod) {
+    private ApplicationId submitWorkflow(PublicationProgress progress) {
         Publication publication = progress.getPublication();
         return new PublishWorkflowSubmitter() //
-                .hdfsPodId(hdfsPod) //
+                .hdfsPodId(HdfsPodContext.getHdfsPodId()) //
                 .workflowProxy(workflowProxy) //
-                .avroDir(avroDir) //
                 .progress(progress) //
                 .publication(publication) //
                 .submit();

@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -59,28 +59,25 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
     private Configuration yarnConfiguration;
 
     @Override
-    public PublicationProgress kickoffNewProgress(Publication publication, String creator)
-            throws IOException {
+    public PublicationProgress kickoffNewProgress(Publication publication, String creator) throws IOException {
         String currentVersion = null;
         switch (publication.getMaterialType()) {
-            case SOURCE:
-                String sourceName = publication.getSourceName();
-                Source source = sourceService.findBySourceName(sourceName);
-                currentVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
-                break;
-            case INGESTION:
-                String ingestionName = publication.getSourceName();
-                String ingestionDir = hdfsPathBuilder.constructIngestionDir(ingestionName)
-                        .toString();
-                List<String> versions = HdfsUtils.getFilesForDir(yarnConfiguration, ingestionDir);
-                if (versions != null && !versions.isEmpty()) {
-                    Path currentVersionPath = new Path((String) Collections.max(versions));
-                    currentVersion = currentVersionPath.getName();
-                }
-                break;
+        case SOURCE:
+            String sourceName = publication.getSourceName();
+            Source source = sourceService.findBySourceName(sourceName);
+            currentVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
+            break;
+        case INGESTION:
+            String ingestionName = publication.getSourceName();
+            String ingestionDir = hdfsPathBuilder.constructIngestionDir(ingestionName).toString();
+            List<String> versions = HdfsUtils.getFilesForDir(yarnConfiguration, ingestionDir);
+            if (versions != null && !versions.isEmpty()) {
+                Path currentVersionPath = new Path((String) Collections.max(versions));
+                currentVersion = currentVersionPath.getName();
+            }
+            break;
         }
-        if (currentVersion != null
-                && newProgressValidator.isValidToStartNewProgress(publication, currentVersion)) {
+        if (currentVersion != null && newProgressValidator.isValidToStartNewProgress(publication, currentVersion)) {
             return publishVersion(publication, currentVersion, creator);
         } else {
             return null;
@@ -88,17 +85,28 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
     }
 
     @Override
-    public PublicationProgress publishVersion(Publication publication, String version,
-            String creator) {
-        PublicationProgress existingProgress = progressEntityMgr
-                .findBySourceVersionUnderMaximumRetry(publication, version);
+    public PublicationProgress publishVersion(Publication publication, String version, String creator) {
+        PublicationProgress existingProgress = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
+                version);
         if (existingProgress != null) {
             return null;
         }
         PublicationDestination destination = constructDestination(publication, version);
-        PublicationProgress progress = progressEntityMgr.startNewProgress(publication, destination,
-                version, creator);
+        PublicationProgress progress = progressEntityMgr.startNewProgress(publication, destination, version, creator);
         log.info("Kick off new progress [" + progress + "]");
+        return progress;
+    }
+
+    @Override
+    public PublicationProgress publishVersion(Publication publication, PublicationDestination destination,
+            String version, String creator) {
+        PublicationProgress existingProgress = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
+                version);
+        if (existingProgress != null) {
+            return null;
+        }
+        PublicationProgress progress = progressEntityMgr.runNewProgress(publication, destination, version, creator);
+        log.info("Kick off and run new progress [" + progress + "]");
         return progress;
     }
 
@@ -112,8 +120,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
     public List<PublicationProgress> scanNonTerminalProgresses() {
         List<PublicationProgress> progresses = new ArrayList<>();
         for (Publication publication : publicationEntityMgr.findAll()) {
-            PublicationProgress progress = progressEntityMgr
-                    .findLatestNonTerminalProgress(publication);
+            PublicationProgress progress = progressEntityMgr.findLatestNonTerminalProgress(publication);
             if (progress != null) {
                 progresses.add(progress);
             }
@@ -124,11 +131,11 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
     private PublicationDestination constructDestination(Publication publication, String version) {
         try {
             switch (publication.getPublicationType()) {
-                case SQL:
-                    return constructSqlDestination(publication, version);
-                default:
-                    throw new UnsupportedOperationException(
-                            "Unknown publication type: " + publication.getPublicationType());
+            case SQL:
+                return constructSqlDestination(publication, version);
+            default:
+                throw new UnsupportedOperationException(
+                        "Unknown publication type: " + publication.getPublicationType());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to construct destination for publication "
@@ -136,21 +143,18 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
         }
     }
 
-    private SqlDestination constructSqlDestination(Publication publication, String version)
-            throws Exception {
-        PublishToSqlConfiguration configuration = (PublishToSqlConfiguration) publication
-                .getDestinationConfiguration();
+    private SqlDestination constructSqlDestination(Publication publication, String version) throws Exception {
+        PublishToSqlConfiguration configuration = (PublishToSqlConfiguration) publication.getDestinationConfiguration();
         if (configuration == null) {
-            throw new IllegalArgumentException("Publication " + publication.getPublicationName()
-                    + " does not have a destination configuration.");
+            throw new IllegalArgumentException(
+                    "Publication " + publication.getPublicationName() + " does not have a destination configuration.");
         }
         String tableName = configuration.getDefaultTableName();
         if (tableName == null) {
             throw new IllegalArgumentException("PublishToSqlConfiguration for publication "
                     + publication.getPublicationName() + " does not have a default table anme.");
         }
-        if (PublishToSqlConfiguration.PublicationStrategy.VERSIONED
-                .equals(configuration.getPublicationStrategy())) {
+        if (PublishToSqlConfiguration.PublicationStrategy.VERSIONED.equals(configuration.getPublicationStrategy())) {
             tableName += "_" + version;
         }
         SqlDestination destination = new SqlDestination();
@@ -199,8 +203,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
 
         @Override
         public PublicationProgressUpdaterImpl fail(String errorMessage) {
-            progress.setErrorMessage(
-                    errorMessage.substring(0, Math.min(1000, errorMessage.length())));
+            progress.setErrorMessage(errorMessage.substring(0, Math.min(1000, errorMessage.length())));
             progress.setStatus(ProgressStatus.FAILED);
             return this;
         }
@@ -208,6 +211,12 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
         @Override
         public PublicationProgressUpdater rowsPublished(Long rows) {
             progress.setRowsPublished(rows);
+            return this;
+        }
+
+        @Override
+        public PublicationProgressUpdater destination(PublicationDestination destination) {
+            progress.setDestination(destination);
             return this;
         }
 

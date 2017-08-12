@@ -12,7 +12,6 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
     protected String username;
     protected String encryptedPassword;
     protected Alias alias;
-    protected PublicationStrategy publicationStrategy;
 
     @Override
     @JsonProperty("ConfigurationType")
@@ -80,16 +79,6 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
         this.defaultTableName = defaultTableName;
     }
 
-    @JsonProperty("Strategy")
-    public PublicationStrategy getPublicationStrategy() {
-        return publicationStrategy;
-    }
-
-    @JsonProperty("Strategy")
-    public void setPublicationStrategy(PublicationStrategy publicationStrategy) {
-        this.publicationStrategy = publicationStrategy;
-    }
-
     @JsonProperty("Username")
     public String getUsername() {
         return username;
@@ -113,9 +102,4 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
     public enum Alias {
         CollectionDB, BulkDB, SourceDB, TestDB
     }
-
-    public enum PublicationStrategy {
-        VERSIONED, REPLACE, APPEND
-    }
-
 }

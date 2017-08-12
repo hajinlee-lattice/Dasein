@@ -43,18 +43,15 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
             Publication publication = getConfiguration().getPublication();
             progress.setPublication(publication);
 
-            String sourceName = getConfiguration().getPublication().getSourceName();
             progress = progressService.update(progress).progress(0.05f).status(ProgressStatus.PROCESSING).commit();
 
             PublicationConfiguration pubConfig = publication.getDestinationConfiguration();
-            pubConfig.setSourceName(sourceName);
-            pubConfig.setAvroDir(getConfiguration().getAvroDir());
             PublicationDestination destination = progress.getDestination();
             pubConfig.setDestination(destination);
             if (pubConfig.getDestination() == null) {
                 throw new IllegalArgumentException("Publication destination is missing.");
             }
-            PublishService publishService = PublishServiceFactory.getPublishServiceBean(pubConfig.getClass());
+            PublishService publishService = PublishServiceFactory.getPublishServiceBean(publication.getPublicationType());
             progress = publishService.publish(progress, pubConfig);
         } catch (Exception e) {
             failByException(e);

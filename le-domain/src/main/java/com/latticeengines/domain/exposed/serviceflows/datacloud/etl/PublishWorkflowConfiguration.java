@@ -30,11 +30,6 @@ public class PublishWorkflowConfiguration extends BaseDataCloudWorkflowConfigura
             return this;
         }
 
-        public Builder avroDir(String avroDir) {
-            publishConfig.setAvroDir(avroDir);
-            return this;
-        }
-
         public PublishWorkflowConfiguration build() {
             configuration.setContainerConfiguration("publishWorkflow", EngineConstants.PRODATA_CUSTOMERSPACE,
                     "PublishWorkflow");

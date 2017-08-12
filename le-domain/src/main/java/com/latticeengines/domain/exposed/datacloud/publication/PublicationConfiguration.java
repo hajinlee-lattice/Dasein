@@ -10,7 +10,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ConfigurationType")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = PublishToSqlConfiguration.class, name = "PublishToSqlConfiguration"),
-        @JsonSubTypes.Type(value = PublishTextToSqlConfiguration.class, name = "PublishTextToSqlConfiguration")
+        @JsonSubTypes.Type(value = PublishTextToSqlConfiguration.class, name = "PublishTextToSqlConfiguration"),
+        @JsonSubTypes.Type(value = PublishToDynamoConfiguration.class, name = "PublishToDynamoConfiguration")
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class PublicationConfiguration {
@@ -21,12 +22,14 @@ public abstract class PublicationConfiguration {
     @JsonProperty("Destination")
     protected PublicationDestination destination;
 
-    @JsonProperty("AvroDir")
-    private String avroDir;
+    @JsonProperty("Strategy")
+    private PublicationStrategy publicationStrategy;
 
     @JsonIgnore
     protected abstract String getConfigurationType();
 
+    // should get source name from publication
+    @Deprecated
     public String getSourceName() {
         return sourceName;
     }
@@ -43,16 +46,21 @@ public abstract class PublicationConfiguration {
         this.destination = destination;
     }
 
-    public String getAvroDir() {
-        return avroDir;
+    public PublicationStrategy getPublicationStrategy() {
+        return publicationStrategy;
     }
 
-    public void setAvroDir(String avroDir) {
-        this.avroDir = avroDir;
+    public void setPublicationStrategy(PublicationStrategy publicationStrategy) {
+        this.publicationStrategy = publicationStrategy;
     }
 
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
+    public enum PublicationStrategy {
+        VERSIONED, REPLACE, APPEND
+    }
+
 }

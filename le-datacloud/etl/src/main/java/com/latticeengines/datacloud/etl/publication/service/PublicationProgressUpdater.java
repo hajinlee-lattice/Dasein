@@ -4,6 +4,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestination;
 
 public interface PublicationProgressUpdater {
 
@@ -13,6 +14,7 @@ public interface PublicationProgressUpdater {
     PublicationProgressUpdater applicationId(ApplicationId applicationId);
     PublicationProgressUpdater progress(Float progress);
     PublicationProgressUpdater rowsPublished(Long rows);
+    PublicationProgressUpdater destination(PublicationDestination destination);
     PublicationProgress commit();
 
 }

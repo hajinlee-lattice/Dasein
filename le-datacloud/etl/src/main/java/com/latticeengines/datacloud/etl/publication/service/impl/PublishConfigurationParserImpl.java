@@ -18,6 +18,7 @@ import com.latticeengines.datacloud.etl.service.SourceColumnService;
 import com.latticeengines.datacloud.etl.service.SourceService;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishTextToSqlConfiguration;
+import com.latticeengines.domain.exposed.datacloud.publication.PublishToDynamoConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -68,6 +69,18 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
 
     @Value("${datacloud.collection.sqoop.mapper.number}")
     private int numMappers;
+
+    @Value("${datacloud.aws.qa.access.key}")
+    private String qaAwsAccessKey;
+
+    @Value("${datacloud.aws.qa.secret.key}")
+    private String qaAwsSecretKey;
+
+    @Value("${datacloud.aws.prod.access.key}")
+    private String prodAwsAccessKey;
+
+    @Value("${datacloud.aws.prod.secret.key}")
+    private String prodAwsSecretKey;
 
     @Autowired
     private SourceService sourceService;
@@ -241,6 +254,27 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
         dataSource.setPassword(CipherUtils.decrypt(sqlConfiguration.getEncryptedPassword()));
         return new JdbcTemplate(dataSource);
     }
+
+    @Override
+    public PublishToDynamoConfiguration parseDynamoAlias(PublishToDynamoConfiguration dynamoConfiguration) {
+        PublishToDynamoConfiguration.Alias alias = dynamoConfiguration.getAlias();
+        if (alias != null) {
+            switch (alias) {
+                case QA:
+                    dynamoConfiguration.setAwsAccessKeyEncrypted(qaAwsAccessKey);
+                    dynamoConfiguration.setAwsSecretKeyEncrypted(qaAwsSecretKey);
+                    break;
+                case Production:
+                    dynamoConfiguration.setAwsAccessKeyEncrypted(prodAwsAccessKey);
+                    dynamoConfiguration.setAwsSecretKeyEncrypted(prodAwsSecretKey);
+                    break;
+                default:
+                    break;
+            }
+        }
+        return dynamoConfiguration;
+    }
+
 
     private DbCreds getDbCreds(PublishToSqlConfiguration sqlConfiguration) {
         DbCreds.Builder builder = new DbCreds.Builder() //

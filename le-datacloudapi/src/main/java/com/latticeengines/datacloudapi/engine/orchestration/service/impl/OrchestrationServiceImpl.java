@@ -200,7 +200,7 @@ public class OrchestrationServiceImpl implements OrchestrationService {
             startTransform(stage, hdfsPod);
             break;
         case PUBLICATION:
-            startPublish(stage, hdfsPod);
+            startPublish(stage);
             break;
         default:
             throw new UnsupportedOperationException(
@@ -224,11 +224,11 @@ public class OrchestrationServiceImpl implements OrchestrationService {
         sourceTransformationService.pipelineTransform(request, hdfsPod);
     }
 
-    private void startPublish(DataCloudEngineStage stage, String hdfsPod) {
+    private void startPublish(DataCloudEngineStage stage) {
         PublicationRequest request = new PublicationRequest();
         request.setSubmitter(ORCHESTRATION);
         request.setSourceVersion(stage.getVersion());
-        publicationService.publish(stage.getEngineName(), request, hdfsPod);
+        publicationService.kickoff(stage.getEngineName(), request);
     }
 
 }

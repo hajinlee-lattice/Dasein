@@ -4,18 +4,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.latticeengines.datacloud.etl.publication.service.PublishService;
-import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 
 public class PublishServiceFactory {
 
-    private static Map<String, PublishService> serviceMap = new ConcurrentHashMap<>();
+    private static Map<Publication.PublicationType, PublishService> serviceMap = new ConcurrentHashMap<>();
 
-    public static PublishService getPublishServiceBean(Class<? extends PublicationConfiguration> configClass) {
-        return serviceMap.get(configClass.getSimpleName());
+    public static PublishService getPublishServiceBean(Publication.PublicationType publicationType) {
+        return serviceMap.get(publicationType);
     }
 
-    static void register(Class<? extends PublicationConfiguration> configClass, PublishService publishService) {
-        serviceMap.put(configClass.getSimpleName(), publishService);
+    static void register(Publication.PublicationType publicationType, PublishService publishService) {
+        serviceMap.put(publicationType, publishService);
     }
 
 }

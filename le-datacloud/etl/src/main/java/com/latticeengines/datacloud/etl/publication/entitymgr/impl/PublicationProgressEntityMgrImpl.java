@@ -46,18 +46,19 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
     @Transactional(value = "propDataManage")
     public PublicationProgress startNewProgress(Publication publication, PublicationDestination destination,
                                                 String sourceVersion, String creator) {
-        PublicationProgress progress = new PublicationProgress();
-        progress.setPublication(publication);
-        progress.setSourceVersion(sourceVersion);
-        progress.setCreatedBy(creator);
-        progress.setDestination(destination);
-        progress.setHdfsPod(HdfsPodContext.getHdfsPodId());
-
-        progress.setCreateTime(new Date());
-        progress.setLatestStatusUpdate(new Date());
-        progress.setProgress(0f);
-        progress.setRetries(0);
+        PublicationProgress progress = newProgress(publication, destination, sourceVersion, creator);
         progress.setStatus(ProgressStatus.NEW);
+        progressDao.create(progress);
+
+        return findBySourceVersionUnderMaximumRetry(publication, sourceVersion);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage")
+    public PublicationProgress runNewProgress(Publication publication, PublicationDestination destination,
+                                                String sourceVersion, String creator) {
+        PublicationProgress progress = newProgress(publication, destination, sourceVersion, creator);
+        progress.setStatus(ProgressStatus.PROCESSING);
         progressDao.create(progress);
 
         return findBySourceVersionUnderMaximumRetry(publication, sourceVersion);
@@ -75,13 +76,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
     public PublicationProgress findLatestNonTerminalProgress(Publication publication) {
         Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
         List<PublicationProgress> progressList = publication1.getProgresses();
-        Collections.sort(progressList, new Comparator<PublicationProgress>() {
-            @Override
-            public int compare(PublicationProgress o1, PublicationProgress o2) {
-                // sort in create time
-                return o1.getCreateTime().compareTo(o2.getCreateTime());
-            }
-        });
+        Collections.sort(progressList, Comparator.comparing(PublicationProgress::getCreateTime));
         for (PublicationProgress progress : progressList) {
             if (canProceed(publication, progress)) {
                 return progress;
@@ -95,13 +90,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
     public PublicationProgress findLatestUnderMaximumRetry(Publication publication) {
         Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
         List<PublicationProgress> progressList = publication1.getProgresses();
-        Collections.sort(progressList, new Comparator<PublicationProgress>() {
-            @Override
-            public int compare(PublicationProgress o1, PublicationProgress o2) {
-                // sort in create time
-                return o1.getCreateTime().compareTo(o2.getCreateTime());
-            }
-        });
+        Collections.sort(progressList, Comparator.comparing(PublicationProgress::getCreateTime));
         for (PublicationProgress progress : progressList) {
             if (!canBeIgnored(publication, progress)) {
                 return progress;
@@ -142,5 +131,23 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
     @Transactional(value = "propDataManage")
     public List<PublicationProgress> findStatusByPublicationVersion(Publication publication, String version) {
         return progressDao.getStatusForLatestVersion(publication, version);
+    }
+
+
+    private PublicationProgress newProgress(Publication publication, PublicationDestination destination,
+                                            String sourceVersion, String creator) {
+        PublicationProgress progress = new PublicationProgress();
+        progress.setPublication(publication);
+        progress.setSourceVersion(sourceVersion);
+        progress.setCreatedBy(creator);
+        progress.setDestination(destination);
+        progress.setHdfsPod(HdfsPodContext.getHdfsPodId());
+
+        progress.setCreateTime(new Date());
+        progress.setLatestStatusUpdate(new Date());
+        progress.setProgress(0f);
+        progress.setRetries(0);
+        progress.setStatus(ProgressStatus.NEW);
+        return progress;
     }
 }
