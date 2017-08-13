@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +107,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
         setupTestEnvironment();
         mainTestTenant = testBed.getMainTestTenant();
-        // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         checkpointService.setMaintestTenant(mainTestTenant);
 
         logger.info("Test environment setup finished.");
@@ -264,6 +265,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         checkpointService.verifySecondConsolidateCheckpoint();
     }
 
+    protected void verifySecondProfileCheckpoint() throws IOException {
+        checkpointService.verifySecondProfileCheckpoint();
+    }
+
     protected void resumeCheckpoint(String checkpoint) throws IOException {
         checkpointService.resumeCheckpoint(checkpoint);
     }
@@ -331,15 +336,15 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return reports.get(0);
     }
 
-    protected void verifyReport(String appId, int reportSize, int count) {
+    protected void verifyReport(String appId, int reportSize, int exportedAccounts, int exportedContacts) {
         Report report = retrieveReport(appId);
         Map<String, Integer> map = JsonUtils.deserialize(report.getJson().getPayload(),
                 new TypeReference<Map<String, Integer>>() {
                 });
         assertEquals(map.entrySet().size(), reportSize);
         if (reportSize != 0) {
-            assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).intValue(), count);
-            assertEquals(map.get(TableRoleInCollection.SortedContact.name()).intValue(), count);
+            assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).intValue(), exportedAccounts);
+            assertEquals(map.get(TableRoleInCollection.SortedContact.name()).intValue(), exportedContacts);
         }
     }
 

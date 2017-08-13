@@ -26,7 +26,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     private static final Logger log = LoggerFactory.getLogger(FirstConsolidateAndProfileDeploymentTestNG.class);
 
     @Test(groups = "end2end")
-    public void testFirstConsolidate() throws Exception {
+    public void runTest() throws Exception {
         importData();
         consolidate();
         verifyConsolidate();
@@ -51,7 +51,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         ApplicationId appId = cdlProxy.consolidate(mainTestTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
-        verifyReport(appId.toString(), 0, 0);
+        verifyReport(appId.toString(), 0, 0, 0);
     }
 
     private void verifyConsolidate() {
@@ -69,7 +69,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         ApplicationId appId = cdlProxy.profile(mainTestTenant.getId());
         JobStatus completedStatus = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
-        verifyReport(appId.toString(), 2, ACCOUNT_IMPORT_SIZE_1);
+        verifyReport(appId.toString(), 2, ACCOUNT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_1);
     }
 
     private void verifyProfile() throws IOException {
@@ -96,8 +96,6 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         }
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
-        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact),
-        // CONTACT_IMPORT_SIZE_1);
     }
 
 }

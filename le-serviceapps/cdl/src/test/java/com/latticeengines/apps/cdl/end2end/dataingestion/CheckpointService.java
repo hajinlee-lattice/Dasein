@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
@@ -18,6 +20,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
@@ -37,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -58,9 +62,11 @@ public class CheckpointService {
 
     public static final int ACCOUNT_IMPORT_SIZE_1 = 200;
     public static final int ACCOUNT_IMPORT_SIZE_2 = 100;
+    public static final int ACCOUNT_IMPORT_SIZE_3 = 300;
 
     public static final int CONTACT_IMPORT_SIZE_1 = 200;
     public static final int CONTACT_IMPORT_SIZE_2 = 100;
+    public static final int CONTACT_IMPORT_SIZE_3 = 300;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -80,6 +86,9 @@ public class CheckpointService {
     @Inject
     private EntityProxy entityProxy;
 
+    @Resource(name = "jdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
+
     @Value("${camille.zk.pod.id}")
     private String podId;
 
@@ -97,25 +106,29 @@ public class CheckpointService {
     }
 
     public void verifyFirstProfileCheckpoint() throws IOException {
-        verifyHdfsCheckpoint();
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
-        Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
-
-        verifyStatistics();
-
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), ACCOUNT_IMPORT_SIZE_1);
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), CONTACT_IMPORT_SIZE_1);
+        verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_1);
     }
 
     public void verifySecondConsolidateCheckpoint() throws IOException {
+        verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2);
+    }
+
+    public void verifySecondProfileCheckpoint() throws IOException {
+        verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2 + ACCOUNT_IMPORT_SIZE_3,
+                CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2 + CONTACT_IMPORT_SIZE_3);
+    }
+
+    private void verifyCheckpoint(long numAccounts, long numContacts) throws IOException {
         verifyHdfsCheckpoint();
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
         Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
+        Assert.assertNotNull(dataFeed.getActiveExecution(), "Should have active execution.");
+        Assert.assertNotNull(dataFeed.getActiveProfile(), "Should have active profile.");
 
         verifyStatistics();
 
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2);
-        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2);
+        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedAccount), numAccounts);
+        Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), numContacts);
     }
 
     public void resumeCheckpoint(String checkpoint) throws IOException {
@@ -141,6 +154,8 @@ public class CheckpointService {
         uploadCheckpointHdfs(checkpoint);
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
+
+        resumeDbState();
     }
 
     private void unzipCheckpoint(String checkpoint) throws IOException {
@@ -240,7 +255,8 @@ public class CheckpointService {
 
     private StatisticsContainer parseCheckpointStatistics(String checkpoint) throws IOException {
         String statsFile = String.format("%s/%s/stats_container.json", checkpointDir, checkpoint);
-        StatisticsContainer statisticsContainer = JsonUtils.deserialize(new FileInputStream(statsFile), StatisticsContainer.class);
+        StatisticsContainer statisticsContainer = JsonUtils.deserialize(new FileInputStream(statsFile),
+                StatisticsContainer.class);
         statisticsContainer.setName(NamingUtils.timestamp("Stats"));
         return statisticsContainer;
     }
@@ -249,6 +265,88 @@ public class CheckpointService {
         if (StringUtils.isNotBlank(checkpointDir)) {
             FileUtils.deleteQuietly(new File(checkpointDir));
         }
+    }
+
+    private void resumeDbState() {
+        logger.info("Resuming DB state.");
+        Long tenantPid = getTenantPid();
+        Long feedPid = getDataFeedPid(tenantPid);
+        Long workflowId = createFakeWorkflow(tenantPid);
+        Long executionId = createExecution(feedPid, workflowId);
+        updateActiveExecution(feedPid, executionId);
+
+        Long workflowId2 = createFakeWorkflow(tenantPid);
+        Long profileId = creatProfile(feedPid, executionId, workflowId2);
+        updateActiveProfile(feedPid, profileId);
+    }
+
+    private Long getTenantPid() {
+        String sql = "SELECT `TENANT_PID` FROM `TENANT` WHERE ";
+        sql += String.format("`TENANT_ID` = '%s'", mainTestTenant.getId());
+        return jdbcTemplate.queryForObject(sql, Long.class);
+    }
+
+    private Long createFakeWorkflow(long tenantPid) {
+        int rand = new Random(System.currentTimeMillis()).nextInt(10000);
+        String appId = String.format("application_%d_%04d", System.currentTimeMillis(), rand);
+
+        String sql = "INSERT INTO `WORKFLOW_JOB` ";
+        sql += "(`TENANT_ID`, `FK_TENANT_ID`, `USER_ID`, `APPLICATION_ID`, `INPUT_CONTEXT`, `START_TIME`) VALUES ";
+        sql += String.format("(%d, %d, 'DEFAULT_USER', '%s', '{}', NOW())", tenantPid, tenantPid, appId);
+        jdbcTemplate.execute(sql);
+
+        sql = "SELECT `PID` FROM `WORKFLOW_JOB` WHERE ";
+        sql += String.format("`TENANT_ID` = %d", tenantPid);
+        sql += String.format(" AND `APPLICATION_ID` = '%s'", appId);
+        long pid = jdbcTemplate.queryForObject(sql, Long.class);
+        logger.info("Created a fake workflow " + pid);
+        return pid;
+    }
+
+    private Long createExecution(long feedPid, long workflowPid) {
+        String sql = "INSERT INTO `DATAFEED_EXECUTION` ";
+        sql += "(`FK_FEED_ID`, `WORKFLOW_ID`, `STATUS`) VALUES ";
+        sql += String.format("(%d, %d, '%s')", feedPid, workflowPid, DataFeedExecution.Status.Consolidated.name());
+        jdbcTemplate.execute(sql);
+
+        sql = "SELECT `PID` FROM `DATAFEED_EXECUTION` WHERE `FK_FEED_ID` = " + feedPid;
+        long pid = jdbcTemplate.queryForObject(sql, Long.class);
+        logger.info("Created a fake execution " + pid);
+        return pid;
+    }
+
+    private Long creatProfile(long feedPid, long execId, long workflowPid) {
+        String sql = "INSERT INTO `DATAFEED_PROFILE` ";
+        sql += "(`FEED_EXEC_ID`, `WORKFLOW_ID`, `FK_FEED_ID`) VALUES ";
+        sql += String.format("(%d, %d, %d)", execId, workflowPid, feedPid);
+        jdbcTemplate.execute(sql);
+
+        sql = "SELECT `PID` FROM `DATAFEED_PROFILE` WHERE `FK_FEED_ID` = " + feedPid;
+        long pid = jdbcTemplate.queryForObject(sql, Long.class);
+        logger.info("Created a fake profile " + pid);
+        return pid;
+    }
+
+    private Long getDataFeedPid(long tenantPid) {
+        String sql = "SELECT `PID` FROM `DATAFEED` WHERE ";
+        sql += String.format("`FK_TENANT_ID` = %d", tenantPid);
+        return jdbcTemplate.queryForObject(sql, Long.class);
+    }
+
+    private void updateActiveExecution(Long feedPid, Long executionId) {
+        String sql = "UPDATE `DATAFEED` ";
+        sql += String.format("SET `ACTIVE_EXECUTION` = %d ", executionId);
+        sql += String.format("WHERE `PID` = %d", feedPid);
+        jdbcTemplate.execute(sql);
+        logger.info("Set execution " + executionId + " as active execution of data feed " + feedPid);
+    }
+
+    private void updateActiveProfile(Long feedPid, Long profileId) {
+        String sql = "UPDATE `DATAFEED` ";
+        sql += String.format("SET `ACTIVE_PROFILE` = %d ", profileId);
+        sql += String.format("WHERE `PID` = %d", feedPid);
+        jdbcTemplate.execute(sql);
+        logger.info("Set profile " + profileId + " as active profile of data feed " + feedPid);
     }
 
 }
