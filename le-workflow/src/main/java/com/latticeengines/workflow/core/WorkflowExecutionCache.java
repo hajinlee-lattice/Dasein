@@ -113,6 +113,9 @@ public class WorkflowExecutionCache {
 
         try {
             JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId.getId());
+            if (jobExecution == null) {
+                return null;
+            }
             JobInstance jobInstance = jobExecution.getJobInstance();
             WorkflowStatus workflowStatus = workflowService.getStatus(workflowId);
             WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());

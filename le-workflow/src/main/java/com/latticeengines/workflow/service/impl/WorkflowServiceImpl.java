@@ -270,6 +270,9 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId) {
         com.latticeengines.domain.exposed.workflow.Job job = workflowExecutionCache.getJob(workflowId);
+        if (job == null) {
+            return null;
+        }
         if (job.getOutputs() != null && job.getApplicationId() != null) {
             job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH,
                     String.format("%s/app/%s", timelineServiceUrl, job.getApplicationId()));

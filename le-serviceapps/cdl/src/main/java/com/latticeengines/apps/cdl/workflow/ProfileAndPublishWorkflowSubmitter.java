@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProfileAndPublishWorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -75,9 +75,8 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
             if (profile.getWorkflowId() == null) {
                 throw new RuntimeException("We can't launch any profile workflow now as there is one still running.");
             }
-            JobStatus status = workflowProxy.getWorkflowExecution(String.valueOf(profile.getWorkflowId()))
-                    .getJobStatus();
-            if (!status.isTerminated()) {
+            Job job = workflowProxy.getWorkflowExecution(String.valueOf(profile.getWorkflowId()));
+            if (job != null && !job.getJobStatus().isTerminated()) {
                 throw new RuntimeException("We can't launch any profile workflow now as there is one still running.");
             }
         }
@@ -89,7 +88,6 @@ public class ProfileAndPublishWorkflowSubmitter extends WorkflowSubmitter {
         dataFeedProxy.startProfile(customerSpace);
         ProfileAndPublishWorkflowConfiguration configuration = generateConfiguration(customerSpace, datafeedStatus);
         return workflowJobService.submit(configuration);
-
     }
 
     public ProfileAndPublishWorkflowConfiguration generateConfiguration(String customerSpace, Status status) {
