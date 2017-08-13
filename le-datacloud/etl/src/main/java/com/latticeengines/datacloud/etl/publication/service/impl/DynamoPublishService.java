@@ -81,17 +81,11 @@ public class DynamoPublishService extends AbstractPublishService
         String tableName = getTableName(configuration);
         log.info("Target table name is " + tableName);
         switch (configuration.getPublicationStrategy()) {
-        case VERSIONED:
-            if (dynamoService.hasTable(tableName)) {
-                tableName = appendSignature(tableName);
-                log.info("Convert target table name to " + tableName);
-            }
-            progress = progressService.update(progress).destination(progress.getDestination()).progress(0.1f).commit();
         case REPLACE:
             log.info("Delete table " + tableName + " if exists.");
             dynamoService.deleteTable(tableName);
             createTable(tableName, configuration);
-            progress = progressService.update(progress).destination(progress.getDestination()).progress(0.3f).commit();
+            progress = progressService.update(progress).destination(destination).progress(0.3f).commit();
         case APPEND:
             if (PublicationConfiguration.PublicationStrategy.APPEND.equals(configuration.getPublicationStrategy())) {
                 long readCapacity = configuration.getLoadingReadCapacity();
@@ -219,13 +213,6 @@ public class DynamoPublishService extends AbstractPublishService
 
     void setJobService(JobService jobService) {
         this.jobService = jobService;
-    }
-
-    static String appendSignature(String tableName) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String signature = dateFormat.format(new Date());
-        return tableName + "_" + signature;
     }
 
 }

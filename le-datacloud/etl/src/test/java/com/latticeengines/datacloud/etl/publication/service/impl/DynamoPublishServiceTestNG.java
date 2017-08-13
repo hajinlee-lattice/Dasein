@@ -99,34 +99,29 @@ public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase
         PublicationProgress progress = progressEntityMgr.startNewProgress(publication, createDestination(),
                 CURRENT_VERSION, SUBMITTER);
 
-        PublishToDynamoConfiguration configuration = createConfiguration();
-        publishService.publish(progress, configuration);
+        publishService.publish(progress, createConfiguration());
 
         String tableName = DynamoPublishService.convertToFabricStoreName(RECORD_TYPE + VERSION);
+        Assert.assertEquals(dynamoTables.size(), 1, "Should have 1 table");
         Assert.assertTrue(dynamoTables.containsKey(tableName), "Should have table " + tableName);
         Assert.assertEquals(dynamoTables.get(tableName).size, 100);
         verifyTags(dynamoTables.get(tableName));
         verifyThroughput(dynamoTables.get(tableName));
 
         progress = progressEntityMgr.runNewProgress(publication, createDestination(), CURRENT_VERSION, SUBMITTER);
-        publishService.publish(progress, configuration);
-
-        String tableName2 = DynamoPublishService.appendSignature(tableName);
-        Assert.assertTrue(dynamoTables.containsKey(tableName2), "Should have table " + tableName2);
-        Assert.assertEquals(dynamoTables.get(tableName2).size, 100);
+        publishService.publish(progress, createConfiguration());
+        Assert.assertEquals(dynamoTables.size(), 1, "Should have 1 table");
+        Assert.assertTrue(dynamoTables.containsKey(tableName), "Should have table " + tableName);
+        Assert.assertEquals(dynamoTables.get(tableName).size, 100);
         verifyTags(dynamoTables.get(tableName));
         verifyThroughput(dynamoTables.get(tableName));
 
-        progress = progressEntityMgr.runNewProgress(publication, createDestination(), CURRENT_VERSION, SUBMITTER);
-        publishService.publish(progress, configuration);
-        Assert.assertEquals(dynamoTables.size(), 2, "Should have 2 tables");
-        Assert.assertEquals(dynamoTables.get(tableName2).size, 100);
-        verifyTags(dynamoTables.get(tableName));
-        verifyThroughput(dynamoTables.get(tableName));
-
+        PublishToDynamoConfiguration configuration = createConfiguration();
         configuration.setPublicationStrategy(PublicationConfiguration.PublicationStrategy.APPEND);
         progress = progressEntityMgr.runNewProgress(publication, createDestination(), CURRENT_VERSION, SUBMITTER);
         publishService.publish(progress, configuration);
+        Assert.assertEquals(dynamoTables.size(), 1, "Should have 1 table");
+        Assert.assertTrue(dynamoTables.containsKey(tableName), "Should have table " + tableName);
         Assert.assertEquals(dynamoTables.get(tableName).size, 200);
         verifyTags(dynamoTables.get(tableName));
         verifyThroughput(dynamoTables.get(tableName));
@@ -153,7 +148,7 @@ public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase
         PublishToDynamoConfiguration configuration = new PublishToDynamoConfiguration();
         configuration.setEntityClass(LatticeAccount.class.getCanonicalName());
         configuration.setRecordType(RECORD_TYPE);
-        configuration.setPublicationStrategy(PublicationConfiguration.PublicationStrategy.VERSIONED);
+        configuration.setPublicationStrategy(PublicationConfiguration.PublicationStrategy.REPLACE);
         configuration.setAlias(PublishToDynamoConfiguration.Alias.QA);
 
         configuration.setLoadingReadCapacity(5L);
