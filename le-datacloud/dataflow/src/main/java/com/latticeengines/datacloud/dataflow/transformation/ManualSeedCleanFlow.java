@@ -37,6 +37,17 @@ public class ManualSeedCleanFlow
         ManualSeedCleanTransformerConfig config = getTransformerConfig(parameters);
         source = dollarInSalesCleanup(source, config.getSalesVolumeInUSDollars());
         source = totalEmployeesCleanup(source, config.getEmployeesTotal());
+
+        // de-dup by duns and keep the one with highest sales volume
+        source = source //
+                .groupByAndLimit(new FieldList(config.getManSeedDuns()),
+                        new FieldList(config.getSalesVolumeInUSDollars()), 1, true, false);
+
+        // de-dup by domain and keep the one with highest sales volume
+        source = source //
+                .groupByAndLimit(new FieldList(config.getManSeedDomain()),
+                        new FieldList(config.getSalesVolumeInUSDollars()), 1, true, false);
+
         return source;
     }
 

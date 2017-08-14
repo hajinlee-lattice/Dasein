@@ -10,6 +10,12 @@ public class ManualSeedCleanTransformerConfig extends TransformerConfig {
     @JsonProperty("EMPLOYEES_TOTAL")
     private String employeesTotal;
 
+    @JsonProperty("ManSeedDomain")
+    private String manSeedDomain;
+
+    @JsonProperty("ManSeedDuns")
+    private String manSeedDuns;
+
     public String getSalesVolumeInUSDollars() {
         return salesVolumeInUSDollars;
     }
@@ -24,6 +30,22 @@ public class ManualSeedCleanTransformerConfig extends TransformerConfig {
 
     public void setEmployeesTotal(String employeesTotal) {
         this.employeesTotal = employeesTotal;
+    }
+
+    public String getManSeedDomain() {
+        return manSeedDomain;
+    }
+
+    public void setManSeedDomain(String manSeedDomain) {
+        this.manSeedDomain = manSeedDomain;
+    }
+
+    public String getManSeedDuns() {
+        return manSeedDuns;
+    }
+
+    public void setManSeedDuns(String manSeedDuns) {
+        this.manSeedDuns = manSeedDuns;
     }
 
 }

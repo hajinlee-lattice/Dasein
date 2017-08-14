@@ -1,8 +1,10 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -93,6 +95,8 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
         ManualSeedCleanTransformerConfig conf = new ManualSeedCleanTransformerConfig();
         conf.setSalesVolumeInUSDollars("Manual_SALES_VOLUME_US_DOLLARS");
         conf.setEmployeesTotal("Manual_EMPLOYEES_TOTAL");
+        conf.setManSeedDomain("Manual_Domain");
+        conf.setManSeedDuns("Manual_Duns");
         return JsonUtils.serialize(conf);
     }
 
@@ -125,35 +129,49 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
         columns.add(Pair.of("Manual_Id", String.class));
         columns.add(Pair.of("Manual_SALES_VOLUME_US_DOLLARS", String.class));
         columns.add(Pair.of("Manual_EMPLOYEES_TOTAL", String.class));
+        columns.add(Pair.of("Manual_Domain", String.class));
+        columns.add(Pair.of("Manual_Duns", String.class));
         Object[][] data = new Object[][] {
-                { "1", "$18.16", "5,001-10,000" },
-                { "2", "$3.93", "5203", }, { "3", "$21.04", ">10,000Œæ" }, { "4", "$35.97", "10001" },
-                { "5", "$5.42", "14,024-20,000" }, { "6", "$9.92", "15098" }, { "7", "$9.86", "23172" },
-                { "8", "$31.39", "" }, { "9", "$10.86", "80,000" },
-                { "10", "$22.76", "18,200" }, { "11", "", "" }, { "12", null, null } };
+                { "1", "$18.16", "5,001-10,000", "netflix.com", "123123" },
+                { "2", "$3.93", "5203", "netapp.com", "456456" }, { "3", "$21.04", ">10,000Œæ", "datos.com", "131313" },
+                { "4", "$35.97", "10001", "apple.com", "413131" },
+                { "5", "$5.42", "14,024-20,000", "ms.com", "289922" },
+                { "6", "$9.92", "15098", "netapp.com", "456456" }, { "7", "$9.86", "23172", "netflix.com", "123123" },
+                { "8", "$31.39", "", "payless.com", "898989" }, { "9", "$10.86", "80,000", "target.com", "689383" },
+                { "10", "$22.76", "18,200", "macys.com", "783921" }, { "11", "", "", "nordstorm.com", "891824" },
+                { "12", null, null, "netflix.com", "123123" } };
         uploadBaseSourceData(baseSource.getSourceName(), baseSourceVersion, columns, data);
     }
+
+    private Object[][] expectedDataValues = { { "1", 18160000000L, null, null, ">10B", "netflix.com", "123123" },
+            { "3", 21040000000L, null, null, ">10B", "datos.com", "131313" },
+            { "4", 35970000000L, 10001, ">10,000", ">10B", "apple.com", "413131" },
+            { "5", 5420000000L, null, null, "5-10B", "ms.com", "289922" },
+            { "6", 9920000000L, 15098, ">10,000", "5-10B", "netapp.com", "456456" },
+            { "8", 31390000000L, null, null, ">10B", "payless.com", "898989" },
+            { "9", 10860000000L, 80000, ">10,000", ">10B", "target.com", "689383" },
+            { "10", 22760000000L, 18200, ">10,000", ">10B", "macys.com", "783921" },
+            { "11", null, null, null, null, "nordstorm.com", "891824" } };
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
-        Object[][] expectedData = new Object[][] {
-                { "1", 18160000000L, null, null, ">10B" }, { "2", 3930000000L, 5203, "5001-10,000", "1-5B" },
-                { "3", 21040000000L, null, null, ">10B" }, { "4", 35970000000L, 10001, ">10,000", ">10B" },
-                { "5", 5420000000L, null, null, "5-10B" }, { "6", 9920000000L, 15098, ">10,000", "5-10B" },
-                { "7", 9860000000L, 23172, ">10,000", "5-10B" }, { "8", 31390000000L, null, null, ">10B" },
-                { "9", 10860000000L, 80000, ">10,000", ">10B" }, { "10", 22760000000L, 18200, ">10,000", ">10B" },
-                { "11", null, null, null, null }, { "12", null, null, null, null } };
+        Map<String, Object[]> expectedData = new HashMap<>();
+        for (Object[] data : expectedDataValues) {
+            expectedData.put(String.valueOf(data[0]), data);
+        }
         while (records.hasNext()) {
             GenericRecord record = records.next();
             String id = String.valueOf(record.get("Manual_Id"));
-            int counter = Integer.parseInt(id);
-            Assert.assertTrue(equals(record.get("Manual_SALES_VOLUME_US_DOLLARS"), expectedData[counter - 1][1]));
-            Assert.assertTrue(equals(record.get("Manual_EMPLOYEES_TOTAL"), expectedData[counter - 1][2]));
-            Assert.assertTrue(equals(record.get("Manual_LE_EMPLOYEE_RANGE"), expectedData[counter - 1][3]));
-            Assert.assertTrue(equals(record.get("Manual_LE_REVENUE_RANGE"), expectedData[counter - 1][4]));
+            Object[] expected = expectedData.get(id);
+            Assert.assertTrue(equals(record.get("Manual_SALES_VOLUME_US_DOLLARS"), expected[1]));
+            Assert.assertTrue(equals(record.get("Manual_EMPLOYEES_TOTAL"), expected[2]));
+            Assert.assertTrue(equals(record.get("Manual_LE_EMPLOYEE_RANGE"), expected[3]));
+            Assert.assertTrue(equals(record.get("Manual_LE_REVENUE_RANGE"), expected[4]));
+            Assert.assertTrue(equals(record.get("Manual_Domain"), expected[5]));
+            Assert.assertTrue(equals(record.get("Manual_Duns"), expected[6]));
             rowCount++;
         }
-        Assert.assertEquals(rowCount, 12);
+        Assert.assertEquals(rowCount, 9);
     }
 }
