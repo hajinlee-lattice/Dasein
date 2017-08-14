@@ -89,7 +89,6 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         verify(targetTableName, 122);
         verifyReport(workflowId, ReportPurpose.PUBLISH_DATA_SUMMARY, 122);
         HdfsUtils.rmdir(yarnConfiguration, dest);
-        metadataProxy.deleteTable(mainTestCustomerSpace.toString(), targetTableName);
     }
 
     @Test(groups = "workflow", dependsOnMethods = "initialLoad")
@@ -100,7 +99,6 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
                 .append(tableName).append("b.avro").toString();
         HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFilePath, dest);
         Table table = MetadataConverter.getTable(yarnConfiguration, dest);
-        metadataProxy.createTable(mainTestCustomerSpace.toString(), table.getName(), table);
         Map<BusinessEntity, Table> sourceTables = new HashMap<>();
         sourceTables.put(BusinessEntity.Account, table);
 
