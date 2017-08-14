@@ -78,7 +78,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role);
-        NodeWatcher.updateWatchedData(CustomerMetadata.name(), String.format("%s|%s", customerSpace, role.name()));
+        if (TableRoleInCollection.BucketedAccount.equals(role) || TableRoleInCollection.SortedContact.equals(role)) {
+            NodeWatcher.updateWatchedData(CustomerMetadata.name(), String.format("%s|%s", customerSpace, role.name()));
+        }
     }
 
     @Override
