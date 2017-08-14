@@ -30,23 +30,35 @@ public class AccountMasterLookupRebuildConfig extends TransformerConfig {
     @JsonProperty("IsPrimaryLocationField")
     private String isPrimaryLocationField;
 
-    @JsonProperty("GuDunsField")
-    private String guDunsField;
-
-    @JsonProperty("DuDunsField")
-    private String duDunsField;
-
-    @JsonProperty("EmployeeField")
-    private String employeeField;
-
-    @JsonProperty("SalesVolumeUsDollars")
-    private String salesVolumeUsDollars;
-
     @JsonProperty("DomainMappingPrimaryDomainField")
     private String domainMappingPrimaryDomainField;
 
     @JsonProperty("DomainMappingSecondaryDomainField")
     private String domainMappingSecondaryDomainField;
+
+    public String getDomainField() {
+        return domainField;
+    }
+
+    public void setDomainField(String domainField) {
+        this.domainField = domainField;
+    }
+
+    public String getDomainMappingPrimaryDomainField() {
+        return domainMappingPrimaryDomainField;
+    }
+
+    public void setDomainMappingPrimaryDomainField(String domainMappingPrimaryDomainField) {
+        this.domainMappingPrimaryDomainField = domainMappingPrimaryDomainField;
+    }
+
+    public String getDomainMappingSecondaryDomainField() {
+        return domainMappingSecondaryDomainField;
+    }
+
+    public void setDomainMappingSecondaryDomainField(String domainMappingSecondaryDomainField) {
+        this.domainMappingSecondaryDomainField = domainMappingSecondaryDomainField;
+    }
 
     public String getLatticeIdField() {
         return latticeIdField;
@@ -88,12 +100,12 @@ public class AccountMasterLookupRebuildConfig extends TransformerConfig {
         this.zipCodeField = zipCodeField;
     }
 
-    public String getDomainField() {
-        return domainField;
+    public String getIsPrimaryLocationField() {
+        return isPrimaryLocationField;
     }
 
-    public void setDomainField(String domainField) {
-        this.domainField = domainField;
+    public void setIsPrimaryLocationField(String isPrimaryLocationField) {
+        this.isPrimaryLocationField = isPrimaryLocationField;
     }
 
     public String getDunsField() {
@@ -110,62 +122,6 @@ public class AccountMasterLookupRebuildConfig extends TransformerConfig {
 
     public void setIsPrimaryDomainField(String isPrimaryDomainField) {
         this.isPrimaryDomainField = isPrimaryDomainField;
-    }
-
-    public String getIsPrimaryLocationField() {
-        return isPrimaryLocationField;
-    }
-
-    public void setIsPrimaryLocationField(String isPrimaryLocationField) {
-        this.isPrimaryLocationField = isPrimaryLocationField;
-    }
-
-    public String getGuDunsField() {
-        return guDunsField;
-    }
-
-    public void setGuDunsField(String guDunsField) {
-        this.guDunsField = guDunsField;
-    }
-
-    public String getDuDunsField() {
-        return duDunsField;
-    }
-
-    public void setDuDunsField(String duDunsField) {
-        this.duDunsField = duDunsField;
-    }
-
-    public String getEmployeeField() {
-        return employeeField;
-    }
-
-    public void setEmployeeField(String employeeField) {
-        this.employeeField = employeeField;
-    }
-
-    public String getSalesVolumeUsDollars() {
-        return salesVolumeUsDollars;
-    }
-
-    public void setSalesVolumeUsDollars(String salesVolumeUsDollars) {
-        this.salesVolumeUsDollars = salesVolumeUsDollars;
-    }
-
-    public String getDomainMappingPrimaryDomainField() {
-        return domainMappingPrimaryDomainField;
-    }
-
-    public void setDomainMappingPrimaryDomainField(String domainMappingPrimaryDomainField) {
-        this.domainMappingPrimaryDomainField = domainMappingPrimaryDomainField;
-    }
-
-    public String getDomainMappingSecondaryDomainField() {
-        return domainMappingSecondaryDomainField;
-    }
-
-    public void setDomainMappingSecondaryDomainField(String domainMappingSecondaryDomainField) {
-        this.domainMappingSecondaryDomainField = domainMappingSecondaryDomainField;
     }
 
 }

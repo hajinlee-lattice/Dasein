@@ -158,15 +158,11 @@ public class AMLookupRebuildPipelineTestNG
         conf.setDomainField("Domain");
         conf.setDomainMappingPrimaryDomainField("PrimaryDomain");
         conf.setDomainMappingSecondaryDomainField("SecondaryDomain");
-        conf.setDuDunsField("LE_PRIMARY_DUNS");
         conf.setDunsField("DUNS");
-        conf.setEmployeeField("EMPLOYEES_HERE");
-        conf.setGuDunsField("GLOBAL_ULTIMATE_DUNS_NUMBER");
         conf.setIsPrimaryDomainField("LE_IS_PRIMARY_DOMAIN");
         conf.setIsPrimaryLocationField("LE_IS_PRIMARY_LOCATION");
         conf.setKeyField("Key");
         conf.setLatticeIdField("LatticeID");
-        conf.setSalesVolumeUsDollars("SALES_VOLUME_US_DOLLARS");
         conf.setStateField("State");
         conf.setZipCodeField("ZipCode");
         return om.writeValueAsString(conf);
