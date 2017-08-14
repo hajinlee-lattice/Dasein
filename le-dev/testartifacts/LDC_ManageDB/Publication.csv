@@ -1,3 +1,2 @@
 PID,CronExpression,DestinationConfig,MaterialType,NewJobMaxRetry,NewJobRetryInterval,PublicationName,PublicationType,SchedularEnabled,SourceName
 1,NULL,"{""ConfigurationType"":""PublishToSqlConfiguration"",""Alias"":""CollectionDB"",""DefaultTableName"":""MadisonLogicDepivoted"",""Strategy"":""APPEND""}",SOURCE,3,NULL,BomboraDepivotedAppend,SQL,0,BomboraDepivoted
-2,NULL,"{""ConfigurationType"":""PublishTextToSqlConfiguration"",""Alias"":""CollectionDB"",""DefaultTableName"":""DnBCacheSeed"",""Strategy"":""APPEND"",""NullString"":""null"",""OptionalEnclosedBy"":""\\\"""}",INGESTION,3,NULL,DnBCacheSeed,SQL,1,DnBCacheSeed

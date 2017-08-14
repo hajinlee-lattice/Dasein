@@ -160,7 +160,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
                     + publication.getPublicationName() + " does not have a default table anme.");
         }
         if (PublishToSqlConfiguration.PublicationStrategy.VERSIONED.equals(configuration.getPublicationStrategy())) {
-            tableName += "_" + version;
+            tableName += "_" + version.replace("-", "_");
         }
         SqlDestination destination = new SqlDestination();
         destination.setTableName(tableName);
