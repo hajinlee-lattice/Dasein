@@ -110,6 +110,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         // TODO: backward compatible with old account table
         if (cms.size() < 10_000) {
+            log.info("Append AM column metadata.");
             Set<String> includedAttrs = getAttrsInStats(customerSpace);
             String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
             List<ColumnMetadata> amCms = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
