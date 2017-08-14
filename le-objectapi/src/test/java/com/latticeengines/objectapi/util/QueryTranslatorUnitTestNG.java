@@ -33,7 +33,7 @@ public class QueryTranslatorUnitTestNG {
         Query translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         LogicalRestriction parent = (LogicalRestriction) translated.getRestriction();
-        assertEquals(parent.getRestrictions().size(), 2);
+        assertEquals(parent.getRestrictions().size(), 5);
         assertTrue(parent.getRestrictions().stream()
                 .anyMatch(r -> ((LogicalRestriction) r).getOperator().equals(LogicalOperator.AND)));
         assertTrue(parent.getRestrictions().stream()
