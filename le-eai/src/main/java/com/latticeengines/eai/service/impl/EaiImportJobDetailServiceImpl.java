@@ -25,8 +25,13 @@ public class EaiImportJobDetailServiceImpl implements EaiImportJobDetailService 
     private EaiImportJobDetailEntityMgr eaiImportJobDetailEntityMgr;
 
     @Override
-    public EaiImportJobDetail getImportJobDetail(String collectionIdentifier) {
+    public EaiImportJobDetail getImportJobDetailByCollectionIdentifier(String collectionIdentifier) {
         return eaiImportJobDetailEntityMgr.findByCollectionIdentifier(collectionIdentifier);
+    }
+
+    @Override
+    public EaiImportJobDetail getImportJobDetailByAppId(String appId) {
+        return eaiImportJobDetailEntityMgr.findByApplicationId(appId);
     }
 
     @Override

@@ -96,16 +96,17 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                     importService.importDataAndWriteToHdfs(sourceImportConfiguration, importContext,
                             vdbConnectorConfiguration);
 
-                    Map<String, List<Extract>> extracts = eaiMetadataService.getExtractsForTable(metadata, importContext);
+                    Map<String, List<Extract>> extracts = eaiMetadataService.getExtractsForTable(metadata,
+                            importContext);
                     for (String taskId : identifiers) {
                         List<Extract> extract = extracts.get(tableTemplates.get(taskId).getName());
                         if (extract != null && extract.size() > 0) {
                             if (extract.size() == 1) {
-                                dataFeedProxy.registerExtract(config.getCustomerSpace().toString(),
-                                        taskId, tableTemplates.get(taskId).getName(), extract.get(0));
+                                dataFeedProxy.registerExtract(config.getCustomerSpace().toString(), taskId,
+                                        tableTemplates.get(taskId).getName(), extract.get(0));
                             } else {
-                                dataFeedProxy.registerExtracts(config.getCustomerSpace().toString(),
-                                        taskId, tableTemplates.get(taskId).getName(), extract);
+                                dataFeedProxy.registerExtracts(config.getCustomerSpace().toString(), taskId,
+                                        tableTemplates.get(taskId).getName(), extract);
                             }
                         }
                     }
@@ -116,14 +117,14 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 }
             } catch (LedpException e) {
                 switch (e.getCode()) {
-                    case LEDP_17011:
-                    case LEDP_17012:
-                    case LEDP_17013:
-                        log.error("Generate connector configuration error!");
-                        break;
-                    default:
-                        cleanup(vdbConnectorConfiguration);
-                        break;
+                case LEDP_17011:
+                case LEDP_17012:
+                case LEDP_17013:
+                    log.error("Generate connector configuration error!");
+                    break;
+                default:
+                    cleanup(vdbConnectorConfiguration);
+                    break;
                 }
 
             } catch (Exception e) {
@@ -162,7 +163,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
             log.info(String.format("Collection identifier: %s", entry.getValue().getCollectionIdentifier()));
             EaiImportJobDetail jobDetail = eaiImportJobDetailService
-                    .getImportJobDetail(entry.getValue().getCollectionIdentifier());
+                    .getImportJobDetailByCollectionIdentifier(entry.getValue().getCollectionIdentifier());
             if (jobDetail == null) {
                 jobDetail = new EaiImportJobDetail();
                 jobDetail.setStatus(ImportStatus.SUBMITTED);
@@ -183,7 +184,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
     private void finalizeJobDetail(VdbConnectorConfiguration config) {
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
             EaiImportJobDetail jobDetail = eaiImportJobDetailService
-                    .getImportJobDetail(entry.getValue().getCollectionIdentifier());
+                    .getImportJobDetailByCollectionIdentifier(entry.getValue().getCollectionIdentifier());
             if (jobDetail != null) {
                 eaiImportJobDetailService.deleteImportJobDetail(jobDetail);
             }
@@ -196,7 +197,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
         }
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
             EaiImportJobDetail jobDetail = eaiImportJobDetailService
-                    .getImportJobDetail(entry.getValue().getCollectionIdentifier());
+                    .getImportJobDetailByCollectionIdentifier(entry.getValue().getCollectionIdentifier());
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, jobDetail.getTargetPath())) {
                     HdfsUtils.rmdir(yarnConfiguration, jobDetail.getTargetPath());

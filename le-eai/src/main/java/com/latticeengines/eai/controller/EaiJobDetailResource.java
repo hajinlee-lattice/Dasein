@@ -21,16 +21,22 @@ public class EaiJobDetailResource implements EaiJobDetailInterface {
     @Autowired
     private EaiImportJobDetailService eaiImportJobDetailService;
 
-    @RequestMapping(value = "/jobdetail/{collectionIdentifier:.+}", method = RequestMethod.GET, headers =
-            "Accept=application/json")
+    @Override
+    @RequestMapping(value = "/jobdetail/collectionIdentifier/{collectionIdentifier:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ApiOperation(value = "Get an eai job detail")
-    public EaiImportJobDetail getImportJobDetail(@PathVariable String collectionIdentifier) {
-        return eaiImportJobDetailService.getImportJobDetail(collectionIdentifier);
+    public EaiImportJobDetail getImportJobDetailByCollectionIdentifier(@PathVariable String collectionIdentifier) {
+        return eaiImportJobDetailService.getImportJobDetailByCollectionIdentifier(collectionIdentifier);
     }
 
     @Override
-    @RequestMapping(value = "/jobdetail/{collectionIdentifier:.+}/cancel", method = RequestMethod.POST, headers =
-            "Accept=application/json")
+    @RequestMapping(value = "/jobdetail/applicationId/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get an eai job detail")
+    public EaiImportJobDetail getImportJobDetailByAppId(@PathVariable String applicationId) {
+        return eaiImportJobDetailService.getImportJobDetailByAppId(applicationId);
+    }
+
+    @Override
+    @RequestMapping(value = "/jobdetail/{collectionIdentifier:.+}/cancel", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Cancel eai job by identifier.")
     public void cancelImportJob(@PathVariable String collectionIdentifier) {
         eaiImportJobDetailService.cancelImportJob(collectionIdentifier);

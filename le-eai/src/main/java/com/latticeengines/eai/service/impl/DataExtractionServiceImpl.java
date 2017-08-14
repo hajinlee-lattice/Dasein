@@ -176,7 +176,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             List<EaiImportJobDetail> jobDetails = new ArrayList<>();
             for (String collectionIdentifier : identifiers) {
                 EaiImportJobDetail eaiImportJobDetail = eaiImportJobDetailService
-                        .getImportJobDetail(collectionIdentifier);
+                        .getImportJobDetailByCollectionIdentifier(collectionIdentifier);
                 if (eaiImportJobDetail != null) {
                     switch (eaiImportJobDetail.getStatus()) {
                     case SUBMITTED:

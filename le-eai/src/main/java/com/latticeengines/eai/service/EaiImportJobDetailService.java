@@ -4,7 +4,7 @@ import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 
 public interface EaiImportJobDetailService {
 
-    EaiImportJobDetail getImportJobDetail(String collectionIdentifier);
+    EaiImportJobDetail getImportJobDetailByCollectionIdentifier(String collectionIdentifier);
 
     boolean updateImportJobDetail(EaiImportJobDetail eaiImportJobDetail);
 
@@ -13,4 +13,6 @@ public interface EaiImportJobDetailService {
     void deleteImportJobDetail(EaiImportJobDetail eaiImportJobDetail);
 
     void cancelImportJob(String collectionIdentifier);
+
+    EaiImportJobDetail getImportJobDetailByAppId(String appId);
 }

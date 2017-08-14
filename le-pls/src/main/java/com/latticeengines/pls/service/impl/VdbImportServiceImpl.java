@@ -47,10 +47,9 @@ public class VdbImportServiceImpl implements VdbImportService {
     @Autowired
     private ImportVdbTableAndPublishWorkflowSubmitter importVdbTableAndPublishWorkflowSubmitter;
 
-    private MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader =
-            new MagicAuthenticationHeaderHttpRequestInterceptor();
-    private List<ClientHttpRequestInterceptor> addMagicAuthHeaders =
-            Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
+    private MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
+    private List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
+            .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
@@ -69,16 +68,16 @@ public class VdbImportServiceImpl implements VdbImportService {
             status.setMessage(e.getMessage());
             status.setVdbQueryHandle(loadConfig.getVdbQueryHandle());
             switch (e.getCode()) {
-                case LEDP_18136:
-                case LEDP_18137:
-                    status.setJobStatus("Running");
-                    break;
-                case LEDP_18138:
-                    status.setJobStatus("Succeed");
-                    break;
-                default:
-                    status.setJobStatus("Failed");
-                    break;
+            case LEDP_18136:
+            case LEDP_18137:
+                status.setJobStatus("Running");
+                break;
+            case LEDP_18138:
+                status.setJobStatus("Succeed");
+                break;
+            default:
+                status.setJobStatus("Failed");
+                break;
             }
             restTemplate.postForEntity(loadConfig.getReportStatusEndpoint(), status, Void.class);
         }
@@ -124,21 +123,22 @@ public class VdbImportServiceImpl implements VdbImportService {
         vdbLoadTableStatus.setVdbQueryHandle(config.getVdbQueryHandle());
         String customSpace = CustomerSpace.parse(config.getTenantId()).toString();
         String extractIdentifier = String.format("%s_%s_%s", customSpace, config.getTableName(), config.getLaunchId());
-        EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetail(extractIdentifier);
+        EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy
+                .getImportJobDetailByCollectionIdentifier(extractIdentifier);
         if (eaiImportJobDetail == null) {
             vdbLoadTableStatus.setJobStatus("DoesNotExist");
         } else {
             switch (eaiImportJobDetail.getStatus()) {
-                case SUBMITTED:
-                case RUNNING:
-                    vdbLoadTableStatus.setJobStatus("Running");
-                    break;
-                case SUCCESS:
-                    vdbLoadTableStatus.setJobStatus("Succeed");
-                    break;
-                case FAILED:
-                    vdbLoadTableStatus.setJobStatus("Failed");
-                    break;
+            case SUBMITTED:
+            case RUNNING:
+                vdbLoadTableStatus.setJobStatus("Running");
+                break;
+            case SUCCESS:
+                vdbLoadTableStatus.setJobStatus("Succeed");
+                break;
+            case FAILED:
+                vdbLoadTableStatus.setJobStatus("Failed");
+                break;
             }
         }
         return vdbLoadTableStatus;
@@ -164,10 +164,10 @@ public class VdbImportServiceImpl implements VdbImportService {
             throw new LedpException(LedpCode.LEDP_18132);
         }
         if (VdbCreateTableRule.getCreateRule(loadConfig.getCreateTableRule()) == null) {
-            throw new LedpException(LedpCode.LEDP_18135, new String[] {loadConfig.getCreateTableRule()});
+            throw new LedpException(LedpCode.LEDP_18135, new String[] { loadConfig.getCreateTableRule() });
         }
         if (tenantEntityMgr.findByTenantId(CustomerSpace.parse(loadConfig.getTenantId()).toString()) == null) {
-            throw new LedpException(LedpCode.LEDP_18074, new String[] {loadConfig.getTenantId()});
+            throw new LedpException(LedpCode.LEDP_18074, new String[] { loadConfig.getTenantId() });
         }
     }
 
@@ -178,7 +178,7 @@ public class VdbImportServiceImpl implements VdbImportService {
     }
 
     private boolean checkVdbSepcMetadata(List<VdbSpecMetadata> metadataList) {
-        for (VdbSpecMetadata metadata: metadataList) {
+        for (VdbSpecMetadata metadata : metadataList) {
             if (StringUtils.isEmpty(metadata.getColumnName()) || StringUtils.isEmpty(metadata.getDataType())) {
                 return false;
             }

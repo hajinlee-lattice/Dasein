@@ -13,8 +13,8 @@ public class EaiJobDetailProxy extends MicroserviceRestApiProxy implements EaiJo
     }
 
     @Override
-    public EaiImportJobDetail getImportJobDetail(String collectionIdentifier) {
-        String url = constructUrl("/jobdetail/{extractIdentifier}", collectionIdentifier);
+    public EaiImportJobDetail getImportJobDetailByCollectionIdentifier(String collectionIdentifier) {
+        String url = constructUrl("/jobdetail/collectionIdentifier/{extractIdentifier}", collectionIdentifier);
         return get("getEaiImportJobDetail", url, null, EaiImportJobDetail.class);
     }
 
@@ -22,5 +22,11 @@ public class EaiJobDetailProxy extends MicroserviceRestApiProxy implements EaiJo
     public void cancelImportJob(String collectionIdentifier) {
         String url = constructUrl("/jobdetail/{extractIdentifier}/cancel", collectionIdentifier);
         post("cancelEaiImportJobByIdentifier", url, null, Void.class);
+    }
+
+    @Override
+    public EaiImportJobDetail getImportJobDetailByAppId(String applicationId) {
+        String url = constructUrl("/jobdetail/applicationId/{applicationId}", applicationId);
+        return get("getEaiImportJobDetail", url, null, EaiImportJobDetail.class);
     }
 }
