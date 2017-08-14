@@ -33,7 +33,7 @@ public class DanteAttributesResourceDeploymentTestNG extends PlsDeploymentTestNG
 
     private Path metadataDocumentPath;
 
-    @BeforeClass
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
         switchToExternalUser();
