@@ -21,7 +21,7 @@ public abstract class DataFeedMetadataService {
 
     public abstract Table getMetadata(String metadataStr);
 
-    public abstract Table resolveMetadata(Table original, SchemaInterpretation schemaInterpretation);
+    public abstract Table resolveMetadata(Table original, Table schemaTable);
 
     public abstract boolean compareMetadata(Table srcTable, Table targetTable, boolean needSameType);
 

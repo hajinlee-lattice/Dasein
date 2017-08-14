@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -58,7 +58,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                                      String metadata) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
         Table newMeta = dataFeedMetadataService.getMetadata(metadata);
-        newMeta = dataFeedMetadataService.resolveMetadata(newMeta, SchemaInterpretation.valueOf(entity));
+        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity));
+        newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
         setCategoryForTable(newMeta, entity);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(metadata);
         if (dlTenantMappingEnabled) {
@@ -112,7 +113,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         String category;
         switch (businessEntity) {
             case Account:
-                category = Category.ACCOUNT_ATTRIBUTES.getName();
+                category = Category.ACCOUNT_ATTRIBUTES.name();
                 break;
             //todo other entity
             default:

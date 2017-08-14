@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,9 +21,9 @@ import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 
@@ -54,9 +56,8 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public Table resolveMetadata(Table original, SchemaInterpretation schemaInterpretation) {
-        Table table = SchemaRepository.instance().getSchema(schemaInterpretation);
-        List<Attribute> attributes = table.getAttributes();
+    public Table resolveMetadata(Table original, Table schemaTable) {
+        List<Attribute> attributes = schemaTable.getAttributes();
         HashMap<String, Attribute> originalAttrs = new HashMap<>();
         for (Attribute attr : original.getAttributes()) {
             originalAttrs.put(attr.getName(), attr);
@@ -106,16 +107,16 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             }
         });
 
-        table.setName(original.getName());
-        table.setDisplayName(original.getDisplayName());
+        schemaTable.setName(original.getName());
+        schemaTable.setDisplayName(original.getDisplayName());
 
-        String lastModifiedKey = table.getLastModifiedKey().getName();
-        if (table.getAttribute(lastModifiedKey) == null) {
+        String lastModifiedKey = schemaTable.getLastModifiedKey().getName();
+        if (schemaTable.getAttribute(lastModifiedKey) == null) {
             log.warn("Cannot map any attribute to designated last modified key " + lastModifiedKey);
-            table.setLastModifiedKey(null);
+            schemaTable.setLastModifiedKey(null);
         }
 
-        return table;
+        return schemaTable;
     }
 
     private void copyAttribute(Attribute dest, Attribute source) {

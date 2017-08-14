@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("csvDataFeedMetadataService")
@@ -38,7 +37,7 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     }
 
     @Override
-    public Table resolveMetadata(Table original, SchemaInterpretation schemaInterpretation) {
+    public Table resolveMetadata(Table original, Table schemaTable) {
         return original;
     }
 

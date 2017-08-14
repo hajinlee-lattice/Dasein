@@ -523,6 +523,7 @@ public class SchemaRepository {
         table.addAttribute(attr("LastModifiedDate") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED" })) //
                 .type(Schema.Type.LONG) //
+                .required()
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -808,7 +809,8 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr("State") //
                 .allowedDisplayNames(
-                        Sets.newHashSet(new String[] { "STATE", "STATE_PROVINCE", "PROVINCE", "STATE OR PROVINCE" })) //
+                        Sets.newHashSet(new String[] { "STATE", "STATE_PROVINCE", "PROVINCE", "STATE OR PROVINCE",
+                                "STATEPROVINCE" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -859,7 +861,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr("LastModifiedDate") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED" })) //
                 .type(Schema.Type.LONG) //
                 .required() //
                 .interfaceName(InterfaceName.LastModifiedDate) //
