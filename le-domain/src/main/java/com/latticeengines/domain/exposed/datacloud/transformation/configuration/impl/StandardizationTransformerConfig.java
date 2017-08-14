@@ -5,109 +5,115 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 
 public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("Sequence")
-    private StandardizationStrategy[] sequence;
+    private StandardizationStrategy[] sequence;     // Put operations in sequence array sequentially
 
     @JsonProperty("DomainFields")
-    private String[] domainFields;
+    private String[] domainFields; // for strategy DOMAIN
 
     @JsonProperty("CountryFields")
-    private String[] countryFields;
+    private String[] countryFields; // for strategy COUNTRY
 
     @JsonProperty("StateFields")
-    private String[] stateFields;   // Country standardization must finish before state standardization; Will use first country field as standard country to standardize state
+    private String[] stateFields; // for strategy STATE (Country standardization
+                                  // must finish before state standardization;
+                                  // Will use first country field as standard
+                                  // country to standardize state)
 
     @JsonProperty("StringFields")
-    private String[] stringFields;
+    private String[] stringFields; // for strategy STRING
 
     @JsonProperty("ConvertTypeFields")
-    private String[] convertTypeFields;
+    private String[] convertTypeFields; // for strategy CONVERT_TYPE
 
     @JsonProperty("ConvertTypeStrategies")
-    private TypeConvertStrategy[] convertTypeStrategies;
+    private TypeConvertStrategy[] convertTypeStrategies;    // for strategy CONVERT_TYPE
 
     @JsonProperty("DedupFields")
-    private String[] dedupFields;
+    private String[] dedupFields; // for strategy DEDUP
 
     @JsonProperty("FilterExpression")
-    private String filterExpression;
+    private String filterExpression; // for strategy FILTER
 
     @JsonProperty("FilterFields")
-    private String[] filterFields;
+    private String[] filterFields; // for strategy FILTER
 
     @JsonProperty("UploadTimestampField")
-    private String uploadTimestampField;
+    private String uploadTimestampField; // for strategy UPLOAD_TIMESTAMP
 
     @JsonProperty("MarkerExpression")
-    private String markerExpression;
+    private String markerExpression; // for strategy MARKER
 
     @JsonProperty("MarkerCheckFields")
-    private String[] markerCheckFields;
+    private String[] markerCheckFields; // for strategy MARKER
 
     @JsonProperty("MarkerField")
-    private String markerField;
+    private String markerField; // for strategy MARKER
 
     @JsonProperty("RenameFields")
-    private String[][] renameFields;    //String[][0] is old name, String[][1] is new name
+    private String[][] renameFields; // for strategy RENAME (String[][0] is old
+                                     // name, String[][1] is new name)
 
     @JsonProperty("RetainFields")
-    private String[] retainFields;
+    private String[] retainFields; // for strategy RETAIN
 
     @JsonProperty("DiscardFields")
-    private String[] discardFields;
+    private String[] discardFields; // for strategy DISCARD
 
     @JsonProperty("AddFields")
-    private String[] addFields;
+    private String[] addFields; // for strategy ADD_FIELD
 
     @JsonProperty("AddFieldValues")
-    private Object[] addFieldValues;
+    private Object[] addFieldValues; // for strategy ADD_FIELD
 
     @JsonProperty("AddFieldTypes")
-    private FieldType[] addFieldTypes;
+    private FieldType[] addFieldTypes; // for strategy ADD_FIELD
 
     @JsonProperty("IsValidDomainField")
-    private String isValidDomainField;
+    private String isValidDomainField; // for strategy VALID_DOMAIN
 
     @JsonProperty("ValidDomainCheckField")
-    private String validDomainCheckField;
+    private String validDomainCheckField; // for strategy VALID_DOMAIN
 
     @JsonProperty("AddConsolidatedIndustryField")
-    private String addConsolidatedIndustryField;
+    private String addConsolidatedIndustryField; // for strategy
+                                                 // CONSOLIDATE_INDUSTRY
 
     @JsonProperty("ConsolidateIndustryStrategy")
-    private ConsolidateIndustryStrategy consolidateIndustryStrategy;
+    private ConsolidateIndustryStrategy consolidateIndustryStrategy;    // for strategy CONSOLIDATE_INDUSTRY
 
     @JsonProperty("IndustryField")
-    private String industryField;
+    private String industryField; // for strategy CONSOLIDATE_INDUSTRY
 
     @JsonProperty("NaicsField")
-    private String naicsField;
+    private String naicsField; // for strategy CONSOLIDATE_INDUSTRY
 
     @JsonProperty("IndustryMapFileName")
-    private String industryMapFileName;
+    private String industryMapFileName; // for strategy CONSOLIDATE_INDUSTRY
 
     @JsonProperty("NaicsMapFileName")
-    private String naicsMapFileName;
+    private String naicsMapFileName; // for strategy CONSOLIDATE_INDUSTRY
 
     @JsonProperty("AddConsolidatedRangeFields")
-    private String[] addConsolidatedRangeFields;
+    private String[] addConsolidatedRangeFields; // for strategy
+                                                 // CONSOLIDATE_RANGE
 
     @JsonProperty("ConsolidateRangeStrategies")
-    private ConsolidateRangeStrategy[] consolidateRangeStrategies;
+    private ConsolidateRangeStrategy[] consolidateRangeStrategies; // for strategy CONSOLIDATE_RANGE
 
     @JsonProperty("RangeInputFields")
-    private String[] rangeInputFields;
+    private String[] rangeInputFields; // for strategy CONSOLIDATE_RANGE
 
     @JsonProperty("RangeMapFileNames")
-    private String[] rangeMapFileNames;
+    private String[] rangeMapFileNames; // for strategy CONSOLIDATE_RANGE
 
     @JsonProperty("DunsFields")
-    private String[] dunsFields;
+    private String[] dunsFields; // for strategy DUNS
 
     @JsonProperty("IDFields")
-    private String[] idFields;
+    private String[] idFields; // for strategy ADD_ID
 
     @JsonProperty("IDStrategies")
-    private IDStrategy[] idStrategies;
+    private IDStrategy[] idStrategies; // for strategy ADD_ID
 
     public enum StandardizationStrategy {
         ADD_ID, DOMAIN, DUNS, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
