@@ -96,7 +96,7 @@ public class DanteAttributesResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("recommendation").size(), 8);
     }
 
-    @AfterClass
+    @AfterClass(groups = "deployment")
     public void teardown() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         camille.delete(metadataDocumentPath);
