@@ -138,23 +138,6 @@ angular
                 }
             }
         })
-        .state('home.playbook.dashboard.insights.syntax', {
-            url: '/syntax',
-            params: {
-                pageIcon: 'ico-playbook',
-                pageTitle: 'Play Book',
-                section: 'dashboard.insights_syntax'
-            },
-            views: {
-                'main@': {
-                    controller: function() {
-
-                    },
-                    controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/insights/syntax/syntax.component.html'
-                }
-            }
-        })
         .state('home.playbook.dashboard.segment', {
             url: '/segment',
             params: {
@@ -421,7 +404,7 @@ angular
                             ts = new Date().getTime(),
                             restriction = QueryStore.getRestriction();
 
-                        console.log("[resolve] SegmentServiceProxy",segment);
+                        //console.log("[resolve] SegmentServiceProxy",segment);
                         
                         if (segment === null) {
                             segment = {

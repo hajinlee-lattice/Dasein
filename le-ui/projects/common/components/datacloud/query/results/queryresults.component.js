@@ -36,7 +36,7 @@ angular.module('common.datacloud.query.results', [
         QueryStore.setAccounts('', $stateParams.segment).then(function(response){
             vm.accounts = response.data;
             vm.loading = false;
-            console.log(vm.accounts);
+            //console.log(vm.accounts);
         });
 
 
@@ -48,7 +48,7 @@ angular.module('common.datacloud.query.results', [
             
             vm.accountsWithoutSfId = count;
 
-            console.log(vm.accountsWithoutSfId);
+            //console.log(vm.accountsWithoutSfId);
         }
 
 
@@ -60,7 +60,7 @@ angular.module('common.datacloud.query.results', [
     vm.excludeNonSalesForceCheckbox = function(excludeAccounts){
         excludeAccounts = !excludeAccounts;
 
-        console.log(excludeAccounts);
+        //console.log(excludeAccounts);
 
         if(excludeAccounts = false){
             vm.excludeNonSalesForce = true;
@@ -125,7 +125,7 @@ angular.module('common.datacloud.query.results', [
     });
 
     $scope.$watch('vm.search', function (tmpStr){
-      console.log(tmpStr);
+      //console.log(tmpStr);
       if (!tmpStr || tmpStr.length == 0)
         return 0;
         if (tmpStr === vm.search){
@@ -152,7 +152,7 @@ angular.module('common.datacloud.query.results', [
             vm.accounts = response.data;
             vm.loading = false;
 
-            console.log(vm.accounts);
+            //console.log(vm.accounts);
         });
 
     };

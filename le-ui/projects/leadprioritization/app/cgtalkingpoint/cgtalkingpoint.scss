@@ -154,6 +154,9 @@
             font-weight: bold;
             padding: 0 10px;
             opacity: 0;
+            &:focus {
+                opacity: 1;
+            }
         }
         &.expand-button {
             border-radius: 50%;
@@ -182,6 +185,12 @@
             -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
             box-shadow: inset 0 1px 1px rgba(0,0,0,0.075)
         }
+    }
+
+    .tp-delete {
+        position: absolute;
+        top: 3px;
+        right: 3px;
     }
 }
 

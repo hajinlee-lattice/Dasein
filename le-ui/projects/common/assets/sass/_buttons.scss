@@ -116,7 +116,8 @@ a.button, .button a:link, .button a:focus, .button a:visited {
 		color: $black-titanium;
 		background-color: $pearl-white;
 		border-color: $silver;
-		&:hover {
+		&:hover,
+    &:focus {
 			background-color: $white-gold;
 		}
 		&:active {

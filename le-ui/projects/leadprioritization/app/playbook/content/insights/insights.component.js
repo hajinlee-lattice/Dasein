@@ -102,7 +102,6 @@ angular.module('lp.playbook.wizard.insights', [])
         });
     }
 
-
     function validateTalkingPoints() {
         var valid = false,
             errors = 0;
@@ -112,10 +111,10 @@ angular.module('lp.playbook.wizard.insights', [])
                 if (!vm.talkingPoints[i].content || !vm.talkingPoints[i].title) {
                     vm.talkingPoints[i].uiError = {};
                     if(!vm.talkingPoints[i].title) {
-                        vm.talkingPoints[i].uiError.title = 'Missing Title';
+                        vm.talkingPoints[i].uiError.title = 'Please provide a title.';
                     }
-                    if(!vm.talkingPoints[i].content) {
-                        vm.talkingPoints[i].uiError.content = 'Missing Content';
+                    if(!vm.talkingPoints[i].content) {tpeditor.component.html
+                        vm.talkingPoints[i].uiError.content = 'Please provide content.';
                     }
                     errors++;
                 }

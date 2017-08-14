@@ -1560,21 +1560,6 @@ angular
                     templateUrl: 'app/marketo/views/SureshotTemplateView.html'
                 }
             }
-        })
-        .state('home.insights_guide', {
-            url: '/insights_guide',
-            views: {
-                // "navigation@": {
-                //     templateUrl: ''
-                // },
-                'main@': {
-                    controller: function() {
-
-                    },
-                    controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/insights/syntax/syntax.component.html'
-                }
-            }
         });
 });
 function ShowSpinner(LoadingString, type) {
