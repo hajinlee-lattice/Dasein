@@ -138,5 +138,28 @@ angular.module('lp.playbook.wizard.insights', [])
         return true;
     };
 
+    vm.revertClick = function($event, val) {
+        $event.stopPropagation();
+
+        vm.revertClicked = val;
+        if (val) {
+            $document.on('click', handleDocumentClick);
+        } else {
+            $document.off('click', handleDocumentClick);
+        }
+    };
+    
+    function handleDocumentClick(evt) {
+        if (vm.revertClicked) {
+            vm.revertClicked = false;
+            $document.off('click', handleDocumentClick);
+            $scope.$digest();
+        }
+    }
+
+    $scope.$on('$destroy', function() {
+        $document.off('click', handleDocumentClick);
+    });
+
     $scope.$watch(validateTalkingPoints);
 });

@@ -13,6 +13,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
         this.savedTalkingPoints = null;
         this.deleteClicked = false;
+        this.calling = [];
     };
     this.init();
 
@@ -113,16 +114,17 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     };
 
     this.getTalkingPointsPreviewResources = function(){
-        var deferred = $q.defer();
-        if(this.talkingPointsPreviewResources) {
-            deferred.resolve(this.talkingPointsPreviewResources);
-        } else {
+        if(!this.calling['getTalkingPointsPreviewResources']) {
+            var deferred = $q.defer();
+            this.calling['getTalkingPointsPreviewResources'] = true; // prevent double calling
+            // don't cache this because we always want a fresh oauth token every time
             CgTalkingPointService.getTalkingPointsPreviewResources().then(function(data){
+                CgTalkingPointStore.calling['getTalkingPointsPreviewResources'] = false;
                 CgTalkingPointStore.talkingPointsPreviewResources = data;
                 deferred.resolve(data);
             });
+            return deferred.promise;
         }
-        return deferred.promise;
     }
 
     this.setSavingFlag = function(bool) {
@@ -256,7 +258,6 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     };
 
     this.generateLeadPreviewObject = function(opts) {
-        //return {"context":"lpipreview","notion":"lead","notionObject":{"ExpectedValue":UNKNOWN_UNTIL_LAUNCHED,"ExternalProbability":UNKNOWN_UNTIL_LAUNCHED,"LastLaunched":UNKNOWN_UNTIL_LAUNCHED,"Lift":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketDisplayName":UNKNOWN_UNTIL_LAUNCHED,"LikelihoodBucketOffset":UNKNOWN_UNTIL_LAUNCHED,"ModelID":null,"Percentile":UNKNOWN_UNTIL_LAUNCHED,"PlayDescription":PLACEHOLDER,"PlayDisplayName":PLACEHOLDER,"PlayID":PLACEHOLDER,"PlaySolutionType":null,"PlayTargetProductName":"D200-L","PlayType":"crosssell","Probability":UNKNOWN_UNTIL_LAUNCHED,"Rank":2,"Theme":"Sell Secure Star into Impravata owners","TalkingPoints":null}};
         var deferred = $q.defer();
         CgTalkingPointService.getPreviewObject(opts).then(function(data){
             deferred.resolve(data);

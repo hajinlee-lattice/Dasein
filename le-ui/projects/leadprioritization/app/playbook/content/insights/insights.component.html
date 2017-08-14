@@ -7,7 +7,7 @@
                     <p>
                         Talking points enable your reps to have successful sales conversation with messages that resonate with decision makers and influencers. Define general or dynamic, customer-specific talking points to give additional context to the rep. This content will be visible immediately if this play is live, without the need to rescore or re-launch. 
                         <strong ng-if="vm.stateParams.section === 'dashboard.insights'">Keep in mind changes you make will overwrite changes made by other users.</strong>
-                        <a ui-sref="home.playbook.dashboard.insights.syntax({play_name: vm.stateParams.play_name})" target="_syntax">Authoring Talking Points Guide</a>
+                        <a ui-sref="home.insights_guide" target="_syntax">Authoring Talking Points Guide</a>
                     </p>
                 </div>
 
@@ -17,11 +17,11 @@
                         <span ng-if="vm.saved && !vm.saving"><i class="fa fa-check"></i> Saved</span>
                     </li>
                     <li class="revert" ng-if="vm.stateParams.section.indexOf('dashboard.') !== -1 && vm.talkingPoints.length">
-                        <button class="button white-button" ng-click="vm.revertClicked = !vm.revertClicked">Revert To Last Published Version</button>
+                        <button class="button white-button" ng-click="vm.revertClick($event,true)">Revert To Last Published Version</button>
                         <div ng-if="vm.revertClicked" class="revert-confirm">
                             Revert To Last Published Version? 
                             <button class="button orange-button" ng-click="vm.revertTalkingPoints()">Revert</button>
-                            <button class="button white-button" ng-click="vm.revertClicked = !vm.revertClicked">Cancel</button>
+                            <button class="button white-button" ng-click="vm.revertClick($event,false)">Cancel</button>
                         </div> 
                     </li>
                 </ul>
