@@ -18,8 +18,7 @@
     }
 }
 
-table {    
-    background: #fff;
+table {
     color: $dark-gray;
     margin: 0 0 18px;
     border-collapse: collapse;
@@ -28,6 +27,7 @@ table {
     width: 100%;
     tbody tr {
         border-bottom: $palladium solid 1px;
+        background: #fff;
         &:nth-child(odd) {
             background: #f9f9f9;
         }

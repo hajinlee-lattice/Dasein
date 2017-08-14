@@ -1382,6 +1382,9 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
+        
+        console.log(vm.cube.data);
+
         if(!vm.cube.data.Stats) {
             return false;
         }

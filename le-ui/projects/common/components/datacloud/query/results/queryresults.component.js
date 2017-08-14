@@ -1,7 +1,7 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, $stateParams, 
+.controller('QueryResultsCtrl', function($scope, $state, $stateParams, $filter, 
     BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore, AccountsCount, Config) {
 
     var vm = this;
@@ -30,37 +30,8 @@ angular.module('common.datacloud.query.results', [
         config: Config
     });
 
-
-    vm.init = function() {
-        
-        QueryStore.setAccounts('', $stateParams.segment).then(function(response){
-            vm.accounts = response.data;
-            vm.loading = false;
-            //console.log(vm.accounts);
-        });
-
-
-        vm.getCountWithoutSfId = function() {
-            var count = 0;
-            angular.forEach(vm.accounts, function(account){
-                count += account.SalesforceAccountID ? 1 : 0;
-            });
-            
-            vm.accountsWithoutSfId = count;
-
-            //console.log(vm.accountsWithoutSfId);
-        }
-
-
-
-    };
-    vm.init();
-
-
     vm.excludeNonSalesForceCheckbox = function(excludeAccounts){
         excludeAccounts = !excludeAccounts;
-
-        //console.log(excludeAccounts);
 
         if(excludeAccounts = false){
             vm.excludeNonSalesForce = true;
@@ -125,11 +96,11 @@ angular.module('common.datacloud.query.results', [
     });
 
     $scope.$watch('vm.search', function (tmpStr){
-      //console.log(tmpStr);
-      if (!tmpStr || tmpStr.length == 0)
-        return 0;
-        if (tmpStr === vm.search){
-          updatePage();
+        if (!tmpStr || tmpStr.length == 0) {
+            return 0;
+            if (tmpStr === vm.search){
+              updatePage();
+            }
         }
     });
 
@@ -147,13 +118,30 @@ angular.module('common.datacloud.query.results', [
             },
             restrict_without_sfdcid: vm.excludeNonSalesForce
         };
+        var NoSfIdQuery = {
+            free_form_text_search: vm.search,
+            frontend_restriction: vm.restriction,
+            page_filter: {
+                num_rows: 1000000,
+                row_offset: 0
+            },
+            restrict_without_sfdcid: true
+        };
+
+        QueryStore.GetCountByQuery('accounts', NoSfIdQuery).then(function(response){
+            console.log(response);
+            vm.accountsWithoutSfId = response;
+        });
 
         QueryStore.setAccounts(query, $stateParams.segment).then(function(response){
             vm.accounts = response.data;
             vm.loading = false;
-
             //console.log(vm.accounts);
         });
 
     };
+
+
 });
+
+

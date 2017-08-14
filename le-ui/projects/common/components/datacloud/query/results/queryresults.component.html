@@ -12,7 +12,7 @@
                 ng-model="excludeAccounts"
                 ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)"
                 ng-change="vm.excludeNonSalesForceCheckbox(excludeAccounts)" />
-            Exclude accounts without SalesForceID (<span class="orange-text">{{vm.accountsWithoutSfId}}</span>)
+            Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.accountsWithoutSfId | number }}</span>)
         </label>
     </div>
 
@@ -54,11 +54,11 @@
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
                 <th class="sortable" ng-click="sortType = 'LDC_Name'; sortReverse = !sortReverse">
-                    Name
+                    Company Name
                     <span ng-show="sortType == 'LDC_Name' && !sortReverse" class="fa fa-caret-down"></span>
                     <span ng-show="sortType == 'LDC_Name' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
-                <th>Website</th>
+                <th>Web Address</th>
                 <th class="sortable" ng-click="sortType = 'LDC_City'; sortReverse = !sortReverse">
                     City
                     <span ng-show="sortType == 'LDC_City' && !sortReverse" class="fa fa-caret-down"></span>
@@ -110,7 +110,7 @@
 
     <p ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts === []">No Records Found<p>
 
-    <ul class="filters" ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts != []">
+    <ul class="filters pull-right" ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts != []">
         <li>
             <pd-pagination-controls
                 current="vm.current"
