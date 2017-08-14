@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -15,26 +17,17 @@ import com.latticeengines.domain.exposed.query.Restriction;
 public class RestrictionOptimizer {
 
     public static Restriction optimize(Restriction restriction) {
-        if (restriction == null || restriction instanceof BucketRestriction) {
+        if (restriction == null || restriction instanceof BucketRestriction
+                || restriction instanceof ConcreteRestriction) {
             return restriction;
         } else if (restriction instanceof LogicalRestriction) {
-            return group(flatten(restriction));
+            return optimizeLogicalRestriction((LogicalRestriction) restriction);
         } else {
-            throw new RuntimeException("Can only optimize bucket and logical restrictions");
+            throw new RuntimeException("Can only optimize logical, bucket and concrete restrictions");
         }
     }
 
-    public static Restriction flatten(Restriction restriction) {
-        if (restriction == null || restriction instanceof BucketRestriction) {
-            return restriction;
-        } else if (restriction instanceof LogicalRestriction) {
-            return flattenLogicalRestriction((LogicalRestriction) restriction);
-        } else {
-            throw new RuntimeException("Can only flatten bucket and logical restrictions");
-        }
-    }
-
-    private static Restriction flattenLogicalRestriction(LogicalRestriction logicalRestriction) {
+    private static Restriction optimizeLogicalRestriction(LogicalRestriction logicalRestriction) {
         if (logicalRestriction.getRestrictions() == null || logicalRestriction.getRestrictions().isEmpty()) {
             return null;
         }
@@ -44,7 +37,7 @@ public class RestrictionOptimizer {
             if (restriction != null) {
                 Restriction flatRestriction;
                 if (restriction instanceof LogicalRestriction) {
-                    flatRestriction = flatten(restriction);
+                    flatRestriction = optimize(restriction);
                 } else {
                     flatRestriction = restriction;
                 }
@@ -85,35 +78,48 @@ public class RestrictionOptimizer {
     }
 
     private static Restriction groupLogicalRestriction(LogicalRestriction logicalRestriction) {
-        List<BucketRestriction> bkts = new ArrayList<>();
-        List<Restriction> nonBkts = new ArrayList<>();
+        List<Restriction> nonLogicals = new ArrayList<>();
+        List<Restriction> logicals = new ArrayList<>();
         logicalRestriction.getRestrictions().forEach(restriction -> {
             if (restriction instanceof LogicalRestriction) {
-                nonBkts.add(groupLogicalRestriction((LogicalRestriction) restriction));
+                logicals.add(groupLogicalRestriction((LogicalRestriction) restriction));
             } else {
-                bkts.add((BucketRestriction) restriction);
+                nonLogicals.add(restriction);
             }
         });
 
         Map<BusinessEntity, List<Restriction>> restrictionMap = new HashMap<>();
-        for (BucketRestriction bkt : bkts) {
-            BusinessEntity entity = bkt.getAttr().getEntity();
+        for (Restriction restriction : nonLogicals) {
+            BusinessEntity entity;
+            if (restriction instanceof BucketRestriction) {
+                entity = ((BucketRestriction) restriction).getAttr().getEntity();
+            } else if (restriction instanceof ConcreteRestriction) {
+                ConcreteRestriction concreteRestriction = (ConcreteRestriction) restriction;
+                if (concreteRestriction.getLhs() instanceof AttributeLookup) {
+                    entity = ((AttributeLookup) concreteRestriction.getLhs()).getEntity();
+                } else {
+                    throw new UnsupportedOperationException(
+                            "LHS of concretion restriction is not an attribute lookup.");
+                }
+            } else {
+                throw new UnsupportedOperationException("Only support logical, bucket and concrete restrictions.");
+            }
             if (!restrictionMap.containsKey(entity)) {
                 restrictionMap.put(entity, new ArrayList<>());
             }
-            restrictionMap.get(entity).add(bkt);
+            restrictionMap.get(entity).add(restriction);
         }
         restrictionMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey)) //
                 .map(Map.Entry::getValue).forEach(restrictions -> {
                     if (restrictions.size() == 1) {
-                        nonBkts.add(restrictions.get(0));
+                        logicals.add(restrictions.get(0));
                     } else if (logicalRestriction.getOperator().equals(LogicalOperator.OR)) {
-                        nonBkts.add(Restriction.builder().or(restrictions).build());
+                        logicals.add(Restriction.builder().or(restrictions).build());
                     } else {
-                        nonBkts.add(Restriction.builder().and(restrictions).build());
+                        logicals.add(Restriction.builder().and(restrictions).build());
                     }
                 });
-        logicalRestriction.setRestrictions(nonBkts);
+        logicalRestriction.setRestrictions(logicals);
         return logicalRestriction;
     }
 

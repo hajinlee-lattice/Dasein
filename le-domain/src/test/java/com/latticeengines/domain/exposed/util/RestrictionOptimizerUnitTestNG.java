@@ -25,14 +25,14 @@ public class RestrictionOptimizerUnitTestNG {
     private static final Restriction C4 = bucket(Contact, 4);
     private static final Restriction C5 = bucket(Contact, 5);
 
-    @Test(groups = "unit", dataProvider = "flattenTestData")
-    public void testFlatten(Restriction restriction, Restriction expected) {
-        Restriction flatten = RestrictionOptimizer.flatten(restriction);
+    @Test(groups = "unit", dataProvider = "optimizeTestData")
+    public void testOptimize(Restriction restriction, Restriction expected) {
+        Restriction flatten = RestrictionOptimizer.optimize(restriction);
         Assert.assertEquals(JsonUtils.serialize(flatten), JsonUtils.serialize(expected));
     }
 
-    @DataProvider(name = "flattenTestData", parallel = true)
-    public Object[][] provideFlattenTestData() {
+    @DataProvider(name = "optimizeTestData", parallel = true)
+    public Object[][] provideOptimizeTestData() {
         Restriction r1 = and(A1, and(A2), and(A3, A4));
         Restriction e1 = and(A1, A2, A3, A4);
 
@@ -73,14 +73,14 @@ public class RestrictionOptimizerUnitTestNG {
         };
     }
 
-    @Test(groups = "unit", dataProvider = "optimizeTestData")
-    public void testOptimize(Restriction restriction, Restriction expected) {
-        Restriction optimized = RestrictionOptimizer.optimize(restriction);
+    @Test(groups = "unit", dataProvider = "optimizeAndGroupTestData")
+    public void testOptimizeAndGroup(Restriction restriction, Restriction expected) {
+        Restriction optimized = RestrictionOptimizer.group(RestrictionOptimizer.optimize(restriction));
         Assert.assertEquals(JsonUtils.serialize(optimized), JsonUtils.serialize(expected));
     }
 
-    @DataProvider(name = "optimizeTestData", parallel = true)
-    public Object[][] provideOptimizeTestData() {
+    @DataProvider(name = "optimizeAndGroupTestData", parallel = true)
+    public Object[][] provideOptimizeAndGroupTestData() {
         Restriction r1 = and(A1, C1, A2, C2);
         Restriction e1 = and(and(A1, A2), and(C1, C2));
 

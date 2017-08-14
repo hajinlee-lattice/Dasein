@@ -7,7 +7,6 @@ import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
@@ -17,6 +16,7 @@ import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
+import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 
 public class QueryTranslator {
     private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
@@ -74,22 +74,24 @@ public class QueryTranslator {
 
         Restriction restriction = frontEndRestriction.getRestriction();
 
+        Restriction translated;
         if (restriction instanceof LogicalRestriction) {
             BreadthFirstSearch search = new BreadthFirstSearch();
             search.run(restriction, (object, ctx) -> {
                 if (object instanceof BucketRestriction) {
                     BucketRestriction bucket = (BucketRestriction) object;
-                    ConcreteRestriction concrete = bucket.convert();
+                    Restriction concrete = bucket.convert();
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(bucket);
                     parent.getRestrictions().add(concrete);
                 }
             });
-            return restriction;
+            translated = restriction;
         } else {
             BucketRestriction bucket = (BucketRestriction) restriction;
-            return bucket.convert();
+            translated = bucket.convert();
         }
+        return RestrictionOptimizer.optimize(translated);
     }
 
     private static Sort translateFrontEndSort(FrontEndSort frontEndSort) {

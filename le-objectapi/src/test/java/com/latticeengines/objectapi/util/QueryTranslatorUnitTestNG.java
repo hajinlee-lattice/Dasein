@@ -20,7 +20,6 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.util.ReverseQueryTranslator;
 
 public class QueryTranslatorUnitTestNG {
 
@@ -41,17 +40,6 @@ public class QueryTranslatorUnitTestNG {
                 .anyMatch(r -> ((LogicalRestriction) r).getOperator().equals(LogicalOperator.OR)));
 
         validateTranslated(translated.getRestriction(), 4, 7);
-
-        FrontEndRestriction reverseTranslated = ReverseQueryTranslator
-                .translateRestriction(translated.getRestriction());
-        validateReverseTranslated(reverseTranslated.getRestriction(), 4, 7);
-
-        frontEndRestriction.setRestriction(createRestriction(Level.Advanced));
-        translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
-        validateTranslated(translated.getRestriction(), 5, 9);
-
-        reverseTranslated = ReverseQueryTranslator.translateRestriction(translated.getRestriction());
-        validateReverseTranslated(reverseTranslated.getRestriction(), 5, 9);
     }
 
     private void validateTranslated(Restriction restriction, int numConcrete, int numTotalRestrictions) {
@@ -68,25 +56,6 @@ public class QueryTranslatorUnitTestNG {
             }
         });
         assertEquals(numConcrete, concreteCounter.intValue());
-        assertEquals(numTotalRestrictions, totalCounter.intValue());
-    }
-
-    private void validateReverseTranslated(Restriction restriction, int numBucket, int numTotalRestrictions) {
-        BreadthFirstSearch search = new BreadthFirstSearch();
-        final MutableInt bucketCounter = new MutableInt(0);
-        final MutableInt totalCounter = new MutableInt(0);
-
-        FrontEndRestriction reverseTranslated = ReverseQueryTranslator.translateRestriction(restriction);
-        search.run(reverseTranslated.getRestriction(), (object, ctx) -> {
-            if (object instanceof Restriction) {
-                totalCounter.increment();
-            }
-            assertFalse(object instanceof ConcreteRestriction);
-            if (object instanceof BucketRestriction) {
-                bucketCounter.increment();
-            }
-        });
-        assertEquals(numBucket, bucketCounter.intValue());
         assertEquals(numTotalRestrictions, totalCounter.intValue());
     }
 

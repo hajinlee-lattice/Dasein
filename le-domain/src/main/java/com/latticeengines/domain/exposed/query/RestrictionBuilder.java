@@ -22,13 +22,17 @@ public class RestrictionBuilder {
     private List<Restriction> children;
 
     public RestrictionBuilder let(BusinessEntity entity, String attrName) {
+        return let(new AttributeLookup(entity, attrName));
+    }
+
+    public RestrictionBuilder let(AttributeLookup lookup) {
         if (restriction != null) {
             throw new IllegalArgumentException("Cannot chain a lookup here.");
         }
         if (existsEntity != null) {
             throw new IllegalArgumentException("Cannot specify let and exists together.");
         }
-        attrLookup = new AttributeLookup(entity, attrName);
+        this.attrLookup = lookup;
         complete = false;
         return this;
     }

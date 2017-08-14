@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.query;
 
 import static com.latticeengines.domain.exposed.query.ComparisonType.EQUAL;
 import static com.latticeengines.domain.exposed.query.ComparisonType.GREATER_OR_EQUAL;
-import static com.latticeengines.domain.exposed.query.ComparisonType.IN_RANGE;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
 import static com.latticeengines.domain.exposed.query.ComparisonType.LESS_THAN;
 
@@ -96,23 +95,28 @@ public class BucketRestriction extends Restriction {
     }
 
     // from UI to backend
-    public ConcreteRestriction convert() {
+    public Restriction convert() {
         if (bkt.getRange() == null && StringUtils.isBlank(bkt.getLabel())) {
             return new ConcreteRestriction(false, attr, IS_NULL, null);
         } else if (bkt.getRange() != null) {
             if (bkt.getRange().getLeft() != null && bkt.getRange().getRight() != null) {
-                return new ConcreteRestriction(false, attr, IN_RANGE,
-                        new RangeLookup(bkt.getRange().getLeft(), bkt.getRange().getRight()));
+                if (bkt.getRange().getLeft().equals(bkt.getRange().getRight())) {
+                    return Restriction.builder().let(attr).eq(bkt.getRange().getLeft())
+                            .build();
+                } else {
+                    Restriction lowerBound = Restriction.builder().let(attr).gte(bkt.getRange().getLeft()).build();
+                    Restriction upperBound = Restriction.builder().let(attr).lt(bkt.getRange().getRight()).build();
+                    return Restriction.builder().and(lowerBound, upperBound).build();
+                }
             } else if (bkt.getRange().getLeft() != null) {
-                return new ConcreteRestriction(false, attr, GREATER_OR_EQUAL,
-                        new ValueLookup(bkt.getRange().getLeft()));
+                return Restriction.builder().let(attr).gte(bkt.getRange().getLeft()).build();
             } else if (bkt.getRange().getRight() != null) {
-                return new ConcreteRestriction(false, attr, LESS_THAN, new ValueLookup(bkt.getRange().getRight()));
+                return Restriction.builder().let(attr).lt(bkt.getRange().getRight()).build();
             } else {
                 throw new IllegalArgumentException("A range cannot have both boundaries null.");
             }
         } else {
-            return new ConcreteRestriction(false, attr, EQUAL, new ValueLookup(bkt.getLabel()));
+            return Restriction.builder().let(attr).eq(bkt.getLabel()).build();
         }
     }
 

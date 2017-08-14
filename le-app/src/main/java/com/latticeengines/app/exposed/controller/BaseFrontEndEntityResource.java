@@ -111,7 +111,7 @@ public abstract class BaseFrontEndEntityResource {
         if (frontEndQuery.getFrontEndRestriction() != null) {
             Restriction restriction = frontEndQuery.getFrontEndRestriction().getRestriction();
             if (restriction != null) {
-                frontEndQuery.getFrontEndRestriction().setRestriction(RestrictionOptimizer.flatten(restriction));
+                frontEndQuery.getFrontEndRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
             }
         }
     }
