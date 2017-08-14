@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataRequest;
 import com.latticeengines.domain.exposed.query.PageFilter;
@@ -15,8 +16,8 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
-import com.latticeengines.objectapi.util.QueryTranslator;
 import com.latticeengines.objectapi.service.AccountQueryService;
+import com.latticeengines.objectapi.util.QueryTranslator;
 
 @Component("accountQueryService")
 public class AccountQueryServiceImpl implements AccountQueryService {
@@ -29,15 +30,15 @@ public class AccountQueryServiceImpl implements AccountQueryService {
         }
         if (StringUtils.isNotBlank(start)) {
             long lastModifiedTime = DateTimeUtils.convertToLongUTCISO8601(start) / 1000;
-            Restriction lastModifiedRestriction = Restriction.builder().let(BusinessEntity.Account, "LastModified")
-                    .gte(lastModifiedTime).build();
+            Restriction lastModifiedRestriction = Restriction.builder()
+                    .let(BusinessEntity.Account, InterfaceName.LastModifiedDate.name()).gte(lastModifiedTime).build();
             restrictions.add(lastModifiedRestriction);
         }
 
         if (CollectionUtils.isNotEmpty(dataRequest.getAccountIds())) {
             RestrictionBuilder accoundIdRestrictionBuilder = Restriction.builder();
             RestrictionBuilder[] accountIdRestrictions = dataRequest.getAccountIds().stream()
-                    .map(id -> Restriction.builder().let(BusinessEntity.Account, "AccountId").eq(id))
+                    .map(id -> Restriction.builder().let(BusinessEntity.Account, InterfaceName.AccountId.name()).eq(id))
                     .toArray(RestrictionBuilder[]::new);
             accoundIdRestrictionBuilder.or(accountIdRestrictions);
             restrictions.add(accoundIdRestrictionBuilder.build());
@@ -51,9 +52,10 @@ public class AccountQueryServiceImpl implements AccountQueryService {
                     dataRequest.getAttributes().toArray(new String[] {}));
         }
         queryBuilder
-                .select(BusinessEntity.Account, "AccountId", "LatticeAccountId", "SalesforceAccountID", "LastModified") //
+                .select(BusinessEntity.Account, InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name(),
+                        InterfaceName.SalesforceAccountID.name(), InterfaceName.LastModifiedDate.name()) //
                 .where(restriction) //
-                .orderBy(BusinessEntity.Account, "AccountId");
+                .orderBy(BusinessEntity.Account, InterfaceName.AccountId.name());
         return queryBuilder.build();
     }
 

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -61,7 +62,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                 playMap.put(PlaymakerConstants.DisplayName, play.getDisplayName());
                 playMap.put(PlaymakerConstants.Description, play.getDescription());
                 playMap.put(PlaymakerConstants.AverageProbability, dummyAvgProbability());
-                playMap.put(PlaymakerConstants.LastModificationDate, secondsFromEpoch(play));
+                playMap.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY, secondsFromEpoch(play));
                 playMap.put(PlaymakerConstants.PlayGroups, dummyPlayGroups());
                 playMap.put(PlaymakerConstants.TargetProducts, dummyTargetProducts());
                 playMap.put(PlaymakerConstants.Workflow, dummyWorkfowType());

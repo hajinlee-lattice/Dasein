@@ -53,6 +53,7 @@ public enum InterfaceName {
     LEContactIDLong, // TODO: to be replaced by VdbContactId
     External_ID, // TODO: temporarily used for contact Id before we have real
                  // contact data
+    SalesforceAccountID, // salesforce account ID
 
     // Data Cloud
     LatticeAccountId // Id in AccountMaster

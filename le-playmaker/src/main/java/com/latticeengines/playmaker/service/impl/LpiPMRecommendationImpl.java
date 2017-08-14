@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -88,7 +89,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                 accExtRec.put(PlaymakerConstants.PriorityID, 25);
                 accExtRec.put(PlaymakerConstants.SfdcContactID, "");
                 accExtRec.put(PlaymakerConstants.Contacts,
-                        createContacts((String) accExtRec.get(PlaymakerConstants.CompanyName)));
+                        createContacts((String) accExtRec.get(InterfaceName.CompanyName.name())));
 
                 accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
 

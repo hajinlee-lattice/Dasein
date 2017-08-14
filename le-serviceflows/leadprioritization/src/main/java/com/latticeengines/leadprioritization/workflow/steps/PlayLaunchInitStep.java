@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
@@ -41,8 +43,6 @@ import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component("playLaunchInitStep")
 public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfiguration> {
@@ -80,15 +80,14 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private long processedSegmentAccountsCount = 0;
 
-    @SuppressWarnings("unchecked")
     List<String> fields = Arrays.asList(new String[] { //
-            PlaymakerConstants.CdlKeyZip, //
-            PlaymakerConstants.AccountId, //
-            PlaymakerConstants.CdlKeyExternal_ID, //
-            PlaymakerConstants.SalesforceAccountID, //
-            PlaymakerConstants.CdlKeyTotalMonetaryValue, //
-            PlaymakerConstants.CdlKeyDisplayName, //
-            PlaymakerConstants.CdlKeyCrmAccount_External_ID });
+            InterfaceName.PostalCode.name(), //
+            InterfaceName.AccountId.name(), //
+            InterfaceName.External_ID.name(), //
+            InterfaceName.SalesforceAccountID.name(), //
+            InterfaceName.AnnualRevenue.name(), //
+            InterfaceName.CompanyName.name(), //
+            InterfaceName.CRMId.name() });
 
     @PostConstruct
     public void init() {
@@ -133,7 +132,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
         }
     }
-    
+
     private void executeLaunchActivity(Tenant tenant, PlayLaunch playLauch, PlayLaunchInitStepConfiguration config,
             Restriction segmentRestriction) {
 
@@ -205,17 +204,17 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         }
         recommendation.setLaunchDate(launchTime);
 
-        recommendation.setAccountId(account.get(PlaymakerConstants.AccountId).toString());
-        recommendation.setLeAccountExternalID(account.get(PlaymakerConstants.CdlKeyExternal_ID).toString());
-        recommendation.setSfdcAccountID(account.get(PlaymakerConstants.SalesforceAccountID).toString());
+        recommendation.setAccountId(account.get(InterfaceName.AccountId.name()).toString());
+        recommendation.setLeAccountExternalID(account.get(InterfaceName.External_ID.name()).toString());
+        recommendation.setSfdcAccountID(account.get(InterfaceName.SalesforceAccountID.name()).toString());
 
-        String valueStr = account.get(PlaymakerConstants.CdlKeyTotalMonetaryValue).toString();
+        String valueStr = account.get(InterfaceName.AnnualRevenue.name()).toString();
         Double value = 0D;
         if (StringUtils.isNotEmpty(valueStr) && StringUtils.isNumeric(valueStr)) {
             value = Double.parseDouble(valueStr);
         }
         recommendation.setMonetaryValue(value);
-        recommendation.setCompanyName(account.get(PlaymakerConstants.CdlKeyDisplayName).toString());
+        recommendation.setCompanyName(account.get(InterfaceName.CompanyName.name()).toString());
         recommendation.setTenantId(tenant.getPid());
         recommendation.setLikelihood(0.5D);
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);

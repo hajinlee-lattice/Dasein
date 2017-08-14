@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
@@ -37,8 +38,8 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
     private DataCollectionProxy dataCollectionProxy;
 
     @Override
-    public List<Map<String, Object>> getAccountExtensions(long start, long offset, long maximum, List<String> accountIds,
-            Long recStart, String columns, boolean hasSfdcContactId) {
+    public List<Map<String, Object>> getAccountExtensions(long start, long offset, long maximum,
+            List<String> accountIds, Long recStart, String columns, boolean hasSfdcContactId) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(accountIds);
@@ -64,18 +65,20 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
             long rowNum = offset + 1;
 
             for (Map<String, Object> accExtRec : data) {
-                if (accExtRec.containsKey(PlaymakerConstants.AccountId)) {
-                    accExtRec.put(PlaymakerConstants.ID, accExtRec.get(PlaymakerConstants.AccountId));
+                if (accExtRec.containsKey(InterfaceName.AccountId.name())) {
+                    accExtRec.put(PlaymakerConstants.ID, accExtRec.get(InterfaceName.AccountId.name()));
                 }
-                if (accExtRec.containsKey(PlaymakerConstants.SalesforceAccountID)) {
-                    accExtRec.put(PlaymakerConstants.SfdcAccountID, accExtRec.get(PlaymakerConstants.SalesforceAccountID));
+                if (accExtRec.containsKey(InterfaceName.SalesforceAccountID.name())) {
+                    accExtRec.put(PlaymakerConstants.SfdcAccountID,
+                            accExtRec.get(InterfaceName.SalesforceAccountID.name()));
                 }
-                if (accExtRec.containsKey(PlaymakerConstants.LatticeAccountId)) {
-                    accExtRec.put(PlaymakerConstants.LEAccountExternalID, accExtRec.get(PlaymakerConstants.LatticeAccountId));
+                if (accExtRec.containsKey(InterfaceName.LatticeAccountId.name())) {
+                    accExtRec.put(PlaymakerConstants.LEAccountExternalID,
+                            accExtRec.get(InterfaceName.LatticeAccountId.name()));
                 }
 
                 accExtRec.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY,
-                        accExtRec.get(PlaymakerConstants.LastModified));
+                        accExtRec.get(InterfaceName.LastModifiedDate.name()));
 
                 accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
             }
