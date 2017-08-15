@@ -5,11 +5,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class TopAttribute {
+
+    @JsonProperty("Entity")
+    private BusinessEntity entity;
 
     @JsonProperty("Attribute")
     private String attribute;
@@ -25,9 +30,18 @@ public class TopAttribute {
     private TopAttribute() {
     }
 
-    public TopAttribute(String attribute, Long count) {
-        this.attribute = attribute;
+    public TopAttribute(AttributeLookup attributeLookup, Long count) {
+        this.entity = attributeLookup.getEntity();
+        this.attribute = attributeLookup.getAttribute();
         this.count = count;
+    }
+
+    public BusinessEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(BusinessEntity entity) {
+        this.entity = entity;
     }
 
     public String getAttribute() {

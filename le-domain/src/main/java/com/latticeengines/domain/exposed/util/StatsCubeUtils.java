@@ -173,24 +173,36 @@ public class StatsCubeUtils {
         bucket.setRange(null);
     }
 
-    public static Statistics constructStatistics(StatsCube statsCube,
-            List<Pair<BusinessEntity, List<ColumnMetadata>>> metadataPairs) {
+    public static Statistics constructStatistics(Map<BusinessEntity, StatsCube> cubeMap,
+            Map<BusinessEntity, List<ColumnMetadata>> cmMap) {
         Statistics statistics = new Statistics();
-        Map<String, Pair<BusinessEntity, ColumnMetadata>> cmMap = convertToMap(metadataPairs);
 
-        Map<String, AttributeStats> attrStatsMap = statsCube.getStatistics();
-        Map<BusinessEntity, Long> counts = new HashMap<>();
-        counts.put(BusinessEntity.Account, statsCube.getCount());
-        statistics.setCounts(counts);
+        for (Map.Entry<BusinessEntity, StatsCube> cubeEntry: cubeMap.entrySet()) {
+            BusinessEntity entity = cubeEntry.getKey();
+            StatsCube cube = cubeEntry.getValue();
+            if (cmMap.containsKey(entity)) {
+                List<ColumnMetadata> cmList = cmMap.get(entity);
+                addStats(entity, cube, cmList, statistics);
+            } else {
+                log.warn("Did not provide column metadata for entity " + entity //
+                        + ", skipping the stats for the whole entity.");
+            }
+        }
+
+        return statistics;
+    }
+
+    private static void addStats(BusinessEntity entity, StatsCube cube, List<ColumnMetadata> cmList, Statistics statistics) {
+        Map<String, ColumnMetadata> cmMap = new HashMap<>();
+        cmList.forEach(cm -> cmMap.put(cm.getColumnId(), cm));
+        Map<String, AttributeStats> attrStatsMap = cube.getStatistics();
         for (String name : attrStatsMap.keySet()) {
-            Pair<BusinessEntity, ColumnMetadata> pair = cmMap.get(name);
-            if (pair == null) {
-                log.warn("Cannot find attribute " + name + " in any of the provided column metadata. Skip it.");
+            ColumnMetadata cm = cmMap.get(name);
+            if (cm == null) {
+                log.warn("Cannot find attribute " + name + " in the provided column metadata for " + entity + ", skipping it.");
                 continue;
             }
 
-            BusinessEntity entity = pair.getLeft();
-            ColumnMetadata cm = pair.getRight();
             AttributeLookup attrLookup = new AttributeLookup(entity, name);
             Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
             String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
@@ -208,22 +220,6 @@ public class StatsCubeUtils {
             SubcategoryStatistics subcategoryStatistics = statistics.getCategory(category).getSubcategory(subCategory);
             subcategoryStatistics.putAttrStats(attrLookup, statsInCube);
         }
-
-        return statistics;
-    }
-
-    private static Map<String, Pair<BusinessEntity, ColumnMetadata>> convertToMap(
-            List<Pair<BusinessEntity, List<ColumnMetadata>>> pairs) {
-        Map<String, Pair<BusinessEntity, ColumnMetadata>> map = new HashMap<>();
-        for (Pair<BusinessEntity, List<ColumnMetadata>> pair : pairs) {
-            BusinessEntity entity = pair.getLeft();
-            for (ColumnMetadata cm : pair.getRight()) {
-                if (!map.containsKey(cm.getColumnId())) {
-                    map.put(cm.getColumnId(), Pair.of(entity, cm));
-                }
-            }
-        }
-        return map;
     }
 
     public static StatsCube toStatsCube(Statistics statistics) {
@@ -288,7 +284,7 @@ public class StatsCubeUtils {
 
     private static TopAttribute toTopAttr(Map.Entry<AttributeLookup, AttributeStats> entry, boolean includeTopBkt) {
         AttributeStats stats = entry.getValue();
-        TopAttribute topAttribute = new TopAttribute(entry.getKey().getAttribute(), stats.getNonNullCount());
+        TopAttribute topAttribute = new TopAttribute(entry.getKey(), stats.getNonNullCount());
         if (includeTopBkt && stats.getBuckets() != null) {
             Bucket topBkt = stats.getBuckets().getBucketList().stream() //
                     .sorted(Comparator.comparing(bkt -> - bkt.getCount()))

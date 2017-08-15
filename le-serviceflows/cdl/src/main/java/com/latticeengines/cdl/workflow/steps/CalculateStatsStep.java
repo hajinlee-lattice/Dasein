@@ -97,7 +97,9 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         String profileTableName = TableUtils.getFullTableName(PROFILE_TABLE_PREFIX, pipelineVersion);
         String statsTableName = TableUtils.getFullTableName(STATS_TABLE_PREFIX, pipelineVersion);
         String sortedTableName = TableUtils.getFullTableName(SORTED_TABLE_PREFIX, pipelineVersion);
-        putStringValueInContext(CALCULATE_STATS_TARGET_TABLE, statsTableName);
+        Map<BusinessEntity, String> statsTableNameMap = new HashMap<>();
+        statsTableNameMap.put(BusinessEntity.Account, statsTableName);
+        putObjectInContext(STATS_TABLE_NAMES, statsTableNameMap);
         upsertTables(configuration.getCustomerSpace().toString(), profileTableName);
         Table sortedTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), sortedTableName);
         enrichTableSchema(sortedTable);

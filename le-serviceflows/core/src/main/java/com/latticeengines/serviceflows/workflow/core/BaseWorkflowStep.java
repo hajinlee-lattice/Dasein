@@ -83,7 +83,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String DATA_RULES = "DATA_RULES";
     protected static final String SOURCE_IMPORT_TABLE = "SOURCE_IMPORT_TABLE_NAME";
     protected static final String TRANSFORM_PIPELINE_VERSION = "TRANSFORM_PIPELINE_VERSION";
-    protected static final String CALCULATE_STATS_TARGET_TABLE = "CALCULATE_STATS_TARGET_TABLE";
+    protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String IS_ACTIVE = "IS_ACTIVE";
     protected static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
     protected static final String TABLE_GOING_TO_REDSHIFT = "TABLE_GOING_TO_REDSHIFT";

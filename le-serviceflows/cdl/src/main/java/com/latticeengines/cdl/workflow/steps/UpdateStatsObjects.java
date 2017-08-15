@@ -1,20 +1,20 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -40,7 +40,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
-    private String statsTableName;
+    private Map<BusinessEntity, Table> statsTableMap = new HashMap<>();
 
     @Override
     public void execute() {
@@ -57,21 +57,29 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             throw new NullPointerException("Profile table for stats object calculation is not found.");
         }
 
-        statsTableName = getStringValueFromContext(CALCULATE_STATS_TARGET_TABLE);
-        log.info(String.format("statsTableName for customer %s is %s", customerSpaceStr, statsTableName));
-        Table statsTable = metadataProxy.getTable(customerSpaceStr, statsTableName);
-        if (statsTable == null) {
-            throw new NullPointerException("Target table for Stats Object Calculation is not found.");
+        Map<BusinessEntity, String> statsTableNames = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class,
+                String.class);
+        if (statsTableNames != null) {
+            statsTableNames.forEach((entity, tableName) -> {
+                log.info(String.format("statsTableName for entity %s and customer %s is %s", entity, customerSpaceStr,
+                        tableName));
+                Table statsTable = metadataProxy.getTable(customerSpaceStr, tableName);
+                if (statsTable == null) {
+                    throw new NullPointerException("Target table " + tableName + " for Stats Object is not found.");
+                }
+                statsTableMap.put(entity, statsTable);
+            });
         }
-
-        StatisticsContainer statsContainer = constructStatsContainer(entityTableMap, statsTable);
+        StatisticsContainer statsContainer = constructStatsContainer(entityTableMap, statsTableMap);
         dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
     }
 
     @Override
     public void onExecutionCompleted() {
-        log.info("Drop stats table " + statsTableName);
-        metadataProxy.deleteTable(getConfiguration().getCustomerSpace().toString(), statsTableName);
+        statsTableMap.forEach((entity, table) -> {
+            log.info("Drop stats table " + table.getName() + " for entity " + entity);
+            metadataProxy.deleteTable(getConfiguration().getCustomerSpace().toString(), table.getName());
+        });
     }
 
     private StatsCube getStatsCube(Table targetTable) {
@@ -86,18 +94,18 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
     }
 
     private StatisticsContainer constructStatsContainer(Map<BusinessEntity, Table> entityTableMap,
-                                                        Table statsTable) {
+            Map<BusinessEntity, Table> statsTableMap) {
         log.info("Converting stats cube to statistics container.");
         // hard code entity
-        List<Pair<BusinessEntity, List<ColumnMetadata>>> mdPairs = new ArrayList<>();
-        entityTableMap.forEach((entity, table) -> //
-                mdPairs.add(ImmutablePair.of(entity, table.getColumnMetadata())));
+        Map<BusinessEntity, List<ColumnMetadata>> mdMap = new HashMap<>();
+        entityTableMap.forEach((entity, table) -> mdMap.put(entity, table.getColumnMetadata()));
         // get StatsCube from statsTable
-        StatsCube statsCube = getStatsCube(statsTable);
-        Statistics statistics = StatsCubeUtils.constructStatistics(statsCube, mdPairs);
+        Map<BusinessEntity, StatsCube> cubeMap = new HashMap<>();
+        statsTableMap.forEach((entity, table) -> cubeMap.put(entity, getStatsCube(table)));
+        Statistics statistics = StatsCubeUtils.constructStatistics(cubeMap, mdMap);
         StatisticsContainer statsContainer = new StatisticsContainer();
         statsContainer.setStatistics(statistics);
-        statsContainer.setName(statsTable.getName());
+        statsContainer.setName(NamingUtils.timestamp("Stats"));
         return statsContainer;
     }
 

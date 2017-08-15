@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -144,7 +143,8 @@ public class AccountMasterColumnMetadataServiceImpl extends BaseColumnMetadataSe
         Iterator<GenericRecord> recordIterator = AvroUtils.iterator(yarnConfiguration, snapshotDir + "/*.avro");
         StatsCube cube = StatsCubeUtils.parseAvro(recordIterator);
         List<ColumnMetadata> amAttrs = fromPredefinedSelection(predefined, fullVersion.getVersion());
-        return StatsCubeUtils.constructStatistics(cube, Collections.singletonList(Pair.of(BusinessEntity.LatticeAccount, amAttrs)));
+        BusinessEntity entity = BusinessEntity.LatticeAccount;
+        return StatsCubeUtils.constructStatistics(ImmutableMap.of(entity, cube), ImmutableMap.of(entity, amAttrs));
     }
 
     private Map<String, GenericRecord> readProfileFromHdfs(String dataCloudVersion) {
