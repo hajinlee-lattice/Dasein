@@ -1,10 +1,9 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -21,8 +20,6 @@ import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
@@ -85,6 +82,15 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                     originalAttrMatch.add(vdbAttrName);
                     break;
                 }
+            }
+        }
+
+        Iterator<Attribute> attrIterator = attributes.iterator();
+        while (attrIterator.hasNext()) {
+            Attribute attribute = attrIterator.next();
+            if (!findMatch.contains(attribute.getName())) {
+                log.info(String.format("Remove unmatched column : %s", attribute.getName()));
+                attrIterator.remove();
             }
         }
 
