@@ -270,7 +270,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         Active("active", true, true), // master table has formed and pushed to
                                       // data store
         Consolidating("consolidating", true, false), //
-        Profiling("profiling", true, false), //
+        Profiling("profiling", false, true), //
         Deleting("deleting", false, false);
 
         private final String name;
