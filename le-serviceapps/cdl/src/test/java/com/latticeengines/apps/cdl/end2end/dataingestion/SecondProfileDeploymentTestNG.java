@@ -7,8 +7,6 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_3;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -16,8 +14,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
-
-    private static final Logger log = LoggerFactory.getLogger(SecondProfileDeploymentTestNG.class);
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -38,8 +34,8 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private void verifyProfile() {
-        int numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2 + ACCOUNT_IMPORT_SIZE_3;
-        int numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2 + CONTACT_IMPORT_SIZE_3;
+        int numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
+        int numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
         verifyReport(profileAppId, 2, numAccounts, numContacts);
 
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
