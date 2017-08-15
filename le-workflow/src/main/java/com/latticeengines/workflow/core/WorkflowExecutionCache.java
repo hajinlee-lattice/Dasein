@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -35,9 +36,11 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
+import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 
 @Component("workflowExecutionCache")
 public class WorkflowExecutionCache {
@@ -62,6 +65,9 @@ public class WorkflowExecutionCache {
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    private JobProxy jobProxy;
 
     @PostConstruct
     public void init() {
@@ -122,7 +128,14 @@ public class WorkflowExecutionCache {
 
             Job job = new Job();
             job.setId(workflowId.getId());
-            job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
+            if (FinalApplicationStatus.FAILED.equals(workflowJob.getStatus())) {
+                job.setJobStatus(JobStatus.FAILED);
+            } else {
+                WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
+                if (job.getJobStatus() == null) {
+                    job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
+                }
+            }
             job.setStartTimestamp(workflowStatus.getStartTime());
             job.setJobType(jobInstance.getJobName());
             job.setSteps(getJobSteps(jobExecution));
