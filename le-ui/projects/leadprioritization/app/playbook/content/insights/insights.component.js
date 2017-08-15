@@ -77,6 +77,7 @@ angular.module('lp.playbook.wizard.insights', [])
         for (var i = pos; i < vm.talkingPoints.length; i++) {
             vm.talkingPoints[i].Offset--;
         }
+        validateTalkingPoints();
     };
 
     vm.reorder = function(from, to) {
@@ -113,7 +114,7 @@ angular.module('lp.playbook.wizard.insights', [])
                     if(!vm.talkingPoints[i].title) {
                         vm.talkingPoints[i].uiError.title = 'Please provide a title.';
                     }
-                    if(!vm.talkingPoints[i].content) {tpeditor.component.html
+                    if(!vm.talkingPoints[i].content) {
                         vm.talkingPoints[i].uiError.content = 'Please provide content.';
                     }
                     errors++;
@@ -128,13 +129,12 @@ angular.module('lp.playbook.wizard.insights', [])
         } else {
             valid = false;
         }
-        //valid = true;
         vm.valid = valid;
         if(valid) {
             PlaybookWizardStore.setTalkingPoints(vm.talkingPoints);
-            PlaybookWizardStore.setValidation('insights', true);
         }
-        return true;
+        PlaybookWizardStore.setValidation('insights', valid);
+        return valid;
     };
 
     vm.revertClick = function($event, val) {

@@ -6,7 +6,11 @@ angular.module('lp.playbook.dashboard', [
     PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore
 ) {
     var vm = this,
-        play_name = $stateParams.play_name;
+        play_name = $stateParams.play_name,
+        launchButtonBase = {
+            label: 'Launch',
+            state: ''
+        };
 
     angular.extend(vm, {
         TimestampIntervalUtility: TimestampIntervalUtility,
@@ -14,8 +18,10 @@ angular.module('lp.playbook.dashboard', [
         launchHistory: [],
         invalid: [],
         editable: true,
-        play: null
+        play: null,
+        launchButton: angular.copy(launchButtonBase)
     });
+
 
     // $q.when($stateParams.play_name, function() {
     //     if(play_name) {
@@ -132,22 +138,37 @@ angular.module('lp.playbook.dashboard', [
         return (vm.invalid.length ? false : true);
     };
 
+    var makeLaunchButton = function(launchHistory) {
+        var state = (vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
+        vm.launchButton.state = state;
+        if(state === 'Launched') {
+            vm.launchButton.label = 'Re-Launch now';
+        } else if(state === 'Launching' ) {
+            vm.launchButton.label = 'Launching';
+        }
+        
+    }
     var getPlay = function() {
         PlaybookWizardStore.getPlay(play_name).then(function(play){
             vm.play = play;
-            vm.launchedState = (vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
+            makeLaunchButton(vm.play.launchHistory);
+            vm.launchedState = vm.launchButton.state; //(vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
             vm.ratingsGraph = makeSimpleGraph(vm.play.rating && vm.play.rating.bucketInformation, 'bucketCount');
             vm.launchGraph = makeLaunchGraph(vm.play.launchHistory);
             vm.launchValidate(play);
 
             if(vm.launchedState === 'Launching') { // if it's in a launching state check every 10 seconds so we can update the button, then stop checking
                 vm.showLaunchSpinner = true;
-                var checkLaunchState = $interval(function(){
+                var checkLaunchState = $interval(function() {
                     PlaybookWizardStore.getPlayLaunches(play_name).then(function(results){
                         var result = results[0];
                         vm.launchHistory = results;
                         vm.launchedState = (result && result.launchState ? result.launchState : null);
-                        if(vm.launchedState === 'Launched') {
+
+                        if(vm.launchedState === 'Failed') {
+                            vm.launchButton = launchButtonBase;
+                        }
+                        if(vm.launchedState === 'Launched' || vm.launchedState === 'Failed') {
                             $interval.cancel(checkLaunchState);
                             vm.showLaunchSpinner = false;
                         }

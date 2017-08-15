@@ -48,7 +48,7 @@ angular
             url: '/dashboard/:play_name',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Play Book'
+                pageTitle: 'Play Overview'
             },
             resolve: {
                 Play: function(PlaybookWizardStore, $stateParams) {
@@ -83,7 +83,7 @@ angular
             url: '/insights',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Play Book',
+                pageTitle: 'Insights',
                 section: 'dashboard.insights'
             },
             resolve: {
@@ -119,7 +119,7 @@ angular
             url: '/preview',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Play Book',
+                pageTitle: 'Insights',
                 section: 'dashboard.insights.preview'
             },
             resolve: {
@@ -142,7 +142,7 @@ angular
             url: '/segment',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Play Book',
+                pageTitle: 'Segments',
                 section: 'dashboard.segment'
             },
             resolve: {
@@ -162,7 +162,7 @@ angular
             url: '/targets/:segment',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Play Book',
+                pageTitle: 'Avaliable Targets',
                 section: 'dashboard.targets'
             },
             resolve: {
@@ -230,7 +230,7 @@ angular
             url: '/launch_history',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Play Book',
+                pageTitle: 'Launch History',
                 section: 'dashboard.launch_history'
             },
             resolve: {
@@ -313,7 +313,7 @@ angular
                 'main@': {
                     resolve: {
                         WizardHeaderTitle: function() {
-                            return 'Play Book';
+                            return 'Create Play';
                         },
                         WizardContainerId: function() {
                             return 'playbook';

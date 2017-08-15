@@ -26,7 +26,7 @@
                     </li>
                 </ul>
 
-                <div ng-if="vm.talkingPoints" ng-repeat="tp in vm.talkingPoints | orderBy:'offset' | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" class="tp-entry" ng-class="{'has-errors': tp.uiError}">
+                <div ng-if="vm.talkingPoints" ng-repeat="tp in vm.talkingPoints | orderBy:'offset' | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" class="tp-entry" ng-class="{'has-errors': tp.uiError && !tp.IsNew}">
                     <cg-talking-point-editor
                         tp="tp"
                         on-delete="vm.onDelete($index)">
