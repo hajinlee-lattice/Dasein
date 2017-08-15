@@ -435,7 +435,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr("CompanyName") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME", "ACCOUNT NAME" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "COMPANY NAME", "ACCOUNT NAME", "DISPLAY_NAME", "DISPLAYNAME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
@@ -940,6 +940,13 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr("DoNotMail") //
+                .allowedDisplayNames(Sets.newHashSet("DONOTMAIL")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.DoNotMail) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.BOOLEAN.name()) //
                 .build());
         return table;
     }

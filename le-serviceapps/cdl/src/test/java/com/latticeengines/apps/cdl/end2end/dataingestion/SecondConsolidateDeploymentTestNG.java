@@ -4,9 +4,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
-import static org.testng.Assert.assertEquals;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -15,7 +13,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
@@ -42,20 +39,13 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
     }
 
     private void importData() throws Exception {
-        mockAvroData(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, ACCOUNT_IMPORT_SIZE_2);
-        mockAvroData(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);
+        mockVdbImoprt(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, ACCOUNT_IMPORT_SIZE_2);
+        mockVdbImoprt(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);
         Thread.sleep(2000);
     }
 
-    private void consolidate() {
-        log.info("Start consolidating ...");
-        ApplicationId appId = cdlProxy.consolidate(mainTestTenant.getId());
-        JobStatus completedStatus = waitForWorkflowStatus(appId.toString(), false);
-        assertEquals(completedStatus, JobStatus.COMPLETED);
-        verifyReport(appId.toString(), 2, ACCOUNT_IMPORT_SIZE_2, ACCOUNT_IMPORT_SIZE_2);
-    }
-
     private void verifyConsolidate() {
+        verifyReport(consolidateAppId, 2, ACCOUNT_IMPORT_SIZE_2, ACCOUNT_IMPORT_SIZE_2);
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
         Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
 

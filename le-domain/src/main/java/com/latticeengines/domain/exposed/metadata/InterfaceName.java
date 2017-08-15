@@ -25,6 +25,7 @@ public enum InterfaceName {
     Email, //
     Salutation, //
     BirthDate, //
+    DoNotMail, //
 
     City, //
     State, //
