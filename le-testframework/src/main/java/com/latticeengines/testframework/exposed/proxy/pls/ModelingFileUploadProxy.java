@@ -35,7 +35,7 @@ public class ModelingFileUploadProxy extends PlsRestApiProxyBase {
             args.add(schemaInterpretation);
         }
         if (entityExternalType != null) {
-            urlPattern += "$entityExternalType={entityExternalType}";
+            urlPattern += "&entityExternalType={entityExternalType}";
             args.add(entityExternalType);
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
