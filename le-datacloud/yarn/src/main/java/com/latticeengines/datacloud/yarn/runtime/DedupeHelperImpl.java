@@ -1,6 +1,8 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +21,9 @@ public class DedupeHelperImpl implements DedupeHelper {
 
     private static final Logger log = LoggerFactory.getLogger(DedupeHelperImpl.class);
 
+    private static Pattern junkNamePattern = Pattern
+            .compile("(^|\\s+)[\\[]*(none|no|not|delete|asd|sdf|unknown|undisclosed|null|dont|don't|n\\/a|n\\.a|abc|xyz|noname|nocompany)($|\\s+)");
+
     @Autowired
     PublicDomainService publicDomainService;
 
@@ -32,7 +37,7 @@ public class DedupeHelperImpl implements DedupeHelper {
         Integer isRemoved = 0;
         String domain = outputRecord.getPreMatchDomain();
 
-        // matched
+        /*** matched ***/
         boolean isMatched = StringUtils.isNotEmpty(latticeAccountId);
         if (isMatched) {
             if (StringUtils.isNotEmpty(outputRecord.getMatchedDduns())) {
@@ -47,7 +52,7 @@ public class DedupeHelperImpl implements DedupeHelper {
             return;
         }
 
-        // un-matched
+        /*** un-matched ***/
         boolean isPublicDomain = !processorContext.getOriginalInput().isPublicDomainAsNormalDomain()
                 && publicDomainService.isPublicDomain(domain);
         int numFeatureValue = outputRecord.getNumFeatureValue();
@@ -60,11 +65,23 @@ public class DedupeHelperImpl implements DedupeHelper {
                 + hasNoNameLocation + " is public=" + isPublicDomain + " Feature num=" + numFeatureValue
                 + " name location=" + nameLocation);
 
-        // removed
-        if (isPublicDomain && hasNoNameLocation) {
-            isRemoved = 1;
-            addDedupeValues(allValues, dedupeId, isRemoved);
-            return;
+        // public domain
+        if (isPublicDomain || StringUtils.isEmpty(domain)) {
+            if (hasNoNameLocation || isJunkCompany(name)) {
+                isRemoved = 1;
+                addDedupeValues(allValues, dedupeId, isRemoved);
+                return;
+            } else if (numFeatureValue > 0) {
+                if (StringUtils.isEmpty(name)) {
+                    name = "";
+                }
+                if (StringUtils.isEmpty(country)) {
+                    country = "USA";
+                }
+                dedupeId = Base64Utils.encodeBase64(DigestUtils.md5(name + country));
+                addDedupeValues(allValues, dedupeId, isRemoved);
+                return;
+            }
         }
 
         // non-public domain
@@ -90,15 +107,16 @@ public class DedupeHelperImpl implements DedupeHelper {
             addDedupeValues(allValues, dedupeId, isRemoved);
             return;
         }
-
-        // public domain
-        if (isPublicDomain && numFeatureValue > 0 && StringUtils.isNotEmpty(name)) {
-            if (StringUtils.isEmpty(country)) {
-                country = "USA";
-            }
-            dedupeId = Base64Utils.encodeBase64(DigestUtils.md5(name + country));
-        }
         addDedupeValues(allValues, dedupeId, isRemoved);
+    }
+
+    private boolean isJunkCompany(String name) {
+        if (StringUtils.isNotEmpty(name)) {
+            name = name.toLowerCase();
+            Matcher matcher = junkNamePattern.matcher(name);
+            return matcher.matches();
+        }
+        return false;
     }
 
     private void addDedupeValues(List<Object> allValues, String dedupeId, Integer isRemoved) {
