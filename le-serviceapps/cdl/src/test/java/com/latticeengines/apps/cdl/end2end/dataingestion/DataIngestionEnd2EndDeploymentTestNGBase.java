@@ -157,7 +157,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         profileAppId = appId.toString();
     }
 
-    protected long mockCsvImoprt(BusinessEntity entity, int fileId) throws IOException {
+    protected long mockCsvImport(BusinessEntity entity, int fileId) throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
 
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
@@ -228,7 +228,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
 
-    protected void mockVdbImoprt(BusinessEntity entity, int offset, int limit) throws IOException {
+    protected void mockVdbImport(BusinessEntity entity, int offset, int limit) throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
 
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",

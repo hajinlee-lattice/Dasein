@@ -39,8 +39,8 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
     }
 
     private void importData() throws Exception {
-        mockVdbImoprt(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, ACCOUNT_IMPORT_SIZE_2);
-        mockVdbImoprt(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);
+        mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, ACCOUNT_IMPORT_SIZE_2);
+        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);
         Thread.sleep(2000);
     }
 

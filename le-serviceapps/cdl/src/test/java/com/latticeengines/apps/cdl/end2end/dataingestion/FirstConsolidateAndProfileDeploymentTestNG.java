@@ -35,11 +35,11 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
     private void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        mockVdbImoprt(BusinessEntity.Account, 0, ACCOUNT_IMPORT_SIZE_1);
-        mockVdbImoprt(BusinessEntity.Contact, 0, CONTACT_IMPORT_SIZE_1);
+        mockVdbImport(BusinessEntity.Account, 0, ACCOUNT_IMPORT_SIZE_1);
+        mockVdbImport(BusinessEntity.Contact, 0, CONTACT_IMPORT_SIZE_1);
         Thread.sleep(2000);
-        mockVdbImoprt(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, 100);
-        mockVdbImoprt(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, 100);
+        mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1, 100);
+        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, 100);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 

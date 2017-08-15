@@ -24,8 +24,8 @@ public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2E
 
     private void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        importedAccounts = mockCsvImoprt(BusinessEntity.Account, 1);
-        importedContacts = mockCsvImoprt(BusinessEntity.Contact, 1);
+        importedAccounts = mockCsvImport(BusinessEntity.Account, 1);
+        importedContacts = mockCsvImport(BusinessEntity.Contact, 1);
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }

@@ -28,8 +28,8 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private void importData() throws Exception {
-        mockVdbImoprt(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, ACCOUNT_IMPORT_SIZE_3);
-        mockVdbImoprt(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2, CONTACT_IMPORT_SIZE_3);
+        mockVdbImport(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, ACCOUNT_IMPORT_SIZE_3);
+        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2, CONTACT_IMPORT_SIZE_3);
         Thread.sleep(2000);
     }
 
