@@ -12,7 +12,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkf
 public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig) {
-        CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask, connectorConfig);
+        CDLDataFeedImportWorkflowConfiguration configuration = generateConfiguration(customerSpace, dataFeedTask,
+                connectorConfig);
 
         return workflowJobService.submit(configuration);
     }
@@ -20,11 +21,12 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
             DataFeedTask dataFeedTask, String connectorConfig) {
 
-        return new CDLDataFeedImportWorkflowConfiguration.Builder()
-                .customer(customerSpace)
-                .microServiceHostPort(microserviceHostPort)
-                .dataFeedTaskId(dataFeedTask.getUniqueId())
-                .importConfig(connectorConfig)
+        return new CDLDataFeedImportWorkflowConfiguration.Builder() //
+                .customer(customerSpace) //
+                .internalResourceHostPort(internalResourceHostPort) //
+                .microServiceHostPort(microserviceHostPort) //
+                .dataFeedTaskId(dataFeedTask.getUniqueId()) //
+                .importConfig(connectorConfig) //
                 .build();
     }
 }
