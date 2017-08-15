@@ -4,7 +4,7 @@
   "name": "Q_FS_LEContact", 
   "fields": [
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "InterfaceName": "Id", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
@@ -24,7 +24,7 @@
       "logicalType": "Id"
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -42,7 +42,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "InterfaceName": "CompanyName", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
@@ -61,7 +61,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -79,7 +79,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -97,7 +97,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -115,7 +115,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "InterfaceName": "City", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
@@ -134,7 +134,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "InterfaceName": "Country", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
@@ -153,7 +153,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -171,7 +171,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -189,7 +189,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "InterfaceName": "StateProvince", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
@@ -208,7 +208,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -226,7 +226,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "InterfaceName": "PostalCode", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
@@ -245,7 +245,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -263,7 +263,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -281,7 +281,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -299,7 +299,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -317,7 +317,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -335,7 +335,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -353,7 +353,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
@@ -371,7 +371,7 @@
       ]
     }, 
     {
-      "Category": "My Attributes", 
+      "Category": "CONTACT_ATTRIBUTES", 
       "Nullable": "true", 
       "FundamentalType": "ALPHA", 
       "DisplayDiscretizationStrategy": "", 
