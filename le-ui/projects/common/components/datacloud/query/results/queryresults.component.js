@@ -1,8 +1,8 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($scope, $state, $stateParams, $filter, 
-    BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore, AccountsCount, Config) {
+.controller('QueryResultsCtrl', function($q, $scope, $state, $stateParams, $filter, 
+    BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore, Config) {
 
     var vm = this;
     angular.extend(vm, {
@@ -10,8 +10,6 @@ angular.module('common.datacloud.query.results', [
         modelId: $stateParams.modelId,
         inModel: $state.current.name.split('.')[1] === 'model',
         accounts: [],
-        accountsCount: AccountsCount,
-        accountsWithoutSfId: 0,
         loading: true,
         restriction: QueryStore.getRestriction(),
         current: 1,
@@ -33,11 +31,11 @@ angular.module('common.datacloud.query.results', [
     vm.excludeNonSalesForceCheckbox = function(excludeAccounts){
         excludeAccounts = !excludeAccounts;
 
-        if(excludeAccounts = false){
-            vm.excludeNonSalesForce = true;
+        if(excludeAccounts){
+            vm.excludeNonSalesForce = false;
             updatePage();
         } else {
-            vm.excludeNonSalesForce = false;
+            vm.excludeNonSalesForce = true;
             updatePage();
         }
         
@@ -108,6 +106,29 @@ angular.module('common.datacloud.query.results', [
 
         vm.loading = true;
 
+
+        if(vm.section === 'dashboard.targets' || vm.section === 'wizard.targets') {
+            
+            var deferred = $q.defer(),
+                restriction = QueryStore.getRestriction(),
+                query = {
+                    'free_form_text_search': '',
+                    'frontend_restriction': restriction,
+                    'page_filter': {
+                        'row_offset': 0,
+                        'num_rows': 1000000
+                    },
+                    'restrict_without_sfdcid': true
+                };
+
+            var excludeCount = QueryStore.GetCountByQuery('accounts', query).then(function(response){ return response }); 
+
+            deferred.resolve( vm.accountsWithoutSfId = excludeCount );
+
+            return deferred.promise;
+        };
+
+
         var offset = (vm.current - 1) * vm.pagesize;
         var query = {
             free_form_text_search: vm.search,
@@ -118,21 +139,6 @@ angular.module('common.datacloud.query.results', [
             },
             restrict_without_sfdcid: vm.excludeNonSalesForce
         };
-        var NoSfIdQuery = {
-            free_form_text_search: vm.search,
-            frontend_restriction: vm.restriction,
-            page_filter: {
-                num_rows: 1000000,
-                row_offset: 0
-            },
-            restrict_without_sfdcid: true
-        };
-
-        QueryStore.GetCountByQuery('accounts', NoSfIdQuery).then(function(response){
-            console.log(response);
-            vm.accountsWithoutSfId = response;
-        });
-
         QueryStore.setAccounts(query, $stateParams.segment).then(function(response){
             vm.accounts = response.data;
             vm.loading = false;

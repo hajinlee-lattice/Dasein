@@ -10,7 +10,6 @@
                 type="checkbox" 
                 class=""
                 ng-model="excludeAccounts"
-                ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)"
                 ng-change="vm.excludeNonSalesForceCheckbox(excludeAccounts)" />
             Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.accountsWithoutSfId | number }}</span>)
         </label>
@@ -92,11 +91,11 @@
                 <td>
                     <span 
                         class="gray-text"
-                        ng-if="!account.SalesforceAccountID">
+                        ng-if="account.SalesforceAccountID === null">
                         None
                     </span>
                     <span
-                        ng-if="account.SalesforceAccountID">
+                        ng-if="account.SalesforceAccountID != null">
                         {{account.SalesforceAccountID}}
                     </span>
                 </td>

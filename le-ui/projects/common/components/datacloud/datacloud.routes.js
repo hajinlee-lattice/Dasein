@@ -490,9 +490,11 @@ angular
                     deferred.resolve( QueryStore.GetCountByQuery('accounts', query, segment).then(function(data){ return data; }));
                     return deferred.promise;
                 }],
-                Config: [function(){
-                    return null;
-                }],
+                Config: ['$q', function($q){
+                    var deferred = $q.defer();
+                    deferred.resolve();
+                    return deferred.promise;
+                }]
             },
             views: {
                 "main@": {

@@ -167,7 +167,7 @@ angular
             },
             resolve: {
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
-                    var CreateOrUpdateSegment = function() {
+
                         var segment = QueryStore.getSegment(),
                             ts = new Date().getTime(),
                             restriction = QueryStore.getRestriction();
@@ -195,23 +195,10 @@ angular
                                     'num_rows': 10
                                 }
                             };
-                        }
+                        };
 
                         return SegmentService.CreateOrUpdateSegment(segment);
-                    };
 
-                    return {
-                        CreateOrUpdateSegment: CreateOrUpdateSegment
-                    };
-                }],
-                AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
-                    var deferred = $q.defer();
-
-                    QueryStore.GetCountByQuery('accounts').then(function(data){ 
-                        deferred.resolve(data);
-                    });
-
-                    return deferred.promise;
                 }],
                 Config: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
                     var deferred = $q.defer();
