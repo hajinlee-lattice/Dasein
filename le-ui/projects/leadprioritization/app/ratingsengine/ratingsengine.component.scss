@@ -1,0 +1,8 @@
+@import "./content/dashboard/dashboard.component.scss";
+
+.ratingsengine-content.container,
+section.ratingsengine.container {
+    *[ng-click]:not(.ignore-ngclick) {
+        cursor: pointer;
+    }
+}

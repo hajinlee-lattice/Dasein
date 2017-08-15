@@ -57,6 +57,16 @@
                 </span>
             </a>
         </li>
+        <li ng-if="showRatingsEngine" role="presentation" ng-class="{active: $state.includes('home.ratingsengine')}">
+            <a ui-sref="home.ratingsengine" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE')}}">
+                <span class="ico-container tool-tip" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE')}}">
+                    <span class="ico ico-alerts"></span>
+                </span>
+                <span class="label">
+                    {{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE')}}
+                </span>
+            </a>
+        </li>
         <li role="presentation" ng-class="{active: $state.includes('home.datacloud.explorer') || $state.includes('home.datacloud.lookup')}">
             <a ui-sref="home.datacloud.explorer({section:'edit',category:'',subcategory:''})" ui-sref-opts="{reload:true}" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DATA_CLOUD')}}">
                 <span class="ico-container tool-tip" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DATA_CLOUD')}}">
