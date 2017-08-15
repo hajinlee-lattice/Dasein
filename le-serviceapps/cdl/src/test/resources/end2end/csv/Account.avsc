@@ -1,0 +1,539 @@
+{
+  "doc": "", 
+  "type": "record", 
+  "name": "Q_FS_LEAccount", 
+  "fields": [
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "Id", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Id", 
+      "Description": "Some description about Id", 
+      "displayName": "Id", 
+      "name": "Id", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ], 
+      "logicalType": "Id"
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "SalesforceAccountID", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "SalesforceAccountID", 
+      "Description": "Some description about SalesforceAccountID", 
+      "displayName": "SalesforceAccountID", 
+      "name": "SalesforceAccountID", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "CompanyName", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "CompanyName", 
+      "Description": "Some description about CompanyName", 
+      "displayName": "CompanyName", 
+      "name": "CompanyName", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Address_Street_1", 
+      "Description": "Some description about Address_Street_1", 
+      "displayName": "Address_Street_1", 
+      "name": "Address_Street_1", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "City", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "City", 
+      "Description": "Some description about City", 
+      "displayName": "City", 
+      "name": "City", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "StateProvince", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "StateProvince", 
+      "Description": "Some description about StateProvince", 
+      "displayName": "StateProvince", 
+      "name": "StateProvince", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "Country", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Country", 
+      "Description": "Some description about Country", 
+      "displayName": "Country", 
+      "name": "Country", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "PostalCode", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "PostalCode", 
+      "Description": "Some description about PostalCode", 
+      "displayName": "PostalCode", 
+      "name": "PostalCode", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "Website", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Website", 
+      "Description": "Some description about Website", 
+      "displayName": "Website", 
+      "name": "Website", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "EstimatedRevenue", 
+      "Description": "Some description about EstimatedRevenue", 
+      "displayName": "EstimatedRevenue", 
+      "name": "EstimatedRevenue", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "NumberOfEmployees", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "NumberOfEmployees", 
+      "Description": "Some description about NumberOfEmployees", 
+      "displayName": "NumberOfEmployees", 
+      "name": "NumberOfEmployees", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "NAICS_Code", 
+      "Description": "Some description about NAICS_Code", 
+      "displayName": "NAICS_Code", 
+      "name": "NAICS_Code", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "SIC_Code", 
+      "Description": "Some description about SIC_Code", 
+      "displayName": "SIC_Code", 
+      "name": "SIC_Code", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "IsCorporateAccount", 
+      "Description": "Some description about IsCorporateAccount", 
+      "displayName": "IsCorporateAccount", 
+      "name": "IsCorporateAccount", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Vertical", 
+      "Description": "Some description about Vertical", 
+      "displayName": "Vertical", 
+      "name": "Vertical", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Territory_External_ID", 
+      "Description": "Some description about Territory_External_ID", 
+      "displayName": "Territory_External_ID", 
+      "name": "Territory_External_ID", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "IsActive", 
+      "Description": "Some description about IsActive", 
+      "displayName": "IsActive", 
+      "name": "IsActive", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "address_street_2", 
+      "Description": "Some description about address_street_2", 
+      "displayName": "address_street_2", 
+      "name": "address_street_2", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "alt_id", 
+      "Description": "Some description about alt_id", 
+      "displayName": "alt_id", 
+      "name": "alt_id", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "businessunit_external_id", 
+      "Description": "Some description about businessunit_external_id", 
+      "displayName": "businessunit_external_id", 
+      "name": "businessunit_external_id", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "est_yearly_revenue_currency_external_id", 
+      "Description": "Some description about est_yearly_revenue_currency_external_id", 
+      "displayName": "est_yearly_revenue_currency_external_id", 
+      "name": "est_yearly_revenue_currency_external_id", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "latitude", 
+      "Description": "Some description about latitude", 
+      "displayName": "latitude", 
+      "name": "latitude", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "link_url", 
+      "Description": "Some description about link_url", 
+      "displayName": "link_url", 
+      "name": "link_url", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "loadchunknumber", 
+      "Description": "Some description about loadchunknumber", 
+      "displayName": "loadchunknumber", 
+      "name": "loadchunknumber", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "longitude", 
+      "Description": "Some description about longitude", 
+      "displayName": "longitude", 
+      "name": "longitude", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "matcher_company_name", 
+      "Description": "Some description about matcher_company_name", 
+      "displayName": "matcher_company_name", 
+      "name": "matcher_company_name", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "owner_external_id", 
+      "Description": "Some description about owner_external_id", 
+      "displayName": "owner_external_id", 
+      "name": "owner_external_id", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "parent_external_id", 
+      "Description": "Some description about parent_external_id", 
+      "displayName": "parent_external_id", 
+      "name": "parent_external_id", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "twitter_handle", 
+      "Description": "Some description about twitter_handle", 
+      "displayName": "twitter_handle", 
+      "name": "twitter_handle", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }
+  ]
+}

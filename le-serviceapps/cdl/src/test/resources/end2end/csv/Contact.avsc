@@ -1,0 +1,392 @@
+{
+  "doc": "", 
+  "type": "record", 
+  "name": "Q_FS_LEContact", 
+  "fields": [
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "Id", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Id", 
+      "Description": "Some description about Id", 
+      "displayName": "Id", 
+      "name": "Id", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ], 
+      "logicalType": "Id"
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "AccountId", 
+      "Description": "Some description about AccountId", 
+      "displayName": "AccountId", 
+      "name": "AccountId", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "CompanyName", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "CompanyName", 
+      "Description": "Some description about CompanyName", 
+      "displayName": "CompanyName", 
+      "name": "CompanyName", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Offset", 
+      "Description": "Some description about Offset", 
+      "displayName": "Offset", 
+      "name": "Offset", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "IsPrimary", 
+      "Description": "Some description about IsPrimary", 
+      "displayName": "IsPrimary", 
+      "name": "IsPrimary", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Address_Street_1", 
+      "Description": "Some description about Address_Street_1", 
+      "displayName": "Address_Street_1", 
+      "name": "Address_Street_1", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "City", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "City", 
+      "Description": "Some description about City", 
+      "displayName": "City", 
+      "name": "City", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "Country", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Country", 
+      "Description": "Some description about Country", 
+      "displayName": "Country", 
+      "name": "Country", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Email_Address", 
+      "Description": "Some description about Email_Address", 
+      "displayName": "Email_Address", 
+      "name": "Email_Address", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Fax_Number", 
+      "Description": "Some description about Fax_Number", 
+      "displayName": "Fax_Number", 
+      "name": "Fax_Number", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "StateProvince", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "StateProvince", 
+      "Description": "Some description about StateProvince", 
+      "displayName": "StateProvince", 
+      "name": "StateProvince", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Title", 
+      "Description": "Some description about Title", 
+      "displayName": "Title", 
+      "name": "Title", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "InterfaceName": "PostalCode", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "PostalCode", 
+      "Description": "Some description about PostalCode", 
+      "displayName": "PostalCode", 
+      "name": "PostalCode", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Master_System", 
+      "Description": "Some description about Master_System", 
+      "displayName": "Master_System", 
+      "name": "Master_System", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "PhoneNumber", 
+      "Description": "Some description about PhoneNumber", 
+      "displayName": "PhoneNumber", 
+      "name": "PhoneNumber", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "CRMId", 
+      "Description": "Some description about CRMId", 
+      "displayName": "CRMId", 
+      "name": "CRMId", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "IsActive", 
+      "Description": "Some description about IsActive", 
+      "displayName": "IsActive", 
+      "name": "IsActive", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "address_street_2", 
+      "Description": "Some description about address_street_2", 
+      "displayName": "address_street_2", 
+      "name": "address_street_2", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "Description", 
+      "Description": "Some description about Description", 
+      "displayName": "Description", 
+      "name": "Description", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "DoNotMail", 
+      "Description": "Some description about DoNotMail", 
+      "displayName": "DoNotMail", 
+      "name": "DoNotMail", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }, 
+    {
+      "Category": "My Attributes", 
+      "Nullable": "true", 
+      "FundamentalType": "ALPHA", 
+      "DisplayDiscretizationStrategy": "", 
+      "ApprovedUsage": "", 
+      "DataQuality": "", 
+      "SourceAttrName": "loadchunknumber", 
+      "Description": "Some description about loadchunknumber", 
+      "displayName": "loadchunknumber", 
+      "name": "loadchunknumber", 
+      "Tags": "", 
+      "sourceLogicalType": "String", 
+      "type": [
+        "string", 
+        "null"
+      ]
+    }
+  ]
+}
