@@ -13,6 +13,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 public class ManualSeedEnrichDunsFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 739402958076252241L;
@@ -33,7 +34,6 @@ public class ManualSeedEnrichDunsFunction extends BaseOperation implements Funct
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        Fields columns = functionCall.getArgumentFields();
         Tuple result = Tuple.size(getFieldDeclaration().size());
         setupTupleForArgument(result, arguments);
         functionCall.getOutputCollector().add(result);
