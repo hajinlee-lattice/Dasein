@@ -259,7 +259,6 @@ angular.module('common.datacloud.query.service',[
         } else {
 
             var restriction = this.getRestriction();
-
             if(query === undefined || query === ''){
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
@@ -277,11 +276,9 @@ angular.module('common.datacloud.query.service',[
                         'num_rows': query.page_filter.num_rows,
                         'row_offset': query.page_filter.row_offset
                     },
-                    'restrict_without_sfdcid': query.restrict_without_sfdcid
+                    'restrict_with_sfdcid': query.restrict_with_sfdcid
                 };
             };
-
-            // console.log(queryWithRestriction, segment);
 
             return QueryService.GetDataByQuery(resourceType, queryWithRestriction, segment);
         }

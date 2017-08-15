@@ -200,6 +200,57 @@ angular
                         return SegmentService.CreateOrUpdateSegment(segment);
 
                 }],
+                AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
+                    var deferred = $q.defer(),
+                        segment = QueryStore.getSegment(),
+                        restriction = QueryStore.getRestriction();
+
+                        if (segment === null) {                     
+                            query = { 
+                                'free_form_text_search': '',
+                                'frontend_restriction': restriction,
+                                'page_filter': {
+                                    'num_rows': 10,
+                                    'row_offset': 0
+                                }
+                            };
+                        } else {
+                            query = { 
+                                'free_form_text_search': '',
+                                'frontend_restriction': segment.frontend_restriction,
+                                'page_filter': {
+                                    'num_rows': 10,
+                                    'row_offset': 0
+                                }
+                            };
+                        };
+
+                    deferred.resolve( QueryStore.GetCountByQuery('accounts', query, segment).then(function(data){ return data; }));
+                    return deferred.promise;
+                }],
+                CountWithoutSalesForce: ['$q', 'QueryStore', function($q, QueryStore){
+
+
+
+                    var deferred = $q.defer(),
+                        restriction = QueryStore.getRestriction(),
+                        query = {
+                            'free_form_text_search': '',
+                            'frontend_restriction': restriction,
+                            'page_filter': {
+                                'num_rows': 1000000,
+                                'row_offset': 0
+                            },
+                            'restrict_without_sfdcid': true
+                        };
+
+                    QueryStore.GetCountByQuery('accounts', query).then(function(response){ 
+                        deferred.resolve(response);
+                    }); 
+
+                    return deferred.promise;
+
+                }],
                 Config: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
                     var deferred = $q.defer();
                     PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){

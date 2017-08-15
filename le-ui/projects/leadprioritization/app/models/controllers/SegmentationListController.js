@@ -13,13 +13,25 @@ angular.module('lp.models.segments', [
         filteredItems: [],
         totalLength: SegmentsList.length,
         tileStates: {},
-        query: ''
+        query: '',
+        header: {
+            sort: {
+                label: 'Sort By',
+                icon: 'numeric',
+                order: '-',
+                property: 'created',
+                items: [
+                    { label: 'Creation Date',   icon: 'numeric',    property: 'created' },
+                    { label: 'Segment Name',      icon: 'alpha',      property: 'display_name' }
+                ]
+            }
+        }
     });
 
 
     vm.init = function($q) {
         
-        // console.log(vm.segments);
+        console.log(vm.segments);
 
         SegmentsList.forEach(function(segment) {
             vm.tileStates[segment.name] = {

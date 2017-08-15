@@ -5,6 +5,7 @@
         
         <div class="list-header">
             <div class="pull-left number-of-items" ng-if="vm.totalLength > 0">
+                <menu-sort-by config="vm.header.sort"></menu-sort-by>
                 <search-filter query="vm.query"></search-filter>
             </div>
             <div class="pull-right">
@@ -24,7 +25,12 @@
 
 
                 <li
-                    ng-repeat="segment in vm.segments | orderBy: '-updated' | filter: vm.query"
+                    ng-repeat="
+                        segment in vm.segments |
+                        filter: vm.query |
+                        orderBy: vm.header.sort.order + vm.header.sort.property |
+                        startFrom: (current - 1) * pagesize |
+                        limitTo: pagesize"
                     ng-click="vm.tileClick($event, segment)"
                     ng-mouseleave="vm.tileStates[segment.name].showCustomMenu ? vm.customMenuClick($event, segment) : null"
                 >
@@ -52,6 +58,11 @@
                                 </li>
                             </ul>
                         </div>
+                    </div>
+                    <div class="tile-metadata" ng-if="!vm.tileStates[segment.name].editSegment">
+                        <ul>
+                            <li>Created on <span class="blue-text">{{segment.created | date}}</span></li>
+                        </ul>
                     </div>
                     <div class="tile-body wrap-body" ng-if="!vm.tileStates[segment.name].editSegment">
                         <p 
@@ -120,7 +131,7 @@
                     </div> -->
                 </li>
 
-                <li class="create-tile">
+                <li class="create-tile" ng-if="vm.segments.length < 12">
                     <a
                         class="button new-tile-button"
                         ng-click="vm.addSegment()">
@@ -133,5 +144,12 @@
             </ul>
         </div>
     </div><!-- End .row -->
+
+    <div class="row" ng-init="pagesize = 12; current = 1" ng-show="max > 1">
+        <div class="pull-right">
+            <pd-pagination-controls current="current" max="max = vm.segments.length / pagesize">
+            </pd-pagination-controls>
+        </div>
+    </div>
 
 </section>

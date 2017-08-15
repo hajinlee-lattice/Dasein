@@ -494,6 +494,11 @@ angular
                     var deferred = $q.defer();
                     deferred.resolve();
                     return deferred.promise;
+                }],
+                CountWithoutSalesForce: ['$q', function($q){
+                    var deferred = $q.defer();
+                    deferred.resolve();
+                    return deferred.promise;
                 }]
             },
             views: {

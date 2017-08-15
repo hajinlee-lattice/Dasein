@@ -10,6 +10,7 @@
                 type="checkbox" 
                 class=""
                 ng-model="excludeAccounts"
+                ng-click="vm.config.onClick('excludeAccountsWithoutSalesforceId', excludeAccounts)"
                 ng-change="vm.excludeNonSalesForceCheckbox(excludeAccounts)" />
             Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.accountsWithoutSfId | number }}</span>)
         </label>
