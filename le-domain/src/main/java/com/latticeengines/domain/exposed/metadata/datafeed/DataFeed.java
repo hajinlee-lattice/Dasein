@@ -224,7 +224,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
                 taskTypeMap.put(task.getFeedType(), task);
             }
         }
-        // taskSrcMap.put(task.getSource(), task);
         tasks.add(task);
     }
 
@@ -233,8 +232,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
             addTask(task);
         }
     }
-
-    // Missing updataTask, deleteTask
 
     public Status getStatus() {
         return status;
