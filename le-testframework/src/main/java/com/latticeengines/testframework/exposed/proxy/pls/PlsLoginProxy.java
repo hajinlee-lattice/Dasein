@@ -1,5 +1,6 @@
-package com.latticeengines.testframework.exposed.proxy;
+package com.latticeengines.testframework.exposed.proxy.pls;
 
+import com.latticeengines.testframework.exposed.proxy.admin.AdminLoginProxy;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

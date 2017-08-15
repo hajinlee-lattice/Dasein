@@ -45,8 +45,8 @@ import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
-import com.latticeengines.testframework.exposed.proxy.AdminInternalProxy;
-import com.latticeengines.testframework.exposed.proxy.AdminTenantProxy;
+import com.latticeengines.testframework.exposed.proxy.admin.AdminInternalProxy;
+import com.latticeengines.testframework.exposed.proxy.admin.AdminTenantProxy;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 

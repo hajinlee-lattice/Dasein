@@ -8,13 +8,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
@@ -40,6 +44,7 @@ public abstract class BaseRestApiProxy {
 
     @Value("${proxy.retry.maxAttempts:10}")
     private int maxAttempts;
+
     // Used to call external API because there is no standardized error handler
     protected BaseRestApiProxy() {
         this.restTemplate = HttpClientUtils.newRestTemplate();
@@ -110,6 +115,39 @@ public abstract class BaseRestApiProxy {
                 }
                 log.info(msg);
                 return restTemplate.postForObject(url, body, returnValueClazz);
+            } catch (LedpException e) {
+                context.setExhaustedOnly();
+                logError(e, method);
+                throw e;
+            } catch (Exception e) {
+                logError(e, method);
+                throw e;
+            }
+        });
+    }
+
+    protected <T> T postMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts, final Class<T> returnValueClazz) {
+        RetryTemplate retry = getRetryTemplate();
+        return retry.execute(context -> {
+            try {
+                String msg = String.format("Invoking %s by posting to url %s.  (Attempt=%d)", method,
+                        url, context.getRetryCount() + 1);
+                log.info(msg);
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+                HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts, headers);
+                RestTemplate newRestTemplate = HttpClientUtils.newRestTemplate();
+                List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+                for (ClientHttpRequestInterceptor interceptor : restTemplate.getInterceptors()) {
+                    if (interceptor instanceof AuthorizationHeaderHttpRequestInterceptor
+                            || interceptor instanceof MagicAuthenticationHeaderHttpRequestInterceptor) {
+                        interceptors.add(interceptor);
+                    }
+                }
+                newRestTemplate.setInterceptors(interceptors);
+                ResponseEntity<T> response =
+                        newRestTemplate.exchange(url, HttpMethod.POST, requestEntity, returnValueClazz);
+                return response.getBody();
             } catch (LedpException e) {
                 context.setExhaustedOnly();
                 logError(e, method);
@@ -287,6 +325,7 @@ public abstract class BaseRestApiProxy {
 
     protected void setMaxAttempts(int maxAttempts) {
         this.maxAttempts = maxAttempts;
+        log.info("set " + getClass().getSimpleName() + " maxattemps to " + maxAttempts);
     }
 
     void enforceSSLNameVerification() {

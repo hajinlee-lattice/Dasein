@@ -27,8 +27,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -59,7 +60,9 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
+import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
@@ -70,6 +73,7 @@ import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
+import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
@@ -96,7 +100,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
+    private ModelingFileUploadProxy fileUploadProxy;
+
+    @Inject
     private CheckpointService checkpointService;
 
     @Value("${camille.zk.pod.id}")
@@ -119,6 +126,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
         logger.info("Test environment setup finished.");
         createDataFeed();
+
+        attachProtectedProxy(fileUploadProxy);
     }
 
     @AfterClass(groups = { "end2end" })
@@ -208,6 +217,14 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             throw new RuntimeException("Failed to upload avro for " + entity);
         }
         return targetPath;
+    }
+
+
+    protected void uploadAccountCSV() {
+        Resource csvResrouce = new ClassPathResource("end2end/csv/Account1.csv", Thread.currentThread().getContextClassLoader());
+        SourceFile sourceFile = fileUploadProxy.uploadFile("Account1.csv", false, "Account1.csv", SchemaInterpretation.Account,
+                EntityExternalType.Account, csvResrouce);
+        logger.info("Uploaded file " + sourceFile.getName() + " to " + sourceFile.getPath());
     }
 
 

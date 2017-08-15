@@ -15,6 +15,7 @@ public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2E
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
+        uploadAccountCSV();
         importData();
         consolidate();
         profile();

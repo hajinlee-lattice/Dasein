@@ -1,4 +1,4 @@
-package com.latticeengines.testframework.exposed.proxy;
+package com.latticeengines.testframework.exposed.proxy.admin;
 
 import org.springframework.stereotype.Component;
 

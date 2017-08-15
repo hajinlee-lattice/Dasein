@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed;
 
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,10 @@ public abstract class ProtectedRestApiProxy extends BaseRestApiProxy {
 
     protected ProtectedRestApiProxy(String hostport, String rootpath, Object... urlVariables) {
         super(hostport, rootpath, urlVariables);
+    }
+
+    @PostConstruct
+    private void postConstruct() {
         setMaxAttempts(1);
     }
 

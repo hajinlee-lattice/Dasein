@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
@@ -48,6 +49,11 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         testBed.bootstrapForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
         testBed.switchToSuperAdmin();
+    }
+
+    protected void attachProtectedProxy(ProtectedRestApiProxy proxy) {
+        proxy.attachInterceptor(testBed.getPlsAuthInterceptor());
+        logger.info("Attached the proxy " + proxy.getClass().getSimpleName() + " to GA testbed.");
     }
 
     protected JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
