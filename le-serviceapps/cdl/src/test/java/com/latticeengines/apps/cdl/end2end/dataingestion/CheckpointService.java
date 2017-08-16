@@ -114,8 +114,7 @@ public class CheckpointService {
     }
 
     public void verifySecondProfileCheckpoint() throws IOException {
-        verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2 + ACCOUNT_IMPORT_SIZE_3,
-                CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2 + CONTACT_IMPORT_SIZE_3);
+        verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2);
     }
 
     private void verifyCheckpoint(long numAccounts, long numContacts) throws IOException {
