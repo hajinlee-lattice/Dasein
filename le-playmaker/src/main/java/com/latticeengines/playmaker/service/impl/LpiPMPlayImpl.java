@@ -58,6 +58,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
                 Map<String, Object> playMap = new HashMap<>();
                 playMap.put(PlaymakerConstants.ID, play.getPid());
+                playMap.put(PlaymakerConstants.ID + PlaymakerConstants.V2, play.getName());
                 playMap.put(PlaymakerConstants.ExternalId, play.getName());
                 playMap.put(PlaymakerConstants.DisplayName, play.getDisplayName());
                 playMap.put(PlaymakerConstants.Description, play.getDescription());

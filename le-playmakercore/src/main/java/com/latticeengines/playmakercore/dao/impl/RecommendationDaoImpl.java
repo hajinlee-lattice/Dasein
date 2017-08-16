@@ -10,6 +10,7 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.playmakercore.dao.RecommendationDao;
 
@@ -93,14 +94,26 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT new map " //
                 + "( " //
-                + "pid AS ID, recommendationId AS RecommendationID, cast(accountId as int) AS AccountID, "
-                + "leAccountExternalID AS LEAccountExternalID, playId AS PlayID, launchId AS LaunchID, "
-                + "description AS Description, UNIX_TIMESTAMP(launchDate) AS LaunchDate, "
-                + "UNIX_TIMESTAMP(lastUpdatedTimestamp) AS LastModificationDate, "
-                + "monetaryValue AS MonetaryValue, likelihood AS Likelihood, companyName AS CompanyName, "
-                + "sfdcAccountID AS SfdcAccountID, priorityID AS PriorityID, priorityDisplayName AS PriorityDisplayName, "
-                + "monetaryValueIso4217ID AS MonetaryValueIso4217ID, contacts AS Contacts " + ") " //
-                + "FROM %s WHERE synchronizationDestination = :syncDestination " //
+                + "pid AS " + PlaymakerConstants.ID //
+                + ", recommendationId AS " + PlaymakerConstants.ID + PlaymakerConstants.V2 //
+                + ", cast(accountId as int) AS " + PlaymakerConstants.AccountID //
+                + ", leAccountExternalID AS " + PlaymakerConstants.LEAccountExternalID //
+                + ", playId AS " + PlaymakerConstants.PlayID //
+                + ", launchId AS " + PlaymakerConstants.LaunchID //
+                + ", description AS " + PlaymakerConstants.Description //
+                + ", UNIX_TIMESTAMP(launchDate) AS " + PlaymakerConstants.LaunchDate //
+                + ", UNIX_TIMESTAMP(lastUpdatedTimestamp) AS " + PlaymakerConstants.LastModificationDate //
+                + ", monetaryValue AS " + PlaymakerConstants.MonetaryValue //
+                + ", likelihood AS " + PlaymakerConstants.Likelihood //
+                + ", companyName AS " + PlaymakerConstants.CompanyName //
+                + ", sfdcAccountID AS " + PlaymakerConstants.SfdcAccountID //
+                + ", priorityID AS " + PlaymakerConstants.PriorityID //
+                + ", priorityDisplayName AS " + PlaymakerConstants.PriorityDisplayName //
+                + ", monetaryValueIso4217ID AS " + PlaymakerConstants.MonetaryValueIso4217ID //
+                + ", contacts AS " + PlaymakerConstants.Contacts //
+                + ") " //
+                + "FROM %s " //
+                + "WHERE synchronizationDestination = :syncDestination " //
                 + "AND lastUpdatedTimestamp >= :lastUpdatedTimestamp ";
 
         if (!CollectionUtils.isEmpty(playIds)) {

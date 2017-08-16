@@ -81,13 +81,11 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     private long processedSegmentAccountsCount = 0;
 
     List<String> fields = Arrays.asList(new String[] { //
-            InterfaceName.PostalCode.name(), //
             InterfaceName.AccountId.name(), //
-            InterfaceName.External_ID.name(), //
             InterfaceName.SalesforceAccountID.name(), //
             InterfaceName.AnnualRevenue.name(), //
             InterfaceName.CompanyName.name(), //
-            InterfaceName.CRMId.name() });
+    });
 
     @PostConstruct
     public void init() {
@@ -204,23 +202,26 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         }
         recommendation.setLaunchDate(launchTime);
 
-        recommendation.setAccountId(account.get(InterfaceName.AccountId.name()).toString());
-        recommendation.setLeAccountExternalID(account.get(InterfaceName.External_ID.name()).toString());
-        recommendation.setSfdcAccountID(account.get(InterfaceName.SalesforceAccountID.name()).toString());
-
-        String valueStr = account.get(InterfaceName.AnnualRevenue.name()).toString();
+        recommendation.setAccountId(checkAndGet(account, InterfaceName.AccountId));
+        recommendation.setLeAccountExternalID(checkAndGet(account, InterfaceName.AccountId));
+        recommendation.setSfdcAccountID(checkAndGet(account, InterfaceName.SalesforceAccountID));
+        String valueStr = checkAndGet(account, InterfaceName.AnnualRevenue);
         Double value = 0D;
         if (StringUtils.isNotEmpty(valueStr) && StringUtils.isNumeric(valueStr)) {
             value = Double.parseDouble(valueStr);
         }
         recommendation.setMonetaryValue(value);
-        recommendation.setCompanyName(account.get(InterfaceName.CompanyName.name()).toString());
+        recommendation.setCompanyName(checkAndGet(account, InterfaceName.CompanyName));
         recommendation.setTenantId(tenant.getPid());
         recommendation.setLikelihood(0.5D);
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
         recommendation.setPriorityDisplayName("A");
 
         return recommendation;
+    }
+
+    private String checkAndGet(Map<String, Object> account, InterfaceName columnName) {
+        return account.get(columnName.name()) != null ? account.get(columnName.name()).toString() : null;
     }
 
     private List<String> getSchema(Tenant tenant, TableRoleInCollection role) {
