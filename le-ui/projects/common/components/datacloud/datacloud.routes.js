@@ -391,6 +391,12 @@ angular
                     };
                         
                     return deferred.promise;
+                }],
+                CountWithoutSalesForce: [function() {
+                    return 0;
+                }],
+                Config: [function() {
+                    return null;
                 }]
             }),
             redirectTo: 'home.model.analysis.explorer',

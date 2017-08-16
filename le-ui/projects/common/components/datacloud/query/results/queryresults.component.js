@@ -35,6 +35,7 @@ angular.module('common.datacloud.query.results', [
     function updatePage() {
 
         vm.loading = true;
+
         var offset = (vm.current - 1) * vm.pagesize;
         var dataQuery = {
             free_form_text_search: vm.search,
