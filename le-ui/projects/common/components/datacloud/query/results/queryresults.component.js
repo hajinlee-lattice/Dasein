@@ -32,6 +32,28 @@ angular.module('common.datacloud.query.results', [
 
 
 
+    function updatePage() {
+
+        vm.loading = true;
+        var offset = (vm.current - 1) * vm.pagesize;
+        var dataQuery = {
+            free_form_text_search: vm.search,
+            frontend_restriction: vm.restriction,
+            page_filter: {
+                num_rows: vm.pagesize,
+                row_offset: offset
+            },
+            restrict_with_sfdcid: vm.excludeNonSalesForce
+        };
+        QueryStore.setAccounts(dataQuery, $stateParams.segment).then(function(response){
+            vm.accounts = response.data;
+            vm.loading = false;
+        });
+
+    };
+
+
+
     vm.excludeNonSalesForceCheckbox = function(excludeAccounts){
         excludeAccounts = !excludeAccounts;
 
@@ -105,30 +127,6 @@ angular.module('common.datacloud.query.results', [
             }
         }
     });
-
-    function updatePage() {
-
-        vm.loading = true;
-        console.log(vm.excludeNonSalesForce);
-
-
-        var offset = (vm.current - 1) * vm.pagesize;
-        var dataQuery = {
-            free_form_text_search: vm.search,
-            frontend_restriction: vm.restriction,
-            page_filter: {
-                num_rows: vm.pagesize,
-                row_offset: offset
-            },
-            restrict_with_sfdcid: vm.excludeNonSalesForce
-        };
-        QueryStore.setAccounts(dataQuery, $stateParams.segment).then(function(response){
-            vm.accounts = response.data;
-            vm.loading = false;
-        });
-
-    };
-
 
 });
 

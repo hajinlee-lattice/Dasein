@@ -295,7 +295,7 @@ angular
                         modelId = $stateParams.modelId,
                         tenantName = $stateParams.tenantName;
 
-                    console.log("[resolve]     Restriction");
+                    // console.log("[resolve]     Restriction");
 
                     QueryStore.setupStore(null).then(function(){
 
@@ -310,7 +310,7 @@ angular
                                         $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
                                     }
                                 } else {
-                                    console.log("[setup store]       ", result);
+                                    // console.log("[setup store]       ", result);
                                     return QueryStore.setupStore(result);
                                 }
                             }).then(function() {
