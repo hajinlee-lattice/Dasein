@@ -24,6 +24,10 @@ COPY files/startup.sh /
 COPY files/server.xml $CATALINA_HOME/conf/server.xml
 COPY files/web.xml $CATALINA_HOME/conf/web.xml
 COPY files/tomcat.jks /etc/pki/java/tomcat.jks
+RUN /bin/rm -rf $CATALINA_HOME/webapps/docs \
+   && /bin/rm -rf $CATALINA_HOME/webapps/examples \
+   && /bin/rm -rf $CATALINA_HOME/webapps/host-manager \
+   && /bin/rm -rf $CATALINA_HOME/webapps/manager
 
 CMD [ "/bin/bash", "/startup.sh" ]
 
