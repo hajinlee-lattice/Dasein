@@ -233,9 +233,6 @@ public class StatsCubeUtils {
             }
         }
         cube.setStatistics(stats);
-        if (statistics.getCounts().containsKey(BusinessEntity.Account)) {
-            cube.setCount(statistics.getCounts().get(BusinessEntity.Account));
-        }
         return cube;
     }
 
