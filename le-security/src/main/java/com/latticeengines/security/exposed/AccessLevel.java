@@ -32,6 +32,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_CDL_DATA, //
             GrantedRight.VIEW_PLS_PLAYS, //
             GrantedRight.EDIT_PLS_PLAYS, //
+            GrantedRight.VIEW_PLS_RATING_ENGINES, //
+            GrantedRight.EDIT_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_REFINE_CLONE //
     ) //
@@ -63,6 +65,11 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_PLAYS, //
             GrantedRight.EDIT_PLS_PLAYS, //
             GrantedRight.CREATE_PLS_PLAYS, //
+            GrantedRight.VIEW_PLS_RATING_ENGINES, //
+            GrantedRight.EDIT_PLS_RATING_ENGINES, //
+            GrantedRight.CREATE_PLS_RATING_ENGINES, //
+            GrantedRight.VIEW_PLS_RATING_ENGINES, //
+            GrantedRight.EDIT_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_REFINE_CLONE //
     ) //
@@ -91,6 +98,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_CDL_DATA, //
             GrantedRight.VIEW_PLS_PLAYS, //
             GrantedRight.EDIT_PLS_PLAYS, //
+            GrantedRight.VIEW_PLS_RATING_ENGINES, //
+            GrantedRight.EDIT_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL //
     ) //
     ), //
@@ -127,6 +136,9 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_PLAYS, //
             GrantedRight.EDIT_PLS_PLAYS, //
             GrantedRight.CREATE_PLS_PLAYS, //
+            GrantedRight.VIEW_PLS_RATING_ENGINES, //
+            GrantedRight.EDIT_PLS_RATING_ENGINES, //
+            GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL //
     )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -164,6 +176,9 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_PLAYS, //
             GrantedRight.EDIT_PLS_PLAYS, //
             GrantedRight.CREATE_PLS_PLAYS, //
+            GrantedRight.VIEW_PLS_RATING_ENGINES, //
+            GrantedRight.EDIT_PLS_RATING_ENGINES, //
+            GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL //
     )); //
 

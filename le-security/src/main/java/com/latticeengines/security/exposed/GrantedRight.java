@@ -57,6 +57,24 @@ public enum GrantedRight implements GrantedAuthority {
             return "Edit_PLS_Models";
         }
     }, //
+    VIEW_PLS_RATING_ENGINES {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_Rating_Engines";
+        }
+    }, //
+    CREATE_PLS_RATING_ENGINES {
+        @Override
+        public String getAuthority() {
+            return "Create_PLS_Rating_Engines";
+        }
+    }, //
+    EDIT_PLS_RATING_ENGINES {
+        @Override
+        public String getAuthority() {
+            return "Edit_PLS_Rating_Engines";
+        }
+    }, //
     VIEW_PLS_PLAYS {
         @Override
         public String getAuthority() {

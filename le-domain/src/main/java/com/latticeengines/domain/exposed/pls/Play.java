@@ -47,7 +47,6 @@ public class Play implements HasName, HasPid, HasTenantId {
     public static final String PLAY_NAME_FORMAT = "%s__%s";
 
     public Play() {
-        setName(generateNameStr());
     }
 
     @Id
@@ -75,15 +74,15 @@ public class Play implements HasName, HasPid, HasTenantId {
     @JsonIgnore
     @Transient
     private MetadataSegment segment;
-    //
-    // @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    // @OnDelete(action = OnDeleteAction.CASCADE)
-    // @JoinColumn(name = "FK_CALL_PREP_ID")
-    // private CallPrep callPrep;
 
     @JsonProperty("rating")
     @Transient
     private RatingObject rating;
+
+    @JsonProperty("ratingEngine")
+    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = true)
+    private RatingEngine ratingEngine;
 
     @JsonProperty("launchHistory")
     @Transient
@@ -178,6 +177,14 @@ public class Play implements HasName, HasPid, HasTenantId {
         if (segment != null) {
             setSegmentName(segment.getName());
         }
+    }
+
+    public RatingEngine getRatingEngine() {
+        return ratingEngine;
+    }
+
+    public void setRatingEngine(RatingEngine ratingEngine) {
+        this.ratingEngine = ratingEngine;
     }
 
     public RatingObject getRating() {

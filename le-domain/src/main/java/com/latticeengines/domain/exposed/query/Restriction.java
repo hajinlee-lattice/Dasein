@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
@@ -17,10 +18,16 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class Restriction implements GraphNode {
 
-    Restriction(){}
+    Restriction() {
+    }
 
     public static RestrictionBuilder builder() {
         return new RestrictionBuilder();
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

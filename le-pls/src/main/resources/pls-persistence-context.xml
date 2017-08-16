@@ -18,7 +18,7 @@
     <!-- Hibernate session factory -->
     <bean id="sessionFactoryAccountMaster" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourceAccountMaster" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.pls, com.latticeengines.domain.exposed.security, com.latticeengines.domain.exposed.workflow" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.pls, com.latticeengines.domain.exposed.metadata, com.latticeengines.domain.exposed.modelreview, com.latticeengines.domain.exposed.security, com.latticeengines.domain.exposed.workflow" />
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>

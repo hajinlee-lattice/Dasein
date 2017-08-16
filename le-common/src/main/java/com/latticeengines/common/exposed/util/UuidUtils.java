@@ -1,9 +1,12 @@
 package com.latticeengines.common.exposed.util;
 
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Strings;
@@ -47,4 +50,10 @@ public class UuidUtils {
         return tokens[7];
     }
 
+    public static String shortenUuid(UUID uuid) {
+        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+        bb.putLong(uuid.getMostSignificantBits());
+        bb.putLong(uuid.getLeastSignificantBits());
+        return Base64.encodeBase64URLSafeString(bb.array());
+    }
 }
