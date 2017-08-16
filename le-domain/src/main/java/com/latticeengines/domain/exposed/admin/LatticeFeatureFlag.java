@@ -39,6 +39,7 @@ public enum LatticeFeatureFlag {
     LATTICE_INSIGHTS("LatticeInsights", "Lattice Insights"), //
     @Deprecated
     BYPASS_DNB_CACHE(true, "BypassDnbCache", "Bypass DnB Cache"), //
+    @Deprecated
     ENABLE_CDL("EnableCdl", "Enable Customer Data Lake"), //
     ENABLE_MATCH_DEBUG("EnableMatchDebug", "Enable Match Debug"), //
     ENABLE_LPI_PLAYMAKER("EnableLpiPlaymaker", "Enable LPI Playmaker"); //

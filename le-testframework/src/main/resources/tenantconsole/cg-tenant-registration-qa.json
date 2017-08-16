@@ -52,7 +52,7 @@
       "displayName": "${TENANT}_CG",
       "description": "A CG solution for ${TENANT} in ${TENANT}"
     },
-    "featureFlags": "{\"Dante\":true,\"EnableDataEncryption\":true,\"EnableCdl\":true,\"EnableTalkingPoints\":true}"
+    "featureFlags": "{\"Dante\":true,\"EnableDataEncryption\":true,\"EnableTalkingPoints\":true}"
   },
   "TenantInfo": {
     "properties": {

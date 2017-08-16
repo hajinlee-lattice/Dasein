@@ -73,8 +73,7 @@
             EnableInternalEnrichmentAttributes = False
             EnableDataEncryption = True
             LatticeInsights = True
-            EnableCdl = True
-            EnableTalkingPoints = True
+            EnableLpiPlaymaker = True
           /properties.json
             description = u'A CG solution for LocalTest'
             displayName = u'LocalTest Tenant'
