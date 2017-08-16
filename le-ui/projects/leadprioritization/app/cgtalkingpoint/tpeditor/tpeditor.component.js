@@ -37,11 +37,13 @@ angular.module('lp.cg.talkingpoint.editor', [])
                     if(!CgTalkingPointStore.saveOnBlur || CgTalkingPointStore.deleteClicked) {
                         return false;
                     }
+
                     var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint();
                         content = (ed.contentDocument && ed.contentDocument.body && ed.contentDocument.body.innerHTML ? ed.contentDocument.body.innerHTML : '');
+
                     CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
                     talkingPoint.content = content;
-                    
+
                     if(CgTalkingPointStore.isTalkingPointDirty(talkingPoint) && !CgTalkingPointStore.getSavingFlag()) {
                         $rootScope.$broadcast('talkingPoints:lock', true);
                         CgTalkingPointStore.saveTalkingPoints([talkingPoint]).then(function(results){
@@ -65,7 +67,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
         lockTalkingPoints: false
     });
 
-    if ($scope.tp.IsNew === true) {
+    if ($scope.tp.IsNew === true || Date.now() - $scope.tp.created < 1000) {
         vm.expanded = true;
         //delete $scope.tp.IsNew;
     }
@@ -97,6 +99,11 @@ angular.module('lp.cg.talkingpoint.editor', [])
             vm.saveTitle();
         }
     };
+
+    vm.setDeleteClicked = function(bool) {
+        vm.deleteClicked = bool;
+        CgTalkingPointStore.deleteClicked = bool;
+    }
 
     $rootScope.$on('talkingPoints:lock', function(e, bool){
         vm.lockTalkingPoints = bool;

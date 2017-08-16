@@ -12,6 +12,10 @@ angular
         templateUrl: '/components/datacloud/explorer/categorytile/categorytile.component.html',
         controller: function ($scope, $document, $timeout, $interval, DataCloudStore) {
             var vm = $scope.vm;
+
+            // get more info for feedback feature:
+            // comapny info: vm.LookupResponse
+            // user input: LookupStore.get('request')); (add LookupStore to controller ^)
             
             angular.extend(vm, { });
 

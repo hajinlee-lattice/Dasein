@@ -112,7 +112,6 @@
                         <button class="launch button blue-button" ng-click="vm.launchPlay()" ng-disabled="vm.invalid.length || vm.launchButton.state == 'Launching'">
                             <span ng-if="vm.showLaunchSpinner"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
                             <span>{{vm.launchButton.label}}</span>
-                            <span ng-if="!vm.launchedState">Launch now</span>
                         </button>
                     </div>
                 </div>

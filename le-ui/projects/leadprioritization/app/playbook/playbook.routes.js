@@ -47,7 +47,7 @@ angular
         .state('home.playbook.dashboard', {
             url: '/dashboard/:play_name',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-insights',
                 pageTitle: 'Play Overview'
             },
             resolve: {
@@ -82,7 +82,7 @@ angular
         .state('home.playbook.dashboard.insights', {
             url: '/insights',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-scoring',
                 pageTitle: 'Insights',
                 section: 'dashboard.insights'
             },
@@ -118,7 +118,7 @@ angular
         .state('home.playbook.dashboard.insights.preview', {
             url: '/preview',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-scoring',
                 pageTitle: 'Insights',
                 section: 'dashboard.insights.preview'
             },
@@ -161,7 +161,7 @@ angular
         .state('home.playbook.dashboard.targets', {
             url: '/targets/:segment',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-targets',
                 pageTitle: 'Avaliable Targets',
                 section: 'dashboard.targets'
             },
@@ -280,7 +280,7 @@ angular
         .state('home.playbook.dashboard.launch_history', {
             url: '/launch_history',
             params: {
-                pageIcon: 'ico-playbook',
+                pageIcon: 'ico-refine',
                 pageTitle: 'Launch History',
                 section: 'dashboard.launch_history'
             },

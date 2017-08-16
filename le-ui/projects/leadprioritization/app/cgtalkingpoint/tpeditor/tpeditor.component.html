@@ -11,7 +11,7 @@
             <button class="button white-button delete-button" ng-click="vm.deleteClick($event,true)">&times;</button>
             <div ng-if="vm.deleteClicked" class="tp-delete-confirm">
                 Delete Talking Point? 
-                <button class="button orange-button" ng-click="onDelete()">Delete</button>
+                <button class="button orange-button" ng-click="onDelete(); vm.setDeleteClicked(false);">Delete</button>
                 <button class="button white-button" ng-click="vm.deleteClick($event,false)">Cancel</button>
             </div>
         </div>

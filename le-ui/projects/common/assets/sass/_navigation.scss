@@ -578,6 +578,11 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
             transition: all 250ms linear, transform 0s linear;
             width: 16px;
             height: 16px;
+            &.ico-insights,
+            &.ico-targets {
+                height: 24px;
+                width: 24px;
+            }
         }
     }
     .header-back-name,

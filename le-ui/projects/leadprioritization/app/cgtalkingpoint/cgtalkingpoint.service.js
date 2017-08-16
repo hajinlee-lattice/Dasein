@@ -1,5 +1,5 @@
 angular.module('lp.cg.talkingpoint.talkingpointservice', [])
-.service('CgTalkingPointStore', function($q, $rootScope, CgTalkingPointService) {
+.service('CgTalkingPointStore', function($q, $rootScope, $timeout, CgTalkingPointService) {
     var CgTalkingPointStore = this;
 
     this.init = function() {
@@ -50,10 +50,8 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
                 'title',
                 'offset'
             ];
+
         if(!talkingPoint.pid) { // this means it's a new talking point
-            if(!talkingPoint.title) {
-                return false; // hack to not let it pass this test if it's new and doesn't have a title
-            }
             return true; // "dirty"
 
         }
@@ -113,15 +111,18 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return deferred.promise;
     };
 
-    this.getTalkingPointsPreviewResources = function(){
-        if(!this.calling['getTalkingPointsPreviewResources']) {
+    this.getTalkingPointsPreviewResources = function() {
+        var callname = 'getTalkingPointsPreviewResources';
+        if(!this.calling[callname]) {
+            this.calling[callname] = true; // prevent double calling
+
             var deferred = $q.defer();
-            this.calling['getTalkingPointsPreviewResources'] = true; // prevent double calling
             // don't cache this because we always want a fresh oauth token every time
             CgTalkingPointService.getTalkingPointsPreviewResources().then(function(data){
-                CgTalkingPointStore.calling['getTalkingPointsPreviewResources'] = false;
                 CgTalkingPointStore.talkingPointsPreviewResources = data;
                 deferred.resolve(data);
+
+                CgTalkingPointStore.calling[callname] = false;
             });
             return deferred.promise;
         }
@@ -136,16 +137,27 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     }
 
     this.saveTalkingPoints = function(opts) {
-        $rootScope.$broadcast('talkingPoints:saving');
         var deferred = $q.defer();
-        CgTalkingPointStore.setSavingFlag(true);
-        CgTalkingPointService.saveTalkingPoints(opts).then(function(data){
-            $rootScope.$broadcast('talkingPoints:saved');
-            CgTalkingPointStore.setTalkingPoints(data);
-            CgTalkingPointStore.savedTalkingPoints = angular.copy(data);
-            CgTalkingPointStore.setSavingFlag(false);
-            deferred.resolve(data);
-        });
+        var callname = 'saveTalkingPoints';
+        if(!this.calling[callname]) {
+            this.calling[callname] = true; // prevent double calling
+
+            $rootScope.$broadcast('talkingPoints:saving');
+            CgTalkingPointStore.setSavingFlag(true);
+
+            CgTalkingPointService.saveTalkingPoints(opts).then(function(data){
+                $rootScope.$broadcast('talkingPoints:saved');
+
+                CgTalkingPointStore.setTalkingPoints(data);
+                CgTalkingPointStore.savedTalkingPoints = angular.copy(data);
+                CgTalkingPointStore.setSavingFlag(false);
+
+                deferred.resolve(data);
+                $timeout(function() {
+                    CgTalkingPointStore.calling[callname] = false;
+                }, 500);
+            });
+        }
         return deferred.promise;
     }
 
