@@ -89,7 +89,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     DataFeedProxy dataFeedProxy;
 
     @Inject
-    CDLProxy cdlProxy;
+    private CDLProxy cdlProxy;
+
+    @Inject
+    private ModelingFileUploadProxy fileUploadProxy;
 
     @Inject
     private EaiProxy eaiProxy;
@@ -99,9 +102,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @Inject
     private Configuration yarnConfiguration;
-
-    @Inject
-    private ModelingFileUploadProxy fileUploadProxy;
 
     @Inject
     private CheckpointService checkpointService;
