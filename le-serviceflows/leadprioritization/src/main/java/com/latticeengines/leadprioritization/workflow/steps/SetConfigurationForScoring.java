@@ -31,8 +31,10 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
         MatchStepConfiguration matchStepConfig = getConfigurationFromJobParameters(MatchStepConfiguration.class);
 
         matchStepConfig.setSkipStep(true);
+        Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
+        matchStepConfig.setInputTableName(matchResultTable.getName());
         putObjectInContext(MatchStepConfiguration.class.getName(), matchStepConfig);
-
+        
         ProcessMatchResultConfiguration processMatchResultStepConfig = getConfigurationFromJobParameters(
                 ProcessMatchResultConfiguration.class);
 
@@ -43,7 +45,6 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
                 RTSScoreStepConfiguration.class);
         rtsScoreStepConfiguration.setModelId(getStringValueFromContext(SCORING_MODEL_ID));
         rtsScoreStepConfiguration.setModelType(getStringValueFromContext(SCORING_MODEL_TYPE));
-        Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
         rtsScoreStepConfiguration.setInputTableName(matchResultTable.getName());
         log.info("rtsScoreStepConfiguration is ");
         putObjectInContext(RTSScoreStepConfiguration.class.getName(), rtsScoreStepConfiguration);
