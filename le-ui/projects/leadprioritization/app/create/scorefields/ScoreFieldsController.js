@@ -12,7 +12,7 @@ angular
         csvFileName: $stateParams.csvFileName,
         schema: Model.ModelDetails.SourceSchemaInterpretation,
         useFuzzyMatch: false,
-        standardFieldsList: ['Id', null, 'CompanyName', 'DUNS', 'City', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
+        standardFieldsList: ['Id', null, 'CompanyName', 'DUNS', 'City', 'State', 'PostalCode', 'Country'],
         requiredFieldsMissing: {
             'Id': true
         },
@@ -45,6 +45,9 @@ angular
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
 
+        if (vm.schema === 'SalesforceAccount') {
+            vm.standardFieldsList.push('PhoneNumber');
+        }
         var fieldMappingsMap = {};
         FieldDocument.fieldMappings.forEach(function(fieldMapping) {
             if (fieldMapping.mappedField) {

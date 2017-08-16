@@ -161,6 +161,10 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
             } else {
                 matchInputKeys.put(MatchKey.Domain, Collections.singletonList(InterfaceName.Email.name()));
             }
+            if (preMatchEventTable.getAttribute(InterfaceName.PhoneNumber.name()) != null) {
+                matchInputKeys.put(MatchKey.PhoneNumber, new ArrayList<>());
+                MATCH_KEYS_TO_DISPLAY_NAMES.remove(MatchKey.PhoneNumber);
+            }
         }
         for (MatchKey matchKey : MATCH_KEYS_TO_DISPLAY_NAMES.keySet()) {
             if (preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)) == null

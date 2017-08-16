@@ -23,7 +23,7 @@ angular
         fieldMappings: FieldDocument.fieldMappings,
         initialized: false,
         NextClicked: false,
-        standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'DUNS', 'City', 'State', 'PostalCode', 'Country', 'PhoneNumber'],
+        standardFieldsList: ['Event', 'Id', null, 'CompanyName', 'DUNS', 'City', 'State', 'PostalCode', 'Country'],
         standardFieldsListMap: {},
         requiredFieldsMissing: {
             'Event': true,
@@ -48,6 +48,9 @@ angular
         vm.standardFieldsList[2] = (vm.schema === 'SalesforceLead') ? 'Email' : 'Website';
         vm.requiredFieldsMissing[vm.standardFieldsList[2]] = true;
 
+        if (vm.schema === 'SalesforceAccount') {
+            vm.standardFieldsList.push('PhoneNumber');
+        }
         if (vm.fuzzyMatchEnabled) {
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
