@@ -16,6 +16,10 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringPath;
 
+/**
+ * This bean is deprecated, because we don't need AM attr repo anymore.
+ * We will convert this bean to a utility class with static methods
+ */
 @Component("attrRepoUtils")
 public class AttrRepoUtils {
     private ColumnMetadataProxy columnMetadataProxy;

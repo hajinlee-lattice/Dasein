@@ -36,8 +36,10 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static String amTableName;
 
     protected static final String BUCKETED_NOMINAL_ATTR = "TechIndicator_Lexity";
-    protected static final String BUCKETED_PHYSICAL_ATTR = "EAttr36";
-    protected static final long  BUCKETED_YES_IN_CUSTOEMR = 2071;
+    protected static final String BUCKETED_PHYSICAL_ATTR = "EAttr394";
+    protected static final long  BUCKETED_YES_IN_CUSTOEMR = 2095;
+    protected static final long  BUCKETED_NO_IN_CUSTOEMR = 39251;
+    protected static final long  BUCKETED_NULL_IN_CUSTOEMR = 100000 - BUCKETED_YES_IN_CUSTOEMR - BUCKETED_NO_IN_CUSTOEMR;
 
 
     @BeforeClass(groups = "functional")
