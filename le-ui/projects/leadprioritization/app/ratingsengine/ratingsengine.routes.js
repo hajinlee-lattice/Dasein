@@ -14,7 +14,7 @@ angular
             url: '/ratings',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Ratings'
+                pageTitle: 'Ratings Engine'
             },
             views: {
                 "main@": {

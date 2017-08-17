@@ -395,6 +395,8 @@ angular
         .state('home.playbook.wizard.settings', {
             url: '/settings',
             params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Play Book',
                 section: 'wizard.targets'
             },
             views: {
