@@ -166,40 +166,6 @@ angular
                 section: 'dashboard.targets'
             },
             resolve: {
-                SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
-
-                        var segment = QueryStore.getSegment(),
-                            ts = new Date().getTime(),
-                            restriction = QueryStore.getRestriction();
-
-                        console.log("[resolve] SegmentServiceProxy",segment);
-                        
-                        if (segment === null) {
-                            segment = {
-                                'name': 'segment' + ts,
-                                'display_name': 'segment' + ts,
-                                'frontend_restriction': restriction,
-                                'page_filter': {
-                                    'row_offset': 0,
-                                    'num_rows': 10
-                                }
-                            };
-                        } else {
-
-                            segment = {
-                                'name': segment.name,
-                                'display_name': segment.display_name,
-                                'frontend_restriction': segment.frontend_restriction,
-                                'page_filter': {
-                                    'row_offset': 0,
-                                    'num_rows': 10
-                                }
-                            };
-                        };
-
-                        return SegmentService.CreateOrUpdateSegment(segment);
-
-                }],
                 AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
                     var deferred = $q.defer(),
                         segment = QueryStore.getSegment(),
@@ -267,7 +233,7 @@ angular
                         deferred.resolve(config);
                     });
                     return deferred.promise;
-                }]
+                }],
             },
             views: {
                 'main@': {

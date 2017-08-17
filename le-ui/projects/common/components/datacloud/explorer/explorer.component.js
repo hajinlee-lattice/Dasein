@@ -12,7 +12,7 @@ angular.module('common.datacloud.explorer', [
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, $routeParams,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryService, QueryStore,
-    SegmentServiceProxy, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, Enrichments
+    SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, Enrichments
 ){
     var vm = this,
         enrichment_chunk_size = 5000,
@@ -1515,17 +1515,69 @@ angular.module('common.datacloud.explorer', [
 
     vm.saveSegment = function() {
         if(Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {
-            SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
-                if (!result.errorMsg) {
-                    if (vm.inModel()) {
-                        $state.go('home.model.segmentation', {}, {notify: true})
-                    } else {
-                        $state.go('home.segments', {}, {notify: true})
+
+            var segmentName = $stateParams.segment,
+                ts = new Date().getTime();
+
+            if (segmentName === 'Create') {
+                
+                var restriction = QueryStore.getRestriction(),
+                    segment = {
+                        'name': 'segment' + ts,
+                        'display_name': 'segment' + ts,
+                        'frontend_restriction': restriction,
+                        'page_filter': {
+                            'row_offset': 0,
+                            'num_rows': 10
+                        }
+                    };
+
+                SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
+                    if (!result.errorMsg) {
+                        if (vm.inModel()) {
+                            $state.go('home.model.segmentation', {}, {notify: true})
+                        } else {
+                            $state.go('home.segments', {}, {notify: true})
+                        }
                     }
-                }
-            });    
-        }
-    }
+                });
+
+
+            } else {
+                
+                SegmentStore.getSegmentByName(segmentName).then(function(result) {
+
+                    console.log(result);
+
+                    var segmentData = result,
+                        restriction = QueryStore.getRestriction(),
+                        segment = {
+                            'name': segmentData.name,
+                            'display_name': segmentData.display_name,
+                            'frontend_restriction': restriction,
+                            'page_filter': {
+                                'row_offset': 0,
+                                'num_rows': 10
+                            }
+                        };
+
+                    SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
+                        if (!result.errorMsg) {
+                            if (vm.inModel()) {
+                                $state.go('home.model.segmentation', {}, {notify: true})
+                            } else {
+                                $state.go('home.segments', {}, {notify: true})
+                            }
+                        }
+                    });
+
+                });
+
+            };
+        };
+
+
+    };
 
     vm.init();
 })

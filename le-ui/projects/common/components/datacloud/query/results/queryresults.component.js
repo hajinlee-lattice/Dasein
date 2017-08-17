@@ -2,7 +2,7 @@ angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('QueryResultsCtrl', function($q, $scope, $state, $stateParams, $filter, 
-    BrowserStorageUtility, QueryStore, QueryService, SegmentServiceProxy, LookupStore, Config, AccountsCount, CountWithoutSalesForce) {
+    BrowserStorageUtility, QueryStore, QueryService, LookupStore, Config, AccountsCount, CountWithoutSalesForce) {
 
     var vm = this;
     angular.extend(vm, {
@@ -13,6 +13,7 @@ angular.module('common.datacloud.query.results', [
         accountsCount: AccountsCount,
         accountsWithoutSfId: CountWithoutSalesForce,
         loading: true,
+        segment: QueryStore.getSegment(),
         restriction: QueryStore.getRestriction(),
         current: 1,
         pagesize: 20,
@@ -100,20 +101,65 @@ angular.module('common.datacloud.query.results', [
         updatePage();
     };
 
-    vm.saveSegment = function () {
-        vm.saving = true;
-        SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
-            if (!result.errorMsg) {
-                if (vm.modelId) {
-                    $state.go('home.model.segmentation', {}, {notify: true})
-                } else {
-                    $state.go('home.segments', {}, {notify: true});
-                }
-            }
-        }).finally(function () {
-            vm.saving = false;
-        });
-    };
+    // vm.saveSegment = function () {
+
+    //     console.log($stateParams);
+
+    //     var segmentName = $stateParams.segment,
+    //         ts = new Date().getTime();
+
+    //     if (segmentName === 'Create') {
+            
+    //         QueryStore.getRestriction().then(function(result){
+    //             var restriction = result;
+    //         });
+    //         var segment = {
+    //             'name': 'segment' + ts,
+    //             'display_name': 'segment' + ts,
+    //             'frontend_restriction': restriction,
+    //             'page_filter': {
+    //                 'row_offset': 0,
+    //                 'num_rows': 10
+    //             }
+    //         };
+
+    //     } else {
+
+    //         SegmentStore.getSegmentByName(segmentName).then(function(result) {
+    //             var segmentData = result;
+    //         });
+
+    //         var segment = {
+    //             'name': segmentData.name,
+    //             'display_name': segmentData.display_name,
+    //             'frontend_restriction': segmentData.frontend_restriction,
+    //             'page_filter': {
+    //                 'row_offset': 0,
+    //                 'num_rows': 10
+    //             }
+    //         };
+
+    //     }
+
+
+
+    //     vm.saving = true;
+    //     SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
+    //         if (!result.errorMsg) {
+    //             if (vm.modelId) {
+    //                 $state.go('home.model.segmentation', {}, {notify: true})
+    //             } else {
+    //                 $state.go('home.segments', {}, {notify: true});
+    //             }
+    //         }
+    //     }).finally(function () {
+    //         vm.saving = false;
+    //     });
+
+
+
+
+    // };
 
     $scope.$watch('vm.current', function(newValue, oldValue) {
         vm.loading = true;

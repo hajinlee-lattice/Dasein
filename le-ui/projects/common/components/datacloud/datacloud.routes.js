@@ -322,42 +322,6 @@ angular
 
                     return deferred.promise;                    
                 }],
-                SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
-                    var CreateOrUpdateSegment = function() {
-                        var segment = QueryStore.getSegment(),
-                            ts = new Date().getTime(),
-                            restriction = QueryStore.getRestriction();
-
-                        if (segment === null) {
-                            segment = {
-                                'name': 'segment' + ts,
-                                'display_name': 'segment' + ts,
-                                'frontend_restriction': restriction,
-                                'page_filter': {
-                                    'row_offset': 0,
-                                    'num_rows': 10
-                                }
-                            };
-                        } else {
-
-                            segment = {
-                                'name': segment.name,
-                                'display_name': segment.display_name,
-                                'frontend_restriction': segment.frontend_restriction,
-                                'page_filter': {
-                                    'row_offset': 0,
-                                    'num_rows': 10
-                                }
-                            };
-                        }
-
-                        return SegmentService.CreateOrUpdateSegment(segment);
-                    };
-
-                    return {
-                        CreateOrUpdateSegment: CreateOrUpdateSegment
-                    };
-                }],
                 AccountsCount: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
                     
                     var deferred = $q.defer(),
@@ -392,12 +356,12 @@ angular
                         
                     return deferred.promise;
                 }],
-                CountWithoutSalesForce: [function() {
-                    return 0;
-                }],
-                Config: [function() {
+                CountWithoutSalesForce: [function(){
                     return null;
-                }]
+                }],
+                Config: [function(){
+                    return null;
+                }],
             }),
             redirectTo: 'home.model.analysis.explorer',
             views: {
@@ -468,6 +432,40 @@ angular
                 pageTitle: 'Accounts'
             },
             resolve: {
+                SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
+
+                        var segment = QueryStore.getSegment(),
+                            ts = new Date().getTime(),
+                            restriction = QueryStore.getRestriction();
+
+                        console.log("[resolve] SegmentServiceProxy",segment);
+                        
+                        if (segment === null) {
+                            segment = {
+                                'name': 'segment' + ts,
+                                'display_name': 'segment' + ts,
+                                'frontend_restriction': restriction,
+                                'page_filter': {
+                                    'row_offset': 0,
+                                    'num_rows': 10
+                                }
+                            };
+                        } else {
+
+                            segment = {
+                                'name': segment.name,
+                                'display_name': segment.display_name,
+                                'frontend_restriction': segment.frontend_restriction,
+                                'page_filter': {
+                                    'row_offset': 0,
+                                    'num_rows': 10
+                                }
+                            };
+                        };
+
+                        return SegmentService.CreateOrUpdateSegment(segment);
+
+                }],
                 AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
                     var deferred = $q.defer(),
                         segment = QueryStore.getSegment(),
@@ -496,16 +494,12 @@ angular
                     deferred.resolve( QueryStore.GetCountByQuery('accounts', query, segment).then(function(data){ return data; }));
                     return deferred.promise;
                 }],
-                Config: ['$q', function($q){
-                    var deferred = $q.defer();
-                    deferred.resolve();
-                    return deferred.promise;
+                CountWithoutSalesForce: [function(){
+                    return null;
                 }],
-                CountWithoutSalesForce: ['$q', function($q){
-                    var deferred = $q.defer();
-                    deferred.resolve();
-                    return deferred.promise;
-                }]
+                Config: [function(){
+                    return null;
+                }],
             },
             views: {
                 "main@": {
