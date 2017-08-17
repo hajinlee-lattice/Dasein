@@ -65,13 +65,11 @@ public class NodeWatcher {
 
     public static synchronized void updateWatchedData(String watcherName, String serializedData) {
         Path path = getWatcherPath(watcherName);
-        if (path != null) {
-            try {
-                log.info("Changing data at watched node " + path + " to "+ serializedData);
-                CamilleEnvironment.getCamille().upsert(path, new Document(serializedData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed up update watcher " + watcherName);
-            }
+        try {
+            log.info("Changing data at watched node " + path + " to "+ serializedData);
+            CamilleEnvironment.getCamille().upsert(path, new Document(serializedData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed up update watcher " + watcherName);
         }
     }
 
