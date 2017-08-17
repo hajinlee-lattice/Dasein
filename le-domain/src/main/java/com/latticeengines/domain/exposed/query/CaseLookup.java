@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -15,8 +16,11 @@ import edu.emory.mathcs.backport.java.util.Collections;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CaseLookup extends Lookup {
 
+    public static final String ACCOUNT_RULE = "accountRule";
+    public static final String CONTACT_RULE = "contactRule";
+
     @JsonProperty("bucketToRuleMap")
-    private TreeMap<String, Restriction> bucketToRuleMap = generateDefaultBuckets();
+    private TreeMap<String, Map<String, Restriction>> bucketToRuleMap = generateDefaultBuckets();
 
     @JsonProperty("defaultBucketName")
     private String defaultBucketName = RuleBucketName.C.getName();
@@ -24,27 +28,11 @@ public class CaseLookup extends Lookup {
     public CaseLookup() {
     }
 
-    public void setBucketToRuleMap(Map<String, Restriction> bucketToRuleMap) {
-        for (Map.Entry<String, Restriction> entry : bucketToRuleMap.entrySet()) {
-            this.addToMap(entry);
-        }
+    public void setBucketToRuleMap(TreeMap<String, Map<String, Restriction>> bucketToRuleMap) {
+        this.bucketToRuleMap = bucketToRuleMap;
     }
 
-    public void addToMap(Map.Entry<String, Restriction> entry) {
-        if (this.bucketToRuleMap == null) {
-            this.bucketToRuleMap = new TreeMap<>();
-        }
-        this.bucketToRuleMap.put(entry.getKey(), entry.getValue());
-    }
-
-    public void addToMap(String key, Restriction value) {
-        if (this.bucketToRuleMap == null) {
-            this.bucketToRuleMap = new TreeMap<>();
-        }
-        this.bucketToRuleMap.put(key, value);
-    }
-
-    public Map<String, Restriction> getBucketToRuleMap() {
+    public TreeMap<String, Map<String, Restriction>> getBucketToRuleMap() {
         return this.bucketToRuleMap;
     }
 
@@ -56,16 +44,22 @@ public class CaseLookup extends Lookup {
         return this.defaultBucketName;
     }
 
+    private TreeMap<String, Map<String, Restriction>> generateDefaultBuckets() {
+        TreeMap<String, Map<String, Restriction>> map = new TreeMap<>();
+        map.put(RuleBucketName.A.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RuleBucketName.A_MINUS.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RuleBucketName.B.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RuleBucketName.C.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RuleBucketName.D.getName(), generateDefaultAccountAndContactBuckets());
+        map.put(RuleBucketName.F.getName(), generateDefaultAccountAndContactBuckets());
+        return map;
+    }
+
     @SuppressWarnings({ "unchecked", "unused" })
-    private TreeMap<String, Restriction> generateDefaultBuckets() {
-        TreeMap<String, Restriction> map = new TreeMap<>();
-        map.put(RuleBucketName.A.getName(), Restriction.builder().and(Collections.<Restriction> emptyList()).build());
-        map.put(RuleBucketName.A_MINUS.getName(),
-                Restriction.builder().and(Collections.<Restriction> emptyList()).build());
-        map.put(RuleBucketName.B.getName(), Restriction.builder().and(Collections.<Restriction> emptyList()).build());
-        map.put(RuleBucketName.C.getName(), Restriction.builder().and(Collections.<Restriction> emptyList()).build());
-        map.put(RuleBucketName.D.getName(), Restriction.builder().and(Collections.<Restriction> emptyList()).build());
-        map.put(RuleBucketName.F.getName(), Restriction.builder().and(Collections.<Restriction> emptyList()).build());
+    private Map<String, Restriction> generateDefaultAccountAndContactBuckets() {
+        Map<String, Restriction> map = new HashMap<>();
+        map.put(ACCOUNT_RULE, Restriction.builder().and(Collections.<Restriction> emptyList()).build());
+        map.put(CONTACT_RULE, Restriction.builder().and(Collections.<Restriction> emptyList()).build());
         return map;
     }
 

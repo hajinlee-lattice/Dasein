@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -37,7 +38,7 @@ public class CaseLookupUnitTestNG {
                 && Dindex < Findex);
     }
 
-    private void assertOrderOfMap(Map<String, Restriction> map) {
+    private void assertOrderOfMap(TreeMap<String, Map<String, Restriction>> map) {
         int count = 0;
         for (String key : map.keySet()) {
             assertEachKey(key, count);
