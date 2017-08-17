@@ -109,7 +109,7 @@ class LaunchConfiguration(Resource):
                 },
                 "InstanceType"   : { "Ref" : instance_type_ref },
                 "EbsOptimized" : { "Fn::FindInMap" : [ "Instance2Options", { "Ref" : "InstanceType" }, "EBSOptimized" ] },
-                "InstanceMonitoring" : "true",
+                "InstanceMonitoring" : "false",
                 "KeyName"        : { "Ref" : "KeyName" },
                 "SecurityGroups" : [ { "Ref" : "SecurityGroupId" } ],
                 "UserData"       : ""

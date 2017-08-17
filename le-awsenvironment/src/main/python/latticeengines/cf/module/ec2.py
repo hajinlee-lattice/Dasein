@@ -244,7 +244,7 @@ class EC2Instance(Resource):
                 "ImageId": EC2Instance._image_id(os),
                 "InstanceType": instance_type.ref(),
                 "SecurityGroupIds": [ ],
-                "Monitoring": "true",
+                "Monitoring": "false",
                 "KeyName": ec2_key.ref(),
                 "UserData": EC2Instance.__userdata(name),
                 "Tags": []
