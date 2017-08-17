@@ -3,6 +3,8 @@ package com.latticeengines.admin.service;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.curator.framework.recipes.cache.TreeCache;
+
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -15,6 +17,8 @@ public interface TenantService {
     boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration);
 
     Collection<TenantDocument> getTenants(String contractId);
+
+    Collection<TenantDocument> getTenantsInCache(String contractId);
 
     boolean deleteTenant(final String userName, String contractId, String tenantId, boolean uninstallComponent);
 

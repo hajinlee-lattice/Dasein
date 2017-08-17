@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -126,6 +127,32 @@ public class TenantLifecycleManager {
             TenantProperties properties = null;
             try {
                 Document tenantPropertiesDocument = c.get(childPair.getValue().append(PathConstants.PROPERTIES_FILE));
+                properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
+                if (properties != null) {
+                    TenantInfo tenantInfo = new TenantInfo(properties);
+                    toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), tenantInfo));
+                }
+            } catch (Exception ex) {
+                log.warn("Failed to retrieve the properties.json at path="
+                        + (childPair.getValue() != null ? childPair.getValue().toString() : ""));
+            }
+        }
+
+        return toReturn;
+    }
+
+    public static List<AbstractMap.SimpleEntry<String, TenantInfo>> getAllInCache(String contractId, TreeCache cache) throws Exception {
+        LifecycleUtils.validateIds(contractId);
+        List<AbstractMap.SimpleEntry<String, TenantInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, TenantInfo>>();
+
+        Camille c = CamilleEnvironment.getCamille();
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c
+                .getChildrenInCache(PathBuilder.buildTenantsPath(CamilleEnvironment.getPodId(), contractId), cache);
+
+        for (Map.Entry<Document, Path> childPair : childPairs) {
+            TenantProperties properties = null;
+            try {
+                Document tenantPropertiesDocument = c.getInCache(childPair.getValue().append(PathConstants.PROPERTIES_FILE), cache);
                 properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
                 if (properties != null) {
                     TenantInfo tenantInfo = new TenantInfo(properties);

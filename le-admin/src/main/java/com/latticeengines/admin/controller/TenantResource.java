@@ -79,7 +79,7 @@ public class TenantResource {
         } else {
             parsedContractId = contractId;
         }
-        return new ArrayList<>(tenantService.getTenants(parsedContractId));
+        return new ArrayList<>(tenantService.getTenantsInCache(parsedContractId));
     }
 
     @RequestMapping(value = "/defaultspaceconfig", method = RequestMethod.GET, headers = "Accept=application/json")

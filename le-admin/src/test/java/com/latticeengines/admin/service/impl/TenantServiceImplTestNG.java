@@ -1,5 +1,7 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -24,5 +26,12 @@ public class TenantServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertEquals(spaceConfig.getTopology(), CRMTopology.MARKETO);
 
         Assert.assertTrue(true);
+    }
+
+    @Test(groups = "functional")
+    public void testGetTenants() throws Exception {
+        Collection<TenantDocument> collection = tenantService.getTenantsInCache(null);
+        Assert.assertNotNull(collection);
+        Assert.assertEquals(collection.size() > 0, true);
     }
 }

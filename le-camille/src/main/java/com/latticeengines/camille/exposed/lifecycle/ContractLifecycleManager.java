@@ -4,6 +4,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -36,7 +37,6 @@ public class ContractLifecycleManager {
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Contracts path already exists in current Pod");
         }
-
         Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
         try {
             camille.create(contractPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
@@ -81,12 +81,45 @@ public class ContractLifecycleManager {
         return new ContractInfo(properties);
     }
 
+    public static ContractInfo getInfoInCache(String contractId, TreeCache cache) throws Exception {
+        LifecycleUtils.validateIds(contractId);
+        Camille c = CamilleEnvironment.getCamille();
+
+        Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
+        ContractProperties properties = null;
+        Document contractPropertiesDocument = c.getInCache(contractPath.append(PathConstants.PROPERTIES_FILE), cache);
+        properties = DocumentUtils.toTypesafeDocument(contractPropertiesDocument, ContractProperties.class);
+        return new ContractInfo(properties);
+    }
+
     public static List<AbstractMap.SimpleEntry<String, ContractInfo>> getAll() throws Exception {
         List<AbstractMap.SimpleEntry<String, ContractInfo>> toReturn = new ArrayList<>();
 
         Camille c = CamilleEnvironment.getCamille();
         List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c
                 .getChildren(PathBuilder.buildContractsPath(CamilleEnvironment.getPodId()));
+
+        for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
+            try {
+                ContractInfo contractInfo = getInfo(childPair.getValue().getSuffix());
+                if (contractInfo != null) {
+                    toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), contractInfo));
+                }
+            } catch (Exception ex) {
+                log.warn(String.format("Failed to get Contract Info for contract %s.",
+                        childPair.getValue().getSuffix()));
+            }
+        }
+
+        return toReturn;
+    }
+
+    public static List<AbstractMap.SimpleEntry<String, ContractInfo>> getAllInCache(TreeCache cache) throws Exception {
+        List<AbstractMap.SimpleEntry<String, ContractInfo>> toReturn = new ArrayList<>();
+
+        Camille c = CamilleEnvironment.getCamille();
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c
+                .getChildrenInCache(PathBuilder.buildContractsPath(CamilleEnvironment.getPodId()), cache);
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
             try {

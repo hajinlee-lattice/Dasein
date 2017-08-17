@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -214,6 +215,20 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public Collection<TenantDocument> getTenants(String contractId) {
         Collection<TenantDocument> tenants = tenantEntityMgr.getTenants(contractId);
+        if (tenants != null) {
+            for (TenantDocument doc : tenants) {
+                String cId = doc.getSpace().getContractId();
+                String tId = doc.getSpace().getTenantId();
+                doc.setBootstrapState(getTenantOverallState(cId, tId));
+            }
+            return tenants;
+        }
+        return null;
+    }
+
+    @Override
+    public Collection<TenantDocument> getTenantsInCache(String contractId) {
+        Collection<TenantDocument> tenants = tenantEntityMgr.getTenantsInCache(contractId);
         if (tenants != null) {
             for (TenantDocument doc : tenants) {
                 String cId = doc.getSpace().getContractId();

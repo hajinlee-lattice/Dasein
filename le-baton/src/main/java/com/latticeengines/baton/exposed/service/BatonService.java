@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.curator.framework.recipes.cache.TreeCache;
+
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -34,6 +36,8 @@ public interface BatonService {
             Map<String, String> properties);
 
     Collection<TenantDocument> getTenants(String contractId);
+
+    Collection<TenantDocument> getTenantsInCache(String contractId);
 
     boolean deleteTenant(String contractId, String tenantId);
 

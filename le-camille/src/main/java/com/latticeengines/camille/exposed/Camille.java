@@ -11,7 +11,9 @@ import java.util.Map.Entry;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.api.SetDataBuilder;
+import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.NodeCache;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.locks.InterProcessReadWriteLock;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
@@ -134,6 +136,51 @@ public class Camille {
                     public List<Entry<Document, Path>> apply(Path input) {
                         try {
                             return asMapEntry(getChildren(input));
+                        } catch (Exception e) {
+                            log.error("error getting children of path " + input, e);
+                            return null;
+                        }
+                    }
+
+                    @SuppressWarnings("unchecked")
+                    private <E extends Map.Entry<Document, Path>> List<E> asMapEntry(
+                            List<AbstractMap.SimpleEntry<Document, Path>> pairs) {
+                        return (List<E>) pairs;
+                    }
+                });
+        return directory;
+    }
+
+    public Document getInCache(Path path, TreeCache cache) throws Exception {
+        ChildData childData = cache.getCurrentData(path.toString());
+        Document doc = null;
+        doc = new Document(new String(childData.getData()), childData.getStat().getVersion());
+        return doc;
+    }
+    /**
+     * Gets direct children only (not a full hierarchy).
+     * 
+     * @throws Exception
+     */
+    public List<AbstractMap.SimpleEntry<Document, Path>> getChildrenInCache(Path path, TreeCache cache) throws Exception {
+
+        Map<String, ChildData> map = cache.getCurrentChildren(path.toString());
+        List<AbstractMap.SimpleEntry<Document, Path>> out = new ArrayList<>(map.size());
+
+        for(Map.Entry<String, ChildData> entry : map.entrySet()) {
+            Path childPath = new Path(entry.getValue().getPath());
+            out.add(new SimpleEntry<Document, Path>(getInCache(childPath, cache), childPath));
+        }
+        return out;
+    }
+
+    public DocumentDirectory getDirectoryInCache(Path path, TreeCache cache) {
+        DocumentDirectory directory = new DocumentDirectory(path,
+                new Function<Path, List<Map.Entry<Document, Path>>>() {
+                    @Override
+                    public List<Entry<Document, Path>> apply(Path input) {
+                        try {
+                            return asMapEntry(getChildrenInCache(input, cache));
                         } catch (Exception e) {
                             log.error("error getting children of path " + input, e);
                             return null;

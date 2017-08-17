@@ -2,6 +2,8 @@ package com.latticeengines.admin.entitymgr;
 
 import java.util.Collection;
 
+import org.apache.curator.framework.recipes.cache.TreeCache;
+
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -16,6 +18,8 @@ public interface TenantEntityMgr {
             CustomerSpaceInfo customerSpaceInfo);
 
     Collection<TenantDocument> getTenants(String contractId);
+
+    Collection<TenantDocument> getTenantsInCache(String contractId);
 
     boolean deleteTenant(String contractId, String tenantId);
 

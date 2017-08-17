@@ -1,5 +1,6 @@
 package com.latticeengines.baton.exposed.service.impl;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -10,7 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.cache.TreeCache;
+import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
+import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.ZooDefs;
 import org.joda.time.DateTime;
@@ -54,6 +60,7 @@ public class BatonServiceImpl implements BatonService {
 
     private static final int MAX_RETRY_TIMES = 3;
 
+    private static TreeCache cache = null;
     @Override
     public boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
             CustomerSpaceInfo spaceInfo) {
@@ -178,6 +185,97 @@ public class BatonServiceImpl implements BatonService {
         } else {
             return getTenants(null, null);
         }
+    }
+
+    @Override
+    public Collection<TenantDocument> getTenantsInCache(String contractId) {
+        TreeCache cache = getTreeCache();
+        if (contractId != null) {
+            try {
+                ContractInfo contractInfo = ContractLifecycleManager.getInfoInCache(contractId, cache);
+                return getTenantsInCache(contractId, contractInfo, cache);
+            } catch (Exception e) {
+                log.error(String.format("Error retrieving tenants in contract %s.", contractId), e);
+                return null;
+            }
+        } else {
+            return getTenantsInCache(null, null, cache);
+        }
+    }
+
+    public Collection<TenantDocument> getTenantsInCache(String contractId, ContractInfo contractInfo, TreeCache cache) {
+        if (contractId != null) {
+            try {
+                List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries = TenantLifecycleManager
+                        .getAllInCache(contractId, cache);
+                if (contractInfo == null) {
+                    contractInfo = ContractLifecycleManager.getInfoInCache(contractId, cache);
+                }
+                return constructTenantDocsWithDefaultSpaceIdInCache(tenantEntries, contractId, contractInfo, cache);
+            } catch (Exception e) {
+                log.error(String.format("Error retrieving tenants in contract %s.", contractId), e);
+            }
+        } else {
+            List<TenantDocument> tenantDocs = new ArrayList<>();
+            List<AbstractMap.SimpleEntry<String, ContractInfo>> contracts = new ArrayList<>();
+            try {
+                contracts = ContractLifecycleManager.getAllInCache(cache);
+            } catch (Exception e) {
+                log.error("Error retrieving all contracts.", e);
+            }
+            if (!contracts.isEmpty()) {
+                for (Map.Entry<String, ContractInfo> contract : contracts) {
+                    try {
+                        tenantDocs.addAll(getTenantsInCache(contract.getKey(), contract.getValue(), cache));
+                    } catch (Exception e) {
+                        log.error(String.format("Error retrieving tenants in contract %s.", contract.getKey()), e);
+                    }
+                }
+            }
+            return tenantDocs;
+        }
+        return null;
+    }
+
+    private List<TenantDocument> constructTenantDocsWithDefaultSpaceIdInCache(List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries, String contractId, ContractInfo contractInfo, TreeCache cache) {
+        Camille c = CamilleEnvironment.getCamille();
+        List<TenantDocument> docs = new ArrayList<>();
+        if(tenantEntries == null)
+            return null;
+
+        for (Map.Entry<String, TenantInfo> tenantEntry : tenantEntries) {
+            String tenantId = tenantEntry.getKey();
+            String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
+
+            try {
+                TenantDocument doc = new TenantDocument();
+
+                Path spaceConfigPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
+                        CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID).append(new Path("/SpaceConfiguration"));
+                DocumentDirectory spaceConfigDir = c.getDirectoryInCache(spaceConfigPath, cache);
+                SpaceConfiguration spaceConfig = null;
+                try {
+                    spaceConfig = new SpaceConfiguration(spaceConfigDir);
+                } catch (Exception e) {
+                    // ignore
+                }
+
+                CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
+                CustomerSpaceInfo spaceInfo = SpaceLifecycleManager.getInfoInCache(contractId, tenantId, spaceId, cache);
+
+                doc.setSpace(space);
+                doc.setSpaceConfig(spaceConfig);
+                doc.setTenantInfo(tenantEntry.getValue());
+                doc.setContractInfo(contractInfo);
+                doc.setSpaceInfo(spaceInfo);
+                docs.add(doc);
+            } catch (Exception e) {
+                log.error(String.format("Error constructing tenant document for contract %s, tenant %s, and space %s.",
+                        contractId, tenantId, spaceId), e);
+            }
+        }
+
+        return docs;
     }
 
     @Override
@@ -487,4 +585,39 @@ public class BatonServiceImpl implements BatonService {
         return products.stream().anyMatch(product -> hasProduct(customerSpace, product));
     }
 
+    private static TreeCache getTreeCache() {
+        if (cache == null) {
+            synchronized (BatonServiceImpl.class) {
+                if (cache == null) {
+                    cache = new TreeCache(CamilleEnvironment.getCamille().getCuratorClient(),
+                          PathBuilder.buildPodPath(CamilleEnvironment.getPodId()).toString());
+                    Semaphore sem = new Semaphore(0);
+                    try {
+                        cache.start();
+                    } catch (Exception e1) {
+                        log.error(String.format("TreeCache don't start normally because of %s",
+                                e1.getMessage()));
+                    }
+                    TreeCacheListener listener = new TreeCacheListener() {
+
+                        @Override
+                        public void childEvent(CuratorFramework client, TreeCacheEvent event)
+                                throws Exception {
+                            switch (event.getType()) {
+                                case INITIALIZED: {
+                                  sem.release();
+                                }
+                            }
+                        }
+                    };
+                    cache.getListenable().addListener(listener);
+                        try {
+                            sem.acquire();
+                        } catch (InterruptedException e) {
+                        }
+                }
+            }
+        }
+        return cache;
+    }
 }

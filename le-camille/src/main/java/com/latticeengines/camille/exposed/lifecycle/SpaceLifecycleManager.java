@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -115,6 +116,35 @@ public class SpaceLifecycleManager {
         Document productsDocument = new Document();
         if (c.exists(productsPath)) {
             productsDocument = c.get(productsPath);
+        } else {
+            productsDocument.setData("");
+            log.warn("Cannot find products path, using empty product list.");
+        }
+        String flags = updateFeatureFlags(spaceFlagsDocument, featureFlagDefinitionDocument, productsDocument,
+                tenantId);
+
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, flags);
+        return spaceInfo;
+    }
+
+    public static CustomerSpaceInfo getInfoInCache(String contractId, String tenantId, String spaceId, TreeCache cache) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId, spaceId);
+        Camille c = CamilleEnvironment.getCamille();
+
+        Path spacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
+                spaceId);
+        Document spacePropertiesDocument = c.getInCache(spacePath.append(PathConstants.PROPERTIES_FILE), cache);
+        CustomerSpaceProperties properties = DocumentUtils.toTypesafeDocument(spacePropertiesDocument,
+                CustomerSpaceProperties.class);
+
+        Document spaceFlagsDocument = c.getInCache(spacePath.append(PathConstants.FEATURE_FLAGS_FILE), cache);
+        Document featureFlagDefinitionDocument = c.getInCache(buildFeatureFlagDefinitionPath(), cache);
+        Path productsPath = PathBuilder
+                .buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId)
+                .append(new Path("/" + PathConstants.SPACECONFIGURATION_NODE + "/" + PathConstants.PRODUCTS_NODE));
+        Document productsDocument = new Document();
+        if (c.exists(productsPath)) {
+            productsDocument = c.getInCache(productsPath, cache);
         } else {
             productsDocument.setData("");
             log.warn("Cannot find products path, using empty product list.");
