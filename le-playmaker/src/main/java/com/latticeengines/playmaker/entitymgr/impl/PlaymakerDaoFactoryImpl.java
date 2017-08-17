@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerSyncLookupSource;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmaker.dao.PlaymakerDBVersionDao;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
@@ -59,8 +60,8 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
     }
 
     @Override
-    public PlaymakerRecommendationDao getRecommendationDao(String tenantName) {
-        if (isLpiBasedPlaymakerEnabledForTenant(tenantName)) {
+    public PlaymakerRecommendationDao getRecommendationDao(String tenantName, String lookupSource) {
+        if (shouldUseLpiBasedPlaymaker(tenantName, lookupSource)) {
             return lpiPlaymakerRecommendationDao;
         } else {
             PlaymakerRecommendationDao defaultDao = null;
@@ -81,41 +82,62 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
         }
     }
 
-    private boolean isLpiBasedPlaymakerEnabledForTenant(String tenantName) {
-        CustomerSpace customerSpace = CustomerSpace.parse(tenantName);
-        try {
-            if (batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER)) {
-                Tenant tenant = tenantEntityMgr.findByTenantId(tenantName);
-                MultiTenantContext.setTenant(tenant);
-                return true;
-            }
-        } catch (Exception ex) {
-            boolean isIgnorableException = false;
-            if (ex instanceof NoNodeException) {
-                // ignore this error as old PL tenant may not have ZK path
-                // created on LPI side. This will then return false by default
-                log.debug("Ignoring: " + ex.getMessage());
-                isIgnorableException = true;
-            } else {
-                Throwable th = ex.getCause();
-                while (th != null) {
-                    if (th instanceof NoNodeException) {
-                        // ignore this error as old PL tenant may not have ZK
-                        // path
-                        // created on LPI side. This will then return false by
-                        // default
-                        log.debug("Ignoring: " + th.getMessage());
-                        isIgnorableException = true;
-                        break;
+    private boolean shouldUseLpiBasedPlaymaker(String tenantName, String lookupSource) {
+        PlaymakerSyncLookupSource playmakerSyncLookupSource = getPlaymakerSyncLookupSource(lookupSource);
+
+        // if playmakerSyncLookupSource is DECIDED_BY_FEATURE_FLAG then use
+        // tenant level feature flags to decide lookup source otherwise use LPI
+        // of playmaker as indicated by loop source enum passed by caller
+
+        if (playmakerSyncLookupSource == PlaymakerSyncLookupSource.DECIDED_BY_FEATURE_FLAG) {
+            CustomerSpace customerSpace = CustomerSpace.parse(tenantName);
+            try {
+                if (batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER)) {
+                    Tenant tenant = tenantEntityMgr.findByTenantId(tenantName);
+                    MultiTenantContext.setTenant(tenant);
+                    return true;
+                }
+            } catch (Exception ex) {
+                boolean isIgnorableException = false;
+                if (ex instanceof NoNodeException) {
+                    // ignore this error as old PL tenant may not have ZK path
+                    // created on LPI side. This will then return false by
+                    // default
+                    log.debug("Ignoring: " + ex.getMessage());
+                    isIgnorableException = true;
+                } else {
+                    Throwable th = ex.getCause();
+                    while (th != null) {
+                        if (th instanceof NoNodeException) {
+                            // ignore this error as old PL tenant may not have
+                            // ZK
+                            // path
+                            // created on LPI side. This will then return false
+                            // by
+                            // default
+                            log.debug("Ignoring: " + th.getMessage());
+                            isIgnorableException = true;
+                            break;
+                        }
+                    }
+
+                    if (!isIgnorableException) {
+                        throw ex;
                     }
                 }
-
-                if (!isIgnorableException) {
-                    throw ex;
-                }
             }
+            return false;
+        } else {
+            return playmakerSyncLookupSource == PlaymakerSyncLookupSource.LPI;
         }
-        return false;
+    }
+
+    private PlaymakerSyncLookupSource getPlaymakerSyncLookupSource(String lookupSource) {
+        PlaymakerSyncLookupSource playmakerSyncLookupSource = PlaymakerSyncLookupSource.DECIDED_BY_FEATURE_FLAG;
+        if (StringUtils.isNotBlank(lookupSource)) {
+            playmakerSyncLookupSource = PlaymakerSyncLookupSource.valueOf(lookupSource.trim());
+        }
+        return playmakerSyncLookupSource;
     }
 
     PlaymakerRecommendationDao findDao(NamedParameterJdbcTemplate namedJdbcTemplate, String normalizedVer,
@@ -140,5 +162,4 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
 
         return builder.toString();
     }
-
 }
