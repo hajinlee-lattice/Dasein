@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.Constants;
@@ -56,6 +57,9 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private RedshiftService redshiftService;
 
     @PostConstruct
     private void postConstruct() {
@@ -191,6 +195,19 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         }
 
         cleanupHdfs();
+    }
+
+    @Override
+    public void cleanupRedshift() {
+        for (Tenant tenant : testTenants) {
+            if (excludedCleanupTenantIds.contains(tenant.getId())) {
+                log.info("Skip cleaning up " + tenant.getId());
+            } else {
+                log.info("Clean up test tenant " + tenant.getId());
+                List<String> tables = redshiftService.getTables(CustomerSpace.parse(tenant.getId()).getTenantId());
+                tables.forEach(redshiftService::dropTable);
+            }
+        }
     }
 
     /**

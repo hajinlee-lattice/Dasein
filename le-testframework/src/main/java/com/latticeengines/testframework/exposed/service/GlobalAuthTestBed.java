@@ -68,6 +68,8 @@ public interface GlobalAuthTestBed {
 
     void cleanupPlsHdfs();
 
+    void cleanupRedshift();
+
     void overwriteFeatureFlag(Tenant tenant, String featureFlagName, boolean value);
 
     void excludeTestTenantsForCleanup(List<Tenant> tenants);
