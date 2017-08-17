@@ -80,13 +80,33 @@ angular.module('lp.playbook.wizard.insights', [])
         validateTalkingPoints();
     };
 
-    vm.reorder = function(from, to) {
-        var tmp = vm.talkingPoints[from];
-        vm.talkingPoints[from] = vm.talkingPoints[to];
-        vm.talkingPoints[to] = tmp;
-        vm.talkingPoints.forEach(function(tp, i) {
-            tp.offset = i;
+    var reorderTalkingPoints = function(from, to) {
+        var min = Math.min(from, to),
+            talkingPoints = sortBy('offset', vm.talkingPoints),
+            ret = [],
+            top = talkingPoints.slice(0, min + 1),
+            bottom = talkingPoints.slice(min + 1, talkingPoints.length),
+            topOffset = top[top.length - 1].offset,
+            bottomOffset = bottom[0].offset;
+
+        top[top.length - 1].offset = bottomOffset;
+        bottom[0].offset = topOffset;
+        ret = sortBy('offset', top.concat(bottom));
+
+        return ret;
+    }
+
+    var sortBy = function(property, obj) { 
+        var arr = obj.slice(0);
+        arr.sort(function(a,b) {
+            return a[property] - b[property];
         });
+        return arr;
+    }
+
+    vm.reorder = function(from, to) {
+        vm.talkingPoints = reorderTalkingPoints(from, to);
+        
         if(CgTalkingPointStore.saveOnBlur) {
             CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints).then(function(results){
                 CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true);
