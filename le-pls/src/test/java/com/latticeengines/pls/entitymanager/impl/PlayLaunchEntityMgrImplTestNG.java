@@ -60,8 +60,8 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         play.setDisplayName(DISPLAY_NAME);
         play.setTenant(tenant1);
         Date timestamp = new Date(System.currentTimeMillis());
-        play.setTimestamp(timestamp);
-        play.setLastUpdatedTimestamp(timestamp);
+        play.setCreated(timestamp);
+        play.setUpdated(timestamp);
         play.setCreatedBy(CREATED_BY);
 
         playEntityMgr.create(play);

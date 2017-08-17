@@ -105,8 +105,8 @@ public class PlayResource {
             // and
             // accounts for a given play
             // for now, just mock them
-            playLaunch.setAccountsNum(4000L);
-            playLaunch.setContactsNum(5000L);
+            playLaunch.setAccountsLaunched(4000L);
+            playLaunch.setContactsLaunched(5000L);
             // ----------------------------------------------------------------------------------------------
             playLaunch.setPlay(play);
             playLaunchService.create(playLaunch);

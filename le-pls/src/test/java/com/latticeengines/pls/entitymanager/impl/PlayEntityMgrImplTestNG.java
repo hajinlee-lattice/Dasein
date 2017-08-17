@@ -40,8 +40,8 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenant1);
 
         play = new Play();
-        play.setTimestamp(new Date(System.currentTimeMillis()));
-        play.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
+        play.setCreated(new Date(System.currentTimeMillis()));
+        play.setUpdated(new Date(System.currentTimeMillis()));
         play.setDisplayName(DISPLAY_NAME);
         play.setDescription(DESCRIPTION);
         play.setCreatedBy(CREATED_BY);
@@ -70,14 +70,13 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(retrievedPlay.getName(), play1.getName());
         Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
         Assert.assertEquals(retrievedPlay.getDisplayName(), DISPLAY_NAME);
-        Assert.assertFalse(retrievedPlay.getExcludeAccountsWithoutSalesforceId());
-        Assert.assertFalse(retrievedPlay.getExcludeContactsWithoutSalesforceId());
+        Assert.assertFalse(retrievedPlay.getExcludeItemsWithoutSalesforceId());
 
         retrievedPlay.setDescription(null);
         retrievedPlay.setDisplayName(NEW_DISPLAY_NAME);
         retrievedPlay.setSegmentName(SEGMENT_NAME);
-        retrievedPlay.setExcludeAccountsWithoutSalesforceId(true);
-        retrievedPlay.setExcludeContactsWithoutSalesforceId(true);
+        retrievedPlay.setExcludeItemsWithoutSalesforceId(true);
+
         playEntityMgr.createOrUpdatePlay(retrievedPlay);
         retrievedPlay = playEntityMgr.findByName(playName);
         Assert.assertNotNull(retrievedPlay);
@@ -85,8 +84,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
         Assert.assertEquals(retrievedPlay.getDisplayName(), NEW_DISPLAY_NAME);
         Assert.assertEquals(retrievedPlay.getSegmentName(), SEGMENT_NAME);
-        Assert.assertTrue(retrievedPlay.getExcludeAccountsWithoutSalesforceId());
-        Assert.assertTrue(retrievedPlay.getExcludeContactsWithoutSalesforceId());
+        Assert.assertTrue(retrievedPlay.getExcludeItemsWithoutSalesforceId());
 
         playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);

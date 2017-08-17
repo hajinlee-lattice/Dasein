@@ -1,6 +1,5 @@
 package com.latticeengines.pls.entitymanager.impl;
 
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -32,10 +31,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Play createOrUpdatePlay(Play play) {
-        Date timestamp = new Date(System.currentTimeMillis());
         if (play.getName() == null) {
-            play.setTimestamp(timestamp);
-            play.setLastUpdatedTimestamp(timestamp);
             play.setName(play.generateNameStr());
             playDao.create(play);
             return play;
@@ -43,14 +39,11 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
             Play retrievedPlay = findByName(play.getName());
             if (retrievedPlay == null) {
                 log.warn(String.format("Play with name %s does not exist, creating it now", play.getName()));
-                play.setTimestamp(timestamp);
-                play.setLastUpdatedTimestamp(timestamp);
                 playDao.create(play);
                 return play;
             } else {
                 // Front end only sends delta to the back end to update existing
                 updateExistingPlay(retrievedPlay, play);
-                retrievedPlay.setLastUpdatedTimestamp(timestamp);
                 playDao.update(retrievedPlay);
                 return retrievedPlay;
             }
@@ -71,11 +64,8 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
         if (play.getSegment() != null) {
             existingPlay.setSegment(play.getSegment());
         }
-        if (play.getExcludeAccountsWithoutSalesforceId() != null) {
-            existingPlay.setExcludeAccountsWithoutSalesforceId(play.getExcludeAccountsWithoutSalesforceId());
-        }
-        if (play.getExcludeContactsWithoutSalesforceId() != null) {
-            existingPlay.setExcludeContactsWithoutSalesforceId(play.getExcludeContactsWithoutSalesforceId());
+        if (play.getExcludeItemsWithoutSalesforceId() != null) {
+            existingPlay.setExcludeItemsWithoutSalesforceId(play.getExcludeItemsWithoutSalesforceId());
         }
     }
 
@@ -110,15 +100,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void createOrUpdate(Play play) {
-        if (play.getName() == null) {
-            throw new NullPointerException("Play name cannot be null.");
-        }
-
-        Play existing = findByName(play.getName());
-        if (existing != null) {
-            delete(existing);
-        }
-        create(play);
+        createOrUpdatePlay(play);
     }
 
 }

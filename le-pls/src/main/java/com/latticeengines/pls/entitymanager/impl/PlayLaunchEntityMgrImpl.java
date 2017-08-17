@@ -39,13 +39,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(PlayLaunch entity) {
-        Date timestamp = new Date(System.currentTimeMillis());
-
         Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
-
         entity.setTenant(tenant);
-        entity.setCreatedTimestamp(timestamp);
-        entity.setLastUpdatedTimestamp(timestamp);
         entity.setLaunchId(generateLaunchId());
         playLaunchDao.create(entity);
     }

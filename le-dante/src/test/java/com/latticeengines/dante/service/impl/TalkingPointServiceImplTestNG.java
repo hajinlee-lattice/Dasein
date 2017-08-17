@@ -240,8 +240,8 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         play.setCreatedBy(CREATED_BY);
         play.setTenant(mainTestTenant);
         play.setTenantId(mainTestTenant.getPid());
-        play.setLastUpdatedTimestamp(new Date());
-        play.setTimestamp(new Date());
+        play.setUpdated(new Date());
+        play.setCreated(new Date());
 
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);

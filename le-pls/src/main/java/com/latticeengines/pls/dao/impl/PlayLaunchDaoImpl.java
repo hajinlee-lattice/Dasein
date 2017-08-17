@@ -47,7 +47,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
 
     @SuppressWarnings("rawtypes")
     @Override
-    public PlayLaunch findByPlayAndTimestamp(Long playId, Date timestamp) {
+    public PlayLaunch findByPlayAndTimestamp(Long playId, Date created) {
         if (playId == null) {
             return null;
         }
@@ -57,11 +57,11 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         String queryStr = String.format(
                 " FROM %s "//
                         + " WHERE fk_play_id = :playId "//
-                        + " AND created_timestamp = :timestamp ", //
+                        + " AND created = :created ", //
                 entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setLong("fk_play_id", playId);
-        query.setDate("timestamp", timestamp);
+        query.setDate("created", created);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -88,7 +88,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
             queryStr += " AND state IN ( :states ) ";
         }
 
-        queryStr += " ORDER BY created_timestamp DESC ";
+        queryStr += " ORDER BY created DESC ";
 
         Query query = session.createQuery(queryStr);
         query.setLong("playId", playId);
@@ -114,7 +114,7 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         String queryStr = String.format(
                 " FROM %s " //
                         + " WHERE state = :state " //
-                        + " ORDER BY created_timestamp DESC ", //
+                        + " ORDER BY created DESC ", //
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("state", state.name());

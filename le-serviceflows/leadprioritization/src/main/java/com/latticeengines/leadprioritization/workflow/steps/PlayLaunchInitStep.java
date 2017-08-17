@@ -80,12 +80,10 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private long processedSegmentAccountsCount = 0;
 
-    List<String> fields = Arrays.asList(new String[] { //
-            InterfaceName.AccountId.name(), //
+    List<String> fields = Arrays.asList(InterfaceName.AccountId.name(), //
             InterfaceName.SalesforceAccountID.name(), //
             InterfaceName.AnnualRevenue.name(), //
-            InterfaceName.CompanyName.name(), //
-    });
+            InterfaceName.CompanyName.name());
 
     @PostConstruct
     public void init() {
@@ -196,7 +194,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         recommendation.setLaunchId(playLaunchId);
         recommendation.setPlayId(playName);
 
-        Date launchTime = playLauch.getCreatedTimestamp();
+        Date launchTime = playLauch.getCreated();
         if (launchTime == null) {
             launchTime = new Date(launchTimestampMillis);
         }

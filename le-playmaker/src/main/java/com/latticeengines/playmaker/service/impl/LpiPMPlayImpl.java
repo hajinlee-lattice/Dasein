@@ -101,7 +101,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
     private long secondsFromEpoch(Play play) {
         try {
-            return play.getLastUpdatedTimestamp().getTime() / 1000;
+            return play.getUpdated().getTime() / 1000;
         } catch (Exception ex) {
             log.error("Ignoring this error", ex);
             return 0L;

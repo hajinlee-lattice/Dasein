@@ -73,13 +73,13 @@
                                 Last Launched: 
                                 <span ng-if="play.launchHistory.playLaunch == null && play.segment == null"><span class="error-text">Not launched yet</span></span>
                                 <span ng-if="play.launchHistory.playLaunch == null && play.segment != null"><span class="blue-text">Ready for launch</span></span>
-                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">Launched {{play.lastUpdatedTimestamp | date}}</span></span>
+                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">Launched {{play.updated | date}}</span></span>
                             </li>
                             <li>
                                 Insights: 
                                 <span ng-if="play.launchHistory.playLaunch == null && play.segment == null"><span class="error-text">None created</span></span>
                                 <span ng-if="play.launchHistory.playLaunch == null && play.segment != null"><span class="blue-text">{{play.talkingPoints.length}} Talking Points created</span></span>
-                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">{{play.talkingPoints.length}} Talking Points - Published {{play.lastUpdatedTimestamp | date}}</span></span>
+                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">{{play.talkingPoints.length}} Talking Points - Published {{play.updated | date}}</span></span>
                             </li>
                         </ul>
 
@@ -126,7 +126,7 @@
                         <span 
                             class="launch-success pull-right" 
                             ng-if="play.launchHistory.playLaunch != null && play.segment != null">
-                            Launched {{play.lastUpdatedTimestamp | date}} 
+                            Launched {{play.updated | date}}
                             <i class="fa fa-check" aria-hidden="true"></i>
                         </span>
 

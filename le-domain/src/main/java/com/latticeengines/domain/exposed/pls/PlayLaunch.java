@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -34,7 +35,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "PLAY_LAUNCH")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
+public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,36 +43,36 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
+    @JsonProperty("launchId")
     @Index(name = "PLAY_LAUNCH_ID")
     @Column(name = "LAUNCH_ID", unique = true, nullable = false)
-    @JsonProperty("launchId")
     private String launchId;
 
-    @Column(name = "DESCRIPTION", nullable = true)
     @JsonProperty("description")
+    @Column(name = "DESCRIPTION", nullable = true)
     private String description;
 
-    @Index(name = "PLAY_LAUNCH_CREATED_TIME")
-    @Column(name = "CREATED_TIMESTAMP", nullable = false)
+    @JsonProperty("created")
+    @Index(name = "PLAY_LAUNCH_CREATED")
+    @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonProperty("createdTimestamp")
-    private Date createdTimestamp;
+    private Date created;
 
-    @Index(name = "PLAY_LAUNCH_LAST_UPD_TIME")
-    @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
+    @JsonProperty("updated")
+    @Index(name = "PLAY_LAUNCH_LAST_UPDATED")
+    @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonProperty("lastUpdatedTimestamp")
-    private Date lastUpdatedTimestamp;
+    private Date updated;
 
+    @JsonProperty("launchState")
     @Index(name = "PLAY_LAUNCH_STATE")
     @Column(name = "STATE", nullable = false)
     @Enumerated(EnumType.STRING)
-    @JsonProperty("launchState")
     private LaunchState launchState;
 
+    @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PLAY_ID", nullable = false)
-    @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Play play;
 
@@ -88,17 +89,17 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @Column(name = "TABLE_NAME", nullable = true)
     @JsonIgnore
+    @Column(name = "TABLE_NAME", nullable = true)
     private String tableName;
 
-    @Column(name = "CONTACTS_NUM")
-    @JsonProperty("contactsNum")
-    private Long contactsNum;
+    @JsonProperty("contactsLaunched")
+    @Column(name = "CONTACTS_LAUNCHED")
+    private Long contactsLaunched;
 
-    @Column(name = "ACCOUNTS_NUM")
-    @JsonProperty("accountsNum")
-    private Long accountsNum;
+    @JsonProperty("accountsLaunched")
+    @Column(name = "ACCOUNTS_LAUNCHED")
+    private Long accountsLaunched;
 
     @Override
     public Long getPid() {
@@ -136,20 +137,20 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
         this.description = description;
     }
 
-    public Date getCreatedTimestamp() {
-        return createdTimestamp;
+    public Date getCreated() {
+        return created;
     }
 
-    public void setCreatedTimestamp(Date createdTimestamp) {
-        this.createdTimestamp = createdTimestamp;
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
-    public Date getLastUpdatedTimestamp() {
-        return lastUpdatedTimestamp;
+    public Date getUpdated() {
+        return updated;
     }
 
-    public void setLastUpdatedTimestamp(Date lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    public void setUpdated(Date updated) {
+        this.updated = updated;
     }
 
     public LaunchState getLaunchState() {
@@ -201,19 +202,19 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId {
         return this.tenantId;
     }
 
-    public Long getAccountsNum() {
-        return this.accountsNum;
+    public Long getAccountsLaunched() {
+        return this.accountsLaunched;
     }
 
-    public void setAccountsNum(Long accountsNum) {
-        this.accountsNum = accountsNum;
+    public void setAccountsLaunched(Long accountsLaunched) {
+        this.accountsLaunched = accountsLaunched;
     }
 
-    public Long getContactsNum() {
-        return this.contactsNum;
+    public Long getContactsLaunched() {
+        return this.contactsLaunched;
     }
 
-    public void setContactsNum(Long contactsNum) {
-        this.contactsNum = contactsNum;
+    public void setContactsLaunched(Long contactsLaunched) {
+        this.contactsLaunched = contactsLaunched;
     }
 }

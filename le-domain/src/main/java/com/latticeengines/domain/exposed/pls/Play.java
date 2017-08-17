@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -41,7 +42,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "pid")
-public class Play implements HasName, HasPid, HasTenantId {
+public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
 
     public static final String PLAY_NAME_PREFIX = "play";
     public static final String PLAY_NAME_FORMAT = "%s__%s";
@@ -102,27 +103,51 @@ public class Play implements HasName, HasPid, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @JsonProperty("timeStamp")
-    @Column(name = "TIMESTAMP", nullable = false)
+    @JsonProperty("created")
+    @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date timestamp;
+    private Date created;
 
-    @JsonProperty("lastUpdatedTimestamp")
-    @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = false)
+    @JsonProperty("updated")
+    @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdatedTimestamp;
+    private Date updated;
+
+    // // TO BE REMOVED ONCE THE TABLE IS STABLE
+    // @JsonProperty("timeStamp")
+    // @Column(name = "TIMESTAMP", nullable = true)
+    // @Temporal(TemporalType.TIMESTAMP)
+    // private Date timestamp;
+    //
+    // @JsonProperty("lastUpdatedTimestamp")
+    // @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = true)
+    // @Temporal(TemporalType.TIMESTAMP)
+    // private Date lastUpdatedTimestamp;
+    //
+    // public Date getTimestamp() {
+    // return timestamp;
+    // }
+    //
+    // public void setTimestamp(Date timestamp) {
+    // this.timestamp = timestamp;
+    // }
+    //
+    // public Date getLastUpdatedTimestamp() {
+    // return lastUpdatedTimestamp;
+    // }
+    //
+    // public void setLastUpdatedTimestamp(Date lastUpdatedTimestamp) {
+    // this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    // }
+    // // TO BE REMOVED ONCE THE TABLE IS STABLE
 
     @JsonProperty("createdBy")
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 
-    @JsonProperty("excludeAccountsWithoutSalesforceId")
-    @Column(name = "EXCLUDE_ACCOUNTS_WITHOUT_SFID", nullable = true)
-    private Boolean excludeAccountsWithoutSalesforceId = Boolean.FALSE;
-
-    @JsonProperty("excludeContactsWithoutSalesforceId")
-    @Column(name = "EXCLUDE_CONTACTS_WITHOUT_SFID", nullable = true)
-    private Boolean excludeContactsWithoutSalesforceId = Boolean.FALSE;
+    @JsonProperty("excludeItemsWithoutSalesforceId")
+    @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = true)
+    private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
 
     @Override
     public Long getPid() {
@@ -236,20 +261,20 @@ public class Play implements HasName, HasPid, HasTenantId {
         this.createdBy = createdBy;
     }
 
-    public Date getTimestamp() {
-        return this.timestamp;
+    public Date getCreated() {
+        return this.created;
     }
 
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
-    public Date getLastUpdatedTimestamp() {
-        return this.lastUpdatedTimestamp;
+    public Date getUpdated() {
+        return this.updated;
     }
 
-    public void setLastUpdatedTimestamp(Date lastUpdatedTimestamp) {
-        this.lastUpdatedTimestamp = lastUpdatedTimestamp;
+    public void setUpdated(Date updated) {
+        this.updated = updated;
     }
 
     public LaunchHistory getLaunchHistory() {
@@ -260,20 +285,12 @@ public class Play implements HasName, HasPid, HasTenantId {
         this.launchHistory = launchHistory;
     }
 
-    public Boolean getExcludeAccountsWithoutSalesforceId() {
-        return this.excludeAccountsWithoutSalesforceId;
+    public Boolean getExcludeItemsWithoutSalesforceId() {
+        return this.excludeItemsWithoutSalesforceId;
     }
 
-    public void setExcludeAccountsWithoutSalesforceId(boolean value) {
-        this.excludeAccountsWithoutSalesforceId = value;
-    }
-
-    public Boolean getExcludeContactsWithoutSalesforceId() {
-        return this.excludeContactsWithoutSalesforceId;
-    }
-
-    public void setExcludeContactsWithoutSalesforceId(boolean value) {
-        this.excludeContactsWithoutSalesforceId = value;
+    public void setExcludeItemsWithoutSalesforceId(boolean value) {
+        this.excludeItemsWithoutSalesforceId = value;
     }
 
     @Override

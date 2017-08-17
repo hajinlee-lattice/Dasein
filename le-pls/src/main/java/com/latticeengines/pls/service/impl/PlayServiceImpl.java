@@ -68,8 +68,7 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public List<Play> getAllFullPlays() {
-        List<Play> fullPlays = getAllPlays().stream().map(p -> getFullPlay(p)).collect(Collectors.toList());
-        return fullPlays;
+        return getAllPlays().stream().map(this::getFullPlay).collect(Collectors.toList());
     }
 
     @Override

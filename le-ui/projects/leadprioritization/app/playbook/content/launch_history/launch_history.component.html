@@ -52,11 +52,11 @@
     		</thead>
     		<tbody>
     			<tr ng-repeat="launch in vm.launches">
-    				<td>{{launch.lastUpdatedTimestamp | date}}</td>
-    				<td>{{launch.contactsNum | number}}</td>
+    				<td>{{launch.updated | date}}</td>
+    				<td>{{launch.contactsLaunched | number}}</td>
     				<td>{{vm.totalSuppressed | number}}</td>
-    				<td>{{launch.accountsNum | number}}</td>
-    				<td>{{launch.contactsNum | number}}</td>
+    				<td>{{launch.accountsLaunched | number}}</td>
+    				<td>{{launch.contactsLaunched | number}}</td>
     			</tr>
     		</tbody>
     	</table>

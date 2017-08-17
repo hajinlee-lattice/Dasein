@@ -25,8 +25,8 @@ public class PlayUnitTestNG {
     public void testDeserialization() throws JsonProcessingException {
 
         Play play = new Play();
-        play.setTimestamp(new Date(System.currentTimeMillis()));
-        play.setLastUpdatedTimestamp(new Date(System.currentTimeMillis()));
+        play.setCreated(new Date(System.currentTimeMillis()));
+        play.setUpdated(new Date(System.currentTimeMillis()));
         play.setDisplayName(DISPLAY_NAME);
         play.setDescription(DESCRIPTION);
         play.setSegmentName(SEGMENT_NAME);
