@@ -55,6 +55,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalAuthCleanupTestNG.class);
     private static final Long cleanupThreshold = TimeUnit.DAYS.toMillis(7);
+    private static final Long redshiftCleanupThreshold = TimeUnit.DAYS.toMillis(2);
     private static final String customerBase = "/user/s-analytics/customers";
 
     @Autowired
@@ -246,7 +247,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                     String tenant = RedshiftUtils.extractTenantFromTableName(table);
                     if (TestFrameworkUtils.isTestTenant(tenant)) {
                         long testTime = TestFrameworkUtils.getTestTimestamp(tenant);
-                        if (testTime > 0 && (System.currentTimeMillis() - testTime) > cleanupThreshold) {
+                        if (testTime > 0 && (System.currentTimeMillis() - testTime) > redshiftCleanupThreshold) {
                             log.info("Dropping redshift table " + table);
                             redshiftService.dropTable(table);
                         }
