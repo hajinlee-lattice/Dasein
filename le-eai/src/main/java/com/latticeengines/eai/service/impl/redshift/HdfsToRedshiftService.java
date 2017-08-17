@@ -118,7 +118,7 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         } else {
             redshiftService.loadTableFromAvroInS3(tableName, redshiftTableConfig.getS3Bucket(), s3Prefix(tableName),
                     redshiftTableConfig.getJsonPathPrefix());
-            //redshiftService.vacuumTable(tableName);
+            redshiftService.vacuumTable(tableName);
             redshiftService.analyzeTable(tableName);
         }
     }
@@ -133,7 +133,7 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         redshiftService.updateExistingRowsFromStagingTable(stagingTableName, tableName,
                 redshiftTableConfig.getDistKey()); // we would use dist key as
                                                    // join field
-        //redshiftService.vacuumTable(tableName);
+        redshiftService.vacuumTable(tableName);
         redshiftService.analyzeTable(tableName);
         redshiftService.dropTable(stagingTableName);
     }
