@@ -60,8 +60,11 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         for (Attribute attr : targetTable.getAttributes()) {
             if (srcAttrs.containsKey(attr.getName())) {
-                if (!StringUtils.equals(srcAttrs.get(attr.getName()).getSourceLogicalDataType(),
-                        attr.getSourceLogicalDataType())) {
+                if (!StringUtils.equalsIgnoreCase(srcAttrs.get(attr.getName()).getPhysicalDataType(),
+                        attr.getPhysicalDataType())) {
+                    if (needSameType) {
+                        throw new RuntimeException("Template table attribute type should not be changed!");
+                    }
                     result = false;
                     break;
                 }

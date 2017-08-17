@@ -45,6 +45,8 @@ public class SchemaRepository {
             return getAccountSchema();
         case Contact:
             return getContactSchema();
+        case Transaction:
+            return getTransactionSchema();
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", entity));
         }
@@ -64,6 +66,8 @@ public class SchemaRepository {
             return getTimeSeriesSchema();
         case Category:
             return getCategorySchema();
+        case Transaction:
+            return getTransactionSchema();
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }
@@ -1003,7 +1007,6 @@ public class SchemaRepository {
 
     private Table getTransactionSchema() {
         Table table = createTable(SchemaInterpretation.Transaction);
-        table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr("Id") //
@@ -1048,7 +1051,6 @@ public class SchemaRepository {
         table.addAttribute(attr("Quantity") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "QUANTITY" })) //
                 .type(Schema.Type.LONG) //
-                .required() //
                 .interfaceName(InterfaceName.Quantity) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
@@ -1058,7 +1060,6 @@ public class SchemaRepository {
         table.addAttribute(attr("Amount") //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "AMOUNT" })) //
                 .type(Schema.Type.LONG) //
-                .required() //
                 .interfaceName(InterfaceName.Amount) //
                 .logicalType(LogicalDataType.Metric) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
