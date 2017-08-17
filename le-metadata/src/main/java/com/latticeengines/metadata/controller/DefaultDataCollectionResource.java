@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -47,13 +48,24 @@ public class DefaultDataCollectionResource {
         return dataCollectionService.getDataCollection(customerSpace, null);
     }
 
+    @RequestMapping(value = "/version/{version}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Switch the version of default data collection")
+    public ResponseDocument<DataCollection.Version> switchVersion(@PathVariable String customerSpace,
+            @PathVariable DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        DataCollection.Version version1 = dataCollectionService.switchDataCollectionVersion(customerSpace, null,
+                version);
+        return ResponseDocument.successResponse(version1);
+    }
+
     @RequestMapping(value = "/tables", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the default data collection")
-    public Table getTable(@PathVariable String customerSpace,
-            @RequestParam(value = "role", required = true) TableRoleInCollection role) {
+    public Table getTable(@PathVariable String customerSpace, @RequestParam(value = "role") TableRoleInCollection role,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        List<Table> tables = dataCollectionService.getTables(customerSpace, null, role);
+        List<Table> tables = dataCollectionService.getTables(customerSpace, null, role, version);
         if (tables == null || tables.isEmpty()) {
             return null;
         } else {
@@ -73,17 +85,19 @@ public class DefaultDataCollectionResource {
     @RequestMapping(value = "/stats", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the main statistics of the default collection.")
-    public StatisticsContainer getMainStats(@PathVariable String customerSpace) {
+    public StatisticsContainer getMainStats(@PathVariable String customerSpace,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getStats(customerSpace, null);
+        return dataCollectionService.getStats(customerSpace, null, version);
     }
 
     @RequestMapping(value = "/attrrepo", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the attribute repository of the default collection.")
-    public AttributeRepository getAttrRepo(@PathVariable String customerSpace) {
+    public AttributeRepository getAttrRepo(@PathVariable String customerSpace,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getAttrRepo(customerSpace, null);
+        return dataCollectionService.getAttrRepo(customerSpace, null, version);
     }
 
     @RequestMapping(value = "/tables/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -91,9 +105,10 @@ public class DefaultDataCollectionResource {
     @ApiOperation(value = "Create or insert a table into the collection")
     public SimpleBooleanResponse upsertTable(@PathVariable String customerSpace, //
             @PathVariable String tableName, //
-            @RequestParam(value = "role") TableRoleInCollection role) {
+            @RequestParam(value = "role") TableRoleInCollection role,
+            @RequestParam(value = "version") DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataCollectionService.upsertTable(customerSpace, null, tableName, role);
+        dataCollectionService.upsertTable(customerSpace, null, tableName, role, version);
         return SimpleBooleanResponse.successResponse();
     }
 

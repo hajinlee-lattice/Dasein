@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
@@ -54,8 +55,10 @@ public class StatisticsContainerServiceImplTestNG extends DataCollectionFunction
         statistics.getCategories().get(Category.ACCOUNT_INFORMATION).getSubcategories()
                 .put(ColumnMetadata.SUBCATEGORY_OTHER, subcategoryStatistics);
         container.setStatistics(statistics);
+        DataCollection.Version version = dataCollectionEntityMgr.getActiveVersion();
+        container.setVersion(version);
         dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container);
-        container = dataCollectionService.getStats(customerSpace1, collectionName);
+        container = dataCollectionService.getStats(customerSpace1, collectionName, version);
         Long pid = container.getPid();
         StatisticsContainer container2 = statisticsContainerService.findByName(customerSpace1, container.getName());
         Assert.assertEquals(container2.getPid(), pid);

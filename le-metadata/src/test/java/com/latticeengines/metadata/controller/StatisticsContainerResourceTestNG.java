@@ -8,6 +8,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
@@ -35,6 +36,8 @@ public class StatisticsContainerResourceTestNG extends DataCollectionFunctionalT
         Statistics statistics = new Statistics();
         statistics.getCategories().put(Category.ACCOUNT_INFORMATION, new CategoryStatistics());
         container.setStatistics(statistics);
+        DataCollection.Version version = dataCollectionProxy.getDefaultDataCollection(customerSpace1).getVersion();
+        container.setVersion(version);
         dataCollectionProxy.upsertStats(customerSpace1, container);
         container = dataCollectionProxy.getStats(customerSpace1);
         System.out.println("stats name = " + container.getName());
@@ -46,7 +49,6 @@ public class StatisticsContainerResourceTestNG extends DataCollectionFunctionalT
         StatisticsContainer retrieved = dataCollectionProxy.getStats(customerSpace1);
         assertEquals(retrieved.getStatistics().getCategories().size(), container.getStatistics().getCategories().size());
         assertTrue(retrieved.getStatistics().getCategories().containsKey(Category.ACCOUNT_INFORMATION));
-
 
         // from stats directly
         retrieved = statisticsContainerProxy.getStatistics(customerSpace1, container.getName());

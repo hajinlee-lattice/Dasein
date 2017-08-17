@@ -5,7 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.listeners.CalculateStatsListener;
+import com.latticeengines.cdl.workflow.listeners.ProfileAndPublishListener;
+import com.latticeengines.cdl.workflow.steps.FinishProfile;
 import com.latticeengines.cdl.workflow.steps.StartProfile;
 import com.latticeengines.cdl.workflow.steps.UpdateStatsObjects;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProfileAndPublishWorkflowConfiguration;
@@ -29,10 +30,13 @@ public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublis
     private UpdateStatsObjects updateStatsObjects;
 
     @Autowired
-    private CalculateStatsListener calculateStatsListener;
+    private ProfileAndPublishListener profileAndPublishListener;
 
     @Autowired
     private RedshiftPublishWorkflow redshiftPublishWorkflow;
+
+    @Autowired
+    private FinishProfile finishProfile;
 
     @Bean
     public Job calculateStatsWorkflowJob() throws Exception {
@@ -47,7 +51,8 @@ public class ProfileAndPublishWorkflow extends AbstractWorkflow<ProfileAndPublis
                 .next(sortContactWrapper)//
                 .next(updateStatsObjects) //
                 .next(redshiftPublishWorkflow) //
-                .listener(calculateStatsListener) //
+                .next(finishProfile) //
+                .listener(profileAndPublishListener) //
                 .build();
     }
 

@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 public interface DataCollectionDao extends BaseDao<DataCollection> {
 
-    List<String> getTableNamesOfRole(String collectionName, TableRoleInCollection tableRole);
+    List<String> getTableNamesOfRole(String collectionName, TableRoleInCollection tableRole,
+            DataCollection.Version version);
 
 }

@@ -3,6 +3,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.collections.Closure;
 import org.apache.hadoop.conf.Configuration;
@@ -19,6 +20,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -191,27 +193,68 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
         final Table clone = TableUtils.clone(existing, "clone_" + UUID.randomUUID().toString().replace('-', '_'));
 
-        DatabaseUtils.retry("createTable", new Closure() {
-            @Override
-            public void execute(Object input) {
-                create(TableUtils.clone(clone, clone.getName()));
-            }
-        });
+        DatabaseUtils.retry("createTable", input -> create(TableUtils.clone(clone, clone.getName())));
 
-        if (clone.getExtracts().size() > 0) {
-            Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                    MultiTenantContext.getCustomerSpace(), existing.getNamespace());
 
-            Path sourcePath = new Path(ExtractUtils.getSingleExtractPath(yarnConfiguration, clone));
-            Path destPath = tablesPath.append(clone.getName());
-            log.info(String.format("Copying table data from %s to %s", sourcePath, destPath));
-            try {
-                HdfsUtils.copyFiles(yarnConfiguration, sourcePath.toString(), destPath.toString());
-            } catch (Exception e) {
-                throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", sourcePath.toString(),
-                        destPath.toString()), e);
+        String cloneTable = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
+                MultiTenantContext.getCustomerSpace(), existing.getNamespace()).append(clone.getName()).toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, cloneTable)) {
+                HdfsUtils.rmdir(yarnConfiguration, cloneTable);
             }
+            HdfsUtils.mkdir(yarnConfiguration, cloneTable);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create table dir at " + cloneTable);
         }
+        Extract newExtract = new Extract();
+        newExtract.setPath(cloneTable + "/*.avro");
+        newExtract.setName(NamingUtils.uuid("Extract"));
+        AtomicLong count = new AtomicLong(0);
+        if (existing.getExtracts() != null && existing.getExtracts().size() > 0) {
+            existing.getExtracts().forEach(extract -> {
+                String srcPath = extract.getPath();
+                boolean singleFile = false;
+                if (!srcPath.endsWith("*.avro")) {
+                    if (srcPath.endsWith(".avro")) {
+                        singleFile = true;
+                    } else {
+                        srcPath = srcPath.endsWith("/") ? srcPath : srcPath + "/";
+                        srcPath += "*.avro";
+                    }
+                }
+                try {
+                    if (singleFile) {
+                        log.info(String.format("Copying table data from %s to %s", srcPath, cloneTable));
+                        HdfsUtils.copyFiles(yarnConfiguration, srcPath, cloneTable);
+                    } else {
+                        log.info(String.format("Copying table data as glob from %s to %s", srcPath, cloneTable));
+                        HdfsUtils.copyGlobToDir(yarnConfiguration, srcPath, cloneTable);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", srcPath,
+                            cloneTable), e);
+                }
+
+                if (extract.getProcessedRecords() != null && extract.getProcessedRecords() > 0) {
+                    count.addAndGet(extract.getProcessedRecords());
+                }
+            });
+        }
+        newExtract.setProcessedRecords(count.get());
+
+        String oldTableSchema = PathBuilder.buildDataTableSchemaPath(CamilleEnvironment.getPodId(),
+                MultiTenantContext.getCustomerSpace(), existing.getNamespace()).append(name).toString();
+        String cloneTableSchema = oldTableSchema.replace(name, clone.getName());
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, oldTableSchema)) {
+                HdfsUtils.copyFiles(yarnConfiguration, oldTableSchema, cloneTableSchema);
+                log.info(String.format("Copying table schema from %s to %s", oldTableSchema, cloneTableSchema));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Failed to copy schema in HDFS from %s to %s", oldTableSchema,
+                    cloneTableSchema), e);
+        }
+
         return clone;
     }
 

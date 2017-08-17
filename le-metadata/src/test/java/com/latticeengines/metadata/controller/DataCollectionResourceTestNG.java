@@ -37,8 +37,9 @@ public class DataCollectionResourceTestNG extends DataCollectionFunctionalTestNG
     @Test(groups = "functional")
     public void getDefaultDataCollection() {
         DataCollection collection = dataCollectionProxy.getDefaultDataCollection(customerSpace1);
+        DataCollection.Version version = dataCollectionEntityMgr.getActiveVersion();
         Assert.assertEquals(collection.getName(), dataCollection.getName());
-        dataCollectionProxy.upsertTable(customerSpace1, TABLE1, TableRoleInCollection.ConsolidatedAccount);
+        dataCollectionProxy.upsertTable(customerSpace1, TABLE1, TableRoleInCollection.ConsolidatedAccount, version);
         Table table = dataCollectionProxy.getTable(customerSpace1, TableRoleInCollection.ConsolidatedAccount);
         Assert.assertNotNull(table);
     }

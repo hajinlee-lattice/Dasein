@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.metadata.dao.StatisticsContainerDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
@@ -64,15 +64,15 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public StatisticsContainer findInSegment(String segmentName) {
-        return statisticsContainerDao.findInSegment(segmentName);
+    public StatisticsContainer findInSegment(String segmentName, DataCollection.Version version) {
+        return statisticsContainerDao.findInSegment(segmentName, version);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public StatisticsContainer findInMasterSegment(String collectionName) {
+    public StatisticsContainer findInMasterSegment(String collectionName, DataCollection.Version version) {
         collectionName = StringUtils.isBlank(collectionName)
                 ? dataCollectionEntityMgr.getOrCreateDefaultCollection().getName() : collectionName;
-        return statisticsContainerDao.findInMasterSegment(collectionName);
+        return statisticsContainerDao.findInMasterSegment(collectionName, version);
     }
 }

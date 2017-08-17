@@ -10,6 +10,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -37,9 +38,8 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         int numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         int numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
         verifyReport(profileAppId, 2, numAccounts, numContacts);
-
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
-        Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
+        verifyDataFeedStatsu(DataFeed.Status.Active);
+        verifyActiveVersion(DataCollection.Version.Green);
 
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
         Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);

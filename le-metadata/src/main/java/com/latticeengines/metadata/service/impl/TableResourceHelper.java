@@ -96,7 +96,7 @@ public class TableResourceHelper {
 
     public Table cloneTable(String customerSpace, //
             String tableName) {
-        log.info(String.format("cloneTable(%s(", tableName));
+        log.info(String.format("cloneTable(%s)", tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         return mdService.cloneTable(space, tableName);
     }

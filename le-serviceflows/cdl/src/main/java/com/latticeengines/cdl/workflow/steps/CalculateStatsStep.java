@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -82,13 +83,13 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        Table masterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
-        if (masterTable == null) {
+        Table activeMasterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
+        if (activeMasterTable == null) {
             throw new IllegalStateException("Cannot find the master table in default collection");
         }
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
-                masterTable.getName()));
-        PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), masterTable);
+                activeMasterTable.getName()));
+        PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), activeMasterTable);
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 
@@ -266,8 +267,9 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         if (profileTable == null) {
             throw new RuntimeException("Failed to find profile table in customer " + customerSpace);
         }
-        dataCollectionProxy.upsertTable(customerSpace, profileTableName, TableRoleInCollection.Profile);
-        profileTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile);
+        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
+        dataCollectionProxy.upsertTable(customerSpace, profileTableName, TableRoleInCollection.Profile, inactiveVersion);
+        profileTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.Profile, inactiveVersion);
         if (profileTable == null) {
             throw new IllegalStateException("Cannot find the upserted profile table in data collection.");
         }

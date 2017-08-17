@@ -6,6 +6,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -37,7 +38,8 @@ public class DataFeedResourceTestNG extends DataCollectionFunctionalTestNGBase {
     public void setup() {
         super.setup();
         TABLE_1.setName(TABLE1);
-        dataCollectionProxy.upsertTable(customerSpace1, TABLE1, TableRoleInCollection.ConsolidatedAccount);
+        DataCollection.Version version = dataCollectionEntityMgr.getActiveVersion();
+        dataCollectionProxy.upsertTable(customerSpace1, TABLE1, TableRoleInCollection.ConsolidatedAccount, version);
         dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace1);
         datafeed = dataFeedProxy.getDataFeed(customerSpace1);
         DATAFEED_NAME = datafeed.getName();

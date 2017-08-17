@@ -3,6 +3,7 @@ package com.latticeengines.metadata.service.impl;
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CustomerMetadata;
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.CustomerStats;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +50,25 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    public DataCollection.Version switchDataCollectionVersion(String customerSpace, String collectionName,
+            DataCollection.Version version) {
+        DataCollection collection = getDataCollection(customerSpace, collectionName);
+        collection.setVersion(version);
+        log.info("Switching " + collectionName + " in " + customerSpace + " to " + version);
+        dataCollectionEntityMgr.update(collection);
+        DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
+        notifyCacheWatchers(customerSpace);
+        return newVersion;
+    }
+
+    @Override
     public DataCollection getOrCreateDefaultCollection(String customerSpace) {
         return dataCollectionEntityMgr.getOrCreateDefaultCollection();
     }
 
     @Override
-    public void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role) {
+    public void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection role,
+            DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
@@ -66,7 +80,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                     "Cannot find table named " + tableName + " for customer " + customerSpace);
         }
 
-        List<Table> existingTables = dataCollectionEntityMgr.getTablesOfRole(collectionName, role);
+        if (version == null) {
+            throw new IllegalArgumentException("Must specify data collection version.");
+        }
+
+        List<Table> existingTables = dataCollectionEntityMgr.getTablesOfRole(collectionName, role, version);
         for (Table existingTable : existingTables) {
             log.info("There are already table(s) of role " + role + " in data collection " + collectionName
                     + ". Remove it from collection and delete it.");
@@ -77,10 +95,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             }
         }
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
-        dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role);
-        if (TableRoleInCollection.BucketedAccount.equals(role) || TableRoleInCollection.SortedContact.equals(role)) {
-            NodeWatcher.updateWatchedData(CustomerMetadata.name(), String.format("%s|%s", customerSpace, role.name()));
-        }
+        dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role, version);
     }
 
     @Override
@@ -90,7 +105,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             collectionName = collection.getName();
         }
 
-        List<Table> existingTables = dataCollectionEntityMgr.getTablesOfRole(collectionName, role);
+        List<Table> existingTables = dataCollectionEntityMgr.getTablesOfRole(collectionName, role, null);
         for (Table existingTable : existingTables) {
             log.info("There are already table(s) of role " + role + " in data collection " + collectionName
                     + ". Remove it from collection and delete it.");
@@ -111,35 +126,38 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                     "Cannot find data collection named " + collectionName + " for customer " + customerSpace);
         }
         dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, container);
-        NodeWatcher.updateWatchedData(CustomerStats.name(), customerSpace);
     }
 
     @Override
-    public StatisticsContainer getStats(String customerSpace, String collectionName) {
+    public StatisticsContainer getStats(String customerSpace, String collectionName, DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
-        return statisticsContainerEntityMgr.findInMasterSegment(collectionName);
+        return statisticsContainerEntityMgr.findInMasterSegment(collectionName, version);
     }
 
     @Override
-    public List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole) {
+    public List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
+        }
+        if (version == null) {
+            // by default get active version
+            version = dataCollectionEntityMgr.getActiveVersion();
         }
         log.info("Getting all tables of role " + tableRole + " in collection " + collectionName);
-        return dataCollectionEntityMgr.getTablesOfRole(collectionName, tableRole);
+        return dataCollectionEntityMgr.getTablesOfRole(collectionName, tableRole, version);
     }
 
-    public AttributeRepository getAttrRepo(String customerSpace, String collectionName) {
+    public AttributeRepository getAttrRepo(String customerSpace, String collectionName, DataCollection.Version version) {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
         }
         final String notNullCollectioName = collectionName;
-        StatisticsContainer statisticsContainer = getStats(customerSpace, notNullCollectioName);
+        StatisticsContainer statisticsContainer = getStats(customerSpace, notNullCollectioName, version);
         if (statisticsContainer == null) {
             return null;
         }
@@ -150,13 +168,27 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<TableRoleInCollection> roles = AttributeRepository.extractServingRoles(statistics);
         Map<TableRoleInCollection, Table> tableMap = new HashMap<>();
         roles.forEach(role -> {
-            List<Table> tables = getTables(customerSpace, notNullCollectioName, role);
+            List<Table> tables = getTables(customerSpace, notNullCollectioName, role, version);
             if (tables != null && !tables.isEmpty()) {
                 tableMap.put(role, tables.get(0));
             }
         });
         return AttributeRepository.constructRepo(statistics, tableMap, CustomerSpace.parse(customerSpace),
                 notNullCollectioName);
+    }
+
+    private void notifyCacheWatchers(String customerSpace) {
+        new Thread(() -> {
+            NodeWatcher.updateWatchedData(CustomerStats.name(), customerSpace);
+            for (TableRoleInCollection role: Arrays.asList(TableRoleInCollection.BucketedAccount, TableRoleInCollection.SortedContact)) {
+                NodeWatcher.updateWatchedData(CustomerMetadata.name(), String.format("%s|%s", customerSpace, role.name()));
+                try {
+                    Thread.sleep(5000L);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        }).run();
     }
 
 }

@@ -6,6 +6,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,12 +19,12 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -79,6 +81,11 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
+
+    @JsonProperty("version")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "VERSION", nullable = false)
+    private DataCollection.Version version;
 
     public byte[] getData() {
         return data;
@@ -171,5 +178,13 @@ public class StatisticsContainer implements HasPid, HasName, HasTenantId, HasTen
 
     public void setSegment(MetadataSegment segment) {
         this.segment = segment;
+    }
+
+    public DataCollection.Version getVersion() {
+        return version;
+    }
+
+    public void setVersion(DataCollection.Version version) {
+        this.version = version;
     }
 }

@@ -2,11 +2,13 @@ package com.latticeengines.metadata.controller;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -62,17 +64,17 @@ public class SegmentResource {
     @RequestMapping(value = "/{segmentName}/stats", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get segment by name")
-    public StatisticsContainer getSegmentStats(@PathVariable String customerSpace, @PathVariable String segmentName) {
+    public StatisticsContainer getSegmentStats(@PathVariable String customerSpace, @PathVariable String segmentName,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return segmentService.getStats(customerSpace, segmentName);
+        return segmentService.getStats(customerSpace, segmentName, version);
     }
 
     @RequestMapping(value = "/{segmentName}/stats", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Upsert stats to a segment")
     public SimpleBooleanResponse upsertStatsToSegment(@PathVariable String customerSpace,
-                                                      @PathVariable String segmentName,
-                                                      @RequestBody StatisticsContainer statisticsContainer) {
+            @PathVariable String segmentName, @RequestBody StatisticsContainer statisticsContainer) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         segmentService.upsertStats(customerSpace, segmentName, statisticsContainer);
         return SimpleBooleanResponse.successResponse();

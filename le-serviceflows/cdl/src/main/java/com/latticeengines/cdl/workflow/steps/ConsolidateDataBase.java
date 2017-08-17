@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
@@ -64,7 +65,8 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
     protected void onPostTransformationCompleted() {
         Table newMasterTable = metadataProxy.getTable(customerSpace.toString(),
                 TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion));
-        dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), batchStore);
+        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
+        dataCollectionProxy.upsertTable(customerSpace.toString(), newMasterTable.getName(), batchStore, activeVersion);
         if (isBucketing()) {
             Table redshiftTable = metadataProxy.getTable(customerSpace.toString(),
                     TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion));

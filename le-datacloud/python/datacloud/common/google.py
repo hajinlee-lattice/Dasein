@@ -90,18 +90,17 @@ if __name__ == '__main__':
     data = read_sheet('Existing Attributes')
     whitelist = {}
     sources = set()
+    columnset = set()
     for row in data:
         if row['Add To New Account Master'] == 'Y':
             print "%s: %s -> %s" % (row['Source'], row['SourceColumnName'], row['ExternalColumnID'])
             sources.add(row['Source'])
             if '{{ ' not in  row['ExternalColumnID']:
+                columnset.add(row['SourceColumnName'])
+                columnset.add(row['ExternalColumnID'])
                 whitelist[row['SourceColumnName']] = row['ExternalColumnID']
 
-    columnset = set()
-    columnset |= set(whitelist.keys())
-    columnset |= set(whitelist.values())
     with open('whitelist.csv', 'w') as file:
-        file.write("AMColumn\n")
         for col in sorted(list(columnset)):
             if len(col) > 0:
                 file.write(col + "\n")

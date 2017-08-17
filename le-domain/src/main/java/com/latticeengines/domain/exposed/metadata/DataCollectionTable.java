@@ -18,6 +18,7 @@ import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -55,6 +56,11 @@ public class DataCollectionTable implements HasPid, HasTenant, HasTenantId {
     @Column(name = "ROLE", nullable = false)
     @Enumerated(EnumType.STRING)
     private TableRoleInCollection role;
+
+    @JsonProperty("version")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "VERSION", nullable = false)
+    private DataCollection.Version version;
 
     @Override
     public Long getPid() {
@@ -111,5 +117,13 @@ public class DataCollectionTable implements HasPid, HasTenant, HasTenantId {
 
     public void setRole(TableRoleInCollection role) {
         this.role = role;
+    }
+
+    public DataCollection.Version getVersion() {
+        return version;
+    }
+
+    public void setVersion(DataCollection.Version version) {
+        this.version = version;
     }
 }

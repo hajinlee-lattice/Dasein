@@ -2,6 +2,7 @@ package com.latticeengines.metadata.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 
@@ -19,7 +20,7 @@ public interface SegmentService {
 
     MetadataSegment findMaster(String customerSpace, String collectionName);
 
-    StatisticsContainer getStats(String customerSpace, String segmentName);
+    StatisticsContainer getStats(String customerSpace, String segmentName, DataCollection.Version version);
 
     void upsertStats(String customerSpace, String segmentName, StatisticsContainer statisticsContainer);
 

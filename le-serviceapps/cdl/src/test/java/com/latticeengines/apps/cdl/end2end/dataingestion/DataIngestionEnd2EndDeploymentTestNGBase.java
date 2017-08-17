@@ -52,12 +52,14 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.pls.EntityExternalType;
@@ -481,6 +483,16 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).intValue(), exportedAccounts);
             assertEquals(map.get(TableRoleInCollection.SortedContact.name()).intValue(), exportedContacts);
         }
+    }
+
+    protected void verifyDataFeedStatsu(DataFeed.Status expected) {
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
+        Assert.assertNotNull(dataFeed);
+        Assert.assertEquals(dataFeed.getStatus(), expected);
+    }
+
+    protected void verifyActiveVersion(DataCollection.Version expected) {
+        Assert.assertEquals(dataCollectionProxy.getActiveVersion(mainTestTenant.getId()), expected);
     }
 
 }

@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -134,6 +135,7 @@ public class CheckpointService {
         unzipCheckpoint(checkpoint);
 
         dataFeedProxy.getDataFeed(mainTestTenant.getId());
+        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
 
         List<TableRoleInCollection> tables = Arrays.asList( //
                 TableRoleInCollection.ConsolidatedAccount, //
@@ -144,10 +146,11 @@ public class CheckpointService {
         for (TableRoleInCollection role : tables) {
             Table table = parseCheckpointTable(checkpoint, role.name());
             metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
-            dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role);
+            dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, activeVersion);
         }
 
         StatisticsContainer statisticsContainer = parseCheckpointStatistics(checkpoint);
+        statisticsContainer.setVersion(activeVersion);
         dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
 
         uploadCheckpointHdfs(checkpoint);

@@ -13,13 +13,18 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
 
     DataCollection getDefaultCollectionReadOnly();
 
+    DataCollection.Version getActiveVersion();
+
+    DataCollection.Version getInactiveVersion();
+
     DataCollection getDataCollection(String name);
 
     void removeDataCollection(String name);
 
-    List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole);
+    List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version);
 
-    void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role);
+    void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,
+            DataCollection.Version version);
 
     void removeTableFromCollection(String collectionName, String tableName);
 

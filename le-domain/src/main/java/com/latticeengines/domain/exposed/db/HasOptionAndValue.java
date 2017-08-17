@@ -5,12 +5,10 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.latticeengines.domain.exposed.metadata.DataCollectionProperty;
-import com.latticeengines.domain.exposed.metadata.MetadataSegmentProperty;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ @Type(value = ProspectDiscoveryOption.class, name = "prospectDiscoveryOption"),
-        @Type(value = MetadataSegmentProperty.class, name = "metadataSegmentProperty"),
         @Type(value = DataCollectionProperty.class, name = "dataCollectionProperty"), })
 public interface HasOptionAndValue {
     String getOption();

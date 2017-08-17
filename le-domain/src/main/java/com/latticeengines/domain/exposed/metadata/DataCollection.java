@@ -74,15 +74,15 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
     @JsonIgnore
     private List<MetadataSegment> segments = new ArrayList<>();
 
-    @JsonProperty("type")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "TYPE", nullable = false)
-    private DataCollectionType type;
-
     @OneToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY, mappedBy = "dataCollection")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private List<DataCollectionTable> collectionTables = new ArrayList<>();
+
+    @JsonProperty("version")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "VERSION", nullable = false)
+    private Version version;
 
     @Override
     public Long getPid() {
@@ -127,12 +127,12 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         this.tenant = tenant;
     }
 
-    public DataCollectionType getType() {
-        return type;
+    public Version getVersion() {
+        return version;
     }
 
-    public void setType(DataCollectionType type) {
-        this.type = type;
+    public void setVersion(Version version) {
+        this.version = version;
     }
 
     @Override
@@ -162,5 +162,20 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         this.segments = segments;
     }
     // =====
+
+    public enum Version {
+        Blue, Green;
+
+        public Version complement() {
+            switch (this) {
+                case Blue:
+                    return Green;
+                case Green:
+                default:
+                    return Blue;
+            }
+        }
+
+    }
 
 }

@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -25,6 +26,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         importData();
+        verifyCannotProfile();
         consolidate();
         verifyConsolidate();
         profile();
@@ -43,22 +45,32 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
+    private void verifyCannotProfile() {
+        try {
+            profile();
+        } catch (Exception e) {
+            log.info("Caught an exception as expected: " + e.getMessage());
+            return;
+        }
+        Assert.fail("Should have thrown an exception.");
+    }
+
     private void verifyConsolidate() {
         verifyReport(consolidateAppId, 0, 0, 0);
-
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
-        Assert.assertEquals(DataFeed.Status.InitialConsolidated, dataFeed.getStatus());
+        verifyDataFeedStatsu(DataFeed.Status.InitialConsolidated);
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
         Assert.assertEquals(numAccounts, ACCOUNT_IMPORT_SIZE_1);
         long numContacts = countTableRole(BusinessEntity.Contact.getBatchStore());
         Assert.assertEquals(numContacts, CONTACT_IMPORT_SIZE_1);
+
+        verifyActiveVersion(DataCollection.Version.Blue);
     }
 
     private void verifyProfile() throws IOException {
         verifyReport(profileAppId, 2, ACCOUNT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_1);
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
-        Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
+        verifyDataFeedStatsu(DataFeed.Status.Active);
+        verifyActiveVersion(DataCollection.Version.Green);
 
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         Table bucketedAccountTable = dataCollectionProxy.getTable(customerSpace,

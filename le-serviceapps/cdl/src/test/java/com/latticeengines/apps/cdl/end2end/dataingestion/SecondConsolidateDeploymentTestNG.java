@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -46,17 +47,17 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
     private void verifyConsolidate() {
         verifyReport(consolidateAppId, 2, ACCOUNT_IMPORT_SIZE_2, ACCOUNT_IMPORT_SIZE_2);
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
-        Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
+        verifyDataFeedStatsu(DataFeed.Status.Active);
+        verifyActiveVersion(DataCollection.Version.Blue);
+
+        StatisticsContainer postConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());
+        Assert.assertEquals(preConsolidateStats.getName(), postConsolidateStats.getName());
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
         Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-
-        StatisticsContainer postConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());
-        Assert.assertEquals(preConsolidateStats.getName(), postConsolidateStats.getName());
     }
 
 }

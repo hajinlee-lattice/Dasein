@@ -17,6 +17,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -52,7 +53,8 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
         if (masterTable == null) {
             throw new NullPointerException("Master table for stats object calculation is not found.");
         }
-        Table profileTable = dataCollectionProxy.getTable(customerSpaceStr, TableRoleInCollection.Profile);
+        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpaceStr);
+        Table profileTable = dataCollectionProxy.getTable(customerSpaceStr, TableRoleInCollection.Profile, inactiveVersion);
         if (profileTable == null) {
             throw new NullPointerException("Profile table for stats object calculation is not found.");
         }
@@ -71,6 +73,7 @@ public class UpdateStatsObjects extends BaseWorkflowStep<UpdateStatsObjectsConfi
             });
         }
         StatisticsContainer statsContainer = constructStatsContainer(entityTableMap, statsTableMap);
+        statsContainer.setVersion(inactiveVersion);
         dataCollectionProxy.upsertStats(customerSpaceStr, statsContainer);
     }
 

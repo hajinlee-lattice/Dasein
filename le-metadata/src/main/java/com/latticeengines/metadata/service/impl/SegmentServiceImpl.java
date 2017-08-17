@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
@@ -70,8 +71,12 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public StatisticsContainer getStats(String customerSpace, String segmentName) {
-        return statisticsContainerEntityMgr.findInSegment(segmentName);
+    public StatisticsContainer getStats(String customerSpace, String segmentName, DataCollection.Version version) {
+        if (version == null) {
+            // by default get from active version
+            version = dataCollectionEntityMgr.getActiveVersion();
+        }
+        return statisticsContainerEntityMgr.findInSegment(segmentName, version);
     }
 
     @Override

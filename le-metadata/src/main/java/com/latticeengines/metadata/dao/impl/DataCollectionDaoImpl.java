@@ -21,7 +21,8 @@ public class DataCollectionDaoImpl extends BaseDaoImpl<DataCollection> implement
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<String> getTableNamesOfRole(String collectionName, TableRoleInCollection tableRole) {
+    public List<String> getTableNamesOfRole(String collectionName, TableRoleInCollection tableRole,
+            DataCollection.Version version) {
         Session session = getSessionFactory().getCurrentSession();
         String queryPattern = "select tbl.name from %s as dc";
         queryPattern += " join dc.collectionTables as cTbl";
@@ -30,11 +31,17 @@ public class DataCollectionDaoImpl extends BaseDaoImpl<DataCollection> implement
         if (tableRole != null) {
             queryPattern += " and cTbl.role = :tableRole";
         }
+        if (version != null) {
+            queryPattern += " and cTbl.version = :version";
+        }
         String queryStr = String.format(queryPattern, getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setParameter("collectionName", collectionName);
         if (tableRole != null) {
             query.setParameter("tableRole", tableRole);
+        }
+        if (version != null) {
+            query.setParameter("version", version);
         }
         return query.list();
     }

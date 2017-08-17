@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -18,6 +17,7 @@ import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDat
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -44,19 +43,17 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
-    @Autowired
-    private RedshiftService redshiftService;
-
     private Map<BusinessEntity, Table> entityTableMap;
 
     private String customerSpace;
-
     private boolean createNew;
+    private DataCollection.Version inactiveVersion;
 
     @Override
     public void execute() {
         log.info("Inside ExportData execute()");
         customerSpace = configuration.getCustomerSpace().toString();
+        inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
         entityTableMap = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT, BusinessEntity.class, Table.class);
         createNew = configuration.getHdfsToRedshiftConfiguration().isCreateNew();
         if (entityTableMap == null) {
@@ -67,6 +64,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             String targetName = renameTable(entry);
             log.info("Uploading to redshift table " + targetName + ", createNew=" + createNew);
             exportData(entry.getValue(), targetName, entry.getKey().getServingStore());
+            entityTableMap.put(entry.getKey(), entry.getValue());
         }
     }
 
@@ -77,13 +75,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                 BusinessEntity entity = entry.getKey();
                 Table sourceTable = entry.getValue();
                 log.info("Upsert " + entity.getServingStore() + " table " + sourceTable.getName());
-                Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore());
-                dataCollectionProxy.upsertTable(customerSpace, sourceTable.getName(), entity.getServingStore());
-                if (oldTable != null) {
-                    // TODO: need to change after we have version
-                    log.info("Removing old batch store from redshift " + oldTable.getName());
-                    redshiftService.dropTable(AvroUtils.getAvroFriendlyString(oldTable.getName()));
-                }
+                dataCollectionProxy.upsertTable(customerSpace, sourceTable.getName(), entity.getServingStore(), inactiveVersion);
             }
         }
     }
@@ -108,9 +100,9 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             log.info("Generated a new target table name: " + goodName);
         }
         if (!createNew) { // upserting
-            Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore());
+            Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore(), inactiveVersion);
             if (oldTable == null) {
-                log.warn("Table for " + entity.getServingStore() + " does not exists. Switch to not append.");
+                log.warn("Table for " + entity.getServingStore() + " at version " + inactiveVersion  + " does not exists. Switch to not append.");
                 createNew = true; // it is essentially creating new
             } else {
                 goodName = oldTable.getName();

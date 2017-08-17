@@ -12,17 +12,22 @@ public interface DataCollectionService {
 
     DataCollection getDataCollection(String customerSpace, String collectionName);
 
+    DataCollection.Version switchDataCollectionVersion(String customerSpace, String collectionName,
+            DataCollection.Version version);
+
     DataCollection getOrCreateDefaultCollection(String customerSpace);
 
     void addStats(String customerSpace, String collectionName, StatisticsContainer container);
 
-    void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection tableRole);
+    void upsertTable(String customerSpace, String collectionName, String tableName, TableRoleInCollection tableRole,
+            DataCollection.Version version);
 
-    List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole);
+    List<Table> getTables(String customerSpace, String collectionName, TableRoleInCollection tableRole,
+            DataCollection.Version version);
 
-    StatisticsContainer getStats(String customerSpace, String collectionName);
+    StatisticsContainer getStats(String customerSpace, String collectionName, DataCollection.Version version);
 
-    AttributeRepository getAttrRepo(String customerSpace, String collectionName);
+    AttributeRepository getAttrRepo(String customerSpace, String collectionName, DataCollection.Version version);
 
     void resetTable(String customerSpace, String collectionName, TableRoleInCollection tableRole);
 }

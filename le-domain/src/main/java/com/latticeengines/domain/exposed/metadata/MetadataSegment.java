@@ -1,8 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -14,17 +12,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -47,8 +44,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentProperty> //
-        implements HasName, HasPid, HasAuditingFields, HasTenantId, HasProperties<MetadataSegmentProperty> {
+public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -96,11 +92,6 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
     @JsonProperty("is_master_segment")
     @Column(name = "IS_MASTER_SEGMENT", nullable = false)
     private Boolean isMasterSegment = false;
-
-    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "owner", fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("segment_properties")
-    private List<MetadataSegmentProperty> properties = new ArrayList<>();
 
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
@@ -189,32 +180,6 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
     }
 
     @Override
-    public List<MetadataSegmentProperty> getProperties() {
-        return properties;
-    }
-
-    @Override
-    protected void setProperties(List<MetadataSegmentProperty> properties) {
-        this.properties = properties;
-    }
-
-    @Transient
-    @JsonIgnore
-    public MetadataSegmentPropertyBag getSegmentPropertyBag() {
-        return new MetadataSegmentPropertyBag(properties);
-    }
-
-    @Transient
-    @JsonIgnore
-    public void setSegmentPropertyBag(MetadataSegmentPropertyBag properties) {
-        this.properties = properties.getBag();
-    }
-
-    public void addSegmentProperty(MetadataSegmentProperty metadataSegmentProperty) {
-        this.putProperty(metadataSegmentProperty.getOption(), metadataSegmentProperty.getValue());
-    }
-
-    @Override
     @JsonIgnore
     public Long getTenantId() {
         return tenantId;
@@ -239,12 +204,6 @@ public class MetadataSegment extends BaseMetadataPropertyOwner<MetadataSegmentPr
 
     public void setMasterSegment(Boolean masterSegment) {
         isMasterSegment = masterSegment;
-    }
-
-    @Override
-    @JsonIgnore
-    protected Class<MetadataSegmentProperty> getPropertyClz() {
-        return MetadataSegmentProperty.class;
     }
 
 }

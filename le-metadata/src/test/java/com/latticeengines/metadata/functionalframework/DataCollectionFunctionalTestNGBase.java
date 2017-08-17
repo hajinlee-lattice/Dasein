@@ -31,14 +31,16 @@ public class DataCollectionFunctionalTestNGBase extends MetadataFunctionalTestNG
     }
 
     protected void addTableToCollection(Table table, TableRoleInCollection role) {
+        DataCollection.Version version = dataCollectionEntityMgr.getActiveVersion();
         if (tableEntityMgr.findByName(table.getName()) == null) {
             tableEntityMgr.create(table);
         }
-        dataCollectionEntityMgr.upsertTableToCollection(collectionName, table.getName(), role);
+        dataCollectionEntityMgr.upsertTableToCollection(collectionName, table.getName(), role, version);
     }
 
     protected List<Table> getTablesInCollection() {
-        return dataCollectionEntityMgr.getTablesOfRole(collectionName, null);
+        DataCollection.Version version = dataCollectionEntityMgr.getActiveVersion();
+        return dataCollectionEntityMgr.getTablesOfRole(collectionName, null, version);
     }
 
 }

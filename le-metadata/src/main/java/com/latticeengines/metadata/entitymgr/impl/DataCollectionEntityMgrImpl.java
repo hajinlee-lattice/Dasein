@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
+import static com.latticeengines.domain.exposed.metadata.DataCollection.Version.Blue;
+
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -19,7 +21,6 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -91,7 +92,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     public void removeDataCollection(String name) {
         DataCollection dataCollection = getDataCollection(name);
 
-        List<Table> tablesInCollection = getTablesOfRole(name, null);
+        List<Table> tablesInCollection = getTablesOfRole(name, null, null);
         tablesInCollection.forEach(t -> removeTableFromCollection(name, t.getName()));
 
         dataCollectionDao.delete(dataCollection);
@@ -99,8 +100,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     @Override
-    public List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole) {
-        List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole);
+    public List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
+        List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
         if (tableNames == null) {
             return Collections.emptyList();
         }
@@ -110,7 +111,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role) {
+    public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role, DataCollection.Version version) {
         Table table = tableEntityMgr.findByName(tableName);
         if (table != null) {
             DataCollection collection = getDataCollection(collectionName);
@@ -124,6 +125,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
             dataCollectionTable.setDataCollection(collection);
             dataCollectionTable.setTable(table);
             dataCollectionTable.setRole(role);
+            dataCollectionTable.setVersion(version);
             dataCollectionTableDao.create(dataCollectionTable);
         }
     }
@@ -182,6 +184,20 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
                 + "Cannot determine which one is the default.");
     }
 
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public DataCollection.Version getActiveVersion() {
+        return getDefaultCollectionReadOnly().getVersion();
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    public DataCollection.Version getInactiveVersion() {
+        DataCollection.Version activeVersion = getActiveVersion();
+        return activeVersion.complement();
+    }
+
     private DataCollection createDefaultCollection() {
         DataCollection dataCollection = new DataCollection();
         return createDataCollection(dataCollection);
@@ -194,8 +210,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         if (getDataCollection(dataCollection.getName()) != null) {
             throw new IllegalStateException("Data collection " + dataCollection.getName() + " already exist.");
         }
-        if (dataCollection.getType() == null) {
-            dataCollection.setType(DataCollectionType.Segmentation);
+        if (dataCollection.getVersion() == null) {
+            dataCollection.setVersion(Blue);
         }
         dataCollection.setTenant(MultiTenantContext.getTenant());
         dataCollectionDao.create(dataCollection);

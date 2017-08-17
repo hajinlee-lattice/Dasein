@@ -59,6 +59,7 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends MetadataFunctio
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("dev/stats.json");
         ObjectMapper om = new ObjectMapper();
         StatisticsContainer container = om.readValue(is, StatisticsContainer.class);
+        container.setVersion(collection.getVersion());
         dataCollectionService.addStats(customerSpace, collection.getName(), container);
     }
 
@@ -73,7 +74,8 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends MetadataFunctio
         } else {
             mdService.updateTable(CustomerSpace.parse(LOCALTEST_TENANT), bucketedTable);
         }
-        dataCollectionService.upsertTable(customerSpace, "", tableName, TableRoleInCollection.BucketedAccount);
+        DataCollection.Version version = dataCollectionService.getDataCollection(customerSpace, "").getVersion();
+        dataCollectionService.upsertTable(customerSpace, "", tableName, TableRoleInCollection.BucketedAccount, version);
     }
 
 }

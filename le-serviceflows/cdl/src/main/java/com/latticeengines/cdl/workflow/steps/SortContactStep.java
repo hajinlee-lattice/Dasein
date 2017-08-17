@@ -52,13 +52,13 @@ public class SortContactStep extends BaseTransformWrapperStep<SortContactStepCon
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        Table masterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedContact);
-        if (masterTable == null) {
+        Table activeMasterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedContact);
+        if (activeMasterTable == null) {
             throw new IllegalStateException("Cannot find the master table in default collection");
         }
         log.info(String.format("masterTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
-                masterTable.getName()));
-        PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), masterTable);
+                activeMasterTable.getName()));
+        PipelineTransformationRequest request = generateRequest(configuration.getCustomerSpace(), activeMasterTable);
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 

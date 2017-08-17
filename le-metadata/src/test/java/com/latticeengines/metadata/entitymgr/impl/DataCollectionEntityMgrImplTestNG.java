@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -43,6 +42,7 @@ public class DataCollectionEntityMgrImplTestNG extends DataCollectionFunctionalT
 
     private static final String tableName1 = "Table1";
     private static final String tableName2 = "Table2";
+    private static final String tableName3 = "Table3";
 
     @Override
     @BeforeClass(groups = "functional")
@@ -71,42 +71,66 @@ public class DataCollectionEntityMgrImplTestNG extends DataCollectionFunctionalT
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void findTableByRole() {
+        DataCollection.Version version = dataCollectionEntityMgr.getActiveVersion();
         Table table1 = new Table();
         table1.setName(tableName1);
         table1.setDisplayName(tableName1);
         table1.setTableType(TableType.DATATABLE);
         tableEntityMgr.create(table1);
-        dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName1, TableRoleInCollection.ConsolidatedAccount);
+        dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName1, TableRoleInCollection.ConsolidatedAccount, version);
 
         Table table2 = new Table();
         table2.setName(tableName2);
         table2.setDisplayName(tableName2);
         table2.setTableType(TableType.DATATABLE);
         tableEntityMgr.create(table2);
-        dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName2, TableRoleInCollection.Profile);
+        dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName2, TableRoleInCollection.Profile, version);
 
-        List<Table> tables = dataCollectionEntityMgr.getTablesOfRole(collectionName, TableRoleInCollection.ConsolidatedAccount);
+        List<Table> tables = dataCollectionEntityMgr.getTablesOfRole(collectionName, TableRoleInCollection.ConsolidatedAccount, version);
         Assert.assertNotNull(tables);
         Assert.assertEquals(tables.size(), 1);
         Assert.assertEquals(tables.get(0).getName(), tableName1);
 
-        tables = dataCollectionEntityMgr.getTablesOfRole(collectionName, TableRoleInCollection.Profile);
+        tables = dataCollectionEntityMgr.getTablesOfRole(collectionName, TableRoleInCollection.Profile, version);
         Assert.assertNotNull(tables);
         Assert.assertEquals(tables.size(), 1);
         Assert.assertEquals(tables.get(0).getName(), tableName2);
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
+    public void inactiveVersion() {
+        DataCollection.Version inactiveVersion = dataCollectionEntityMgr.getInactiveVersion();
+        Table table3 = new Table();
+        table3.setName(tableName3);
+        table3.setDisplayName(tableName3);
+        table3.setTableType(TableType.DATATABLE);
+        tableEntityMgr.create(table3);
+        dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName3, TableRoleInCollection.ConsolidatedContact, inactiveVersion);
+
+        DataCollection.Version version = dataCollectionEntityMgr.getActiveVersion();
+        List<Table> tables = dataCollectionEntityMgr.getTablesOfRole(collectionName, TableRoleInCollection.ConsolidatedContact, version);
+        Assert.assertNotNull(tables);
+        Assert.assertTrue(tables.isEmpty());
+
+        tables = dataCollectionEntityMgr.getTablesOfRole(collectionName, TableRoleInCollection.ConsolidatedContact, inactiveVersion);
+        Assert.assertNotNull(tables);
+        Assert.assertEquals(tables.size(), 1);
+        Assert.assertEquals(tables.get(0).getName(), tableName3);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "create")
     public void checkMasterSegment() {
+        DataCollection.Version version = dataCollectionEntityMgr.getActiveVersion();
         MetadataSegment masterSegment = segmentService.findMaster(customerSpace1, collectionName);
         Assert.assertNotNull(masterSegment);
 
         Statistics statistics = new Statistics();
         StatisticsContainer statisticsContainer = new StatisticsContainer();
         statisticsContainer.setStatistics(statistics);
+        statisticsContainer.setVersion(version);
         dataCollectionEntityMgr.upsertStatsForMasterSegment(collectionName, statisticsContainer);
 
-        StatisticsContainer retrieved = statisticsContainerEntityMgr.findInMasterSegment(collectionName);
+        StatisticsContainer retrieved = statisticsContainerEntityMgr.findInMasterSegment(collectionName, version);
         Assert.assertNotNull(retrieved);
     }
 
@@ -114,7 +138,6 @@ public class DataCollectionEntityMgrImplTestNG extends DataCollectionFunctionalT
     public void retrieve() {
         DataCollection retrieved = dataCollectionEntityMgr.getDataCollection(collectionName);
         assertEquals(retrieved.getName(), collectionName);
-        assertEquals(retrieved.getType(), DataCollectionType.Segmentation);
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")

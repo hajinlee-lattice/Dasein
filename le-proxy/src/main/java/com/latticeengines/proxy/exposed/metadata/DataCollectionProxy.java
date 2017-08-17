@@ -2,6 +2,8 @@ package com.latticeengines.proxy.exposed.metadata;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -35,6 +38,12 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("get default dataCollection", url, DataCollection.class);
     }
 
+    public void switchVersion(String customerSpace, DataCollection.Version version) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/version/{version}",
+                shortenCustomerSpace(customerSpace), version);
+        put("get default dataCollection", url, ResponseDocument.class);
+    }
+
     public AttributeRepository getAttrRepo(String customerSpace) {
         if (attrRepoCache == null) {
             initializeAttrRepoCache();
@@ -43,15 +52,35 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public StatisticsContainer getStats(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/stats",
-                shortenCustomerSpace(customerSpace));
+        return getStats(customerSpace, null);
+    }
+
+    public StatisticsContainer getStats(String customerSpace, DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/stats";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        if (version != null) {
+            urlPattern += "?version={version}";
+            args.add(version);
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
         return get("get stats", url, StatisticsContainer.class);
     }
 
-    public Table getTable(String customerSpace, TableRoleInCollection tableRole) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/tables?role={tableRole}", //
-                shortenCustomerSpace(customerSpace), tableRole);
+    public Table getTable(String customerSpace, TableRoleInCollection role) {
+        return getTable(customerSpace, role, null);
+    }
+
+    public Table getTable(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables?role={role}";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(role);
+        if (version != null) {
+            urlPattern += "&version={version}";
+            args.add(version);
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
         return get("getTable", url, Table.class);
     }
 
@@ -62,10 +91,17 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         post("resetTable", url, null, Table.class);
     }
 
-    public void upsertTable(String customerSpace, String tableName, TableRoleInCollection role) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/tables/{tableName}?role={role}",
-                shortenCustomerSpace(customerSpace), tableName, role);
+    public void upsertTable(String customerSpace, String tableName, TableRoleInCollection role, DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/{tableName}?role={role}";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(tableName);
+        args.add(role);
+        if (version != null) {
+            urlPattern += "&version={version}";
+            args.add(version);
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
         post("upsertTable", url, null, DataCollection.class);
     }
 
@@ -96,6 +132,15 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo",
                 shortenCustomerSpace(customerSpace));
         return get("get default attribute repo", url, AttributeRepository.class);
+    }
+
+    public DataCollection.Version getActiveVersion(String customerSpace) {
+        return getDefaultDataCollection(customerSpace).getVersion();
+    }
+
+    public DataCollection.Version getInactiveVersion(String customerSpace) {
+        DataCollection.Version activeVersion = getActiveVersion(customerSpace);
+        return activeVersion.complement();
     }
 
 }
