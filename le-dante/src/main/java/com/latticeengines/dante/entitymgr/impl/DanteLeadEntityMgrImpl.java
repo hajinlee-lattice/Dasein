@@ -11,7 +11,7 @@ import com.latticeengines.dantedb.exposed.dao.BaseDanteDao;
 import com.latticeengines.dantedb.exposed.entitymgr.impl.BaseDanteEntityMgrImpl;
 import com.latticeengines.domain.exposed.dante.DanteLead;
 
-@Component("danteAccountEntityMgr")
+@Component("danteLeadEntityMgr")
 public class DanteLeadEntityMgrImpl extends BaseDanteEntityMgrImpl<DanteLead> implements DanteLeadEntityMgr {
     private static final Logger log = LoggerFactory.getLogger(DanteLeadEntityMgrImpl.class);
 
