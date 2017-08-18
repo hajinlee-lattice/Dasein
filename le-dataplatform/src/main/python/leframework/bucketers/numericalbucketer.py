@@ -217,12 +217,10 @@ def createBinsBySampleCount(xList, rawSplits):
     return binIdx
 
 def logTransform(x):
-    if x > 0:
-        return log10(x)
-    elif x == 0:
+    if x == 0:
         return 0
     else:
-        return -log10(-x)
+        return sign(x) * log10 (abs(x) + 1) + 1
     
 # split into roughly equally sized buckets
 def createBinsByValueRange(xList, rawSplits, useGeometric, minRegBucketSize):
