@@ -1382,9 +1382,6 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
-        
-        console.log(vm.cube.data);
-
         if(!vm.cube.data.Stats) {
             return false;
         }
@@ -1407,37 +1404,38 @@ angular.module('common.datacloud.explorer', [
         if(attributeRangeKey) {
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
+
         vm.saveSegmentEnabled = true;
 
         if (vm.segmentAttributeInput[attributeKey] === true) {
-            QueryStore.counts.accounts.loading = true;
-            $timeout(function(){
-                QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
-            }, 1000);
+            QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
         } else {
-            QueryStore.counts.accounts.loading = true;
-            $timeout(function(){
-                QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
-            }, 1000);
+            QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
         }
-
     }
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
 
-        // console.log(enrichment, stat, disable);
+        if(stat.Rng === null){
+            var attributeRangeKey = stat.Lbl;
+        } else {
+            var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
+        }
+
 
         var disable = disable || false,
+            
             attributeKey = enrichment.Attribute || enrichment.ColumnName,
-            attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng),
+            
             fieldName = enrichment.ColumnName,
+
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
             entity = enrichment.Entity,
             topBkt = enrichment.TopBkt;
 
-        console.log(stat, topBkt);
+        console.log(enrichment, stat, attributeKey, attributeRangeKey);
 
         if(disable) {
             return false;
@@ -1448,19 +1446,13 @@ angular.module('common.datacloud.explorer', [
 
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
+        
         vm.saveSegmentEnabled = true;
+        
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-            QueryStore.counts.accounts.loading = true;
-            $timeout(function(){
-                QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
-            }, 1000);
-
+            QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
         } else {
-            QueryStore.counts.accounts.loading = true;
-            $timeout(function(){
-                QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
-            }, 1000);
-
+            QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
         }
         /*
          * Rebuild the tile table items
@@ -1491,6 +1483,7 @@ angular.module('common.datacloud.explorer', [
             range = {min: bucket, max: bucket, is_null_only: false};
 
         vm.segmentBucketInput[bucketId] = !vm.segmentBucketInput[bucketId];
+        
         vm.saveSegmentEnabled = true;
         if (vm.segmentBucketInput[bucketId] === true) {
             QueryStore.addRestriction({columnName: id, range: range});
@@ -1532,6 +1525,8 @@ angular.module('common.datacloud.explorer', [
                         }
                     };
 
+                console.log(restriction);
+
                 SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
                     if (!result.errorMsg) {
                         if (vm.inModel()) {
@@ -1560,6 +1555,8 @@ angular.module('common.datacloud.explorer', [
                                 'num_rows': 10
                             }
                         };
+
+                    console.log(restriction);
 
                     SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
                         if (!result.errorMsg) {

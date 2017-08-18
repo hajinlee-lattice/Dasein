@@ -1,6 +1,6 @@
 angular.module('common.datacloud.query.service',[
 ])
-.service('QueryStore', function($filter, $q, $stateParams, $timeout, QueryService, BucketRestriction) {
+.service('QueryStore', function($filter, $q, $stateParams, $timeout, $destroy, QueryService, BucketRestriction) {
 
     angular.extend(this, {});
 
@@ -103,10 +103,9 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.setupStore = function(segment) {
+
         var self = this,
-            deferred = $q.defer(),
-            allRestrictions = [],
-            anyRestrictions = [];
+            deferred = $q.defer();
         
         this.setSegment(segment);
 
@@ -293,20 +292,19 @@ angular.module('common.datacloud.query.service',[
     this.GetCountByQuery = function(resourceType, query) {
 
         canceler.resolve("cancelled");
-        canceler = $q.defer(); 
+        var deferred = $q.defer(); 
 
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/count',
-            data: query,
-            timeout: canceler.promise
+            data: query
         }).success(function(result) {
-            canceler.resolve(result);
+            deferred.resolve(result);
         }).error(function(result) {
-            canceler.resolve(result);
+            deferred.resolve(result);
         });
 
-        return canceler.promise;
+        return deferred.promise;
     };
 
     this.GetDataByQuery = function(resourceType, query, segment) {
