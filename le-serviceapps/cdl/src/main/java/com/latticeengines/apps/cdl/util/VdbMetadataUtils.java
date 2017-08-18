@@ -33,12 +33,12 @@ public class VdbMetadataUtils {
             attr.setDisplayName(metadata.getDisplayName());
             attr.setSourceLogicalDataType(metadata.getDataType());
             attr.setPhysicalDataType(metadata.getDataType());
-            attr.setApprovedUsage(metadata.getApprovedUsage());
             attr.setDescription(metadata.getDescription());
             attr.setDataSource(metadata.getDataSource());
             attr.setFundamentalType(resolveFundamentalType(metadata));
             attr.setStatisticalType(resolveStatisticalType(metadata));
             attr.setTags(metadata.getTags());
+            attr.setApprovedUsage(metadata.getApprovedUsage());
             attr.setDisplayDiscretizationStrategy(metadata.getDisplayDiscretizationStrategy());
             if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
                 attr.setDataQuality(metadata.getDataQuality().get(0));
@@ -80,10 +80,13 @@ public class VdbMetadataUtils {
         try {
             return StatisticalType.fromName(vdbStatisticalType);
         } catch (IllegalArgumentException e) {
-            if (metadata.getApprovedUsage().contains(ApprovedUsage.NONE.getName())) {
+            if (metadata.getApprovedUsage() != null &&
+                    metadata.getApprovedUsage().contains(ApprovedUsage.NONE.getName())) {
                 return null;
             } else {
-                throw e;
+                metadata.setApprovedUsage(Arrays.asList(ApprovedUsage.NONE.getName()));
+                log.error("Found unknown VDB statistical type: StatisticalType=" + vdbStatisticalType);
+                return null;
             }
         }
     }

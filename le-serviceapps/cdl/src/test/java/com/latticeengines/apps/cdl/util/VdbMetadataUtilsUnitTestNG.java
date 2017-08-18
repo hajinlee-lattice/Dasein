@@ -7,8 +7,10 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 
 public class VdbMetadataUtilsUnitTestNG {
@@ -35,6 +37,42 @@ public class VdbMetadataUtilsUnitTestNG {
                 { "Bit",  FundamentalType.BOOLEAN },
                 { "BIT",  FundamentalType.BOOLEAN },
                 { "EpochTime",  FundamentalType.DATE }
+        };
+    }
+
+    @Test(groups = "unit", dataProvider = "statisticalTypeTestData")
+    public void testStatisticalType(String vdbType, StatisticalType expected) {
+        VdbSpecMetadata metadata = createVdbMetadata();
+        metadata.setStatisticalType(vdbType);
+
+        Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata);
+        runBasicVerification(attribute);
+        if (expected == null) {
+            Assert.assertNull(attribute.getStatisticalType());
+            if (!StringUtils.isBlank(vdbType)) {
+                Assert.assertNotNull(attribute.getApprovedUsage());
+                boolean noneApprovedUsage = false;
+                for (String approvedUsage : attribute.getApprovedUsage()) {
+                    if (approvedUsage.equalsIgnoreCase(ApprovedUsage.NONE.getName())) {
+                        noneApprovedUsage = true;
+                        break;
+                    }
+                }
+                Assert.assertTrue(noneApprovedUsage);
+            }
+        } else  {
+            Assert.assertEquals(StatisticalType.fromName(attribute.getStatisticalType()), expected);
+        }
+    }
+
+    @DataProvider(name = "statisticalTypeTestData", parallel = true)
+    public Object[][] provideStatisticalTypeTestData() {
+        return new Object[][]{
+                { "",  null },
+                { null,  null },
+                { "Dummy Type", null },
+                { "interval",  StatisticalType.INTERVAL },
+                { "INTERVAL",  StatisticalType.INTERVAL }
         };
     }
 
