@@ -14,8 +14,8 @@ angular.module('lp.playbook.wizard.segment', ['mainApp.appCommon.utilities.Segme
     });
 
     $scope.$watch('vm.search', function(newValue, oldValue) {
-        if(vm.search) {
-            vm.current = 1;
+        if(vm.search || oldValue) {
+            vm.currentPage = 1;
         }
     });
 

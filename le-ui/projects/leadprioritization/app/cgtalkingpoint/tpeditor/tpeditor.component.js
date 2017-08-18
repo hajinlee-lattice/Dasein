@@ -37,10 +37,13 @@ angular.module('lp.cg.talkingpoint.editor', [])
                     if(!CgTalkingPointStore.saveOnBlur || CgTalkingPointStore.deleteClicked) {
                         return false;
                     }
-
+                    
                     var talkingPoint = CgTalkingPointStore.getEditedTalkingPoint();
-                        content = (ed.contentDocument && ed.contentDocument.body && ed.contentDocument.body.innerHTML ? ed.contentDocument.body.innerHTML : '');
+                        content = tinymce.activeEditor.getContent();
 
+                    if(content === '') {
+                        return false;
+                    }
                     CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
                     talkingPoint.content = content;
 
@@ -67,9 +70,8 @@ angular.module('lp.cg.talkingpoint.editor', [])
         lockTalkingPoints: false
     });
 
-    if ($scope.tp.IsNew === true || Date.now() - $scope.tp.created < 1000) {
+    if ($scope.tp.IsNew === true || Date.now() - $scope.tp.created < 1000) { // if it hasn't been saved
         vm.expanded = true;
-        //delete $scope.tp.IsNew;
     }
 
     vm.CgTalkingPointStore = CgTalkingPointStore;
@@ -83,7 +85,8 @@ angular.module('lp.cg.talkingpoint.editor', [])
         });
     };
 
-    if(!$scope.tp.content && (Date.now() - $scope.tp.updated) < 2000) {
+    //console.log(CgTalkingPointStore.getEditedTalkingPoint('name'), $scope.tp.name, CgTalkingPointStore.getEditedTalkingPoint());
+    if((Date.now() - $scope.tp.updated) < 2000) { // if it has been saved but you want to re-open it
         vm.expand(true);
     }
 
@@ -111,7 +114,7 @@ angular.module('lp.cg.talkingpoint.editor', [])
 
     vm.saveTitle = function() {
         $timeout(function(){
-            if(!CgTalkingPointStore.saveOnBlur || vm.deleteClicked) {
+            if(!CgTalkingPointStore.saveOnBlur || vm.deleteClicked || !$scope.tp.title) {
                 return false;
             }
             CgTalkingPointStore.setEditedTalkingPoint($scope.tp, 'title');

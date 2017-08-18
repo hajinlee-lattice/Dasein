@@ -177,9 +177,9 @@ angular.module('lp.playbook')
         return this.currentPlay;
     }
 
-    this.getPlay = function(play_name) {
+    this.getPlay = function(play_name, nocache) {
         var deferred = $q.defer();
-        if(this.currentPlay && play_name) {
+        if(this.currentPlay && play_name && !nocache) {
             deferred.resolve(this.currentPlay);
         } else {
             PlaybookWizardService.getPlay(play_name).then(function(data){

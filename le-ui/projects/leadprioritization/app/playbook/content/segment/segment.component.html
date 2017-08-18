@@ -35,7 +35,7 @@
                     <li class="accounts">Accounts</li>
                 </ul>
             </li>
-            <li ng-repeat="segment in vm.segments | filter: {'display_name': vm.search} | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" class="item segment">
+            <li ng-repeat="segment in (filteredList = (vm.segments | filter: {'display_name': vm.search})) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" class="item segment">
                 <ul>
                     <li class="name">
                         <input  type="radio" 
@@ -52,7 +52,7 @@
         </ul>
         <pd-pagination-controls
             current="vm.currentPage"
-            max="vm.segments.length / vm.pageSize">
+            max="filteredList.length / vm.pageSize">
         </pd-pagination-controls>
 
         </div>

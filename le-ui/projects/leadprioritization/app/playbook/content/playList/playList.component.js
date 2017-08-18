@@ -16,10 +16,10 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
                 label: 'Sort By',
                 icon: 'numeric',
                 order: '-',
-                property: 'timeStamp',
+                property: 'created',
                 items: [
-                    { label: 'Modified Date',   icon: 'numeric',    property: 'lastUpdatedTimestamp' },
-                    { label: 'Creation Date',   icon: 'numeric',    property: 'timeStamp' },
+                    { label: 'Modified Date',   icon: 'numeric',    property: 'updated' },
+                    { label: 'Creation Date',   icon: 'numeric',    property: 'created' },
                     { label: 'Play Name',      icon: 'alpha',      property: 'displayName' }
                 ]
             },
@@ -154,6 +154,7 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
         tileState.launching = !tileState.launching;
 
         PlaybookWizardStore.launchPlay(play).then(function(data) {
+            PlaybookWizardStore.clear();
             $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
         });
 

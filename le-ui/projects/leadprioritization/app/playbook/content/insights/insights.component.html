@@ -9,7 +9,6 @@
                         <a href="/assets/files/talking-points/syntax.html" target="_syntax">Please refer to this guide for more details</a>.
                     </p>
                 </div>
-
                 <ul class="talkingpoints-top-controls">
                     <li class="saved">
                         <span ng-if="vm.saving && !vm.saved"><i class="fa fa-floppy-o"></i> Saving...</span>
@@ -28,7 +27,7 @@
                 <div ng-if="vm.talkingPoints" ng-repeat="tp in vm.talkingPoints | orderBy:'offset' | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" class="tp-entry" ng-class="{'has-errors': tp.uiError && !tp.IsNew}">
                     <cg-talking-point-editor
                         tp="tp"
-                        on-delete="vm.onDelete($index)">
+                        on-delete="vm.onDelete(tp, $index)">
                     </cg-talking-point-editor>
                     <ul class="controls" ng-if="!tp.IsNew">
                         <li class="tp-entry-sort" ng-if="vm.talkingPoints.length > 1">
@@ -50,7 +49,7 @@
                     </ul>
                 </div>
                 <div class="row tp-footer">
-                    <span ng-click="vm.addTalkingPoint()">
+                    <span ng-click="vm.addTalkingPoint()" class="tp-add-container" ng-disabled="vm.saving">
                         <button class="add-tp-button button white-button"><i class="fa fa-plus"></i></button><span>Add Talking Point</span>
                     </span>
                 </div>

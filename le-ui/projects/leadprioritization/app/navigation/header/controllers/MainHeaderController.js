@@ -56,8 +56,8 @@ angular.module('pd.navigation.header', [
         if (isModelDetailState(fromState.name) && ! isModelDetailState(toState.name)) {
             $scope.isModelDetailsPage = false;
         }
-
-        if($scope.headerBack && toState.name && !toState.name.match($scope.headerBack.path)) {
+        
+        if($scope.headerBack && toState.name && ($scope.headerBack.path && !toState.name.match($scope.headerBack.path))) {
             $scope.headerBack = null;
         }
     });

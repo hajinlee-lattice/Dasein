@@ -35,7 +35,10 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         }
     };
 
-    this.getEditedTalkingPoint = function() {
+    this.getEditedTalkingPoint = function(property) {
+        if(property) {
+            return (this.editedTalkingPoint[property] ? this.editedTalkingPoint[property] : null);
+        }
         return this.editedTalkingPoint;
     };
 

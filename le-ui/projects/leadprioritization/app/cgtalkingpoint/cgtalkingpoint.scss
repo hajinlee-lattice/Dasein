@@ -75,6 +75,10 @@
         .tp-footer {
             margin: 0 2px;
             margin-bottom: 5px;
+            .tp-add-container[disabled] {
+                pointer-events: none;
+                opacity: .5;
+            }
             button.add-tp-button {
                 border-radius: 50%;
                 border: 0;

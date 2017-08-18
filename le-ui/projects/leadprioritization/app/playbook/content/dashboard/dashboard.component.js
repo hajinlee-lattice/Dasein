@@ -34,7 +34,7 @@ angular.module('lp.playbook.dashboard', [
     vm.removeSegment = function(play) {
         PlaybookWizardStore.removeSegment(play);
     }
-
+    
     vm.launchPlay = function() {
         vm.showLaunchSpinner = true;
         PlaybookWizardStore.launchPlay(vm.play).then(function(data) {

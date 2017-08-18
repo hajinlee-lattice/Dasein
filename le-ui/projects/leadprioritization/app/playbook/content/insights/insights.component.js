@@ -18,7 +18,22 @@ angular.module('lp.playbook.wizard.insights', [])
 
     $rootScope.$on('talkingPoints:sync', function(e){
         CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
-            vm.talkingPoints = talkingPoints;
+
+            var _tp = [];
+            talkingPoints.forEach(function(talkingPoint, index) {
+                delete talkingPoint.title;
+                delete talkingPoint.content;
+                if(vm.talkingPoints && vm.talkingPoints[index]) {
+                    delete vm.talkingPoints[index].pid;
+                    delete vm.talkingPoints[index].name;
+                    delete vm.talkingPoints[index].IsNew;
+                }
+                _tp.push(angular.extend({}, talkingPoint, vm.talkingPoints[index]));
+            });
+            vm.talkingPoints = _tp;
+
+            //vm.talkingPoints = talkingPoints;
+
             $rootScope.$broadcast('talkingPoints:sync:complete');
         });
     });
@@ -45,7 +60,7 @@ angular.module('lp.playbook.wizard.insights', [])
 
     var cachedTalkingPoints = angular.copy(TalkingPoints);
 
-    vm.addTalkingPoint = function() {
+    var newTalkingPoint = function() {
         var talkingPoint = CgTalkingPointStore.generateTalkingPoint({
                 timestamp: new Date().getTime(),
                 customerID: BrowserStorageUtility.getClientSession().Tenant.Identifier,
@@ -57,6 +72,16 @@ angular.module('lp.playbook.wizard.insights', [])
         talkingPoint.IsNew = true;
         vm.talkingPoints.push(talkingPoint);
         CgTalkingPointStore.setEditedTalkingPoint(talkingPoint);
+    }
+
+    vm.addTalkingPoint = function() {
+        if(vm.talkingPoints.length) {
+            CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints).then(function(results){
+                newTalkingPoint();
+            });
+        } else {
+            newTalkingPoint();
+        }
     };
 
     vm.saveTalkingPoints = function() {
@@ -67,11 +92,9 @@ angular.module('lp.playbook.wizard.insights', [])
         });
     }
 
-    vm.onDelete = function(pos) {
-        var remove_talkingpoint_name = vm.talkingPoints[pos].name;
-        if(vm.talkingPoints[pos].pid) {
-            CgTalkingPointStore.deleteTalkingPoint(remove_talkingpoint_name).then(function(response){
-            });
+    vm.onDelete = function(talkingPoint, pos) {
+        if(!talkingPoint.IsNew) {
+            CgTalkingPointStore.deleteTalkingPoint(talkingPoint.name);
         }
         vm.talkingPoints.splice(pos, 1);
         for (var i = pos; i < vm.talkingPoints.length; i++) {
