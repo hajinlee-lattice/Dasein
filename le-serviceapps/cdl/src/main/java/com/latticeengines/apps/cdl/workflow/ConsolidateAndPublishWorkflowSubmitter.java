@@ -93,13 +93,14 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
             if (execution.getWorkflowId() == null) {
                 throw new RuntimeException("We can't retry any consolidate workflow now as we can't find workflow id.");
             }
-            JobStatus status = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()))
-                    .getJobStatus();
+            Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()));
+            JobStatus status = job.getJobStatus();
             if (JobStatus.FAILED.equals(status)) {
                 log.info(String.format(
                         "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
                         execution, datafeed));
-                dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
+                dataFeedProxy.failExecution(customerSpace,
+                        job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
             } else {
                 throw new RuntimeException(
                         "We can't restart consolidate workflow as the most recent one is not failed");
