@@ -112,7 +112,7 @@ public class DanteLeadNotionObject {
         analyticAttributes = null;
         expectedValue = null;
         externalProbability = null;
-        lastLaunched = play.getLaunchHistory().getMostRecentLaunch().getCreated();
+        lastLaunched = recommendation.getLastUpdatedTimestamp();// play.getLaunchHistory().getMostRecentLaunch().getCreated();
         lastModified = recommendation.getLastUpdatedTimestamp();
         leadId = baseExternalId;
         lift = null;

@@ -48,6 +48,9 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
     @BeforeClass
     public void setup() throws Exception {
         setupTestTenant();
+        segment = createTestSegment();
+        play = createTestPlay();
+        playLaunch = createTestPlayLaunch(play);
     }
 
     @Test(groups = "workflow")
@@ -70,9 +73,6 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
     }
 
     private PlayLaunchWorkflowConfiguration generatePlayLaunchWorkflowConfiguration() throws Exception {
-        segment = createTestSegment();
-        play = createTestPlay();
-        playLaunch = createTestPlayLaunch(play);
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "playLaunchWorkflow");
         return new PlayLaunchWorkflowConfiguration.Builder() //
@@ -117,7 +117,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
         play.setTenant(mainTestTenant);
         play.setUpdated(new Date());
         play.setCreated(new Date());
-
+        play.setName(play.generateNameStr());
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);
         TransactionTemplate tx = new TransactionTemplate(ptm);

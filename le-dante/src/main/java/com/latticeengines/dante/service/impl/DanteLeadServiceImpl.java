@@ -46,14 +46,14 @@ public class DanteLeadServiceImpl implements DanteLeadService {
     @Override
     public void create(Recommendation recommendation, String customerSpace) {
         if (recommendation == null) {
-            throw new LedpException(LedpCode.LEDP_38021, new String[]{customerSpace});
+            throw new LedpException(LedpCode.LEDP_38021, new String[] { customerSpace });
         }
         Play play;
         try {
             play = internalResourceRestApiProxy.findPlayByName(CustomerSpace.parse(customerSpace),
                     recommendation.getPlayId());
             if (play == null) {
-                throw new LedpException(LedpCode.LEDP_38012, new String[]{recommendation.getPlayId()});
+                throw new LedpException(LedpCode.LEDP_38012, new String[] { recommendation.getPlayId() });
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38013, e);
@@ -62,7 +62,7 @@ public class DanteLeadServiceImpl implements DanteLeadService {
         try {
             danteLeadEntityMgr.create(convertForDante(recommendation, customerSpace, play));
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38020, e, new String[]{recommendation.getId(), customerSpace});
+            throw new LedpException(LedpCode.LEDP_38020, e, new String[] { recommendation.getId(), customerSpace });
         }
     }
 

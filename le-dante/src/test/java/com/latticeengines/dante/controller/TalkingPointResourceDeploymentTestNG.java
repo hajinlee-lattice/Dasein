@@ -189,7 +189,7 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
         Assert.assertEquals(tenantNameViaToken, mainTestTenant.getId());
     }
 
-    @AfterClass
+    @AfterClass(groups = "deployment")
     public void cleanup() {
         deletePlay(testPlay);
     }
@@ -217,6 +217,7 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
         play.setTenantId(mainTestTenant.getPid());
         play.setUpdated(new Date());
         play.setCreated(new Date());
+        play.setName(play.generateNameStr());
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);
         TransactionTemplate tx = new TransactionTemplate(ptm);
