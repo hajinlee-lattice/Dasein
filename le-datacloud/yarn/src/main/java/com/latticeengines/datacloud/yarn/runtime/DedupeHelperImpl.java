@@ -85,25 +85,17 @@ public class DedupeHelperImpl implements DedupeHelper {
         }
 
         // non-public domain
-        if (!isPublicDomain && numFeatureValue > 0) {
+        if (!isPublicDomain && StringUtils.isNotEmpty(domain) && numFeatureValue > 0) {
             if (StringUtils.isEmpty(domain) && StringUtils.isNotEmpty(name)) {
                 if (StringUtils.isEmpty(country)) {
                     country = "USA";
                 }
-                dedupeId = Base64Utils.encodeBase64(DigestUtils.md5(name + country));
-            }
-            if (StringUtils.isNotEmpty(domain) && StringUtils.isEmpty(name)) {
+            } else {
                 if (StringUtils.isEmpty(country)) {
                     country = "";
                 }
-                dedupeId = Base64Utils.encodeBase64(DigestUtils.md5(domain + country));
             }
-            if (StringUtils.isNotEmpty(domain) && StringUtils.isNotEmpty(name)) {
-                if (StringUtils.isEmpty(country)) {
-                    country = "";
-                }
-                dedupeId = Base64Utils.encodeBase64(DigestUtils.md5(domain + name + country));
-            }
+            dedupeId = Base64Utils.encodeBase64(DigestUtils.md5(domain + country));
             addDedupeValues(allValues, dedupeId, isRemoved);
             return;
         }

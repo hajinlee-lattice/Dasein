@@ -71,8 +71,8 @@ public class DedupeHelperImplTestNG {
                 new Object[] { false, true, null, null, null, null, "lattice.com", "USA", "6Lz7PZ3j8botd6YLHFYggA", 0 }, //
                 new Object[] { false, true, null, null, null, null, "lattice.com", null, "O1PHfxXxmvFFBwBNaGYdXQ", 0 }, //
                 new Object[] { false, true, null, null, null, "lattice", "lattice.com", "USA",
-                        "JIZieF0VtoItLIB39_uXeg", 0 }, //
-                new Object[] { false, true, null, null, null, "lattice", "lattice.com", null, "a6Fp8Ppvweqvp-Fe0Y9n3w",
+                        "6Lz7PZ3j8botd6YLHFYggA", 0 }, //
+                new Object[] { false, true, null, null, null, "lattice", "lattice.com", null, "O1PHfxXxmvFFBwBNaGYdXQ",
                         0 }, //
                 new Object[] { false, true, null, null, null, null, null, null, null, 1 }, //
                 new Object[] { false, true, null, null, null, " none ", null, null, null, 1 }, //
@@ -94,7 +94,7 @@ public class DedupeHelperImplTestNG {
                 new Object[] { true, true, null, null, null, " noname ", "lattice.com", "USA", null, 1 }, //
                 new Object[] { true, true, null, null, null, " nocompany ", "lattice.com", "USA", null, 1 }, //
 
-                new Object[] { false, true, null, null, null, " nocompany ", "lattice.com", "USA", "SoKj_r3WS-FFuMmP4kATag", 0 }, //
+                new Object[] { false, true, null, null, null, " nocompany ", "lattice.com", "USA", "6Lz7PZ3j8botd6YLHFYggA", 0 }, //
 
                 new Object[] { true, true, null, null, null, "lattice", null, "USA", "Nw79Her_B75t4qmy5lXDGQ", 0 }, //
                 new Object[] { true, true, null, null, null, "lattice", null, null, "Nw79Her_B75t4qmy5lXDGQ", 0 }, //
