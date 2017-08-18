@@ -49,6 +49,7 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
     private EaiMetadataService eaiMetadataService;
 
     @Override
+    @SuppressWarnings("unchecked")
     public void invoke(CSVToHdfsConfiguration config) {
         List<SourceImportConfiguration> sourceImportConfigs = config.getSourceConfigurations();
         String customerSpace = config.getCustomerSpace().toString();
@@ -91,7 +92,9 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             tableMetadata.addAll(metadata);
 
             sourceImportConfig.setTables(metadata);
-
+            for (Table table : metadata) {
+                context.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class).put(table.getName(), Boolean.FALSE);
+            }
             importService.importDataAndWriteToHdfs(sourceImportConfig, context, connectorConfiguration);
 
             Map<String, List<Extract>> extracts = eaiMetadataService.getExtractsForTable(metadata, context);

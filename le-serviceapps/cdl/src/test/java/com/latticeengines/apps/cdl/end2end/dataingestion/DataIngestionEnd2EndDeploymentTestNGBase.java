@@ -20,13 +20,16 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Hdfs;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -46,6 +49,7 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -65,6 +69,8 @@ import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.pls.EntityExternalType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
@@ -76,6 +82,7 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
@@ -92,6 +99,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @Inject
     private CDLProxy cdlProxy;
+
+    @Inject
+    private PlsCDLImportProxy plsCDLImportProxy;
 
     @Inject
     private ModelingFileUploadProxy fileUploadProxy;
@@ -130,6 +140,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         createDataFeed();
 
         attachProtectedProxy(fileUploadProxy);
+        attachProtectedProxy(plsCDLImportProxy);
     }
 
     @AfterClass(groups = { "end2end" })
@@ -268,6 +279,66 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", entity.name());
         dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(),
                 e);
+    }
+
+    protected long importCsv(BusinessEntity entity, int fileId) throws Exception {
+        String csvPath = String.format("end2end/csv/%s%d.csv", entity.name(), fileId);
+        Resource csvResource = new ClassPathResource(csvPath, Thread.currentThread().getContextClassLoader());
+        String templateName = String.format("%s_template.csv", entity);
+        String dataName = String.format("%s_data.csv", entity);
+        SourceFile template = fileUploadProxy.uploadFile(templateName, false, templateName, entity.name(), csvResource);
+        SourceFile data = fileUploadProxy.uploadFile(dataName, false, dataName, entity.name(), csvResource);
+        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(true);
+            }
+        }
+        fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
+        long startTime = System.currentTimeMillis();
+        ApplicationId applicationId = plsCDLImportProxy.startImportCSV(template.getName(), data.getName(), "File",
+                entity.name(), "e2etest");
+        com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(applicationId
+                .toString(), false);
+        long endTime = System.currentTimeMillis();
+        assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);
+        return tryGetAvroFileRows(startTime, endTime);
+    }
+
+    private long tryGetAvroFileRows(long startMillis, long endMillis) throws Exception {
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId())).toString(),
+                SourceType.FILE.getName());
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, targetPath);
+        for (String file : files) {
+            String filename = file.substring(file.lastIndexOf("/") + 1);
+            Date folderTime = new SimpleDateFormat(COLLECTION_DATE_FORMAT).parse(filename);
+            if (folderTime.getTime() > startMillis && folderTime.getTime() < endMillis) {
+                logger.info("Find matched file: " + filename);
+                HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
+
+                    @Override
+                    public boolean accept(FileStatus file) {
+                        if (file == null) {
+                            return false;
+                        }
+
+                        String name = file.getPath().getName().toString();
+                        return name.endsWith(".avro");
+                    }
+
+                };
+                List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, file, filter);
+                Assert.assertTrue(avroFiles.size() > 0);
+                String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
+
+                return AvroUtils.count(yarnConfiguration, avroFilePath + "/*.avro");
+            }
+        }
+        Assert.assertTrue(false, "No data collection folder was created!");
+        return 0L;
     }
 
     private Schema getVdbImportSchema(BusinessEntity entity) {
