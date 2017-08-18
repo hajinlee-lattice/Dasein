@@ -65,6 +65,15 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
             int rowNum = offset + 1;
 
             for (Map<String, Object> accExtRec : data) {
+
+                if (accExtRec.containsKey(PlaymakerConstants.AccountID)) {
+                    String accountId = (String) accExtRec.get(PlaymakerConstants.AccountID);
+                    if (StringUtils.isNumeric(accountId)) {
+                        Long longAccId = Long.parseLong(accountId);
+                        accExtRec.put(PlaymakerConstants.AccountID, longAccId);
+                    }
+                }
+
                 String playName = (String) accExtRec.get(PlaymakerConstants.PlayID);
 
                 if (accExtRec.containsKey(PlaymakerConstants.PlayID)) {

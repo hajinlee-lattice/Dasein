@@ -96,7 +96,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + "( " //
                 + "pid AS " + PlaymakerConstants.ID //
                 + ", recommendationId AS " + PlaymakerConstants.ID + PlaymakerConstants.V2 //
-                + ", cast(accountId as int) AS " + PlaymakerConstants.AccountID //
+                + ", accountId AS " + PlaymakerConstants.AccountID //
                 + ", leAccountExternalID AS " + PlaymakerConstants.LEAccountExternalID //
                 + ", playId AS " + PlaymakerConstants.PlayID //
                 + ", launchId AS " + PlaymakerConstants.LaunchID //
