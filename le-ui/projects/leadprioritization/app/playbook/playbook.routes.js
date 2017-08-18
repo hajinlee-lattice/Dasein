@@ -196,8 +196,6 @@ angular
                 }],
                 CountWithoutSalesForce: ['$q', 'QueryStore', function($q, QueryStore){
 
-
-
                     var deferred = $q.defer(),
                         restriction = QueryStore.getRestriction(),
                         query = {
@@ -450,6 +448,27 @@ angular
                     });
 
                     return deferred.promise;
+                }],
+                CountWithoutSalesForce: ['$q', 'QueryStore', function($q, QueryStore){
+
+                    var deferred = $q.defer(),
+                        restriction = QueryStore.getRestriction(),
+                        query = {
+                            'free_form_text_search': '',
+                            'frontend_restriction': restriction,
+                            'page_filter': {
+                                'num_rows': 1000000,
+                                'row_offset': 0
+                            },
+                            'restrict_without_sfdcid': true
+                        };
+
+                    QueryStore.GetCountByQuery('accounts', query).then(function(response){ 
+                        deferred.resolve(response);
+                    }); 
+
+                    return deferred.promise;
+
                 }],
                 Config: [function() {
                     return null;
