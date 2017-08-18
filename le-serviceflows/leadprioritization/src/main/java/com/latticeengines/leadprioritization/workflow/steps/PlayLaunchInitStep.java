@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
+import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
@@ -73,6 +74,9 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     @Autowired
     private TalkingPointProxy talkingPointProxy;
+
+    @Autowired
+    private DanteLeadProxy danteLeadProxy;
 
     private long launchTimestampMillis;
 
@@ -169,6 +173,11 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                                     Recommendation recommendation = //
                                             prepareRecommendation(tenant, playLauch, config, account);
                                     recommendationService.create(recommendation);
+                                    try {
+                                        danteLeadProxy.create(recommendation, config.getCustomerSpace().toString());
+                                    } catch (Exception e) {
+                                        log.error("Failed to publish lead to dante, ignoring", e);
+                                    }
                                     return recommendation.getRecommendationId();
                                 } catch (Throwable th) {
                                     log.error(th.getMessage(), th);
@@ -177,7 +186,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                             }) //
                             .collect(Collectors.toList());
                 }
-
                 processedSegmentAccountsCount += accountList.size();
             }
         }

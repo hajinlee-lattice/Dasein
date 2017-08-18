@@ -113,34 +113,6 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
-    // // TO BE REMOVED ONCE THE TABLE IS STABLE
-    // @JsonProperty("timeStamp")
-    // @Column(name = "TIMESTAMP", nullable = true)
-    // @Temporal(TemporalType.TIMESTAMP)
-    // private Date timestamp;
-    //
-    // @JsonProperty("lastUpdatedTimestamp")
-    // @Column(name = "LAST_UPDATED_TIMESTAMP", nullable = true)
-    // @Temporal(TemporalType.TIMESTAMP)
-    // private Date lastUpdatedTimestamp;
-    //
-    // public Date getTimestamp() {
-    // return timestamp;
-    // }
-    //
-    // public void setTimestamp(Date timestamp) {
-    // this.timestamp = timestamp;
-    // }
-    //
-    // public Date getLastUpdatedTimestamp() {
-    // return lastUpdatedTimestamp;
-    // }
-    //
-    // public void setLastUpdatedTimestamp(Date lastUpdatedTimestamp) {
-    // this.lastUpdatedTimestamp = lastUpdatedTimestamp;
-    // }
-    // // TO BE REMOVED ONCE THE TABLE IS STABLE
-
     @JsonProperty("createdBy")
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
@@ -148,6 +120,11 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     @JsonProperty("excludeItemsWithoutSalesforceId")
     @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = true)
     private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
+
+    @JsonProperty("lastPublished")
+    @Column(name = "LAST_PUBLISHED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastPublished;
 
     @Override
     public Long getPid() {

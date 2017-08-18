@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.playmakercore.Recommendation;
+import com.latticeengines.domain.exposed.pls.Play;
 
 public class DanteLeadNotionObject {
 
@@ -21,10 +23,10 @@ public class DanteLeadNotionObject {
     private String displayName;
 
     @JsonProperty(value = "ExpectedValue", index = 5)
-    private double expectedValue;
+    private Double expectedValue;
 
     @JsonProperty(value = "ExternalProbability", index = 6)
-    private double externalProbability;
+    private Double externalProbability;
 
     @JsonProperty(value = "LastLaunched", index = 7)
     private Date lastLaunched;
@@ -36,19 +38,19 @@ public class DanteLeadNotionObject {
     private String leadId;
 
     @JsonProperty(value = "Lift", index = 10)
-    private double lift;
+    private Double lift;
 
     @JsonProperty(value = "LikelihoodBucketDisplayName", index = 11)
     private String likelihoodBucketDisplayName;
 
     @JsonProperty(value = "LikelihoodBucketOffset", index = 12)
-    private int likelihoodBucketOffset;
+    private Integer likelihoodBucketOffset;
 
     @JsonProperty(value = "ModelID", index = 13)
     private String modelId;
 
     @JsonProperty(value = "Percentile", index = 14)
-    private int percentile;
+    private Integer percentile;
 
     @JsonProperty(value = "PlayDescription", index = 15)
     private String playDescription;
@@ -69,19 +71,19 @@ public class DanteLeadNotionObject {
     private String playType;
 
     @JsonProperty(value = "Probability", index = 21)
-    private double probability;
+    private Double probability;
 
     @JsonProperty(value = "Rank", index = 22)
-    private int rank;
+    private Integer rank;
 
     @JsonProperty(value = "RecommendationID", index = 23)
-    private int recommendationID;
+    private Integer recommendationID;
 
     @JsonProperty(value = "SalesforceAccountID", index = 24)
-    private int salesforceAccountID;
+    private Integer salesforceAccountID;
 
     @JsonProperty(value = "SfdcID", index = 25)
-    private int sfdcID;
+    private Integer sfdcID;
 
     @JsonProperty(value = "Theme", index = 26)
     private String theme;
@@ -98,12 +100,45 @@ public class DanteLeadNotionObject {
     @JsonProperty(value = "TalkingPoints", index = 30)
     private List<DanteTalkingPointValue> talkingPoints;
 
+    private String danteLeadNotionName = "DanteLead";
+
     public DanteLeadNotionObject() {
+    }
+
+    public DanteLeadNotionObject(Recommendation recommendation, Play play) {
+        baseExternalId = recommendation.getId();
+        notionName = danteLeadNotionName;
+        displayName = play.getDisplayName();
+        analyticAttributes = null;
+        expectedValue = null;
+        externalProbability = null;
+        lastLaunched = play.getLaunchHistory().getMostRecentLaunch().getCreated();
+        lastModified = recommendation.getLastUpdatedTimestamp();
+        leadId = baseExternalId;
+        lift = null;
+        likelihoodBucketDisplayName = recommendation.getPriorityDisplayName();
+        likelihoodBucketOffset = null;
+        modelId = null;
+        percentile = null;
+        playDescription = play.getDescription();
+        playDisplayName = play.getDisplayName();
+        playID = play.getName();
+        playSolutionType = null;
+        playTargetProductName = null;
+        playType = null;
+        probability = null;
+        rank = null;
+        recommendationID = null;
+        theme = null;
+        talkingPoints = null;
+        userRoleDisplayName = null;
+        headerName = null;
+        timestamp = lastModified;
     }
 
     public DanteLeadNotionObject(List<DanteTalkingPointValue> danteTalkingPoints) {
         baseExternalId = "testLeadForPreview";
-        notionName = "DanteLead";
+        notionName = danteLeadNotionName;
         displayName = "Demo Lead for Preview";
         analyticAttributes = null;
         expectedValue = 23456.78;
@@ -132,19 +167,19 @@ public class DanteLeadNotionObject {
         timestamp = lastLaunched;
     }
 
-    public double getExpectedValue() {
+    public Double getExpectedValue() {
         return expectedValue;
     }
 
-    public void setExpectedValue(double expectedValue) {
+    public void setExpectedValue(Double expectedValue) {
         this.expectedValue = expectedValue;
     }
 
-    public double getExternalProbability() {
+    public Double getExternalProbability() {
         return externalProbability;
     }
 
-    public void setExternalProbability(double externalProbability) {
+    public void setExternalProbability(Double externalProbability) {
         this.externalProbability = externalProbability;
     }
 
@@ -156,11 +191,11 @@ public class DanteLeadNotionObject {
         this.lastLaunched = lastLaunched;
     }
 
-    public double getLift() {
+    public Double getLift() {
         return lift;
     }
 
-    public void setLift(double lift) {
+    public void setLift(Double lift) {
         this.lift = lift;
     }
 
@@ -172,11 +207,11 @@ public class DanteLeadNotionObject {
         this.likelihoodBucketDisplayName = likelihoodBucketDisplayName;
     }
 
-    public int getLikelihoodBucketOffset() {
+    public Integer getLikelihoodBucketOffset() {
         return likelihoodBucketOffset;
     }
 
-    public void setLikelihoodBucketOffset(int likelihoodBucketOffset) {
+    public void setLikelihoodBucketOffset(Integer likelihoodBucketOffset) {
         this.likelihoodBucketOffset = likelihoodBucketOffset;
     }
 
@@ -188,11 +223,11 @@ public class DanteLeadNotionObject {
         this.modelId = modelId;
     }
 
-    public int getPercentile() {
+    public Integer getPercentile() {
         return percentile;
     }
 
-    public void setPercentile(int percentile) {
+    public void setPercentile(Integer percentile) {
         this.percentile = percentile;
     }
 
@@ -244,19 +279,19 @@ public class DanteLeadNotionObject {
         this.playType = playType;
     }
 
-    public double getProbability() {
+    public Double getProbability() {
         return probability;
     }
 
-    public void setProbability(double probability) {
+    public void setProbability(Double probability) {
         this.probability = probability;
     }
 
-    public int getRank() {
+    public Integer getRank() {
         return rank;
     }
 
-    public void setRank(int rank) {
+    public void setRank(Integer rank) {
         this.rank = rank;
     }
 
@@ -316,27 +351,27 @@ public class DanteLeadNotionObject {
         this.leadId = leadId;
     }
 
-    public int getRecommendationID() {
+    public Integer getRecommendationID() {
         return recommendationID;
     }
 
-    public void setRecommendationID(int recommendationID) {
+    public void setRecommendationID(Integer recommendationID) {
         this.recommendationID = recommendationID;
     }
 
-    public int getSalesforceAccountID() {
+    public Integer getSalesforceAccountID() {
         return salesforceAccountID;
     }
 
-    public void setSalesforceAccountID(int salesforceAccountID) {
+    public void setSalesforceAccountID(Integer salesforceAccountID) {
         this.salesforceAccountID = salesforceAccountID;
     }
 
-    public int getSfdcID() {
+    public Integer getSfdcID() {
         return sfdcID;
     }
 
-    public void setSfdcID(int sfdcID) {
+    public void setSfdcID(Integer sfdcID) {
         this.sfdcID = sfdcID;
     }
 

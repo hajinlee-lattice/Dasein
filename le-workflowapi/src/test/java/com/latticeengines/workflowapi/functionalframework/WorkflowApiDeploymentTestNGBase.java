@@ -26,7 +26,6 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
-
 @Listeners({ GlobalAuthCleanupTestListener.class })
 public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNGBase {
 
@@ -68,6 +67,7 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
     protected void setupTestTenant() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
         Tenant tenantWithPid = tenantService.findByTenantId(mainTestTenant.getId());
+        mainTestTenant = tenantWithPid;
         MultiTenantContext.setTenant(tenantWithPid);
     }
 
