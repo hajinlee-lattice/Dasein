@@ -1317,7 +1317,7 @@ public class InternalResource extends InternalResourceBase {
     public Play getPlay(@PathVariable String playName, @PathVariable String customerSpace) {
         manufactureSecurityContextForInternalAccess(customerSpace);
         log.debug(String.format("Get play with %s playName.", playName));
-        return playService.getPlayByName(playName);
+        return playService.getFullPlayByName(playName);
     }
 
     @RequestMapping(value = "/segment/{segmentName}/restriction/" + TENANT_ID_PATH, method = RequestMethod.GET)
