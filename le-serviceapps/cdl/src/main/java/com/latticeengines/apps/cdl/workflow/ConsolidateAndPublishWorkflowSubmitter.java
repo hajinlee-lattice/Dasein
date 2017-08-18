@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ConsolidateAndPublishWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -59,8 +60,8 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 throw new RuntimeException(
                         "We can't launch any consolidate workflow now as there is one still running.");
             }
-            JobStatus status = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()))
-                    .getJobStatus();
+            Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()));
+            JobStatus status = job.getJobStatus();
             if (!status.isTerminated()) {
                 throw new RuntimeException(
                         "We can't launch any consolidate workflow now as there is one still running.");
@@ -68,7 +69,8 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 log.info(String.format(
                         "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
                         execution, datafeed));
-                dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
+                dataFeedProxy.failExecution(customerSpace,
+                        job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
             }
         } else if (execution != null && DataFeedExecution.Status.Failed.equals(execution.getStatus())) {
             log.info("current execution failed, we will start a new one");
