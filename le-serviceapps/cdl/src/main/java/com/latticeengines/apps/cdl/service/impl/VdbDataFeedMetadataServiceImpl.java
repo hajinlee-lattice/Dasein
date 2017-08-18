@@ -85,15 +85,6 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             }
         }
 
-        Iterator<Attribute> attrIterator = attributes.iterator();
-        while (attrIterator.hasNext()) {
-            Attribute attribute = attrIterator.next();
-            if (!findMatch.contains(attribute.getName())) {
-                log.info(String.format("Remove unmatched column : %s", attribute.getName()));
-                attrIterator.remove();
-            }
-        }
-
         if (findMatch.size() != attributes.size()) {
             List<String> missingField = new ArrayList<>();
             for (Attribute attr : attributes) {
@@ -104,6 +95,15 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             if (missingField.size() > 0) {
                 throw new RuntimeException(
                         String.format("Missing the following required field: %s", String.join(",", missingField)));
+            }
+        }
+
+        Iterator<Attribute> attrIterator = attributes.iterator();
+        while (attrIterator.hasNext()) {
+            Attribute attribute = attrIterator.next();
+            if (!findMatch.contains(attribute.getName())) {
+                log.info(String.format("Remove unmatched column : %s", attribute.getName()));
+                attrIterator.remove();
             }
         }
 
