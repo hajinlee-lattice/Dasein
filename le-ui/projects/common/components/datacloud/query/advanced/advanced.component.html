@@ -2,10 +2,10 @@
     <div class="columns twelve">
         <ul class="row controls">
             <li class="buttons pull-right">
-                <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}"
+                <!-- <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}"
                     class="button icon-button white-button" target="_self" download>
                     <i class="fa fa-download"></i>
-                </a>
+                </a> -->
 
                 <button class="button icon-button white-button" ng-click="vm.goAttributes()" ng-disabled="vm.saving">Add Attributes</button>
                 <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>

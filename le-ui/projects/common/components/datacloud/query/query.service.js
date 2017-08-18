@@ -1,6 +1,6 @@
 angular.module('common.datacloud.query.service',[
 ])
-.service('QueryStore', function($filter, $q, $stateParams, $timeout, $destroy, QueryService, BucketRestriction) {
+.service('QueryStore', function($filter, $q, $stateParams, $timeout, QueryService, BucketRestriction) {
 
     angular.extend(this, {});
 
@@ -103,7 +103,6 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.setupStore = function(segment) {
-
         var self = this,
             deferred = $q.defer();
         
