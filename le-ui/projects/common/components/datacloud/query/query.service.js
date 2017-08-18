@@ -6,7 +6,7 @@ angular.module('common.datacloud.query.service',[
 
     this.validResourceTypes = ['accounts', 'contacts'];
     this.segment = null;
-    
+ 
     this.validContexts = ['accounts', 'contacts'];
     var allRestrictions = [];
     var anyRestrictions = [];
@@ -81,8 +81,6 @@ angular.module('common.datacloud.query.service',[
         self.setResourceTypeCount(resourceType, true);
     });
 
-
-
     this.setRestriction = function(restriction) {
         this.restriction = restriction;
     };
@@ -110,7 +108,7 @@ angular.module('common.datacloud.query.service',[
             allRestrictions = [],
             anyRestrictions = [];
         
-        // this.setSegment(segment);
+        this.setSegment(segment);
 
         if (segment != null) {
             // Set variables so I can manipulate later when unchecking box.
@@ -149,13 +147,11 @@ angular.module('common.datacloud.query.service',[
 
         this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
 
-        console.log(this.restriction);
-
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
             self.setResourceTypeCount('accounts', false, data);
         });
-        
+
     };
 
     this.removeRestriction = function(attribute) {
@@ -174,7 +170,6 @@ angular.module('common.datacloud.query.service',[
         }
 
         allRestrictions.splice(index, 1);
-
         this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
 
         var self = this;
@@ -298,19 +293,20 @@ angular.module('common.datacloud.query.service',[
     this.GetCountByQuery = function(resourceType, query) {
 
         canceler.resolve("cancelled");
-        var deferred = $q.defer(); 
+        canceler = $q.defer(); 
 
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/count',
-            data: query
+            data: query,
+            timeout: canceler.promise
         }).success(function(result) {
-            deferred.resolve(result);
+            canceler.resolve(result);
         }).error(function(result) {
-            deferred.resolve(result);
+            canceler.resolve(result);
         });
 
-        return deferred.promise;
+        return canceler.promise;
     };
 
     this.GetDataByQuery = function(resourceType, query, segment) {
