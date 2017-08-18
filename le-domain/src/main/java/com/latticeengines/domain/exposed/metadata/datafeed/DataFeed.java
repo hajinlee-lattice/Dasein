@@ -19,6 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -41,8 +42,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED", uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID",
-        "NAME" }))
+@Table(name = "DATAFEED", uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID", "NAME" }))
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serializable {
@@ -101,9 +101,9 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @Transient
     private List<DataFeedExecution> executions = new ArrayList<>();
 
+    @JsonProperty("tasks")
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("tasks")
     private List<DataFeedTask> tasks = new ArrayList<>();
 
     @Transient

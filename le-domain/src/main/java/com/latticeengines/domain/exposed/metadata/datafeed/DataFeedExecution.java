@@ -19,7 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Transient;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -28,10 +28,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED_EXECUTION")
+@Table(name = "DATAFEED_EXECUTION")
 public class DataFeedExecution implements HasPid, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
@@ -54,18 +53,14 @@ public class DataFeedExecution implements HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @JsonProperty("imports")
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "execution")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("imports")
     private List<DataFeedImport> imports = new ArrayList<>();
 
     @JsonProperty("workflow_id")
     @Column(name = "WORKFLOW_ID", nullable = true)
     private Long workflowId;
-
-    @JsonIgnore
-    @Transient
-    private List<Table> runtimeTables = new ArrayList<>();
 
     @Override
     public Long getPid() {
@@ -101,18 +96,6 @@ public class DataFeedExecution implements HasPid, Serializable {
 
     public void setImports(List<DataFeedImport> imports) {
         this.imports = imports;
-    }
-
-    public List<Table> getRunTables() {
-        return runtimeTables;
-    }
-
-    public void addRuntimeTable(Table table) {
-        runtimeTables.add(table);
-    }
-
-    public void setRuntimeTables(List<Table> tables) {
-        this.runtimeTables = tables;
     }
 
     public Status getStatus() {

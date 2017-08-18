@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -21,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
-@javax.persistence.Table(name = "DATAFEED_PROFILE")
+@Table(name = "DATAFEED_PROFILE")
 public class DataFeedProfile implements HasPid, Serializable {
 
     private static final long serialVersionUID = 5167450463065928362L;

@@ -140,7 +140,6 @@ public class DataCollection implements HasName, HasTenant, HasTenantId, HasPid {
         return JsonUtils.serialize(this);
     }
 
-
     // =====
     // Use datafeed entity mgr
     private List<DataFeed> getDatafeeds() {
