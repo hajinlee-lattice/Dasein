@@ -167,17 +167,21 @@ angular
         })
 
         ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
-
-            ImportService.StartTestingSet(vm.modelId, vm.csvFileName, true).then(function(result) {
-                $scope.saveInProgress = false;
-                if (result.Success) {
-                    $state.go('home.model.jobs', { 'jobCreationSuccess': result.Success });
-                } else {
-                    $state.go('home.model.scoring', { 'showImportError': result.Error });
-                }
-            });
-
+            ScoreLeadEnrichmentModal.showFileScoreModal(vm.modelId, vm.csvFileName, 'home.model.jobs');
         });
+
+        // ImportService.SaveFieldDocuments(vm.csvFileName, FieldDocument, true).then(function(result) {
+
+        //     ImportService.StartTestingSet(vm.modelId, vm.csvFileName, true).then(function(result) {
+        //         $scope.saveInProgress = false;
+        //         if (result.Success) {
+        //             $state.go('home.model.jobs', { 'jobCreationSuccess': result.Success });
+        //         } else {
+        //             $state.go('home.model.scoring', { 'showImportError': result.Error });
+        //         }
+        //     });
+
+        // });
 
     };
 

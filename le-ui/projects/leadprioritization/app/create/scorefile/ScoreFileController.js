@@ -82,15 +82,6 @@ angular.module('mainApp.create.csvBulkUpload', [
                 $state.go('home.model.scoring.mapping', { csvFileName: fileName });
             }, 1);
         }
-        
-        if (!IsPmml) {
-            ScoreLeadEnrichmentModal.showFileScoreModal(vm.params.modelId, vm.fileName);
-        } else {
-            ShowSpinner('Executing Scoring Job...');
-
-            ImportService.StartTestingSet(vm.params.modelId, vm.fileName, false).then(function(result) {
-                $state.go('home.model.jobs', { 'jobCreationSuccess': (!!vm.fileName) });
-            });
-        }
+    
     }
 });
