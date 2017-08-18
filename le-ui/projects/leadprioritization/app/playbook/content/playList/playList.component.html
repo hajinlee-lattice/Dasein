@@ -121,8 +121,9 @@
                         <button
                             type="button"
                             class="button gray-button pull-right"
-                            ng-if="vm.tileStates[play.name].launching">
-                            <i class="fa fa-spinner fa-pulse fw"></i> Launching...</button>
+                            ng-if="vm.tileStates[play.name].launching || play.launchHistory.playLaunch.launchState === 'Launching'">
+                            <i class="fa fa-spinner fa-pulse fw"></i> 
+                            Launching...</button>
                         <span 
                             class="launch-success pull-right" 
                             ng-if="play.launchHistory.playLaunch != null && play.segment != null">

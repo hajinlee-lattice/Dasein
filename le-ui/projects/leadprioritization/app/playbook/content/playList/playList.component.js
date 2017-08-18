@@ -58,6 +58,10 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
     });
 
     vm.init = function($q) {
+
+
+        // console.log(vm.plays);
+
         PlaybookWizardStore.clear();
         angular.forEach(PlayList, function(play) {
             vm.tileStates[play.name] = {
