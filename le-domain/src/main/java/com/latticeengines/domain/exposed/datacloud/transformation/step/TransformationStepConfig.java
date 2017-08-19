@@ -53,6 +53,9 @@ public class TransformationStepConfig {
     @JsonIgnore
     private String configuration;
 
+    @JsonProperty("CreateReport")
+    private boolean createReport;
+
     public String getTransformer() {
         return transformer;
     }
@@ -138,11 +141,11 @@ public class TransformationStepConfig {
     }
 
     public List<Integer> getInputSteps() {
-       return inputSteps;
+        return inputSteps;
     }
 
     public void setInputSteps(List<Integer> inputSteps) {
-       this.inputSteps = inputSteps;
+        this.inputSteps = inputSteps;
     }
 
     public String getStepType() {
@@ -159,5 +162,13 @@ public class TransformationStepConfig {
 
     public void setTargetTable(TargetTable targetTable) {
         this.targetTable = targetTable;
+    }
+
+    public boolean shouldCreateReport() {
+        return createReport;
+    }
+
+    public void setCreateReport(boolean createReport) {
+        this.createReport = createReport;
     }
 }

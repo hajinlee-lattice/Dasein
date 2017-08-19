@@ -50,6 +50,12 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private DataCollection.Version inactiveVersion;
 
     @Override
+    public void initialize() {
+        super.initialize();
+        setRunAgainWhenComplete(false);
+    }
+
+    @Override
     public void execute() {
         log.info("Inside ExportData execute()");
         customerSpace = configuration.getCustomerSpace().toString();

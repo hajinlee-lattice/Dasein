@@ -167,6 +167,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         targetTable.setNamePrefix(batchStoreTablePrefix);
         targetTable.setPrimaryKey(batchStorePrimaryKey);
         step4.setTargetTable(targetTable);
+        // step4.setCreateReport(true);
         return step4;
     }
 

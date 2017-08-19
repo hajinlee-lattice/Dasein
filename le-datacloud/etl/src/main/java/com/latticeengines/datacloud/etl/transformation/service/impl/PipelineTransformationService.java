@@ -276,7 +276,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                                     + baseTable.getCustomerSpace() + " : " + baseTable.getTableName());
                         }
                         if (table == null) {
-                            throw new RuntimeException("There is no table named " + baseTable.getTableName() + " for customer " + baseTable.getCustomerSpace());
+                            throw new RuntimeException("There is no table named " + baseTable.getTableName()
+                                    + " for customer " + baseTable.getCustomerSpace());
                         }
                         source = new TableSource(table, baseTable.getCustomerSpace());
                         involvedTableSources.put(sourceName, (TableSource) source);
@@ -366,7 +367,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                 log.info("Found a iterative step " + step.getName());
             } else {
                 step = new TransformStep(String.valueOf(stepIdx), transformer, baseSources, baseVersions, baseTemplates,
-                        target, targetVersion, targetTemplate, confStr);
+                        target, targetVersion, targetTemplate, confStr, config.shouldCreateReport());
                 log.info("Found a simple step " + step.getName());
             }
             steps[stepIdx] = step;
@@ -494,7 +495,8 @@ public class PipelineTransformationService extends AbstractTransformationService
                 int iteration = (Integer) iterationContext.get(CTX_ITERATION);
                 log.info("Starting " + iteration + "-th iteration ...");
                 succeeded = transformer.transform(progress, workflowDir, step);
-                saveSourceVersionWithoutHive(progress, null, step.getTarget(), step.getTargetVersion(), workflowDir, step.getCount());
+                saveSourceVersionWithoutHive(progress, null, step.getTarget(), step.getTargetVersion(), workflowDir,
+                        step.getCount());
                 cleanupWorkflowDir(progress, workflowDir);
                 converged = updateIterationContext(step, iterationContext);
                 if (!converged) {

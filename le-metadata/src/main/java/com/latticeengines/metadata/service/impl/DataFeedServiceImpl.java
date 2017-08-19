@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedProfileEntityMgr;
@@ -119,7 +119,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
 
         for (DataFeedTask task : dataFeed.getTasks()) {
-             datafeedTaskService.resetImport(customerSpace, task);
+            datafeedTaskService.resetImport(customerSpace, task);
         }
     }
 
@@ -136,16 +136,19 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     public Status getFailedDataFeedStatus(String initialDataFeedStatus) {
         Status datafeedStatus = Status.fromName(initialDataFeedStatus);
-        if (datafeedStatus == Status.InitialLoaded) {
+        switch (datafeedStatus) {
+        case InitialLoaded:
             return Status.InitialLoaded;
-        }
-        if (datafeedStatus == Status.InitialConsolidated) {
+        case InitialConsolidated:
             return Status.InitialConsolidated;
-        } else if (datafeedStatus == Status.Active) {
+        case Active:
+        case Consolidating:
             return Status.Active;
+        default:
+            throw new RuntimeException(
+                    String.format("Can't finish this execution due to datafeed status is %s", initialDataFeedStatus));
         }
-        throw new RuntimeException(
-                String.format("Can't finish this execution due to datafeed status is %s", initialDataFeedStatus));
+
     }
 
     @Override

@@ -19,7 +19,7 @@ public class ConsolidateDataHelper {
         List<String> dupeFields = new ArrayList<>();
         for (int i = 0; i < sourceNames.size(); i++) {
             Node source = sources.get(i);
-            Map<String, String> dupeFieldMapPerTable = checkAndSetDupeMap(sourceNames, dupeFieldMap, i);
+            Map<String, String> dupeFieldMapPerTable = checkAndSetDupeMap(sourceNames.get(i), dupeFieldMap);
             List<String> fieldNames = source.getFieldNames();
             List<String> oldNames = new ArrayList<>();
             List<String> newNames = new ArrayList<>();
@@ -44,13 +44,9 @@ public class ConsolidateDataHelper {
         }
     }
 
-    private Map<String, String> checkAndSetDupeMap(List<String> sourceNames,
-            Map<String, Map<String, String>> dupeFieldMap, int i) {
-        Map<String, String> dupeFieldMapPerTable = dupeFieldMap.get(sourceNames.get(i));
-        if (dupeFieldMapPerTable == null) {
-            dupeFieldMapPerTable = new HashMap<String, String>();
-            dupeFieldMap.put(sourceNames.get(i), dupeFieldMapPerTable);
-        }
+    private Map<String, String> checkAndSetDupeMap(String sourceName, Map<String, Map<String, String>> dupeFieldMap) {
+        dupeFieldMap.putIfAbsent(sourceName, new HashMap<String, String>());
+        Map<String, String> dupeFieldMapPerTable = dupeFieldMap.get(sourceName);
         return dupeFieldMapPerTable;
     }
 

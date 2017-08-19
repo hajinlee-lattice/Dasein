@@ -240,7 +240,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
             step4.setInputSteps(Arrays.asList(0, 2));
             step4.setTransformer("consolidateDataTransformer");
             step4.setConfiguration(getConsolidateDataMasterConfig());
-
+            step4.setCreateReport(true);
             targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
             targetTable.setNamePrefix(masterTableName);
@@ -394,8 +394,8 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
 
         List<String> fieldNames = Arrays.asList("ID", "Domain", "Email");
         List<Class<?>> clz = Arrays.asList((Class<?>) Integer.class, String.class, String.class);
-        uploadDataToHdfs(data, fieldNames, clz, "/" + "PipelineConsolidateDeploymentTestNG" + "/" + tableName1
-                + ".avro", tableName1);
+        uploadDataToHdfs(data, fieldNames, clz,
+                "/" + "PipelineConsolidateDeploymentTestNG" + "/" + tableName1 + ".avro", tableName1);
     }
 
     private void uploadTable2() {
@@ -406,8 +406,8 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         };
         List<String> fieldNames = Arrays.asList("ID", "Domain", "FirstName");
         List<Class<?>> clz = Arrays.asList((Class<?>) Integer.class, String.class, String.class);
-        uploadDataToHdfs(data, fieldNames, clz, "/" + "PipelineConsolidateDeploymentTestNG" + "/" + tableName2
-                + ".avro", tableName2);
+        uploadDataToHdfs(data, fieldNames, clz,
+                "/" + "PipelineConsolidateDeploymentTestNG" + "/" + tableName2 + ".avro", tableName2);
 
     }
 
@@ -420,8 +420,8 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         List<String> fieldNames = Arrays.asList("ID", "Domain", "FirstName", "LastName", "LatticeAccountId");
         List<Class<?>> clz = Arrays.asList((Class<?>) Integer.class, String.class, String.class, String.class,
                 String.class);
-        uploadDataToHdfs(data, fieldNames, clz, "/" + "PipelineConsolidateDeploymentTestNG" + "/" + masterTableName
-                + ".avro", masterTableName);
+        uploadDataToHdfs(data, fieldNames, clz,
+                "/" + "PipelineConsolidateDeploymentTestNG" + "/" + masterTableName + ".avro", masterTableName);
 
     }
 

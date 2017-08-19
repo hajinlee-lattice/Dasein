@@ -72,7 +72,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
     }
 
     protected P getParameters(TransformationProgress progress, Source[] baseSources, Source[] baseTemplates,
-            Source targetTemplate, T configuration, String confJson, List<String> baseVersions) {
+            Source targetTemplate, T configuration, String confJson, List<String> baseVersions,
+            boolean shouldCreateReport) {
         P parameters;
         try {
             parameters = getDataFlowParametersClass().newInstance();
@@ -125,7 +126,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         }
 
         parameters.setTemplateSourceMap(templateSourceMap);
-
+        parameters.setCreateReport(shouldCreateReport);
         updateParameters(parameters, baseTemplates, targetTemplate, configuration, baseVersions);
         return parameters;
     }
@@ -143,7 +144,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             // The order of base sources in the source object should match with
             // the order of base versions in the configuration
             P parameters = getParameters(progress, baseSources, baseTemplates, targetTemplate, configuration, confStr,
-                    baseSourceVersions);
+                    baseSourceVersions, step.shouldCreateReport());
             preDataFlowProcessing(step, workflowDir, parameters, configuration);
             Map<Source, List<String>> baseSourceVersionMap = setupBaseSourceVersionMap(step, parameters, configuration);
             Map<String, Table> baseTables = setupSourceTables(baseSourceVersionMap);
@@ -244,7 +245,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         return null;
     }
 
-    protected void preDataFlowProcessing(TransformStep step, String workflowDir, P parameters, T configuration) {}
+    protected void preDataFlowProcessing(TransformStep step, String workflowDir, P parameters, T configuration) {
+    }
 
     protected void postDataFlowProcessing(String workflowDir, P parameters, T configuration) {
     }

@@ -28,7 +28,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     protected Long jobId;
 
     private boolean dryRun = false;
-    private boolean runAgainWhenComplete = false;
+    private boolean runAgainWhenComplete = true;
     private Class<T> configurationClass;
     private JobParameters jobParameters;
 

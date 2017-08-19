@@ -23,9 +23,10 @@ public class TransformStep {
     private long elapsedTime;
     private Long count;
     private Map<String, Table> baseTables;
+    private boolean createReport;
 
     public TransformStep(String name, Transformer transformer, Source[] baseSources, List<String> baseVersions,
-                         Source[] baseTemplates, Source target, String targetVersion, Source targetTemplate, String config) {
+            Source[] baseTemplates, Source target, String targetVersion, Source targetTemplate, String config) {
         this.name = name;
         this.transformer = transformer;
         this.config = config;
@@ -35,6 +36,14 @@ public class TransformStep {
         this.target = target;
         this.targetVersion = targetVersion;
         this.targetTemplate = targetTemplate;
+    }
+
+    public TransformStep(String name, Transformer transformer, Source[] baseSources, List<String> baseVersions,
+            Source[] baseTemplates, Source target, String targetVersion, Source targetTemplate, String config,
+            boolean createReport) {
+        this(name, transformer, baseSources, baseVersions, baseTemplates, target, targetVersion, targetTemplate,
+                config);
+        this.createReport = createReport;
     }
 
     public String getName() {
@@ -103,6 +112,14 @@ public class TransformStep {
 
     public void setBaseTables(Map<String, Table> baseTables) {
         this.baseTables = baseTables;
+    }
+
+    public boolean shouldCreateReport() {
+        return createReport;
+    }
+
+    public void setCreateReport(boolean createReport) {
+        this.createReport = createReport;
     }
 
 }

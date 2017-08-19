@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataB
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.StartExecutionConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -66,6 +67,7 @@ public class StartExecution extends BaseWorkflowStep<StartExecutionConfiguration
                         .forEach(e -> {
                             log.info("enabling consolidate step:" + e.getKey());
                             e.getValue().setSkipStep(false);
+                            ((ConsolidateDataBaseConfiguration) e.getValue()).setPhase(Phase.PRE_PROCESSING);
                             putObjectInContext(e.getKey(), e.getValue());
                         });
             });

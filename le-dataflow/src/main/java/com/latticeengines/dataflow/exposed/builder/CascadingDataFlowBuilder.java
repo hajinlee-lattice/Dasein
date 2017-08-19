@@ -109,6 +109,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private DataFlowStepListener dataFlowStepListener = new DataFlowStepListener();
 
+    String lastOperator = null;
+
     public void reset() {
         counter = 1;
         taps = new HashMap<>();
@@ -947,7 +949,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             log.info("This dataflow cannot use flink engine, fall back to tez.");
         }
 
-        String lastOperator = null;
         if (sourceTables != null) {
             lastOperator = constructFlowDefinition(parameters).getIdentifier();
         } else {
@@ -955,15 +956,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         engine.setEnforceGlobalOrdering(enforceGlobalOrdering());
 
-        Tap<?, ?, ?> sink = createSink(lastOperator, targetPath);
-
-        FlowDef flowDef = FlowDef.flowDef().setName(flowName + "_" + DateTime.now().getMillis()) //
-                .addSources(getSources()) //
-                .addTailSink(getPipeByIdentifier(lastOperator), sink);
-
-        for (AbstractMap.SimpleEntry<Checkpoint, Tap> entry : checkpoints.values()) {
-            flowDef = flowDef.addCheckpoint(entry.getKey(), entry.getValue());
-        }
+        FlowDef flowDef = constructFlowDef();
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty(DataFlowProperty.HADOOPCONF, Configuration.class);
         Properties properties = new Properties();
@@ -1065,6 +1058,22 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         } finally {
             FlinkYarnCluster.shutdown();
         }
+    }
+
+    protected FlowDef constructFlowDef() {
+        String flowName = dataFlowCtx.getProperty(DataFlowProperty.FLOWNAME, String.class);
+        String targetPath = dataFlowCtx.getProperty(DataFlowProperty.TARGETPATH, String.class);
+        Tap<?, ?, ?> sink = createSink(lastOperator, targetPath);
+
+        FlowDef flowDef = FlowDef.flowDef().setName(flowName + "_" + DateTime.now().getMillis()) //
+                .addSources(getSources()) //
+                .addTailSink(getPipeByIdentifier(lastOperator), sink);
+
+        for (AbstractMap.SimpleEntry<Checkpoint, Tap> entry : checkpoints.values()) {
+            flowDef = flowDef.addCheckpoint(entry.getKey(), entry.getValue());
+        }
+
+        return flowDef;
     }
 
     private Tap<?, ?, ?> createCheckpointSink(String name) {
