@@ -214,30 +214,6 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowExecutionId relaunch(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob) {
-        JobExecution jobExecution = null;
-
-        try {
-            Job workflow = jobRegistry.getJob(workflowConfiguration.getWorkflowName());
-            JobParameters parameters = leJobExecutionRetriever
-                    .getJobExecution(workflowConfiguration.getWorkflowIdToRestart().getId()).getJobParameters();
-            jobExecution = jobLauncher.run(workflow, parameters);
-
-            workflowJob.setWorkflowId(jobExecution.getId());
-            workflowJobEntityMgr.registerWorkflowId(workflowJob);
-            log.info(String.format("Restarted workflow from jobExecutionId:%d. Created new jobExecutionId:%d",
-                    workflowConfiguration.getWorkflowIdToRestart().getId(), jobExecution.getId()));
-        } catch (JobInstanceAlreadyCompleteException | NoSuchJobException | JobRestartException
-                | JobParametersInvalidException | JobExecutionAlreadyRunningException e) {
-            throw new LedpException(LedpCode.LEDP_28002, e,
-                    new String[] { String.valueOf(workflowConfiguration.getWorkflowIdToRestart()),
-                            String.valueOf(workflowConfiguration.getWorkflowIdToRestart()) });
-        }
-
-        return new WorkflowExecutionId(jobExecution.getId());
-    }
-
-    @Override
     public void stop(WorkflowExecutionId workflowId) {
         try {
             WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());

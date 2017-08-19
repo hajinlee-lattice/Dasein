@@ -51,6 +51,4 @@ public interface WorkflowService {
 
     WorkflowExecutionId start(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob);
 
-    WorkflowExecutionId relaunch(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob);
-
 }
