@@ -50,12 +50,6 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private DataCollection.Version inactiveVersion;
 
     @Override
-    public void initialize() {
-        super.initialize();
-        setRunAgainWhenComplete(false);
-    }
-
-    @Override
     public void execute() {
         log.info("Inside ExportData execute()");
         customerSpace = configuration.getCustomerSpace().toString();
@@ -81,7 +75,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                 BusinessEntity entity = entry.getKey();
                 Table sourceTable = entry.getValue();
                 log.info("Upsert " + entity.getServingStore() + " table " + sourceTable.getName());
-                dataCollectionProxy.upsertTable(customerSpace, sourceTable.getName(), entity.getServingStore(), inactiveVersion);
+                dataCollectionProxy.upsertTable(customerSpace, sourceTable.getName(), entity.getServingStore(),
+                        inactiveVersion);
             }
         }
     }
@@ -108,7 +103,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         if (!createNew) { // upserting
             Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore(), inactiveVersion);
             if (oldTable == null) {
-                log.warn("Table for " + entity.getServingStore() + " at version " + inactiveVersion  + " does not exists. Switch to not append.");
+                log.warn("Table for " + entity.getServingStore() + " at version " + inactiveVersion
+                        + " does not exists. Switch to not append.");
                 createNew = true; // it is essentially creating new
             } else {
                 goodName = oldTable.getName();
