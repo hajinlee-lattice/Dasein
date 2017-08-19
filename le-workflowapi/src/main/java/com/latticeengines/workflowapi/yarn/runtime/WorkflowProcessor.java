@@ -78,7 +78,6 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
         try {
             if (workflowConfig.isRestart()) {
-                log.info("Restarting workflow " + workflowConfig.getWorkflowIdToRestart().getId());
                 workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart(), workflowJob);
             } else {
                 workflowId = workflowService.start(workflowConfig, workflowJob);
