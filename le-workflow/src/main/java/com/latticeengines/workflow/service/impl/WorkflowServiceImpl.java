@@ -381,4 +381,9 @@ public class WorkflowServiceImpl implements WorkflowService {
         }
         return inputs;
     }
+
+    @Override
+    public WorkflowJob getJob(long workflowId) {
+        return workflowJobEntityMgr.findByWorkflowId(workflowId);
+    }
 }

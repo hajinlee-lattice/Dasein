@@ -1,15 +1,12 @@
 package com.latticeengines.workflowapi.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,10 +22,14 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "workflow", description = "REST resource for workflows")
 @RestController
@@ -71,18 +72,21 @@ public class WorkflowResource implements WorkflowInterface {
         if (status == null) {
             throw new LedpException(LedpCode.LEDP_28017, new String[] { String.valueOf(workflowId) });
         } else if (!WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
-            throw new LedpException(LedpCode.LEDP_28018, new String[] { String.valueOf(workflowId),
-                    status.getStatus().name() });
+            throw new LedpException(LedpCode.LEDP_28018,
+                    new String[] { String.valueOf(workflowId), status.getStatus().name() });
         }
+        WorkflowJob workflowJob = workflowService.getJob(workflowId);
 
         WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
         workflowConfig.setWorkflowName(status.getWorkflowName());
         workflowConfig.setRestart(true);
         workflowConfig.setWorkflowIdToRestart(workflowExecutionId);
         workflowConfig.setCustomerSpace(status.getCustomerSpace());
+        workflowConfig.setInputProperties(workflowJob.getInputContext());
+        workflowConfig.setUserId(workflowJob.getUserId());
 
-        return new AppSubmission(Arrays.<ApplicationId> asList(new ApplicationId[] { workflowContainerService
-                .submitWorkFlow(workflowConfig) }));
+        return new AppSubmission(Arrays.<ApplicationId> asList(
+                new ApplicationId[] { workflowContainerService.submitWorkFlow(workflowConfig) }));
     }
 
     @RequestMapping(value = "/yarnapps/id/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

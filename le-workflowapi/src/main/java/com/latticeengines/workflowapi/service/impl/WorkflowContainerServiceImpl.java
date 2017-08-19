@@ -211,9 +211,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         for (WorkflowJob workflowJob : workflowJobs) {
             if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null) {
                 WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
-                if (workflowId == null
-                        || (workflowJob.getStatus() != null && workflowJob.getStatus().equals(
-                                FinalApplicationStatus.FAILED))) {
+                if (workflowId == null || (workflowJob.getStatus() != null
+                        && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED))) {
                     com.latticeengines.domain.exposed.workflow.Job job = getJobFromWorkflowJobAndYarn(workflowJob);
                     jobs.add(job);
                 } else {
@@ -247,7 +246,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         }
 
         // get state first from database
-        if (workflowJob.getStatus() != null && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED)) {
+        if (workflowJob.getStatus() != null && FinalApplicationStatus.FAILED.equals(workflowJob.getStatus())) {
             job.setJobStatus(JobStatus.FAILED);
         } else {
             WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
