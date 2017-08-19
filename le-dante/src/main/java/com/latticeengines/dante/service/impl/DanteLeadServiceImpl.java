@@ -75,6 +75,7 @@ public class DanteLeadServiceImpl implements DanteLeadService {
         lead.setExternalID(recommendation.getId());
         lead.setLastModificationDate(now);
         lead.setSalesforceID(recommendation.getSfdcAccountID());
+        lead.setRecommendaitonID(recommendation.getPid().intValue());
         lead.setValue(JsonUtils.serialize(new DanteLeadNotionObject(recommendation, play)));
         return lead;
     }
