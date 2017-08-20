@@ -132,7 +132,7 @@ public class WorkflowExecutionCache {
                 job.setJobStatus(JobStatus.FAILED);
             } else {
                 WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
-                if (job.getJobStatus() == null) {
+                if (job.getJobStatus() == null || job.getJobStatus() == JobStatus.PENDING) {
                     job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
                 }
             }
