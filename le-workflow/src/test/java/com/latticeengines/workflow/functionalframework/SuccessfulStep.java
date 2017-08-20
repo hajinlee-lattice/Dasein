@@ -13,6 +13,11 @@ public class SuccessfulStep extends AbstractStep<BaseStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(SuccessfulStep.class);
 
     @Override
+    public void initialize() {
+        this.setRunAgainWhenComplete(false);
+    }
+
+    @Override
     public void execute() {
         log.info("Inside SuccessfulStep execute()");
     }
