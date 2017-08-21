@@ -47,7 +47,7 @@
         </ul>
         <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
     </li>
-<!--
+    <!--
      <li class="download-link dropdown-container" ng-if="vm.section == 'segment.analysis'">
         <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}"
             target="_self" download=""
@@ -55,10 +55,10 @@
             <i class="fa fa-download"></i>
         </a>
     </li>
--->
-    <li class="refine-query" ng-if="!vm.inModel() && vm.section == 'segment.analysis'">
+    -->
+    <!-- <li class="refine-query" ng-if="!vm.inModel() && vm.section == 'segment.analysis'">
         <button class="save button white-button" ui-sref="home.import.entry">{{vm.label.button_import_data}}</button>
-    </li>
+    </li> -->
     <li class="refine-query" ng-if="vm.section == 'segment.analysis'">
         <button class="save button white-button" ng-disabled="vm.refineQueryDisabled" ng-click="vm.refineQuery()">{{vm.label.button_refine_query}}</button>
     </li>

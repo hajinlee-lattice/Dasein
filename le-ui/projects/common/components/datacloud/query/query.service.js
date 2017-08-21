@@ -105,7 +105,7 @@ angular.module('common.datacloud.query.service',[
     this.setupStore = function(segment) {
         var self = this,
             deferred = $q.defer();
-        
+
         this.setSegment(segment);
 
         if (segment != null) {
@@ -117,8 +117,15 @@ angular.module('common.datacloud.query.service',[
             deferred.resolve( this.setRestriction(segment.frontend_restriction) );
 
         } else {
+
+            anyRestrictions = [];
+            allRestrictions = [];
+
             // default state. restriction is empty.
             deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );
+
+            console.log(this.restriction);
+
         }
         return deferred.promise;
     };

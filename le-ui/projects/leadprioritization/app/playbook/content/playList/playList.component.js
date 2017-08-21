@@ -64,10 +64,11 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
 
         PlaybookWizardStore.clear();
         angular.forEach(PlayList, function(play) {
+
+
             vm.tileStates[play.name] = {
                 showCustomMenu: false,
-                editSegment: false,
-                launching: false
+                editSegment: false
             };
 
             if(play.segment != null) {

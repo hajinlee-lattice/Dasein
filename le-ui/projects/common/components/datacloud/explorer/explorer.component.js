@@ -129,6 +129,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.relanding = function() {
+
         vm.TileTableItems = {};
 
         if (vm.metadataSegments || QueryRestriction) {

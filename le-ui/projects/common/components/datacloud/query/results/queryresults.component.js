@@ -13,6 +13,7 @@ angular.module('common.datacloud.query.results', [
         accountsCount: AccountsCount,
         accountsWithoutSfId: CountWithoutSalesForce,
         loading: true,
+        saving: false,
         segment: QueryStore.getSegment(),
         restriction: QueryStore.getRestriction(),
         current: 1,
