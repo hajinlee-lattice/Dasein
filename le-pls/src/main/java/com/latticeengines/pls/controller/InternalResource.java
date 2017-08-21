@@ -725,22 +725,29 @@ public class InternalResource extends InternalResourceBase {
             for (User user : users) {
                 if (user.getEmail().equals(emailInfo.getUserId())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
-                    if (result.equals("COMPLETED")) {
-                        if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                    true);
-                        } else {
-                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                    false);
-                        }
-                    } else {
-                        if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, true);
-                        } else {
-                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, false);
-                        }
+                    switch (result.toUpperCase()) {
+                        case "COMPLETED":
+                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                        true);
+                            } else {
+                                emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                        false);
+                            }
+                            break;
+                        case "FAILED":
+                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                                emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, true);
+                            } else {
+                                emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, false);
+                            }
+                            break;
+                        default:
+                            log.warn(String.format("Non-completed nor failed model created. Model status: %s, " +
+                                    "Tenant ID: %s, Details: %s", result, tenantId, JsonUtils.serialize(emailInfo)));
+                            break;
                     }
                 }
             }
