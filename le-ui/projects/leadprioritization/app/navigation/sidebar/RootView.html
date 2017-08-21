@@ -27,7 +27,7 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SEGMENTATION')}}</span>
             </a>
         </li>
-        <li role="presentation" ng-class="{active: $state.includes('home.models') || $state.includes('home.models.history')}">
+        <li ng-if="!showCdlEnabledPage" role="presentation" ng-class="{active: $state.includes('home.models') || $state.includes('home.models.history')}">
             <a ui-sref="home.models" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}" ui-sref-opts="{reload: true}">
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MODEL_LIST')}}">
                     <span class="ico ico-model ico-light-gray"></span>
@@ -67,7 +67,7 @@
                 </span>
             </a>
         </li>
-        <li role="presentation" ng-class="{active: $state.includes('home.datacloud.explorer') || $state.includes('home.datacloud.lookup')}">
+        <li ng-if="!showCdlEnabledPage" role="presentation" ng-class="{active: $state.includes('home.datacloud.explorer') || $state.includes('home.datacloud.lookup')}">
             <a ui-sref="home.datacloud.explorer({section:'edit',category:'',subcategory:''})" ui-sref-opts="{reload:true}" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DATA_CLOUD')}}">
                 <span class="ico-container tool-tip" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DATA_CLOUD')}}">
                     <span class="ico ico-enrichment ico-light-gray"></span>
@@ -77,7 +77,7 @@
                 </span>
             </a>
         </li>
-        <li ng-if="showMarketoSettings" role="presentation" ng-class="{active: $state.includes('home.marketosettings')}">
+        <li ng-if="showMarketoSettings && !showCdlEnabledPage" role="presentation" ng-class="{active: $state.includes('home.marketosettings')}">
             <a ui-sref="home.marketosettings.apikey" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}">
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_MARKETO')}}">
                     <span class="ico ico-marketo ico-light-gray"></span>
@@ -87,7 +87,7 @@
                 </span>
             </a>
         </li>
-        <li ng-if="showEloquaSettings" role="presentation" ng-class="{active: $state.includes('home.eloquasettings')}">
+        <li ng-if="showEloquaSettings && !showCdlEnabledPage" role="presentation" ng-class="{active: $state.includes('home.eloquasettings')}">
             <a ui-sref="home.eloquasettings.apikey" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}">
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ELOQUA')}}">
                     <span class="ico ico-eloqua ico-light-gray"></span>
@@ -107,7 +107,7 @@
                 </span>
             </a>
         </li>
-        <li ng-if="showApiConsole" role="presentation" ui-sref-active="active">
+        <li ng-if="showApiConsole && !showCdlEnabledPage" role="presentation" ui-sref-active="active">
             <a ui-sref="home.apiconsole" analytics-on="click" analytics-event="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_API_CONSOLE')}}">
                 <span class="ico-container" data-stooltip="{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_API_CONSOLE')}}">
                     <span class="ico ico-api-console ico-light-gray"></span>

@@ -37,6 +37,7 @@ angular
             $scope.showPlayBook = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             $scope.showRatingsEngine = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             $scope.showSegmentationPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+            $scope.showCdlEnabledPage = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
             $scope.showLatticeInsightsPage = FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS);
             $scope.showContactUs = false;
         });
