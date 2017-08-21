@@ -37,7 +37,7 @@
                     
 
                     <div class="tile-header" ng-if="!vm.tileStates[play.name].editPlay">
-                        <h2 title="{{play.displayName}}">{{play.displayName | limitTo: 44 }}{{play.displayName.length > 44 ? '&hellip;' : ''}}</h2>
+                        <h2 title="{{play.displayName}}">{{play.displayName | limitTo: 30 }}{{play.displayName.length > 30 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
                             <button
                                     type="button"
