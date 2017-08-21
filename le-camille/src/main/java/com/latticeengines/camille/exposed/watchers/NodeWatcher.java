@@ -66,10 +66,15 @@ public class NodeWatcher {
     public static synchronized void updateWatchedData(String watcherName, String serializedData) {
         Path path = getWatcherPath(watcherName);
         try {
-            log.info("Changing data at watched node " + path + " to "+ serializedData);
-            CamilleEnvironment.getCamille().upsert(path, new Document(serializedData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            if (!CamilleEnvironment.getCamille().exists(path)) {
+                log.info("Creating watched node " + path + " with data " + serializedData);
+                CamilleEnvironment.getCamille().create(path, new Document(serializedData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            } else {
+                log.info("Changing data at watched node " + path + " to " + serializedData);
+                CamilleEnvironment.getCamille().upsert(path, new Document(serializedData), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Failed up update watcher " + watcherName);
+            throw new RuntimeException("Failed to update watcher " + watcherName, e);
         }
     }
 
@@ -77,9 +82,13 @@ public class NodeWatcher {
         Path path = getWatcherPath(watcherName);
         if (path != null) {
             try {
-                return CamilleEnvironment.getCamille().get(path).getData();
+                if (CamilleEnvironment.getCamille().exists(path)) {
+                    return CamilleEnvironment.getCamille().get(path).getData();
+                } else {
+                    return null;
+                }
             } catch (Exception e) {
-                throw new RuntimeException("Failed get data at watcher " + watcherName);
+                throw new RuntimeException("Failed get data at watcher " + watcherName, e);
             }
         }
         return null;
