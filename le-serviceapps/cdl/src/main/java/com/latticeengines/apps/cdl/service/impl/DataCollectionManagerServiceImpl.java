@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("dataCollectionManagerService")
@@ -43,7 +44,9 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
             return true;
         }
 
-        quiesceDataFeed(customerSpaceStr, df);
+        if ((status == DataFeed.Status.Consolidating) || (status == DataFeed.Status.Profiling)) {
+            quiesceDataFeed(customerSpaceStr, df);
+        }
 
         dataFeedProxy.updateDataFeedStatus(customerSpaceStr, DataFeed.Status.Initing.getName());
 
@@ -71,24 +74,33 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
         return true;
     }
 
+    private void stopWorkflow(Long workflowId) {
+        if (workflowId == null) {
+            return;
+        }
+        try {
+            Job job = workflowProxy.getWorkflowExecution(workflowId.toString());
+            if ((job != null) && (job.isRunning())) {
+                workflowProxy.stopWorkflow(workflowId.toString());
+            }
+        } catch (Exception e) {
+            log.error("Failed to stop workflow " + workflowId, e);
+        }
+    } 
+
     private void quiesceDataFeed(String customerSpaceStr, DataFeed df) {
         DataFeedExecution exec = df.getActiveExecution();
         if (exec != null) {
-            Long workflowId = exec.getWorkflowId();
-            if (workflowId != null) {
-                workflowProxy.stopWorkflow(workflowId.toString());
-            }
+            stopWorkflow(exec.getWorkflowId());
             dataFeedProxy.finishExecution(customerSpaceStr, DataFeed.Status.Active.getName());
         }
 
         DataFeedProfile profile = df.getActiveProfile();
         if (profile != null) {
-            Long workflowId = profile.getWorkflowId();
-            if (workflowId != null) {
-                workflowProxy.stopWorkflow(workflowId.toString());
-            }
+            stopWorkflow(profile.getWorkflowId());
         }
     }
+
 
     private void resetImport(String customerSpaceStr) {
         dataFeedProxy.resetImport(customerSpaceStr);
