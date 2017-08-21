@@ -2,14 +2,22 @@ angular.module('lp.playbook.dashboard', [
     'mainApp.appCommon.utilities.TimestampIntervalUtility'
 ])
 .controller('PlaybookDashboard', function(
-    $q, $stateParams, $state, $interval,
+    $q, $scope, $stateParams, $state, $interval,
     PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore
 ) {
     var vm = this,
         play_name = $stateParams.play_name,
-        launchButtonBase = {
-            label: 'Launch',
-            state: ''
+        launchButtonStates = {
+            initial: {
+                label: 'Launch',
+                state: ''
+            },
+            Launching: {
+                label: 'Launching'
+            },
+            Launched: {
+                label: 'Re-Launch Now'
+            }
         };
 
     angular.extend(vm, {
@@ -19,7 +27,8 @@ angular.module('lp.playbook.dashboard', [
         invalid: [],
         editable: true,
         play: null,
-        launchButton: angular.copy(launchButtonBase)
+        launchButton: angular.copy(launchButtonStates.initial),
+        showLaunchSpinner: false
     });
 
 
@@ -36,12 +45,14 @@ angular.module('lp.playbook.dashboard', [
     }
     
     vm.launchPlay = function() {
-        vm.showLaunchSpinner = true;
-        PlaybookWizardStore.launchPlay(vm.play).then(function(data) {
-            vm.launchHistory.push(data);
-            vm.showLaunchSpinner = false;
-            $state.go('home.playbook.dashboard.launch_job', {play_name: vm.play.name, applicationId: data.applicationId});
-        });
+        if(!vm.showLaunchSpinner) {
+            vm.showLaunchSpinner = true;
+            PlaybookWizardStore.launchPlay(vm.play).then(function(data) {
+                vm.launchHistory.push(data);
+                vm.showLaunchSpinner = false;
+                $state.go('home.playbook.dashboard.launch_job', {play_name: vm.play.name, applicationId: data.applicationId});
+            });
+        }
     }
 
     var findByPath = function(path, obj) {
@@ -141,13 +152,14 @@ angular.module('lp.playbook.dashboard', [
     var makeLaunchButton = function(launchHistory) {
         var state = (vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
         vm.launchButton.state = state;
-        if(state === 'Launched') {
-            vm.launchButton.label = 'Re-Launch now';
-        } else if(state === 'Launching' ) {
-            vm.launchButton.label = 'Launching';
+        if(state) {
+            vm.launchButton.label = launchButtonStates[state].label;
+        } else {
+            vm.launchButton.label = launchButtonStates.initial.label;
         }
-        
     }
+
+    var checkLaunchState;
     var getPlay = function() {
         PlaybookWizardStore.getPlay(play_name).then(function(play){
             vm.play = play;
@@ -159,25 +171,38 @@ angular.module('lp.playbook.dashboard', [
 
             if(vm.launchedState === 'Launching') { // if it's in a launching state check every 10 seconds so we can update the button, then stop checking
                 vm.showLaunchSpinner = true;
-                var checkLaunchState = $interval(function() {
+
+                checkLaunchState = $interval(function() {
                     PlaybookWizardStore.getPlayLaunches(play_name).then(function(results){
                         var result = results[0];
                         vm.launchHistory = results;
                         vm.launchedState = (result && result.launchState ? result.launchState : null);
 
                         if(vm.launchedState === 'Failed') {
-                            vm.launchButton = launchButtonBase;
+                            if(play.launchHistory.playLaunch) {
+                                vm.launchButton.label = launchButtonStates.Launched.label;
+                                vm.launchButton.state = 'Launched';
+                            } else {
+                                vm.launchButton = launchButtonStates.initial;
+                            }
+                        }
+                        if(vm.launchedState === 'Launched') {
+                            vm.launchButton.label = launchButtonStates.Launched.label;
+                            vm.launchButton.state = vm.launchedState;
                         }
                         if(vm.launchedState === 'Launched' || vm.launchedState === 'Failed') {
                             $interval.cancel(checkLaunchState);
                             vm.showLaunchSpinner = false;
                         }
                     });
-                }, 10000);
+                }, 1 * 1000);
             }
         });
     }
 
+    $scope.$on('$destroy', function() {
+        $interval.cancel(checkLaunchState);
+    });
 
     //PlaybookWizardStore.clear();
     if(play_name) {

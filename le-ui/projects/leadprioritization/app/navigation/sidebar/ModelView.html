@@ -14,7 +14,8 @@
                 <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span>
             </a>
         </li>
-        <li ng-if="showAnalysisPage" role="presentation" ui-sref-active="active">
+<!--
+         <li ng-if="showAnalysisPage" role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.analysis" analytics-on="click" analytics-event="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ANALYSIS')}}">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ANALYSIS')}}">
                     <span class="ico ico-analysis ico-light-gray"></span>
@@ -30,7 +31,8 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SEGMENTATION')}}</span>
             </a>
         </li>
-        <li ng-if="IsPmml == false" role="presentation" ui-sref-active="active">
+ -->
+         <li ng-if="IsPmml == false" role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.attributes" analytics-on="click" analytics-event="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
                 <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
                     <span class="ico ico-attributes ico-light-gray"></span>
