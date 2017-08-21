@@ -1,66 +1,57 @@
 package com.latticeengines.domain.exposed.query;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.RuleBucketName;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CaseLookup extends Lookup {
 
-    public static final String ACCOUNT_RULE = "accountRule";
-    public static final String CONTACT_RULE = "contactRule";
+    @JsonProperty("alias")
+    private String alias;
 
-    @JsonProperty("bucketToRuleMap")
-    private TreeMap<String, Map<String, Restriction>> bucketToRuleMap = generateDefaultBuckets();
+    @JsonProperty("cases")
+    private TreeMap<String, Restriction> caseMap;
 
-    @JsonProperty("defaultBucketName")
-    private String defaultBucketName = RuleBucketName.C.getName();
-
-    public CaseLookup() {
+    // for jackson
+    private CaseLookup() {
     }
 
-    public void setBucketToRuleMap(TreeMap<String, Map<String, Restriction>> bucketToRuleMap) {
-        this.bucketToRuleMap = bucketToRuleMap;
+    public CaseLookup(TreeMap<String, Restriction> caseMap, String alias) {
+        this.caseMap = caseMap;
+        this.alias = alias;
     }
 
-    public TreeMap<String, Map<String, Restriction>> getBucketToRuleMap() {
-        return this.bucketToRuleMap;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setDefaultBucketName(String defaultBucketName) {
-        this.defaultBucketName = defaultBucketName;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
-    public String getDefaultBucketName() {
-        return this.defaultBucketName;
+    public TreeMap<String, Restriction> getCaseMap() {
+        return caseMap;
     }
 
-    private TreeMap<String, Map<String, Restriction>> generateDefaultBuckets() {
-        TreeMap<String, Map<String, Restriction>> map = new TreeMap<>();
-        map.put(RuleBucketName.A.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.A_MINUS.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.B.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.C.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.D.getName(), generateDefaultAccountAndContactBuckets());
-        map.put(RuleBucketName.F.getName(), generateDefaultAccountAndContactBuckets());
-        return map;
+    public void setCaseMap(TreeMap<String, Restriction> caseMap) {
+        this.caseMap = caseMap;
     }
 
-    @SuppressWarnings({ "unchecked", "unused" })
-    private Map<String, Restriction> generateDefaultAccountAndContactBuckets() {
-        Map<String, Restriction> map = new HashMap<>();
-        map.put(ACCOUNT_RULE, Restriction.builder().and(Collections.<Restriction> emptyList()).build());
-        map.put(CONTACT_RULE, Restriction.builder().and(Collections.<Restriction> emptyList()).build());
-        return map;
+    @Override
+    public Collection<? extends GraphNode> getChildren() {
+        if (caseMap != null) {
+            return caseMap.values();
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override

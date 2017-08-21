@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.domain.exposed.query.CaseLookup;
 
 @Entity
 @javax.persistence.Table(name = "RULE_BASED_MODEL")
@@ -28,18 +27,18 @@ public class RuleBasedModel extends RatingModel {
     }
 
     @JsonIgnore
-    @Column(name = "CASE_LOOKUP", nullable = true)
+    @Column(name = "RULE", nullable = true)
     @Type(type = "text")
-    private String caseLookupStr;
+    private String ratingRule;
 
-    @JsonProperty("caseLookup")
-    public void setCaseLookup(CaseLookup caseLookup) {
-        this.caseLookupStr = caseLookup.toString();
+    @JsonProperty("ratingRule")
+    public void setRatingRule(RatingRule ratingRule) {
+        this.ratingRule = JsonUtils.serialize(ratingRule);
     }
 
-    @JsonProperty("caseLookup")
-    public CaseLookup getCaseLookup() {
-        return JsonUtils.deserialize(this.caseLookupStr, CaseLookup.class);
+    @JsonProperty("ratingRule")
+    public RatingRule getRatingRule() {
+        return JsonUtils.deserialize(this.ratingRule, RatingRule.class);
     }
 
     @Override

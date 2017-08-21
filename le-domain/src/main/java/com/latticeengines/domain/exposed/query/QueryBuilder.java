@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,6 +30,15 @@ public class QueryBuilder {
         for (String attr : attrs) {
             lookups.add(new AttributeLookup(entity, attr));
         }
+        return this;
+    }
+
+    public QueryBuilder select(TreeMap<String, Restriction> caseMap, String alias) {
+        return select(new CaseLookup(caseMap, alias));
+    }
+
+    public QueryBuilder select(CaseLookup caseLookup) {
+        lookups.add(caseLookup);
         return this;
     }
 
