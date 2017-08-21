@@ -32,7 +32,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testWindowFunctionComparison() throws SQLException {
         SQLQueryFactory factory = factory();
-        StringPath tablePath = Expressions.stringPath("SegmentUI");
+        StringPath tablePath = Expressions.stringPath("query_test");
         StringPath idPath = Expressions.stringPath(tablePath, "accountid");
         StringPath innerPath = Expressions.stringPath("inner");
         long count = factory
@@ -52,7 +52,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCount() throws SQLException {
         SQLQueryFactory factory = factory();
-        StringPath tablePath = Expressions.stringPath("SegmentUI");
+        StringPath tablePath = Expressions.stringPath("query_test");
         try (PerformanceTimer timer = new PerformanceTimer("getCount")) {
             long count = factory.query().from(tablePath).fetchCount();
             Assert.assertTrue(count > 0);
@@ -61,8 +61,8 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testExists() {
-        StringPath outerTable = Expressions.stringPath("SegmentUI");
-        StringPath innerTable = Expressions.stringPath("SegmentUI");
+        StringPath outerTable = Expressions.stringPath("query_test");
+        StringPath innerTable = Expressions.stringPath("query_test");
 
         StringPath outerColumn = Expressions.stringPath(outerTable, "accountid");
         StringPath innerColumn = Expressions.stringPath(innerTable, "accountid");
@@ -81,7 +81,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testWindowFunctionBug() throws SQLException {
         SQLQueryFactory factory = factory();
-        StringPath tablePath = Expressions.stringPath("SegmentUI");
+        StringPath tablePath = Expressions.stringPath("query_test");
         StringPath columnPath = Expressions.stringPath(tablePath, "accountid");
         StringPath innerPath = Expressions.stringPath("inner");
         SQLQuery<?> query = factory

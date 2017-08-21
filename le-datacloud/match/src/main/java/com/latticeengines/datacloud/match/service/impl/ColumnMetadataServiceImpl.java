@@ -9,7 +9,6 @@ import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 
 @Component("columnMetadataService")
@@ -34,11 +33,6 @@ public class ColumnMetadataServiceImpl extends BaseColumnMetadataServiceImpl<Ext
     @Override
     protected String getLatestVersion() {
         return latstRtsCache;
-    }
-
-    @Override
-    public AttributeRepository getAttrRepo(String dataCloudVersion) {
-        throw new UnsupportedOperationException("Attribute repository is not supported in 1.0.0");
     }
 
     @Override

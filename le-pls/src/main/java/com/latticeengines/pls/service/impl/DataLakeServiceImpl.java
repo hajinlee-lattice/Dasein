@@ -39,12 +39,10 @@ import com.latticeengines.domain.exposed.metadata.statistics.Statistics;
 import com.latticeengines.domain.exposed.metadata.statistics.SubcategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.pls.service.DataLakeService;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -58,9 +56,6 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Autowired
     private AttributeCustomizationService attributeCustomizationService;
-
-    @Autowired
-    private ColumnMetadataProxy columnMetadataProxy;
 
     private WatcherCache<String, Statistics> statsCache = null;
     private WatcherCache<String, List<ColumnMetadata>> cmCache = null;
@@ -107,17 +102,6 @@ public class DataLakeServiceImpl implements DataLakeService {
             if (!BusinessEntity.LatticeAccount.equals(entity)) {
                 cms.addAll(getAttributesInEntity(customerSpace, entity));
             }
-        }
-        // TODO: backward compatible with old account table
-        if (cms.size() < 10_000) {
-            log.info("Append AM column metadata.");
-            Set<String> includedAttrs = getAttrsInStats(customerSpace);
-            String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-            List<ColumnMetadata> amCms = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
-                    currentDataCloudVersion);
-            amCms.forEach(cm -> cm.setEntity(BusinessEntity.LatticeAccount));
-            amCms.removeIf(cm -> !includedAttrs.contains(cm.getColumnId()));
-            cms.addAll(amCms);
         }
         return cms;
     }

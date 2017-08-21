@@ -1,6 +1,5 @@
 package com.latticeengines.objectapi.functionalframework;
 
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -8,10 +7,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.functionalframework.QueryTestUtils;
-import com.latticeengines.query.util.AttrRepoUtils;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-objectapi-context.xml" })
@@ -20,17 +17,11 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
     @Autowired
     protected QueryEvaluator queryEvaluator;
 
-    @Autowired
-    private AttrRepoUtils attrRepoUtils;
-
     protected AttributeRepository attrRepo;
 
     @BeforeClass(groups = "functional")
     public void setupBase() {
         attrRepo = QueryTestUtils.getCustomerAttributeRepo();
-        ColumnMetadataProxy proxy = Mockito.mock(ColumnMetadataProxy.class);
-        Mockito.when(proxy.getAttrRepo()).thenReturn(QueryTestUtils.getAMAttributeRepo());
-        attrRepoUtils.setColumnMetadataProxy(proxy);
     }
 
 }

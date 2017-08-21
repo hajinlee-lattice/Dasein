@@ -12,20 +12,16 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.query.evaluator.lookup.LookupResolverFactory;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.exposed.factory.QueryFactory;
-import com.latticeengines.query.util.AttrRepoUtils;
 
 public final class RestrictionResolverFactory {
-
-    protected AttrRepoUtils attrRepoUtils;
 
     private LookupResolverFactory lookupFactory;
     private List<JoinSpecification> existsJoins;
     private QueryFactory queryFactory;
     private Map<String, RestrictionResolver> resolvers = new HashMap<>();
 
-    public RestrictionResolverFactory(AttrRepoUtils attrRepoUtils, LookupResolverFactory lookupFactory,
+    public RestrictionResolverFactory(LookupResolverFactory lookupFactory,
             List<JoinSpecification> existsJoins, QueryFactory queryFactory) {
-        this.attrRepoUtils = attrRepoUtils;
         this.lookupFactory = lookupFactory;
         this.existsJoins = existsJoins;
         this.queryFactory = queryFactory;
@@ -65,9 +61,5 @@ public final class RestrictionResolverFactory {
 
     QueryFactory getQueryFactory() {
         return queryFactory;
-    }
-
-    public AttrRepoUtils getAttrRepoUtils() {
-        return attrRepoUtils;
     }
 }

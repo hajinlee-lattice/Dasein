@@ -21,11 +21,6 @@ public class ContactQueryDecorator extends QueryDecorator {
     }
 
     @Override
-    public String[] getLDCLookups() {
-        return new String[] {};
-    }
-
-    @Override
     public BusinessEntity getFreeTextSearchEntity() {
         return BusinessEntity.Contact;
     }

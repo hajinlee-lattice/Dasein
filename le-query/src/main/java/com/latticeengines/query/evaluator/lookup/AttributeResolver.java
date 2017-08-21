@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
-import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
@@ -20,8 +19,8 @@ import edu.emory.mathcs.backport.java.util.Collections;
 public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
         implements LookupResolver<AttributeLookup> {
 
-    public AttributeResolver(AttrRepoUtils attrRepoUtils, AttributeRepository repository) {
-        super(attrRepoUtils, repository);
+    public AttributeResolver(AttributeRepository repository) {
+        super(repository);
     }
 
     @SuppressWarnings("unchecked")

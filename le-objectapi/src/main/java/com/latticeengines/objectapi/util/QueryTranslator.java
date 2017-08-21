@@ -57,7 +57,6 @@ public class QueryTranslator {
             });
         } else if (decorator != null) {
             if (decorator.addSelects()) {
-                queryBuilder.select(BusinessEntity.LatticeAccount, decorator.getLDCLookups());
                 queryBuilder.select(decorator.getLookupEntity(), decorator.getEntityLookups());
             }
             queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),

@@ -11,14 +11,11 @@ import com.latticeengines.query.util.AttrRepoUtils;
 
 public abstract class BaseRestrictionResolver<T extends Restriction> {
 
-    protected AttrRepoUtils attrRepoUtils;
-
     protected RestrictionResolverFactory factory;
     protected LookupResolverFactory lookupFactory;
     private AttributeRepository attrRepo;
 
     BaseRestrictionResolver(RestrictionResolverFactory factory) {
-        this.attrRepoUtils = factory.getAttrRepoUtils();
         this.lookupFactory = factory.getLookupFactory();
         this.factory = factory;
     }
@@ -36,7 +33,7 @@ public abstract class BaseRestrictionResolver<T extends Restriction> {
         if (attrRepo == null) {
             attrRepo = getAttrRepo();
         }
-        return attrRepoUtils.getAttribute(attrRepo, attributeLookup);
+        return AttrRepoUtils.getAttribute(attrRepo, attributeLookup);
     }
 
 }

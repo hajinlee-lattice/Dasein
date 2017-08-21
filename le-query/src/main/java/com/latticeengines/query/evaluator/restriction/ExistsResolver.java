@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.query.JoinSpecification;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -43,7 +44,7 @@ public class ExistsResolver extends BaseRestrictionResolver<ExistsRestriction>
         BusinessEntity srcEntity = join.getSourceEntity();
         BusinessEntity.Relationship relationship = srcEntity.join(tgtEntity);
         List<Predicate> joinPredicates = QueryUtils.getJoinPredicates(relationship);
-        StringPath mainTable = attrRepoUtils.getTablePath(attrRepo, tgtEntity);
+        StringPath mainTable = AttrRepoUtils.getTablePath(attrRepo, tgtEntity);
         SQLQuery<?> query = queryFactory.getQuery(attrRepo).from(mainTable.as(tgtEntity.name()));
         Restriction innerRestriction = restriction.getRestriction();
         RestrictionResolver innerResolver = factory.getRestrictionResolver(innerRestriction.getClass());

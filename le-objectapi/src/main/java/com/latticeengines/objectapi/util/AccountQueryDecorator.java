@@ -17,17 +17,12 @@ public class AccountQueryDecorator extends QueryDecorator {
 
     @Override
     public String[] getEntityLookups() {
-        return new String[] { "SalesforceAccountID" };
-    }
-
-    @Override
-    public String[] getLDCLookups() {
-        return new String[] { "LDC_Domain", "LDC_Name", "LDC_Country", "LDC_City", "LDC_State" };
+        return new String[] { "LDC_Domain", "LDC_Name", "LDC_Country", "LDC_City", "LDC_State", "SalesforceAccountID" };
     }
 
     @Override
     public BusinessEntity getFreeTextSearchEntity() {
-        return BusinessEntity.LatticeAccount;
+        return BusinessEntity.Account;
     }
 
     @Override

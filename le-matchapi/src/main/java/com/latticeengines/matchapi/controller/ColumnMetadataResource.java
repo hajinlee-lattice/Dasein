@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
@@ -78,18 +77,6 @@ public class ColumnMetadataResource {
         ColumnMetadataService columnMetadataService = beanDispatcher
                 .getColumnMetadataService(dataCloudVersion);
         return columnMetadataService.findAll(dataCloudVersion);
-    }
-
-    @ApiIgnore
-    @RequestMapping(value = "/attrrepo", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ApiOperation(value = "Get attribute repository.")
-    public AttributeRepository getAttrRepoAtVersion(
-            @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
-        if (StringUtils.isBlank(dataCloudVersion)){
-            dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
-        }
-        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
-        return columnMetadataService.getAttrRepo(dataCloudVersion);
     }
 
     @ApiIgnore

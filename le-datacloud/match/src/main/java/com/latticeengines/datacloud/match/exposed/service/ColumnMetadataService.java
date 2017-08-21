@@ -6,7 +6,6 @@ import org.apache.avro.Schema;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -23,8 +22,6 @@ public interface ColumnMetadataService extends HasDataCloudVersion {
             String dataCloudVersion);
 
     List<ColumnMetadata> findAll(String dataCloudVersion);
-
-    AttributeRepository getAttrRepo(String dataCloudVersion);
 
     StatsCube getStatsCube(String dataCloudVersion);
 

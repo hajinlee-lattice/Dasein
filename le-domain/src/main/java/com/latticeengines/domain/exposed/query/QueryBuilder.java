@@ -33,10 +33,6 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder select(TreeMap<String, Restriction> caseMap, String alias) {
-        return select(new CaseLookup(caseMap, alias));
-    }
-
     public QueryBuilder select(CaseLookup caseLookup) {
         lookups.add(caseLookup);
         return this;

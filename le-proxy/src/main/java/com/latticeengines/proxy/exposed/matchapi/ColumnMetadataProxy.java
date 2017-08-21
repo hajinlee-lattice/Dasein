@@ -20,7 +20,6 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
@@ -29,7 +28,6 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 @Component("columnMetadataProxyMatchapi")
 public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface {
 
-    private static final String ATTR_REPO = "AttrRepo";
     private static final String STATS_CUBE = "StatsCube";
     private static final String TOPN_TREE = "TopNTree";
 
@@ -78,7 +76,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                 .watch(AMApiUpdate) //
                 .maximum(5) //
                 .load(key -> getStatsObjectViaREST((String) key)) //
-                .initKeys(new String[] { ATTR_REPO, STATS_CUBE, TOPN_TREE }) //
+                .initKeys(new String[] { STATS_CUBE, TOPN_TREE }) //
                 .build();
     }
 
@@ -146,10 +144,6 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return metadataList;
     }
 
-    public AttributeRepository getAttrRepo() {
-        return (AttributeRepository) amStatsCache.get(ATTR_REPO);
-    }
-
     public StatsCube getStatsCube() {
         return (StatsCube) amStatsCache.get(STATS_CUBE);
     }
@@ -160,8 +154,6 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     private Object getStatsObjectViaREST(String key) {
         switch (key) {
-            case ATTR_REPO:
-                return get("get AM attr repo", constructUrl("/attrrepo"), AttributeRepository.class);
             case STATS_CUBE:
                 return get("get AM status cube", constructUrl("/statscube"), StatsCube.class);
             case TOPN_TREE:

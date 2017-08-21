@@ -59,14 +59,6 @@ public class DataCloudVersion implements HasPid, Serializable {
     private String accountLookupHdfsVersion;
 
     @JsonIgnore
-    @Column(name = "AMBucketedRedShiftTable")
-    private String amBucketedRedShiftTable;
-
-    @JsonIgnore
-    @Column(name = "SegmentStatsVersion", length = 100)
-    private String segmentStatsVersion;
-
-    @JsonIgnore
     @Column(name = "EnrichmentStatsVersion", length = 100)
     private String enrichmentStatsVersion;
 
@@ -159,22 +151,6 @@ public class DataCloudVersion implements HasPid, Serializable {
 
     public void setDynamoTableSignatureLookup(String dynamoTableSignatureLookup) {
         this.dynamoTableSignatureLookup = dynamoTableSignatureLookup;
-    }
-
-    public String getAmBucketedRedShiftTable() {
-        return amBucketedRedShiftTable;
-    }
-
-    public void setAmBucketedRedShiftTable(String amBucketedRedShiftTable) {
-        this.amBucketedRedShiftTable = amBucketedRedShiftTable;
-    }
-
-    public String getSegmentStatsVersion() {
-        return segmentStatsVersion;
-    }
-
-    public void setSegmentStatsVersion(String segmentStatsVersion) {
-        this.segmentStatsVersion = segmentStatsVersion;
     }
 
     public String getEnrichmentStatsVersion() {

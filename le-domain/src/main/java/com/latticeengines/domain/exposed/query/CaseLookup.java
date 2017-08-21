@@ -20,12 +20,16 @@ public class CaseLookup extends Lookup {
     @JsonProperty("cases")
     private TreeMap<String, Restriction> caseMap;
 
+    @JsonProperty("default")
+    private String defaultCase;
+
     // for jackson
     private CaseLookup() {
     }
 
-    public CaseLookup(TreeMap<String, Restriction> caseMap, String alias) {
+    public CaseLookup(TreeMap<String, Restriction> caseMap, String defaultCase, String alias) {
         this.caseMap = caseMap;
+        this.defaultCase = defaultCase;
         this.alias = alias;
     }
 
@@ -43,6 +47,14 @@ public class CaseLookup extends Lookup {
 
     public void setCaseMap(TreeMap<String, Restriction> caseMap) {
         this.caseMap = caseMap;
+    }
+
+    public String getDefaultCase() {
+        return defaultCase;
+    }
+
+    public void setDefaultCase(String defaultCase) {
+        this.defaultCase = defaultCase;
     }
 
     @Override

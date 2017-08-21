@@ -161,8 +161,6 @@ SET Groups = REPLACE(REPLACE(Groups, ',Segment', ''), 'Segment', '')
 WHERE Groups LIKE '%Segment%'
 AND (AMColumnID LIKE 'Bmbr30%' OR AMColumnID LIKE 'Feature%');
 
-
-
 INSERT `DataCloudVersion` (Version, CreateDate, MajorVersion, Status, MetadataRefreshDate)
 VALUES
   ('2.0.0', '2016-08-28', '2.0', 'APPROVED', NOW()),
@@ -215,8 +213,6 @@ SET
   `AccountLookupHdfsVersion` = '2017-06-03_00-14-03_UTC',
   `DynamoTableSignature`        = '20170629',
   `DynamoTableSignature_Lookup` = '20170629',
-  `AMBucketedRedShiftTable`     = 'AccountMasterBucketed_2017_07_17_19_21_03_UTC',
-  `SegmentStatsVersion`         = '2017-07-17_19-21-03_UTC',
   `EnrichmentStatsVersion`      = '2017-07-22_04-52-07_UTC'
 WHERE `Version` = '2.0.5';
 

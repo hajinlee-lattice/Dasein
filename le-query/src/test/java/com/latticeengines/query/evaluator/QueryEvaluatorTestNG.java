@@ -1,10 +1,13 @@
 package com.latticeengines.query.evaluator;
 
+import java.util.TreeMap;
+
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
@@ -193,6 +196,27 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("order by %s.DisplayName asc", ACCOUNT));
+    }
+
+    @Test(groups = "functional")
+    public void testCaseLookup() {
+        TreeMap<String, Restriction> cases = new TreeMap<>();
+        cases.put("B", Restriction.builder().let(BusinessEntity.Account, "Website").in("a", "b").build());
+        cases.put("A", Restriction.builder().let(BusinessEntity.Account, "DisplayName").in("c", "d").build());
+        cases.put("C", Restriction.builder().let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq("No").build());
+        CaseLookup caseLookup = new CaseLookup(cases, "B", "Score");
+
+        Query query = Query.builder() //
+                .select(caseLookup) //
+                .build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, "DisplayName"));
+        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, "Website"));
+        sqlContains(sqlQuery, String.format("when (%s.%s&?)>>? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
+        sqlContains(sqlQuery, "else ? end");
+        sqlContains(sqlQuery, "as Score");
+        Assert.assertTrue(sqlQuery.toString().indexOf("DisplayName") < sqlQuery.toString().indexOf("Website"));
+        Assert.assertTrue(sqlQuery.toString().indexOf("Website") < sqlQuery.toString().indexOf(BUCKETED_PHYSICAL_ATTR));
     }
 
     private void sqlContains(SQLQuery<?> query, String content) {
