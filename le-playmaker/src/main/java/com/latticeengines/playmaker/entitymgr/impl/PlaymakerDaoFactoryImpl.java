@@ -128,7 +128,7 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
             }
             return false;
         } else {
-            return playmakerSyncLookupSource == PlaymakerSyncLookupSource.LPI;
+            return playmakerSyncLookupSource == PlaymakerSyncLookupSource.V2;
         }
     }
 

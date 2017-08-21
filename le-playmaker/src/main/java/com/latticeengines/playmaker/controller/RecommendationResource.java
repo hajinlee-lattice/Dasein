@@ -37,7 +37,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get recommendations")
     public Map<String, Object> getRecommendations(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
@@ -53,7 +53,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get recommendation count")
     public Map<String, Object> getRecommendationCount(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = true) @RequestParam(value = "destination", required = true) String destination,
             @ApiParam(value = "Play's Id whose recommendations are returned; all play Ids if not specified", required = false) @RequestParam(value = "playId", required = false) List<String> playIds) {
@@ -67,7 +67,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get plays")
     public Map<String, Object> getPlays(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
@@ -81,7 +81,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get play count")
     public Map<String, Object> getPlayCount(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Play group's Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "playgroupId", required = false) List<Integer> playgroupIds) {
 
@@ -93,7 +93,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get account extensions")
     public Map<String, Object> getAccountExtensions(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
@@ -116,7 +116,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get record count of account extension")
     public Map<String, Object> getAccountExtensionCount(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp on Account Extension", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified. This is mutual exclusive to filberBy/recStart.", required = false) @RequestParam(value = "accountId", required = false) List<String> accountIds,
             @ApiParam(value = "filterBy is a flag to filter Account Extensions with Recommendations, NoRecommendations or All, which "
@@ -133,7 +133,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get account extensions")
     public List<Map<String, Object>> getAccountExtensionSchema(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource) {
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource) {
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getAccountExtensionSchema(tenantName, lookupSource);
     }
@@ -142,7 +142,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get column count of account extension")
     public Map<String, Object> getAccountExtensionColumnCount(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource) {
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource) {
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getAccountExtensionColumnCount(tenantName, lookupSource);
     }
@@ -151,7 +151,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get contacts")
     public Map<String, Object> getContacts(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
@@ -167,7 +167,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get contact count")
     public Map<String, Object> getContactCount(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Lattice Contact Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds,
             @ApiParam(value = "Lattice Account Id whose contacts are returned; all contacts returned if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
@@ -180,7 +180,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get contact extensions")
     public Map<String, Object> getContactExtensions(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
@@ -195,7 +195,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get record count of contact extension")
     public Map<String, Object> getContactExtensionCount(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Contact Id whose extension columns are returned; all contact Ids if not specified", required = false) @RequestParam(value = "contactId", required = false) List<Integer> contactIds) {
 
@@ -207,7 +207,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get Contact extensions")
     public List<Map<String, Object>> getContactExtensionSchema(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource) {
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource) {
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getContactExtensionSchema(tenantName, lookupSource);
     }
@@ -216,7 +216,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get column count of contact extension")
     public Map<String, Object> getContactExtensionColumnCount(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource) {
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource) {
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getContactExtensionColumnCount(tenantName, lookupSource);
     }
@@ -225,7 +225,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get flexible play values")
     public Map<String, Object> getPlayValues(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
@@ -239,7 +239,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get flexible play value count")
     public Map<String, Object> getPlayValues(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Play group's Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "playgroupId", required = false) List<Integer> playgroupIds) {
 
@@ -251,7 +251,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get workflow types' IDs and Names")
     public List<Map<String, Object>> getWorkflowTypes(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource) {
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getWorkflowTypes(tenantName, lookupSource);
@@ -261,7 +261,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get record count of play groups")
     public Map<String, Object> getPlayGroupCount(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
@@ -272,7 +272,7 @@ public class RecommendationResource {
     @ResponseBody
     @ApiOperation(value = "Get all play groups' IDs and Names")
     public List<Map<String, Object>> getPlayGroups(HttpServletRequest request,
-            @RequestHeader(value = "lookupSource", required = false) String lookupSource,
+            @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum) {
