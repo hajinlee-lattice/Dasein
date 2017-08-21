@@ -68,6 +68,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                 executors.submit(exporter);
             }
             try {
+                executors.shutdown();
                 executors.awaitTermination(1, TimeUnit.DAYS);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Waiting for exporters to finish interrupted.", e);
