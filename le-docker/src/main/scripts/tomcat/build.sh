@@ -21,7 +21,7 @@ popd
 
 for img in 'playmaker' 'oauth2'; do
 
-    if [ $MICROSERVICES == *"${img}"* ]; then
+    if [[ $MICROSERVICES == *"${img}"* ]]; then
     pushd le-${img} &&
         build_docker latticeengines/${img} &&
         popd &
