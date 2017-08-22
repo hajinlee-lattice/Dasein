@@ -71,7 +71,6 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.QUOTA, //
                 LatticeFeatureFlag.TARGET_MARKET, //
                 LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL, //
-                LatticeFeatureFlag.ENABLE_CDL, //
                 LatticeFeatureFlag.BYPASS_DNB_CACHE, //
                 LatticeFeatureFlag.ENABLE_MATCH_DEBUG, //
                 LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER);
