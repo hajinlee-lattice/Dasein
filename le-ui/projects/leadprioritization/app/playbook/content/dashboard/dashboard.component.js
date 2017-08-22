@@ -5,6 +5,7 @@ angular.module('lp.playbook.dashboard', [
     $q, $scope, $stateParams, $state, $interval,
     PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, QueryStore
 ) {
+
     var vm = this,
         play_name = $stateParams.play_name,
         launchButtonStates = {
@@ -28,9 +29,9 @@ angular.module('lp.playbook.dashboard', [
         editable: true,
         play: null,
         launchButton: angular.copy(launchButtonStates.initial),
-        showLaunchSpinner: false
+        showLaunchSpinner: false,
+        editing: {}
     });
-
 
     // $q.when($stateParams.play_name, function() {
     //     if(play_name) {
@@ -39,6 +40,27 @@ angular.module('lp.playbook.dashboard', [
     //         });
     //     }
     // });
+    
+    /**
+     * contenteditable elements convert to html entities, so I removed it but want to keep this 
+     * function because it could be useful if I figure out a way around this issue
+     */
+    vm.keydown = function($event, max, debug) {
+        var element = angular.element($event.currentTarget),
+            html = element.html();
+            length = html.length,
+            max = max || 50,
+            allowedKeys = [8, 35, 36, 37, 38, 39, 40, 46]; // up, down, home, end, delete, backspace, things like that go in here
+
+        if(debug) {
+            console.log('pressed', $event.keyCode, 'length', length, 'html', html);
+        }
+        
+        if(length > (max - 1) && allowedKeys.indexOf($event.keyCode) === -1) {
+            $event.preventDefault();
+        }
+
+    }
 
     vm.removeSegment = function(play) {
         PlaybookWizardStore.removeSegment(play);
@@ -82,20 +104,20 @@ angular.module('lp.playbook.dashboard', [
         if(!launchHistory || !launchHistory.playLaunch) {
             return false;
         }
-        var total_contacts = launchHistory.playLaunch.contactsNum + launchHistory.newContactsNum,
-            total_accounts = launchHistory.playLaunch.accountsNum + launchHistory.newAccountsNum,
+        var total_contacts = launchHistory.playLaunch.contactsLaunched + launchHistory.newContactsNum,
+            total_accounts = launchHistory.playLaunch.accountsLaunched + launchHistory.newAccountsNum,
             total = total_contacts + total_accounts;
 
         return {
             buckets: {
                 contacts: {
                     new: launchHistory.newContactsNum,
-                    current: launchHistory.playLaunch.contactsNum,
+                    current: launchHistory.playLaunch.contactsLaunched,
                     total: total_contacts
                 },
                 accounts: {
                     new: launchHistory.newAccountsNum,
-                    current: launchHistory.playLaunch.accountsNum,
+                    current: launchHistory.playLaunch.accountsLaunched,
                     total: total_accounts
                 }
             },
@@ -103,9 +125,24 @@ angular.module('lp.playbook.dashboard', [
         };
     }
 
-    vm.edited = function($event, property) {
-        var $element = angular.element($event.target),
-            content = $element.text().trim(),
+    vm.autofocus = function($event) {
+        var element = angular.element($event.currentTarget),
+            target = element.find('[autofocus]');
+
+        target.focus();
+        // set focus and put cursor at begining
+        setTimeout(function() {
+            target.focus(); // because textareas
+            target[0].setSelectionRange(0, 0);
+        }, 10);
+    }
+
+    vm.edited = function(property) {
+        if(!vm.editing[property]) {
+            return false;
+        }
+
+        var content = vm.editing[property],
             newPlay = angular.copy(vm.play),
             save = false;
 
@@ -113,10 +150,10 @@ angular.module('lp.playbook.dashboard', [
 
         if(vm.play[property] != newPlay[property]) {
             save = true;
-            if(property === 'displayName' && !content) {
-                save = false;
-                $element.text(vm.play[property]);
-            }
+            // if(property === 'displayName' && !content) {
+            //     save = false;
+            //     $element.text(vm.play[property]);
+            // }
         }
 
         if(save) {

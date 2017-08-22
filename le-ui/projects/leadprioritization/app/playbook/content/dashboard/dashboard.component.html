@@ -5,12 +5,23 @@
             <div class="dashboard-section play">
                 <div class="dashboard-section-container">
                     <div class="dashboard-section-header">
-                        <h2><div contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'displayName')">{{ vm.play.displayName||'Play Name' }}</div></h2>
+                        <h2>
+                            <!-- <div ng-keydown="vm.keydown($event)" contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'displayName')">{{ vm.play.displayName||'Play Name' }}</div> -->
+                            <div class="contenteditable title" ng-class="{editing: focus.title}" ng-focus="focus = {}; focus.title = true; vm.autofocus($event);" tabindex="-1">
+                                <span ng-show="!focus.title">{{ vm.play.displayName||'Play Name' }}</span>
+                                <div class="editor" ng-show="focus.title">
+                                    <input autofocus maxlength="50" ng-blur="vm.edited('displayName'); focus = {};" name="displayName" ng-model="vm.editing.displayName" ng-value="vm.play.displayName" />
+                                </div>
+                            </div>
+                        </h2>
                     </div>
                     <div class="dashboard-section-content">
                         <p> 
-                            <div contenteditable="{{vm.editable}}" ng-blur="vm.edited($event, 'description')" ng-class="{empty: !vm.play.description}">
-                                {{vm.play.description}}
+                            <div class="contenteditable description" ng-class="{empty: !vm.play.description, editing: focus.description}" ng-focus="focus = {}; focus.description = true; vm.autofocus($event)" tabindex="-1">
+                                <span ng-show="!focus.description">{{vm.play.description}}</span>
+                                <div class="editor">
+                                    <textarea autofocus ng-show="focus.description" maxlength="1000" ng-blur="vm.edited('description'); focus = {};" name="description" ng-model="vm.editing.description" ng-init="vm.editing.description = vm.play.description"></textarea>
+                                </div>
                             </div>
                         </p>
                         <div class="dashboard-section-content-subsection rating_ has-icon">
@@ -86,9 +97,9 @@
                             <ul class="playbook-launch-history graph">
                                 <li class="launch-history-graph" ng-repeat="(name, history) in vm.launchGraph.buckets">
                                     <div class="history-label"><strong>{{name}}</strong></div>
-                                    <div class="history-bar" style="width:{{history.total/vm.launchGraph.total*100}}%;">
-                                        <div class="history-bar-current" ng-if="history.current" style="width:{{history.current/history.total*100}}%;"></div>
-                                        <div class="history-bar-new" ng-if="history.new" style="width:{{history.new/history.total*100}}%;"></div>
+                                    <div class="history-bar" ng-style="{'width': (history.total/vm.launchGraph.total)*100 + '%'}">
+                                        <div class="history-bar-current" ng-if="history.current" ng-style="{'width': (history.current/history.total)*100 + '%'}"></div>
+                                        <div class="history-bar-new" ng-if="history.new" ng-style="{'width': (history.new/history.total)*100 + '%'}"></div>
                                     </div>
                                     <div class="history-count" ng-show="history.total"><strong>{{vm.NumberUtility.AbbreviateLargeNumber(history.total)}}</strong></div>
                                 </li>
@@ -101,7 +112,7 @@
                             <ul class="playbook-ratings graph" ng-if="vm.ratingsGraph">
                                 <li class="_rating" ng-repeat="rating in vm.ratingsGraph.buckets">
                                     <div class="rating-count" ng-show="rating.bucketCount">{{rating.bucketCount}}</div>
-                                    <div class="rating-bar" style="height:{{rating.bucketCount/vm.ratingsGraph.total*100}}%;"></div>
+                                    <div class="rating-bar" ng-style="{'height': (rating.bucketCount/vm.ratingsGraph.total)*100 + '%'}"></div>
                                     <div class="rating-label">{{rating.bucket}}</div>
                                 </li>
                             </ul>

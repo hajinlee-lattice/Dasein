@@ -109,9 +109,6 @@ angular
                     controller: 'PlaybookWizardInsights',
                     controllerAs: 'vm',
                     templateUrl: 'app/playbook/content/insights/insights.component.html'
-                    // controller: 'PlaybookDashboardInsights',
-                    // controllerAs: 'vm',
-                    // templateUrl: 'app/playbook/content/insights_dashboard/insights_dashboard.component.html'
                 }
             }
         })
