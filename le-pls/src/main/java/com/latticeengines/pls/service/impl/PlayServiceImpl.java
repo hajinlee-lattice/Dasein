@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -102,7 +103,7 @@ public class PlayServiceImpl implements PlayService {
         // TODO in M14, we will get real data for AccountRatingMap
         // for now, just mock them
         RatingObject rating = new RatingObject();
-        List<BucketInformation> accountRatingList = new ArrayList<BucketInformation>();
+        List<BucketInformation> accountRatingList = new ArrayList<>();
         BucketInformation aBucket = new BucketInformation();
         aBucket.setBucket(BucketName.A.name());
         aBucket.setBucketCount(500);
@@ -131,6 +132,21 @@ public class PlayServiceImpl implements PlayService {
             throw new LedpException(LedpCode.LEDP_18144);
         }
         playEntityMgr.deleteByName(name);
+    }
+
+    @Override
+    public void publishTalkingPoints(String playName, String customerSpace) {
+        if (StringUtils.isBlank(playName)) {
+            throw new LedpException(LedpCode.LEDP_18144);
+        }
+        Play play = playEntityMgr.findByName(playName);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_18144, new String[] { playName });
+        }
+
+        talkingPointProxy.publish(playName, customerSpace);
+        play.setLastTalkingPointPublishTime(new Date());
+        playEntityMgr.update(play);
     }
 
 }

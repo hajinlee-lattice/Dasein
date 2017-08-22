@@ -140,6 +140,9 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
                 getRestAPIHostPort() + "/pls/dante/talkingpoints/publish?playName=" + play.getName(), //
                 null, String.class);
 
+        play = playService.getPlayByName(play.getName());
+        Assert.assertNotNull(play.getLastTalkingPointPublishTime());
+
         restTemplate.delete(getRestAPIHostPort() + "/pls/dante/talkingpoints/"
                 + tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID());
         restTemplate.delete(getRestAPIHostPort() + "/pls/dante/talkingpoints/"

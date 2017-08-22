@@ -18,4 +18,5 @@ public interface PlayService {
 
     Play getFullPlayByName(String name);
 
+    void publishTalkingPoints(String playName, String customerSpace);
 }

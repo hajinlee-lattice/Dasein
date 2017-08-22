@@ -261,6 +261,7 @@ public enum LedpCode {
     LEDP_18148("Your file has {0} million rows. Please reduce number of rows to below 1 million."), //
     LEDP_18149("Play {0} cannot be launched since it does not have segment specified."), //
     LEDP_18150("Cannot get tenant configuration."), //
+    LEDP_18151("Play not found for {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

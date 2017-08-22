@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
+import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -34,6 +35,9 @@ public class TalkingPointResource {
 
     @Autowired
     private TalkingPointProxy talkingPointProxy;
+
+    @Autowired
+    private PlayService playService;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
@@ -100,7 +104,7 @@ public class TalkingPointResource {
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_38008);
         }
-        talkingPointProxy.publish(playName, customerSpace.toString());
+        playService.publishTalkingPoints(playName, customerSpace.toString());
     }
 
     @RequestMapping(value = "/revert", method = RequestMethod.POST)
