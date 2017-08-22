@@ -619,6 +619,7 @@
             .box {
                 .box-inner {
                     padding-bottom: 4em;
+                    height: auto;
                 }
             }
         }
@@ -638,6 +639,7 @@
         clear: both;
         .box {
             @include flex-item(0 0 auto);
+            @include flex-container;
             width: $box-width;
             padding: 14px 14px 0 0;
             &.box-value-no {
@@ -785,8 +787,9 @@
                                                 display: block;
                                                 height: 10px;
                                                 position: relative;
-                                                top: 50%;
-                                                transform: translateY(-50%);
+                                                margin-top: 5px;
+                                                // top: 50%;
+                                                // transform: translateY(-50%);
                                             }
                                         }
                                     }
@@ -796,8 +799,8 @@
                                         span {
                                             display: block;
                                             position: relative;
-                                            top: 50%;
-                                            transform: translateY(-50%);
+                                            // top: 50%;
+                                            // transform: translateY(-50%);
                                         }
                                     }
                                 }
