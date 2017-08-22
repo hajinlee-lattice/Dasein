@@ -2,15 +2,20 @@ package com.latticeengines.query.evaluator;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.SubQuery;
+import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 
 /**
@@ -173,4 +178,57 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), count);
     }
+
+    @Test(groups = "functional")
+    public void testCaseLookup() {
+        TreeMap<String, Restriction> cases = new TreeMap<>();
+        Restriction A = Restriction.builder().let(BusinessEntity.Account, "DisplayName").in("c", "d").build();
+        Restriction B = Restriction.builder().let(BusinessEntity.Account, "Website").in("a", "b").build();
+        Restriction C = Restriction.builder().let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq("No").build();
+
+        cases.put("B", B);
+        cases.put("A", A);
+        cases.put("C", C);
+        CaseLookup caseLookup = new CaseLookup(cases, "B", "Score");
+
+        Query query = Query.builder() //
+                .select(caseLookup) //
+                .build();
+
+        // sub query
+        SubQuery subQuery = new SubQuery(query, "Alias");
+        SubQueryAttrLookup attrLookup = new SubQueryAttrLookup(subQuery, "Score");
+        Query query2 = Query.builder() //
+                .select(attrLookup, AggregateLookup.count().as("Count")) //
+                .from(subQuery) //
+                .groupBy(attrLookup) //
+                .having(Restriction.builder().let(attrLookup).neq("C").build()) //
+                .build();
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query2).getData();
+        Assert.assertEquals(results.size(), 2);
+        results.forEach(map -> {
+            if ("A".equals(map.get("score"))) {
+                Assert.assertEquals(map.get("count"), 1816L);
+            } else if ("B".equals(map.get("score"))) {
+                Assert.assertEquals(map.get("count"), 62724L);
+            }
+        });
+
+        // direct group by
+        query = Query.builder() //
+                .select(caseLookup, AggregateLookup.count().as("Count")) //
+                .where(Restriction.builder().or(A, B).build()) //
+                .groupBy(caseLookup) //
+                .build();
+        results = queryEvaluatorService.getData(attrRepo, query).getData();
+        Assert.assertEquals(results.size(), 2);
+        results.forEach(map -> {
+            if ("A".equals(map.get("score"))) {
+                Assert.assertEquals(map.get("count"), 1816L);
+            } else if ("B".equals(map.get("score"))) {
+                Assert.assertEquals(map.get("count"), 8657L);
+            }
+        });
+    }
+
 }

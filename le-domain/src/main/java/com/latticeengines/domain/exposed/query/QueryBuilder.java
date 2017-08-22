@@ -1,8 +1,9 @@
 package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,7 +12,9 @@ import com.latticeengines.domain.exposed.query.Query.FreeFormTextSearchAttribute
 public class QueryBuilder {
 
     private List<Lookup> lookups = new ArrayList<>();
+    private GroupBy groupBy;
     private BusinessEntity mainEntity;
+    private SubQuery subQuery;
     private Restriction restriction;
     private Sort sort;
     private PageFilter pageFilter;
@@ -33,8 +36,8 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder select(CaseLookup caseLookup) {
-        lookups.add(caseLookup);
+    public QueryBuilder select(Lookup... lookupArray) {
+        Collections.addAll(lookups, lookupArray);
         return this;
     }
 
@@ -86,6 +89,22 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder from(SubQuery subQuery) {
+        this.subQuery = subQuery;
+        return this;
+    }
+
+    public QueryBuilder groupBy(Lookup... groupByLookups) {
+        groupBy = new GroupBy();
+        groupBy.setLookups(Arrays.asList(groupByLookups));
+        return this;
+    }
+
+    public QueryBuilder having(Restriction restriction) {
+        groupBy.setHaving(restriction);
+        return this;
+    }
+
     public Query build() {
         Query query = new Query();
         query.setLookups(lookups);
@@ -95,6 +114,8 @@ public class QueryBuilder {
         query.setFreeFormTextSearch(freeFormTextSearch);
         query.setFreeFormTextSearchAttributes(freeFormTextSearchAttributes);
         query.setMainEntity(mainEntity);
+        query.setSubQuery(subQuery);
+        query.setGroupBy(groupBy);
         return query;
     }
 

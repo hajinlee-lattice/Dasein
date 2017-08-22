@@ -1,6 +1,7 @@
 package com.latticeengines.query.evaluator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -12,12 +13,14 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.GroupBy;
 import com.latticeengines.domain.exposed.query.JoinSpecification;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
+import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.query.evaluator.lookup.LookupResolver;
 import com.latticeengines.query.evaluator.lookup.LookupResolverFactory;
 import com.latticeengines.query.evaluator.restriction.RestrictionResolver;
@@ -67,16 +70,28 @@ public class QueryProcessor {
             sqlQuery = addSort(sqlQuery, query.getSort(), resolverFactory);
         }
 
+
+        if (query.getGroupBy() != null) {
+            sqlQuery = addGroupBy(sqlQuery, query.getGroupBy(), resolverFactory);
+        }
+
         return sqlQuery;
     }
 
     /**
-     * FROM TABLE
+     * FROM TABLE or FROM (sub query) AS alias
      */
     private SQLQuery<?> from(AttributeRepository repository, Query query) {
-        BusinessEntity mainEntity = query.getMainEntity();
-        StringPath mainTable = AttrRepoUtils.getTablePath(repository, mainEntity);
-        SQLQuery<?> sqlQuery = queryFactory.getQuery(repository).from(mainTable.as(mainEntity.name()));
+        SubQuery subQuery = query.getSubQuery();
+        SQLQuery<?> sqlQuery;
+        if (subQuery != null) {
+            Expression<?> subQueryExpression = process(repository, subQuery.getQuery()).as(subQuery.getAlias());
+            sqlQuery = queryFactory.getQuery(repository).from(subQueryExpression);
+        } else {
+            BusinessEntity mainEntity = query.getMainEntity();
+            StringPath mainTable = AttrRepoUtils.getTablePath(repository, mainEntity);
+            sqlQuery = queryFactory.getQuery(repository).from(mainTable.as(mainEntity.name()));
+        }
         return addJoins(sqlQuery, repository, query);
     }
 
@@ -151,6 +166,23 @@ public class QueryProcessor {
                         sqlQuery = sqlQuery.orderBy(resolved.asc());
                     }
                 }
+            }
+        }
+        return sqlQuery;
+    }
+
+    @SuppressWarnings("unchecked")
+    private SQLQuery<?> addGroupBy(SQLQuery<?> sqlQuery, GroupBy groupBy, LookupResolverFactory resolverFactory) {
+        if (groupBy != null) {
+            for (Lookup lookup: groupBy.getLookups()) {
+                LookupResolver resolver = resolverFactory.getLookupResolver(lookup.getClass());
+                ComparableExpression<String> resolved = Expressions.asComparable(resolver.resolveForSelect(lookup, false));
+                sqlQuery = sqlQuery.groupBy(resolved);
+            }
+            if (groupBy.getHaving() != null) {
+                Restriction restriction = groupBy.getHaving();
+                BooleanExpression booleanExpression = processRestriction(restriction, resolverFactory, Collections.emptyList());
+                sqlQuery = sqlQuery.having(booleanExpression);
             }
         }
         return sqlQuery;

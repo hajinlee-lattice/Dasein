@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,8 +38,14 @@ import com.latticeengines.common.exposed.visitor.VisitorContext;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Query implements GraphNode {
 
+    private static final Logger log = LoggerFactory.getLogger(Query.class);
+
     @JsonProperty("main_entity")
     private BusinessEntity mainEntity;
+
+    // only support single sub query for now.
+    @JsonProperty("subquery")
+    private SubQuery subQuery;
 
     @JsonProperty("lookups")
     private List<Lookup> lookups = new ArrayList<>();
@@ -47,6 +55,9 @@ public class Query implements GraphNode {
 
     @JsonProperty("sort")
     private Sort sort;
+
+    @JsonProperty("group_by")
+    private GroupBy groupBy;
 
     @JsonProperty("page_filter")
     private PageFilter pageFilter;
@@ -111,6 +122,14 @@ public class Query implements GraphNode {
         this.sort = sort;
     }
 
+    public GroupBy getGroupBy() {
+        return groupBy;
+    }
+
+    public void setGroupBy(GroupBy groupBy) {
+        this.groupBy = groupBy;
+    }
+
     public PageFilter getPageFilter() {
         return pageFilter;
     }
@@ -136,9 +155,14 @@ public class Query implements GraphNode {
     }
 
     public void analyze() {
-        traverseEntities();
-        resolveMainEntity();
-        generateJoins();
+        if (subQuery != null) {
+            log.info("Skip automatic join resolution, as the query is based on a sub-query.");
+            lookupJoins = Collections.emptyList();
+        } else {
+            traverseEntities();
+            resolveMainEntity();
+            generateJoins();
+        }
     }
 
     private void traverseEntities() {
@@ -201,6 +225,14 @@ public class Query implements GraphNode {
 
     public void setMainEntity(BusinessEntity mainEntity) {
         this.mainEntity = mainEntity;
+    }
+
+    public SubQuery getSubQuery() {
+        return subQuery;
+    }
+
+    public void setSubQuery(SubQuery subQuery) {
+        this.subQuery = subQuery;
     }
 
     public Set<BusinessEntity> getEntitiesForJoin() {

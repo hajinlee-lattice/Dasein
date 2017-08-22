@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
+import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.query.evaluator.restriction.RestrictionResolverFactory;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
@@ -36,6 +38,10 @@ public final class LookupResolverFactory {
             resolvers.put(lookupType.getSimpleName(), new AttributeResolver(attrRepo));
             return;
         }
+        if (lookupType.isAssignableFrom(SubQueryAttrLookup.class)) {
+            resolvers.put(lookupType.getSimpleName(), new SubQueryAttrResolver(attrRepo));
+            return;
+        }
         if (lookupType.isAssignableFrom(EntityLookup.class)) {
             resolvers.put(lookupType.getSimpleName(), new EntityResolver(attrRepo));
             return;
@@ -46,6 +52,10 @@ public final class LookupResolverFactory {
         }
         if (lookupType.isAssignableFrom(ValueLookup.class)) {
             resolvers.put(lookupType.getSimpleName(), new ValueResolver(attrRepo));
+            return;
+        }
+        if (lookupType.isAssignableFrom(AggregateLookup.class)) {
+            resolvers.put(lookupType.getSimpleName(), new AggregateResolver(attrRepo, this));
             return;
         }
         if (lookupType.isAssignableFrom(CaseLookup.class)) {

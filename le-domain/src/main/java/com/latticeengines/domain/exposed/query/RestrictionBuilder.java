@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+
 public class RestrictionBuilder {
 
     private Restriction restriction;
@@ -25,16 +27,20 @@ public class RestrictionBuilder {
         return let(new AttributeLookup(entity, attrName));
     }
 
-    public RestrictionBuilder let(AttributeLookup lookup) {
-        if (restriction != null) {
-            throw new IllegalArgumentException("Cannot chain a lookup here.");
+    public RestrictionBuilder let(Lookup lookup) {
+        if (lookup instanceof AttributeLookup || lookup instanceof SubQueryAttrLookup) {
+            if (restriction != null) {
+                throw new IllegalArgumentException("Cannot chain a lookup here.");
+            }
+            if (existsEntity != null) {
+                throw new IllegalArgumentException("Cannot specify let and exists together.");
+            }
+            this.attrLookup = lookup;
+            complete = false;
+            return this;
+        } else {
+            throw new UnsupportedOperationException("Only support attribute lookup and sub query attr lookup.");
         }
-        if (existsEntity != null) {
-            throw new IllegalArgumentException("Cannot specify let and exists together.");
-        }
-        this.attrLookup = lookup;
-        complete = false;
-        return this;
     }
 
     public RestrictionBuilder exists(BusinessEntity entity) {
@@ -64,10 +70,17 @@ public class RestrictionBuilder {
         return this;
     }
 
+    public RestrictionBuilder not(ConcreteRestriction restriction) {
+        negate = true;
+        this.restriction = JsonUtils.deserialize(JsonUtils.serialize(restriction), ConcreteRestriction.class);
+        ((ConcreteRestriction) this.restriction).setNegate(true);
+        complete = true;
+        return this;
+    }
+
     public RestrictionBuilder eq(Object value) {
         operator = ComparisonType.EQUAL;
         rhsLookup = new ValueLookup(value);
-        negate = false;
         completeConcrete();
         return this;
     }
@@ -75,7 +88,6 @@ public class RestrictionBuilder {
     public RestrictionBuilder eq(BusinessEntity entity, String attrName) {
         operator = ComparisonType.EQUAL;
         rhsLookup = new AttributeLookup(entity, attrName);
-        negate = false;
         completeConcrete();
         return this;
     }

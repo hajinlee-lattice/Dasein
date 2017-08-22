@@ -6,11 +6,14 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
+import com.latticeengines.domain.exposed.query.SubQuery;
+import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.querydsl.sql.SQLQuery;
@@ -201,9 +204,13 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCaseLookup() {
         TreeMap<String, Restriction> cases = new TreeMap<>();
-        cases.put("B", Restriction.builder().let(BusinessEntity.Account, "Website").in("a", "b").build());
-        cases.put("A", Restriction.builder().let(BusinessEntity.Account, "DisplayName").in("c", "d").build());
-        cases.put("C", Restriction.builder().let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq("No").build());
+        Restriction A = Restriction.builder().let(BusinessEntity.Account, "DisplayName").in("c", "d").build();
+        Restriction B = Restriction.builder().let(BusinessEntity.Account, "Website").in("a", "b").build();
+        Restriction C = Restriction.builder().let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq("No").build();
+
+        cases.put("B", B);
+        cases.put("A", A);
+        cases.put("C", C);
         CaseLookup caseLookup = new CaseLookup(cases, "B", "Score");
 
         Query query = Query.builder() //
@@ -217,6 +224,35 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, "as Score");
         Assert.assertTrue(sqlQuery.toString().indexOf("DisplayName") < sqlQuery.toString().indexOf("Website"));
         Assert.assertTrue(sqlQuery.toString().indexOf("Website") < sqlQuery.toString().indexOf(BUCKETED_PHYSICAL_ATTR));
+
+        // sub query
+        SubQuery subQuery = new SubQuery(query, "Alias");
+        SubQueryAttrLookup attrLookup = new SubQueryAttrLookup(subQuery, "Score");
+        Query query2 = Query.builder() //
+                .select(attrLookup, AggregateLookup.count().as("Count")) //
+                .from(subQuery) //
+                .groupBy(attrLookup) //
+                .build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query2);
+        sqlContains(sqlQuery, "select Alias.Score");
+        sqlContains(sqlQuery, "count(?) as Count");
+        sqlContains(sqlQuery, "as Alias");
+        sqlContains(sqlQuery, "group by Alias.Score");
+
+        // direct group by
+        query = Query.builder() //
+                .select(caseLookup, AggregateLookup.count().as("Count")) //
+                .where(Restriction.builder().or(A, B).build()) //
+                .groupBy(caseLookup) //
+                .build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, "DisplayName"));
+        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, "Website"));
+        sqlContains(sqlQuery, String.format("when (%s.%s&?)>>? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
+        sqlContains(sqlQuery, "else ? end");
+        sqlContains(sqlQuery, "as Score");
+        sqlContains(sqlQuery, "group by Score");
+
     }
 
     private void sqlContains(SQLQuery<?> query, String content) {

@@ -1,0 +1,64 @@
+package com.latticeengines.domain.exposed.query;
+
+
+import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.COUNT;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+public class AggregateLookup extends Lookup {
+
+    @JsonProperty("aggregator")
+    private Aggregator aggregator;
+
+    @JsonProperty("lookup")
+    private Lookup lookup;
+
+    @JsonProperty("alias")
+    private String alias;
+
+    public static AggregateLookup count() {
+        AggregateLookup lookup1 = new AggregateLookup();
+        lookup1.setAggregator(COUNT);
+        return lookup1;
+    }
+
+    public Aggregator getAggregator() {
+        return aggregator;
+    }
+
+    public void setAggregator(Aggregator aggregator) {
+        this.aggregator = aggregator;
+    }
+
+    public Lookup getLookup() {
+        return lookup;
+    }
+
+    public void setLookup(Lookup lookup) {
+        this.lookup = lookup;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public AggregateLookup as(String alias) {
+        setAlias(alias);
+        return this;
+    }
+
+    public enum Aggregator {
+        COUNT
+    }
+}

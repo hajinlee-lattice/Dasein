@@ -65,25 +65,39 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             LookupResolver rhsResolver = lookupFactory.getLookupResolver(rhs.getClass());
             List<ComparableExpression<String>> rhsPaths = rhsResolver.resolveForCompare(rhs);
 
+            BooleanExpression booleanExpression;
+
             switch (restriction.getRelation()) {
             case EQUAL:
-                return lhsPath.eq(rhsPaths.get(0));
+                booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                break;
             case GREATER_OR_EQUAL:
-                return lhsPath.goe(rhsPaths.get(0));
+                booleanExpression = lhsPath.goe(rhsPaths.get(0));
+                break;
             case GREATER_THAN:
-                return lhsPath.gt(rhsPaths.get(0));
+                booleanExpression = lhsPath.gt(rhsPaths.get(0));
+                break;
             case LESS_OR_EQUAL:
-                return lhsPath.loe(rhsPaths.get(0));
+                booleanExpression = lhsPath.loe(rhsPaths.get(0));
+                break;
             case LESS_THAN:
-                return lhsPath.lt(rhsPaths.get(0));
+                booleanExpression = lhsPath.lt(rhsPaths.get(0));
+                break;
             case IN_RANGE:
                 if (rhsPaths.size() > 1) {
-                    return lhsPath.between(rhsPaths.get(0), rhsPaths.get(1));
+                    booleanExpression = lhsPath.between(rhsPaths.get(0), rhsPaths.get(1));
                 } else {
-                    return lhsPath.eq(rhsPaths.get(0));
+                    booleanExpression = lhsPath.eq(rhsPaths.get(0));
                 }
+                break;
             default:
                 throw new LedpException(LedpCode.LEDP_37006, new String[] { restriction.getRelation().toString() });
+            }
+
+            if (restriction.getNegate()) {
+                return booleanExpression.not();
+            } else {
+                return booleanExpression;
             }
         }
     }
