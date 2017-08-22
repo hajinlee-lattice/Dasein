@@ -947,7 +947,6 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.CRMId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("CRMID", "CRMLINK_ID", "CRM ID", "CRM_ID")) //
                 .type(Schema.Type.STRING) //
-                .required() //
                 .interfaceName(InterfaceName.CRMId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
