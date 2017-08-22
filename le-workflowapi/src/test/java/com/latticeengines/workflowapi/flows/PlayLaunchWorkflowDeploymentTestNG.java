@@ -45,7 +45,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
     private PlayLaunch playLaunch;
     private MetadataSegment segment;
 
-    @BeforeClass
+    @BeforeClass(groups = "workflow")
     public void setup() throws Exception {
         setupTestTenant();
         segment = createTestSegment();
