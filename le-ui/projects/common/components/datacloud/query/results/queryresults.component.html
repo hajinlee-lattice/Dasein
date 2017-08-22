@@ -44,7 +44,10 @@
                 <!-- <a href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}"><button class="button icon-button white-button"><i class="fa fa-download"></i></button></a> -->
                 <!-- <button ng-if="!vm.inModel" class="button white-button" ui-sref="home.import.entry">Import Data</button> -->
                 <button class="button icon-button white-button" ui-sref="{{ vm.refineQuery() }}" ng-disabled="vm.saving">Refine Query</button>
-                <button ng-disabled="vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
+
+                <button class="save button blue-button" ng-if="vm.saveSegmentEnabled" ng-click="vm.saveSegment()">Save Segment</button>
+                <button class="save button blue-button" ng-if="!vm.saveSegmentEnabled" disabled>Save Segment</button>
+
             </div>
         </li>
     </ul>

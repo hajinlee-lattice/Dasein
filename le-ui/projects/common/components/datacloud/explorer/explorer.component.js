@@ -1406,19 +1406,23 @@ angular.module('common.datacloud.explorer', [
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
 
-        vm.saveSegmentEnabled = true;
-
         if (vm.segmentAttributeInput[attributeKey] === true) {
             QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
         } else {
             QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
         }
+
+        vm.checkSaveButtonState();
+
     }
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
     vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
 
-        if(stat.Rng === null){
+
+        console.log(stat.Rng);
+
+        if(stat.Rng === undefined){
             var attributeRangeKey = stat.Lbl;
         } else {
             var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
@@ -1448,8 +1452,6 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         
-        vm.saveSegmentEnabled = true;
-        
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
             QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
         } else {
@@ -1462,6 +1464,10 @@ angular.module('common.datacloud.explorer', [
         if(vm.metadataSegments || QueryRestriction) {
             getExplorerSegments(vm.enrichments);
         }
+
+
+        vm.checkSaveButtonState();
+
     }
 
 
@@ -1506,6 +1512,37 @@ angular.module('common.datacloud.explorer', [
             $state.go('home.segment.explorer.query.advanced');
         }
     }
+
+    vm.checkSaveButtonState = function(){
+
+        var segmentName = $stateParams.segment;
+        if (segmentName === 'Create') {
+            var oldVal = JSON.stringify({restriction:{logicalRestriction:{operator:"AND",restrictions:[{logicalRestriction:{operator:"AND",restrictions:[]}},{logicalRestriction:{operator:"OR",restrictions:[]}}]}}});
+            var newVal = JSON.stringify(QueryStore.getRestriction());
+
+            if(oldVal === newVal){
+                vm.saveSegmentEnabled = false;
+            } else {
+                vm.saveSegmentEnabled = true;
+            };
+
+        } else {
+
+            SegmentStore.getSegmentByName(segmentName).then(function(result) {
+
+                var oldVal = JSON.stringify(result.frontend_restriction),
+                    newVal = JSON.stringify(QueryStore.getRestriction());
+
+                if(oldVal === newVal){
+                    vm.saveSegmentEnabled = false;
+                } else {
+                    vm.saveSegmentEnabled = true;
+                };
+            });
+        };
+
+    }
+
 
     vm.saveSegment = function() {
         if(Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {

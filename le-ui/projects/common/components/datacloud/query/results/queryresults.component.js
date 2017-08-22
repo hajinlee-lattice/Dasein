@@ -14,6 +14,7 @@ angular.module('common.datacloud.query.results', [
         accountsWithoutSfId: CountWithoutSalesForce,
         loading: true,
         saving: false,
+        saveSegmentEnabled: false,
         segment: QueryStore.getSegment(),
         restriction: QueryStore.getRestriction(),
         current: 1,
@@ -102,65 +103,104 @@ angular.module('common.datacloud.query.results', [
         updatePage();
     };
 
-    // vm.saveSegment = function () {
 
-    //     console.log($stateParams);
+    vm.checkSaveButtonState = function(){
 
-    //     var segmentName = $stateParams.segment,
-    //         ts = new Date().getTime();
+        var segmentName = $stateParams.segment;
+        if (segmentName === 'Create') {
+            var oldVal = JSON.stringify({restriction:{logicalRestriction:{operator:"AND",restrictions:[{logicalRestriction:{operator:"AND",restrictions:[]}},{logicalRestriction:{operator:"OR",restrictions:[]}}]}}});
+            var newVal = JSON.stringify(QueryStore.getRestriction());
 
-    //     if (segmentName === 'Create') {
+            if(oldVal === newVal){
+                vm.saveSegmentEnabled = false;
+            } else {
+                vm.saveSegmentEnabled = true;
+            };
+
+        } else {
+
+            SegmentStore.getSegmentByName(segmentName).then(function(result) {
+
+                var oldVal = JSON.stringify(result.frontend_restriction),
+                    newVal = JSON.stringify(QueryStore.getRestriction());
+
+                if(oldVal === newVal){
+                    vm.saveSegmentEnabled = false;
+                } else {
+                    vm.saveSegmentEnabled = true;
+                };
+            });
+        };
+
+    }
+
+    vm.saveSegment = function() {
+        
+        var segmentName = $stateParams.segment,
+            ts = new Date().getTime();
+
+        if (segmentName === 'Create') {
             
-    //         QueryStore.getRestriction().then(function(result){
-    //             var restriction = result;
-    //         });
-    //         var segment = {
-    //             'name': 'segment' + ts,
-    //             'display_name': 'segment' + ts,
-    //             'frontend_restriction': restriction,
-    //             'page_filter': {
-    //                 'row_offset': 0,
-    //                 'num_rows': 10
-    //             }
-    //         };
+            var restriction = QueryStore.getRestriction(),
+                segment = {
+                    'name': 'segment' + ts,
+                    'display_name': 'segment' + ts,
+                    'frontend_restriction': restriction,
+                    'page_filter': {
+                        'row_offset': 0,
+                        'num_rows': 10
+                    }
+                };
 
-    //     } else {
+            console.log(restriction);
 
-    //         SegmentStore.getSegmentByName(segmentName).then(function(result) {
-    //             var segmentData = result;
-    //         });
-
-    //         var segment = {
-    //             'name': segmentData.name,
-    //             'display_name': segmentData.display_name,
-    //             'frontend_restriction': segmentData.frontend_restriction,
-    //             'page_filter': {
-    //                 'row_offset': 0,
-    //                 'num_rows': 10
-    //             }
-    //         };
-
-    //     }
+            SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
+                if (!result.errorMsg) {
+                    if (vm.inModel()) {
+                        $state.go('home.model.segmentation', {}, {notify: true})
+                    } else {
+                        $state.go('home.segments', {}, {notify: true})
+                    }
+                }
+            });
 
 
+        } else {
+            
+            SegmentStore.getSegmentByName(segmentName).then(function(result) {
 
-    //     vm.saving = true;
-    //     SegmentServiceProxy.CreateOrUpdateSegment().then(function(result) {
-    //         if (!result.errorMsg) {
-    //             if (vm.modelId) {
-    //                 $state.go('home.model.segmentation', {}, {notify: true})
-    //             } else {
-    //                 $state.go('home.segments', {}, {notify: true});
-    //             }
-    //         }
-    //     }).finally(function () {
-    //         vm.saving = false;
-    //     });
+                console.log(result);
+
+                var segmentData = result,
+                    restriction = QueryStore.getRestriction(),
+                    segment = {
+                        'name': segmentData.name,
+                        'display_name': segmentData.display_name,
+                        'frontend_restriction': restriction,
+                        'page_filter': {
+                            'row_offset': 0,
+                            'num_rows': 10
+                        }
+                    };
+
+                console.log(restriction);
+
+                SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
+                    if (!result.errorMsg) {
+                        if (vm.inModel()) {
+                            $state.go('home.model.segmentation', {}, {notify: true})
+                        } else {
+                            $state.go('home.segments', {}, {notify: true})
+                        }
+                    }
+                });
+
+            });
+
+        };
 
 
-
-
-    // };
+    };
 
     $scope.$watch('vm.current', function(newValue, oldValue) {
         vm.loading = true;

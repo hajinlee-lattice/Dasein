@@ -270,8 +270,9 @@ angular.module('common.datacloud')
     this.setCube = function(cube) {
         DataCloudStore.cube = cube;
     }
+
 })
-.service('DataCloudService', function($q, $http, $state, $stateParams) {
+.service('DataCloudService', function($q, $http, $state, $stateParams, SegmentStore) {
     this.host = '/pls';
     this.paths = {
         'lattice': '/latticeinsights',

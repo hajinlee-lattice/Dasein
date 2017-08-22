@@ -6,31 +6,11 @@ angular.module('common.datacloud.query.service',[
 
     this.validResourceTypes = ['accounts', 'contacts'];
     this.segment = null;
- 
+
     this.validContexts = ['accounts', 'contacts'];
     var allRestrictions = [];
     var anyRestrictions = [];
-    this.restriction = {
-        "restriction": {
-            "logicalRestriction": {
-                "operator": "AND",
-                "restrictions": [
-                    {
-                        "logicalRestriction": {
-                            "operator": "AND",
-                            "restrictions": allRestrictions
-                        }
-                    },
-                    {
-                        "logicalRestriction": {
-                            "operator": "OR",
-                            "restrictions": anyRestrictions
-                        }
-                    }
-                ]
-            }
-        }
-    };
+    this.restriction = {restriction: {logicalRestriction: {operator: "AND",restrictions: [{logicalRestriction: {operator: "AND",restrictions: allRestrictions}},{logicalRestriction: {operator: "OR",restrictions: anyRestrictions}}]}}};
     this.counts = {
         accounts: {
             value: 0,
@@ -124,9 +104,8 @@ angular.module('common.datacloud.query.service',[
             // default state. restriction is empty.
             deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );
 
-            console.log(this.restriction);
-
         }
+
         return deferred.promise;
     };
 
