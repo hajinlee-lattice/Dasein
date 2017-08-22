@@ -102,8 +102,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             log.info("Progress version " + progress.getVersion());
             parameters.setTimestamp(HdfsPathBuilder.dateFormat.parse(progress.getVersion()));
         } catch (ParseException e) {
-            throw new LedpException(LedpCode.LEDP_25012, e,
-                    new String[] { targetTemplate.getSourceName(), e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_25012, e, new String[] { targetTemplate.getSourceName(),
+                    e.getMessage() });
         }
         parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(targetTemplate.getSourceName()));
 
@@ -149,7 +149,7 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
             Map<Source, List<String>> baseSourceVersionMap = setupBaseSourceVersionMap(step, parameters, configuration);
             Map<String, Table> baseTables = setupSourceTables(baseSourceVersionMap);
             step.setBaseTables(baseTables);
-            Table result = dataFlowService.executeDataFlow(step, getDataFlowBeanName(), parameters, workflowDir);
+            Table result = executeDataFlow(workflowDir, step, parameters);
             step.setCount(result.getCount());
             List<Schema> baseSchemas = getBaseSourceSchemas(step);
             step.setTargetSchema(getTargetSchema(result, parameters, configuration, baseSchemas));
@@ -161,6 +161,11 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         }
 
         return true;
+    }
+
+    protected Table executeDataFlow(String workflowDir, TransformStep step, P parameters) {
+        Table result = dataFlowService.executeDataFlow(step, getDataFlowBeanName(), parameters, workflowDir);
+        return result;
     }
 
     private List<Schema> getBaseSourceSchemas(TransformStep step) {
@@ -216,8 +221,8 @@ public abstract class AbstractDataflowTransformer<T extends TransformerConfig, P
         try {
             if (source instanceof TableSource) {
                 TableSource tableSource = (TableSource) source;
-                sourceTable = metadataProxy.getTable(tableSource.getCustomerSpace().toString(),
-                        tableSource.getTable().getName());
+                sourceTable = metadataProxy.getTable(tableSource.getCustomerSpace().toString(), tableSource.getTable()
+                        .getName());
             } else if (versions.size() == 1) {
                 sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, versions.get(0));
             } else {

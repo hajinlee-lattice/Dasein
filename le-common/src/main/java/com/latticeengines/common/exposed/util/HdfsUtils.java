@@ -105,8 +105,8 @@ public class HdfsUtils {
         }
     }
 
-    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream,
-            String hdfsPath) throws IOException {
+    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(inputStream, outputStream);
@@ -354,8 +354,8 @@ public class HdfsUtils {
         }
     }
 
-    public static final List<String> getFilesForDirRecursiveWithFilterOnDir(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, HdfsFileFilter folderFilter) throws IOException {
+    public static final List<String> getFilesForDirRecursiveWithFilterOnDir(Configuration configuration,
+            String hdfsDir, HdfsFileFilter filter, HdfsFileFilter folderFilter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<String> filePaths = new HashSet<String>();
@@ -363,8 +363,8 @@ public class HdfsUtils {
                 if (status.isDirectory()) {
                     if (folderFilter.accept(status)) {
                         filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), filter));
-                        filePaths.addAll(getFilesForDirRecursiveWithFilterOnDir(configuration,
-                                status.getPath().toString(), filter, folderFilter));
+                        filePaths.addAll(getFilesForDirRecursiveWithFilterOnDir(configuration, status.getPath()
+                                .toString(), filter, folderFilter));
                     }
                 }
             }
@@ -522,6 +522,17 @@ public class HdfsUtils {
         }
     }
 
+    public static void moveGlobToDir(Configuration configuration, String sourceGlob, String targetDir)
+            throws IOException {
+        if (!isDirectory(configuration, targetDir)) {
+            mkdir(configuration, targetDir);
+        }
+        for (String filePath : getFilesByGlob(configuration, sourceGlob)) {
+            String fileName = new Path(filePath).getName();
+            moveFile(configuration, filePath, new Path(targetDir, fileName).toString());
+        }
+    }
+
     private static boolean keyEquals(EncryptionZone zone1, EncryptionZone zone2) {
         return zone1.getKeyName().equals(zone2.getKeyName()) && zone1.getVersion().equals(zone2.getVersion());
     }
@@ -535,10 +546,10 @@ public class HdfsUtils {
 
     public static final void copyGlobToDir(Configuration configuration, String sourceGlob, String targetDir)
             throws IOException {
+        if (!isDirectory(configuration, targetDir)) {
+            mkdir(configuration, targetDir);
+        }
         for (String filePath : getFilesByGlob(configuration, sourceGlob)) {
-            if (!isDirectory(configuration, targetDir)) {
-                mkdir(configuration, targetDir);
-            }
             String fileName = new Path(filePath).getName();
             copyFiles(configuration, filePath, new Path(targetDir, fileName).toString());
         }
@@ -631,8 +642,8 @@ public class HdfsUtils {
             }
             return false;
         } catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Could not check if key %s exists using provider %s", keyName, provider), e);
+            throw new RuntimeException(String.format("Could not check if key %s exists using provider %s", keyName,
+                    provider), e);
         }
     }
 
@@ -662,10 +673,9 @@ public class HdfsUtils {
             InputStream inputStream, String hdfsPath, long totalRows) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
-                return copyLarge(
-                        new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
-                                ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
-                        outputStream, totalRows);
+                return copyLarge(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), outputStream,
+                        totalRows);
             }
         }
     }
@@ -690,4 +700,5 @@ public class HdfsUtils {
         }
         return rows;
     }
+
 }

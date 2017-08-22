@@ -114,43 +114,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         verifyRecordsInMergedTable(mergedTableFullName);
     }
 
-    private void verifyRecordsInMergedTable(String mergedTableFullName) {
-        List<GenericRecord> records = getRecordFromTable(mergedTableFullName);
-        log.info("Start to verify records one by one.");
-        Integer rowCount = 0;
-        Map<String, GenericRecord> recordMap = new HashMap<>();
-        for (GenericRecord record : records) {
-            String id = String.valueOf(record.get(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name()));
-            recordMap.put(id, record);
-            rowCount++;
-        }
-        Assert.assertEquals(rowCount, new Integer(5));
-        GenericRecord record = recordMap.get("1");
-        Assert.assertEquals(record.get("Domain").toString(), "google.com");
-        Assert.assertEquals(record.get("Email").toString(), "123@google.com");
-        Assert.assertEquals(record.get("FirstName").toString(), "John");
-
-        record = recordMap.get("2");
-        Assert.assertEquals(record.get("Domain").toString(), "oracle.com");
-        Assert.assertEquals(record.get("Email").toString(), "234@oracle.com");
-        Assert.assertEquals(record.get("FirstName").toString(), "Smith");
-
-        record = recordMap.get("3");
-        Assert.assertEquals(record.get("Domain").toString(), "salesforce.com");
-        Assert.assertEquals(record.get("Email"), null);
-        Assert.assertEquals(record.get("FirstName"), null);
-
-        record = recordMap.get("4");
-        Assert.assertEquals(record.get("Domain").toString(), "microsoft.com");
-        Assert.assertEquals(record.get("Email").toString(), "234@d.com");
-        Assert.assertEquals(record.get("FirstName").toString(), "Marry");
-
-        record = recordMap.get("5");
-        Assert.assertEquals(record.get("Domain").toString(), "faceboook.com");
-        Assert.assertEquals(record.get("Email"), null);
-        Assert.assertEquals(record.get("FirstName"), null);
-    }
-
+   
     @Override
     protected String getTargetSourceName() {
         return masterTableName;
@@ -325,6 +289,44 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     private void cleanupRegisteredTable(String tableName) {
         metadataProxy.deleteTable(customerSpace.toString(), tableName);
     }
+    
+    private void verifyRecordsInMergedTable(String mergedTableFullName) {
+        List<GenericRecord> records = getRecordFromTable(mergedTableFullName);
+        log.info("Start to verify records one by one.");
+        Integer rowCount = 0;
+        Map<String, GenericRecord> recordMap = new HashMap<>();
+        for (GenericRecord record : records) {
+            String id = String.valueOf(record.get(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name()));
+            recordMap.put(id, record);
+            rowCount++;
+        }
+        Assert.assertEquals(rowCount, new Integer(5));
+        GenericRecord record = recordMap.get("1");
+        Assert.assertEquals(record.get("Domain").toString(), "google.com");
+        Assert.assertEquals(record.get("Email").toString(), "123@google.com");
+        Assert.assertEquals(record.get("FirstName").toString(), "John");
+
+        record = recordMap.get("2");
+        Assert.assertEquals(record.get("Domain").toString(), "oracle.com");
+        Assert.assertEquals(record.get("Email").toString(), "234@oracle.com");
+        Assert.assertEquals(record.get("FirstName").toString(), "Smith");
+
+        record = recordMap.get("3");
+        Assert.assertEquals(record.get("Domain").toString(), "salesforce.com");
+        Assert.assertEquals(record.get("Email"), null);
+        Assert.assertEquals(record.get("FirstName"), null);
+
+        record = recordMap.get("4");
+        Assert.assertEquals(record.get("Domain").toString(), "microsoft.com");
+        Assert.assertEquals(record.get("Email").toString(), "234@d.com");
+        Assert.assertEquals(record.get("FirstName").toString(), "Marry");
+
+        record = recordMap.get("5");
+        Assert.assertEquals(record.get("Domain").toString(), "faceboook.com");
+        Assert.assertEquals(record.get("Email"), null);
+        Assert.assertEquals(record.get("FirstName"), null);
+    }
+
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {

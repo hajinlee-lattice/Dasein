@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 public enum TableRoleInCollection {
     ConsolidatedAccount, //
     ConsolidatedContact, //
+    ConsolidatedTransaction, //
 
     Profile, //
 
@@ -39,6 +40,9 @@ public enum TableRoleInCollection {
         SortedContact.primaryKey = ConsolidatedContact.primaryKey;
         SortedContact.foreignKeys = ConsolidatedContact.foreignKeys;
 
+        ConsolidatedTransaction.primaryKey = InterfaceName.TransactionId;
+        ConsolidatedTransaction.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
     }
 }

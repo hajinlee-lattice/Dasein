@@ -37,6 +37,10 @@ public class TransformStep {
         this.targetVersion = targetVersion;
         this.targetTemplate = targetTemplate;
     }
+    
+    public TransformStep(String name) {
+        this.name = name;
+    }
 
     public TransformStep(String name, Transformer transformer, Source[] baseSources, List<String> baseVersions,
             Source[] baseTemplates, Source target, String targetVersion, Source targetTemplate, String config,
@@ -76,6 +80,10 @@ public class TransformStep {
 
     public Source getTargetTemplate() {
         return targetTemplate;
+    }
+
+    public void setTargetTemplate(Source targetTemplate) {
+        this.targetTemplate = targetTemplate;
     }
 
     public String getTargetVersion() {

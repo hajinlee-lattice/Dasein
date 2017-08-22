@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl;
 
+import java.util.List;
 import java.util.Set;
-
 
 public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
@@ -9,9 +9,10 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
     private String masterIdField;
 
     private boolean createTimestampColumn;
-    
+
     private Set<String> columnsFromRight;
-    
+    private List<String> compositeKeys;
+
     public String getSrcIdField() {
         return srcIdField;
     }
@@ -43,6 +44,13 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
     public void setColumnsFromRight(Set<String> columnsFromRight) {
         this.columnsFromRight = columnsFromRight;
     }
-    
-    
+
+    public List<String> getCompositeKeys() {
+        return compositeKeys;
+    }
+
+    public void setCompositeKeys(List<String> compositeKeys) {
+        this.compositeKeys = compositeKeys;
+    }
+
 }

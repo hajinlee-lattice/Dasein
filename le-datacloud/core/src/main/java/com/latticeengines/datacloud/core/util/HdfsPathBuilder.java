@@ -24,6 +24,7 @@ public class HdfsPathBuilder {
 
     public static final String SUCCESS_FILE = "_SUCCESS";
     public static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
+    public static final String DATE_ONLY_FORMAT_STRING = "yyyy-MM-dd";
     public static final String UTC = "UTC";
     public static final String VERSION_FILE = "_CURRENT_VERSION";
 
@@ -53,9 +54,11 @@ public class HdfsPathBuilder {
     private static final String PODS_ROOT = PATH_SEPARATOR + "Pods";
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+    public static final SimpleDateFormat dateOnlyFormat = new SimpleDateFormat(DATE_ONLY_FORMAT_STRING);
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+        dateOnlyFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
     public Path podDir() {

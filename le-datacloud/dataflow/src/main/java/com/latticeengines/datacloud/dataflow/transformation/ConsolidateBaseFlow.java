@@ -4,13 +4,16 @@ import java.util.List;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddNewColumnFuction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
 public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends ConfigurableFlowBase<T> {
+    private static final String COMPOSITE_KEY = "__Composite_Key__";
     public static String CREATE_DATE = "CREATION_DATE";
     public static String UPDATE_DATE = "UPDATE_DATE";
 
@@ -50,5 +53,21 @@ public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends C
             }
             sources.set(i, source);
         }
+    }
+
+    protected String buildNewIdColumn(ConsolidateDataTransformerConfig config, List<Node> sources) {
+        List<String> keys = config.getCompositeKeys();
+
+        for (int i = 0; i < sources.size(); i++) {
+            Node source = sources.get(i);
+            List<String> fieldNames = source.getFieldNames();
+            if (fieldNames.contains(COMPOSITE_KEY)) {
+                continue;
+            }
+            source = source.apply(new ConsolidateAddNewColumnFuction(keys, COMPOSITE_KEY), new FieldList(keys),
+                    new FieldMetadata(COMPOSITE_KEY, String.class));
+            sources.set(i, source);
+        }
+        return COMPOSITE_KEY;
     }
 }

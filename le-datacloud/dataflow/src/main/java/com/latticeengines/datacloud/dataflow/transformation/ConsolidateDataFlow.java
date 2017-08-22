@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -38,12 +39,15 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         List<Node> sources = new ArrayList<>();
         List<Table> sourceTables = new ArrayList<>();
         List<String> sourceNames = new ArrayList<>();
-        String masterId = processIdColumns(parameters, config, sources, sourceTables, sourceNames);
+        String groupByKey = processIdColumns(parameters, config, sources, sourceTables, sourceNames);
         if (config.isCreateTimestampColumn()) {
             createTimestampColumns(config, sources);
         }
         if (sources.size() <= 1) {
             return sources.get(0);
+        }
+        if (CollectionUtils.isNotEmpty(config.getCompositeKeys())) {
+            groupByKey = buildNewIdColumn(config, sources);
         }
 
         Map<String, Map<String, String>> dupeFieldMap = new LinkedHashMap<>();
@@ -53,7 +57,7 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         consolidateHelper.preProcessSources(sourceNames, sources, dupeFieldMap, fieldToRetain, commonFields);
 
         List<FieldList> groupFieldLists = consolidateHelper.getGroupFieldList(sourceNames, sourceTables, dupeFieldMap,
-                masterId);
+                groupByKey);
 
         Node result = sources.get(0).coGroup(groupFieldLists.get(0), sources.subList(1, sources.size()),
                 groupFieldLists.subList(1, groupFieldLists.size()), JoinType.OUTER);
