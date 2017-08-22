@@ -10,8 +10,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -54,9 +54,10 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, int offset) {
 
         List<Play> plays = internalResourceRestApiProxy.getPlays(MultiTenantContext.getCustomerSpace());
-        Map<String, Pair<Long, String>> playNameAndPidMap = new HashMap<>();
+        Map<String, Triple<Long, String, String>> playNameAndPidMap = new HashMap<>();
         for (Play play : plays) {
-            playNameAndPidMap.put(play.getName(), new ImmutablePair<>(play.getPid(), play.getName()));
+            playNameAndPidMap.put(play.getName(),
+                    new ImmutableTriple<>(play.getPid(), play.getDisplayName(), play.getDescription()));
         }
 
         Map<String, Long> playLaunchNameAndPidMap = new HashMap<>();
@@ -78,8 +79,12 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
                 if (accExtRec.containsKey(PlaymakerConstants.PlayID)) {
                     accExtRec.put(PlaymakerConstants.PlayID, playNameAndPidMap.get(playName).getLeft());
-                    accExtRec.put(PlaymakerConstants.PlayID + PlaymakerConstants.V2,
-                            playNameAndPidMap.get(playName).getRight());
+                    accExtRec.put(PlaymakerConstants.PlayID + PlaymakerConstants.V2, playName);
+                    accExtRec.put(PlaymakerConstants.DisplayName, playNameAndPidMap.get(playName).getMiddle());
+
+                    if (accExtRec.get(PlaymakerConstants.Description) == null) {
+                        accExtRec.put(PlaymakerConstants.Description, playNameAndPidMap.get(playName).getRight());
+                    }
                 }
 
                 if (accExtRec.containsKey(PlaymakerConstants.LaunchID)) {
