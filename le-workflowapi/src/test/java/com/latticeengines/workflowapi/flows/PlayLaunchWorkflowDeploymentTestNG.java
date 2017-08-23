@@ -67,9 +67,9 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
 
     @AfterClass(groups = "workflow")
     public void cleanup() {
-        deleteTestPlay();
-        deleteTestPlayLaunch();
-        deleteTestSegment();
+        // deleteTestPlay();
+        // deleteTestPlayLaunch();
+        // deleteTestSegment();
     }
 
     private PlayLaunchWorkflowConfiguration generatePlayLaunchWorkflowConfiguration() throws Exception {
