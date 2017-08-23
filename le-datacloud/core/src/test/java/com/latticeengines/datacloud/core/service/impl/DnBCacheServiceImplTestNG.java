@@ -67,14 +67,14 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
         entityContext.setOutOfBusiness((Boolean) data[0][10]);
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         entityContext.setDnbCode(DnBReturnCode.OK);
-        whiteCaches.add(dnbCacheService.addCache(entityContext));
+        whiteCaches.add(dnbCacheService.addCache(entityContext, true));
         
         DnBMatchContext emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[0][6]);
         emailContext.setDuns((String) data[0][7]);
         emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
         emailContext.setDnbCode(DnBReturnCode.OK);
-        whiteCaches.add(dnbCacheService.addCache(emailContext));
+        whiteCaches.add(dnbCacheService.addCache(emailContext, true));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreateWhiteCache", enabled = true)
@@ -222,13 +222,13 @@ public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase
         entityContext.setInputNameLocation(nameLocation);
         entityContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         entityContext.setDnbCode(DnBReturnCode.UNMATCH);
-        blackCaches.add(dnbCacheService.addCache(entityContext));
+        blackCaches.add(dnbCacheService.addCache(entityContext, true));
 
         DnBMatchContext emailContext = new DnBMatchContext();
         emailContext.setInputEmail((String) data[0][6]);
         emailContext.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.EMAIL);
         emailContext.setDnbCode(DnBReturnCode.UNMATCH);
-        blackCaches.add(dnbCacheService.addCache(emailContext));
+        blackCaches.add(dnbCacheService.addCache(emailContext, true));
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreateBlackCache", enabled = true)

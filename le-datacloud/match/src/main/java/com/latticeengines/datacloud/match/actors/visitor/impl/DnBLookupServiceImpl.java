@@ -394,7 +394,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         context.setResponseTime(new Date());
         validateDuns(context);
         dnbMatchResultValidator.validate(context);
-        DnBCache dnBCache = dnbCacheService.addCache(context);
+        DnBCache dnBCache = dnbCacheService.addCache(context, false);
         if (dnBCache != null) {
             context.setCacheId(dnBCache.getId());
         }
@@ -633,7 +633,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 } else {
                     validateDuns(context);
                     dnbMatchResultValidator.validate(context);
-                    dnbCacheService.addCache(context);
+                    dnbCacheService.addCache(context, false);
                 }
             }
             removeReq(lookupRequestId);

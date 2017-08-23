@@ -15,10 +15,14 @@ public interface DnBCacheService {
 
     Map<String, DnBCache> batchLookupCache(Map<String, DnBMatchContext> contexts);
 
-    DnBCache addCache(DnBMatchContext context);
+    DnBCache addCache(DnBMatchContext context, boolean sync);
 
     List<DnBCache> batchAddCache(List<DnBMatchContext> contexts);
 
     void removeCache(DnBCache cache);
+
+    void dumpQueue();
+
+    int getQueueSize();
 
 }

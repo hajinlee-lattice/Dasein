@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.service.DnBCacheService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.DomainCollectService;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
@@ -73,6 +74,9 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
 
     @Autowired
     private DomainCollectService domainCollectService;
+
+    @Autowired
+    private DnBCacheService dnbCacheService;
 
     @Autowired
     private DedupeHelper dedupeHelper;
@@ -285,6 +289,11 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             domainCollectService.dumpQueue();
         } catch (Exception e) {
             log.error("Failed to dump domains to SQL.", e);
+        }
+        try {
+            dnbCacheService.dumpQueue();
+        } catch (Exception e) {
+            log.error("Failed to dump remaining DnBCaches to Dynamo.", e);
         }
     }
 

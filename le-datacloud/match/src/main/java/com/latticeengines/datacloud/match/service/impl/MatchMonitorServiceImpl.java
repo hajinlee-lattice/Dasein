@@ -121,6 +121,9 @@ public class MatchMonitorServiceImpl implements MatchMonitorService {
         // DomainCollectService Checking
         sb.append("DOMAIN COLLECT\n");
         sb.append(String.format("pending domains in queue: %d\n", domainCollectService.getQueueSize()));
+        // DnBCacheService Checking
+        sb.append("DNB CACHE DUMP\n");
+        sb.append(String.format("pending DnBCaches in queue: %d\n", dnbCacheService.getQueueSize()));
         // External Services Checking
         synchronized (externalMetrics) {
             for (String service : externalMetrics.keySet()) {

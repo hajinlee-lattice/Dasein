@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DnBCacheEntityMgr;
@@ -20,6 +25,8 @@ import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("dnbCacheService")
 public class DnBCacheServiceImpl implements DnBCacheService {
@@ -47,6 +54,53 @@ public class DnBCacheServiceImpl implements DnBCacheService {
 
     @Autowired
     private FabricDataService dataService;
+
+    @SuppressWarnings("unchecked")
+    private final List<DnBCache> cacheQueue = Collections.synchronizedList(new ArrayList<>());
+
+    @Autowired
+    @Qualifier("commonTaskScheduler")
+    private ThreadPoolTaskScheduler scheduler;
+
+    private static final int BUFFER_SIZE = 25;
+
+    @Value("${datacloud.dnb.cache.queue.size}")
+    private int queueMaxSize;
+
+    @PostConstruct
+    public void postConstruct() {
+        scheduler.scheduleWithFixedDelay(this::dumpQueue, TimeUnit.SECONDS.toMillis(5));
+    }
+
+    @Override
+    public void dumpQueue() {
+        List<DnBCache> caches = new ArrayList<>();
+        synchronized (cacheQueue) {
+            caches.addAll(cacheQueue);
+            cacheQueue.clear();
+        }
+        if (!caches.isEmpty()) {
+            List<DnBCache> cacheBuffer = new ArrayList<>();
+            log.info("Splitting " + caches.size() + " DnBCaches into groups.");
+            for (DnBCache cache : caches) {
+                cacheBuffer.add(cache);
+                if (cacheBuffer.size() >= BUFFER_SIZE) {
+                    Long startTime = System.currentTimeMillis();
+                    getCacheMgr().batchCreate(cacheBuffer);
+                    log.info(String.format("Dumped %d DnBCaches into Dynamo table. Duration=%d", cacheBuffer.size(),
+                            System.currentTimeMillis() - startTime));
+                    cacheBuffer.clear();
+                }
+            }
+            if (!cacheBuffer.isEmpty()) {
+                Long startTime = System.currentTimeMillis();
+                getCacheMgr().batchCreate(cacheBuffer);
+                log.info(String.format("Dumped %d DnBCaches into Dynamo table. Duration=%d", cacheBuffer.size(),
+                        System.currentTimeMillis() - startTime));
+                cacheBuffer.clear();
+            }
+        }
+    }
 
     @Override
     public DnBCache lookupCache(DnBMatchContext context) {
@@ -86,7 +140,7 @@ public class DnBCacheServiceImpl implements DnBCacheService {
     }
 
     @Override
-    public DnBCache addCache(DnBMatchContext context) {
+    public DnBCache addCache(DnBMatchContext context, boolean sync) {
         DnBCache cache = null;
         if (StringUtils.isNotEmpty(context.getDuns())
                 && (context.getDnbCode() == DnBReturnCode.OK || context.getDnbCode() == DnBReturnCode.DISCARD)) {
@@ -101,10 +155,24 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         if (context.getPatched() != null) {
             cache.setPatched(context.getPatched());
         }
-        getCacheMgr().create(cache);
-        log.info(String.format("Added Id=%s to %s cache. DnBCode=%s. OutOfBusiness=%s, DunsInAM=%s", cache.getId(),
-                cache.isWhiteCache() ? "white" : "black", context.getDnbCode(),
-                context.isOutOfBusinessString(), context.isDunsInAMString()));
+        if (sync) {
+            getCacheMgr().create(cache);
+            log.info(String.format("Added Id=%s to %s DnBCache. DnBCode=%s. OutOfBusiness=%s, DunsInAM=%s",
+                    cache.getId(), cache.isWhiteCache() ? "white" : "black", context.getDnbCode(),
+                    context.isOutOfBusinessString(), context.isDunsInAMString()));
+        } else {
+            if (cacheQueue.size() >= queueMaxSize) {
+                log.info(String.format(
+                        "Discarded Id=%s since DnBCache queue has exceeded maximum size limit %d. DnBCode=%s. OutOfBusiness=%s, DunsInAM=%s",
+                        cache.getId(), queueMaxSize, context.getDnbCode(), context.isOutOfBusinessString(),
+                        context.isDunsInAMString()));
+            } else {
+                cacheQueue.add(cache);
+                log.info(String.format("Added Id=%s to %s DnBCache queue. DnBCode=%s. OutOfBusiness=%s, DunsInAM=%s",
+                        cache.getId(), cache.isWhiteCache() ? "white" : "black", context.getDnbCode(),
+                        context.isOutOfBusinessString(), context.isDunsInAMString()));
+            }
+        }
         return cache;
     }
 
@@ -231,6 +299,10 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         } else {
             return false;
         }
+    }
+
+    public int getQueueSize() {
+        return cacheQueue.size();
     }
 
 }
