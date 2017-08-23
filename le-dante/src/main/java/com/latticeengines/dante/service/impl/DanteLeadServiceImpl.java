@@ -74,8 +74,11 @@ public class DanteLeadServiceImpl implements DanteLeadService {
         lead.setCustomerID(CustomerSpace.parse(customerSpace).getTenantId());
         lead.setExternalID(recommendation.getId());
         lead.setLastModificationDate(now);
-        lead.setSalesforceID(recommendation.getSfdcAccountID());
+        lead.setSalesforceID(null);
+        lead.setAccountExternalID(recommendation.getSfdcAccountID());
+        /// TODO: Remove this once both BIS & DanteUI support String IDs
         lead.setRecommendaitonID(recommendation.getPid().intValue());
+        /// TODO: END
         lead.setValue(JsonUtils.serialize(new DanteLeadNotionObject(recommendation, play)));
         return lead;
     }

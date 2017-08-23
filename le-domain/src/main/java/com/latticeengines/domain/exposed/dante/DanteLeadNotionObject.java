@@ -80,7 +80,7 @@ public class DanteLeadNotionObject {
     private Integer recommendationID;
 
     @JsonProperty(value = "SalesforceAccountID", index = 24)
-    private Integer salesforceAccountID;
+    private String salesforceAccountID;
 
     @JsonProperty(value = "SfdcID", index = 25)
     private Integer sfdcID;
@@ -129,6 +129,7 @@ public class DanteLeadNotionObject {
         probability = null;
         rank = null;
         recommendationID = null;
+        salesforceAccountID = recommendation.getSfdcAccountID();
         theme = null;
         talkingPoints = null;
         userRoleDisplayName = null;
@@ -359,11 +360,11 @@ public class DanteLeadNotionObject {
         this.recommendationID = recommendationID;
     }
 
-    public Integer getSalesforceAccountID() {
+    public String getSalesforceAccountID() {
         return salesforceAccountID;
     }
 
-    public void setSalesforceAccountID(Integer salesforceAccountID) {
+    public void setSalesforceAccountID(String salesforceAccountID) {
         this.salesforceAccountID = salesforceAccountID;
     }
 
