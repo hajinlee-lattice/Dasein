@@ -44,7 +44,7 @@ public enum LatticeFeatureFlag {
     @Deprecated
     BYPASS_DNB_CACHE(true, "BypassDnbCache", "Bypass DnB Cache"), //
     @Deprecated
-    ENABLE_CDL(true, "EnableCdl", "Enable Customer Data Lake"); //
+    ENABLE_CDL("EnableCdl", "Enable Customer Data Lake"); //
 
     private String name;
     private String documentation;
