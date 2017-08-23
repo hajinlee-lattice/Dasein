@@ -72,6 +72,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
 
     private static Set<ReportPurpose> reports = Sets.newHashSet( //
             ReportPurpose.IMPORT_DATA_SUMMARY, //
+            ReportPurpose.CONSOLIDATE_NEW_RECORDS_COUNT_SUMMARY, //
             ReportPurpose.PUBLISH_DATA_SUMMARY);
 
     private static Splitter nameSplitter = Splitter.on(JobNameServiceImpl.JOBNAME_DELIMITER).trimResults()

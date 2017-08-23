@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C extends WorkflowConfiguration>
@@ -42,6 +45,16 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
     public void skipStep() {
         log.info("Skip the wrapper step and the wrapped workflow steps.");
         skipEmbeddedWorkflow(getWrappedWorkflowConfClass());
+    }
+
+    protected void report(ReportPurpose purpose, String name, String json) {
+        Report report = new Report();
+        KeyValue kv = new KeyValue();
+        kv.setPayload(json.toString());
+        report.setJson(kv);
+        report.setPurpose(purpose);
+        report.setName(name);
+        registerReport(configuration.getCustomerSpace(), report);
     }
 
     protected abstract Class<C> getWrappedWorkflowConfClass();

@@ -5,12 +5,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -22,6 +24,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateDataBaseConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
@@ -54,6 +57,8 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
     protected BusinessEntity entity;
     protected TableRoleInCollection batchStore;
     protected TableRoleInCollection servingStore;
+
+    protected String newRecordsTablePrefix = "newRecordsTablePrefix";
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -88,6 +93,15 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
             }
             appendTableMap.put(entity, true);
             putObjectInContext(APPEND_TO_REDSHIFT_TABLE, appendTableMap);
+        }
+
+        if (BusinessEntity.Account.equals(getBusinessEntity())) {
+            Table newRecordsTable = metadataProxy.getTable(customerSpace.toString(),
+                    TableUtils.getFullTableName(newRecordsTablePrefix, pipelineVersion));
+            ObjectNode json = JsonUtils.createObjectNode();
+            json.put(getBusinessEntity().name() + "_New", newRecordsTable.getExtracts().get(0).getProcessedRecords());
+            report(ReportPurpose.CONSOLIDATE_NEW_RECORDS_COUNT_SUMMARY, UUID.randomUUID().toString(), json.toString());
+            metadataProxy.deleteTable(customerSpace.toString(), newRecordsTable.getName());
         }
     }
 

@@ -53,9 +53,6 @@ public class TransformationStepConfig {
     @JsonIgnore
     private String configuration;
 
-    @JsonProperty("CreateReport")
-    private boolean createReport;
-
     public String getTransformer() {
         return transformer;
     }
@@ -164,11 +161,4 @@ public class TransformationStepConfig {
         this.targetTable = targetTable;
     }
 
-    public boolean shouldCreateReport() {
-        return createReport;
-    }
-
-    public void setCreateReport(boolean createReport) {
-        this.createReport = createReport;
-    }
 }

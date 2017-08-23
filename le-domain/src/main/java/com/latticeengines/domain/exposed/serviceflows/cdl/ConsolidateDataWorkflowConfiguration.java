@@ -26,6 +26,12 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            consolidateAccountDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            consolidateContactDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
         public Builder accountIdField(String idField) {
             consolidateAccountDataConfiguration.setIdField(idField);
             return this;

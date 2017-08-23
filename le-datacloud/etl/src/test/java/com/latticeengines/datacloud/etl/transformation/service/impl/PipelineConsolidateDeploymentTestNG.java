@@ -204,7 +204,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
             step4.setInputSteps(Arrays.asList(0, 2));
             step4.setTransformer("consolidateDataTransformer");
             step4.setConfiguration(getConsolidateDataMasterConfig());
-            step4.setCreateReport(true);
+
             targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
             targetTable.setNamePrefix(masterTableName);

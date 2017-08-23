@@ -43,6 +43,7 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             startExecutionConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            consolidateDataConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }

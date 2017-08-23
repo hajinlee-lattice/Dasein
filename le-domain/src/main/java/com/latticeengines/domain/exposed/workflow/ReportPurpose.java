@@ -24,6 +24,12 @@ public enum ReportPurpose {
     PREMATCH_EVENT_TABLE_SUMMARY("PreMatchEventTableSummary"), //
 
     /**
+     * CDL
+     * 
+     */
+    CONSOLIDATE_NEW_RECORDS_COUNT_SUMMARY("ConsolidateNewRecordsCount"), //
+
+    /**
      * Generic
      */
     IMPORT_DATA_SUMMARY("ImportDataSummary"), //

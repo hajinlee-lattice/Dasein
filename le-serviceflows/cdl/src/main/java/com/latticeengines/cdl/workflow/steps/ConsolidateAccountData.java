@@ -52,6 +52,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
     private int diffStep;
     private int matchDiffStep;
     private int bucketStep;
+    @SuppressWarnings("unused")
     private int sortStep;
 
     @Override
@@ -126,6 +127,11 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         step2.setInputSteps(Collections.singletonList(mergeStep));
         step2.setTransformer("consolidateDeltaNewTransformer");
         step2.setConfiguration(getConsolidateDataConfig());
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(newRecordsTablePrefix);
+        targetTable.setPrimaryKey(batchStorePrimaryKey);
+        step2.setTargetTable(targetTable);
         return step2;
 
     }
@@ -167,7 +173,6 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         targetTable.setNamePrefix(batchStoreTablePrefix);
         targetTable.setPrimaryKey(batchStorePrimaryKey);
         step4.setTargetTable(targetTable);
-        // step4.setCreateReport(true);
         return step4;
     }
 

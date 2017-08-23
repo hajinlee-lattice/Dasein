@@ -46,9 +46,6 @@ public class TransformationFlowParameters extends DataFlowParameters {
     @JsonProperty(ENGINE_CONFIG)
     private EngineConfiguration engineConfiguration;
 
-    @JsonProperty("CreateReport")
-    private boolean createReport;
-
     public String getConfJsonPath() {
         return confJsonPath;
     }
@@ -127,14 +124,6 @@ public class TransformationFlowParameters extends DataFlowParameters {
 
     public void setEngineConfiguration(EngineConfiguration engineConfiguration) {
         this.engineConfiguration = engineConfiguration;
-    }
-
-    public boolean shouldCreateReport() {
-        return createReport;
-    }
-
-    public void setCreateReport(boolean createReport) {
-        this.createReport = createReport;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

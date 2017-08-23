@@ -86,7 +86,7 @@ public class IngestedFileToSourceTransformer
             String confStr = step.getConfig();
             IngestedFileToSourceTransformerConfig configuration = getConfiguration(confStr);
             IngestedFileToSourceParameters parameters = getParameters(progress, baseSources, baseTemplates,
-                    targetTemplate, configuration, confStr, baseSourceVersions, step.shouldCreateReport());
+                    targetTemplate, configuration, confStr, baseSourceVersions);
             dataFlowService.executeDataFlow(targetTemplate, workflowDir, baseSourceVersions.get(0), parameters);
         } catch (Exception e) {
             log.error("Failed to transform data", e);

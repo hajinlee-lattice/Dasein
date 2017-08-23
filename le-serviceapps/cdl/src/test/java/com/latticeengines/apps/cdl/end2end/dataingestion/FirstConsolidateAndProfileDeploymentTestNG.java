@@ -56,7 +56,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     }
 
     private void verifyConsolidate() {
-        verifyReport(consolidateAppId, 0, 0, 0);
+        verifyReport(consolidateAppId, 1, 0, 0);
         verifyDataFeedStatsu(DataFeed.Status.InitialConsolidated);
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());

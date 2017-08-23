@@ -367,7 +367,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                 log.info("Found a iterative step " + step.getName());
             } else {
                 step = new TransformStep(String.valueOf(stepIdx), transformer, baseSources, baseVersions, baseTemplates,
-                        target, targetVersion, targetTemplate, confStr, config.shouldCreateReport());
+                        target, targetVersion, targetTemplate, confStr);
                 log.info("Found a simple step " + step.getName());
             }
             steps[stepIdx] = step;
