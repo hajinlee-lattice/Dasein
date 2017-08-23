@@ -13,6 +13,9 @@ angular.module('common.datacloud.query.factory.restriction', [])
         } else {
             this.bkt = bkt;
         }
+        if (!range) {
+            return null;
+        }
 
     };
 

@@ -58,10 +58,10 @@
                 <ul class="graph">
                     <li class="label" title="{{stat.Lbl}}">
                         <input  type="checkbox"
-                                ng-model="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng)]" 
-                                ng-checked="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng)]" 
-                                name="{{vm.makeSegmentsRangeKey(enrichment,stat.Rng)}}" 
-                                id="{{vm.makeSegmentsRangeKey(enrichment,stat.Rng)}}"
+                                ng-model="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng,stat.Lbl)]" 
+                                ng-checked="vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng,stat.Lbl)]" 
+                                name="{{vm.makeSegmentsRangeKey(enrichment,stat.Rng,stat.Lbl)}}" 
+                                id="{{vm.makeSegmentsRangeKey(enrichment,stat.Rng,stat.Lbl)}}"
                                 ng-if="vm.section == 'segment.analysis'" />
                         {{stat.Lbl}}
                     </li>
