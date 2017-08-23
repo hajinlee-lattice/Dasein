@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -222,6 +223,12 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         recommendation.setLikelihood(0.5D);
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
         recommendation.setPriorityDisplayName("A");
+
+        // TODO - read contact data from redshift api
+        List<Map<String, String>> contactList = PlaymakerUtils
+                .createDummyContacts(StringUtils.isBlank(recommendation.getCompanyName()) ? "Dummy Company"
+                        : recommendation.getCompanyName());
+        recommendation.setExpandedContacts(contactList);
 
         return recommendation;
     }

@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.playmakercore;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -8,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -16,8 +19,10 @@ import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
@@ -99,6 +104,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
     @JsonProperty("monetaryValueIso4217ID")
     private String monetaryValueIso4217ID;
 
+    @Lob
     @Column(name = "CONTACTS")
     @JsonProperty("CONTACTS")
     private String contacts;
@@ -111,7 +117,6 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
     @Column(name = "TENANT_ID", nullable = false)
     @JsonProperty("tenant_id")
     private Long tenantId;
-
 
     public Long getPid() {
         return pid;
@@ -247,6 +252,14 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
 
     public void setContacts(String contacts) {
         this.contacts = contacts;
+    }
+
+    public List<Map<String, String>> getExpandedContacts() {
+        return PlaymakerUtils.getExpandedContacts(this.contacts);
+    }
+
+    public void setExpandedContacts(List<Map<String, String>> contactList) {
+        this.contacts = JsonUtils.serialize(contactList);
     }
 
     public String getSynchronizationDestination() {

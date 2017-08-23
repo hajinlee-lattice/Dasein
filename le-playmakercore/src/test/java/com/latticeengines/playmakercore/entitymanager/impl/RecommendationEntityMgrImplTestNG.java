@@ -40,6 +40,8 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
     private String LAUNCH_DESCRIPTION = "Recommendation done on " + CURRENT_TIME_MILLIS;
     private long TENANT_PID = 1L;
     private String CUSTOMER_SPACE = "LocalTest.LocalTest.Production";
+    private String DUMMY_EMAIL = "FirstName5763@com";
+    private String DUMMY_ZIP = "48098-2815";
 
     private Tenant tenant;
 
@@ -53,6 +55,22 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         recommendation.setAccountId(ACCOUNT_ID);
         recommendation.setLeAccountExternalID(ACCOUNT_ID);
         recommendation.setTenantId(TENANT_PID);
+        String contacts = //
+                " [ " //
+                        + "  { " //
+                        + "   \"Email\": \"" + DUMMY_EMAIL + "\", " //
+                        + "   \"Address\": \"null Dr\", " //
+                        + "   \"Phone\": \"248.813.2000\", " //
+                        + "   \"State\": \"MI\", " //
+                        + "   \"ZipCode\": \"" + DUMMY_ZIP + "\", " //
+                        + "   \"Country\": \"USA\", " //
+                        + "   \"SfdcContactID\": \"\", " //
+                        + "   \"City\": \"Troy\", " //
+                        + "   \"ContactID\": \"5763\", " //
+                        + "   \"Name\": \"FirstName5763 LastName5763\" " //
+                        + "  } " //
+                        + " ] ";
+        recommendation.setContacts(contacts);
         recommendation.setSynchronizationDestination(SynchronizationDestinationEnum.SFDC.toString());
 
         tenant = new Tenant(CUSTOMER_SPACE);
@@ -84,6 +102,12 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         for (Recommendation recommendation : recommendations) {
             Assert.assertNotNull(recommendation.getRecommendationId());
             Assert.assertNotNull(recommendation.getPid());
+            Assert.assertNotNull(recommendation.getContacts());
+            List<Map<String, String>> contactList = recommendation.getExpandedContacts();
+            Assert.assertNotNull(contactList);
+            Assert.assertTrue(contactList.size() == 1);
+            Assert.assertEquals(contactList.get(0).get("Email"), DUMMY_EMAIL);
+            Assert.assertEquals(contactList.get(0).get("ZipCode"), DUMMY_ZIP);
         }
     }
 

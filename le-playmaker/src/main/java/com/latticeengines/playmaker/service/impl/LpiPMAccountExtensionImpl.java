@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
@@ -53,7 +54,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
         dataRequest.setAttributes(attributes);
         DataPage dataPage = accountProxy.getAccounts(customerSpace,
-                DateTimeUtils.convertToStringUTCISO8601(LpiPMUtils.dateFromEpochSeconds(start)), offset, maximum,
+                DateTimeUtils.convertToStringUTCISO8601(PlaymakerUtils.dateFromEpochSeconds(start)), offset, maximum,
                 dataRequest);
 
         return postProcess(dataPage.getData(), offset);
@@ -93,7 +94,7 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
         DataRequest dataRequest = new DataRequest();
         dataRequest.setAccountIds(accountIds);
         return (int) accountProxy.getAccountsCount(customerSpace,
-                DateTimeUtils.convertToStringUTCISO8601(LpiPMUtils.dateFromEpochSeconds(start)), dataRequest);
+                DateTimeUtils.convertToStringUTCISO8601(PlaymakerUtils.dateFromEpochSeconds(start)), dataRequest);
     }
 
     @Override
@@ -127,9 +128,9 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
                     Map<String, Object> metadataInfoMap = new HashMap<>();
                     metadataInfoMap.put(PlaymakerConstants.DisplayName, metadata.getDisplayName());
                     metadataInfoMap.put(PlaymakerConstants.Type,
-                            LpiPMUtils.convertToSFDCFieldType(metadata.getSourceLogicalDataType()));
+                            PlaymakerUtils.convertToSFDCFieldType(metadata.getSourceLogicalDataType()));
                     metadataInfoMap.put(PlaymakerConstants.StringLength,
-                            LpiPMUtils.findLengthIfStringType(metadata.getSourceLogicalDataType()));
+                            PlaymakerUtils.findLengthIfStringType(metadata.getSourceLogicalDataType()));
                     metadataInfoMap.put(PlaymakerConstants.Field, metadata.getName());
                     return metadataInfoMap;
                 });
