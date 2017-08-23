@@ -7,10 +7,10 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 public class BaseReportStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     @NotEmptyString
-    @JsonProperty
+    @JsonProperty("internal_resource_host_port")
     private String internalResourceHostPort;
 
-    @JsonProperty
+    @JsonProperty("report_name_prefix")
     private String reportNamePrefix;
 
     public String getInternalResourceHostPort() {
