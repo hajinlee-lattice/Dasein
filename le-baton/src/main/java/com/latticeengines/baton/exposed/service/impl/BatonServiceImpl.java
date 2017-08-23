@@ -566,13 +566,10 @@ public class BatonServiceImpl implements BatonService {
                     FeatureFlagDefinition definition = FeatureFlagClient.getDefinition(flag.getName());
                     valueMap.put(flag.getName(), definition.getDefaultValue());
                 }
+            } else if (valueMapInCamille.containsKey(flag.getName())) {
+                valueMap.remove(flag.getName());
             }
         });
-        for (LatticeProduct product: LatticeProduct.values()) {
-            if (hasProduct(customerSpace, product)) {
-                valueMap.put(String.format("Has %s", product.getName()), true);
-            }
-        }
         return valueMap;
     }
 
