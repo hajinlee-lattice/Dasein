@@ -23,6 +23,8 @@ import com.querydsl.sql.SQLQuery;
 @Component("queryEvaluator")
 public class QueryEvaluator {
 
+    public static final String SCORE = "Score";
+
     @Autowired
     private QueryProcessor processor;
 
@@ -47,6 +49,7 @@ public class QueryEvaluator {
                 attrNames.put(attrName.toLowerCase(), attrName);
             }
         });
+        attrNames.put(SCORE.toLowerCase(), SCORE);
 
         try (ResultSet results = sqlquery.getResults()) {
             ResultSetMetaData metadata = results.getMetaData();

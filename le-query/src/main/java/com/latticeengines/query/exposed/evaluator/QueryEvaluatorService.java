@@ -56,4 +56,7 @@ public class QueryEvaluatorService {
                 sqlQuery.getSQL().getSQL().trim().replaceAll(System.lineSeparator(), " "));
     }
 
+    public void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
+        this.dataCollectionProxy = dataCollectionProxy;
+    }
 }

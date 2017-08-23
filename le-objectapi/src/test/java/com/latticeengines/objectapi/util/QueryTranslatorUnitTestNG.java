@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -30,15 +29,8 @@ public class QueryTranslatorUnitTestNG {
         frontEndRestriction.setRestriction(createRestriction(Level.Simple));
         query.setFrontEndRestriction(frontEndRestriction);
 
-        Query translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
+        Query translated = QueryTranslator.translate(BusinessEntity.Account, query, AccountQueryDecorator.WITHOUT_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
-        LogicalRestriction parent = (LogicalRestriction) translated.getRestriction();
-//        assertEquals(parent.getRestrictions().size(), 5);
-//        assertTrue(parent.getRestrictions().stream()
-//                .anyMatch(r -> ((LogicalRestriction) r).getOperator().equals(LogicalOperator.AND)));
-//        assertTrue(parent.getRestrictions().stream()
-//                .anyMatch(r -> ((LogicalRestriction) r).getOperator().equals(LogicalOperator.OR)));
-//
         validateTranslated(translated.getRestriction(), 6, 8);
     }
 
@@ -67,7 +59,7 @@ public class QueryTranslatorUnitTestNG {
         frontEndRestriction.setRestriction(createRestriction(Level.Simple));
         query.setFrontEndRestriction(frontEndRestriction);
 
-        Query result = QueryTranslator.translate(query, AccountQueryDecorator.WITH_SELECTS);
+        Query result = QueryTranslator.translate(BusinessEntity.Account, query, AccountQueryDecorator.WITH_SELECTS);
         assertTrue(result.getLookups().size() > 0);
         assertTrue(result.getFreeFormTextSearchAttributes().size() > 0);
     }

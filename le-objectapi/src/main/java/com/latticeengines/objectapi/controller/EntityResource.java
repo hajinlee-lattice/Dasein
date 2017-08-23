@@ -1,5 +1,7 @@
 package com.latticeengines.objectapi.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +44,14 @@ public class EntityResource {
     public DataPage getData(@PathVariable String customerSpace, @PathVariable BusinessEntity entity,
                             @RequestBody FrontEndQuery frontEndQuery) {
         return entityQueryService.getData(entity, frontEndQuery);
+    }
+
+    @RequestMapping(value = "/ratingcount", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the rows for the specified query")
+    public Map<String, Long> getRatingCount(@PathVariable String customerSpace, @PathVariable BusinessEntity entity,
+                                            @RequestBody FrontEndQuery frontEndQuery) {
+        return entityQueryService.getRatingCount(entity, frontEndQuery);
     }
 
 }

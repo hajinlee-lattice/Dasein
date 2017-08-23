@@ -1,12 +1,17 @@
 package com.latticeengines.objectapi.util;
 
+import java.util.TreeMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.domain.exposed.pls.RatingRule;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
@@ -24,7 +29,7 @@ public class QueryTranslator {
     public static final int MAX_ROWS = 250;
     private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
-    public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
+    public static Query translate(BusinessEntity entity, FrontEndQuery frontEndQuery, QueryDecorator decorator) {
         Restriction restriction = translateFrontEndRestriction(frontEndQuery.getFrontEndRestriction());
         if (frontEndQuery.restrictNullSalesforceId()) {
             Restriction sfidRestriction = Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID")
@@ -58,6 +63,19 @@ public class QueryTranslator {
         } else if (decorator != null) {
             if (decorator.addSelects()) {
                 queryBuilder.select(decorator.getLookupEntity(), decorator.getEntityLookups());
+                if (frontEndQuery.getRatingModels() != null) {
+                    frontEndQuery.getRatingModels().forEach(model -> {
+                        if (model instanceof RuleBasedModel) {
+                            String alias = model.getId();
+                            if (frontEndQuery.getRatingModels().size() == 1)
+                                alias = "Score";
+                            CaseLookup caseLookup = translateRatingRule(entity, ((RuleBasedModel) model).getRatingRule(), alias);
+                            queryBuilder.select(caseLookup);
+                        } else {
+                            log.warn("Cannot not handle rating model of type " + model.getClass().getSimpleName());
+                        }
+                    });
+                }
             }
             queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
                     decorator.getFreeTextSearchAttrs());
@@ -86,9 +104,11 @@ public class QueryTranslator {
                 }
             });
             translated = restriction;
-        } else {
+        } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucket = (BucketRestriction) restriction;
             translated = bucket.convert();
+        } else {
+            translated = restriction;
         }
         return RestrictionOptimizer.optimize(translated);
     }
@@ -99,6 +119,13 @@ public class QueryTranslator {
         } else {
             return null;
         }
+    }
+
+    public static CaseLookup translateRatingRule(BusinessEntity entity, RatingRule ratingRule, String alias) {
+        // TODO: only handles account restriction now
+        TreeMap<String, Restriction> cases = new TreeMap<>();
+        ratingRule.getBucketToRuleMap().forEach((key, val) -> cases.put(key, val.get(RatingRule.ACCOUNT_RULE)));
+        return new CaseLookup(cases, ratingRule.getDefaultBucketName(), alias);
     }
 
 }

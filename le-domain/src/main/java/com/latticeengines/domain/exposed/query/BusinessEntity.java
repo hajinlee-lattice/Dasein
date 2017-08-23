@@ -28,6 +28,8 @@ public enum BusinessEntity implements GraphNode {
     Product, //
     Transaction, //
 
+    Rating, //
+
     // Lattice Data Cloud
     LatticeAccount;
 
@@ -44,6 +46,7 @@ public enum BusinessEntity implements GraphNode {
         Account.addRelationship(Contact, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(LatticeAccount, Cardinality.ONE_TO_ONE, InterfaceName.LatticeAccountId);
         Account.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
+        Contact.addRelationship(Account, Cardinality.MANY_TO_MANY, InterfaceName.AccountId);
         Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
     }
 
@@ -100,7 +103,7 @@ public enum BusinessEntity implements GraphNode {
     }
 
     public enum Cardinality {
-        ONE_TO_ONE, ONE_TO_MANY, MANY_TO_MANY
+        ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY
     }
 
     public static class Relationship {

@@ -1,5 +1,6 @@
 package com.latticeengines.app.exposed.controller;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,8 @@ public abstract class BaseFrontEndEntityResource {
 
     private final LoadingCache<String, DataPage> dataCache;
 
+    private final LoadingCache<String, Map<String, Long>> ratingCache;
+
     BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy) {
         this.entityProxy = entityProxy;
         this.segmentProxy = segmentProxy;
@@ -41,6 +44,11 @@ public abstract class BaseFrontEndEntityResource {
                 .expireAfterWrite(10, TimeUnit.MINUTES) //
                 .refreshAfterWrite(1, TimeUnit.MINUTES) //
                 .build(this::getDataFromObjectApi);
+        ratingCache = Caffeine.newBuilder() //
+                .maximumSize(1000) //
+                .expireAfterWrite(10, TimeUnit.MINUTES) //
+                .refreshAfterWrite(1, TimeUnit.MINUTES) //
+                .build(this::getRatingCountFromObjectApi);
     }
 
     public long getCount(FrontEndQuery frontEndQuery, String segment) {
@@ -73,11 +81,25 @@ public abstract class BaseFrontEndEntityResource {
         return dataCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
     }
 
+    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, String segment) {
+        appendSegmentRestriction(frontEndQuery, segment);
+        optimizeRestriction(frontEndQuery);
+        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
+        return ratingCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
+    }
+
     private DataPage getDataFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf(":"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         return entityProxy.getData(tenantId, getMainEntity(), frontEndQuery);
+    }
+
+    private Map<String, Long> getRatingCountFromObjectApi(String serializedKey) {
+        String tenantId = serializedKey.substring(0, serializedKey.indexOf(":"));
+        String serializedQuery = serializedKey.substring(tenantId.length() + 1);
+        FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
+        return entityProxy.getRatingCount(tenantId, getMainEntity(), frontEndQuery);
     }
 
     private void appendSegmentRestriction(FrontEndQuery frontEndQuery, String segment) {

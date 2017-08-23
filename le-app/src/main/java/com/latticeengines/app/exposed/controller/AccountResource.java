@@ -1,7 +1,9 @@
 package com.latticeengines.app.exposed.controller;
 
-import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,11 +17,11 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
-import javax.inject.Inject;
 
 @Api(value = "accounts", description = "REST resource for serving data about accounts")
 @RestController
@@ -62,6 +64,19 @@ public class AccountResource extends BaseFrontEndEntityResource {
             @RequestParam(value = "segment", required = false) String segment) {
         try {
             return super.getData(frontEndQuery, segment);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_36002, e);
+        }
+    }
+
+    @Override
+    @RequestMapping(value = "/ratingcount", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the rows for the specified query")
+    public Map<String, Long> getRatingCount(@RequestBody FrontEndQuery frontEndQuery,
+                                            @RequestParam(value = "segment", required = false) String segment) {
+        try {
+            return super.getRatingCount(frontEndQuery, segment);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }

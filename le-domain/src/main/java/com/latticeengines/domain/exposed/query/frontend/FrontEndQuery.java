@@ -1,20 +1,21 @@
 package com.latticeengines.domain.exposed.query.frontend;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 
 import io.swagger.annotations.ApiModelProperty;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -29,6 +30,9 @@ public class FrontEndQuery {
 
     @JsonProperty("page_filter")
     private PageFilter pageFilter;
+
+    @JsonProperty("rating_models")
+    private List<RatingModel> ratingModels;
 
     @JsonProperty("free_form_text_search")
     private String freeFormTextSearch;
@@ -90,6 +94,21 @@ public class FrontEndQuery {
 
     public void setRestrictNotNullSalesforceId(boolean restrictNotNullSalesforceId) {
         this.restrictNotNullSalesforceId = restrictNotNullSalesforceId;
+    }
+
+    public List<RatingModel> getRatingModels() {
+        return ratingModels;
+    }
+
+    public void setRatingModels(List<RatingModel> ratingModels) {
+        this.ratingModels = ratingModels;
+    }
+
+    private void addRatingModel(RatingModel ratingModel) {
+        if (ratingModel == null) {
+            ratingModels = new ArrayList<>();
+        }
+        ratingModels.add(ratingModel);
     }
 
     public List<Lookup> getLookups() {
