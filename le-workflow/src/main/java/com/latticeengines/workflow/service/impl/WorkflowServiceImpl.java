@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.TransformerUtils;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -216,10 +215,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public void stop(WorkflowExecutionId workflowId) {
         try {
-            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
             jobOperator.stop(workflowId.getId());
-            workflowJob.setStatus(FinalApplicationStatus.KILLED);
-            workflowJobEntityMgr.updateWorkflowJob(workflowJob);
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
             throw new LedpException(LedpCode.LEDP_28003, e, new String[] { String.valueOf(workflowId.getId()) });
         }
