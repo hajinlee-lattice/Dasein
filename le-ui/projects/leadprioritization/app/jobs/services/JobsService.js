@@ -95,6 +95,12 @@ angular
         "score_training_set": 0
     };
 
+    var nonDisplayedJobTypes = new Set([
+        'bulkmatchworkflow',
+        'playlaunchworkflow',
+        'consolidateandpublishworkflow',
+        'profileandpublishworkflow']);
+
     this.getErrorLog = function(JobReport) {
         var deferred = $q.defer();
         //jobType = jobType == 'importMatchAndModelWorkflow' ? 'models' : 'scores';
@@ -174,7 +180,7 @@ angular
         }).then(
             function onSuccess(response) {
                 var jobs = _.reject(response.data, function(job) {
-                    job.jobType.toLowerCase() === 'bulkmatchworkflow';
+                    return nonDisplayedJobTypes.has(job.jobType.toLowerCase());
                 });
                 result = {
                     success: true,
