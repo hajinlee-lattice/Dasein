@@ -56,11 +56,7 @@ public class NodeWatcher {
     }
 
     private static Path getWatcherPath(String watcherName) {
-        if (watchers.containsKey(watcherName)) {
-            return PathBuilder.buildWatcherPath(CamilleEnvironment.getPodId(), watcherName);
-        } else {
-            return null;
-        }
+        return PathBuilder.buildWatcherPath(CamilleEnvironment.getPodId(), watcherName);
     }
 
     public static synchronized void updateWatchedData(String watcherName, String serializedData) {

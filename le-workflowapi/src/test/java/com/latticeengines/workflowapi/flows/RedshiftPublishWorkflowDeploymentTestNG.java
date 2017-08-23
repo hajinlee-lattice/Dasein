@@ -7,8 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.annotations.BeforeClass;
@@ -23,6 +24,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -33,6 +35,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
@@ -40,11 +43,13 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
 
     private static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/redshiftpublish/avrofiles";
 
-    @Autowired
-    @Qualifier(value = "redshiftJdbcTemplate")
+    @Resource(name = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
-    @Autowired
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Value("${aws.test.s3.bucket}")
@@ -93,6 +98,9 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
 
     @Test(groups = "workflow", dependsOnMethods = "initialLoad")
     public void updateRows() throws Exception {
+        DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(mainTestCustomerSpace.toString());
+        dataCollectionProxy.switchVersion(mainTestCustomerSpace.toString(), inactiveVersion);
+
         String localFilePath = getClass().getClassLoader().getResource(RESOURCE_BASE + "/part-00001.avro").getPath();
         String tableName = AvroUtils.readSchemaFromLocalFile(localFilePath).getName();
         String dest = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), mainTestCustomerSpace)
@@ -110,6 +118,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         builder.customer(mainTestCustomerSpace);
         builder.internalResourceHostPort(internalResourceHostPort);
         builder.microServiceHostPort(microserviceHostPort);
+        exportConfig.setCreateNew(false);
         RedshiftPublishWorkflowConfiguration config = builder.build();
         WorkflowExecutionId workflowId = workflowService.start(config);
         waitForCompletion(workflowId);
