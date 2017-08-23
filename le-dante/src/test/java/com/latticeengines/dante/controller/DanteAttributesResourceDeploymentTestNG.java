@@ -38,7 +38,7 @@ public class DanteAttributesResourceDeploymentTestNG extends DanteTestNGBase {
 
     private Path metadataDocumentPath;
 
-    @BeforeClass
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         CamilleConfiguration config = new CamilleConfiguration();
         config.setConnectionString(zkConnectionString);
@@ -82,21 +82,22 @@ public class DanteAttributesResourceDeploymentTestNG extends DanteTestNGBase {
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testAttributes() {
-        List<String> notions = Arrays
-                .asList(new String[] { "RecoMMendation", "accOUNT", "something", "invalid", "account", "account" });
+        List<String> notions = Arrays.asList(
+                new String[] { "RecoMMendation", "accOUNT", "something", "invalid", "account", "account", "Variable" });
         DanteNotionAttributes notionAttributes = danteAttributesProxy.getAttributesByNotions(notions,
                 mainTestCustomerSpace.toString());
         Assert.assertNotNull(notionAttributes);
         Assert.assertNotNull(notionAttributes.getInvalidNotions());
         Assert.assertEquals(notionAttributes.getInvalidNotions().size(), 2);
-        Assert.assertEquals(notionAttributes.getNotionAttributes().size(), 2);
+        Assert.assertEquals(notionAttributes.getNotionAttributes().size(), 3);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("account").size(), 27);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("recommendation").size(), 8);
+        Assert.assertEquals(notionAttributes.getNotionAttributes().get("variable").size(), 5);
     }
 
-    @AfterClass
+    @AfterClass(groups = "deployment")
     public void teardown() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         camille.delete(metadataDocumentPath);

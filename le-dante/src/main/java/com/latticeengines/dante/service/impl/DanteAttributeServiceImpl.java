@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dante.DanteAttribute;
+import com.latticeengines.domain.exposed.dante.DanteAttributeNotion;
 import com.latticeengines.domain.exposed.dante.DanteNotionAttributes;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -36,8 +37,7 @@ public class DanteAttributeServiceImpl implements DanteAttributeService {
     private final Path metadataDocumentPath = new Path("/MetadataDocument.json");
     private final String danteAccountKey = "DanteAccount";
     private final String recomendationAttributesFilePath = "com/latticeengines/dante/metadata/RecommendationAttributes.json";
-    private final String accountNotion = "account";
-    private final String recommendationNotion = "recommendation";
+    private final String variableAttributesFilePath = "com/latticeengines/dante/metadata/VariableAttributes.json";
 
     @SuppressWarnings("unchecked")
     @Override
@@ -68,6 +68,21 @@ public class DanteAttributeServiceImpl implements DanteAttributeService {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<DanteAttribute> getVariableAttributes(String customerSpace) {
+        try {
+            log.info("Compiling Variable attributes for customerspace : " + customerSpace);
+            ClassLoader classLoader = getClass().getClassLoader();
+            InputStream tableRegistryStream = classLoader.getResourceAsStream(variableAttributesFilePath);
+            String attributesDoc = StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
+            List<Object> raw = JsonUtils.deserialize(attributesDoc, List.class);
+            return JsonUtils.convertList(raw, DanteAttribute.class);
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_10011, e, new String[] { variableAttributesFilePath });
+        }
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public DanteNotionAttributes getAttributesForNotions(List<String> notions, String customerSpace) {
@@ -78,17 +93,23 @@ public class DanteAttributeServiceImpl implements DanteAttributeService {
         DanteNotionAttributes toReturn = new DanteNotionAttributes();
 
         for (String notion : uniqueNotions) {
-            switch (notion) {
-            case accountNotion:
-                toReturn.addNotion(notion, getAccountAttributes(customerSpace));
-                break;
-            case recommendationNotion:
-                toReturn.addNotion(notion, getRecommendationAttributes(customerSpace));
-                break;
-            default:
+            if (DanteAttributeNotion.isValidDanteNotion(notion)) {
+                switch (DanteAttributeNotion.getDanteNotion(notion)) {
+                case Account:
+                    toReturn.addNotion(notion, getAccountAttributes(customerSpace));
+                    break;
+                case Recommendation:
+                    toReturn.addNotion(notion, getRecommendationAttributes(customerSpace));
+                    break;
+                case Variable:
+                    toReturn.addNotion(notion, getVariableAttributes(customerSpace));
+                    break;
+                }
+            } else {
                 toReturn.addInvalidNotion(notion);
                 log.error("Attempted to find attributes for invalid notion " + notion);
             }
+
         }
 
         return toReturn;

@@ -40,7 +40,7 @@ public class DanteAttributeServiceImplTestNG extends AbstractTestNGSpringContext
 
     private final String tenantName = "DanteAttributeTestTenant";
 
-    @BeforeClass
+    @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         CamilleTestEnvironment.start();
         Camille camille = CamilleEnvironment.getCamille();
@@ -75,18 +75,19 @@ public class DanteAttributeServiceImplTestNG extends AbstractTestNGSpringContext
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void testAttributes() {
-        List<String> notions = Arrays
-                .asList(new String[] { "RecoMMendation", "accOUNT", "something", "invalid", "account", "account" });
+        List<String> notions = Arrays.asList(
+                new String[] { "RecoMMendation", "accOUNT", "something", "invalid", "account", "account", "Variable" });
         DanteNotionAttributes notionAttributes = danteAttributeService.getAttributesForNotions(notions, tenantName);
         Assert.assertNotNull(notionAttributes);
         Assert.assertNotNull(notionAttributes.getInvalidNotions());
         Assert.assertEquals(notionAttributes.getInvalidNotions().size(), 2);
-        Assert.assertEquals(notionAttributes.getNotionAttributes().size(), 2);
+        Assert.assertEquals(notionAttributes.getNotionAttributes().size(), 3);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("account").size(), 27);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("recommendation").size(), 8);
+        Assert.assertEquals(notionAttributes.getNotionAttributes().get("variable").size(), 5);
     }
 
-    @AfterClass
+    @AfterClass(groups = "functional")
     public void teardown() throws Exception {
         CamilleTestEnvironment.stop();
     }

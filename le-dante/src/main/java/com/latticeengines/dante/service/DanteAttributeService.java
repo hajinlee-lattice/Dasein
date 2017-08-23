@@ -10,5 +10,7 @@ public interface DanteAttributeService {
 
     List<DanteAttribute> getRecommendationAttributes(String customerSpace);
 
+    List<DanteAttribute> getVariableAttributes(String customerSpace);
+
     DanteNotionAttributes getAttributesForNotions(List<String> notions, String customerSpace);
 }

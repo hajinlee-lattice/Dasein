@@ -83,17 +83,18 @@ public class DanteAttributesResourceDeploymentTestNG extends PlsDeploymentTestNG
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment")
     public void testAttributes() {
-        List<String> notions = Arrays
-                .asList(new String[] { "RecoMMendation", "accOUNT", "something", "invalid", "account", "account" });
+        List<String> notions = Arrays.asList(
+                new String[] { "RecoMMendation", "accOUNT", "something", "invalid", "account", "account", "Variable" });
         DanteNotionAttributes notionAttributes = restTemplate.postForObject( //
                 getRestAPIHostPort() + "/pls/dante/attributes", //
                 notions, DanteNotionAttributes.class);
         Assert.assertNotNull(notionAttributes);
         Assert.assertNotNull(notionAttributes.getInvalidNotions());
         Assert.assertEquals(notionAttributes.getInvalidNotions().size(), 2);
-        Assert.assertEquals(notionAttributes.getNotionAttributes().size(), 2);
+        Assert.assertEquals(notionAttributes.getNotionAttributes().size(), 3);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("account").size(), 27);
         Assert.assertEquals(notionAttributes.getNotionAttributes().get("recommendation").size(), 8);
+        Assert.assertEquals(notionAttributes.getNotionAttributes().get("variable").size(), 5);
     }
 
     @AfterClass(groups = "deployment")
