@@ -505,14 +505,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return exportConfig;
     }
 
-    protected Report retrieveReport(String appId) {
+    protected List<Report> retrieveReport(String appId) {
         Job job = testBed.getRestTemplate().getForObject( //
                 String.format("%s/pls/jobs/yarnapps/%s", deployedHostPort, appId), //
                 Job.class);
         assertNotNull(job);
         List<Report> reports = job.getReports();
-        assertEquals(reports.size(), 2);
-        return reports.get(0);
+        return reports;
     }
 
     protected void verifyStats(BusinessEntity... entities) {
@@ -543,20 +542,33 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Assert.assertTrue(statistics.hasCategory(Category.CONTACT_ATTRIBUTES));
     }
 
-    protected void verifyReport(String appId, int reportSize, Long exportedAccounts, Long exportedContacts) {
-        verifyReport(appId, reportSize, exportedAccounts.intValue(), exportedContacts.intValue());
-    }
-
-    protected void verifyReport(String appId, int reportSize, int exportedAccounts, int exportedContacts) {
-        Report report = retrieveReport(appId);
-        Map<String, Integer> map = JsonUtils.deserialize(report.getJson().getPayload(),
+    protected void verifyConsolidateReport(String appId, int publishReportSize, long exportedAccounts,
+            long exportedContacts) {
+        List<Report> reports = retrieveReport(appId);
+        assertEquals(reports.size(), 2);
+        Report publishReport = reports.get(1);
+        Map<String, Integer> map = JsonUtils.deserialize(publishReport.getJson().getPayload(),
                 new TypeReference<Map<String, Integer>>() {
                 });
-        assertEquals(map.entrySet().size(), reportSize);
-        if (reportSize > 1) {
-            assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).intValue(), exportedAccounts);
-            assertEquals(map.get(TableRoleInCollection.SortedContact.name()).intValue(), exportedContacts);
+        assertEquals(map.entrySet().size(), publishReportSize);
+        if (publishReportSize != 0) {
+            assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).longValue(), exportedAccounts);
+            assertEquals(map.get(TableRoleInCollection.SortedContact.name()).longValue(), exportedContacts);
         }
+    }
+
+    protected void verifyProfileReport(String appId, int publishReportSize, long exportedAccounts,
+            long exportedContacts) {
+        List<Report> reports = retrieveReport(appId);
+        assertEquals(reports.size(), 1);
+        Report publishReport = reports.get(0);
+        Map<String, Integer> map = JsonUtils.deserialize(publishReport.getJson().getPayload(),
+                new TypeReference<Map<String, Integer>>() {
+                });
+        assertEquals(map.entrySet().size(), publishReportSize);
+        assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).longValue(), exportedAccounts);
+        assertEquals(map.get(TableRoleInCollection.SortedContact.name()).longValue(), exportedContacts);
+
     }
 
     protected void verifyDataFeedStatsu(DataFeed.Status expected) {

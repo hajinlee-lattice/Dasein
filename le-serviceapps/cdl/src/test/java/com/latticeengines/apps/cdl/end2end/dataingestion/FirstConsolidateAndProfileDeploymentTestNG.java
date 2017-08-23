@@ -56,7 +56,8 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     }
 
     private void verifyConsolidate() {
-        verifyReport(consolidateAppId, 1, 0, 0);
+        verifyConsolidateReport(consolidateAppId, 0, 0, 0);
+        verifyConsolidateReport(consolidateAppId, 1, 0, 0);
         verifyDataFeedStatsu(DataFeed.Status.InitialConsolidated);
 
         long numAccounts = countTableRole(BusinessEntity.Account.getBatchStore());
@@ -68,7 +69,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
     }
 
     private void verifyProfile() throws IOException {
-        verifyReport(profileAppId, 2, ACCOUNT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_1);
+        verifyProfileReport(profileAppId, 2, ACCOUNT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_1);
         verifyDataFeedStatsu(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
 

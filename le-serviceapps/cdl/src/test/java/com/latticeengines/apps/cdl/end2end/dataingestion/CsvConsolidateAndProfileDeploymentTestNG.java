@@ -24,8 +24,8 @@ public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2E
 
     private void importData() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-//        importedAccounts = importCsv(BusinessEntity.Account, 1);
-//        importedContacts = importCsv(BusinessEntity.Contact, 1);
+        // importedAccounts = importCsv(BusinessEntity.Account, 1);
+        // importedContacts = importCsv(BusinessEntity.Contact, 1);
         importedAccounts = mockCsvImport(BusinessEntity.Account, 1);
         importedContacts = mockCsvImport(BusinessEntity.Contact, 1);
         Thread.sleep(2000);
@@ -33,14 +33,15 @@ public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2E
     }
 
     private void verifyProfile() throws IOException {
-        verifyReport(profileAppId, 2, importedAccounts, importedContacts);
+        verifyProfileReport(profileAppId, 2, importedAccounts, importedContacts);
         DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
         Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
 
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact);
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), importedAccounts);
-        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact), importedContacts);
+        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact),
+        // importedContacts);
     }
 
 }

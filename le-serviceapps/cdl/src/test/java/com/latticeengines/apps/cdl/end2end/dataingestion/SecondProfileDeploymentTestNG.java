@@ -37,7 +37,7 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private void verifyProfile() {
         int numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         int numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
-        verifyReport(profileAppId, 2, numAccounts, numContacts);
+        verifyProfileReport(profileAppId, 2, numAccounts, numContacts);
         verifyDataFeedStatsu(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
 
