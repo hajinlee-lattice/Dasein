@@ -261,7 +261,7 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
                     deferred.resolve(CgTalkingPointStore.attributes);
                 });
             } else {
-                var entities = ['account','recommendation'];
+                var entities = ['account','recommendation','variable'];
                 CgTalkingPointService.getAttributes(entities).then(function(response) {
                     CgTalkingPointStore.attributes = response.notionAttributes;
                     deferred.resolve(CgTalkingPointStore.attributes);

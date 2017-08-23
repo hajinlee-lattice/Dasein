@@ -1,3 +1,6 @@
+body.not-ie .playbook-dashboard .container-body .dashboard-section {
+    height: 100%;
+}
 .playbook-dashboard {
     .container-body {
         @include flex-container;
@@ -12,7 +15,6 @@
         .dashboard-section {
             @include flex-item(1 1 auto);
             width: 100%;
-            height: 100%;
             padding-right: 10px;
             padding-bottom: 10px;
             .dashboard-section-container {
