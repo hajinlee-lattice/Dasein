@@ -58,7 +58,7 @@ public class UuidUtilsUnitTestNG {
         UUID uuid = UUID.fromString(_UUID);
         String shortUuid = UuidUtils.shortenUuid(uuid);
         System.out.println(shortUuid);
-        Assert.assertEquals(shortUuid, "XQdPcsjwTVOuvJEvsGbaoA");
+        Assert.assertEquals(shortUuid, "xqdpcsjwtvouvjevsgbaoa");
     }
 
 }
