@@ -84,7 +84,8 @@ angular.module('common.datacloud.explorer', [
         TileTableItems: {},
         workingBuckets: CurrentConfiguration,
         pagesize: 24,
-        categorySize: 7
+        categorySize: 7,
+        feedbackModal: DataCloudStore.getFeedbackModal()
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
@@ -109,6 +110,7 @@ angular.module('common.datacloud.explorer', [
         if (vm.section === 'segment.analysis') {
             vm.metadataSegments = QueryRestriction;
         }
+        DataCloudStore.setFeedbackModal(false);
     }
 
     /* some rules that might hide the page */
@@ -1261,7 +1263,7 @@ angular.module('common.datacloud.explorer', [
 
     }
 
-    vm.clearExplorerSegments = function() { 
+    vm.clearExplorerSegments = function() {
         var _enrichments = vm.filter(vm.enrichments, 'SegmentChecked', true);
 
         vm.segmentAttributeInput = {};
@@ -1610,8 +1612,6 @@ angular.module('common.datacloud.explorer', [
 
             };
         };
-
-
     };
 
     vm.init();
@@ -1627,4 +1627,65 @@ angular.module('common.datacloud.explorer', [
     }
 
     return fallbackSrc;
+})
+.directive('attributeFeedbackModal', function() {
+    return {
+        restrict: 'EA',
+        templateUrl: '/components/datacloud/explorer/attributefeedback/attributefeedbackmodal.component.html',
+        scope: {
+            lookup: '='
+        },
+        controller: ['$scope', '$document', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, LookupStore, DataCloudStore, BrowserStorageUtility) { 
+            $scope.modal = DataCloudStore.getFeedbackModal();
+            $scope.close = function() {
+                DataCloudStore.setFeedbackModal(false);
+            }
+            var clientSession = BrowserStorageUtility.getClientSession();
+
+            $scope.report = {
+                context: $scope.modal.context,
+                clientSession: {
+                    email: clientSession.EmailAddress,
+                    tenant: clientSession.Tenant.Identifier
+                },
+                userInput: LookupStore.get('request'),
+                companyInfo: $scope.lookup
+            };
+
+            $document.on('click', handleDocumentClick);
+
+            function handleDocumentClick(evt) {
+                var target = angular.element(evt.target),
+                    clickedModal = target.parents('attribute-feedback-modal').length;
+
+                if(!clickedModal) {
+                    $scope.close();
+                    $scope.$apply();
+                }
+            }
+
+            $scope.$on('$destroy', function() {
+                $document.off('click', handleDocumentClick);
+            });
+        }]
+    };
+})
+.directive('attributeFeedbackButton', function() {
+    return {
+        restrict: 'EA',
+        templateUrl: '/components/datacloud/explorer/attributefeedback/attributefeedbackbutton.component.html',
+        scope: {
+            attribute: '=',
+            value: '='
+        },
+        controller: ['$scope', '$stateParams', 'DataCloudStore', function ($scope, $stateParams, DataCloudStore) {
+            $scope.open = function($event) {
+                $event.stopPropagation();
+                DataCloudStore.setFeedbackModal(true, {
+                    attribute: $scope.attribute,
+                    value: $scope.value
+                });
+            }
+        }]
+    };
 });

@@ -249,6 +249,24 @@
                                     transform: translateY(-50%);
                                 }
                             }
+                            .column {
+                                strong {
+                                    position: relative;
+                                    padding-left: 15px;
+                                }
+                            }
+                            &:hover {
+                                attribute-feedback-button {
+                                    pointer-events: auto;
+                                    display: block;
+                                    position: absolute;
+                                    top: 0;
+                                    left: 2px;
+                                    div {
+                                        color: inherit;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1535,6 +1553,39 @@
             top: 18px;
             right: 10px;
         }
+    }
+    attribute-feedback-modal {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: white;
+        overflow: hidden;
+        border: 1px solid #d0d1d0;
+        border-radius: 4px;
+        z-index: 1;
+        .close {
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            color: #d0d1d0;
+            &:hover {
+                color: #111;
+            }
+        }
+        .attribute-feedback-container {
+            padding: 20px;
+            margin-top: 25px;
+            max-width: 600px;
+            max-height: 500px;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+    }
+    attribute-feedback-button {
+        display: none;
+        color: #0c8bc7;
+        line-height: 11px;
     }
 }
 .insights-content {

@@ -230,6 +230,37 @@ angular.module('lp.playbook')
         });
         return deferred.promise;
     }
+
+    this.launchButton = function(play, launchedState) {
+        var launchButton = {},
+            launchButtonStates = {
+                initial: {
+                    label: 'Launch',
+                    state: ''
+                },
+                Launching: {
+                    label: 'Launching'
+                },
+                Launched: {
+                    label: 'Re-Launch Now'
+                }
+            },
+            state = (play.launchHistory && play.launchHistory.mostRecentLaunch && play.launchHistory.mostRecentLaunch.launchState ? play.launchHistory.mostRecentLaunch.launchState : null);
+
+        launchButton.state = launchedState || state;
+
+        if(launchedState !== 'Failed' && state && launchButtonStates[state]) {
+            launchButton.label = launchButtonStates[state].label;
+        } else {
+            if((state === 'Failed' ||  launchedState === 'Failed') && play.launchHistory.playLaunch) {
+                launchButton.label = launchButtonStates.Launched.label;
+            } else {
+                launchButton.label = launchButtonStates.initial.label;
+            }
+        }
+        
+        return launchButton;
+    }
 })
 .service('PlaybookWizardService', function($q, $http, $state) {
     this.host = '/pls'; //default

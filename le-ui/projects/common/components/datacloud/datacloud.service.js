@@ -35,9 +35,22 @@ angular.module('common.datacloud')
             category: null,
             subcategory: null
         };
+        this.feedbackModal = {
+            show: false,
+            context: null
+        };
     }
 
     this.init();
+
+    this.getFeedbackModal = function() {
+        return this.feedbackModal;
+    }
+
+    this.setFeedbackModal = function(bool, obj) {
+        this.feedbackModal.context = obj;
+        return this.feedbackModal.show = bool;
+    }
 
     var getObj = function(path, obj) {
         return path.split('.').reduce(function(obj, i) {

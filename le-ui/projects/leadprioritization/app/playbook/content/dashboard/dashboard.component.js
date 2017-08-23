@@ -8,6 +8,7 @@ angular.module('lp.playbook.dashboard', [
 
     var vm = this,
         play_name = $stateParams.play_name,
+        onpage = true,
         launchButtonStates = {
             initial: {
                 label: 'Launch',
@@ -72,7 +73,9 @@ angular.module('lp.playbook.dashboard', [
             PlaybookWizardStore.launchPlay(vm.play).then(function(data) {
                 vm.launchHistory.push(data);
                 vm.showLaunchSpinner = false;
-                $state.go('home.playbook.dashboard.launch_job', {play_name: vm.play.name, applicationId: data.applicationId});
+                if(onpage) {
+                    $state.go('home.playbook.dashboard.launch_job', {play_name: vm.play.name, applicationId: data.applicationId});
+                }
             });
         }
     }
@@ -186,59 +189,40 @@ angular.module('lp.playbook.dashboard', [
         return (vm.invalid.length ? false : true);
     };
 
-    var makeLaunchButton = function(launchHistory) {
-        var state = (vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
-        vm.launchButton.state = state;
-        if(state) {
-            vm.launchButton.label = launchButtonStates[state].label;
-        } else {
-            vm.launchButton.label = launchButtonStates.initial.label;
-        }
-    }
-
     var checkLaunchState;
     var getPlay = function() {
-        PlaybookWizardStore.getPlay(play_name).then(function(play){
+        PlaybookWizardStore.getPlay(play_name, true).then(function(play){
             vm.play = play;
-            makeLaunchButton(vm.play.launchHistory);
+
+            vm.launchButton = PlaybookWizardStore.launchButton(play);
             vm.launchedState = vm.launchButton.state; //(vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
-            vm.ratingsGraph = makeSimpleGraph(vm.play.rating && vm.play.rating.bucketInformation, 'bucketCount');
-            vm.launchGraph = makeLaunchGraph(vm.play.launchHistory);
-            vm.launchValidate(play);
+            vm.ratingsGraph = makeSimpleGraph(play.rating && play.rating.bucketInformation, 'bucketCount');
+            vm.launchGraph = makeLaunchGraph(play.launchHistory);
 
             if(vm.launchedState === 'Launching') { // if it's in a launching state check every 10 seconds so we can update the button, then stop checking
                 vm.showLaunchSpinner = true;
 
                 checkLaunchState = $interval(function() {
-                    PlaybookWizardStore.getPlayLaunches(play_name).then(function(results){
+                    PlaybookWizardStore.getPlayLaunches(play_name).then(function(results) {
                         var result = results[0];
                         vm.launchHistory = results;
                         vm.launchedState = (result && result.launchState ? result.launchState : null);
 
-                        if(vm.launchedState === 'Failed') {
-                            if(play.launchHistory.playLaunch) {
-                                vm.launchButton.label = launchButtonStates.Launched.label;
-                                vm.launchButton.state = 'Launched';
-                            } else {
-                                vm.launchButton = launchButtonStates.initial;
-                            }
-                        }
-                        if(vm.launchedState === 'Launched') {
-                            vm.launchButton.label = launchButtonStates.Launched.label;
-                            vm.launchButton.state = vm.launchedState;
-                        }
+                        vm.launchButton = PlaybookWizardStore.launchButton(play, vm.launchedState);
                         if(vm.launchedState === 'Launched' || vm.launchedState === 'Failed') {
                             $interval.cancel(checkLaunchState);
                             vm.showLaunchSpinner = false;
                         }
                     });
-                }, 1 * 1000);
+                }, 10 * 1000);
             }
         });
     }
 
     $scope.$on('$destroy', function() {
+        onpage = false;
         $interval.cancel(checkLaunchState);
+        checkLaunchState = null;
     });
 
     //PlaybookWizardStore.clear();
