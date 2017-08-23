@@ -362,7 +362,7 @@ public class ProcessorContext {
             groupSize = actorsGroupSize;
             numThreads = actorsThreadPool;
             if (useRemoteDnB) {
-                groupSize = 128;
+                groupSize = originalInput.getFetchOnly() ? 1000: 128;
             }
         } else {
             if (groupSize == null || groupSize < 1) {
