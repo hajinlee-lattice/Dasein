@@ -1636,6 +1636,7 @@ angular.module('common.datacloud.explorer', [
             lookup: '='
         },
         controller: ['$scope', '$document', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, LookupStore, DataCloudStore, BrowserStorageUtility) { 
+            // test on LETest1503428538807_LPI
             $scope.modal = DataCloudStore.getFeedbackModal();
             $scope.close = function() {
                 DataCloudStore.setFeedbackModal(false);
