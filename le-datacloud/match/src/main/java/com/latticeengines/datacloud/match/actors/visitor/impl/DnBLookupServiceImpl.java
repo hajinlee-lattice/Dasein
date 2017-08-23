@@ -394,7 +394,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         context.setResponseTime(new Date());
         validateDuns(context);
         dnbMatchResultValidator.validate(context);
-        DnBCache dnBCache = dnbCacheService.addCache(context, false);
+        // Sync write to DnB cache for realtime service for 2 reasons:
+        // 1. Performance will not degrade much
+        // 2. Patch service needs it
+        DnBCache dnBCache = dnbCacheService.addCache(context, true);
         if (dnBCache != null) {
             context.setCacheId(dnBCache.getId());
         }

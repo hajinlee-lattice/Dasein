@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
@@ -18,11 +17,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.service.DnBCacheService;
-import com.latticeengines.datacloud.core.util.PropDataConstants;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.PatchService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
@@ -167,7 +166,8 @@ public class PatchServiceImpl implements PatchService {
         if (StringUtils.isEmpty(duns) && dnbCacheIds != null && dnbCacheIds.size() == 1) {
             String dnbCacheId = dnbCacheIds.get(0);
             DnBCache dnBCache = dnBCacheService.getCacheMgr().findByKey(dnbCacheId);
-            if (dnBCache.getCacheContext() == null || !dnBCache.getCacheContext().containsKey("Duns")
+            if (dnBCache == null || dnBCache.getCacheContext() == null
+                    || !dnBCache.getCacheContext().containsKey("Duns")
                     || StringUtils.isEmpty((String) dnBCache.getCacheContext().get("Duns"))) {
                 if (matchLogs != null) {
                     log.info("Match Logs: \n" + StringUtils.join(matchLogs, "\n"));
