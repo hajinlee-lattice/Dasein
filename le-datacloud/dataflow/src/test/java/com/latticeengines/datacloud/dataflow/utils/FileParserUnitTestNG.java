@@ -31,15 +31,12 @@ public class FileParserUnitTestNG {
 
     @Test(groups = "unit")
     public void testParseBomboraIntent() {
-        Map<String, Map<Range<Integer>, String>> intentMap = FileParser.parseBomboraIntent();
+        Map<Range<Integer>, String> intentMap = FileParser.parseBomboraIntent();
         Assert.assertNotNull(intentMap);
         Assert.assertEquals(intentMap.size(), 3);
-        for (String bucketCode : intentMap.keySet()) {
-            Map<Range<Integer>, String> compoScoreIntent = intentMap.get(bucketCode);
-            for (Range<Integer> range : compoScoreIntent.keySet()) {
-                log.info(String.format("BucketCode=%s, CompoScore range=(%d,%d), Intent=%s", bucketCode,
-                        range.getMinimum(), range.getMaximum(), compoScoreIntent.get(range)));
-            }
+        for (Range<Integer> range : intentMap.keySet()) {
+            log.info(String.format("CompoScore range=(%d,%d), Intent=%s", range.getMinimum(), range.getMaximum(),
+                    intentMap.get(range)));
         }
     }
 }

@@ -36,10 +36,10 @@ public class BuiltWithTechIndicatorsTestNG
 
     private final String TECH_INDICATORS = "TechIndicators";
 
-    private final String TECH_UNIX = "TechIndicator_Unix";
+    private final String TECH_SEO_TITLE = "TechIndicator_SEO_TITLE";
     private final String TECH_MOD_SSL = "TechIndicator_mod_ssl";
 
-    private int HAS_UNIX_POS = -1;
+    private int HAS_TECH_SEO_TITLE_POS = -1;
     private int HAS_MOD_SSL_POS = -1;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -125,6 +125,8 @@ public class BuiltWithTechIndicatorsTestNG
     @Override
     public void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
+        System.out.println("HAS_TECH_SEO_TITLE_POS: " + HAS_TECH_SEO_TITLE_POS);
+        System.out.println("HAS_MOD_SSL_POS: " + HAS_MOD_SSL_POS);
         int recordsToCheck = 100;
         int pos = 0;
         while (pos++ < recordsToCheck && records.hasNext()) {
@@ -132,7 +134,7 @@ public class BuiltWithTechIndicatorsTestNG
             String domain = record.get("Domain").toString();
             try {
                 boolean[] bits = BitCodecUtils.decode(record.get(TECH_INDICATORS).toString(),
-                        new int[]{HAS_UNIX_POS, HAS_MOD_SSL_POS});
+                        new int[] { HAS_TECH_SEO_TITLE_POS, HAS_MOD_SSL_POS });
                 if ("sandisland.com".equals(domain)) {
                     Assert.assertTrue(bits[0]);
                     Assert.assertTrue(bits[1]);
@@ -148,12 +150,12 @@ public class BuiltWithTechIndicatorsTestNG
         List<SourceColumn> columns = sourceColumnEntityMgr.getSourceColumns(source.getSourceName());
         for (SourceColumn column : columns) {
             String columnName = column.getColumnName();
-            if (TECH_UNIX.equals(columnName)) {
-                HAS_UNIX_POS = parseBitPos(column.getArguments());
+            if (TECH_SEO_TITLE.equals(columnName)) {
+                HAS_TECH_SEO_TITLE_POS = parseBitPos(column.getArguments());
             } else if (TECH_MOD_SSL.equals(columnName)) {
                 HAS_MOD_SSL_POS = parseBitPos(column.getArguments());
             }
-            if (Collections.min(Arrays.asList(HAS_UNIX_POS, HAS_MOD_SSL_POS)) > -1) {
+            if (Collections.min(Arrays.asList(HAS_TECH_SEO_TITLE_POS, HAS_MOD_SSL_POS)) > -1) {
                 break;
             }
         }

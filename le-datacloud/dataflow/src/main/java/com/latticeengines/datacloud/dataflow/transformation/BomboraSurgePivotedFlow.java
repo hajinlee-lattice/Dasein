@@ -39,7 +39,7 @@ public class BomboraSurgePivotedFlow extends ConfigurableFlowBase<BomboraSurgeCo
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);
-        Map<String, Map<Range<Integer>, String>> intentMap = FileParser.parseBomboraIntent();
+        Map<Range<Integer>, String> intentMap = FileParser.parseBomboraIntent();
         Node bomburaSurge = addSource(parameters.getBaseTables().get(0));
         bomburaSurge = bomburaSurge.groupByAndLimit(new FieldList(groupByFields), 1);
         bomburaSurge = addIntent(bomburaSurge, intentMap);
@@ -49,10 +49,9 @@ public class BomboraSurgePivotedFlow extends ConfigurableFlowBase<BomboraSurgeCo
         return encoded;
     }
 
-    private Node addIntent(Node node, Map<String, Map<Range<Integer>, String>> intentMap) {
-        return node.apply(new BomboraSurgeIntentFunction(INTENT, config.getCompoScoreField(),
-                config.getBucketCodeField(), intentMap), new FieldList(node.getFieldNames()),
-                new FieldMetadata(INTENT, String.class));
+    private Node addIntent(Node node, Map<Range<Integer>, String> intentMap) {
+        return node.apply(new BomboraSurgeIntentFunction(INTENT, config.getCompoScoreField(), intentMap),
+                new FieldList(node.getFieldNames()), new FieldMetadata(INTENT, String.class));
     }
 
     @Override

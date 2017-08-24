@@ -25,8 +25,7 @@ public class FileParser {
 
     private static final String[] BOMBORA_METRO_CODES_HEADER = { "﻿New Metro Name", "Country" };
 
-    private static final String[] BOMBORA_INTENT_HEADER = { "CompositeScoreMin", "CompositeScoreMax", "BucketCode",
-            "Intent" };
+    private static final String[] BOMBORA_INTENT_HEADER = { "CompositeScoreMin", "CompositeScoreMax", "Intent" };
 
     public static final String[] AM_PROFILE_CONFIG_HEADER = { "AMColumnID", "IsSegment", "DecodeStrategy",
             "EncodeBitUnit", "BucketAlgorithm" };
@@ -60,8 +59,8 @@ public class FileParser {
     }
 
     @SuppressWarnings("resource")
-    public static Map<String, Map<Range<Integer>, String>> parseBomboraIntent() {
-        Map<String, Map<Range<Integer>, String>> intentMap = new HashMap<>();
+    public static Map<Range<Integer>, String> parseBomboraIntent() {
+        Map<Range<Integer>, String> intentMap = new HashMap<>();
         InputStream is = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("etl/BomboraIntentCuration.csv");
         if (is == null) {
@@ -75,12 +74,8 @@ public class FileParser {
                 CSVRecord record = csvRecords.get(i);
                 Integer compoScoreMin = Integer.valueOf(record.get(BOMBORA_INTENT_HEADER[0]));
                 Integer compoScoreMax = Integer.valueOf(record.get(BOMBORA_INTENT_HEADER[1]));
-                String bucketCode = record.get(BOMBORA_INTENT_HEADER[2]);
-                String intent = record.get(BOMBORA_INTENT_HEADER[3]);
-                if (!intentMap.containsKey(bucketCode)) {
-                    intentMap.put(bucketCode, new HashMap<>());
-                }
-                intentMap.get(bucketCode).put(Range.between(compoScoreMin, compoScoreMax), intent);
+                String intent = record.get(BOMBORA_INTENT_HEADER[2]);
+                intentMap.put(Range.between(compoScoreMin, compoScoreMax), intent);
             }
         } catch (IOException e) {
             throw new RuntimeException("Fail to parse AllUniqueMetroCodes.csv", e);

@@ -144,11 +144,11 @@ public class BomboraSurgePivotedServiceImplTestNG
     }
 
     private Object[][] data = new Object[][] { //
-            { 1, "google.com", topics[0], 75, "A" }, // Very High
-            { 2, "google.com", topics[1], 55, "B" }, // High
-            { 3, "yahoo.com", topics[0], 45, "B" }, // Medium
-            { 4, "yahoo.com", topics[2], 25, "A" }, // Low
-            { 5, "apple.com", "Dummy Topic", 15, "C" }, // Very Low
+            { 1, "google.com", topics[0], 75, "A" }, // High
+            { 2, "google.com", topics[1], 60, "B" }, // Moderate
+            { 3, "yahoo.com", topics[0], 67, "B" }, // Moderate
+            { 4, "yahoo.com", topics[2], 25, "A" }, // Normal
+            { 5, "apple.com", "Dummy Topic", 15, "C" }, // Normal
     };
 
     private void prepareBomboraSurge() {
@@ -184,8 +184,8 @@ public class BomboraSurgePivotedServiceImplTestNG
     }
 
     private Object[][] expected = { //
-            { "yahoo.com", 45, null, 25, "B", null, "A", "Medium", null, "Low" },//
-            { "google.com", 75, 55, null, "A", "B", null, "Very High", "High", null }
+            { "yahoo.com", 67, null, 25, "B", null, "A", "Moderate", null, "Normal" }, //
+            { "google.com", 75, 60, null, "A", "B", null, "High", "Moderate", null }
     };
 
     @Override
@@ -291,19 +291,17 @@ public class BomboraSurgePivotedServiceImplTestNG
         intentCodeBook.setDecodeStrategy(DecodeStrategy.ENUM_STRING);
         bitsPosMap = new HashMap<>();
         bitsPosMap.put("BmbrSurge_2in1PCs_Intent", 0);
-        bitsPosMap.put("BmbrSurge_3DPrinting_Intent", 3);
-        bitsPosMap.put("BmbrSurge_401k_Intent", 6);
+        bitsPosMap.put("BmbrSurge_3DPrinting_Intent", 2);
+        bitsPosMap.put("BmbrSurge_401k_Intent", 4);
         intentCodeBook.setBitsPosMap(bitsPosMap);
         intentDecodeFields.add("BmbrSurge_2in1PCs_Intent");
         intentDecodeFields.add("BmbrSurge_3DPrinting_Intent");
         intentDecodeFields.add("BmbrSurge_401k_Intent");
         intentCodeBook.setBitUnit(3);
         valueDictRev = new HashMap<>();
-        valueDictRev.put("1", "Very Low");
-        valueDictRev.put("10", "Low");
-        valueDictRev.put("11", "Medium");
-        valueDictRev.put("100", "High");
-        valueDictRev.put("101", "Very High");
+        valueDictRev.put("1", "Normal");
+        valueDictRev.put("10", "Moderate");
+        valueDictRev.put("11", "High");
         intentCodeBook.setValueDictRev(valueDictRev);
     }
 }

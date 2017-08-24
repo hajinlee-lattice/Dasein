@@ -24,18 +24,16 @@ public class BomboraSurgeIntentFunction extends BaseOperation implements Functio
     private static final Logger log = LoggerFactory.getLogger(BomboraSurgeIntentFunction.class);
 
     private Map<String, Integer> namePositionMap;
-    private Map<String, Map<Range<Integer>, String>> intentMap;
+    private Map<Range<Integer>, String> intentMap;
     private String compoScoreField;
-    private String bucketCodeField;
     private int intentLoc;
 
-    public BomboraSurgeIntentFunction(String intentField, String compoScoreField, String bucketCodeField,
-            Map<String, Map<Range<Integer>, String>> intentMap) {
+    public BomboraSurgeIntentFunction(String intentField, String compoScoreField,
+            Map<Range<Integer>, String> intentMap) {
         super(new Fields(intentField));
         this.namePositionMap = getPositionMap(fieldDeclaration);
         this.intentMap = intentMap;
         this.compoScoreField = compoScoreField;
-        this.bucketCodeField = bucketCodeField;
         this.intentLoc = this.namePositionMap.get(intentField);
     }
 
@@ -43,12 +41,10 @@ public class BomboraSurgeIntentFunction extends BaseOperation implements Functio
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         Integer compoScore = (Integer) arguments.getObject(compoScoreField);
-        String bucketCode = arguments.getString(bucketCodeField);
-        Map<Range<Integer>, String> compoRangeIntent = intentMap.get(bucketCode);
         Tuple result = Tuple.size(getFieldDeclaration().size());
-        for (Range<Integer> range : compoRangeIntent.keySet()) {
+        for (Range<Integer> range : intentMap.keySet()) {
             if (range.contains(compoScore)) {
-                result.set(intentLoc, compoRangeIntent.get(range));
+                result.set(intentLoc, intentMap.get(range));
                 break;
             }
         }
