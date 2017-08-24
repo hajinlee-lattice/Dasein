@@ -170,13 +170,13 @@ public class AccountMasterRebuildRefreshTestNG
         domKeyMap.put(orb.getSourceName(), new String[] { "Domain" });
         domKeyMap.put(semrush.getSourceName(), new String[] { "Domain" });
         dunsKeyMap.put(dnb.getSourceName(), new String[] { "DUNS_NUMBER" });
-        keyMap.put(new String[] { "Domain" }, domKeyMap);
-        keyMap.put(new String[] { "DUNS" }, dunsKeyMap);
+        keyMap.put(new String[] { "LDC_Domain" }, domKeyMap);
+        keyMap.put(new String[] { "LDC_DUNS" }, dunsKeyMap);
 
         keyMapRefresh = new HashMap<>();
         Map<String, String[]> domKeyMapRefresh = new HashMap<>();
         domKeyMapRefresh.put(bomboraSurge.getSourceName(), new String[] { "Domain" });
-        keyMapRefresh.put(new String[] { "Domain" }, domKeyMapRefresh);
+        keyMapRefresh.put(new String[] { "LDC_Domain" }, domKeyMapRefresh);
     }
 
     private void prepareBaseSources() {
@@ -198,9 +198,9 @@ public class AccountMasterRebuildRefreshTestNG
     private void prepareAMSeed() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of("LatticeID", Long.class));
-        columns.add(Pair.of("Domain", String.class));
-        columns.add(Pair.of("DUNS", String.class));
-        columns.add(Pair.of("Name", String.class));
+        columns.add(Pair.of("LDC_Domain", String.class));
+        columns.add(Pair.of("LDC_DUNS", String.class));
+        columns.add(Pair.of("LDC_Name", String.class));
         Object[][] data = new Object[][] { //
                 { 1L, "dom1.com", "DUNS1", "Name1" }, //
                 { 2L, "dom2.com", "DUNS2", "Name2" }, //
@@ -395,9 +395,9 @@ public class AccountMasterRebuildRefreshTestNG
             log.info(record.toString());
             Long id = (Long) record.get("LatticeID");
             Object[] expected = expectedData.get(id);
-            Assert.assertTrue(equals(record.get("Domain"), expected[1]));
-            Assert.assertTrue(equals(record.get("DUNS"), expected[2]));
-            Assert.assertTrue(equals(record.get("Name"), expected[3]));
+            Assert.assertTrue(equals(record.get("LDC_Domain"), expected[1]));
+            Assert.assertTrue(equals(record.get("LDC_DUNS"), expected[2]));
+            Assert.assertTrue(equals(record.get("LDC_Name"), expected[3]));
             Assert.assertTrue(equals(record.get("AlexaRank"), expected[4]));
             Assert.assertTrue(equals(record.get("Bmbr30_Healthcare_Total"), expected[5]));
             Assert.assertTrue(equals(record.get("BmbrSurge_BucketCode"), expected[6]));
