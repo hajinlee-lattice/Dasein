@@ -89,13 +89,13 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
         // tenant level feature flags to decide lookup source otherwise use LPI
         // of playmaker as indicated by loop source enum passed by caller
 
+        boolean shouldUseLpi = false;
+
         if (playmakerSyncLookupSource == PlaymakerSyncLookupSource.DECIDED_BY_FEATURE_FLAG) {
             CustomerSpace customerSpace = CustomerSpace.parse(tenantName);
             try {
                 if (batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER)) {
-                    Tenant tenant = tenantEntityMgr.findByTenantId(tenantName);
-                    MultiTenantContext.setTenant(tenant);
-                    return true;
+                    shouldUseLpi = true;
                 }
             } catch (Exception ex) {
                 boolean isIgnorableException = false;
@@ -126,10 +126,16 @@ public class PlaymakerDaoFactoryImpl implements PlaymakerDaoFactory {
                     }
                 }
             }
-            return false;
         } else {
-            return playmakerSyncLookupSource == PlaymakerSyncLookupSource.V2;
+            shouldUseLpi = playmakerSyncLookupSource == PlaymakerSyncLookupSource.V2;
         }
+
+        if (shouldUseLpi) {
+            Tenant tenant = tenantEntityMgr.findByTenantId(tenantName);
+            MultiTenantContext.setTenant(tenant);
+        }
+
+        return shouldUseLpi;
     }
 
     private PlaymakerSyncLookupSource getPlaymakerSyncLookupSource(String lookupSource) {
