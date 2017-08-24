@@ -55,35 +55,29 @@ public class CDLProxy extends MicroserviceRestApiProxy {
         return ("Success".equals(statusStr));
     }
 
+    @SuppressWarnings("unchecked")
     public String createDataFeedTask(String customerSpace, String source, String entity, String feedType,
                                      String metadata) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks?source={source}" +
                         "&feedtype={feedtype}&entity={entity}",
                 shortenCustomerSpace(customerSpace), source, feedType, entity);
-        String taskIdStr = post("createDataFeedTask", url, metadata, String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode json;
-        try {
-            json = mapper.readValue(taskIdStr, JsonNode.class);
-        } catch (IOException e) {
+        ResponseDocument<String> responseDoc = post("createDataFeedTask", url, metadata, ResponseDocument.class);
+        if (responseDoc == null) {
             return null;
         }
-        return JsonUtils.getOrDefault(json.get("task_id"), String.class, "");
+        return responseDoc.getResult();
     }
 
+    @SuppressWarnings("unchecked")
     public ApplicationId submitImportJob(String customerSpace, String taskIdentifier, String importConfig) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/import" +
                 "/{taskIdentifier}", customerSpace, taskIdentifier);
-        String appIdStr = post("submitImportJob", url, importConfig, String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode json;
-        try {
-            json = mapper.readValue(appIdStr, JsonNode.class);
-        } catch (IOException e) {
+        ResponseDocument<String> responseDoc = post("submitImportJob", url, importConfig, ResponseDocument.class);
+        if (responseDoc == null) {
             return null;
         }
-        String appId = JsonUtils.getOrDefault(json.get("application_id"), String.class, "");
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appId);
+        String appIdStr = responseDoc.getResult();
+        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
     }
 
 }
