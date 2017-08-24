@@ -10,5 +10,6 @@ mvn -f pom-connect-shaded.xml -DskipTests package && \
 popd
 
 echo "Copy datafabric connect shaded jar to confluent home"
+mkdir -p ${CONFLUENT_HOME}/connectors
 cp ${WSHOME}/le-datafabric/target/le-datafabric-connect-*-shaded.jar ${CONFLUENT_HOME}/connectors
 ls -al ${CONFLUENT_HOME}/connectors

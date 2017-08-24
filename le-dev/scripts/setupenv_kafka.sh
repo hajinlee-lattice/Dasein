@@ -8,7 +8,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     echo "Bootstrapping kafka via confluent platform ..."
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
     CP_MAJOR=3.2
-    CP_VERSION=3.2.2
+    CP_VERSION=3.2.0
     CP_SCALA_VERSION=2.11
     CP_TGZ_URL="http://packages.confluent.io/archive/${CP_MAJOR}/confluent-oss-${CP_VERSION}-${CP_SCALA_VERSION}.tar.gz"
 

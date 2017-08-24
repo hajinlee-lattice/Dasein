@@ -18,7 +18,7 @@ sleep 3
 tail ${CONFLUENT_HOME}/logs/kafkaServer.out
 
 echo "Starting schema registry ..."
-${CONFLUENT_HOME}/bin/schema-registry-start -daemon ${DEV_KAFKA_DIR}/schema-registry.properties
+${CONFLUENT_HOME}/bin/schema-registry-start ${DEV_KAFKA_DIR}/schema-registry.properties > ${CONFLUENT_HOME}/logs/schemaRegistry.out &
 
 echo "Sleep 3 sec, and check tail of schema registry log ..."
 sleep 3
