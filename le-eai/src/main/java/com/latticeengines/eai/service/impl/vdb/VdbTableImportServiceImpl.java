@@ -527,7 +527,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                                 log.warn(String.format("Row batch is %d, but only %d rows append to avro.", rowsToGet,
                                         rowsAppend));
                             }
-                            startRow += rowsAppend;
+                            startRow += rowsToGet;
                             extractRecords += rowsAppend;
 
                             vdbGetQueryData.setStartRow(startRow);
@@ -539,7 +539,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                             reportStatus(statusUrl, vdbLoadTableStatus);
                             dataContainer.flush();
                             if (dataContainer.getLocalDataFile().length() >= sizePerFile
-                                    || extractRecords >= recordsPerExtract) {
+                                    || (extractRecords + rowsToGet) > recordsPerExtract) {
                                 dataContainer.endContainer();
                                 String fileName = generateAvroFileName(avroFileName, fileIndex);
                                 try (PerformanceTimer timer = new PerformanceTimer("DL copy to hdfs")) {
@@ -551,7 +551,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                                 eaiImportJobDetailService.updateImportJobDetail(importJobDetail);
                                 dataContainer.getLocalDataFile().delete();
                                 log.info(String.format("Get data from DL takes %d ms", getDLDataResultTime));
-                                if (extractRecords >= recordsPerExtract) {
+                                if ((extractRecords + rowsToGet) > recordsPerExtract) {
                                     if (needMultipleExtracts) {
                                         updateExtractContext(table, context, targetPath, new Long(extractRecords));
                                         fileIndex = 0;
@@ -624,18 +624,52 @@ public class VdbTableImportServiceImpl extends ImportService {
         int rowSize = vdbQueryDataResult.getColumns().get(0).getValues().size();
         int rowsAppend = 0;
         for (int i = 0; i < rowSize; i++) {
-            dataContainer.newRecord();
-            for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
-                if (attributeMap.containsKey(column.getColumnName())) {
-                    Attribute attr = attributeMap.get(column.getColumnName());
-                    dataContainer.setValueForAttribute(attr, column.getValues().get(i));
+            if (validateRecord(attributeMap, vdbQueryDataResult, i)) {
+                dataContainer.newRecord();
+                for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
+                    if (attributeMap.containsKey(column.getColumnName())) {
+                        Attribute attr = attributeMap.get(column.getColumnName());
+                        dataContainer.setValueForAttribute(attr, column.getValues().get(i));
+                    }
                 }
+                dataContainer.endRecord();
+                rowsAppend++;
             }
-            dataContainer.endRecord();
-            rowsAppend++;
         }
         return rowsAppend;
     }
+
+    private boolean validateRecord(HashMap<String, Attribute> attributeMap, VdbQueryDataResult vdbQueryDataResult,
+                                   int index) {
+        boolean result = true;
+        for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
+            if (attributeMap.containsKey(column.getColumnName())) {
+                if (!attributeMap.get(column.getColumnName()).isNullable()) {
+                    if (StringUtils.isEmpty(column.getValues().get(index))) {
+                        result = false;
+                        String record = getVdbRecord(vdbQueryDataResult, index);
+                        log.error(String.format("Missing required field: %s. Record values: %s",
+                                attributeMap.get(column.getColumnName()).getName(), record));
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private String getVdbRecord(VdbQueryDataResult vdbQueryDataResult, int index) {
+        String result = "";
+        for (VdbQueryResultColumn column : vdbQueryDataResult.getColumns()) {
+            result += column.getValues().get(index);
+            result += ",";
+        }
+        if (!StringUtils.isEmpty(result)) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
+    }
+
 
     private boolean copyToHdfs(DataContainer dataContainer, String filePath, Configuration yarnConfiguration) {
         int retries = 0;

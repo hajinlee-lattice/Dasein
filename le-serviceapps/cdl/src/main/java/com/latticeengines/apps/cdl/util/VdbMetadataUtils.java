@@ -28,6 +28,7 @@ public class VdbMetadataUtils {
     public static Attribute convertToAttribute(VdbSpecMetadata metadata) {
         try {
             Attribute attr = new Attribute();
+            attr.setNullable(Boolean.TRUE);
             attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()));
             attr.setSourceAttrName(metadata.getColumnName());
             attr.setDisplayName(metadata.getDisplayName());
