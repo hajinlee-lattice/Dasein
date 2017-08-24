@@ -193,8 +193,6 @@ angular
                 }],
                 CountWithoutSalesForce: ['$q', 'QueryStore', function($q, QueryStore){
 
-
-
                     var deferred = $q.defer(),
                         restriction = QueryStore.getRestriction(),
                         query = {
@@ -225,6 +223,10 @@ angular
                             onClick: function(property, bool) {
                                 play[property] = bool;
                                 PlaybookWizardStore.savePlay(play);
+                            },
+                            header: {
+                                class: 'playbook-targets',
+                                label: 'Targets'
                             }
                         }
                         deferred.resolve(config);
@@ -441,8 +443,6 @@ angular
                 }],
                 CountWithoutSalesForce: ['$q', 'QueryStore', function($q, QueryStore){
 
-
-
                     var deferred = $q.defer(),
                         restriction = QueryStore.getRestriction(),
                         query = {
@@ -472,7 +472,12 @@ angular
                     return deferred.promise;
                 }],
                 Config: [function() {
-                    return null;
+                    return { 
+                            header: {
+                                class: 'playbook-targets',
+                                label: 'Targets'
+                            }
+                        }
                 }]
             },
             views: {

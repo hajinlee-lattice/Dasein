@@ -32,8 +32,6 @@ angular.module('common.datacloud.query.results', [
         config: Config
     });
 
-
-
     function updatePage() {
 
         vm.loading = true;

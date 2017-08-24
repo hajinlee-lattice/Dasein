@@ -1,7 +1,8 @@
 
 <div class="container query-results">
-
-
+    <div ng-if="vm.config.header" class="sub-header {{vm.config.header.class}}">
+        <h2>{{vm.config.header.label}}</h2>
+    </div>
     <div 
         class="exclude-filter"
         ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">

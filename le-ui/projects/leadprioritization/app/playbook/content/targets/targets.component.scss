@@ -1,7 +1,15 @@
 .playbook-targets {
-     & > .header {
+     & > .header,
+     &.sub-header {
         h2 {
+            background-repeat: no-repeat;
             background-image: url('/assets/images/ico-targets.png');
+        }
+    }
+    &.sub-header {
+        h2 {
+            padding-left: 30px;
+            margin-bottom: 10px;
         }
     }
 
