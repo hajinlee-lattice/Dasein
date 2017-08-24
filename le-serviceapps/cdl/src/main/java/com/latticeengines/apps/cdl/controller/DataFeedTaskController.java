@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -12,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
+import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
@@ -35,6 +34,7 @@ public class DataFeedTaskController {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
+    @NoCustomerSpace
     public ResponseDocument<String> createDataFeedTaskDeprecated(@PathVariable String customerSpace,
                                                                  @RequestParam(value = "source") String source,
                                                                  @RequestParam(value = "feedtype") String feedtype,
@@ -55,6 +55,7 @@ public class DataFeedTaskController {
             "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a data feed task")
+    @NoCustomerSpace
     public ResponseDocument<String>  startImportJobDeprecated(@PathVariable String customerSpace,
                                                          @PathVariable String taskIdentifier,
                                                          @RequestBody String metadata) {

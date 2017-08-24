@@ -1029,6 +1029,7 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets
                         .newHashSet(new String[] { "PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID" })) //
                 .type(Schema.Type.STRING) //
+                .required()
                 .interfaceName(InterfaceName.ProductId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //

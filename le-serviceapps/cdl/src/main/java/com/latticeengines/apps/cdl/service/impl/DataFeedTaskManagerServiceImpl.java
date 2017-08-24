@@ -57,10 +57,6 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     public String createDataFeedTask(String customerSpaceStr, String feedType, String entity, String source,
                                      String metadata) {
         DataFeedMetadataService dataFeedMetadataService = DataFeedMetadataService.getService(source);
-        Table newMeta = dataFeedMetadataService.getMetadata(metadata);
-        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity));
-        newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
-        setCategoryForTable(newMeta, entity);
         CustomerSpace customerSpace = dataFeedMetadataService.getCustomerSpace(metadata);
         if (dlTenantMappingEnabled) {
             log.info("DL tenant mapping is enabled");
@@ -71,6 +67,10 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             throw new RuntimeException(String.format("Cannot find the tenant %s", customerSpace.getTenantId()));
         }
         MultiTenantContext.setTenant(tenant);
+        Table newMeta = dataFeedMetadataService.getMetadata(metadata);
+        Table schemaTable = SchemaRepository.instance().getSchema(BusinessEntity.valueOf(entity));
+        newMeta = dataFeedMetadataService.resolveMetadata(newMeta, schemaTable);
+        setCategoryForTable(newMeta, entity);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask != null) {
             Table originMeta = dataFeedTask.getImportTemplate();
