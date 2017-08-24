@@ -2,7 +2,7 @@ angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('QueryResultsCtrl', function($q, $scope, $state, $stateParams, $filter, 
-    BrowserStorageUtility, QueryStore, QueryService, LookupStore, Config, AccountsCount, CountWithoutSalesForce) {
+    BrowserStorageUtility, QueryStore, QueryService, SegmentService, SegmentStore, LookupStore, Config, AccountsCount, CountWithoutSalesForce) {
 
     var vm = this;
     angular.extend(vm, {
@@ -14,7 +14,6 @@ angular.module('common.datacloud.query.results', [
         accountsWithoutSfId: CountWithoutSalesForce,
         loading: true,
         saving: false,
-        saveSegmentEnabled: false,
         segment: QueryStore.getSegment(),
         restriction: QueryStore.getRestriction(),
         current: 1,
@@ -53,6 +52,8 @@ angular.module('common.datacloud.query.results', [
             vm.accounts = response.data;
             vm.loading = false;
         });
+
+        vm.checkSaveButtonState();
 
     };
 
@@ -106,36 +107,29 @@ angular.module('common.datacloud.query.results', [
 
     vm.checkSaveButtonState = function(){
 
-        var segmentName = $stateParams.segment;
-        if (segmentName === 'Create') {
-            var oldVal = JSON.stringify({restriction:{logicalRestriction:{operator:"AND",restrictions:[{logicalRestriction:{operator:"AND",restrictions:[]}},{logicalRestriction:{operator:"OR",restrictions:[]}}]}}});
-            var newVal = JSON.stringify(QueryStore.getRestriction());
+        var oldVal = $stateParams.defaultSegmentRestriction,
+            newVal = JSON.stringify(QueryStore.getRestriction());
 
-            if(oldVal === newVal){
-                vm.saveSegmentEnabled = false;
-            } else {
-                vm.saveSegmentEnabled = true;
-            };
+        console.log(oldVal);
+        console.log(newVal);
 
+        if(oldVal === newVal){
+            vm.saveSegmentEnabled = false;
         } else {
-
-            SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
-                var oldVal = JSON.stringify(result.frontend_restriction),
-                    newVal = JSON.stringify(QueryStore.getRestriction());
-
-                if(oldVal === newVal){
-                    vm.saveSegmentEnabled = false;
-                } else {
-                    vm.saveSegmentEnabled = true;
-                };
-            });
+            vm.saveSegmentEnabled = true;
         };
 
+    };
+
+    vm.inModel = function() {
+        var name = $state.current.name.split('.');
+        return name[1] == 'model';
     }
 
     vm.saveSegment = function() {
         
+        console.log("save");
+
         var segmentName = $stateParams.segment,
             ts = new Date().getTime();
 

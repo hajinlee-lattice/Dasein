@@ -81,9 +81,6 @@ angular
         }],
         // below resolves are needed. Do not removed
         // override at child state when needed
-        SegmentServiceProxy: function() {
-            return null;
-        },
         QueryRestriction: function() {
             return null;
         },
@@ -313,6 +310,7 @@ angular
                                     }
                                 } else {
                                     // console.log("[setup store]       ", result);
+
                                     return QueryStore.setupStore(result);
                                 }
                             }).then(function() {
@@ -343,7 +341,9 @@ angular
                     } else {
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
                             var segment = result;
-                            console.log("[resolve] AccountsCount", segment);
+
+                            // console.log("[resolve] AccountsCount", segment);
+
                             query = { 
                                 'free_form_text_search': '',
                                 'frontend_restriction': segment.frontend_restriction,
@@ -434,40 +434,6 @@ angular
                 pageTitle: 'Accounts'
             },
             resolve: {
-                SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
-
-                        var segment = QueryStore.getSegment(),
-                            ts = new Date().getTime(),
-                            restriction = QueryStore.getRestriction();
-
-                        console.log("[resolve] SegmentServiceProxy",segment);
-                        
-                        if (segment === null) {
-                            segment = {
-                                'name': 'segment' + ts,
-                                'display_name': 'segment' + ts,
-                                'frontend_restriction': restriction,
-                                'page_filter': {
-                                    'row_offset': 0,
-                                    'num_rows': 10
-                                }
-                            };
-                        } else {
-
-                            segment = {
-                                'name': segment.name,
-                                'display_name': segment.display_name,
-                                'frontend_restriction': segment.frontend_restriction,
-                                'page_filter': {
-                                    'row_offset': 0,
-                                    'num_rows': 10
-                                }
-                            };
-                        };
-
-                        return SegmentService.CreateOrUpdateSegment(segment);
-
-                }],
                 AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
                     var deferred = $q.defer(),
                         segment = QueryStore.getSegment(),

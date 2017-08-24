@@ -92,6 +92,7 @@ angular.module('common.datacloud.query.service',[
         this.setSegment(segment);
 
         if (segment != null) {
+
             // Set variables so I can manipulate later when unchecking box.
             allRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[0].logicalRestriction.restrictions;
             anyRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[1].logicalRestriction.restrictions;
@@ -163,6 +164,7 @@ angular.module('common.datacloud.query.service',[
                 break;
             }
         }
+
 
         allRestrictions.splice(index, 1);
         this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
