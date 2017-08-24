@@ -62,7 +62,7 @@ public class RatingEngineResource {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a Rating Engine")
-    @PreAuthorize("hasRole('Create_PLS_Rating_Engines')")
+    @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
     public RatingEngine createRatingEngine(@RequestBody RatingEngine ratingEngine, HttpServletRequest request) {
         return createRatingEngine();
     }
@@ -70,7 +70,7 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a Rating Engine given its id")
-    @PreAuthorize("hasRole('Create_PLS_Rating_Engines')")
+    @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
     public RatingEngine updateRatingEngine( //
             @RequestBody RatingEngine ratingEngine, //
             @PathVariable String ratingEngineId, //
@@ -81,7 +81,7 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
-    @PreAuthorize("hasRole('Edit_PLS_Rating_Engines')")
+    @PreAuthorize("hasRole('Edit_PLS_RatingEngines')")
     public Boolean deleteRatingEngine(@PathVariable String ratingEngineId, HttpServletRequest request) {
         return true;
     }
