@@ -158,11 +158,11 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
         do {
             processRecords(processorContext, startTime, internalRecords, internalCompletedRecords, futures,
-                    completedFutures, combinedContext, 100, NUM_10K * 2);
+                    completedFutures, combinedContext, 100, NUM_10K * 4);
             if (processorContext.isPartialMatch()) {
                 return;
             }
-        } while (futures.size() > NUM_10K * 4);
+        } while (futures.size() > NUM_10K * 5);
     }
 
     private void processRecords(ProcessorContext processorContext, Long startTime,
@@ -212,7 +212,7 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
 
     private void sleepSeconds(int count) {
         try {
-            log.info("Many records, sleep for seconds! size=" + count);
+            log.info("Too many records, sleep for seconds! size=" + count);
             Thread.sleep(10_000L);
         } catch (Exception ex) {
             log.warn("Failed to sleep!");
