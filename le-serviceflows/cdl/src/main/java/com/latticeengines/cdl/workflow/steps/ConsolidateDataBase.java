@@ -99,7 +99,8 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
             Table newRecordsTable = metadataProxy.getTable(customerSpace.toString(),
                     TableUtils.getFullTableName(newRecordsTablePrefix, pipelineVersion));
             ObjectNode json = JsonUtils.createObjectNode();
-            json.put(getBusinessEntity().name() + "_New", newRecordsTable.getExtracts().get(0).getProcessedRecords());
+            json.put(getBusinessEntity().getBatchStore().name() + "_New",
+                    newRecordsTable.getExtracts().get(0).getProcessedRecords());
             report(ReportPurpose.CONSOLIDATE_NEW_RECORDS_COUNT_SUMMARY, UUID.randomUUID().toString(), json.toString());
             metadataProxy.deleteTable(customerSpace.toString(), newRecordsTable.getName());
         }
