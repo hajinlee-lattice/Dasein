@@ -471,8 +471,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.PostalCode.name()) //
-                .allowedDisplayNames(Sets
-                        .newHashSet("POSTAL_CODE", "POSTALCODE", "ZIP", "POSTAL CODE", "BILLING ZIP")) //
+                .allowedDisplayNames(Sets.newHashSet("POSTAL_CODE", "POSTALCODE", "ZIP", "POSTAL CODE", "BILLING ZIP")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -505,8 +504,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.NumberOfEmployees.name()) //
-                .allowedDisplayNames(
-                        Sets.newHashSet("NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "EMPLOYEES")) //
+                .allowedDisplayNames(Sets.newHashSet("NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "EMPLOYEES")) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
@@ -526,7 +524,6 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED")) //
                 .type(Schema.Type.LONG) //
-                .required()
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -551,7 +548,8 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.CRMId.name()) //
-                .allowedDisplayNames(Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "CRMID", "CRMLINK_ID", "CRM ID", "CRM_ID")) //
+                .allowedDisplayNames(
+                        Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "CRMID", "CRMLINK_ID", "CRM ID", "CRM_ID")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CRMId) //
                 .logicalType(LogicalDataType.Id) //
@@ -783,8 +781,8 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.AccountId.name()) //
-                .allowedDisplayNames(Sets
-                        .newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
+                .allowedDisplayNames(
+                        Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.AccountId) //
@@ -835,8 +833,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.PostalCode.name()) //
-                .allowedDisplayNames(
-                        Sets.newHashSet("POSTAL_CODE", "POSTALCODE", "ZIP", "POSTAL CODE")) //
+                .allowedDisplayNames(Sets.newHashSet("POSTAL_CODE", "POSTALCODE", "ZIP", "POSTAL CODE")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -845,7 +842,8 @@ public class SchemaRepository {
                 .build());
 
         table.addAttribute(attr(InterfaceName.CompanyName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "COMPANY", "ACCOUNT", "DISPLAY_NAME", "DISPLAYNAME")) //
+                .allowedDisplayNames(
+                        Sets.newHashSet("COMPANY NAME", "COMPANY", "ACCOUNT", "DISPLAY_NAME", "DISPLAYNAME")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -872,7 +870,6 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED")) //
                 .type(Schema.Type.LONG) //
-                .required() //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -923,8 +920,7 @@ public class SchemaRepository {
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         table.addAttribute(attr(InterfaceName.NumberOfEmployees.name()) //
-                .allowedDisplayNames(Sets
-                        .newHashSet("NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "NO. OF EMPLOYEES")) //
+                .allowedDisplayNames(Sets.newHashSet("NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "NO. OF EMPLOYEES")) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
@@ -1015,9 +1011,8 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr("AccountId") //
-                .allowedDisplayNames(Sets
-                        .newHashSet(new String[] { "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID",
-                                "ACCOUNT" })) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        new String[] { "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.AccountId) //
@@ -1029,16 +1024,15 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets
                         .newHashSet(new String[] { "PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID" })) //
                 .type(Schema.Type.STRING) //
-                .required()
-                .interfaceName(InterfaceName.ProductId) //
+                .required().interfaceName(InterfaceName.ProductId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "TIMESTAMP", "TIME STAMP", "LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED" })) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "TIMESTAMP", "TIME STAMP", "LASTMODIFIEDDATE",
+                        "LAST MODIFIED DATE", "LASTMODIFIED" })) //
                 .type(Schema.Type.LONG) //
-                .required()
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
