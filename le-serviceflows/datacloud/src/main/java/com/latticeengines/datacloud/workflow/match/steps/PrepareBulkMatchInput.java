@@ -81,12 +81,25 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     private Integer[] determineBlockSizes(Long count) {
         if (MatchUtils.isValidForAccountMasterBasedMatch(getConfiguration().getMatchInput().getDataCloudVersion())) {
-            return new Integer[] { count.intValue() };
+            if (getConfiguration().getMatchInput().getFetchOnly()) {
+                return divideIntoNumBlocks(count, determineNumBlocksForAM(count));
+            } else {
+                return new Integer[] { count.intValue() };
+            }
         } else {
             return divideIntoNumBlocks(count, determineNumBlocks(count));
         }
     }
 
+    private Integer determineNumBlocksForAM(Long count) {
+        Integer numBlocks = 1;
+        Integer averageBlockSize = 100_000;
+        while (count >= averageBlockSize * numBlocks && numBlocks < maxNumBlocks) {
+            numBlocks++;
+        }
+        return numBlocks;
+    }
+    
     private Integer determineNumBlocks(Long count) {
         Integer numBlocks = 1;
         Integer averageBlockSize = getConfiguration().getAverageBlockSize();
@@ -95,7 +108,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         }
         return numBlocks;
     }
-
+    
     private Integer[] divideIntoNumBlocks(Long count, Integer numBlocks) {
         Long blockSize = count / numBlocks;
         Integer[] blocks = new Integer[numBlocks];
@@ -124,8 +137,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             if (blocks.length == 1) {
                 jobConfiguration.setAvroPath(avroGlobs);
             } else {
-                String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(jobConfiguration.getRootOperationUid(),
-                        jobConfiguration.getBlockOperationUid()).toString();
+                String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(
+                        jobConfiguration.getRootOperationUid(), jobConfiguration.getBlockOperationUid()).toString();
                 jobConfiguration.setAvroPath(targetFile);
                 writeBlock(iterator, blockSize, targetFile);
             }
@@ -133,11 +146,11 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             String appId = matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid())
                     .getApplicationId();
             if (StringUtils.isBlank(appId)) {
-                jobConfiguration.setAppName(String.format("%s~DataCloudMatch~Block[%d/%d]",
-                        getConfiguration().getCustomerSpace().getTenantId(), blockIdx, blocks.length));
+                jobConfiguration.setAppName(String.format("%s~DataCloudMatch~Block[%d/%d]", getConfiguration()
+                        .getCustomerSpace().getTenantId(), blockIdx, blocks.length));
             } else {
-                jobConfiguration.setAppName(String.format("%s~DataCloudMatch[%s]~Block[%d/%d]",
-                        getConfiguration().getCustomerSpace().getTenantId(), appId, blockIdx, blocks.length));
+                jobConfiguration.setAppName(String.format("%s~DataCloudMatch[%s]~Block[%d/%d]", getConfiguration()
+                        .getCustomerSpace().getTenantId(), appId, blockIdx, blocks.length));
             }
             configurations.add(jobConfiguration);
         }
