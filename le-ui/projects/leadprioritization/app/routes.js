@@ -104,16 +104,29 @@ angular
                     templateUrl: 'app/navigation/header/views/MainHeaderView.html'
                 },
                 "navigation": {
-                    controller: function($rootScope, $stateParams, $state, Tenant) {
+                    controller: function($rootScope, $stateParams, $state, Tenant, FeatureFlagService) {
                         var tenantName = $stateParams.tenantName;
 
                         if (tenantName != Tenant.DisplayName) {
                             $rootScope.tenantName = window.escape(Tenant.DisplayName);
                             $rootScope.tenantId = window.escape(Tenant.Identifier);
 
-                            $state.go('home.models', {
-                                tenantName: Tenant.DisplayName
+
+                            FeatureFlagService.GetAllFlags().then(function(result) {
+                                var flags = FeatureFlagService.Flags();
+
+                                if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
+                                    $state.go('home.segments', {
+                                        tenantName: Tenant.DisplayName
+                                    });
+                                } else {
+                                    $state.go('home.models', {
+                                        tenantName: Tenant.DisplayName
+                                    });
+                                }
                             });
+
+
                         }
                     },
                     templateUrl: 'app/navigation/sidebar/RootView.html'
