@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
@@ -193,9 +194,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
         final Table clone = TableUtils.clone(existing, "clone_" + UUID.randomUUID().toString().replace('-', '_'));
 
-        DatabaseUtils.retry("createTable", input -> create(TableUtils.clone(clone, clone.getName())));
-
-
         String cloneTable = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 MultiTenantContext.getCustomerSpace(), existing.getNamespace()).append(clone.getName()).toString();
         try {
@@ -241,6 +239,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             });
         }
         newExtract.setProcessedRecords(count.get());
+        newExtract.setExtractionTimestamp(System.currentTimeMillis());
+        clone.setExtracts(Collections.singletonList(newExtract));
 
         String oldTableSchema = PathBuilder.buildDataTableSchemaPath(CamilleEnvironment.getPodId(),
                 MultiTenantContext.getCustomerSpace(), existing.getNamespace()).append(name).toString();
@@ -254,6 +254,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             throw new RuntimeException(String.format("Failed to copy schema in HDFS from %s to %s", oldTableSchema,
                     cloneTableSchema), e);
         }
+
+        DatabaseUtils.retry("createTable", input -> create(TableUtils.clone(clone, clone.getName())));
 
         return clone;
     }
