@@ -26,39 +26,51 @@ angular
         'importMatchAndScoreWorkflow': {
         },*/
         'importMatchAndModelWorkflow': {
-            'importData':                           'load_data',
-            'createEventTableReport':               'load_data',
-            'createPrematchEventTableReport':       'generate_insights',
-            'validatePrematchEventTable':           'generate_insights',
-            'dedupEventTable':                      'generate_insights',
-            'matchDataCloud':                       'generate_insights',
-            'processMatchResult':                   'generate_insights',
-            'addStandardAttributes':                'create_global_target_market',
-            'sample':                               'create_global_target_market',
-            'exportData':                           'create_global_target_market',
-            'setMatchSelection':                    'create_global_target_market',
-            'writeMetadataFiles':                   'create_global_target_market',
-            'profile':                              'create_global_target_market',
-            'createModel':                          'create_global_target_market',
-            'reviewModel':                          'create_global_target_market',
-            'remediateDataRules':                   'create_global_target_market',
-            'downloadAndProcessModelSummaries':     'create_global_target_market',
-            'persistDataRules':                     'create_global_target_market',
-            'setConfigurationForScoring':           'score_training_set',
-            // 'matchDataCloud':                       'score_training_set',
-            // 'processMatchResult':                   'score_training_set',
-            // 'addStandardAttributes':                'score_training_set',
-            'scoreEventTable':                      'score_training_set',
-            'combineInputTableWithScoreDataFlow':   'score_training_set',
-            // 'exportData':                           'score_training_set',
-            'pivotScoreAndEvent':                   'score_training_set',
-            // 'exportData':                           'score_training_set',
+
+            "importData":                           "load_data",
+            "createEventTableReport":               "load_data",
+
+            "createPrematchEventTableReport":       "generate_insights",
+            "validatePrematchEventTable":           "generate_insights",
+            "preMatchStep":                         "generate_insights",
+            "prepareBulkMatchInput":                "generate_insights",
+            "parallelBlockExecution":               "generate_insights",
+            "processMatchResult":                   "generate_insights",
+            "dedupEventTableDataFlow":              "generate_insights",
+
+            "addStandardAttributesDataFlow":        "create_global_target_market",
+            "sample":                               "create_global_target_market",
+            "exportData":                           "create_global_target_market",
+            "setMatchSelection":                    "create_global_target_market",
+            "writeMetadataFiles":                   "create_global_target_market",
+            "profile":                              "create_global_target_market",
+            "reviewModel":                          "create_global_target_market",
+            "remediateDataRules":                   "create_global_target_market",
+            "writeMetadataFiles":                   "create_global_target_market",
+            "createModel":                          "create_global_target_market",
+            "downloadAndProcessModelSummaries":     "create_global_target_market",
+            "createNote":                           "create_global_target_market",
+            "persistDataRules":                     "create_global_target_market",
+            "setConfigurationForScoring":           "create_global_target_market",
+            "preMatchStep":                         "create_global_target_market",
+            "prepareBulkMatchInput":                "create_global_target_market",
+
+            "parallelBlockExecution":               "score_training_set",
+            "processMatchResult":                   "score_training_set",
+            "rtsScoreEventTable":                   "score_training_set",
+            "combineMatchDebugWithScoreDataFlow":   "score_training_set",
+            "combineInputTableWithScoreDataFlow":   "score_training_set",
+            "exportData":                           "score_training_set",
+            "pivotScoreAndEventDataFlow":           "score_training_set",
+            "exportData":                           "score_training_set"
+
         },
         'modelAndEmailWorkflow': {
             'dedupEventTable':                          'load_data',
             'matchDataCloud':                           'load_data',
             'processMatchResult':                       'generate_insights',
             'addStandardAttributes':                    'generate_insights',
+
             'resolveMetadataFromUserRefinedAttributes': 'create_global_target_market',
             'sample':                                   'create_global_target_market',
             'exportData':                               'create_global_target_market',
@@ -70,6 +82,7 @@ angular
             'createModel':                              'create_global_target_market',
             'downloadAndProcessModelSummaries':         'create_global_target_market',
             'persistDataRules':                         'create_global_target_market',
+
             'setConfigurationForScoring':               'score_training_set',
             // 'matchDataCloud':                        'score_training_set',
             // 'processMatchResult':                    'score_training_set',
@@ -78,7 +91,7 @@ angular
             'scoreEventTable':                          'score_training_set',
             'combineInputTableWithScore':               'score_training_set',
             // 'exportData':                            'score_training_set',
-            'pivotScoreAndEvent':                       'score_training_set',
+            'pivotScoreAndEvent':                       'score_training_set'
             // 'exportData':                            'score_training_set',
         },
         'pmmlModelWorkflow': {
@@ -444,6 +457,8 @@ angular
 
     function getDictionaryValue(job, i) {
         var JobType = dictionary[job.jobType];
+
+        console.log( job );
 
         var stepDisplayName = JobType
             ? JobType[job.steps[i].jobStepType.trim()]
