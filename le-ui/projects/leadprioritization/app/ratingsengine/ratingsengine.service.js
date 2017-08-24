@@ -3,7 +3,11 @@ angular.module('lp.ratingsengine')
     var RatingsEngineStore = this;
 
     this.init = function() {
-        this.foo = null;
+        this.validation = {
+            segment: true,
+            attributes: true
+        }
+        this.currentRating = {};
     }
 
     this.init();
@@ -12,7 +16,17 @@ angular.module('lp.ratingsengine')
         this.init();
     }
 
+    this.setCurrentRating = function(rating) {
+        this.currentRating = rating;
+    }
+
+    this.getCurrentRating = function() {
+        return this.currentRating;
+    }
+
+    this.nextSaveGeneric = function(nextState) {
+        $state.go(nextState, {rating_id: RatingsEngineStore.currentRating.id});
+    }
 })
 .service('RatingsEngineService', function($q, $http, $state) {
-    this.host = '/pls'; //default
 });

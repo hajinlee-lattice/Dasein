@@ -13,6 +13,14 @@
                 <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_BACK_TO_RATING_ENGINE')}}</span>
             </a>
         </li>
+        <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.dashboard'}" ng-disabled="menuDisabled || dashboardDisabled">
+            <a ui-sref="home.ratingsengine.dashboard({rating_id: rating_id})">
+                <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_OVERVIEW')}}">
+                    <span class="ico ico-insights ico-light-gray"></span>
+                </span>
+                <span class="label">{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_OVERVIEW')}}</span>
+            </a>
+        </li>
     </ul>
     <button class="open-button open">
         <span class="ico ico-arrow-open"></span>
