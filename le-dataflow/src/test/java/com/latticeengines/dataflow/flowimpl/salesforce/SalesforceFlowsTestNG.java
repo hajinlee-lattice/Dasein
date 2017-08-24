@@ -34,12 +34,15 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
     private String opportunityContactRole;
     private Configuration config = new Configuration();
 
+    private static final String PATH_TEST = String.format("/tmp/%s", SalesforceFlowsTestNG.class.getSimpleName());
+    private static final String PATH_PDTABLE = String.format("%s/PDTable", PATH_TEST);
+    private static final String PATH_EVENTTABLE = String.format("%s/EventTable", PATH_TEST);
+    private static final String PATH_TMPEVENTTABLE = String.format("%s/TmpEventTable", PATH_TEST);
+    private static final String PATH_AVRO = String.format("%s/avro", PATH_TEST);
+
     @BeforeMethod(groups = "functional")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(config, "/tmp/PDTable");
-        HdfsUtils.rmdir(config, "/tmp/EventTable");
-        HdfsUtils.rmdir(config, "/tmp/TmpEventTable");
-        HdfsUtils.rmdir(config, "/tmp/checkpoints");
+        HdfsUtils.rmdir(config, PATH_TEST);
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
         opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro")
                 .getPath();
@@ -51,10 +54,10 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 
         List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
 
-        entries.add(new AbstractMap.SimpleEntry<>("file://" + lead, "/tmp/avro"));
-        entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunity, "/tmp/avro"));
-        entries.add(new AbstractMap.SimpleEntry<>("file://" + contact, "/tmp/avro"));
-        entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunityContactRole, "/tmp/avro"));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + lead, PATH_AVRO));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunity, PATH_AVRO));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + contact, PATH_AVRO));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunityContactRole, PATH_AVRO));
 
         FileSystem fs = FileSystem.get(config);
         doCopy(fs, entries);
@@ -70,17 +73,17 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
             sources.put("Contact", contact);
             sources.put("OpportunityContactRole", opportunityContactRole);
         } else {
-            sources.put("Lead", "/tmp/avro/Lead.avro");
-            sources.put("Opportunity", "/tmp/avro/Opportunity.avro");
-            sources.put("Contact", "/tmp/avro/Contact.avro");
-            sources.put("OpportunityContactRole", "/tmp/avro/OpportunityContactRole.avro");
+            sources.put("Lead", PATH_AVRO + "/Lead.avro");
+            sources.put("Opportunity", PATH_AVRO + "/Opportunity.avro");
+            sources.put("Contact", PATH_AVRO + "/Contact.avro");
+            sources.put("OpportunityContactRole", PATH_AVRO + "/OpportunityContactRole.avro");
         }
 
         // Execute the first flow
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty(DataFlowProperty.CUSTOMER, "customer1");
         ctx.setProperty(DataFlowProperty.SOURCES, sources);
-        ctx.setProperty(DataFlowProperty.TARGETPATH, "/tmp/TmpEventTable");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, PATH_TMPEVENTTABLE);
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "TmpEventTable");
         ctx.setProperty(DataFlowProperty.QUEUE, LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty(DataFlowProperty.FLOWNAME, "CreateInitialEventTable");
@@ -88,21 +91,21 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty(DataFlowProperty.HADOOPCONF, config);
         ctx.setProperty(DataFlowProperty.ENGINE, "TEZ");
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
-        verifyNumRows(config, "/tmp/TmpEventTable", 10787);
+        verifyNumRows(config, PATH_TMPEVENTTABLE, 10787);
 
         // Execute the second flow, with the output of the first flow as input
         // into the second
-        sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
-        ctx.setProperty(DataFlowProperty.TARGETPATH, "/tmp/PDTable");
+        sources.put("EventTable", PATH_TMPEVENTTABLE + "/*.avro");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, PATH_PDTABLE);
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "PDTable");
         ctx.setProperty(DataFlowProperty.FLOWNAME, "CreatePropDataInput");
         dataTransformationService.executeNamedTransformation(ctx, "createPropDataInput");
-        verifyNumRows(config, "/tmp/PDTable", 106);
+        verifyNumRows(config, PATH_PDTABLE, 106);
 
         // Execute the third flow, with the output of the first flow as input
         // into the third
-        sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
-        ctx.setProperty(DataFlowProperty.TARGETPATH, "/tmp/EventTable");
+        sources.put("EventTable", PATH_TMPEVENTTABLE + "/*.avro");
+        ctx.setProperty(DataFlowProperty.TARGETPATH, PATH_EVENTTABLE);
         ctx.setProperty(DataFlowProperty.TARGETTABLENAME, "EventTable");
         ctx.setProperty(DataFlowProperty.FLOWNAME, "CreateFinalEventTable");
 
