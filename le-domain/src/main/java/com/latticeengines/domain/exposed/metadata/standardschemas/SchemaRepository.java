@@ -431,7 +431,6 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Website.name()) //
                 .allowedDisplayNames(Sets.newHashSet("WEBSITE", "URL")) //
                 .type(Schema.Type.STRING) //
-                .required() //
                 .interfaceName(InterfaceName.Website) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
@@ -554,7 +553,6 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.CRMId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "CRMID", "CRMLINK_ID", "CRM ID", "CRM_ID")) //
                 .type(Schema.Type.STRING) //
-                .required() //
                 .interfaceName(InterfaceName.CRMId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -786,7 +784,7 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.AccountId.name()) //
                 .allowedDisplayNames(Sets
-                        .newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID")) //
+                        .newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.AccountId) //
@@ -805,7 +803,6 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.Email.name()) //
                 .allowedDisplayNames(Sets.newHashSet("EMAIL", "EMAIL_ADDRESS")) //
                 .type(Schema.Type.STRING) //
-                .required() //
                 .interfaceName(InterfaceName.Email) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_EMAIL) //
@@ -893,7 +890,6 @@ public class SchemaRepository {
         table.addAttribute(attr(InterfaceName.BirthDate.name()) //
                 .allowedDisplayNames(Sets.newHashSet("BIRTHDATE", "BIRTH DATE")) //
                 .type(Schema.Type.LONG) //
-                .required() //
                 .interfaceName(InterfaceName.BirthDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1006,6 +1002,7 @@ public class SchemaRepository {
 
     private Table getTransactionSchema() {
         Table table = createTable(SchemaInterpretation.Transaction);
+        table.setLastModifiedKey(createLastModifiedKey(InterfaceName.LastModifiedDate.name()));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr("Id") //
@@ -1019,7 +1016,8 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr("AccountId") //
                 .allowedDisplayNames(Sets
-                        .newHashSet(new String[] { "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID" })) //
+                        .newHashSet(new String[] { "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID",
+                                "ACCOUNT" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.AccountId) //
@@ -1031,16 +1029,15 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets
                         .newHashSet(new String[] { "PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
                 .interfaceName(InterfaceName.ProductId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
-        table.addAttribute(attr("Timestamp") //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "TIMESTAMP", "TIME STAMP" })) //
+        table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "TIMESTAMP", "TIME STAMP", "LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED" })) //
                 .type(Schema.Type.LONG) //
-                .required() //
+                .required()
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Timestamp) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //

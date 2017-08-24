@@ -116,10 +116,12 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         schemaTable.setName(original.getName());
         schemaTable.setDisplayName(original.getDisplayName());
 
-        String lastModifiedKey = schemaTable.getLastModifiedKey().getName();
-        if (schemaTable.getAttribute(lastModifiedKey) == null) {
-            log.warn("Cannot map any attribute to designated last modified key " + lastModifiedKey);
-            schemaTable.setLastModifiedKey(null);
+        if (schemaTable.getLastModifiedKey() != null) {
+            String lastModifiedKey = schemaTable.getLastModifiedKey().getName();
+            if (schemaTable.getAttribute(lastModifiedKey) == null) {
+                log.warn("Cannot map any attribute to designated last modified key " + lastModifiedKey);
+                schemaTable.setLastModifiedKey(null);
+            }
         }
 
         return schemaTable;
