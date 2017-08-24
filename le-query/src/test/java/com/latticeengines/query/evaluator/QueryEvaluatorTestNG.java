@@ -1,5 +1,6 @@
 package com.latticeengines.query.evaluator;
 
+import java.util.Arrays;
 import java.util.TreeMap;
 
 import org.testng.Assert;
@@ -88,6 +89,20 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         query = Query.builder().where(restriction).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("%s.DisplayName = %s.Display_Name", ACCOUNT, ACCOUNT));
+
+        // collection look up with 2 elements
+        Restriction inCollection = Restriction.builder().let(BusinessEntity.Account, "DisplayName")
+                .in(Arrays.asList('a', 'c')).build();
+        query = Query.builder().where(inCollection).build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("%s.DisplayName in (?, ?)", ACCOUNT));
+
+        // collection look up with 1 element, corner case
+        Restriction inCollection1 = Restriction.builder().let(BusinessEntity.Account, "DisplayName")
+                .in(Arrays.asList('a')).build();
+        query = Query.builder().where(inCollection1).build();
+        sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("%s.DisplayName = ?", ACCOUNT));
 
         // range look up
         Restriction range1 = Restriction.builder() //

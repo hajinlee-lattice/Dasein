@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.CaseLookup;
+import com.latticeengines.domain.exposed.query.CollectionLookup;
 import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
@@ -48,6 +49,10 @@ public final class LookupResolverFactory {
         }
         if (lookupType.isAssignableFrom(RangeLookup.class)) {
             resolvers.put(lookupType.getSimpleName(), new RangeResolver(attrRepo));
+            return;
+        }
+        if (lookupType.isAssignableFrom(CollectionLookup.class)) {
+            resolvers.put(lookupType.getSimpleName(), new CollectionResolver(attrRepo));
             return;
         }
         if (lookupType.isAssignableFrom(ValueLookup.class)) {

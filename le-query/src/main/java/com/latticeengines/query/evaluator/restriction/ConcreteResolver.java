@@ -90,6 +90,15 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     booleanExpression = lhsPath.eq(rhsPaths.get(0));
                 }
                 break;
+            case IN_COLLECTION:
+                // when there's only 1 element in the collection, querydsl generates something
+                // like "attr in ?", which is not a valid syntax so we treat it differently
+                if (rhsPaths.size() > 1) {
+                    booleanExpression = lhsPath.in(rhsPaths.toArray(new ComparableExpression[0]));
+                } else {
+                    booleanExpression = lhsPath.eq(rhsPaths.get(0));
+                }
+                break;
             default:
                 throw new LedpException(LedpCode.LEDP_37006, new String[] { restriction.getRelation().toString() });
             }

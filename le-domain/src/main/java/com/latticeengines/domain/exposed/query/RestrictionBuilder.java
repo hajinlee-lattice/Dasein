@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -106,6 +107,17 @@ public class RestrictionBuilder {
 
     public RestrictionBuilder lt(Object max) {
         return in(null, max);
+    }
+
+    public RestrictionBuilder in(Collection<Object> collection) {
+        if (collection == null) {
+            throw new RuntimeException("collection cannot be null");
+        }
+        operator = ComparisonType.IN_COLLECTION;
+        negate = false;
+        rhsLookup = new CollectionLookup(collection);
+        completeConcrete();
+        return this;
     }
 
     public RestrictionBuilder in(Object min, Object max) {

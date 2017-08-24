@@ -8,5 +8,6 @@ public enum ComparisonType {
     LESS_OR_EQUAL, //
     GREATER_THAN, //
     GREATER_OR_EQUAL, //
-    IN_RANGE
+    IN_RANGE, //
+    IN_COLLECTION
 }

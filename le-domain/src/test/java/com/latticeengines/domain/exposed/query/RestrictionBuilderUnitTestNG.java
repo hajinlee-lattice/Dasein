@@ -5,6 +5,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 
+import java.util.Arrays;
+
 public class RestrictionBuilderUnitTestNG {
 
     @Test(groups = "unit")
@@ -47,6 +49,11 @@ public class RestrictionBuilderUnitTestNG {
                 .and(aAndB, cOrD)
                 .build();
         verify(finalAnd);
+
+        Restriction inCollection = Restriction.builder() //
+                .let(BusinessEntity.Account, "A").in(Arrays.asList(3, 5)).build();
+        verify(inCollection);
+
     }
 
     private void verify(Restriction restriction) {

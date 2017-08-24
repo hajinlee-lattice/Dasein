@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.graph.GraphNode;
         @Type(value = ColumnLookup.class, name = "column"), //
         @Type(value = ValueLookup.class, name = "value"), //
         @Type(value = RangeLookup.class, name = "range"), //
+        @Type(value = CollectionLookup.class, name = "collection"), //
         @Type(value = CaseLookup.class, name = "case"), //
         @Type(value = SubQueryAttrLookup.class, name = "subquery"), //
         @Type(value = AggregateLookup.class, name = "aggregate")})
