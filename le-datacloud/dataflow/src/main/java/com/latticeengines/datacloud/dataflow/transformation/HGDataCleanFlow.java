@@ -36,26 +36,30 @@ public class HGDataCleanFlow extends ConfigurableFlowBase<HGDataCleanConfig> {
         source = source.apply(new DomainCleanupFunction(config.getDomainField(), true),
                 new FieldList(config.getDomainField()), new FieldMetadata(config.getDomainField(), String.class));
 
-        source = source.apply(new DateToTimestampFunction("DateLastVerified"), new FieldList("DateLastVerified"),
-                new FieldMetadata("DateLastVerified", Long.class));
+        source = source.apply(new DateToTimestampFunction(config.getDateLastVerifiedField()),
+                new FieldList(config.getDateLastVerifiedField()),
+                new FieldMetadata(config.getDateLastVerifiedField(), Long.class));
 
-        FieldList contents = new FieldList("URL", "SupplierName", "ProductName", "HGCategory1", "HGCategory2",
-                "HGCategory1Parent", "HGCategory2Parent");
+        FieldList contents = new FieldList(config.getDomainField(), config.getVendorField(), config.getProductField(),
+                config.getCategoryField(), config.getCategory2Field(), config.getCategoryParentField(),
+                config.getCategoryParent2Field());
 
-        FieldList contentsWithDate = contents.addAll(Collections.singletonList("DateLastVerified"));
+        FieldList contentsWithDate = contents.addAll(Collections.singletonList(config.getDateLastVerifiedField()));
 
-        Node latest = source.groupByAndLimit(contents, new FieldList("DateLastVerified"), 1, true, true);
+        Node latest = source.groupByAndLimit(contents, new FieldList(config.getDateLastVerifiedField()), 1, true, true);
         latest = latest.retain(contentsWithDate);
         latest = latest.renamePipe("latest");
 
         source = source.innerJoin(contentsWithDate, latest, contentsWithDate);
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("Intensity", "MaxIntensity", AggregationType.MAX));
-        aggregations.add(new Aggregation("URL", "LocationCount", AggregationType.COUNT));
+        aggregations.add(new Aggregation(config.getIntensityField(), "MaxIntensity", AggregationType.MAX));
+        aggregations.add(new Aggregation(config.getDomainField(), "LocationCount", AggregationType.COUNT));
         Node aggregated = source.groupBy(contentsWithDate, aggregations);
-        aggregated = aggregated.retain(new FieldList("URL", "SupplierName", "ProductName", "HGCategory1", "HGCategory2",
-                "HGCategory1Parent", "HGCategory2Parent", "DateLastVerified", "MaxIntensity", "LocationCount"));
+        aggregated = aggregated.retain(new FieldList(config.getDomainField(), config.getVendorField(),
+                config.getProductField(), config.getCategoryField(), config.getCategory2Field(),
+                config.getCategoryParentField(), config.getCategoryParent2Field(), config.getDateLastVerifiedField(),
+                "MaxIntensity", "LocationCount"));
 
         aggregated = aggregated.apply("LocationCount.intValue()", new FieldList("LocationCount"),
                 new FieldMetadata("LocationCount", Integer.class));
@@ -70,8 +74,10 @@ public class HGDataCleanFlow extends ConfigurableFlowBase<HGDataCleanConfig> {
         aggregated = aggregated.addTimestamp("LE_Last_Upload_Date", now);
 
         aggregated = aggregated.rename(
-                new FieldList("URL", "SupplierName", "ProductName", "HGCategory1", "HGCategory2", "HGCategory1Parent",
-                        "HGCategory2Parent", "MaxIntensity", "LocationCount", "DateLastVerified"),
+                new FieldList(config.getDomainField(), config.getVendorField(), config.getProductField(),
+                        config.getCategoryField(), config.getCategory2Field(),
+                        config.getCategoryParentField(), config.getCategoryParent2Field(), "MaxIntensity",
+                        "LocationCount", config.getDateLastVerifiedField()),
                 new FieldList("Domain", "Supplier_Name", "Segment_Name", "HG_Category_1", "HG_Category_2",
                         "HG_Category_1_Parent", "HG_Category_2_Parent", "Max_Location_Intensity", "Location_Count",
                         "Last_Verified_Date"));

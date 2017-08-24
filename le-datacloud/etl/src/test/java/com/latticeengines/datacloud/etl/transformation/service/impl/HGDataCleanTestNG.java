@@ -9,13 +9,12 @@ import java.util.concurrent.TimeUnit;
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.datacloud.core.source.impl.HGDataRaw;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.HGDataCleanFlow;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.HGDataCleanConfig;
@@ -26,8 +25,7 @@ public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
 
     private static final Logger log = LoggerFactory.getLogger(HGDataCleanTestNG.class);
 
-    @Autowired
-    HGDataRaw baseSource;
+    GeneralSource baseSource = new GeneralSource("HGSeedRaw");
 
     ObjectMapper om = new ObjectMapper();
 
@@ -55,7 +53,7 @@ public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("HGDataTechIndicators");
+            configuration.setName("HGDataClean");
             configuration.setVersion(targetVersion);
 
             TransformationStepConfig step1 = new TransformationStepConfig();
@@ -85,6 +83,14 @@ public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
         config.setDomainField("URL");
         calendar.set(2016, Calendar.AUGUST, 1);
         config.setFakedCurrentDate(calendar.getTime());
+        config.setDateLastVerifiedField("DateLastVerified");
+        config.setVendorField("Vendor");
+        config.setProductField("Product");
+        config.setCategoryField("Category");
+        config.setCategory2Field("Category2");
+        config.setCategoryParentField("CategoryParent");
+        config.setCategoryParent2Field("CategoryParent2");
+        config.setIntensityField("Intensity");
         return om.writeValueAsString(config);
     }
 
@@ -96,6 +102,7 @@ public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
         Long sixMonths = 6 * TimeUnit.DAYS.toMillis(30);
         while (pos++ < recordsToCheck && records.hasNext()) {
             GenericRecord record = records.next();
+            log.info(record.toString());
             Long lastVerified = (Long) record.get("Last_Verified_Date");
             Long timeStamp = (Long) record.get("LE_Last_Upload_Date");
             try {
