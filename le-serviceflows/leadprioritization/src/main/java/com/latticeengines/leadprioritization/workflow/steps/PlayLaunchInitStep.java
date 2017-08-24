@@ -87,7 +87,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     List<String> fields = Arrays.asList(InterfaceName.AccountId.name(), //
             InterfaceName.SalesforceAccountID.name(), //
-            InterfaceName.AnnualRevenue.name(), //
             InterfaceName.CompanyName.name());
 
     @PostConstruct
@@ -212,11 +211,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         recommendation.setAccountId(checkAndGet(account, InterfaceName.AccountId));
         recommendation.setLeAccountExternalID(checkAndGet(account, InterfaceName.AccountId));
         recommendation.setSfdcAccountID(checkAndGet(account, InterfaceName.SalesforceAccountID));
-        String valueStr = checkAndGet(account, InterfaceName.AnnualRevenue);
         Double value = 0D;
-        if (StringUtils.isNotEmpty(valueStr) && StringUtils.isNumeric(valueStr)) {
-            value = Double.parseDouble(valueStr);
-        }
         recommendation.setMonetaryValue(value);
         recommendation.setCompanyName(checkAndGet(account, InterfaceName.CompanyName));
         recommendation.setTenantId(tenant.getPid());
