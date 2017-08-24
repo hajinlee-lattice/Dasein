@@ -60,19 +60,19 @@ public enum GrantedRight implements GrantedAuthority {
     VIEW_PLS_RATING_ENGINES {
         @Override
         public String getAuthority() {
-            return "View_PLS_Rating_Engines";
+            return "View_PLS_RatingEngines";
         }
     }, //
     CREATE_PLS_RATING_ENGINES {
         @Override
         public String getAuthority() {
-            return "Create_PLS_Rating_Engines";
+            return "Create_PLS_RatingEngines";
         }
     }, //
     EDIT_PLS_RATING_ENGINES {
         @Override
         public String getAuthority() {
-            return "Edit_PLS_Rating_Engines";
+            return "Edit_PLS_RatingEngines";
         }
     }, //
     VIEW_PLS_PLAYS {
