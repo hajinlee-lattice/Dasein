@@ -1,10 +1,12 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -31,6 +33,11 @@ public class RuleBasedModel extends RatingModel {
     @Type(type = "text")
     private String ratingRule;
 
+    @JsonIgnore
+    @Column(name = "SELECTED_ATTRIBUTES", nullable = true)
+    @Type(type = "text")
+    private String selectedAttributes;
+
     @JsonProperty("ratingRule")
     public void setRatingRule(RatingRule ratingRule) {
         this.ratingRule = JsonUtils.serialize(ratingRule);
@@ -39,6 +46,22 @@ public class RuleBasedModel extends RatingModel {
     @JsonProperty("ratingRule")
     public RatingRule getRatingRule() {
         return JsonUtils.deserialize(this.ratingRule, RatingRule.class);
+    }
+
+    @JsonProperty("selectedAttributes")
+    public void setSelectedAttributes(List<String> selectedAttributes) {
+        this.selectedAttributes = JsonUtils.serialize(selectedAttributes);
+    }
+
+    @JsonProperty("selectedAttributes")
+    public List<String> getSelectedAttributes() {
+        List<String> attrList = null;
+        if (StringUtils.isNotBlank(this.selectedAttributes)) {
+            List<?> attrListIntermediate = JsonUtils.deserialize(this.selectedAttributes, List.class);
+            attrList = JsonUtils.convertList(attrListIntermediate, String.class);
+        }
+
+        return attrList;
     }
 
     @Override
