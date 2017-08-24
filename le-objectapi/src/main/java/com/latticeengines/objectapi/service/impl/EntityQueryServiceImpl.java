@@ -79,7 +79,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                 groupBy.setLookups(Collections.singletonList(caseLookup));
                 query.setGroupBy(groupBy);
                 query.addLookup(caseLookup);
-                query.addLookup(AggregateLookup.count().as(QueryEvaluator.SCORE));
+                query.addLookup(AggregateLookup.count().as("Count"));
                 return query;
             } else {
                 throw new UnsupportedOperationException("Can not count rating model of type " + model.getClass().getSimpleName());

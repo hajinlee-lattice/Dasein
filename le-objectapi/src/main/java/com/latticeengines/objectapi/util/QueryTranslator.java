@@ -124,7 +124,11 @@ public class QueryTranslator {
     public static CaseLookup translateRatingRule(BusinessEntity entity, RatingRule ratingRule, String alias) {
         // TODO: only handles account restriction now
         TreeMap<String, Restriction> cases = new TreeMap<>();
-        ratingRule.getBucketToRuleMap().forEach((key, val) -> cases.put(key, val.get(RatingRule.ACCOUNT_RULE)));
+        ratingRule.getBucketToRuleMap().forEach((key, val) -> {
+            FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+            frontEndRestriction.setRestriction(val.get(RatingRule.ACCOUNT_RULE));
+            cases.put(key, translateFrontEndRestriction(frontEndRestriction));
+        });
         return new CaseLookup(cases, ratingRule.getDefaultBucketName(), alias);
     }
 
