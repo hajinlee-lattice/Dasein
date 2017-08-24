@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -81,6 +82,22 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         data.forEach(row -> {
             Assert.assertTrue(row.containsKey("Score"));
             String score = (String) row.get("Score");
+            Assert.assertNotNull(score);
+            Assert.assertTrue(Arrays.asList(RuleBucketName.A.getName(), RuleBucketName.C.getName()).contains(score));
+        });
+
+        frontEndQuery.setLookups(Arrays.asList(
+                new AttributeLookup(BusinessEntity.Account, "LDC_City"),
+                new AttributeLookup(BusinessEntity.Account, "LDC_Country"),
+                new AttributeLookup(BusinessEntity.Rating, model.getId())
+        ));
+        System.out.println(JsonUtils.pprint(frontEndQuery));
+        dataPage = entityQueryService.getData(BusinessEntity.Account, frontEndQuery);
+        Assert.assertNotNull(dataPage);
+        data = dataPage.getData();
+        data.forEach(row -> {
+            Assert.assertTrue(row.containsKey(model.getId()));
+            String score = (String) row.get(model.getId());
             Assert.assertNotNull(score);
             Assert.assertTrue(Arrays.asList(RuleBucketName.A.getName(), RuleBucketName.C.getName()).contains(score));
         });

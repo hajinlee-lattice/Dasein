@@ -1,11 +1,13 @@
 package com.latticeengines.objectapi.util;
 
+import java.util.List;
 import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -58,7 +60,11 @@ public class QueryTranslator {
         if (frontEndQuery.getLookups() != null && !frontEndQuery.getLookups().isEmpty()) {
             frontEndQuery.getLookups().forEach(lookup -> {
                 AttributeLookup attributeLookup = (AttributeLookup) lookup;
-                queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
+                if (BusinessEntity.Rating.equals(attributeLookup.getEntity())) {
+                    queryBuilder.select(parseRatingLookup(entity, attributeLookup, frontEndQuery.getRatingModels()));
+                } else {
+                    queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
+                }
             });
         } else if (decorator != null) {
             if (decorator.addSelects()) {
@@ -130,6 +136,23 @@ public class QueryTranslator {
             cases.put(key, translateFrontEndRestriction(frontEndRestriction));
         });
         return new CaseLookup(cases, ratingRule.getDefaultBucketName(), alias);
+    }
+
+    private static CaseLookup parseRatingLookup(BusinessEntity entity, AttributeLookup lookup, List<RatingModel> models) {
+        if (models == null) {
+            throw new RuntimeException("You specified a rating lookup " + lookup + " but no rating models, cannot parse the lookup.");
+        }
+        RatingModel model = models.stream().filter(m -> lookup.getAttribute().equalsIgnoreCase(m.getId())).findFirst().orElse(null);
+        if (model != null) {
+            if (models.get(0) instanceof RuleBasedModel) {
+                RatingRule ratingRule = ((RuleBasedModel) models.get(0)).getRatingRule();
+                return translateRatingRule(entity, ratingRule, lookup.getAttribute());
+            } else {
+                throw new UnsupportedOperationException("Only support rule based model now.");
+            }
+        } else {
+            throw new RuntimeException("Cannot find a rating model with id=" + lookup.getAttribute());
+        }
     }
 
 }
