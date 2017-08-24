@@ -13,7 +13,8 @@ angular.module('lp.playbook.wizard.insights', [])
         stateParams: $stateParams,
         revertClicked: false,
         saving: false,
-        saved: false
+        saved: false,
+        currentPlay: PlaybookWizardStore.getCurrentPlay()
     });
 
     $rootScope.$on('talkingPoints:sync', function(e){

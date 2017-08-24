@@ -14,7 +14,7 @@
                         <span ng-if="vm.saving && !vm.saved"><i class="fa fa-floppy-o"></i> Saving...</span>
                         <span ng-if="vm.saved && !vm.saving"><i class="fa fa-check"></i> Saved</span>
                     </li>
-                    <li class="revert" ng-if="vm.stateParams.section.indexOf('dashboard.') !== -1 && vm.talkingPoints.length">
+                    <li class="revert" ng-if="vm.stateParams.section.indexOf('dashboard.') !== -1 && vm.talkingPoints.length && vm.currentPlay.lastTalkingPointPublishTime">
                         <button class="button white-button" ng-click="vm.revertClick($event,true)">Revert To Last Published Version</button>
                         <div ng-if="vm.revertClicked" class="revert-confirm">
                             Revert To Last Published Version? 

@@ -163,6 +163,11 @@ body.not-ie .playbook-dashboard .container-body .dashboard-section {
                         background-image: url('/assets/images/ico-insights.png');
                     }
                 }
+                .dashboard-section-footer {
+                    button {
+                        margin-left: 20px;
+                    }
+                }
             }
             &.launch-history {
                 .dashboard-section-header {

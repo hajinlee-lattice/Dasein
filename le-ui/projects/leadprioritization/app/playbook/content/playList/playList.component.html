@@ -78,8 +78,14 @@
                             <li>
                                 Insights: 
                                 <span ng-if="play.launchHistory.playLaunch == null && play.segment == null"><span class="error-text">None created</span></span>
-                                <span ng-if="play.launchHistory.playLaunch == null && play.segment != null"><span class="blue-text">{{play.talkingPoints.length}} Talking Points created</span></span>
-                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">{{play.talkingPoints.length}} Talking Points - Published {{play.updated | date}}</span></span>
+                                <span ng-if="play.launchHistory.playLaunch == null && play.segment != null"><span class="blue-text">
+                                    {{play.talkingPoints.length}} Talking Points created
+                                </span></span>
+                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">
+                                    {{play.talkingPoints.length}} Talking Points - 
+                                    <strong ng-if="play.lastTalkingPointPublishTime">Published {{play.lastTalkingPointPublishTime | date}}</strong>
+                                    <strong ng-if="!play.lastTalkingPointPublishTime" class="error-text">Not Published</strong>
+                                </span></span>
                             </li>
                         </ul>
 
