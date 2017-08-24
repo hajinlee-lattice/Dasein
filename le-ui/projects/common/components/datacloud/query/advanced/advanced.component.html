@@ -8,7 +8,12 @@
                 </a> -->
 
                 <button class="button icon-button white-button" ng-click="vm.goAttributes()" ng-disabled="vm.saving">Add Attributes</button>
-                <button ng-if="!vm.saving" class="button icon-button blue-button" ng-click="vm.saveSegment()">Save Segment</button>
+                <button class="button icon-button blue-button"
+                        ng-if="!vm.saving" 
+                        ng-disabled="vm.checkDisableSave()" 
+                        ng-click="vm.saveSegment()">
+                    Save Segment
+                </button>
                 <button ng-if="vm.saving" disabled class="button icon-button blue-button">Saving <i class="fa fa-spinner fa-pulse fw"></i></button>
             </li>
         </ul>
@@ -16,29 +21,36 @@
         <div class="row query-algorithm noselect-children">
             <div class="query-algorithm-display">
                 <ul class="query-input query-input-root">
-                    <li ng-repeat="tree in vm[vm.state]"
-                        query-input-directive 
-                        items="vm.items" tree="tree" operator="{{ vm.operator }}">
+                    <li query-input-directive
+                        ng-repeat="tree in vm.tree"
+                        ng-class="{'input-section-item-box-subtree':tree.logicalRestriction.restrictions}" 
+                        class="{{ tree.logicalRestriction.operator ? 'query-input-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
+                        items="vm.items" tree="tree" root="vm" parent="vm[vm.state]">
                     </li>
                 </ul>
-                <!--1 <strong>OR</strong> (2 <strong>OR</strong> 3) <strong>OR</strong> 4-->
             </div>
 
-            <div class="query-algorithm-undo button white-button" ng-click="vm.click()">
+            <button class="query-algorithm-undo button white-button" 
+                    ng-click="vm.clickUndo()" 
+                    ng-disabled="vm.history.length == 0">
                 <i class="fa fa-undo"></i> UNDO
-            </div>
+            </button>
+        </div>
+        
+        <div ng-if="vm.tree.name" class="row query-helper-text-one">
+            <span ng-if="vm.tree.name == 'accounts'">
+                Build a segment with <strong>accounts</strong> that have:
+            </span>
         </div>
 
         <ul class="query-section query-tree-root">
-            <li ng-repeat="tree in vm[vm.state]">
-                <query-tree-directive items="vm.items" tree="tree" operator="{{ vm.operator }}"></query-tree-directive>
+            <li     ng-class="{'query-section-item-box-subtree':tree.logicalRestriction.operator}" 
+                    ng-repeat="tree in vm.tree">
+                <query-tree-directive 
+                        class="{{ tree.logicalRestriction.operator ? 'query-section-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
+                        items="vm.items" tree="tree" root="vm">
+                </query-tree-directive>
             </li>
         </ul>
-
-        <!--div class="query-section-divider" ng-repeat-end>
-            <span>AND <i class="fa fa-chevron-down"></i></span>
-            <div></div>
-        </div-->
-
     </div>
 </div>

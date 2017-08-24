@@ -12,7 +12,7 @@ div.advanced-query-builder {
             }
 
             span.query-input-number {
-                /*background: #333;*/
+                border-bottom: 3px solid #999;
                 border-radius: 0px;
                 color: #000;
                 font-weight: bold;
@@ -36,7 +36,6 @@ div.advanced-query-builder {
             }
 
             span.query-input-operator {
-                /*font-weight: bold;*/
                 text-transform: uppercase;
                 margin: 0 0.2em 0 0em;
             }
@@ -46,6 +45,7 @@ div.advanced-query-builder {
                 width: 0.3em;
                 height: 1em;
             }
+
             span.query-input-parenthesis-label {
                 font-size: 1.7em;
                 line-height: 1em;
@@ -54,6 +54,7 @@ div.advanced-query-builder {
                 position: absolute;
                 margin-left: 3px;
             }
+            
             span.query-input-section-end .query-input-parenthesis-label {
                 margin-left: -5px;
             }
@@ -69,23 +70,17 @@ div.advanced-query-builder {
                     float: left;
                 }
             }
-
-            span.query-input-section-end {
-                /*display: none;*/
-            }
         }
 
         &.query-input-root {
             .query-input {
-                /*background-color: rgba(0,0,0,.075);*/
-                border-top: 1px dashed;
+                border-top: 1px dashed #999;
                 margin-top: 2px;
                 padding: 0 2px;
             }
 
             &.query-input,
             &.query-input > li > ul {
-                /*background-color: transparent;*/
                 border-top: none;
                 margin-top: 0;
                 padding: 0;
@@ -99,6 +94,26 @@ div.advanced-query-builder {
                     display: none;
                 }
             }
+        }
+    }
+
+    .query-input-type-and {
+        &> span > div.item-operator-and {
+            display: inline-block;
+        }
+
+        &> span > div.item-operator-or {
+            display: none;
+        }
+    }
+
+    .query-input-type-or {
+        &> span > div.item-operator-and {
+            display: none;
+        }
+
+        &> span > div.item-operator-or {
+            display: inline-block;
         }
     }
 } 

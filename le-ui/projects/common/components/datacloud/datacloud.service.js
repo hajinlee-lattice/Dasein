@@ -4,6 +4,7 @@ angular.module('common.datacloud')
 
     this.init = function() {
         this.enrichments = null;
+        this.enrichmentsMap = {};
         this.categories = null;
         this.subcategories = {};
         this.count = null;
@@ -184,6 +185,14 @@ angular.module('common.datacloud')
         } else {
             this.enrichments = enrichments;
         }
+    }
+
+    this.setEnrichmentsMap = function(map) {
+        this.enrichmentsMap = map;
+    }
+
+    this.getEnrichmentsMap = function(key) {
+        return key ? this.enrichmentsMap[key] : this.enrichmentsMap;
     }
 
     this.updateEnrichments = function(enrichments){

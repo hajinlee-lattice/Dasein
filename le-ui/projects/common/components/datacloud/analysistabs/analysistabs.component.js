@@ -28,6 +28,8 @@ angular.module('common.datacloud.analysistabs', [
             QueryStore.setResourceTypeCount('accounts', false, vm.accountsCount);
         }, 2000);
 
+        QueryStore.history = [];
+
         QueryStore.GetCountByQuery('accounts').then(function(data){ 
             vm.accountsCount = data;
         });

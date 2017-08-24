@@ -15,7 +15,6 @@ angular.module('common.datacloud.explorer', [
     SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, Enrichments
 ){
     var vm = this,
-        enrichment_chunk_size = 5000,
         flags = FeatureFlagService.Flags();
 
     angular.extend(vm, {
@@ -85,6 +84,7 @@ angular.module('common.datacloud.explorer', [
         workingBuckets: CurrentConfiguration,
         pagesize: 24,
         categorySize: 7,
+        addBucketTreeRoot: null,
         feedbackModal: DataCloudStore.getFeedbackModal()
     });
 
@@ -110,6 +110,14 @@ angular.module('common.datacloud.explorer', [
         if (vm.section === 'segment.analysis') {
             vm.metadataSegments = QueryRestriction;
         }
+
+        // for Advanced Query Builder
+        vm.addBucketTreeRoot = QueryStore.getAddBucketTreeRoot();
+
+        $scope.$on("$destroy", function() {
+            delete (vm.addBucketTreeRoot = QueryStore.setAddBucketTreeRoot(null));
+        });
+
         DataCloudStore.setFeedbackModal(false);
     }
 
@@ -575,8 +583,7 @@ angular.module('common.datacloud.explorer', [
         } else if (type === 'disabled') {
             flags.hidden = true;
             flags.highlighted = false;
-        }
-
+        }  
         vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
         setFlags(opts, flags).then(function(){
@@ -1226,6 +1233,9 @@ angular.module('common.datacloud.explorer', [
             var metadataSegments = QueryRestriction.restriction.logicalRestriction.restrictions;
         };
 
+        if (vm.addBucketTreeRoot) {
+            return;
+        }
         // console.log("!!!!!!!!!!!!!!!!!!", metadataSegments);
         for(var i in metadataSegments) {
             var restrictions = metadataSegments[i];
@@ -1567,15 +1577,13 @@ angular.module('common.datacloud.explorer', [
 
 
     vm.saveSegment = function() {
-        if(Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {
-
+        if (Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {
             var segmentName = $stateParams.segment,
                 ts = new Date().getTime();
 
             if (segmentName === 'Create') {
-                
                 var restriction = QueryStore.getRestriction(),
-                    segment = {
+                    segment = SegmentStore.sanitizeSegment({
                         'name': 'segment' + ts,
                         'display_name': 'segment' + ts,
                         'frontend_restriction': restriction,
@@ -1583,30 +1591,18 @@ angular.module('common.datacloud.explorer', [
                             'row_offset': 0,
                             'num_rows': 10
                         }
-                    };
+                    });
 
-                console.log(restriction);
+                SegmentStore.sanitizeSegment(restriction);
 
                 SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
-                    if (!result.errorMsg) {
-                        if (vm.inModel()) {
-                            $state.go('home.model.segmentation', {}, {notify: true})
-                        } else {
-                            $state.go('home.segments', {}, {notify: true})
-                        }
-                    }
+                    vm.saveSegmentEnabled = false;
                 });
-
-
             } else {
-                
                 SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
-                    console.log(result);
-
                     var segmentData = result,
                         restriction = QueryStore.getRestriction(),
-                        segment = {
+                        segment = SegmentStore.sanitizeSegment({
                             'name': segmentData.name,
                             'display_name': segmentData.display_name,
                             'frontend_restriction': restriction,
@@ -1614,22 +1610,12 @@ angular.module('common.datacloud.explorer', [
                                 'row_offset': 0,
                                 'num_rows': 10
                             }
-                        };
-
-                    console.log(restriction);
+                        });
 
                     SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
-                        if (!result.errorMsg) {
-                            if (vm.inModel()) {
-                                $state.go('home.model.segmentation', {}, {notify: true})
-                            } else {
-                                $state.go('home.segments', {}, {notify: true})
-                            }
-                        }
+                        vm.saveSegmentEnabled = false;
                     });
-
                 });
-
             };
         };
     };

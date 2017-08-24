@@ -4,23 +4,30 @@ angular
     return {
         restrict: 'AE',
         scope: {
-            tree: '=',
-            items: '=',
-            operator: '@'
+            root: '=',
+            tree: '='
         },
         templateUrl: '/components/datacloud/query/advanced/input/input.component.html',
         controllerAs: 'vm',
-        controller: function ($scope, $document, $timeout, $interval) {
+        controller: function ($scope, DataCloudStore) {
             var vm = this;
 
             angular.extend(vm, {
+                root: $scope.root,
                 tree: $scope.tree,
-                items: $scope.items,
-                operator: $scope.operator
+                items: $scope.root.items,
+                enrichments: [],
+                enrichmentsMap: DataCloudStore.getEnrichmentsMap()
             });
 
             vm.init = function (type, value) {
-                //console.log('queryInputDirective', vm.tree, vm.items, vm.operator);
+                DataCloudStore.getEnrichments().then(function(enrichments) {
+                    vm.enrichments = enrichments;
+                    
+                    if (vm.tree.bucketRestriction) {
+                        vm.item = vm.enrichments[ vm.enrichmentsMap[ vm.tree.bucketRestriction.attr.split('.')[1] ] ]
+                    }
+                });
             }
 
             vm.init();

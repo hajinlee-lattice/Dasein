@@ -29,6 +29,7 @@ div.advanced-query-builder {
             width: 100%;
         }
     }
+
     .query-section {
         li {
             position: relative;
@@ -41,6 +42,14 @@ div.advanced-query-builder {
             }
             
             .query-section-type-dotline {
+                display: none;
+            }
+
+            & > .query-section-label > .query-section-label-expand {
+                display: none;
+            }
+
+            .query-section-controls {
                 display: none;
             }
         }
@@ -66,7 +75,7 @@ div.advanced-query-builder {
         
         .query-section-operator.label-operator {
             left: -1.1em;
-            top: 1.9em;
+            top: 1.3em;
             cursor: default;
         }
 
@@ -217,10 +226,14 @@ div.advanced-query-builder {
 
         .query-section-item-box {
             position: relative;
-            border-left: 1px dashed #000;
-            border-bottom: 1px dashed #000;
+            border-left: 1px dashed #666;
+            border-bottom: 1px dashed #666;
             padding: 2.5em 0 1.2em 1.5em;
             margin-bottom: 0em;
+            
+            &.query-section-item-end:first-child div.query-section-item-end {
+                top: 0.75em;
+            }
         }
 
         .query-section-item-box-subtree {
@@ -240,9 +253,66 @@ div.advanced-query-builder {
             background: #f3f3f3;
             border: 1px solid #d0d0d0;
             cursor: move;
+            padding-left: 0.8em;
             
+            &, & * {
+                -webkit-transition: none;
+                -moz-transition: none;
+                -ms-transition: none;
+                transition: none;
+            }
+
+            button {
+                border-radius: 3px;
+            }
+
+            .query-section-label-expand.fa {
+                position: absolute;
+                left: -0.6em;
+                top: 3.3em;
+                font-size: 10pt;
+                border: 2px solid white;
+                border-bottom: transparent;
+                background: white;
+                cursor: pointer;
+                color: #666;
+            }
+            
+            .button.icon-button, 
+            button.button.icon-button, 
+            a.button.icon-button, 
+            .button a:link.icon-button, 
+            .button a:focus.icon-button, 
+            .button a:visited.icon-button {
+                padding: 0;
+                font-size: 10pt;
+                vertical-align: baseline;
+                
+                &.white-button:hover,
+                &.white-button:focus {
+                    background-color: white;
+                }
+                
+                &.light-gray-button {
+                    background: #aaa;
+                }
+
+                span {
+                    display: inline-block;
+                    padding: 0.1em .4em 0;
+                    font-weight: bold;
+                }
+
+                i {
+                    display: inline-block;
+                    margin: 0.35em .2em 0.25em;
+                    color: #eee;
+                    font-weight: normal;
+                }
+            }
+
             .query-section-label-text {
-                padding: 0.333em 1em;
+                padding: 0.333em 0em .333em .25em;
                 display: inline-block;
             }
             
@@ -271,6 +341,26 @@ div.advanced-query-builder {
         }
     }
 
+    .query-section-type-and {
+        &> div > div.item-operator-and {
+            display: block;
+        }
+
+        &> div > div.item-operator-or {
+            display: none;
+        }
+    }
+
+    .query-section-type-or {
+        &> div > div.item-operator-and {
+            display: none;
+        }
+
+        &> div > div.item-operator-or {
+            display: block;
+        }
+    }
+    
     .query-section-item-box:first-child {
         padding-top: 1.25em;
 
@@ -281,6 +371,10 @@ div.advanced-query-builder {
 
             &> .query-section-item {
                 top: .75em;
+            }
+            
+            &> div > .query-section-label > .query-section-label-expand {
+                top: 2em;
             }
         }
     }

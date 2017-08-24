@@ -1,78 +1,85 @@
-<div ng-if="vm.tree.name" class="row query-helper-text-one">
-    <span ng-if="vm.tree.name == 'accounts'">
-        Build a segment with <strong>accounts</strong> that have:
-    </span>
-
-    <span ng-if="vm.tree.name == 'contacts'">
-        And <strong>contacts</strong> that have:
-    </span>
-</div>
-
-<div    ng-if="vm.tree.type && !vm.tree.item"
+<div    ng-if="vm.tree.logicalRestriction"
         class="row query-section noselect-children"
         ng-class="{
-            'query-section-all': vm.tree.type == 'and',
-            'query-section-any': vm.tree.type == 'or'
+            'query-section-all': vm.tree.logicalRestriction.operator == 'AND',
+            'query-section-any': vm.tree.logicalRestriction.operator == 'OR'
         }">
-    
-    <div class="query-section-operator label-operator">{{ vm.operator == 'and' ? 'or' : 'and' }}</div>
-    
+
+    <div class="query-section-operator label-operator item-operator-and">and</div>
+    <div class="query-section-operator label-operator item-operator-or">or</div>
+
     <div class="query-section-type-dotline"></div>
     
     <div class="query-section-label">
-        <span class="query-section-label-text" ng-if="vm.tree.type == 'or'">
-            <strong>Any</strong> of the selected attribute value combinations (OR)
-            <i class="fa fa-chevron-down"></i>
-        </span>
+        <i class="query-section-label-expand fa fa-{{ vm.tree.collapsed ? 'plus' : 'minus' }}-square-o" ng-click="vm.clickCollapsed()"></i>
+        
+        <div class="button-group" role="group" ng-click="vm.clickOperator(vm.tree.logicalRestriction.operator == 'AND' ? 'OR' : 'AND')">
+            <button type="button" 
+                    class="button icon-button {{vm.tree.logicalRestriction.operator == 'AND' ? 'white' : 'light-gray'}}-button" 
+                    value="{{vm.tree.logicalRestriction.operator == 'AND' ? 'All' : 'Any'}}">
+                <span ng-if="vm.tree.logicalRestriction.operator == 'AND'">All</span>
+                <i class="fa fa-bars fa-rotate-90" ng-if="vm.tree.logicalRestriction.operator == 'OR'"></i>
+            </button>
+            <button type="button" 
+                    class="button icon-button {{vm.tree.logicalRestriction.operator == 'OR' ? 'white' : 'light-gray'}}-button" 
+                    value="{{vm.tree.logicalRestriction.operator == 'AND' ? 'All' : 'Any'}}">
+                <i class="fa fa-bars fa-rotate-90" ng-if="vm.tree.logicalRestriction.operator == 'AND'"></i>
+                <span ng-if="vm.tree.logicalRestriction.operator == 'OR'">Any</span>
+            </button>
+        </div>
 
-        <span class="query-section-label-text" ng-if="vm.tree.type == 'and'">
-            <strong>All</strong> of the selected attribute value combinations (AND)
-            <i class="fa fa-chevron-down"></i>
+        <span class="query-section-label-text">
+            of the selected attribute value combinations ({{ vm.tree.logicalRestriction.operator }})
         </span>
 
         <div class="query-section-controls pull-right">
-            <i class="fa fa-minus"></i>
-            <i class="fa fa-close"></i>
-    
+            <i class="fa fa-close" ng-click="vm.clickDelete()"></i>
         </div>
     </div>
 </div>
 
-<div class="query-section-item noselect-children category-{{ data.Category.replace(' ','_') | lowercase }}" ng-if="vm.tree.item" ng-init="data = vm.items[vm.tree.item]">
-    <div class="query-section-operator item-operator">{{ vm.operator }}</div>
+<div    class="query-section-item noselect-children category-{{ vm.item.Category.replace(' ','_') | lowercase }}" 
+        ng-if="vm.tree.bucketRestriction" 
+        ng-init="data = vm.enrichments['LatticeAccount.'+vm.tree.bucketRestriction.attr]">
+    <div class="query-section-operator item-operator item-operator-and">and</div>
+    <div class="query-section-operator item-operator item-operator-or">or</div>
 
     <div class="query-section-item-label">
-        <strong>{{data.label}}</strong>
+        <strong>{{vm.root.getBucketLabel(vm.tree)}}</strong>
     </div>
 
     <div class="query-section-item-content">
-        <span class="query-section-item-category">{{data.Category}}{{data.Subcategory != 'Other' ? ' - ' + data.Subcategory : ''}}</span>
+        <span class="query-section-item-category">{{vm.item.Category}}{{vm.item.Subcategory != 'Other' ? ' - ' + vm.item.Subcategory : ''}}</span>
         <span class="query-section-item-displayname">
-            <span class="query-section-item-name"><strong>{{data.DisplayName}}</strong></span>
+            <span class="query-section-item-name"><strong>{{vm.item.DisplayName}}</strong></span>
             <span class="query-section-item-operation">has a value of</span>
-            <span class="query-section-item-value"><strong>{{data.Value}}</strong></span>
+            <span class="query-section-item-value"><strong>{{vm.tree.bucketRestriction.bkt.Lbl}}</strong></span>
         </span>
     </div>
 
     <div class="query-section-item-records">
         <span class="query-section-item-records-label">RECORDS</span>
-        <span class="query-section-item-records-number">{{data.RecordsCount}}</span>
-        <i class="fa fa-close"></i>
+        <span class="query-section-item-records-number">{{vm.tree.bucketRestriction.bkt.Cnt}}</span>
+        <i class="fa fa-close" ng-click="vm.clickDelete($parent)"></i>
     </div>
 </div>
 
-<ul ng-if="vm.tree.items">
-    <li     class="query-section-item-box" 
-            ng-class="{'query-section-item-box-subtree':item.items}" 
-            ng-repeat="item in vm.tree.items"
-            ng-if="vm.operator = item.type || vm.operator">
-        <query-tree-directive items="vm.items" tree="item" operator="{{ vm.operator }}"></query-tree-directive>
+<ul ng-if="vm.tree.logicalRestriction && !vm.tree.collapsed">
+    <li     ng-repeat="item in vm.tree.logicalRestriction.restrictions"
+            ng-class="{'query-section-item-box-subtree':item.logicalRestriction}" 
+            class="query-section-item-box">
+        <query-tree-directive 
+                class="{{ vm.tree.logicalRestriction ? 'query-section-type-' + vm.tree.logicalRestriction.operator.toLowerCase() : '' }}" 
+                items="vm.items" tree="item" root="vm.root" parent="vm.tree">
+        </query-tree-directive>
     </li>
 
     <li class="query-section-item-box query-section-item-end" ng-repeat-end>
         <div class="query-section-item query-section-item-end noselect-children">
             <span>
-                <i class="fa fa-plus"></i> Add <a href="#">attribute / operator</a>
+                <i class="fa fa-plus"></i> Add 
+                <a href="javascript:void(0)" ng-click="vm.addAttribute(vm.tree)">attribute</a> / 
+                <a href="javascript:void(0)" ng-click="vm.addOperator(vm.tree)">operator</a>
             </span>
         </div>
     </li>

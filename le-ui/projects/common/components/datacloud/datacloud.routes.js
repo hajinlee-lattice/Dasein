@@ -13,12 +13,14 @@ angular
         var states = {
             'home.segment.explorer': 'customer', 
             'home.segment.explorer.attributes': 'customer',
+            'home.segment.explorer.query.advanced': 'customer',
             'home.model.analysis.explorer': 'customer',
             'home.model.analysis.explorer.attributes': 'customer',
+            'home.model.analysis.explorer.query.advanced': 'customer',
             'home.datacloud.explorer': 'lattice',
             'home.datacloud.insights': 'lattice',
             'home.datacloud.lookup.form': 'lattice'
-        }
+        };
 
         if (states[toState.name]) {
             if (DataCloudService.path != DataCloudService.paths[states[toState.name]]) {
@@ -559,6 +561,7 @@ angular
         }))
         .state('home.model.analysis.explorer.attributes', getState('attributes'))
         .state('home.model.analysis.explorer.query', getState('query'))
+        .state('home.model.analysis.explorer.query.advanced', getState('advquery'))
         .state('home.model.analysis.accounts', getState('accounts'))
         .state('home.model.analysis.contacts', getState('contacts'))
         .state('home.segment', getState('main', {

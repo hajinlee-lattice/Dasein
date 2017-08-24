@@ -1,11 +1,14 @@
 angular.module('common.datacloud.query.service',[
 ])
-.service('QueryStore', function($filter, $q, $stateParams, $timeout, QueryService, BucketRestriction) {
+.service('QueryStore', function($filter, $q, $stateParams, $timeout, QueryService, BucketRestriction, SegmentStore) {
 
     angular.extend(this, {});
-
     this.validResourceTypes = ['accounts', 'contacts'];
     this.segment = null;
+
+    // for Adanced Query Builder
+    this.addBucketTreeRoot = null;
+    this.history = [];
 
     this.validContexts = ['accounts', 'contacts'];
     var allRestrictions = [];
@@ -103,7 +106,6 @@ angular.module('common.datacloud.query.service',[
 
             // default state. restriction is empty.
             deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );
-
         }
 
         return deferred.promise;
@@ -120,12 +122,21 @@ angular.module('common.datacloud.query.service',[
         return null;
     };
 
-    this.addRestriction = function(attribute) {
+    this.setAddBucketTreeRoot = function(tree) {
+        this.addBucketTreeRoot = tree;
+    }
 
+    this.getAddBucketTreeRoot = function(tree) {
+        return this.addBucketTreeRoot;
+    }
+
+    this.addRestriction = function(attribute) {
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
-        allRestrictions.push({
+        var treeRoot = this.getAddBucketTreeRoot();
+
+        ((treeRoot ? treeRoot.logicalRestriction.restrictions : null) || allRestrictions).push({
             bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
 
@@ -224,6 +235,8 @@ angular.module('common.datacloud.query.service',[
                     'restrict_without_sfdcid': query.restrict_without_sfdcid
                 };
             };
+
+            queryWithRestriction = SegmentStore.sanitizeSegment(queryWithRestriction);
 
             deferred.resolve(QueryService.GetCountByQuery(resourceType, queryWithRestriction));
             return deferred.promise;

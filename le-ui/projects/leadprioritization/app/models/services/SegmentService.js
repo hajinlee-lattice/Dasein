@@ -1,25 +1,29 @@
 angular
 .module('lp.models.segments')
 .service('SegmentStore', function($q, SegmentService) {
+    var SegmentStore = this;
+
     this.segments = [];
 
     this.setSegments = function(segments) {
         this.segments = segments;
-    };
+    }
 
     this.getSegments = function() {
         return this.segments;
-    };
+    }
 
     this.getSegmentByName = function(segmentName) {
-        var deferred = $q.defer();
+        var deferred = $q.defer(),
+            found = false;
 
-        var found = false;
         for (var i = 0; i < this.segments.length; i++) {
             var segment = this.segments[i];
+
             if (segment.name === segmentName) {
                 deferred.resolve(segment);
                 found = true;
+
                 break;
             }
         }
@@ -31,10 +35,63 @@ angular
         }
 
         return deferred.promise;
+    }
+
+    this.CreateOrUpdateSegment = function(segment, restriction) {
+        var ts = new Date().getTime();
+
+        if (!segment) {
+            segment = {
+                'name': 'segment' + ts,
+                'display_name': 'segment' + ts,
+                'frontend_restriction': restriction,
+                'page_filter': {
+                    'row_offset': 0,
+                    'num_rows': 10
+                }
+            };
+        } else {
+            segment = {
+                'name': segment.name,
+                'display_name': segment.display_name,
+                'frontend_restriction': restriction || segment.frontend_restriction,
+                'page_filter': {
+                    'row_offset': 0,
+                    'num_rows': 10
+                }
+            };
+        }
+
+        this.sanitizeSegment(segment);
+
+        return SegmentService.CreateOrUpdateSegment(segment);
     };
+
+    this.sanitizeSegment = function(segment) {
+        var restriction = segment.frontend_restriction.restriction.logicalRestriction;
+
+        this.sanitizeSegmentRestriction(restriction.restrictions);
+
+        return segment;
+    }
+
+    this.sanitizeSegmentRestriction = function(tree) {
+        tree.forEach(function(branch) {
+            if (branch && typeof branch.labelGlyph != undefined) {
+                delete branch.labelGlyph;
+            }
+
+            if (branch && typeof branch.collapsed != undefined) {
+                delete branch.collapsed;
+            }
+
+            if (branch && branch.logicalRestriction) {
+                SegmentStore.sanitizeSegmentRestriction(branch.logicalRestriction.restrictions);
+            }
+        });
+    }
 })
 .service('SegmentService', function($http, $q, $state) {
-
     this.GetSegments = function() {
         var deferred = $q.defer(),
             result,
