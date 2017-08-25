@@ -82,6 +82,7 @@
                                 <argument>LDC_ManageDB</argument>
                                 <argument>false</argument>
                                 <argument>com.latticeengines.domain.exposed.datacloud.manage</argument>
+                                <argument>com.latticeengines.domain.exposed.datacloud.customer</argument>
                             </arguments>
                         </configuration>
                     </execution>
