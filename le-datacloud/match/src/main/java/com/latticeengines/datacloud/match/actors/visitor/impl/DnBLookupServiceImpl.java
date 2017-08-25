@@ -426,8 +426,11 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             // Failed batch requests to process
             List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
             List<DnBBatchMatchContext> batchesToSubmit = new ArrayList<>();
-            // Get batches to submit:
-            // batch size = 10K, or batch is sealed, or timestamp of last inserted record is 2 mins ago
+            // Get batches to submit if meeting one of the requirements:
+            // 1. batch size = 10K,
+            // 2. batch is sealed,
+            // 3. timestamp of last inserted record is 2 mins ago
+            // 4. batch request has been created for 5 mins
             synchronized (unsubmittedBatches) {
                 int unsubmittedNum = getUnsubmittedStats().get(MatchConstants.REQUEST_NUM);
                 if (unsubmittedNum > 0) {
