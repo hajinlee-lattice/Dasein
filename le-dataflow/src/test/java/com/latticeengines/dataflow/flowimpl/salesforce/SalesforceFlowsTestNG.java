@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -21,6 +23,8 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(SalesforceFlowsTestNG.class);
 
     @Autowired
     private CreateInitialEventTable createInitialEventTable;
@@ -61,6 +65,9 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 
         FileSystem fs = FileSystem.get(config);
         doCopy(fs, entries);
+
+        log.info(
+                "Lead.avro, Opportunity.avro, Contact.avro and OpportunityContactRole.avro have been copied to target hdfs dir");
     }
 
     @Test(groups = "functional", dataProvider = "checkpointProvider")
