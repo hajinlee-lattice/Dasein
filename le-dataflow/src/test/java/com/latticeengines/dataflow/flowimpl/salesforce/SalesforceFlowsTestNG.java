@@ -47,6 +47,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
     @BeforeMethod(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(config, PATH_TEST);
+        log.info(PATH_TEST + " is cleaned up");
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
         opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro")
                 .getPath();
