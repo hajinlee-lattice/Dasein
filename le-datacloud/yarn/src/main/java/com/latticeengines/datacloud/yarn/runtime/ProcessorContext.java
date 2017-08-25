@@ -363,8 +363,10 @@ public class ProcessorContext {
             numThreads = actorsThreadPool;
             if (useRemoteDnB) {
                 groupSize = 128;
-            } else if (originalInput.getFetchOnly())
+            } else if (originalInput.getFetchOnly()) {
                 groupSize = 1000;
+                numThreads = 16;
+            }
         } else {
             if (groupSize == null || groupSize < 1) {
                 groupSize = sqlGroupSize;
