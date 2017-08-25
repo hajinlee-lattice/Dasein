@@ -430,7 +430,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             // 1. batch size = 10K,
             // 2. batch is sealed,
             // 3. timestamp of last inserted record is 2 mins ago
-            // 4. batch request has been created for 5 mins
+            // 4. batch request has been created for 30 mins
             synchronized (unsubmittedBatches) {
                 int unsubmittedNum = getUnsubmittedStats().get(MatchConstants.REQUEST_NUM);
                 if (unsubmittedNum > 0) {
@@ -441,7 +441,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                         DnBBatchMatchContext batchContext = iter.next();
                         if (batchContext.isSealed() || batchContext.getContexts().size() == maximumBatchSize
                                 || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) >= 120000
-                                || (System.currentTimeMillis() - batchContext.getCreateTime().getTime()) >= 300000) {
+                                || (System.currentTimeMillis() - batchContext.getCreateTime().getTime()) >= 1800000) {
                             batchContext.setSealed(true);
                             batchesToSubmit.add(batchContext);
                             iter.remove();
