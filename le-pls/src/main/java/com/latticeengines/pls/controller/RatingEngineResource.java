@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -36,15 +36,14 @@ public class RatingEngineResource {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineResource.class);
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=applicaiton/json")
+    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all Rating Engines for a tenant")
     public List<RatingEngine> getRatingEngines() {
         return createRatingEngineList();
     }
 
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/types", method = RequestMethod.GET, headers = "Accept=applicaiton/json")
+    @RequestMapping(value = "/types", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get types for Rating Engines")
     public List<RatingEngineType> getRatingEngineTypes() {
