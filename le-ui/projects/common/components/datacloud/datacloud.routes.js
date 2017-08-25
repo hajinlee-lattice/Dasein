@@ -19,7 +19,8 @@ angular
             'home.model.analysis.explorer.query.advanced': 'customer',
             'home.datacloud.explorer': 'lattice',
             'home.datacloud.insights': 'lattice',
-            'home.datacloud.lookup.form': 'lattice'
+            'home.datacloud.lookup.form': 'lattice',
+            'home.ratingsengine.wizard.segment.attributes': 'customer'
         };
 
         if (states[toState.name]) {

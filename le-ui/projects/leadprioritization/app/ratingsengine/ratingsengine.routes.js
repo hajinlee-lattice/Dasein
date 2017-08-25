@@ -128,7 +128,8 @@ angular
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Create Ratings Engine',
-                section: 'wizard.segment'
+                section: 'wizard.attributes',
+                gotoNonemptyCategory: true
             },
             resolve: {
                 EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {

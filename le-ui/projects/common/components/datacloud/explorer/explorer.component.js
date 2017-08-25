@@ -86,7 +86,8 @@ angular.module('common.datacloud.explorer', [
         pagesize: 24,
         categorySize: 7,
         addBucketTreeRoot: null,
-        feedbackModal: DataCloudStore.getFeedbackModal()
+        feedbackModal: DataCloudStore.getFeedbackModal(),
+        stateParams: $stateParams
     });
 
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
@@ -1136,7 +1137,7 @@ angular.module('common.datacloud.explorer', [
         var categories = [],
             category = '';
         
-        if (vm.category) {
+        if (vm.categoryCounts) {
             for (var i in vm.categoryCounts) {
                 if (vm.categoryCounts[i] > 0) {
                     categories.push(i);
@@ -1147,6 +1148,11 @@ angular.module('common.datacloud.explorer', [
         if(categories.length <= 1 && !vm.lookupMode) {
             vm.setCategory(categories[0]);
         }
+    }
+
+    vm.setCategory = function(category) {
+        vm.category = category;
+        DataCloudStore.setMetadata('category', category);
     }
 
     vm.isYesNoCategory = function(category, includeKeywords) {
@@ -1374,8 +1380,8 @@ angular.module('common.datacloud.explorer', [
             }
         }
         vm.categoryCounts[item.Category] = result.length;
-        if(result.length <= 1) {
-            //gotoNonemptyCategory();
+        if($stateParams.gotoNonemptyCategory) {
+            gotoNonemptyCategory();
         }
 
         vm.hasCategoryCount = result.length;
@@ -1584,7 +1590,6 @@ angular.module('common.datacloud.explorer', [
         };
 
     };
-
 
     vm.saveSegment = function() {
         if (Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {

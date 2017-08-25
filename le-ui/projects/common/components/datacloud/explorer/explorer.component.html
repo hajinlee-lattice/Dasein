@@ -1,4 +1,4 @@
-<div class="enrichment-wizard-container container section-{{vm.section}}">
+<div class="enrichment-wizard-container container section-{{vm.section.replace('.','-')}}">
     <attribute-feedback-modal ng-if="vm.feedbackModal.show" lookup="vm.LookupResponse" />
     <div ng-if="!vm.category" ng-init="vm.relanding()"></div>
     <div class="status-alert-box {{vm.status_alert.type}}" ng-if="vm.status_alert.show">
@@ -43,7 +43,7 @@
             </ul>
         </div>
         <div class="subcategory-container" ng-if="vm.subcategories[vm.category].length && !vm.subcategory">
-            <div class="subcategory-back" ng-if="vm.category">
+            <div class="subcategory-back" ng-if="vm.category && !vm.stateParams.gotoNonemptyCategory">
                 <span ng-click="vm.setCategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-show="vm.max > 1">
@@ -94,7 +94,7 @@
                     <span ng-click="vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span> | {{vm.subcategory}}
                 </div>
             </div>
-            <div class="subcategory-back" ng-if="filteredList.length && vm.category && (!vm.subcategory || (vm.subcategory == 'Other' && !vm.isYesNoCategory(vm.category, true)))">
+            <div class="subcategory-back" ng-if="filteredList.length && vm.category && (!vm.subcategory || (vm.subcategory == 'Other' && !vm.isYesNoCategory(vm.category, true))) && !vm.stateParams.gotoNonemptyCategory">
                 <span ng-click="vm.setCategory(''); vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-if="filteredList.length > vm.pagesize">

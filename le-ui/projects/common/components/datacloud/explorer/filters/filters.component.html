@@ -9,7 +9,7 @@
             <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
         </div>
     </li>
-    <li class="filter dropdown-container" ng-if="vm.section != 'segment.analysis'">
+    <li class="filter dropdown-container" ng-if="['segment.analysis','wizard.segment'].indexOf(vm.section) == -1">
         <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal || (vm.section != 'insights' && vm.metadata.toggle.show.enabled) || vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted  || vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls}">
             <i class="fa fa-filter"></i>
         </h2>
@@ -30,15 +30,15 @@
             <li class="toggle no-attributes show" ng-if="vm.lookupMode"><input type="checkbox" id="nulls" name="nulls" ng-model="vm.metadata.toggle.show.nulls" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.nulls" /> <label for="nulls">Include "No" Attributes</label></li>
         </ul>
     </li>
-    <li class="sort" ng-disabled="!vm.category" ng-if="vm.category">
+    <li class="sort" ng-disabled="!vm.category" ng-if="vm.category && ['wizard.segment'].indexOf(vm.section) == -1">
         <a class="button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;" ng-init="vm.sortPrefix = '+';">
             <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
         </a>
     </li>
-    <li class="save" ng-if="vm.enabledManualSave">
+    <li class="save" ng-if="vm.enabledManualSave && ['wizard.segment'].indexOf(vm.section) == -1">
         <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
     </li>
-    <li class="download dropdown-container" ng-if="!vm.lookupMode && vm.section != 'insights' && vm.section != 'browse' && vm.section != 'team' && vm.section != 'segment.analysis'">
+    <li class="download dropdown-container" ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.segment'].indexOf(vm.section) == -1">
         <h2 class="button icon-button white-button">
             <i class="fa fa-download"></i>
         </h2>
