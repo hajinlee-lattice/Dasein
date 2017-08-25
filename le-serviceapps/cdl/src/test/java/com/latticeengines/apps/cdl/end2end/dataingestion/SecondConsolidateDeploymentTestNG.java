@@ -37,6 +37,7 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
         verifyConsolidate();
 
         verifySecondConsolidateCheckpoint();
+        saveCheckpoint("consolidate2");
     }
 
     private void importData() throws Exception {
@@ -48,7 +49,7 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
     private void verifyConsolidate() {
         verifyConsolidateReport(consolidateAppId, 2, ACCOUNT_IMPORT_SIZE_2, ACCOUNT_IMPORT_SIZE_2);
         verifyDataFeedStatsu(DataFeed.Status.Active);
-        verifyActiveVersion(DataCollection.Version.Blue);
+        verifyActiveVersion(initialVersion);
 
         StatisticsContainer postConsolidateStats = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertEquals(preConsolidateStats.getName(), postConsolidateStats.getName());

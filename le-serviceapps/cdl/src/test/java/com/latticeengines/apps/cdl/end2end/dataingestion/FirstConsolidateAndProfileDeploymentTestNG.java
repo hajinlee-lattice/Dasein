@@ -33,6 +33,7 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
         verifyProfile();
 
         verifyFirstProfileCheckpoint();
+        saveCheckpoint("profile1");
     }
 
     private void importData() throws Exception {

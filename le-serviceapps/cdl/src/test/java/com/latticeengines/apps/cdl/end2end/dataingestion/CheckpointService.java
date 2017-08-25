@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -61,13 +62,13 @@ public class CheckpointService {
 
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
-    public static final int ACCOUNT_IMPORT_SIZE_1 = 200;
-    public static final int ACCOUNT_IMPORT_SIZE_2 = 100;
-    public static final int ACCOUNT_IMPORT_SIZE_3 = 300;
+    static final int ACCOUNT_IMPORT_SIZE_1 = 500;
+    static final int ACCOUNT_IMPORT_SIZE_2 = 200;
+    static final int ACCOUNT_IMPORT_SIZE_3 = 300;
 
-    public static final int CONTACT_IMPORT_SIZE_1 = 200;
-    public static final int CONTACT_IMPORT_SIZE_2 = 100;
-    public static final int CONTACT_IMPORT_SIZE_3 = 300;
+    static final int CONTACT_IMPORT_SIZE_1 = 500;
+    static final int CONTACT_IMPORT_SIZE_2 = 200;
+    static final int CONTACT_IMPORT_SIZE_3 = 300;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -102,19 +103,19 @@ public class CheckpointService {
 
     private String checkpointDir;
 
-    public void setMaintestTenant(Tenant mainTestTenant) {
+    void setMaintestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
     }
 
-    public void verifyFirstProfileCheckpoint() throws IOException {
+    void verifyFirstProfileCheckpoint() throws IOException {
         verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_1);
     }
 
-    public void verifySecondConsolidateCheckpoint() throws IOException {
+    void verifySecondConsolidateCheckpoint() throws IOException {
         verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2);
     }
 
-    public void verifySecondProfileCheckpoint() throws IOException {
+    void verifySecondProfileCheckpoint() throws IOException {
         verifyCheckpoint(ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2, CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2);
     }
 
@@ -131,33 +132,41 @@ public class CheckpointService {
         Assert.assertEquals(countTableRole(TableRoleInCollection.ConsolidatedContact), numContacts);
     }
 
-    public void resumeCheckpoint(String checkpoint) throws IOException {
+    void resumeCheckpoint(String checkpoint) throws IOException {
         unzipCheckpoint(checkpoint);
 
         dataFeedProxy.getDataFeed(mainTestTenant.getId());
-        DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
 
-        List<TableRoleInCollection> tables = Arrays.asList( //
-                TableRoleInCollection.ConsolidatedAccount, //
-                TableRoleInCollection.ConsolidatedContact, //
-                TableRoleInCollection.BucketedAccount, //
-                TableRoleInCollection.SortedContact, //
-                TableRoleInCollection.Profile);
-        for (TableRoleInCollection role : tables) {
-            Table table = parseCheckpointTable(checkpoint, role.name());
-            metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
-            dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, activeVersion);
+        for (DataCollection.Version version : DataCollection.Version.values()) {
+            List<TableRoleInCollection> tables = Arrays.asList( //
+                    TableRoleInCollection.ConsolidatedAccount, //
+                    TableRoleInCollection.ConsolidatedContact, //
+                    TableRoleInCollection.BucketedAccount, //
+                    TableRoleInCollection.SortedContact, //
+                    TableRoleInCollection.Profile);
+            for (TableRoleInCollection role : tables) {
+                Table table = parseCheckpointTable(checkpoint, role.name(), version);
+                if (table != null) {
+                    metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
+                    dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, version);
+                }
+            }
+
+            StatisticsContainer statisticsContainer = parseCheckpointStatistics(checkpoint, version);
+            if (statisticsContainer != null) {
+                dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
+            }
         }
-
-        StatisticsContainer statisticsContainer = parseCheckpointStatistics(checkpoint);
-        statisticsContainer.setVersion(activeVersion);
-        dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
 
         uploadCheckpointHdfs(checkpoint);
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Active.name());
 
         resumeDbState();
+
+        DataCollection.Version activeVersion = getCheckpointVersion(checkpoint);
+        dataCollectionProxy.switchVersion(mainTestTenant.getId(), activeVersion);
+        logger.info("Switch active version to " + activeVersion);
     }
 
     private void unzipCheckpoint(String checkpoint) throws IOException {
@@ -234,9 +243,22 @@ public class CheckpointService {
         logger.info("Upload checkpoint to hdfs path " + targetPath);
     }
 
-    private Table parseCheckpointTable(String checkpoint, String tableName) throws IOException {
-        String jsonFile = String.format("%s/%s/tables/%s.json", checkpointDir, checkpoint, tableName);
-        JsonNode json = om.readTree(new File(jsonFile));
+    private DataCollection.Version getCheckpointVersion(String checkpoint) throws IOException {
+        String versionFile = String.format("%s/%s/_VERSION_", checkpointDir, checkpoint);
+        String version = FileUtils.readFileToString(new File(versionFile), "UTF-8").trim();
+        return DataCollection.Version.valueOf(version);
+    }
+
+    private Table parseCheckpointTable(String checkpoint, String tableName, DataCollection.Version version)
+            throws IOException {
+        String jsonFilePath = String.format("%s/%s/%s/tables/%s.json", checkpointDir, checkpoint, version.name(),
+                tableName);
+        File jsonFile = new File(jsonFilePath);
+        if (!jsonFile.exists()) {
+            return null;
+        }
+
+        JsonNode json = om.readTree(jsonFile);
         String hdfsPath = json.get("extracts_directory").asText();
         Pattern pattern = Pattern.compile("/Contracts/(.*)/Tenants/");
         Matcher matcher = pattern.matcher(hdfsPath);
@@ -255,8 +277,12 @@ public class CheckpointService {
         return JsonUtils.deserialize(str, Table.class);
     }
 
-    private StatisticsContainer parseCheckpointStatistics(String checkpoint) throws IOException {
-        String statsFile = String.format("%s/%s/stats_container.json", checkpointDir, checkpoint);
+    private StatisticsContainer parseCheckpointStatistics(String checkpoint, DataCollection.Version version)
+            throws IOException {
+        String statsFile = String.format("%s/%s/%s/stats_container.json", checkpointDir, checkpoint, version.name());
+        if (!new File(statsFile).exists()) {
+            return null;
+        }
         StatisticsContainer statisticsContainer = JsonUtils.deserialize(new FileInputStream(statsFile),
                 StatisticsContainer.class);
         statisticsContainer.setName(NamingUtils.timestamp("Stats"));
@@ -349,6 +375,71 @@ public class CheckpointService {
         sql += String.format("WHERE `PID` = %d", feedPid);
         jdbcTemplate.execute(sql);
         logger.info("Set profile " + profileId + " as active profile of data feed " + feedPid);
+    }
+
+    void saveCheckPoint(String checkpoint) throws IOException {
+        downloadHdfsData(checkpoint);
+
+        for (DataCollection.Version version : DataCollection.Version.values()) {
+            String tablesDir = "checkpoints/" + checkpoint + "/" + version.name() + "/tables";
+            FileUtils.forceMkdir(new File(tablesDir));
+
+            List<TableRoleInCollection> tables = Arrays.asList( //
+                    TableRoleInCollection.ConsolidatedAccount, //
+                    TableRoleInCollection.ConsolidatedContact, //
+                    TableRoleInCollection.BucketedAccount, //
+                    TableRoleInCollection.SortedContact, //
+                    TableRoleInCollection.Profile);
+            for (TableRoleInCollection role : tables) {
+                saveTableIfExists(role, version, checkpoint);
+            }
+
+            saveStatsIfExists(version, checkpoint);
+        }
+
+        saveCheckpointVersion(checkpoint);
+    }
+
+    private void saveCheckpointVersion(String checkpoint) throws IOException {
+        String versionFile = "checkpoints/" + checkpoint + "/_VERSION_";
+        DataCollection.Version version = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+        FileUtils.write(new File(versionFile), version.name(), "UTF-8");
+    }
+
+    private void downloadHdfsData(String checkpoint) throws IOException {
+        String localDir = "checkpoints/" + checkpoint + "/hdfs/Data";
+        FileUtils.forceMkdirParent(new File(localDir));
+        CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
+        String targetPath = PathBuilder.buildCustomerSpacePath(podId, cs).append("Data").toString();
+        HdfsUtils.copyHdfsToLocal(yarnConfiguration, targetPath, localDir);
+        logger.info("Downloaded hdfs path " + targetPath + " to " + localDir);
+        Collection<File> crcFiles = FileUtils.listFiles(new File(localDir), new String[]{"crc"}, true);
+        crcFiles.forEach(FileUtils::deleteQuietly);
+    }
+
+    private void saveTableIfExists(TableRoleInCollection role, DataCollection.Version version, String checkpoint)
+            throws IOException {
+        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role, version);
+        if (table != null) {
+            String jsonFile = String.format("checkpoints/%s/%s/tables/%s.json", checkpoint, version.name(),
+                    role.name());
+            om.writeValue(new File(jsonFile), table);
+            logger.info("Save " + role + " at version " + version + " to " + jsonFile);
+        } else {
+            logger.info("There is no " + role + " table at version " + version);
+        }
+    }
+
+    private void saveStatsIfExists(DataCollection.Version version, String checkpoint)
+            throws IOException {
+        StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId(), version);
+        if (statisticsContainer != null) {
+            String jsonFile = String.format("checkpoints/%s/%s/stats_container.json", checkpoint, version.name());
+            om.writeValue(new File(jsonFile), statisticsContainer);
+            logger.info("Save stats at version " + version + " to " + jsonFile);
+        } else {
+            logger.info("There is no stats at version " + version);
+        }
     }
 
 }

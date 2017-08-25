@@ -123,6 +123,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     protected String consolidateAppId;
     protected String profileAppId;
+    protected DataCollection.Version initialVersion;
 
     @BeforeClass(groups = { "end2end" })
     public void setup() throws Exception {
@@ -450,6 +451,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     protected void resumeCheckpoint(String checkpoint) throws IOException {
         checkpointService.resumeCheckpoint(checkpoint);
+        initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
+    }
+
+    protected void saveCheckpoint(String checkpoint) throws IOException {
+        checkpointService.saveCheckPoint(checkpoint);
     }
 
     protected void exportEntityToRedshift(BusinessEntity entity) {

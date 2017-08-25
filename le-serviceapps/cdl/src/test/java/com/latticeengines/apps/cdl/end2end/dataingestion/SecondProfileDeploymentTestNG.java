@@ -26,6 +26,7 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         verifyProfile();
 
         verifySecondProfileCheckpoint();
+        saveCheckpoint("profile2");
     }
 
     private void importData() throws Exception {
@@ -39,7 +40,7 @@ public class SecondProfileDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         int numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
         verifyProfileReport(profileAppId, 2, numAccounts, numContacts);
         verifyDataFeedStatsu(DataFeed.Status.Active);
-        verifyActiveVersion(DataCollection.Version.Green);
+        verifyActiveVersion(initialVersion.complement());
 
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);
         Assert.assertEquals(countTableRole(BusinessEntity.Contact.getBatchStore()), numContacts);
