@@ -124,7 +124,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         dataTransformationService.executeNamedTransformation(ctx, "createFinalEventTable");
     }
 
-    @DataProvider(name = "checkpointProvider")
+    @DataProvider(name = "checkpointProvider", parallel = false)
     public Object[][] getEngine() {
         return new Object[][] { { true }, //
                 { false } };
