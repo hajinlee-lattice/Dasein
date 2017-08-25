@@ -7,18 +7,16 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.CompanyProfileService;
-import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -78,9 +76,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         matchInput.setFields(fields);
         matchInput.setData(data);
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.Enrichment);
-        if (StringUtils.isBlank(dataCloudVersion)) {
-            dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        }
+        dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         matchInput.setUseRemoteDnB(enforceFuzzyMatch);
         matchInput.setDataCloudVersion(dataCloudVersion);
         matchInput.setLogLevel(Level.DEBUG);
