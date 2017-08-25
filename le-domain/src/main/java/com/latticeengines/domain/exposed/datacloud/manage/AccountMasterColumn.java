@@ -98,6 +98,9 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "DecodeStrategy", length = 1000)
     private String decodeStrategy;
 
+    @Column(name = "IsEOL", nullable = false)
+    private boolean eol;
+
     @Override
     @JsonIgnore
     public Long getPid() {
@@ -245,6 +248,16 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @JsonIgnore
     public void setInternalEnrichment(boolean internalEnrichment) {
         this.internalEnrichment = internalEnrichment;
+    }
+
+    @JsonIgnore
+    public boolean isEol() {
+        return eol;
+    }
+
+    @JsonIgnore
+    public void setEol(boolean eol) {
+        this.eol = eol;
     }
 
     @JsonIgnore
