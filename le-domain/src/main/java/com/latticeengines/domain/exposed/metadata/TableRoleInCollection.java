@@ -15,6 +15,7 @@ public enum TableRoleInCollection {
 
     BucketedAccount, //
     SortedContact, //
+    BucketedTransaction, //
     
     AccountMaster;
 

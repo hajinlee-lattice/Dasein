@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateAccountDataStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateContactDataStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateTransactionDataStepConfiguration;
 
 public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -17,10 +18,11 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
         public ConsolidateDataWorkflowConfiguration configuration = new ConsolidateDataWorkflowConfiguration();
         public ConsolidateAccountDataStepConfiguration consolidateAccountDataConfiguration = new ConsolidateAccountDataStepConfiguration();
         public ConsolidateContactDataStepConfiguration consolidateContactDataConfiguration = new ConsolidateContactDataStepConfiguration();
+        public ConsolidateTransactionDataStepConfiguration consolidateTransactionDataConfiguration = new ConsolidateTransactionDataStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("consolidateDataWorkflow", customerSpace,
-                    "consolidateDataWorkflow");
+            configuration
+                    .setContainerConfiguration("consolidateDataWorkflow", customerSpace, "consolidateDataWorkflow");
             consolidateAccountDataConfiguration.setCustomerSpace(customerSpace);
             consolidateContactDataConfiguration.setCustomerSpace(customerSpace);
             return this;
@@ -39,6 +41,11 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
 
         public Builder contactIdField(String idField) {
             consolidateContactDataConfiguration.setIdField(idField);
+            return this;
+        }
+
+        public Builder transactionIdField(String idField) {
+            consolidateTransactionDataConfiguration.setIdField(idField);
             return this;
         }
 

@@ -63,6 +63,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
+        public Builder transactionIdField(String idField) {
+            consolidateDataConfigurationBuilder.transactionIdField(idField);
+            return this;
+        }
+
         public Builder matchKeyMap(Map<MatchKey, List<String>> matchKeyMap) {
             consolidateDataConfigurationBuilder.matchKeyMap(matchKeyMap);
             return this;

@@ -125,6 +125,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .build()) //
                 .accountIdField(InterfaceName.Id.name()) //
                 .contactIdField(InterfaceName.Id.name()) //
+                .transactionIdField(InterfaceName.Id.name()) //
                 .workflowContainerMem(workflowMemMb) //
                 .build();
     }

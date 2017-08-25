@@ -19,6 +19,10 @@ public class ConsolidateDataWorkflow extends AbstractWorkflow<ConsolidateDataWor
     @Autowired
     private ConsolidateContactWrapper consolidateContactWrapper;
 
+    @Autowired
+    private ConsolidateTransactionWrapper consolidateTransactionWrapper;
+
+    
     @Bean
     public Job consolidateDataWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -29,6 +33,7 @@ public class ConsolidateDataWorkflow extends AbstractWorkflow<ConsolidateDataWor
         return new WorkflowBuilder() //
                 .next(consolidateAccountWrapper) //
                 .next(consolidateContactWrapper) //
+//                .next(consolidateTransactionWrapper) //
                 .build();
     }
 }

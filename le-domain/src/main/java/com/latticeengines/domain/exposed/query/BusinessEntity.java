@@ -2,8 +2,10 @@ package com.latticeengines.domain.exposed.query;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMaster;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
 
 import java.util.ArrayList;
@@ -39,6 +41,8 @@ public enum BusinessEntity implements GraphNode {
         Account.setServingStore(BucketedAccount);
         Contact.setBatchStore(ConsolidatedContact);
         Contact.setServingStore(SortedContact);
+        Transaction.setBatchStore(ConsolidatedTransaction);
+        Transaction.setServingStore(BucketedTransaction);
 
         LatticeAccount.setServingStore(AccountMaster);
 
