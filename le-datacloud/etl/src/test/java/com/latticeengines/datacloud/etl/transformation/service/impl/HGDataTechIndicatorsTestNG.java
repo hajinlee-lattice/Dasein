@@ -40,13 +40,13 @@ public class HGDataTechIndicatorsTestNG
     private final String TECH_VMWARE = "TechIndicator_VMware";
     private final String TECH_VSPHERE = "TechIndicator_VMwarevSphere";
 
-    private final String TECH_IBM = "TechIndicator_IBM";
-    private final String TECH_COGNOS = "TechIndicator_CognosImpromptu";
+    private final String TECH_MS = "TechIndicator_Microsoft";
+    private final String TECH_ACCESS = "TechIndicator_MicrosoftAccess";
 
     private int HAS_VMWARE_POS = -1;
     private int HAS_VSPHERE_POS = -1;
-    private int HAS_IBM_POS = -1;
-    private int HAS_COGNOS_POS = -1;
+    private int HAS_MS_POS = -1;
+    private int HAS_ACCESS_POS = -1;
 
     private final ObjectMapper om = new ObjectMapper();
 
@@ -132,21 +132,23 @@ public class HGDataTechIndicatorsTestNG
         log.info("Start to verify records one by one.");
         int recordsToCheck = 100;
         int pos = 0;
+        log.info("HAS_VMWARE_POS: " + HAS_VMWARE_POS);
+        log.info("HAS_VSPHERE_POS: " + HAS_VSPHERE_POS);
+        log.info("HAS_MS_POS: " + HAS_MS_POS);
+        log.info("HAS_LabVIEW_POS: " + HAS_ACCESS_POS);
         while (pos++ < recordsToCheck && records.hasNext()) {
             GenericRecord record = records.next();
             String domain = record.get("Domain").toString();
             try {
                 boolean[] bits = BitCodecUtils.decode(record.get(SEGMENT_INDICATORS).toString(),
-                        new int[]{HAS_VSPHERE_POS, HAS_COGNOS_POS});
+                        new int[] { HAS_VSPHERE_POS, HAS_ACCESS_POS });
                 boolean[] bits2 = BitCodecUtils.decode(record.get(SUPPLIER_INDICATORS).toString(),
-                        new int[]{HAS_VMWARE_POS, HAS_IBM_POS});
-                if ("avon.com".equals(domain)) {
-                    Assert.assertTrue(bits[1]);
-                    Assert.assertTrue(bits2[1]);
-                }
+                        new int[] { HAS_VMWARE_POS, HAS_MS_POS });
                 if ("arcelormittal.com".equals(domain)) {
                     Assert.assertTrue(bits[0]);
                     Assert.assertTrue(bits2[0]);
+                    Assert.assertTrue(bits[1]);
+                    Assert.assertTrue(bits2[1]);
                 }
             } catch (IOException e) {
                 System.out.println(record);
@@ -163,12 +165,12 @@ public class HGDataTechIndicatorsTestNG
                 HAS_VMWARE_POS = parseBitPos(column.getArguments());
             } else if (TECH_VSPHERE.equals(columnName)) {
                 HAS_VSPHERE_POS = parseBitPos(column.getArguments());
-            } else if (TECH_IBM.equals(columnName)) {
-                HAS_IBM_POS = parseBitPos(column.getArguments());
-            } else if (TECH_COGNOS.equals(columnName)) {
-                HAS_COGNOS_POS = parseBitPos(column.getArguments());
+            } else if (TECH_MS.equals(columnName)) {
+                HAS_MS_POS = parseBitPos(column.getArguments());
+            } else if (TECH_ACCESS.equals(columnName)) {
+                HAS_ACCESS_POS = parseBitPos(column.getArguments());
             }
-            if (Collections.min(Arrays.asList(HAS_VMWARE_POS, HAS_VSPHERE_POS, HAS_IBM_POS, HAS_COGNOS_POS)) > -1) {
+            if (Collections.min(Arrays.asList(HAS_VMWARE_POS, HAS_VSPHERE_POS, HAS_MS_POS, HAS_ACCESS_POS)) > -1) {
                 break;
             }
         }
