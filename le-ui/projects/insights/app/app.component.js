@@ -28,6 +28,10 @@ var mainApp = angular.module('insightsApp', [
 .config(function ($httpProvider) {
     $httpProvider.interceptors.push('authInterceptor');
 })
+.service('SegmentService', function() {
+})
+.service('SegmentStore', function() {
+})
 .service('AuthStore', function($q) {
     this.Authorization = '';
     

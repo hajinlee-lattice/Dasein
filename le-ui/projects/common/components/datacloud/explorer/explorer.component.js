@@ -9,10 +9,10 @@ angular.module('common.datacloud.explorer', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('DataCloudController', function(
-    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, $routeParams,
+    $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, Enrichments,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryService, QueryStore,
-    SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, Enrichments
+    SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse 
 ){
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -1409,8 +1409,13 @@ angular.module('common.datacloud.explorer', [
         }
 
         var attributeKey = attribute.Attribute || attribute.FieldName,
-            stat = vm.getAttributeStat(attribute) || {},
-            attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : ''),
+            stat = vm.getAttributeStat(attribute) || {};
+
+        if (!stat.Rng) {
+            return false;
+        }
+        
+        var attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : ''),
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
             entity = enrichment.Entity,
