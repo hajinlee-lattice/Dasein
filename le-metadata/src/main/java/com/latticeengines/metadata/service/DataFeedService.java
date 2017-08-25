@@ -30,4 +30,6 @@ public interface DataFeedService {
 
     void resetImport(String customerSpace, String datafeedName);
 
+    DataFeed finishProfile(String customerSpace, String datafeedName, String statusStr);
+
 }

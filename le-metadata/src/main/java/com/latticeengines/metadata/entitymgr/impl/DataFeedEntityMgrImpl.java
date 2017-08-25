@@ -196,6 +196,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedExecutionEntityMgr.update(execution);
 
         datafeed.setStatus(datafeedStatus);
+        if (DataFeedExecution.Status.Consolidated == status && Status.Active == datafeedStatus) {
+            datafeed.setLastPublished(new Date());
+        }
         log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName, datafeed));
         datafeedDao.update(datafeed);
         return execution;

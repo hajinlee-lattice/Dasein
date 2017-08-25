@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.listeners;
 
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -39,20 +37,17 @@ public class ProfileAndPublishListener extends LEJobListener {
     @Override
     public void afterJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-        String statusStr = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_STATUS);
-        Status status = Status.fromName(statusStr);
+        String initialDataFeedStatus = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_STATUS);
         String customerSpace = job.getTenant().getId();
 
         if (jobExecution.getStatus() == BatchStatus.FAILED) {
-            log.info(String.format(
-                    "Workflow failed. Update datafeed status for customer %s with status of %s",
-                    customerSpace, status));
-            dataFeedProxy.updateDataFeedStatus(customerSpace, status.getName());
+            log.info(String.format("Workflow failed. Update datafeed status for customer %s with status of %s",
+                    customerSpace, initialDataFeedStatus));
+            dataFeedProxy.updateDataFeedStatus(customerSpace, initialDataFeedStatus);
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            log.info(String.format(
-                    "Workflow completed. Update datafeed status for customer %s with status of %s",
+            log.info(String.format("Workflow completed. Update datafeed status for customer %s with status of %s",
                     customerSpace, Status.Active.getName()));
-            dataFeedProxy.updateDataFeedStatus(customerSpace, Status.Active.getName());
+            dataFeedProxy.finishProfile(customerSpace, Status.Active.getName());
             DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
             log.info("Switch data collection to version " + inactiveVersion);
             dataCollectionProxy.switchVersion(customerSpace, inactiveVersion);

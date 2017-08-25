@@ -34,7 +34,7 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
     private int mergeStep;
     private int upsertMasterStep;
     private int diffStep;
-    
+
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();

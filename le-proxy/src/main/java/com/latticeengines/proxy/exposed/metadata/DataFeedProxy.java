@@ -76,9 +76,10 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         post("createDataFeedTask", url, dataFeedTask, Void.class);
     }
 
-    public void createOrUpdateDataFeedTask(String customerSpace, String source, String feedType, String entity, String
-            templateName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}/{tableName}",
+    public void createOrUpdateDataFeedTask(String customerSpace, String source, String feedType, String entity,
+            String templateName) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/tasks/{source}/{dataFeedType}/{entity}/{tableName}",
                 shortenCustomerSpace(customerSpace), source, feedType, entity, templateName);
         post("createOrUpdateDataFeedTask", url, null, Void.class);
     }
@@ -124,8 +125,7 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     }
 
     public void resetImport(String customerSpace) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/resetimport",
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/resetimport",
                 shortenCustomerSpace(customerSpace));
         post("resetImport", url, null, Void.class);
     }
@@ -134,6 +134,13 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/startprofile",
                 shortenCustomerSpace(customerSpace));
         return post("startProfile", url, null, DataFeedProfile.class);
+    }
+
+    public DataFeedExecution finishProfile(String customerSpace, String initialDataFeedStatus) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/status/{initialDataFeedStatus}/finishprofile",
+                shortenCustomerSpace(customerSpace), initialDataFeedStatus);
+        return post("finishProfile", url, null, DataFeedExecution.class);
     }
 
     public DataFeedProfile updateProfileWorkflowId(String customerSpace, Long workflowId) {

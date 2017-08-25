@@ -95,6 +95,14 @@ public class DefaultDataFeedController {
         return datafeedService.startProfile(customerSpace, "");
     }
 
+    @RequestMapping(value = "/status/{initialDataFeedStatus}/finishprofile", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "finish data feed profile")
+    public DataFeed finishProfile(@PathVariable String customerSpace, @PathVariable String initialDataFeedStatus) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return datafeedService.finishProfile(customerSpace, "", initialDataFeedStatus);
+    }
+
     @RequestMapping(value = "/profile/workflow/{workflowId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "update data feed profile")

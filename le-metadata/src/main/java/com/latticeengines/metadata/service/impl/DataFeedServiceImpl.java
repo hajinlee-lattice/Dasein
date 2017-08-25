@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.Date;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,13 +127,16 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     public Status getSuccessfulDataFeedStatus(String initialDataFeedStatus) {
         Status datafeedStatus = Status.fromName(initialDataFeedStatus);
-        if (datafeedStatus == Status.InitialLoaded || datafeedStatus == Status.InitialConsolidated) {
+        switch (datafeedStatus) {
+        case InitialLoaded:
+        case InitialConsolidated:
             return Status.InitialConsolidated;
-        } else if (datafeedStatus == Status.Active) {
+        case Active:
             return Status.Active;
+        default:
+            throw new RuntimeException(
+                    String.format("Can't finish this execution due to datafeed status is %s", initialDataFeedStatus));
         }
-        throw new RuntimeException(
-                String.format("Can't finish this execution due to datafeed status is %s", initialDataFeedStatus));
     }
 
     public Status getFailedDataFeedStatus(String initialDataFeedStatus) {
@@ -163,6 +168,21 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public DataFeedProfile startProfile(String customerSpace, String datafeedName) {
         return datafeedEntityMgr.startProfile(datafeedName);
+    }
+
+    @Override
+    public DataFeed finishProfile(String customerSpace, String datafeedName, String statusStr) {
+        DataFeed datafeed = findDataFeedByName(customerSpace, datafeedName);
+        if (datafeed == null) {
+            throw new NullPointerException("Datafeed is null. Cannot update status.");
+        } else {
+            Status status = Status.fromName(statusStr);
+            datafeed.setStatus(status);
+            datafeed.setLastProfiled(new Date());
+            datafeed.setLastPublished(new Date());
+            datafeedEntityMgr.update(datafeed);
+        }
+        return datafeed;
     }
 
     @Override

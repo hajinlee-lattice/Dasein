@@ -150,7 +150,7 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
         assertEquals(df.getExecutions().size(), 1);
         assertEquals(df.getStatus(), Status.InitialConsolidated);
-
+        assertNull(df.getLastPublished());
         assertEquals(exec1.getStatus(), df.getExecutions().get(0).getStatus());
         assertEquals(exec1.getImports().size(), df.getTasks().size());
 

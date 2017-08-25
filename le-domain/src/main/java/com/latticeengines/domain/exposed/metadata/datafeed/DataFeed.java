@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.metadata.datafeed;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -105,6 +108,16 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "dataFeed")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<DataFeedTask> tasks = new ArrayList<>();
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LAST_PUBLISHED", nullable = true)
+    @JsonProperty("last_published")
+    private Date lastPublished;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LAST_PROFILED", nullable = true)
+    @JsonProperty("last_profiled")
+    private Date lastProfiled;
 
     @Transient
     @JsonIgnore
@@ -255,6 +268,22 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setActiveProfile(DataFeedProfile activeProfile) {
         this.activeProfile = activeProfile;
+    }
+
+    public Date getLastPublished() {
+        return lastPublished;
+    }
+
+    public void setLastPublished(Date lastPublished) {
+        this.lastPublished = lastPublished;
+    }
+
+    public Date getLastProfiled() {
+        return lastProfiled;
+    }
+
+    public void setLastProfiled(Date lastProfiled) {
+        this.lastProfiled = lastProfiled;
     }
 
     public enum Status {
