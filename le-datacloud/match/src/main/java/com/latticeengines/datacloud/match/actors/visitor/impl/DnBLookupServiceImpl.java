@@ -437,7 +437,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     while (iter.hasNext()) {
                         DnBBatchMatchContext batchContext = iter.next();
                         if (batchContext.isSealed() || batchContext.getContexts().size() == maximumBatchSize
-                                || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) >= 120000) {
+                                || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) >= 120000
+                                || (System.currentTimeMillis() - batchContext.getCreateTime().getTime()) >= 300000) {
                             batchContext.setSealed(true);
                             batchesToSubmit.add(batchContext);
                             iter.remove();

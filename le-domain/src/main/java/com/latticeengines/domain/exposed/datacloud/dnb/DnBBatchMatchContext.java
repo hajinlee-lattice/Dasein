@@ -12,6 +12,8 @@ public class DnBBatchMatchContext {
 
     private Date timestamp;
 
+    private Date createTime;
+
     private DnBReturnCode dnbCode;
 
     private Map<String, DnBMatchContext> contexts;
@@ -28,6 +30,7 @@ public class DnBBatchMatchContext {
 
     public DnBBatchMatchContext() {
         contexts = new HashMap<>();
+        createTime = new Date();
     }
 
     public void copyForRetry(DnBBatchMatchContext batchContext) {
@@ -35,6 +38,7 @@ public class DnBBatchMatchContext {
         retryTimes = 1;
         retryForServiceBatchId = batchContext.getServiceBatchId();
         sealed = true;
+        createTime = new Date();
         for (String lookupRequestId : batchContext.getContexts().keySet()) {
             DnBMatchContext context = new DnBMatchContext();
             context.copyMatchInput(batchContext.getContexts().get(lookupRequestId));
@@ -120,6 +124,14 @@ public class DnBBatchMatchContext {
 
     public void setSealed(boolean sealed) {
         this.sealed = sealed;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
 }
