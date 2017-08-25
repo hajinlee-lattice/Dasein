@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
 import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
@@ -56,6 +57,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
+    @VisibleForTesting
     void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
         this.internalResourceRestApiProxy = internalResourceRestApiProxy;
     }

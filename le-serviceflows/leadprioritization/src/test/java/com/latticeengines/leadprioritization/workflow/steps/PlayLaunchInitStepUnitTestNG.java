@@ -1,8 +1,6 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyListOf;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -23,14 +21,16 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
@@ -42,7 +42,7 @@ public class PlayLaunchInitStepUnitTestNG {
     PlayLaunchInitStepConfiguration configuration;
 
     @Mock
-    AccountProxy accountProxy;
+    EntityProxy entityProxy;
 
     @Mock
     DataCollectionProxy dataCollectionProxy;
@@ -81,7 +81,7 @@ public class PlayLaunchInitStepUnitTestNG {
 
         playLaunchInitStep = new PlayLaunchInitStep();
 
-        playLaunchInitStep.setAccountProxy(accountProxy);
+        playLaunchInitStep.setEntityProxy(entityProxy);
         playLaunchInitStep.setDataCollectionProxy(dataCollectionProxy);
         playLaunchInitStep.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
         playLaunchInitStep.setPageSize(pageSize);
@@ -153,17 +153,16 @@ public class PlayLaunchInitStepUnitTestNG {
 
     @SuppressWarnings("deprecation")
     private void mockAccountProxy(long pageSize) {
-        when(accountProxy.getAccountsCount( //
+        when(entityProxy.getCount( //
                 anyString(), //
-                any(Restriction.class))) //
+                any(BusinessEntity.class), //
+                any(FrontEndQuery.class))) //
                         .thenReturn(2l);
 
-        when(accountProxy.getAccounts( //
+        when(entityProxy.getData( //
                 anyString(), //
-                any(Restriction.class), //
-                anyLong(), //
-                anyLong(), //
-                anyListOf(String.class))) //
+                any(BusinessEntity.class), //
+                any(FrontEndQuery.class))) //
                         .thenReturn(generateDataPage(pageSize));
     }
 

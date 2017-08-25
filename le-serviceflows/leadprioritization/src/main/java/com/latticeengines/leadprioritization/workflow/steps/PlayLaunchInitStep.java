@@ -32,16 +32,20 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.DataRequest;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.objectapi.AccountProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -68,7 +72,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     private RecommendationService recommendationService;
 
     @Autowired
-    private AccountProxy accountProxy;
+    private EntityProxy entityProxy;
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
@@ -111,19 +115,22 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.info("For playId: " + playName);
             log.info("For playLaunchId: " + playLaunchId);
 
-            PlayLaunch playLauch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
+            PlayLaunch playLaunch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
             Play play = internalResourceRestApiProxy.findPlayByName(customerSpace, playName);
-            playLauch.setPlay(play);
+            playLaunch.setPlay(play);
 
             String segmentName = play.getSegmentName();
             log.info("Processing segment: " + segmentName);
 
-            Restriction segmentRestrictionQuery = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
+            Restriction segmentRestriction = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
                     segmentName);
 
-            log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestrictionQuery));
+            log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestriction));
 
-            executeLaunchActivity(tenant, playLauch, config, segmentRestrictionQuery);
+            FrontEndQuery frontEndQuery = new FrontEndQuery();
+            frontEndQuery.setFrontEndRestriction(new FrontEndRestriction(segmentRestriction));
+            frontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
+            executeLaunchActivity(tenant, playLaunch, config, frontEndQuery);
 
             talkingPointProxy.publish(playName, customerSpace.toString());
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
@@ -133,10 +140,11 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         }
     }
 
-    private void executeLaunchActivity(Tenant tenant, PlayLaunch playLauch, PlayLaunchInitStepConfiguration config,
-            Restriction segmentRestriction) {
+    private void executeLaunchActivity(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
+            FrontEndQuery frontEndQuery) {
 
-        segmentAccountsCount = accountProxy.getAccountsCount(tenant.getId(), segmentRestriction);
+        segmentAccountsCount = entityProxy.getCount(config.getCustomerSpace().toString(), BusinessEntity.Account,
+                frontEndQuery);
         log.info("Total records in segment: " + segmentAccountsCount);
 
         if (segmentAccountsCount > 0) {
@@ -154,8 +162,10 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                 long expectedPageSize = //
                         Math.min(pageSize * 1L, (segmentAccountsCount - processedSegmentAccountsCount));
 
-                DataPage accountPage = accountProxy.getAccounts(tenant.getId(), segmentRestriction,
-                        processedSegmentAccountsCount, expectedPageSize, fields);
+                frontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
+
+                DataPage accountPage = entityProxy.getData(config.getCustomerSpace().toString(), BusinessEntity.Account,
+                        frontEndQuery);
 
                 log.info("Got #" + accountPage.getData().size() + " elements in this loop");
 
@@ -171,7 +181,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                             .map(account -> {
                                 try {
                                     Recommendation recommendation = //
-                                            prepareRecommendation(tenant, playLauch, config, account);
+                                            prepareRecommendation(tenant, playLaunch, config, account);
                                     recommendationService.create(recommendation);
                                     try {
                                         danteLeadProxy.create(recommendation, config.getCustomerSpace().toString());
@@ -189,7 +199,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                 processedSegmentAccountsCount += accountList.size();
             }
         }
-
     }
 
     private Recommendation prepareRecommendation(Tenant tenant, PlayLaunch playLauch,
@@ -271,8 +280,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     @VisibleForTesting
-    void setAccountProxy(AccountProxy accountProxy) {
-        this.accountProxy = accountProxy;
+    void setEntityProxy(EntityProxy entityProxy) {
+        this.entityProxy = entityProxy;
     }
 
     @VisibleForTesting
