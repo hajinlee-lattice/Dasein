@@ -55,6 +55,9 @@ public class MarketoCredentialServiceImpl implements MarketoCredentialService {
     @Override
     public MarketoCredential findMarketoCredentialById(String credentialId) {
         MarketoCredential marketoCredential = marketoCredentialEntityMgr.findMarketoCredentialById(credentialId);
+        if (marketoCredential == null) {
+            return null;
+        }
         Enrichment enrichment = marketoCredential.getEnrichment();
         enrichment.setWebhookUrl(enrichmentWebhookUrl);
         enrichment.setTenantCredentialGUID(UuidUtils.packUuid(MultiTenantContext.getTenant().getId(), credentialId));
