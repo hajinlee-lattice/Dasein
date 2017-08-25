@@ -67,10 +67,10 @@
                     <div class="column data value" ng-if="vm.section == 'segment.analysis' && attribute.TopBkt">{{ attribute.TopBkt.Lbl }}</div>
                     <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.data.Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>
                     <div class="column data records" ng-if="!vm.lookupMode && !vm.inModel()">
-                        <strong><attribute-feedback-button ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" attribute="attribute" value="attribute.TopBkt.Cnt" />{{ attribute.TopBkt.Cnt|number }}</strong>
+                        <strong><attribute-feedback-button type="'infodot'" attribute="attribute" value="attribute.TopBkt.Cnt" ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'"/>{{ attribute.TopBkt.Cnt|number }}</strong>
                     </div>
                     <div class="column data values" ng-if="vm.lookupMode && vm.section != 'segment.analysis'">
-                        <strong><attribute-feedback-button ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" attribute="attribute" value="vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType)" />{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</strong>
+                        <strong><attribute-feedback-button type="'infodot'" attribute="attribute" value="vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType)" ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" />{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</strong>
                     </div>
                 </li>
             </ul>

@@ -1692,12 +1692,24 @@ angular.module('common.datacloud.explorer', [
         restrict: 'EA',
         templateUrl: '/components/datacloud/explorer/attributefeedback/attributefeedbackbutton.component.html',
         scope: {
+            type: '=?',
             attribute: '=',
             value: '='
         },
         controller: ['$scope', '$stateParams', 'DataCloudStore', function ($scope, $stateParams, DataCloudStore) {
+            $scope.menuClick = function($event) {
+                $event.stopPropagation();
+                $scope.showMenu = !$scope.showMenu;
+
+            }
+
+            $scope.closeMenu = function($event) {
+                $scope.showMenu = false;
+            }
+
             $scope.open = function($event) {
                 $event.stopPropagation();
+                $scope.closeMenu($event);
                 DataCloudStore.setFeedbackModal(true, {
                     attribute: $scope.attribute,
                     value: $scope.value

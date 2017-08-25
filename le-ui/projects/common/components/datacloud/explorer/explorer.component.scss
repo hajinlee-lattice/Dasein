@@ -255,16 +255,19 @@
                                     padding-left: 15px;
                                 }
                             }
+                            attribute-feedback-button {
+                                display: none;
+                                pointer-events: auto;
+                                position: absolute;
+                                top: 0;
+                                left: 2px;
+                                div.infodot {
+                                    color: #0c8bc7;
+                                }
+                            }
                             &:hover {
                                 attribute-feedback-button {
-                                    pointer-events: auto;
                                     display: block;
-                                    position: absolute;
-                                    top: 0;
-                                    left: 2px;
-                                    div {
-                                        color: inherit;
-                                    }
                                 }
                             }
                         }
@@ -846,6 +849,11 @@
                     display: inline-block;
                     color: black;
                     text-align: left;
+                }
+                attribute-feedback-button {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
                 }
             }
         }
@@ -1584,9 +1592,69 @@
         }
     }
     attribute-feedback-button {
-        display: none;
-        color: #0c8bc7;
-        line-height: 11px;
+        .infodot {
+            line-height: 11px;
+        }
+        .menu {
+            position: relative;
+            text-align: right;
+            button.attribute-feedback-menu-button {
+                padding: 0.5em 0.75em 0.35em 0.8em;
+                margin-right: 0;
+                font-size: larger;
+                transition: all 0s linear;
+                background-color: transparent;
+                border: 0;
+                border-bottom-width: 1px;
+                &.open {
+                    background: #222;
+                    color: #fff;
+                    border-radius: 4px;
+                    border-bottom-right-radius: 0;
+                    border-bottom-left-radius: 0;
+                    border-top-left-radius: 0;
+                    &:hover * {
+                        color: #fff;
+                    }
+                }
+                &:hover {
+                    * {
+                        color: #f16a22;
+                    }
+                }
+            }
+            ul.attribute-feedback-menu {
+                position: absolute;
+                right: 0;
+                z-index: 200;
+                background: #222;
+                padding: 10px 0;
+                font-size: 16px;
+                -webkit-border-bottom-left-radius: 6px;
+                -moz-border-bottom-left-radius: 6px;
+                border-bottom-left-radius: 6px;
+                -webkit-border-top-left-radius: 6px;
+                -moz-border-top-left-radius: 6px;
+                border-top-left-radius: 6px;
+                font-family:'ProximaNova-Regular','Open Sans',sans-serif;
+                li {
+                    display: block;
+                    list-style: none;
+                    padding: 0.3em 1em;
+                    text-align: right;
+                    color: #eee;
+                    white-space: nowrap;
+                    &:hover {
+                        background: #444;
+                        transition: none;
+                        color: #f16a22;
+                    }
+                    &:last-of-type {
+                        margin-bottom: 0;
+                    }
+                }
+            }
+        }
     }
 }
 .insights-content {

@@ -1,6 +1,9 @@
 <div ng-if="vm.debug" style="display:none;">[{{vm.section}}]{{enrichment|json}}</div>
 <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
      ng-class="{'active': enrichment.IsSelected}">
+
+    <attribute-feedback-button type="'menu'" attribute="enrichment" value="enrichment.DisplayName" ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" />
+
     <div class="header">
         <h2 title="{{enrichment.DisplayName}}">
             <div class="category-icon">
