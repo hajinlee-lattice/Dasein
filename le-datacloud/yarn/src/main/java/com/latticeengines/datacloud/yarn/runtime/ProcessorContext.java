@@ -364,8 +364,8 @@ public class ProcessorContext {
             if (useRemoteDnB) {
                 groupSize = 128;
             } else if (originalInput.getFetchOnly()) {
-                groupSize = 1000;
-                numThreads = 16;
+                groupSize = 128;
+                numThreads = 8;
             }
         } else {
             if (groupSize == null || groupSize < 1) {
