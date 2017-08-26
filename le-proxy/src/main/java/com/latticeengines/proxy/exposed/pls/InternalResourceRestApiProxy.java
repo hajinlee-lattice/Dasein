@@ -500,6 +500,12 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         restTemplate.put(url, null);
     }
 
+    public void publishTalkingPoints(CustomerSpace customerSpace, String playName) {
+        String url = constructUrl("pls/internal/plays/" + playName + "/talkingpoints/publish/",
+                customerSpace.toString());
+        restTemplate.postForObject(url, null, String.class);
+    }
+
     public Play findPlayByName(CustomerSpace customerSpace, //
             String playName) {
         try {

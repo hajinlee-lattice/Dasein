@@ -85,8 +85,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private long launchTimestampMillis;
 
-    private long segmentAccountsCount = Long.MAX_VALUE;
-
     private long processedSegmentAccountsCount = 0;
 
     List<String> fields = Arrays.asList(InterfaceName.AccountId.name(), //
@@ -100,7 +98,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     @Override
     public void execute() {
-        Tenant tenant = null;
+        Tenant tenant;
         PlayLaunchInitStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
         String playName = config.getPlayName();
@@ -121,18 +119,18 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
             String segmentName = play.getSegmentName();
             log.info("Processing segment: " + segmentName);
-
             Restriction segmentRestriction = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
                     segmentName);
 
             log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestriction));
-
             FrontEndQuery frontEndQuery = new FrontEndQuery();
             frontEndQuery.setFrontEndRestriction(new FrontEndRestriction(segmentRestriction));
             frontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
+            frontEndQuery.addLookups(BusinessEntity.Account, fields.toArray(new String[fields.size()]));
+
             executeLaunchActivity(tenant, playLaunch, config, frontEndQuery);
 
-            talkingPointProxy.publish(playName, customerSpace.toString());
+            internalResourceRestApiProxy.publishTalkingPoints(customerSpace, playName);
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -143,24 +141,24 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     private void executeLaunchActivity(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
             FrontEndQuery frontEndQuery) {
 
-        segmentAccountsCount = entityProxy.getCount(config.getCustomerSpace().toString(), BusinessEntity.Account,
+        long totalAccounts = entityProxy.getCount(config.getCustomerSpace().toString(), BusinessEntity.Account,
                 frontEndQuery);
-        log.info("Total records in segment: " + segmentAccountsCount);
+        log.info("Total records in segment: " + totalAccounts);
 
-        if (segmentAccountsCount > 0) {
+        if (totalAccounts > 0) {
             List<String> accountSchema = getSchema(tenant, TableRoleInCollection.BucketedAccount);
             DataRequest dataRequest = new DataRequest();
             dataRequest.setAttributes(accountSchema);
 
-            int numberOfLoops = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
+            int pages = (int) Math.ceil((totalAccounts * 1.0D) / pageSize);
 
-            log.info("Number of required loops: " + numberOfLoops + ", with pageSize: " + pageSize);
+            log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
 
-            for (int loopId = 0; loopId < numberOfLoops; loopId++) {
-                log.info("Loop #" + loopId);
+            for (int pageNo = 0; pageNo < pages; pageNo++) {
+                log.info("Loop #" + pageNo);
 
                 long expectedPageSize = //
-                        Math.min(pageSize * 1L, (segmentAccountsCount - processedSegmentAccountsCount));
+                        Math.min(pageSize, (totalAccounts - processedSegmentAccountsCount));
 
                 frontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
 

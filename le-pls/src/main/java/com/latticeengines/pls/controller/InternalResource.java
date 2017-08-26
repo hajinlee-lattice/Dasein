@@ -726,28 +726,30 @@ public class InternalResource extends InternalResourceBase {
                 if (user.getEmail().equals(emailInfo.getUserId())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
                     switch (result.toUpperCase()) {
-                        case "COMPLETED":
-                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                                emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                        true);
-                            } else {
-                                emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
-                                        false);
-                            }
-                            break;
-                        case "FAILED":
-                            if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
-                                    || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
-                                emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, true);
-                            } else {
-                                emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, false);
-                            }
-                            break;
-                        default:
-                            log.warn(String.format("Non-completed nor failed model created. Model status: %s, " +
-                                    "Tenant ID: %s, Details: %s", result, tenantId, JsonUtils.serialize(emailInfo)));
-                            break;
+                    case "COMPLETED":
+                        if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                    true);
+                        } else {
+                            emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl, tenantName, modelName,
+                                    false);
+                        }
+                        break;
+                    case "FAILED":
+                        if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
+                                || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
+                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, true);
+                        } else {
+                            emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl, tenantName, modelName, false);
+                        }
+                        break;
+                    default:
+                        log.warn(String.format(
+                                "Non-completed nor failed model created. Model status: %s, "
+                                        + "Tenant ID: %s, Details: %s",
+                                result, tenantId, JsonUtils.serialize(emailInfo)));
+                        break;
                     }
                 }
             }
@@ -1340,6 +1342,17 @@ public class InternalResource extends InternalResourceBase {
         } else {
             return null;
         }
+    }
+
+    @RequestMapping(value = "/plays/{playName}/talkingpoints/publish/" + TENANT_ID_PATH, method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Publish given play's Talking Points to dante.")
+    public void publishTalkinPoints(@PathVariable("playName") String playName, //
+            @PathVariable("tenantId") String tenantId) {
+        log.debug(String.format("Publish talking points for play: %s", playName));
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        playService.publishTalkingPoints(playName, tenantId);
     }
 
 }
