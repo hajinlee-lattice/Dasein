@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.util;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ContactQueryDecorator extends QueryDecorator {
@@ -17,7 +18,8 @@ public class ContactQueryDecorator extends QueryDecorator {
 
     @Override
     public String[] getEntityLookups() {
-        return new String[] { "SalesforceAccountID" };
+        return new String[] { InterfaceName.FirstName.toString(), InterfaceName.LastName.toString(),
+                InterfaceName.CompanyName.toString(), InterfaceName.Email.toString(), InterfaceName.CRMId.toString() };
     }
 
     @Override
@@ -27,7 +29,8 @@ public class ContactQueryDecorator extends QueryDecorator {
 
     @Override
     public String[] getFreeTextSearchAttrs() {
-        return new String[] { "" };
+        return new String[] { InterfaceName.FirstName.toString(), InterfaceName.LastName.toString(),
+                InterfaceName.CompanyName.toString(), InterfaceName.Email.toString() };
     }
 
     @Override
