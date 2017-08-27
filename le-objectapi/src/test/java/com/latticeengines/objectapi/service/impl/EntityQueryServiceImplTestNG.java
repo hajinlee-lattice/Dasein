@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -24,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
@@ -58,8 +58,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "LDC_Name").gte("a").build();
         frontEndRestriction.setRestriction(restriction);
-        frontEndQuery.setFrontEndRestriction(frontEndRestriction);
-        Long count = entityQueryService.getCount(BusinessEntity.Account, frontEndQuery);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        Long count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(1513L));
     }
@@ -72,11 +73,12 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "LDC_Name").gte("a").build();
         frontEndRestriction.setRestriction(restriction);
-        frontEndQuery.setFrontEndRestriction(frontEndRestriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setPageFilter(new PageFilter(0, 10));
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
 
-        DataPage dataPage = entityQueryService.getData(BusinessEntity.Account, frontEndQuery);
+        DataPage dataPage = entityQueryService.getData(frontEndQuery);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
         data.forEach(row -> {
@@ -91,8 +93,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
                 new AttributeLookup(BusinessEntity.Account, "LDC_Country"),
                 new AttributeLookup(BusinessEntity.Rating, model.getId())
         ));
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
         System.out.println(JsonUtils.pprint(frontEndQuery));
-        dataPage = entityQueryService.getData(BusinessEntity.Account, frontEndQuery);
+        dataPage = entityQueryService.getData(frontEndQuery);
         Assert.assertNotNull(dataPage);
         data = dataPage.getData();
         data.forEach(row -> {
@@ -111,10 +114,11 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "LDC_Name").gte("a").build();
         frontEndRestriction.setRestriction(restriction);
-        frontEndQuery.setFrontEndRestriction(frontEndRestriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setRatingModels(Collections.singletonList(model));
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
 
-        Map<String, Long> ratingCounts = entityQueryService.getRatingCount(BusinessEntity.Account, frontEndQuery);
+        Map<String, Long> ratingCounts = entityQueryService.getRatingCount(frontEndQuery);
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {

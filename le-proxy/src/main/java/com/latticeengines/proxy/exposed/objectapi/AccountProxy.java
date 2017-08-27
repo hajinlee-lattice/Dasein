@@ -3,7 +3,6 @@ package com.latticeengines.proxy.exposed.objectapi;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,8 +46,9 @@ public class AccountProxy extends MicroserviceRestApiProxy implements AccountInt
     public long getAccountsCount(String customerSpace, Restriction restriction) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setFrontEndRestriction(new FrontEndRestriction(restriction));
-        return entityProxy.getCount(customerSpace, BusinessEntity.Account, frontEndQuery);
+        frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        return entityProxy.getCount(customerSpace, frontEndQuery);
     }
 
     public DataPage getAccounts(String customerSpace, Restriction restriction, Long offset, Long pageSize,
@@ -61,27 +61,11 @@ public class AccountProxy extends MicroserviceRestApiProxy implements AccountInt
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         PageFilter pageFilter = new PageFilter(offset, pageSize);
         FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setFrontEndRestriction(new FrontEndRestriction(restriction));
+        frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
         frontEndQuery.setPageFilter(pageFilter);
         frontEndQuery.addLookups(BusinessEntity.Account, fields.toArray(new String[fields.size()]));
-        return entityProxy.getData(customerSpace, BusinessEntity.Account, frontEndQuery);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        return entityProxy.getData(customerSpace, frontEndQuery);
     }
 
-    /*
-     * TODO - need to be implemented by Bernard
-     * 
-     * This API accepts list of ordered restrictions and list of accountIds. It
-     * needs to evaluate which account matches with one of these restrictions
-     * (give priority to lowest index matching bucket). This API needs to return
-     * list of indexes of matching restrictions for each of the accountIds
-     */
-    public List<Integer> calculateMatchingRestrictionIdx(String customerSpace, List<Restriction> orderedRestrictions,
-            List<Long> accountIds) {
-        List<Integer> accountToMatchingRestrictionIndexList = //
-                accountIds.stream().//
-                        map(accountId -> {
-                            return 0;
-                        }).collect(Collectors.toList());
-        return accountToMatchingRestrictionIndexList;
-    }
 }

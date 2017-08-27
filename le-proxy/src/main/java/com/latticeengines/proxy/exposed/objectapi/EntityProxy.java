@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -18,22 +17,19 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         super("objectapi/customerspaces");
     }
 
-    public long getCount(String customerSpace, BusinessEntity entity, FrontEndQuery frontEndQuery) {
-        String url = constructUrl("/{customerSpace}/entities/{entity}/count", shortenCustomerSpace(customerSpace),
-                entity);
+    public long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
+        String url = constructUrl("/{customerSpace}/entity/count", shortenCustomerSpace(customerSpace));
         return post("getCount", url, frontEndQuery, Long.class);
     }
 
-    public DataPage getData(String customerSpace, BusinessEntity entity, FrontEndQuery frontEndQuery) {
-        String url = constructUrl("/{customerSpace}/entities/{entity}/data", shortenCustomerSpace(customerSpace),
-                entity);
+    public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
+        String url = constructUrl("/{customerSpace}/entity/data", shortenCustomerSpace(customerSpace));
         return post("getData", url, frontEndQuery, DataPage.class);
     }
 
-    @SuppressWarnings("unchecked")
-    public Map<String, Long> getRatingCount(String customerSpace, BusinessEntity entity, FrontEndQuery frontEndQuery) {
-        String url = constructUrl("/{customerSpace}/entities/{entity}/ratingcount", shortenCustomerSpace(customerSpace),
-                entity);
+    @SuppressWarnings({ "rawtypes" })
+    public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
+        String url = constructUrl("/{customerSpace}/entity/ratingcount", shortenCustomerSpace(customerSpace));
         Map map = post("getRatingCount", url, frontEndQuery, Map.class);
         if (map == null) {
             return null;

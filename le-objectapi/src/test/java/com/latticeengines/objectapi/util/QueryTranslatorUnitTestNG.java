@@ -27,9 +27,10 @@ public class QueryTranslatorUnitTestNG {
         FrontEndQuery query = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         frontEndRestriction.setRestriction(createRestriction(Level.Simple));
-        query.setFrontEndRestriction(frontEndRestriction);
+        query.setAccountRestriction(frontEndRestriction);
+        query.setMainEntity(BusinessEntity.Account);
 
-        Query translated = QueryTranslator.translate(BusinessEntity.Account, query, AccountQueryDecorator.WITHOUT_SELECTS);
+        Query translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
         validateTranslated(translated.getRestriction(), 6, 8);
     }
@@ -57,9 +58,10 @@ public class QueryTranslatorUnitTestNG {
         query.setFreeFormTextSearch("intel");
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         frontEndRestriction.setRestriction(createRestriction(Level.Simple));
-        query.setFrontEndRestriction(frontEndRestriction);
+        query.setAccountRestriction(frontEndRestriction);
+        query.setMainEntity(BusinessEntity.Account);
 
-        Query result = QueryTranslator.translate(BusinessEntity.Account, query, AccountQueryDecorator.WITH_SELECTS);
+        Query result = QueryTranslator.translate(query, AccountQueryDecorator.WITH_SELECTS);
         assertTrue(result.getLookups().size() > 0);
         assertTrue(result.getFreeFormTextSearchAttributes().size() > 0);
     }
@@ -106,7 +108,7 @@ public class QueryTranslatorUnitTestNG {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setFreeFormTextSearch("Boulder");
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        frontEndQuery.setFrontEndRestriction(frontEndRestriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
 
         BucketRestriction a = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C307"),

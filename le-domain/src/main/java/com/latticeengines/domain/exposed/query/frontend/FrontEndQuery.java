@@ -23,7 +23,10 @@ import io.swagger.annotations.ApiModelProperty;
 public class FrontEndQuery {
 
     @JsonProperty("frontend_restriction")
-    private FrontEndRestriction frontEndRestriction;
+    private FrontEndRestriction accountRestriction;
+
+    @JsonProperty("contact_restriction")
+    private FrontEndRestriction contactRestriction;
 
     @JsonProperty("sort")
     private FrontEndSort sort;
@@ -48,12 +51,15 @@ public class FrontEndQuery {
     @JsonProperty("lookups")
     private List<Lookup> lookups = new ArrayList<>();
 
-    public FrontEndRestriction getFrontEndRestriction() {
-        return frontEndRestriction;
+    @JsonProperty("main_entity")
+    private BusinessEntity mainEntity;
+
+    public FrontEndRestriction getAccountRestriction() {
+        return accountRestriction;
     }
 
-    public void setFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
-        this.frontEndRestriction = frontEndRestriction;
+    public void setAccountRestriction(FrontEndRestriction frontEndRestriction) {
+        this.accountRestriction = frontEndRestriction;
     }
 
     public FrontEndSort getSort() {
@@ -104,13 +110,6 @@ public class FrontEndQuery {
         this.ratingModels = ratingModels;
     }
 
-    private void addRatingModel(RatingModel ratingModel) {
-        if (ratingModel == null) {
-            ratingModels = new ArrayList<>();
-        }
-        ratingModels.add(ratingModel);
-    }
-
     public List<Lookup> getLookups() {
         return lookups;
     }
@@ -119,10 +118,19 @@ public class FrontEndQuery {
         this.lookups = lookups;
     }
 
+    public BusinessEntity getMainEntity() {
+        return mainEntity;
+    }
+
+    public void setMainEntity(BusinessEntity mainEntity) {
+        this.mainEntity = mainEntity;
+    }
+
     public void addLookups(BusinessEntity businessEntity, String... attrNames) {
         List<Lookup> moreLookups = new ArrayList<>(Arrays.asList(attrNames)).stream() //
                 .map((attrName) -> new AttributeLookup(businessEntity, attrName)) //
                 .collect(Collectors.toList());
         lookups.addAll(moreLookups);
     }
+
 }

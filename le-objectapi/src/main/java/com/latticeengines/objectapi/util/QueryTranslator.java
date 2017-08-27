@@ -31,8 +31,8 @@ public class QueryTranslator {
     public static final int MAX_ROWS = 250;
     private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
-    public static Query translate(BusinessEntity entity, FrontEndQuery frontEndQuery, QueryDecorator decorator) {
-        Restriction restriction = translateFrontEndRestriction(frontEndQuery.getFrontEndRestriction());
+    public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
+        Restriction restriction = translateFrontEndRestriction(frontEndQuery.getAccountRestriction());
         if (frontEndQuery.restrictNullSalesforceId()) {
             Restriction sfidRestriction = Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID")
                     .isNull().build();
@@ -61,7 +61,8 @@ public class QueryTranslator {
             frontEndQuery.getLookups().forEach(lookup -> {
                 AttributeLookup attributeLookup = (AttributeLookup) lookup;
                 if (BusinessEntity.Rating.equals(attributeLookup.getEntity())) {
-                    queryBuilder.select(parseRatingLookup(entity, attributeLookup, frontEndQuery.getRatingModels()));
+                    queryBuilder.select(parseRatingLookup(frontEndQuery.getMainEntity(), attributeLookup,
+                            frontEndQuery.getRatingModels()));
                 } else {
                     queryBuilder.select(attributeLookup.getEntity(), attributeLookup.getAttribute());
                 }
@@ -73,9 +74,11 @@ public class QueryTranslator {
                     frontEndQuery.getRatingModels().forEach(model -> {
                         if (model instanceof RuleBasedModel) {
                             String alias = model.getId();
-                            if (frontEndQuery.getRatingModels().size() == 1)
+                            if (frontEndQuery.getRatingModels().size() == 1) {
                                 alias = "Score";
-                            CaseLookup caseLookup = translateRatingRule(entity, ((RuleBasedModel) model).getRatingRule(), alias);
+                            }
+                            CaseLookup caseLookup = translateRatingRule(frontEndQuery.getMainEntity(),
+                                    ((RuleBasedModel) model).getRatingRule(), alias);
                             queryBuilder.select(caseLookup);
                         } else {
                             log.warn("Cannot not handle rating model of type " + model.getClass().getSimpleName());

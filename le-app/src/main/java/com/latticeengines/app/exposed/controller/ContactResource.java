@@ -1,7 +1,5 @@
 package com.latticeengines.app.exposed.controller;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +31,7 @@ public class ContactResource extends BaseFrontEndEntityResource {
         super(entityProxy, segmentProxy);
     }
 
+    @Override
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
@@ -45,6 +44,7 @@ public class ContactResource extends BaseFrontEndEntityResource {
         }
     }
 
+    @Override
     @Deprecated
     @RequestMapping(value = "/count/restriction", method = RequestMethod.POST)
     @ResponseBody

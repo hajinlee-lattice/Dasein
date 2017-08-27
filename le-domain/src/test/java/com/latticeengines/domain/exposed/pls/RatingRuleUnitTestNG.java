@@ -18,13 +18,13 @@ public class RatingRuleUnitTestNG {
         Assert.assertEquals(ratingRule.getDefaultBucketName(), RuleBucketName.C.getName());
         assertOrderOfMap(ratingRule.getBucketToRuleMap());
         System.out.println("ratingRule is " + ratingRule);
-        assertOrderOfCaseLookupString(ratingRule.toString());
+        assertOrderOfRatingRuleString(ratingRule.toString());
         RatingRule deserialized = JsonUtils.deserialize(ratingRule.toString(), RatingRule.class);
         assertOrderOfMap(deserialized.getBucketToRuleMap());
 
     }
 
-    private void assertOrderOfCaseLookupString(String ratingRule) {
+    private void assertOrderOfRatingRuleString(String ratingRule) {
         int Aindex = ratingRule.indexOf("\"" + RuleBucketName.A.getName() + "\"");
         int AminusIndex = ratingRule.indexOf("\"" + RuleBucketName.A_MINUS.getName() + "\"");
         int Bindex = ratingRule.indexOf("\"" + RuleBucketName.B.getName() + "\"");

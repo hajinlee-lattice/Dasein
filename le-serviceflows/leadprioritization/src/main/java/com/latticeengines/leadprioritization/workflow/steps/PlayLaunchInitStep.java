@@ -124,7 +124,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
             log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestriction));
             FrontEndQuery frontEndQuery = new FrontEndQuery();
-            frontEndQuery.setFrontEndRestriction(new FrontEndRestriction(segmentRestriction));
+            frontEndQuery.setAccountRestriction(new FrontEndRestriction(segmentRestriction));
             frontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
             frontEndQuery.addLookups(BusinessEntity.Account, fields.toArray(new String[fields.size()]));
 
@@ -141,8 +141,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     private void executeLaunchActivity(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
             FrontEndQuery frontEndQuery) {
 
-        long totalAccounts = entityProxy.getCount(config.getCustomerSpace().toString(), BusinessEntity.Account,
-                frontEndQuery);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        long totalAccounts = entityProxy.getCount(config.getCustomerSpace().toString(), frontEndQuery);
         log.info("Total records in segment: " + totalAccounts);
 
         if (totalAccounts > 0) {
@@ -161,9 +161,9 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                         Math.min(pageSize, (totalAccounts - processedSegmentAccountsCount));
 
                 frontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
+                frontEndQuery.setMainEntity(BusinessEntity.Account);
 
-                DataPage accountPage = entityProxy.getData(config.getCustomerSpace().toString(), BusinessEntity.Account,
-                        frontEndQuery);
+                DataPage accountPage = entityProxy.getData(config.getCustomerSpace().toString(), frontEndQuery);
 
                 log.info("Got #" + accountPage.getData().size() + " elements in this loop");
 

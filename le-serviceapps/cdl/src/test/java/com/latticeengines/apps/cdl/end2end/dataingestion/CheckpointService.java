@@ -193,7 +193,8 @@ public class CheckpointService {
 
     long countInRedshift(BusinessEntity entity) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
-        return entityProxy.getCount(mainTestTenant.getId(), entity, frontEndQuery);
+        frontEndQuery.setMainEntity(entity);
+        return entityProxy.getCount(mainTestTenant.getId(), frontEndQuery);
     }
 
     private void verifyStatistics() {

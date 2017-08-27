@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.objectapi.service.EntityQueryService;
@@ -20,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "entities", description = "REST resource for entities")
 @RestController
-@RequestMapping("/customerspaces/{customerSpace}/entities/{entity}")
+@RequestMapping("/customerspaces/{customerSpace}/entity")
 public class EntityResource {
 
     private final EntityQueryService entityQueryService;
@@ -33,25 +32,23 @@ public class EntityResource {
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public long getCount(@PathVariable String customerSpace, @PathVariable BusinessEntity entity,
-                         @RequestBody FrontEndQuery frontEndQuery) {
-        return entityQueryService.getCount(entity, frontEndQuery);
+    public long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+        return entityQueryService.getCount(frontEndQuery);
     }
 
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getData(@PathVariable String customerSpace, @PathVariable BusinessEntity entity,
-                            @RequestBody FrontEndQuery frontEndQuery) {
-        return entityQueryService.getData(entity, frontEndQuery);
+    public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery) {
+        return entityQueryService.getData(frontEndQuery);
     }
 
     @RequestMapping(value = "/ratingcount", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public Map<String, Long> getRatingCount(@PathVariable String customerSpace, @PathVariable BusinessEntity entity,
-                                            @RequestBody FrontEndQuery frontEndQuery) {
-        return entityQueryService.getRatingCount(entity, frontEndQuery);
+    public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
+            @RequestBody FrontEndQuery frontEndQuery) {
+        return entityQueryService.getRatingCount(frontEndQuery);
     }
 
 }

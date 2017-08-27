@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +24,7 @@ import com.latticeengines.objectapi.util.AccountQueryDecorator;
 import com.latticeengines.objectapi.util.ContactQueryDecorator;
 import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryTranslator;
+import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -39,42 +39,44 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     }
 
     @Override
-    public long getCount(BusinessEntity entity, FrontEndQuery frontEndQuery) {
+    public long getCount(FrontEndQuery frontEndQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = QueryTranslator.translate(entity, frontEndQuery, getDecorator(entity, false));
-        query.setLookups(Collections.singletonList(new EntityLookup(entity)));
+        Query query = QueryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
+        query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         return queryEvaluatorService.getCount(customerSpace.toString(), query);
     }
 
     @Override
-    public DataPage getData(BusinessEntity entity, FrontEndQuery frontEndQuery) {
+    public DataPage getData(FrontEndQuery frontEndQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = QueryTranslator.translate(entity, frontEndQuery, getDecorator(entity, true));
+        Query query = QueryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), true));
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
-            query.addLookup(new EntityLookup(entity));
+            query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
         return queryEvaluatorService.getData(customerSpace.toString(), query);
     }
 
     @Override
-    public Map<String, Long> getRatingCount(BusinessEntity entity, FrontEndQuery frontEndQuery) {
+    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = ratingCountQuery(entity, frontEndQuery);
+        Query query = ratingCountQuery(frontEndQuery);
         List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), query).getData();
         Map<String, Long> counts = new HashMap<>();
         data.forEach(map -> counts.put((String) map.get(QueryEvaluator.SCORE), (Long) map.get("count")));
         return counts;
     }
 
-    private Query ratingCountQuery(BusinessEntity entity, FrontEndQuery frontEndQuery) {
+    private Query ratingCountQuery(FrontEndQuery frontEndQuery) {
         List<RatingModel> models = frontEndQuery.getRatingModels();
         if (models != null && models.size() == 1) {
-            Query query = QueryTranslator.translate(entity, frontEndQuery, getDecorator(entity, false));
+            Query query = QueryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
             query.setPageFilter(null);
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
-                CaseLookup caseLookup = QueryTranslator.translateRatingRule(entity, ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE);
+                CaseLookup caseLookup = QueryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
+                        ruleBasedModel.getRatingRule(),
+                        QueryEvaluator.SCORE);
                 GroupBy groupBy = new GroupBy();
                 groupBy.setLookups(Collections.singletonList(caseLookup));
                 query.setGroupBy(groupBy);
@@ -82,7 +84,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                 query.addLookup(AggregateLookup.count().as("Count"));
                 return query;
             } else {
-                throw new UnsupportedOperationException("Can not count rating model of type " + model.getClass().getSimpleName());
+                throw new UnsupportedOperationException(
+                        "Can not count rating model of type " + model.getClass().getSimpleName());
             }
         } else {
             throw new RuntimeException("Must specify one and only one rating model.");
@@ -91,12 +94,12 @@ public class EntityQueryServiceImpl implements EntityQueryService {
 
     private QueryDecorator getDecorator(BusinessEntity entity, boolean addSelects) {
         switch (entity) {
-            case Account:
-                return addSelects ? AccountQueryDecorator.WITH_SELECTS : AccountQueryDecorator.WITHOUT_SELECTS;
-            case Contact:
-                return addSelects ? ContactQueryDecorator.WITH_SELECTS : ContactQueryDecorator.WITHOUT_SELECTS;
-            default:
-                throw new UnsupportedOperationException("Cannot find a decorator for entity " + entity);
+        case Account:
+            return addSelects ? AccountQueryDecorator.WITH_SELECTS : AccountQueryDecorator.WITHOUT_SELECTS;
+        case Contact:
+            return addSelects ? ContactQueryDecorator.WITH_SELECTS : ContactQueryDecorator.WITHOUT_SELECTS;
+        default:
+            throw new UnsupportedOperationException("Cannot find a decorator for entity " + entity);
         }
     }
 

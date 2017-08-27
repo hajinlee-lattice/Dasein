@@ -62,13 +62,14 @@ public abstract class BaseFrontEndEntityResource {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf(":"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
-        return entityProxy.getCount(tenantId, getMainEntity(), frontEndQuery);
+        frontEndQuery.setMainEntity(getMainEntity());
+        return entityProxy.getCount(tenantId, frontEndQuery);
     }
 
     public long getCountForRestriction(FrontEndRestriction restriction) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         if (restriction != null) {
-            frontEndQuery.setFrontEndRestriction(restriction);
+            frontEndQuery.setAccountRestriction(restriction);
         }
         optimizeRestriction(frontEndQuery);
         return getCount(frontEndQuery, null);
@@ -92,14 +93,16 @@ public abstract class BaseFrontEndEntityResource {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf(":"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
-        return entityProxy.getData(tenantId, getMainEntity(), frontEndQuery);
+        frontEndQuery.setMainEntity(getMainEntity());
+        return entityProxy.getData(tenantId, frontEndQuery);
     }
 
     private Map<String, Long> getRatingCountFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf(":"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
-        return entityProxy.getRatingCount(tenantId, getMainEntity(), frontEndQuery);
+        frontEndQuery.setMainEntity(getMainEntity());
+        return entityProxy.getRatingCount(tenantId, frontEndQuery);
     }
 
     private void appendSegmentRestriction(FrontEndQuery frontEndQuery, String segment) {
@@ -108,14 +111,14 @@ public abstract class BaseFrontEndEntityResource {
             segmentRestriction = getSegmentRestriction(segment);
         }
         Restriction frontEndRestriction = null;
-        if (frontEndQuery.getFrontEndRestriction() != null) {
-            frontEndRestriction = frontEndQuery.getFrontEndRestriction().getRestriction();
+        if (frontEndQuery.getAccountRestriction() != null) {
+            frontEndRestriction = frontEndQuery.getAccountRestriction().getRestriction();
         }
         if (segmentRestriction != null && frontEndRestriction != null) {
             Restriction totalRestriction = Restriction.builder().and(frontEndRestriction, segmentRestriction).build();
-            frontEndQuery.getFrontEndRestriction().setRestriction(totalRestriction);
+            frontEndQuery.getAccountRestriction().setRestriction(totalRestriction);
         } else if (segmentRestriction != null) {
-            frontEndQuery.getFrontEndRestriction().setRestriction(segmentRestriction);
+            frontEndQuery.getAccountRestriction().setRestriction(segmentRestriction);
         }
     }
 
@@ -130,10 +133,10 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     private void optimizeRestriction(FrontEndQuery frontEndQuery) {
-        if (frontEndQuery.getFrontEndRestriction() != null) {
-            Restriction restriction = frontEndQuery.getFrontEndRestriction().getRestriction();
+        if (frontEndQuery.getAccountRestriction() != null) {
+            Restriction restriction = frontEndQuery.getAccountRestriction().getRestriction();
             if (restriction != null) {
-                frontEndQuery.getFrontEndRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
+                frontEndQuery.getAccountRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
             }
         }
     }

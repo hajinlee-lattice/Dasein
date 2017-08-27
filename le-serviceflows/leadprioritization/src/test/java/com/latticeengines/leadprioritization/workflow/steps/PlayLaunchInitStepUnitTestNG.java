@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -151,17 +150,14 @@ public class PlayLaunchInitStepUnitTestNG {
                         any(LaunchState.class));
     }
 
-    @SuppressWarnings("deprecation")
     private void mockAccountProxy(long pageSize) {
         when(entityProxy.getCount( //
                 anyString(), //
-                any(BusinessEntity.class), //
                 any(FrontEndQuery.class))) //
                         .thenReturn(2l);
 
         when(entityProxy.getData( //
                 anyString(), //
-                any(BusinessEntity.class), //
                 any(FrontEndQuery.class))) //
                         .thenReturn(generateDataPage(pageSize));
     }
