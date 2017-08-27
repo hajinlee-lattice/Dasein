@@ -122,7 +122,7 @@ FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(SourceAttributeID,Arguments,Attribute,Source,Stage,Transformer);
+(SourceAttributeID,Arguments,Attribute,Source,Stage,Transformer,DataCloudVersion);
 
 INSERT `DecisionGraph` (GraphName, Vertices, StartingVertices, Edges)
 VALUES

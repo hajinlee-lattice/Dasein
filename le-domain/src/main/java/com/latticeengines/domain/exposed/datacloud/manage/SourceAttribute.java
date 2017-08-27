@@ -46,6 +46,10 @@ public class SourceAttribute implements HasPid, Serializable {
     @Column(name = "Arguments", length = 1024)
     private String arguments;
 
+    @Index(name = "IX_VERSION")
+    @Column(name = "DataCloudVersion", length = 50)
+    private String dataCloudVersion;
+
     public SourceAttribute() {
         super();
     }
