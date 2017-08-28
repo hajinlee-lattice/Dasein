@@ -1,8 +1,7 @@
 package com.latticeengines.eai.service.impl.vdb;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,23 +13,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
-import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.VdbToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
-import com.latticeengines.eai.service.EaiImportJobDetailService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
@@ -45,9 +39,6 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
 
     @Autowired
     private EaiMetadataService eaiMetadataService;
-
-    @Autowired
-    private EaiImportJobDetailService eaiImportJobDetailService;
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -96,22 +87,8 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                     importService.importDataAndWriteToHdfs(sourceImportConfiguration, importContext,
                             vdbConnectorConfiguration);
 
-                    Map<String, List<Extract>> extracts = eaiMetadataService.getExtractsForTable(metadata,
-                            importContext);
-                    for (String taskId : identifiers) {
-                        List<Extract> extract = extracts.get(tableTemplates.get(taskId).getName());
-                        if (extract != null && extract.size() > 0) {
-                            if (extract.size() == 1) {
-                                dataFeedProxy.registerExtract(config.getCustomerSpace().toString(), taskId,
-                                        tableTemplates.get(taskId).getName(), extract.get(0));
-                            } else {
-                                dataFeedProxy.registerExtracts(config.getCustomerSpace().toString(), taskId,
-                                        tableTemplates.get(taskId).getName(), extract);
-                            }
-                        }
-                    }
                     log.info("Finalize import job detail record");
-                    finalizeJobDetail(vdbConnectorConfiguration);
+                    finalizeJobDetail(vdbConnectorConfiguration, tableTemplates, importContext);
                 } catch (Exception e) {
                     throw e;
                 }
@@ -123,7 +100,6 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                     log.error("Generate connector configuration error!");
                     break;
                 default:
-                    cleanup(vdbConnectorConfiguration);
                     break;
                 }
 
@@ -162,50 +138,35 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
         log.info(String.format("Table config count: %d", config.getTableConfigurations().size()));
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
             log.info(String.format("Collection identifier: %s", entry.getValue().getCollectionIdentifier()));
-            EaiImportJobDetail jobDetail = eaiImportJobDetailService
-                    .getImportJobDetailByCollectionIdentifier(entry.getValue().getCollectionIdentifier());
-            if (jobDetail == null) {
-                jobDetail = new EaiImportJobDetail();
-                jobDetail.setStatus(ImportStatus.SUBMITTED);
-                jobDetail.setSourceType(SourceType.VISIDB);
-                jobDetail.setCollectionIdentifier(entry.getValue().getCollectionIdentifier());
-                jobDetail.setProcessedRecords(0);
-                jobDetail.setCollectionTimestamp(new Date());
-                jobDetail.setTargetPath(entry.getValue().getExtractPath());
-                eaiImportJobDetailService.createImportJobDetail(jobDetail);
-            } else {
-                jobDetail.setStatus(ImportStatus.SUBMITTED);
-                eaiImportJobDetailService.updateImportJobDetail(jobDetail);
-            }
-
+            initJobDetail(entry.getValue().getCollectionIdentifier(), SourceType.VISIDB);
         }
     }
 
-    private void finalizeJobDetail(VdbConnectorConfiguration config) {
+    @SuppressWarnings("unchecked")
+    private void finalizeJobDetail(VdbConnectorConfiguration config, HashMap<String, Table> tableMetaData,
+                                   ImportContext importContext) {
+        Map<String, Boolean> multipleExtractMap = importContext.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class);
+        Map<String, String> targetPathsMap = importContext.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
+        Map<String, Long> processedRecordsMap = importContext.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
+        Map<String, List<String>> multipleTargets = importContext.getProperty(ImportProperty.EXTRACT_PATH_LIST,
+                Map.class);
+        Map<String, List<Long>> multipleRecords = importContext.getProperty(ImportProperty.EXTRACT_RECORDS_LIST,
+                Map.class);
         for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
-            EaiImportJobDetail jobDetail = eaiImportJobDetailService
-                    .getImportJobDetailByCollectionIdentifier(entry.getValue().getCollectionIdentifier());
-            if (jobDetail != null) {
-                eaiImportJobDetailService.deleteImportJobDetail(jobDetail);
-            }
-        }
-    }
-
-    private void cleanup(VdbConnectorConfiguration config) {
-        if (config == null || config.isDlDataReady()) {
-            return;
-        }
-        for (Map.Entry<String, ImportVdbTableConfiguration> entry : config.getTableConfigurations().entrySet()) {
-            EaiImportJobDetail jobDetail = eaiImportJobDetailService
-                    .getImportJobDetailByCollectionIdentifier(entry.getValue().getCollectionIdentifier());
-            try {
-                if (HdfsUtils.fileExists(yarnConfiguration, jobDetail.getTargetPath())) {
-                    HdfsUtils.rmdir(yarnConfiguration, jobDetail.getTargetPath());
+            Table table = tableMetaData.get(entry.getValue().getCollectionIdentifier());
+            if (multipleExtractMap.get(table.getName())) {
+                List<String> recordList = new ArrayList<>();
+                for(Long record : multipleRecords.get(table.getName())) {
+                    recordList.add(record.toString());
                 }
-            } catch (IOException e) {
-                log.error("Cannot remove extract dir in hdfs");
+                updateJobDetailExtractInfo(entry.getValue().getCollectionIdentifier(), table.getName(),
+                        multipleTargets.get(table.getName()), recordList);
+            } else {
+                updateJobDetailExtractInfo(entry.getValue().getCollectionIdentifier(), table.getName(),
+                        Arrays.asList(targetPathsMap.get(table.getName())),
+                        Arrays.asList(processedRecordsMap.get(table.getName()).toString()));
             }
-            eaiImportJobDetailService.deleteImportJobDetail(jobDetail);
         }
+
     }
 }

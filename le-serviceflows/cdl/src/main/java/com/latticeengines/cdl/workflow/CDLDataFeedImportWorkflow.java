@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow;
 
+import com.latticeengines.cdl.workflow.steps.importdata.RegisterExtract;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class CDLDataFeedImportWorkflow extends AbstractWorkflow<CDLDataFeedImpor
     @Autowired
     private ImportDataFeedTask importDataFeedTask;
 
+    @Autowired
+    private RegisterExtract registerExtract;
+
     @Bean
     public Job cdlDataFeedImportWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -26,6 +30,7 @@ public class CDLDataFeedImportWorkflow extends AbstractWorkflow<CDLDataFeedImpor
     public Workflow defineWorkflow() {
         return new WorkflowBuilder()
                 .next(importDataFeedTask)
+                .next(registerExtract)
                 .build();
     }
 }
