@@ -184,8 +184,7 @@ angular
             },
             views: {
                 "summary@": {
-                    controller: '',
-                    templateUrl: ''
+                    template: ''
                 },
                 "navigation@": {
                     controller: function($scope, $stateParams, $state, $rootScope) {
