@@ -88,6 +88,9 @@ public class ProcessorContext {
     @Value("${datacloud.yarn.actors.num.threads}")
     private int actorsThreadPool;
 
+    @Value("${datacloud.yarn.fetchonly.num.threads:12}")
+    private int fetchonlyThreadPool;
+    
     @Value("${datacloud.yarn.actors.group.size}")
     private int actorsGroupSize;
 
@@ -365,7 +368,7 @@ public class ProcessorContext {
                 groupSize = 128;
             } else if (originalInput.getFetchOnly()) {
                 groupSize = 128;
-                numThreads = 8;
+                numThreads = fetchonlyThreadPool;
             }
         } else {
             if (groupSize == null || groupSize < 1) {
