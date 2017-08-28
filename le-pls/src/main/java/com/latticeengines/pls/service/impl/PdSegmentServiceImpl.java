@@ -18,15 +18,15 @@ import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.ConnectionMgrFactory;
 import com.latticeengines.liaison.exposed.service.Query;
 import com.latticeengines.liaison.exposed.service.QueryColumn;
-import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
-import com.latticeengines.pls.service.SegmentService;
+import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
+import com.latticeengines.pls.service.PdSegmentService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 
-@Component("segmentService")
-public class SegmentServiceImpl implements SegmentService {
+@Component("pdSegmentService")
+public class PdSegmentServiceImpl implements PdSegmentService {
 
     private static final String visiDBManagerType = "visiDB";
     private static final String modelingQueryName = "Q_PLS_Modeling";
@@ -39,7 +39,7 @@ public class SegmentServiceImpl implements SegmentService {
     private SessionService sessionService;
 
     @Autowired
-    private SegmentEntityMgr segmentEntityMgr;
+    private PdSegmentEntityMgr pdSegmentEntityMgr;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -55,12 +55,12 @@ public class SegmentServiceImpl implements SegmentService {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         segment.setTenant(tenant);
-        segmentEntityMgr.create(segment);
+        pdSegmentEntityMgr.create(segment);
     }
 
     @Override
     public void update(String segmentName, Segment segment) {
-        Segment segmentFromDb = segmentEntityMgr.findByName(segmentName);
+        Segment segmentFromDb = pdSegmentEntityMgr.findByName(segmentName);
 
         if (segmentFromDb == null) {
             throw new LedpException(LedpCode.LEDP_18025, new String[] { segmentName });
@@ -72,7 +72,7 @@ public class SegmentServiceImpl implements SegmentService {
 
         segmentFromDb.setModelId(segment.getModelId());
         segmentFromDb.setPriority(segment.getPriority());
-        segmentEntityMgr.update(segmentFromDb);
+        pdSegmentEntityMgr.update(segmentFromDb);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class SegmentServiceImpl implements SegmentService {
             List<QueryColumn> scoringCols = new ArrayList<>();
             List<QueryColumn> modelingCols = modelingQuery.getColumns();
             for (QueryColumn modelingCol : modelingCols) {
-                if (!eventFcnName.equals(modelingCol.getName())){
+                if (!eventFcnName.equals(modelingCol.getName())) {
                     scoringCols.add(modelingCol);
                 } else {
                     scoringCols.add(modelGuidCol);
@@ -101,7 +101,7 @@ public class SegmentServiceImpl implements SegmentService {
             boolean updateRequired = false;
             List<String> scoringOriginalCols = scoringIncrQuery.getColumnNames();
             for (QueryColumn scoringCol : scoringCols) {
-                if(!scoringOriginalCols.contains(scoringCol.getName())) {
+                if (!scoringOriginalCols.contains(scoringCol.getName())) {
                     updateRequired = true;
                     break;
                 }

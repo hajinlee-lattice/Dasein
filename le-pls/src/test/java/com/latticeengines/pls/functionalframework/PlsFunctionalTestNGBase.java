@@ -21,9 +21,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
-import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
@@ -37,7 +37,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
-    private SegmentEntityMgr segmentEntityMgr;
+    private PdSegmentEntityMgr segmentEntityMgr;
 
     @Autowired
     private QuotaEntityMgr quotaEntityMgr;
@@ -125,13 +125,12 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         setupDbUsingDefaultTenantIds(true, true);
     }
 
-    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2)
-            throws Exception {
+    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
         setupDbUsingDefaultTenantIds(useTenant1, useTenant2, true, true);
     }
 
-    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2,
-            boolean createSummaries, boolean createSegments) throws Exception {
+    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries,
+            boolean createSegments) throws Exception {
         marketoTenant = testTenants().get(0);
         eloquaTenant = testTenants().get(1);
         testBed.setMainTestTenant(eloquaTenant);
@@ -144,8 +143,8 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         setupDbWithMarketoSMB(tenant, true, true);
     }
 
-    protected void setupDbWithMarketoSMB(Tenant tenant, boolean createSummaries,
-            boolean createSegments) throws Exception {
+    protected void setupDbWithMarketoSMB(Tenant tenant, boolean createSummaries, boolean createSegments)
+            throws Exception {
 
         ModelSummary summary1 = null;
         if (createSummaries) {
@@ -155,8 +154,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
             summary1.setLookupId(String.format("%s|%s|%s", tokens[0], tokens[1], tokens[2]));
 
             String modelId = summary1.getId();
-            ModelSummary summary = modelSummaryEntityMgr
-                    .retrieveByModelIdForInternalOperations(modelId);
+            ModelSummary summary = modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
             if (summary != null) {
                 setupSecurityContext(summary);
                 modelSummaryEntityMgr.deleteByModelId(summary.getId());
@@ -187,8 +185,8 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         setupDbWithEloquaSMB(tenant, true, true);
     }
 
-    protected void setupDbWithEloquaSMB(Tenant tenant, boolean createSummaries,
-            boolean createSegments) throws Exception {
+    protected void setupDbWithEloquaSMB(Tenant tenant, boolean createSummaries, boolean createSegments)
+            throws Exception {
         ModelSummary summary2 = null;
         if (createSummaries) {
             summary2 = getDetails(tenant, "eloqua");
@@ -223,8 +221,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
             s2p1.addPredictorElement(s2el2);
 
             String modelId = summary2.getId();
-            ModelSummary summary = modelSummaryEntityMgr
-                    .retrieveByModelIdForInternalOperations(modelId);
+            ModelSummary summary = modelSummaryEntityMgr.retrieveByModelIdForInternalOperations(modelId);
             if (summary != null) {
                 setupSecurityContext(summary);
                 modelSummaryEntityMgr.deleteByModelId(summary.getId());

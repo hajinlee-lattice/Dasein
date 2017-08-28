@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
+import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
@@ -23,7 +23,7 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
-    private SegmentEntityMgr segmentEntityMgr;
+    private PdSegmentEntityMgr pdSegmentEntityMgr;
 
     private Tenant tenant1;
     private Tenant tenant2;
@@ -46,10 +46,10 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         segment1.setPriority(1);
         segment1.setTenant(tenant1);
         setupSecurityContext(tenant1);
-        for (Segment segment : segmentEntityMgr.findAll()) {
-            segmentEntityMgr.delete(segment);
+        for (Segment segment : pdSegmentEntityMgr.findAll()) {
+            pdSegmentEntityMgr.delete(segment);
         }
-        segmentEntityMgr.create(segment1);
+        pdSegmentEntityMgr.create(segment1);
 
         Segment segment2 = new Segment();
         segment2.setModelId(summariesForTenant2.get(0).getId());
@@ -57,28 +57,29 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         segment2.setPriority(2);
         segment2.setTenant(tenant2);
         setupSecurityContext(tenant2);
-        for (Segment segment : segmentEntityMgr.findAll()) {
-            segmentEntityMgr.delete(segment);
+        for (Segment segment : pdSegmentEntityMgr.findAll()) {
+            pdSegmentEntityMgr.delete(segment);
         }
-        segmentEntityMgr.create(segment2);
+        pdSegmentEntityMgr.create(segment2);
     }
 
     @Test(groups = "functional")
     public void findAll() {
         setupSecurityContext(tenant1);
-        List<Segment> segments = segmentEntityMgr.findAll();
+        List<Segment> segments = pdSegmentEntityMgr.findAll();
         assertEquals(segments.size(), 1);
     }
 
     @Test(groups = "functional")
     public void getAll() {
-        assertTrue(segmentEntityMgr.getAll().size() >= 2, "should have at least the two segments created in this test");
+        assertTrue(pdSegmentEntityMgr.getAll().size() >= 2,
+                "should have at least the two segments created in this test");
     }
 
     @Test(groups = "functional")
     public void findByName() {
         setupSecurityContext(tenant2);
-        Segment segment = segmentEntityMgr.findByName("US");
+        Segment segment = pdSegmentEntityMgr.findByName("US");
         assertNotNull(segment);
         assertEquals(segment.getPriority().intValue(), 2);
     }

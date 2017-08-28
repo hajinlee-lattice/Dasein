@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.Segment;
-import com.latticeengines.pls.dao.SegmentDao;
+import com.latticeengines.pls.dao.PdSegmentDao;
 
-@Component("segmentDao")
-public class SegmentDaoImpl extends BaseDaoImpl<Segment> implements SegmentDao {
+@Component("pdSegmentDao")
+public class PdSegmentDaoImpl extends BaseDaoImpl<Segment> implements PdSegmentDao {
 
     @Override
     protected Class<Segment> getEntityClass() {

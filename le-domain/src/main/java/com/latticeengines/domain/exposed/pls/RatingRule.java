@@ -13,12 +13,13 @@ public class RatingRule {
 
     public static final String ACCOUNT_RULE = "accountRule";
     public static final String CONTACT_RULE = "contactRule";
+    public static final String DEFAULT_BUCKET_NAME = RuleBucketName.C.getName();
 
     @JsonProperty("bucketToRuleMap")
     private TreeMap<String, Map<String, Restriction>> bucketToRuleMap = generateDefaultBuckets();
 
     @JsonProperty("defaultBucketName")
-    private String defaultBucketName = RuleBucketName.C.getName();
+    private String defaultBucketName = DEFAULT_BUCKET_NAME;
 
     public RatingRule() {
     }
@@ -50,7 +51,6 @@ public class RatingRule {
         return map;
     }
 
-    @SuppressWarnings({ "unused" })
     private Map<String, Restriction> generateDefaultAccountAndContactBuckets() {
         Map<String, Restriction> map = new HashMap<>();
         map.put(ACCOUNT_RULE, Restriction.builder().and(Collections.emptyList()).build());

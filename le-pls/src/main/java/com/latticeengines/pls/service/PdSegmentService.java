@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public interface SegmentService {
+public interface PdSegmentService {
 
     void createSegment(Segment segment, HttpServletRequest request);
 

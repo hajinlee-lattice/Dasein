@@ -9,6 +9,7 @@
     <import resource="classpath:testframework-context.xml"/>
     <import resource="classpath:common-properties-context.xml"/>
     <import resource="classpath:swlib-context.xml"/>
+    <import resource="classpath:metadata-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.common.exposed, com.latticeengines.scoringapi.exposed"/>
 

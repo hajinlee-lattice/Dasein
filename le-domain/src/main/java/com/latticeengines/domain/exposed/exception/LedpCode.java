@@ -262,8 +262,9 @@ public enum LedpCode {
     LEDP_18149("Play {0} cannot be launched since it does not have segment specified."), //
     LEDP_18150("Cannot get tenant configuration."), //
     LEDP_18151("Play not found for {0}."), //
-
     LEDP_18152("Failed to submit a customer report on matching issue."), //
+    LEDP_18153("Segment not defined for Rating Engine {0}."), //
+    LEDP_18154("Type not defined for Rating Engine {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

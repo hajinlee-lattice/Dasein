@@ -38,8 +38,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import io.swagger.annotations.ApiModelProperty;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_SEGMENT", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "TENANT_ID", "NAME" }))
+@javax.persistence.Table(name = "METADATA_SEGMENT", uniqueConstraints = @UniqueConstraint(columnNames = { "TENANT_ID",
+        "NAME" }))
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
@@ -48,7 +48,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
+    @JsonProperty("pid")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;

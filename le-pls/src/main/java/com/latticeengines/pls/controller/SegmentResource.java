@@ -29,8 +29,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
-import com.latticeengines.pls.service.SegmentService;
+import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
+import com.latticeengines.pls.service.PdSegmentService;
 import com.latticeengines.pls.service.impl.TenantConfigServiceImpl;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -50,10 +50,10 @@ public class SegmentResource {
     private SessionService sessionService;
 
     @Autowired
-    private SegmentEntityMgr segmentEntityMgr;
+    private PdSegmentEntityMgr pdSegmentEntityMgr;
 
     @Autowired
-    private SegmentService segmentService;
+    private PdSegmentService pdSegmentService;
 
     @Autowired
     private DataLoaderService dataLoaderService;
@@ -69,7 +69,7 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Get segment by name")
     public Segment getSegmentByName(@PathVariable String segmentName) {
-        return segmentEntityMgr.findByName(segmentName);
+        return pdSegmentEntityMgr.findByName(segmentName);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -91,13 +91,12 @@ public class SegmentResource {
     @ApiOperation(value = "Create a segment")
     public ResponseDocument<?> createSegment(@RequestBody Segment segment, HttpServletRequest request) {
         try {
-            segmentService.createSegment(segment, request);
+            pdSegmentService.createSegment(segment, request);
             return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getStackTrace(e)));
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils.getStackTrace(e)));
         }
     }
 
@@ -106,15 +105,14 @@ public class SegmentResource {
     @ResponseBody
     @ApiOperation(value = "Delete a segment")
     public ResponseDocument<?> delete(@PathVariable String segmentName) {
-        Segment segment = segmentEntityMgr.findByName(segmentName);
+        Segment segment = pdSegmentEntityMgr.findByName(segmentName);
         try {
-            segmentEntityMgr.delete(segment);
+            pdSegmentEntityMgr.delete(segment);
             return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getStackTrace(e)));
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils.getStackTrace(e)));
         }
     }
 
@@ -124,13 +122,12 @@ public class SegmentResource {
     @ApiOperation(value = "Update a segment")
     public ResponseDocument<?> update(@PathVariable String segmentName, @RequestBody Segment newSegment) {
         try {
-            segmentService.update(segmentName, newSegment);
+            pdSegmentService.update(segmentName, newSegment);
             return SimpleBooleanResponse.successResponse();
         } catch (LedpException e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getStackTrace(e)));
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils.getStackTrace(e)));
         }
     }
 
@@ -144,7 +141,7 @@ public class SegmentResource {
             log.info("updateSegments:" + segments);
             dataLoaderService.setSegments(CustomerSpace.parse(tenant.getId()).getTenantId(),
                     tenantConfigService.getDLRestServiceAddress(tenant.getId()), segments);
-            segmentService.synchronizeModelingAndScoring(tenant);
+            pdSegmentService.synchronizeModelingAndScoring(tenant);
 
             // Models assigned to segments are considered active, those
             // otherwise are inactive.
@@ -164,8 +161,7 @@ public class SegmentResource {
         } catch (LedpException e) {
             return SimpleBooleanResponse.failedResponse(Collections.singletonList(e.getMessage()));
         } catch (Exception e) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils
-                    .getStackTrace(e)));
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(ExceptionUtils.getStackTrace(e)));
         }
     }
 

@@ -24,9 +24,9 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
-import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -54,7 +54,7 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
-    private SegmentEntityMgr segmentEntityMgr;
+    private PdSegmentEntityMgr segmentEntityMgr;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;

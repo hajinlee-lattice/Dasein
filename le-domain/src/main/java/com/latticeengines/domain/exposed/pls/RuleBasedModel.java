@@ -7,6 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -19,6 +21,7 @@ import com.latticeengines.common.exposed.util.UuidUtils;
 @Entity
 @javax.persistence.Table(name = "RULE_BASED_MODEL")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@OnDelete(action = OnDeleteAction.CASCADE)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class RuleBasedModel extends RatingModel {
 
@@ -69,8 +72,7 @@ public class RuleBasedModel extends RatingModel {
         return JsonUtils.serialize(this);
     }
 
-    @Override
-    public String generateIdStr() {
+    public static String generateIdStr() {
         return String.format(RULE_BASED_MODEL_FORMAT, RULE_BASED_MODEL_PREFIX,
                 UuidUtils.shortenUuid(UUID.randomUUID()));
     }

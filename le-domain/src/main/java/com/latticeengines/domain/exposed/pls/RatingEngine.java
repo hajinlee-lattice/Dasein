@@ -44,12 +44,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
-    public static final String PLAY_ENGINE_PREFIX = "play_engine";
-    public static final String PLAY_ENGINE_FORMAT = "%s__%s";
+    public static final String RATING_ENGINE_PREFIX = "rating_engine";
+    public static final String RATING_ENGINE_FORMAT = "%s__%s";
 
     public RatingEngine() {
     }
 
+    @JsonProperty("pid")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -106,6 +107,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     @JsonProperty("ratingModels")
     @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "ratingEngine", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RatingModel> ratingModels = new HashSet<>();
 
     @JsonIgnore
@@ -222,6 +224,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         if (this.ratingModels == null) {
             this.ratingModels = new HashSet<>();
         }
+        ratingModel.setRatingEngine(this);
         this.ratingModels.add(ratingModel);
     }
 
@@ -238,7 +241,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return JsonUtils.serialize(this);
     }
 
-    public String generateNameStr() {
-        return String.format(PLAY_ENGINE_FORMAT, PLAY_ENGINE_PREFIX, UuidUtils.shortenUuid(UUID.randomUUID()));
+    public static String generateIdStr() {
+        return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, UuidUtils.shortenUuid(UUID.randomUUID()));
     }
 }

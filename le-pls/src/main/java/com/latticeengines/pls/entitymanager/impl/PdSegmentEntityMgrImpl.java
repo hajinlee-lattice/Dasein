@@ -12,18 +12,18 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Segment;
-import com.latticeengines.pls.dao.SegmentDao;
-import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
+import com.latticeengines.pls.dao.PdSegmentDao;
+import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
 
-@Component("segmentEntityMgr")
-public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<Segment> implements SegmentEntityMgr {
+@Component("pdSegmentEntityMgr")
+public class PdSegmentEntityMgrImpl extends BaseEntityMgrImpl<Segment> implements PdSegmentEntityMgr {
 
     @Autowired
-    private SegmentDao segmentDao;
+    private PdSegmentDao pdSegmentDao;
 
     @Override
     public BaseDao<Segment> getDao() {
-        return segmentDao;
+        return pdSegmentDao;
     }
 
     @Override
@@ -41,13 +41,13 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<Segment> implements 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Segment findByName(String segmentName) {
-        return segmentDao.findByName(segmentName);
+        return pdSegmentDao.findByName(segmentName);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Segment findByModelId(String modelId) {
-        return segmentDao.findByModelId(modelId);
+        return pdSegmentDao.findByModelId(modelId);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<Segment> implements 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public Segment retrieveByModelIdForInternalOperations(String modelId) {
-        return segmentDao.findByModelId(modelId);
+        return pdSegmentDao.findByModelId(modelId);
     }
 
 }

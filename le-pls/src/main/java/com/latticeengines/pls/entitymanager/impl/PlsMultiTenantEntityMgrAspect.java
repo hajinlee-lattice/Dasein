@@ -23,8 +23,8 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.find*(..))")
-    public void findSegment(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.PdSegmentEntityMgrImpl.find*(..))")
+    public void findPdSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
@@ -48,8 +48,8 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.update*(..))")
-    public void updateSegment(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.PdSegmentEntityMgrImpl.update*(..))")
+    public void updatePdSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
@@ -73,8 +73,8 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.delete*(..))")
-    public void deleteSegment(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.PdSegmentEntityMgrImpl.delete*(..))")
+    public void deletePdSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
@@ -135,6 +135,16 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.pls.entitymanager.PlayEntityMgr.delete*(..))")
     public void deletePlay(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.RatingEngineEntityMgr.find*(..))")
+    public void findRatingEngine(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.RatingEngineEntityMgr.delete*(..))")
+    public void deleteRatingEngine(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 

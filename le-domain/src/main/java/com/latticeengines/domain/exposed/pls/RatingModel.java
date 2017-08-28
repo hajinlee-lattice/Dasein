@@ -16,6 +16,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,7 +31,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 @Entity(name = "RATING_MODEL")
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.JOINED)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
@@ -50,11 +53,6 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     @Column(name = "Iteration", nullable = false)
     private int iteration = 1;
 
-    @JsonProperty("ratingEngine")
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = false)
-    private RatingEngine ratingEngine;
-
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
@@ -64,6 +62,12 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
+
+    @JsonProperty("ratingEngine")
+    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    protected RatingEngine ratingEngine;
 
     @Override
     public void setPid(Long pid) {
@@ -120,6 +124,4 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     public RatingEngine getRatingEngine() {
         return this.ratingEngine;
     }
-
-    public abstract String generateIdStr();
 }

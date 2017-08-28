@@ -129,7 +129,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
         Session session = getSessionFactory().getCurrentSession();
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < fieldsAndValues.length; i += 2) {
+        for (int i = 0; i < fieldsAndValues.length - 1; i += 2) {
             if (i > 0) {
                 sb.append(" and ");
             }
