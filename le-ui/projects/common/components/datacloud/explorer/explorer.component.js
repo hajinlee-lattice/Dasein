@@ -104,13 +104,13 @@ angular.module('common.datacloud.explorer', [
         vm.processCategories();
         vm.processEnrichments(Enrichments, true);
         vm.generateTree(true);
-        vm.setCurrentRestrictionForSaveButton();
 
         if (vm.lookupMode && typeof vm.lookupFiltered === 'object' && Object.keys(vm.lookupFiltered).length < 1) {
             vm.no_lookup_results_message = true;
         }
 
         if (vm.section === 'segment.analysis') {
+            vm.setCurrentRestrictionForSaveButton();
             vm.metadataSegments = QueryRestriction;
         }
 
@@ -1581,12 +1581,12 @@ angular.module('common.datacloud.explorer', [
 
     vm.checkSaveButtonState = function(){
 
-        console.log($stateParams);
+        //console.log($stateParams);
 
         var newVal = JSON.stringify(QueryStore.getRestriction());
 
-        console.log($stateParams.defaultSegmentRestriction);
-        console.log(newVal);
+        //console.log($stateParams.defaultSegmentRestriction);
+        //console.log(newVal);
 
         if($stateParams.defaultSegmentRestriction === newVal){
             vm.saveSegmentEnabled = false;
