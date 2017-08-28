@@ -1,4 +1,10 @@
 <ul class="filters" >
+    <li class="ratings-selected" ng-if="vm.section == 'wizard.segment'">
+    <ul>
+        <li>Selected Attributes (n)</li>
+        <li>All Attributes (n)</li>
+    </ul>
+    </li>
     <li class="query">
         <div class="ng-search">
             <a class="button icon-button white-button" ng-click="vm.queryText.length ? vm.queryText = null : ''">
@@ -30,7 +36,7 @@
             <li class="toggle no-attributes show" ng-if="vm.lookupMode"><input type="checkbox" id="nulls" name="nulls" ng-model="vm.metadata.toggle.show.nulls" ng-change="vm.metadata.current = 1;" ng-checked="vm.metadata.toggle.show.nulls" /> <label for="nulls">Include "No" Attributes</label></li>
         </ul>
     </li>
-    <li class="sort" ng-disabled="!vm.category" ng-if="vm.category && ['wizard.segment'].indexOf(vm.section) == -1">
+    <li class="sort" ng-disabled="!vm.category" ng-if="vm.category">
         <a class="button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;" ng-init="vm.sortPrefix = '+';">
             <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
         </a>

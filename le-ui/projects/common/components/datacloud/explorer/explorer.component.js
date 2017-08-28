@@ -1380,6 +1380,7 @@ angular.module('common.datacloud.explorer', [
             }
         }
         vm.categoryCounts[item.Category] = result.length;
+        
         if($stateParams.gotoNonemptyCategory) {
             gotoNonemptyCategory();
         }

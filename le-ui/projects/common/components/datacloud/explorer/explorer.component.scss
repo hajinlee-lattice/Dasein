@@ -255,21 +255,6 @@
                                     padding-left: 15px;
                                 }
                             }
-                            attribute-feedback-button {
-                                display: none;
-                                pointer-events: auto;
-                                position: absolute;
-                                top: 0;
-                                left: 2px;
-                                div.infodot {
-                                    color: #0c8bc7;
-                                }
-                            }
-                            &:hover {
-                                attribute-feedback-button {
-                                    display: block;
-                                }
-                            }
                         }
                     }
                 }
@@ -395,11 +380,33 @@
                     h2 {
                         @include text-ellipsis;
                         font-size: 20px;
+                        .attribute-feedback-container {
+                            display: inline;
+                            position: relative;
+                            padding-right: 15px;
+                            attribute-feedback-button {
+                                display: none;
+                                pointer-events: auto;
+                                position: absolute;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                right: 2px;
+                                font-size: 11px;
+                                div.infodot {
+                                    color: #0c8bc7;
+                                }
+                            }
+                        }
+                        &:hover {
+                            attribute-feedback-button {
+                                display: block;
+                            }
+                        }
                     }
                     .info {
                         margin-bottom: 10px;
                     }
-                    .details {
+                    .details { //ben
                         font-size: 12px;
                         h3 {
                             font-weight: bold;
@@ -424,6 +431,44 @@
                                 }
                                 h3 {
                                     @include flex-item(1 1 auto);
+                                }
+                                &:hover {
+                                    attribute-feedback-button {
+                                        display: block;
+                                    }
+                                }
+                            }
+                        }
+                        .attribute-feedback-container {
+                            display: inline;
+                            position: relative;
+                            padding-left: 15px;
+                            attribute-feedback-button {
+                                display: none;
+                                pointer-events: auto;
+                                position: absolute;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                left: 2px;
+                                div.infodot {
+                                    color: #0c8bc7;
+                                }
+                            }
+                        }
+                        .sales-employees .sales, 
+                        .sales-employees .employees, 
+                        .industry {
+                            .attribute-feedback-container {
+                                padding-left: 0;
+                                padding-right: 15px;
+                                attribute-feedback-button {
+                                    left: auto;
+                                    right: 2px;
+                                }
+                            }
+                            &:hover {
+                                attribute-feedback-button {
+                                    display: block;
                                 }
                             }
                         }
@@ -899,7 +944,7 @@
                 }
             }
         }
-        ul.attributes {
+        ul.attributes { 
             margin-top: 15px;
             font-size: 11px;
             text-align: left;
@@ -919,6 +964,26 @@
                     padding-bottom: 0;
                     .column.label {
                         text-transform: uppercase;
+                    }
+                }
+                .attribute-feedback-container {
+                    display: inline;
+                    position: relative;
+                    padding-left: 15px;
+                    attribute-feedback-button {
+                        display: none;
+                        pointer-events: auto;
+                        position: absolute;
+                        top: 0;
+                        left: 2px;
+                        div.infodot {
+                            color: #0c8bc7;
+                        }
+                    }
+                }
+                &:hover {
+                    attribute-feedback-button {
+                        display: block;
                     }
                 }
                 & > .column {
