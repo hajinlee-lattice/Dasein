@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -33,9 +34,13 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.DataRequest;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -54,6 +59,10 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStep.class);
+
+    private static final String NAME_AS_PER_LATTICE_MATCH = "LDC_Name";
+
+    private static final String SCORING_FIELD_NAME = "__RuleModel_Score__";
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -82,11 +91,14 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private long launchTimestampMillis;
 
+    private long segmentAccountsCount = 0;
+
     private long processedSegmentAccountsCount = 0;
 
     List<String> fields = Arrays.asList(InterfaceName.AccountId.name(), //
             InterfaceName.SalesforceAccountID.name(), //
-            InterfaceName.CompanyName.name());
+            InterfaceName.CompanyName.name(), //
+            NAME_AS_PER_LATTICE_MATCH);
 
     @PostConstruct
     public void init() {
@@ -116,17 +128,53 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
             String segmentName = play.getSegmentName();
             log.info("Processing segment: " + segmentName);
-            Restriction segmentRestriction = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
-                    segmentName);
+            FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
+            FrontEndQuery contactFrontEndQuery = new FrontEndQuery();
 
-            log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestriction));
-            FrontEndQuery frontEndQuery = new FrontEndQuery();
-            frontEndQuery.setAccountRestriction(new FrontEndRestriction(segmentRestriction));
-            frontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
-            frontEndQuery.addLookups(BusinessEntity.Account, fields.toArray(new String[fields.size()]));
-            frontEndQuery.setMainEntity(BusinessEntity.Account);
+            List<Lookup> lookups = new ArrayList<>();
+            for (String fieldName : fields) {
+                Lookup lookup = new AttributeLookup(BusinessEntity.Account, fieldName);
+                lookups.add(lookup);
+            }
+            accountFrontEndQuery.setLookups(lookups);
+            RatingEngine ratingEngine = play.getRatingEngine();
+            if (ratingEngine != null) {
+                if (ratingEngine.getSegment() != null) {
+                    FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
+                            ratingEngine.getSegment().getRestriction());
+                    accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
+                }
+                accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
 
-            executeLaunchActivity(tenant, playLaunch, config, frontEndQuery);
+                List<RatingModel> ratingModels = new ArrayList<>();
+                for (RatingModel model : ratingEngine.getRatingModels()) {
+                    ratingModels.add((RuleBasedModel) model);
+                    break;
+                }
+                accountFrontEndQuery.setRatingModels(ratingModels);
+
+                lookups = accountFrontEndQuery.getLookups();
+                Lookup lookup = new AttributeLookup(BusinessEntity.Rating, SCORING_FIELD_NAME);
+                lookups.add(lookup);
+
+                for (RatingModel ratingModel : accountFrontEndQuery.getRatingModels()) {
+                    ratingModel.setId(SCORING_FIELD_NAME);
+                }
+            }
+
+            if (accountFrontEndQuery.getAccountRestriction() == null) {
+
+                Restriction segmentRestriction = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
+                        segmentName);
+
+                log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestriction));
+
+                FrontEndRestriction frontEndRestriction = new FrontEndRestriction(segmentRestriction);
+                accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
+            }
+
+            accountFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
+            executeLaunchActivity(tenant, playLaunch, config, accountFrontEndQuery, contactFrontEndQuery);
 
             internalResourceRestApiProxy.publishTalkingPoints(customerSpace, playName);
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
@@ -137,38 +185,41 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     private void executeLaunchActivity(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
-                                       FrontEndQuery frontEndQuery) {
-        long totalAccounts = entityProxy.getCount(config.getCustomerSpace().toString(), frontEndQuery);
-        log.info("Total records in segment: " + totalAccounts);
+            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery) {
+
+        segmentAccountsCount = entityProxy.getCount( //
+                config.getCustomerSpace().toString(), //
+                accountFrontEndQuery);
+        log.info("Total records in segment: " + segmentAccountsCount);
 
         long suppressedAccounts = 0;
-        if (frontEndQuery.restrictNotNullSalesforceId()) {
-            frontEndQuery.setRestrictNotNullSalesforceId(false);
-            suppressedAccounts = entityProxy.getCount(config.getCustomerSpace().toString(), frontEndQuery) - totalAccounts;
-            frontEndQuery.setRestrictNotNullSalesforceId(true);
+        if (accountFrontEndQuery.restrictNotNullSalesforceId()) {
+            accountFrontEndQuery.setRestrictNotNullSalesforceId(false);
+            suppressedAccounts = entityProxy.getCount(config.getCustomerSpace().toString(), accountFrontEndQuery)
+                    - segmentAccountsCount;
+            accountFrontEndQuery.setRestrictNotNullSalesforceId(true);
         }
         playLaunch.setAccountsSuppressed(suppressedAccounts);
 
-        if (totalAccounts > 0) {
-            List<String> accountSchema = getSchema(tenant, TableRoleInCollection.BucketedAccount);
-            DataRequest dataRequest = new DataRequest();
-            dataRequest.setAttributes(accountSchema);
+        if (segmentAccountsCount > 0) {
             AtomicLong launched = new AtomicLong();
             AtomicLong errored = new AtomicLong();
 
-            int pages = (int) Math.ceil((totalAccounts * 1.0D) / pageSize);
+            int pages = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
 
             log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
 
             for (int pageNo = 0; pageNo < pages; pageNo++) {
                 log.info("Loop #" + pageNo);
 
-                long expectedPageSize = Math.min(pageSize, (totalAccounts - processedSegmentAccountsCount));
+                long expectedPageSize = Math.min(pageSize, (segmentAccountsCount - processedSegmentAccountsCount));
 
-                frontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
-                frontEndQuery.setMainEntity(BusinessEntity.Account);
+                accountFrontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
+                accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
 
-                DataPage accountPage = entityProxy.getData(config.getCustomerSpace().toString(), frontEndQuery);
+                DataPage accountPage = entityProxy.getData( //
+                        config.getCustomerSpace().toString(), //
+                        accountFrontEndQuery);
 
                 log.info("Got #" + accountPage.getData().size() + " elements in this loop");
 
@@ -176,11 +227,20 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
                 if (CollectionUtils.isNotEmpty(accountList)) {
 
-                    Stream<Map<String, Object>> parallelStream = //
-                            accountList.stream() //
-                                    .parallel();
+                    List<Long> accountIds = //
+                            parallelStream(accountList) //
+                                    .map(account -> //
+                                    {
+                                        String accountIdStr = (String) account.get(InterfaceName.AccountId.name());
+                                        return StringUtils.isNotBlank(accountIdStr)
+                                                && StringUtils.isNumeric(accountIdStr) ? Long.parseLong(accountIdStr)
+                                                        : null;
+                                    })//
+                                    .collect(Collectors.toList());
 
-                    parallelStream //
+                    log.info("Extracting contacts for accountIds: " + accountIds.toArray(new Long[accountIds.size()]));
+
+                    parallelStream(accountList) //
                             .map(account -> {
                                 try {
                                     Recommendation recommendation = //
@@ -202,7 +262,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                             .collect(Collectors.toList());
                 }
                 processedSegmentAccountsCount += accountList.size();
-                playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / totalAccounts);
+                playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / segmentAccountsCount);
                 playLaunch.setAccountsLaunched(launched.get());
                 playLaunch.setAccountsErrored(errored.get());
                 updateLaunchProgress(playLaunch);
@@ -210,14 +270,16 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         }
     }
 
+    private Stream<Map<String, Object>> parallelStream(List<Map<String, Object>> accountList) {
+        return accountList.stream() //
+                .parallel();
+    }
+
     private void updateLaunchProgress(PlayLaunch playLaunch) {
         try {
             internalResourceRestApiProxy.updatePlayLaunchProgress(getConfiguration().getCustomerSpace().toString(), //
-                    playLaunch.getPlay().getName(),
-                    playLaunch.getLaunchId(),
-                    playLaunch.getLaunchCompletionPercent(),
-                    playLaunch.getAccountsLaunched(),
-                    playLaunch.getAccountsErrored(),
+                    playLaunch.getPlay().getName(), playLaunch.getLaunchId(), playLaunch.getLaunchCompletionPercent(),
+                    playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored(),
                     playLaunch.getAccountsSuppressed());
         } catch (Exception e) {
             log.error("Unable to update launch progress.", e);
@@ -225,7 +287,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     private Recommendation prepareRecommendation(Tenant tenant, PlayLaunch playLauch,
-                                                 PlayLaunchInitStepConfiguration config, Map<String, Object> account) {
+            PlayLaunchInitStepConfiguration config, Map<String, Object> account) {
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
 
@@ -240,16 +302,16 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         }
         recommendation.setLaunchDate(launchTime);
 
-        recommendation.setAccountId(checkAndGet(account, InterfaceName.AccountId));
-        recommendation.setLeAccountExternalID(checkAndGet(account, InterfaceName.AccountId));
-        recommendation.setSfdcAccountID(checkAndGet(account, InterfaceName.SalesforceAccountID));
+        recommendation.setAccountId(checkAndGet(account, InterfaceName.AccountId.name()));
+        recommendation.setLeAccountExternalID(checkAndGet(account, InterfaceName.AccountId.name()));
+        recommendation.setSfdcAccountID(checkAndGet(account, InterfaceName.SalesforceAccountID.name()));
         Double value = 0D;
         recommendation.setMonetaryValue(value);
-        recommendation.setCompanyName(checkAndGet(account, InterfaceName.CompanyName));
+        recommendation.setCompanyName(checkAndGet(account, InterfaceName.CompanyName.name()));
         recommendation.setTenantId(tenant.getPid());
         recommendation.setLikelihood(0.5D);
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
-        recommendation.setPriorityDisplayName("A");
+        recommendation.setPriorityDisplayName(checkAndGet(account, SCORING_FIELD_NAME, "A"));
 
         // TODO - read contact data from redshift api
         List<Map<String, String>> contactList = PlaymakerUtils
@@ -260,8 +322,13 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         return recommendation;
     }
 
-    private String checkAndGet(Map<String, Object> account, InterfaceName columnName) {
-        return account.get(columnName.name()) != null ? account.get(columnName.name()).toString() : null;
+    private String checkAndGet(Map<String, Object> account, String columnName) {
+        return account.get(columnName) != null ? account.get(columnName).toString() : null;
+    }
+
+    private String checkAndGet(Map<String, Object> account, String columnName, String defaultValue) {
+        String value = checkAndGet(account, columnName);
+        return value == null ? defaultValue : value;
     }
 
     private List<String> getSchema(Tenant tenant, TableRoleInCollection role) {
@@ -309,5 +376,10 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     @VisibleForTesting
     void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
+    }
+
+    @VisibleForTesting
+    void setDanteLeadProxy(DanteLeadProxy danteLeadProxy) {
+        this.danteLeadProxy = danteLeadProxy;
     }
 }

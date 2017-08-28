@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
+import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -52,6 +53,9 @@ public class PlayLaunchInitStepUnitTestNG {
     RecommendationService recommendationService;
 
     @Mock
+    DanteLeadProxy danteLeadProxy;
+
+    @Mock
     TenantEntityMgr tenantEntityMgr;
 
     @BeforeClass(groups = "unit")
@@ -74,6 +78,8 @@ public class PlayLaunchInitStepUnitTestNG {
 
         mockTalkingPointProxy();
 
+        mockDanteLeadProxy();
+
         playLaunchInitStep = new PlayLaunchInitStep();
 
         playLaunchInitStep.setEntityProxy(entityProxy);
@@ -82,6 +88,7 @@ public class PlayLaunchInitStepUnitTestNG {
         playLaunchInitStep.setPageSize(pageSize);
         playLaunchInitStep.setRecommendationService(recommendationService);
         playLaunchInitStep.setTenantEntityMgr(tenantEntityMgr);
+        playLaunchInitStep.setDanteLeadProxy(danteLeadProxy);
 
         playLaunchInitStep.setConfiguration(createConf(CustomerSpace.parse(tenantIdentifier), playId, playLaunchId));
     }
@@ -116,6 +123,12 @@ public class PlayLaunchInitStepUnitTestNG {
         when(tenantEntityMgr.findByTenantId( //
                 anyString())) //
                         .thenReturn(tenant);
+    }
+
+    private void mockDanteLeadProxy() {
+        doNothing() //
+                .when(danteLeadProxy) //
+                .create(any(Recommendation.class), anyString());
     }
 
     private void mockInternalResource(String playId, String playLaunchId) {
