@@ -8,7 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Index;
 
@@ -17,9 +16,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "CategoricalAttribute", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "AttrName", "AttrValue", "ParentID" })
-})
+@Table(name = "CategoricalAttribute")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CategoricalAttribute implements HasPid {
 
