@@ -1,7 +1,9 @@
 package com.latticeengines.pls.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.latticeengines.domain.exposed.exception.LedpCode.LEDP_18152;
+
+import javax.inject.Inject;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
+import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
+import com.latticeengines.pls.service.DataCloudService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,21 +26,35 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/datacloud")
 @PreAuthorize("hasRole('View_PLS_Models')")
 public class DataCloudResource {
-    private static final Logger log = LoggerFactory.getLogger(DataCloudResource.class);
+
+    private final DataCloudService dataCloudService;
+
+    @Inject
+    public DataCloudResource(DataCloudService dataCloudService) {
+        this.dataCloudService = dataCloudService;
+    }
 
     @RequestMapping(value = "/customerreports/incorrectlookups", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert one customer report")
-    public ResponseDocument<String> createLookupCustomerReport(@RequestBody CustomerReport report) {
-        log.debug(String.format("customer report %s is created", report));
-        return null;
+    public ResponseDocument<String> createLookupCustomerReport(@RequestBody IncorrectLookupReportRequest request) {
+        try {
+            CustomerReport report = dataCloudService.reportIncorrectLookup(request);
+            return ResponseDocument.successResponse(report.getId());
+        } catch (Exception e) {
+            throw new LedpException(LEDP_18152);
+        }
     }
 
     @RequestMapping(value = "/customerreports/incorrectmatchedattrs", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert one customer report")
-    public ResponseDocument<String> createMatchedAttrsCustomerReport(@RequestBody CustomerReport report) {
-        log.debug(String.format("customer report %s is created", report));
-        return null;
+    public ResponseDocument<String> createMatchedAttrsCustomerReport(@RequestBody IncorrectMatchedAttrReportRequest request) {
+        try {
+            CustomerReport report = dataCloudService.reportIncorrectMatchedAttr(request);
+            return ResponseDocument.successResponse(report.getId());
+        } catch (Exception e) {
+            throw new LedpException(LEDP_18152);
+        }
     }
 }

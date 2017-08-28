@@ -263,6 +263,8 @@ public enum LedpCode {
     LEDP_18150("Cannot get tenant configuration."), //
     LEDP_18151("Play not found for {0}."), //
 
+    LEDP_18152("Failed to submit a customer report on matching issue."), //
+
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
 
