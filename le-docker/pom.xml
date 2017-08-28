@@ -11,7 +11,6 @@
         <component-name>docker</component-name>
         <kafka.connect.docker.context>src/main/scripts/kafka/le-kafka-connect</kafka.connect.docker.context>
         <tomcat.docker.context>src/main/scripts/tomcat/le-tomcatbase</tomcat.docker.context>
-        <config.docker.context>src/main/scripts/tomcat/le-config</config.docker.context>
         <matchapi.docker.context>src/main/scripts/tomcat/le-matchapi</matchapi.docker.context>
         <oauth2.docker.context>src/main/scripts/tomcat/le-oauth2</oauth2.docker.context>
         <playmaker.docker.context>src/main/scripts/tomcat/le-playmaker</playmaker.docker.context>
@@ -51,24 +50,6 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
                                       tofile="${project.basedir}/${tomcat.docker.context}/conf/env/prodcluster/latticeengines.properties"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-config/conf/env/devcluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${config.docker.context}/conf/env/devcluster/latticeengines.properties"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-config/conf/env/qacluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${config.docker.context}/conf/env/qacluster/latticeengines.properties"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${config.docker.context}/conf/env/prodcluster/latticeengines.properties"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-config/conf/env/devcluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/devcluster/latticeengines.properties"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-config/conf/env/qacluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/qacluster/latticeengines.properties"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-config/conf/env/prodcluster/latticeengines.properties"
-                                      tofile="${project.basedir}/${workflowapp.docker.context}/conf/env/prodcluster/latticeengines.properties"
                                       overwrite="true" />
 
                                 <!-- special wars -->
