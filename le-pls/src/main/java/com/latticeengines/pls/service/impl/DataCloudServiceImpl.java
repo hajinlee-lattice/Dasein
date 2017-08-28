@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
+import com.latticeengines.domain.exposed.datacloud.customer.CustomerReportType;
 import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
 import com.latticeengines.pls.service.DataCloudService;
@@ -25,6 +26,8 @@ public class DataCloudServiceImpl implements DataCloudService {
         CustomerReport customerReport = new CustomerReport();
         customerReport.setId(UUID.randomUUID().toString());
 
+        customerReport.setType(CustomerReportType.LOOkUP);
+
         return customerReport;
     }
 
@@ -35,6 +38,8 @@ public class DataCloudServiceImpl implements DataCloudService {
         //TODO: change to call matchapi
         CustomerReport customerReport = new CustomerReport();
         customerReport.setId(UUID.randomUUID().toString());
+
+        customerReport.setType(CustomerReportType.MATCHEDATTRIBUTE);
 
         return customerReport;
     }
