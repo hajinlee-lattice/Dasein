@@ -66,11 +66,47 @@
                     <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
                     <div class="column data value" ng-if="vm.section == 'segment.analysis' && attribute.TopBkt">{{ attribute.TopBkt.Lbl }}</div>
                     <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.data.Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>
+
                     <div class="column data records" ng-if="!vm.lookupMode && !vm.inModel()">
-                        <strong><attribute-feedback-button type="'infodot'" attribute="attribute" value="attribute.TopBkt.Cnt" ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'"/>{{ attribute.TopBkt.Cnt|number }}</strong>
+                        <strong ng-if="vm.section === 'segment.analysis'">
+                            <attribute-feedback-button 
+                                type="'infodot'" 
+                                attribute="attribute" 
+                                value="attribute.TopBkt.Cnt" 
+                                ng-if="
+                                    vm.lookupMode && 
+                                    vm.hasCompanyInfo && 
+                                    vm.section != 'insights'"/>
+
+                                {{ attribute.TopBkt.Cnt|number }}
+                        </strong>
+                        <strong ng-if="vm.section != 'segment.analysis'">
+                            <attribute-feedback-button 
+                                type="'infodot'" 
+                                attribute="attribute" 
+                                value="attribute.Count" 
+                                ng-if="
+                                    vm.lookupMode && 
+                                    vm.hasCompanyInfo && 
+                                    vm.section != 'insights'"/>
+
+                                {{ attribute.Count |number }}
+                        </strong>
                     </div>
-                    <div class="column data values" ng-if="vm.lookupMode && vm.section != 'segment.analysis'">
-                        <strong><attribute-feedback-button type="'infodot'" attribute="attribute" value="vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType)" ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" />{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</strong>
+                    <div 
+                        class="column data values" 
+                        ng-if="vm.lookupMode && vm.section != 'segment.analysis'">
+                        
+                        <strong>
+                            <attribute-feedback-button 
+                                type="'infodot'" 
+                                attribute="attribute" 
+                                value="vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType)" 
+                                ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" />
+
+                            {{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}
+                        </strong>
+
                     </div>
                 </li>
             </ul>
