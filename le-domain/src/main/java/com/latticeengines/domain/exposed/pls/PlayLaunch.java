@@ -76,7 +76,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Play play;
 
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
@@ -93,6 +93,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "TABLE_NAME", nullable = true)
     private String tableName;
 
+    @JsonProperty("launchCompletionPercent")
+    @Column(name = "LAUNCH_COMPLETION_PERCENT")
+    private double launchCompletionPercent;
+
     @JsonProperty("contactsLaunched")
     @Column(name = "CONTACTS_LAUNCHED")
     private Long contactsLaunched;
@@ -100,6 +104,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("accountsLaunched")
     @Column(name = "ACCOUNTS_LAUNCHED")
     private Long accountsLaunched;
+
+    @JsonProperty("accountsSuppressed")
+    @Column(name = "ACCOUNTS_SUPPRESSED")
+    private Long accountsSuppressed;
+
+    @JsonProperty("accountsErrored")
+    @Column(name = "ACCOUNTS_ERRORED")
+    private Long accountsErrored;
 
     @Override
     public Long getPid() {
@@ -202,6 +214,15 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         return this.tenantId;
     }
 
+    public double getLaunchCompletionPercent() {
+        return launchCompletionPercent;
+    }
+
+    public void setLaunchCompletionPercent(double launchCompletionPercent) {
+        this.launchCompletionPercent = launchCompletionPercent;
+    }
+
+
     public Long getAccountsLaunched() {
         return this.accountsLaunched;
     }
@@ -216,5 +237,21 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setContactsLaunched(Long contactsLaunched) {
         this.contactsLaunched = contactsLaunched;
+    }
+
+    public Long getAccountsSuppressed() {
+        return accountsSuppressed;
+    }
+
+    public void setAccountsSuppressed(Long accountsSuppressed) {
+        this.accountsSuppressed = accountsSuppressed;
+    }
+
+    public Long getAccountsErrored() {
+        return accountsErrored;
+    }
+
+    public void setAccountsErrored(Long accountsErrored) {
+        this.accountsErrored = accountsErrored;
     }
 }

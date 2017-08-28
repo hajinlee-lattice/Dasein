@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,7 +44,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
-import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -76,9 +76,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
-
-    @Autowired
-    private TalkingPointProxy talkingPointProxy;
 
     @Autowired
     private DanteLeadProxy danteLeadProxy;
@@ -127,6 +124,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             frontEndQuery.setAccountRestriction(new FrontEndRestriction(segmentRestriction));
             frontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
             frontEndQuery.addLookups(BusinessEntity.Account, fields.toArray(new String[fields.size()]));
+            frontEndQuery.setMainEntity(BusinessEntity.Account);
 
             executeLaunchActivity(tenant, playLaunch, config, frontEndQuery);
 
@@ -139,16 +137,24 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     private void executeLaunchActivity(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
-            FrontEndQuery frontEndQuery) {
-
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
+                                       FrontEndQuery frontEndQuery) {
         long totalAccounts = entityProxy.getCount(config.getCustomerSpace().toString(), frontEndQuery);
         log.info("Total records in segment: " + totalAccounts);
+
+        long suppressedAccounts = 0;
+        if (frontEndQuery.restrictNotNullSalesforceId()) {
+            frontEndQuery.setRestrictNotNullSalesforceId(false);
+            suppressedAccounts = entityProxy.getCount(config.getCustomerSpace().toString(), frontEndQuery) - totalAccounts;
+            frontEndQuery.setRestrictNotNullSalesforceId(true);
+        }
+        playLaunch.setAccountsSuppressed(suppressedAccounts);
 
         if (totalAccounts > 0) {
             List<String> accountSchema = getSchema(tenant, TableRoleInCollection.BucketedAccount);
             DataRequest dataRequest = new DataRequest();
             dataRequest.setAttributes(accountSchema);
+            AtomicLong launched = new AtomicLong();
+            AtomicLong errored = new AtomicLong();
 
             int pages = (int) Math.ceil((totalAccounts * 1.0D) / pageSize);
 
@@ -157,8 +163,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             for (int pageNo = 0; pageNo < pages; pageNo++) {
                 log.info("Loop #" + pageNo);
 
-                long expectedPageSize = //
-                        Math.min(pageSize, (totalAccounts - processedSegmentAccountsCount));
+                long expectedPageSize = Math.min(pageSize, (totalAccounts - processedSegmentAccountsCount));
 
                 frontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
                 frontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -186,21 +191,41 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                                     } catch (Exception e) {
                                         log.error("Failed to publish lead to dante, ignoring", e);
                                     }
+                                    launched.addAndGet(1);
                                     return recommendation.getRecommendationId();
                                 } catch (Throwable th) {
                                     log.error(th.getMessage(), th);
+                                    errored.addAndGet(1);
                                     throw th;
                                 }
                             }) //
                             .collect(Collectors.toList());
                 }
                 processedSegmentAccountsCount += accountList.size();
+                playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / totalAccounts);
+                playLaunch.setAccountsLaunched(launched.get());
+                playLaunch.setAccountsErrored(errored.get());
+                updateLaunchProgress(playLaunch);
             }
         }
     }
 
+    private void updateLaunchProgress(PlayLaunch playLaunch) {
+        try {
+            internalResourceRestApiProxy.updatePlayLaunchProgress(getConfiguration().getCustomerSpace().toString(), //
+                    playLaunch.getPlay().getName(),
+                    playLaunch.getLaunchId(),
+                    playLaunch.getLaunchCompletionPercent(),
+                    playLaunch.getAccountsLaunched(),
+                    playLaunch.getAccountsErrored(),
+                    playLaunch.getAccountsSuppressed());
+        } catch (Exception e) {
+            log.error("Unable to update launch progress.", e);
+        }
+    }
+
     private Recommendation prepareRecommendation(Tenant tenant, PlayLaunch playLauch,
-            PlayLaunchInitStepConfiguration config, Map<String, Object> account) {
+                                                 PlayLaunchInitStepConfiguration config, Map<String, Object> account) {
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
 
@@ -253,8 +278,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     private List<Attribute> getSchemaAttributes(Tenant tenant, TableRoleInCollection role) {
         String customerSpace = tenant.getId();
         Table schemaTable = dataCollectionProxy.getTable(customerSpace, role);
-        List<Attribute> schemaAttributes = schemaTable.getAttributes();
-        return schemaAttributes;
+        return schemaTable.getAttributes();
     }
 
     @VisibleForTesting
@@ -285,10 +309,5 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     @VisibleForTesting
     void setDataCollectionProxy(DataCollectionProxy dataCollectionProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
-    }
-
-    @VisibleForTesting
-    void setTalkingPointProxy(TalkingPointProxy talkingPointProxy) {
-        this.talkingPointProxy = talkingPointProxy;
     }
 }

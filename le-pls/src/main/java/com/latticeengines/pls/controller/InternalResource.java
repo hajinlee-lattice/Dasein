@@ -1320,6 +1320,27 @@ public class InternalResource extends InternalResourceBase {
         return playLaunchService.update(playLaunch);
     }
 
+    @RequestMapping(value = "/plays/{playName}/launches/{launchId}/" + TENANT_ID_PATH, method = RequestMethod.PATCH)
+    @ResponseBody
+    @ApiOperation(value = "Update play launch state.")
+    public PlayLaunch updatePlayLaunchProgress(@PathVariable("tenantId") String tenantId,
+            @PathVariable("playName") String playName, //
+            @PathVariable("launchId") String launchId, //
+            @RequestParam("launchCompletionPercent") double launchCompletionPercent, //
+            @RequestParam("accountsLaunched") long accountsLaunched, //
+            @RequestParam("accountsErrored") long accountsErrored, //
+            @RequestParam("accountsSuppressed") long accountsSuppressed) {
+        log.debug(String.format("Record play launch progress for %s launchId", launchId));
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        playLaunch.setAccountsLaunched(accountsLaunched);
+        playLaunch.setAccountsErrored(accountsErrored);
+        playLaunch.setLaunchCompletionPercent(launchCompletionPercent);
+        playLaunch.setAccountsSuppressed(accountsSuppressed);
+        return playLaunchService.update(playLaunch);
+    }
+
     @RequestMapping(value = "/play/{playName}/customerspace/{customerSpace:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get play for a specific tenant based on playName")

@@ -27,7 +27,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
-import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -53,9 +52,6 @@ public class PlayLaunchInitStepUnitTestNG {
     RecommendationService recommendationService;
 
     @Mock
-    TalkingPointProxy talkingPointProxy;
-
-    @Mock
     TenantEntityMgr tenantEntityMgr;
 
     @BeforeClass(groups = "unit")
@@ -64,7 +60,7 @@ public class PlayLaunchInitStepUnitTestNG {
         String tenantIdentifier = randId + "." + randId + ".Production";
         String playId = "play__" + randId;
         String playLaunchId = "launch__" + randId;
-        long pageSize = 2l;
+        long pageSize = 2L;
 
         MockitoAnnotations.initMocks(this);
 
@@ -85,7 +81,6 @@ public class PlayLaunchInitStepUnitTestNG {
         playLaunchInitStep.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
         playLaunchInitStep.setPageSize(pageSize);
         playLaunchInitStep.setRecommendationService(recommendationService);
-        playLaunchInitStep.setTalkingPointProxy(talkingPointProxy);
         playLaunchInitStep.setTenantEntityMgr(tenantEntityMgr);
 
         playLaunchInitStep.setConfiguration(createConf(CustomerSpace.parse(tenantIdentifier), playId, playLaunchId));
@@ -107,8 +102,8 @@ public class PlayLaunchInitStepUnitTestNG {
 
     private void mockTalkingPointProxy() {
         doNothing() //
-                .when(talkingPointProxy) //
-                .publish(anyString(), anyString());
+                .when(internalResourceRestApiProxy) //
+                .publishTalkingPoints(any(CustomerSpace.class), anyString());
     }
 
     private void mockRecommendationService() {
@@ -154,7 +149,7 @@ public class PlayLaunchInitStepUnitTestNG {
         when(entityProxy.getCount( //
                 anyString(), //
                 any(FrontEndQuery.class))) //
-                        .thenReturn(2l);
+                        .thenReturn(2L);
 
         when(entityProxy.getData( //
                 anyString(), //
@@ -185,8 +180,7 @@ public class PlayLaunchInitStepUnitTestNG {
             Map<String, Object> data = new HashMap<>();
             dataList.add(data);
         }
-        DataPage dataPage = new DataPage(dataList);
-        return dataPage;
+        return new DataPage(dataList);
     }
 
 }

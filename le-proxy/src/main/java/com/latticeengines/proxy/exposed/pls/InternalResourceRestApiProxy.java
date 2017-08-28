@@ -500,6 +500,21 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         restTemplate.put(url, null);
     }
 
+    public void updatePlayLaunchProgress(String customerSpace, //
+            String playName, //
+            String launchId, //
+            double launchCompletionPercent, //
+            long accountsLaunched, //
+            long accountsErrored, //
+            long accountsSuppressed) {
+        String url = constructUrl("pls/internal/plays/" + playName + "/launches/" + launchId, customerSpace);
+        url += "?launchCompletionPercent=" + launchCompletionPercent;
+        url += "&accountsLaunched=" + accountsLaunched;
+        url += "&accountsErrored=" + accountsErrored;
+        url += "&accountsSuppressed=" + accountsSuppressed;
+        restTemplate.patchForObject(url, null, String.class);
+    }
+
     public void publishTalkingPoints(CustomerSpace customerSpace, String playName) {
         String url = constructUrl("pls/internal/plays/" + playName + "/talkingpoints/publish/",
                 customerSpace.toString());
