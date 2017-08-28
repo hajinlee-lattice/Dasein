@@ -47,7 +47,11 @@ public class QueryBuilder {
     }
 
     public QueryBuilder exist(BusinessEntity entity) {
-        this.restriction = new ExistsRestriction(entity, false, null);
+        return exist(entity, null);
+    }
+
+    public QueryBuilder exist(BusinessEntity entity, Restriction innerRestriction) {
+        this.restriction = new ExistsRestriction(entity, false, innerRestriction);
         return this;
     }
 

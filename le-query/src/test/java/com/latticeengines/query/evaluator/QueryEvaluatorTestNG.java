@@ -3,6 +3,7 @@ package com.latticeengines.query.evaluator;
 import java.util.Arrays;
 import java.util.TreeMap;
 
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -216,6 +217,22 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("order by %s.DisplayName asc", ACCOUNT));
     }
 
+    // require a non-bucketed numeric attribute to test this later
+    @Test(groups = "functional", enabled = false)
+    public void testSumAggregation() {
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Account, "DisplayName");
+        AttributeLookup aggrAttrLookup = new AttributeLookup(BusinessEntity.Account, "AlexaRank");
+        Query query = Query.builder() //
+                .select(attrLookup, AggregateLookup.sum(aggrAttrLookup)) //
+                .from(BusinessEntity.Account) //
+                .groupBy(attrLookup) //
+                .build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, "select Account.DisplayName");
+        sqlContains(sqlQuery, "sum(Account.AlexaRank)");
+        sqlContains(sqlQuery, "group by Account.DisplayName");
+    }
+
     @Test(groups = "functional")
     public void testCaseLookup() {
         TreeMap<String, Restriction> cases = new TreeMap<>();
@@ -244,13 +261,14 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         SubQuery subQuery = new SubQuery(query, "Alias");
         SubQueryAttrLookup attrLookup = new SubQueryAttrLookup(subQuery, "Score");
         Query query2 = Query.builder() //
-                .select(attrLookup, AggregateLookup.count().as("Count")) //
+                .select(attrLookup, AggregateLookup.count().as("Count"), AggregateLookup.sum(attrLookup)) //
                 .from(subQuery) //
                 .groupBy(attrLookup) //
                 .build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query2);
         sqlContains(sqlQuery, "select Alias.Score");
         sqlContains(sqlQuery, "count(?) as Count");
+        sqlContains(sqlQuery, "sum(Alias.Score)");
         sqlContains(sqlQuery, "as Alias");
         sqlContains(sqlQuery, "group by Alias.Score");
 

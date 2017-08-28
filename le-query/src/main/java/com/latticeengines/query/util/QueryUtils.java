@@ -1,9 +1,15 @@
 package com.latticeengines.query.util;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.query.SubQuery;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.NumberPath;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -20,6 +26,14 @@ public final class QueryUtils {
 
     public static StringPath getAttributePath(SubQuery subQuery, String attrName) {
         return Expressions.stringPath(Expressions.stringPath(subQuery.getAlias()), attrName);
+    }
+
+    public static NumberPath getAttributeNumberPath(BusinessEntity entity, String attrName) {
+        return Expressions.numberPath(BigDecimal.class, Expressions.stringPath(entity.name()), attrName);
+    }
+
+    public static NumberPath getAttributeNumberPath(SubQuery subQuery, String attrName) {
+        return Expressions.numberPath(BigDecimal.class, Expressions.stringPath(subQuery.getAlias()), attrName);
     }
 
     public static List<Predicate> getJoinPredicates(BusinessEntity.Relationship relationship) {

@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.query;
 
 
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.COUNT;
+import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.SUM;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,6 +27,13 @@ public class AggregateLookup extends Lookup {
     public static AggregateLookup count() {
         AggregateLookup lookup1 = new AggregateLookup();
         lookup1.setAggregator(COUNT);
+        return lookup1;
+    }
+
+    public static AggregateLookup sum(Lookup mixin) {
+        AggregateLookup lookup1 = new AggregateLookup();
+        lookup1.setLookup(mixin);
+        lookup1.setAggregator(SUM);
         return lookup1;
     }
 
@@ -59,6 +67,7 @@ public class AggregateLookup extends Lookup {
     }
 
     public enum Aggregator {
-        COUNT
+        COUNT, //
+        SUM
     }
 }
