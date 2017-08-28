@@ -336,7 +336,7 @@ public class AccountMasterRebuildRefreshTestNG
     private void prepareDnB() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of("DUNS_NUMBER", String.class));
-        columns.add(Pair.of("SALES_VOLUME_US_DOLLARS", Long.class));
+        columns.add(Pair.of("SALES_VOLUME_LOCAL_CURRENCY", Long.class));
         Object[][] data = new Object[][] { //
                 { "DUNS1", 111222333L }, //
                 { "DUNS2", 444555666L }, //
@@ -409,7 +409,7 @@ public class AccountMasterRebuildRefreshTestNG
             Assert.assertTrue(equals(record.get("HPAEmailSuffix"), expected[12]));
             Assert.assertTrue(equals(record.get("Total_Amount_Raised"), expected[13]));
             Assert.assertTrue(equals(record.get("SemrushRank"), expected[14]));
-            Assert.assertTrue(equals(record.get("SALES_VOLUME_US_DOLLARS"), expected[15]));
+            Assert.assertTrue(equals(record.get("SALES_VOLUME_LOCAL_CURRENCY"), expected[15]));
         }
     }
 
