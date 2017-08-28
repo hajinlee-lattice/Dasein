@@ -2,14 +2,18 @@ angular.module('lp.playbook.plays', [
     'mainApp.playbook.content.playList.deletePlayModal'
 ])
 .controller('PlayListController', function ($scope, $timeout, $element, $state, 
-$stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayModal) {
+$stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, TimestampIntervalUtility, NumberUtility, DeletePlayModal) {
 
-    var vm = this;
+    var vm = this,
+        onpage = true,
+        checkLaunchState;
     angular.extend(vm, {
         plays: PlayList || [],
         filteredItems: [],
         totalLength: PlayList.length,
         tileStates: {},
+        TimestampIntervalUtility: TimestampIntervalUtility,
+        NumberUtility: NumberUtility,
         query: '',
         header: {
             sort: {
@@ -57,24 +61,51 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
         }
     });
 
+    vm.checkLaunchStateInterval = function(play){
+        var checkLaunchState = $interval(function() {
+            PlaybookWizardStore.getPlayLaunches(play.name).then(function(result) {
+
+                console.log(play.displayName, result[0].launchState);
+                if(result[0].launchState === 'Launched' || result[0].launchState === 'Failed') {
+                    $interval.cancel(checkLaunchState);
+                    play.launchHistory.mostRecentLaunch.launchState = result[0].launchState;
+                    vm.tileStates[play.name].launching == false;
+                }
+
+                // var result = results[0];
+                // vm.launchHistory = results;
+                // vm.launchedState = (result && result.launchState ? result.launchState : null);
+
+                // vm.launchButton = PlaybookWizardStore.launchButton(play, vm.launchedState);
+                // if(vm.launchedState === 'Launched' || vm.launchedState === 'Failed') {
+                //     $interval.cancel(checkLaunchState);
+                //     vm.showLaunchSpinner = false;
+                // }
+
+            });
+        }, 10 * 1000);
+
+    };
+
     vm.init = function($q) {
+        
 
-
-        // console.log(vm.plays);
-
-        PlaybookWizardStore.clear();
         angular.forEach(PlayList, function(play) {
-
 
             vm.tileStates[play.name] = {
                 showCustomMenu: false,
-                editSegment: false
+                editSegment: false,
+                launching: false
             };
+
+            if(play.launchHistory.mostRecentLaunch != null && play.launchHistory.mostRecentLaunch.launchState === 'Launching'){
+                vm.tileStates[play.name].launching = true;
+                vm.checkLaunchStateInterval(play);
+            }
 
             if(play.segment != null) {
                 play.hasSegment = true;
-            }
-
+            };
         });
 
     }
@@ -180,4 +211,12 @@ $stateParams, PlayList, PlaybookWizardService, PlaybookWizardStore, DeletePlayMo
         });
 
     }
+
+    $scope.$on('$destroy', function() {
+        onpage = false;
+        $interval.cancel(checkLaunchState);
+        checkLaunchState = null;
+    });
+
+    
 });

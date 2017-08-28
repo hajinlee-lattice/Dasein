@@ -70,22 +70,8 @@
                                 <span ng-if="play.segment == null" class="gray-text">Segment not selected</span>
                             </li>
                             <li>
-                                Last Launched: 
-                                <span ng-if="play.launchHistory.playLaunch == null && play.segment == null"><span class="error-text">Not launched yet</span></span>
-                                <span ng-if="play.launchHistory.playLaunch == null && play.segment != null"><span class="blue-text">Ready for launch</span></span>
-                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">Launched {{play.updated | date}}</span></span>
-                            </li>
-                            <li>
-                                Insights: 
-                                <span ng-if="play.launchHistory.playLaunch == null && play.segment == null"><span class="error-text">None created</span></span>
-                                <span ng-if="play.launchHistory.playLaunch == null && play.segment != null"><span class="blue-text">
-                                    {{play.talkingPoints.length}} Talking Points created
-                                </span></span>
-                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">
-                                    {{play.talkingPoints.length}} Talking Points - 
-                                    <strong ng-if="play.lastTalkingPointPublishTime">Published {{play.lastTalkingPointPublishTime | date}}</strong>
-                                    <strong ng-if="!play.lastTalkingPointPublishTime" class="error-text">Not Published</strong>
-                                </span></span>
+                                Last Data Refresh: 
+                                <span class="gray-text">No refresh data yet</span></span>                                
                             </li>
                         </ul>
 
@@ -94,7 +80,14 @@
 
                         <div ng-if="play.launchHistory.playLaunch == null && play.segment == null"><strong>This play was started but not finished.</strong> It can be launched after all steps are completed.</div>
 
-                        <div ng-if="play.launchHistory.playLaunch == null && play.segment != null">Play has been created and is ready for launch.</div>
+                        <div ng-if="
+                            play.launchHistory.playLaunch == null && 
+                            play.segment != null && 
+                            vm.tileStates[play.name].launching == false && play.launchHistory.mostRecentLaunch.launchState != 'Failed'">Play has been created and is ready for launch.</div>
+
+                        <div ng-if="vm.tileStates[play.name].launching == true">Launching...</div>
+
+                        <div ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Failed'" class="error-text">Your most recent launch, has failed.</div>
 
                         <div ng-if="play.launchHistory.playLaunch != null && play.segment != null">
                             <h4>Account Ratings</h4>
@@ -117,17 +110,18 @@
                             ng-click="vm.continuePlaySetup($event)">
                             Continue
                         </button>
+
                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="play.launchHistory.playLaunch == null && play.segment != null && play.launchHistory.mostRecentLaunch.launchState != 'Launching'"
+                            ng-if="play.launchHistory.playLaunch == null && play.segment != null && vm.tileStates[play.name].launching == false"
                             ng-click="vm.launchPlay($event, play)">
                             Launch
                         </button>
                         <button
                             type="button"
                             class="button gray-button pull-right"
-                            ng-if="play.launchHistory.mostRecentLaunch.launchState === 'Launching'">
+                            ng-if="vm.tileStates[play.name].launching == true">
                             <i class="fa fa-spinner fa-pulse fw"></i> 
                             Launching...</button>
                         <span 

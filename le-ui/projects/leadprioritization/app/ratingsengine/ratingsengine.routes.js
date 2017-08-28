@@ -1,7 +1,9 @@
 angular
 .module('lp.ratingsengine', [
     'common.wizard',
+    'lp.ratingsengine.ratingsenginetabs',
     'lp.ratingsengine.ratingslist',
+    'lp.ratingsengine.creationhistory',
     'lp.ratingsengine.dashboard',
     'lp.ratingsengine.wizard.segment',
     'lp.ratingsengine.wizard.attributes'
@@ -10,7 +12,141 @@ angular
     $stateProvider
         .state('home.ratingsengine', {
             url: '/ratings_engine',
-            redirectTo: 'home.ratingsengine.ratingslist'
+            redirectTo: 'home.ratingsengine.ratingslist',
+            resolve: {
+                RatingList: function($q, RatingsEngineService) {
+                    // var deferred = $q.defer();
+
+                    // RatingsEngineService.getRatings().then(function(result) {
+                    //     console.log(result);
+                    //     deferred.resolve(result);
+                    // });
+
+                    // return deferred.promise;
+
+                    return [
+                      {
+                        "created": "2017-08-28T17:11:47.490Z",
+                        "createdBy": "string",
+                        "displayName": "Jon Test Rating Engine",
+                        "id": "1234",
+                        "note": "string",
+                        "pid": 0,
+                        "ratingModels": [
+                          {
+                            "created": "2017-08-28T17:11:47.490Z",
+                            "id": "string",
+                            "iteration": 0,
+                            "ratingEngine": {
+                              "created": "2017-08-28T17:11:47.490Z",
+                              "createdBy": "string",
+                              "displayName": "string",
+                              "id": "string",
+                              "note": "string",
+                              "pid": 0,
+                              "ratingModels": [
+                                {}
+                              ],
+                              "segment": {
+                                "created": "2017-08-28T17:11:47.490Z",
+                                "description": "string",
+                                "display_name": "string",
+                                "frontend_restriction": {
+                                  "restriction": {
+                                    "childMap": {},
+                                    "children": [
+                                      {
+                                        "childMap": {},
+                                        "children": [
+                                          {}
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "is_master_segment": true,
+                                "masterSegment": true,
+                                "name": "string",
+                                "restriction": {
+                                  "childMap": {},
+                                  "children": [
+                                    {
+                                      "childMap": {},
+                                      "children": [
+                                        {}
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "updated": "2017-08-28T17:11:47.499Z"
+                              },
+                              "status": "ACTIVE",
+                              "tenant": {
+                                "DisplayName": "string",
+                                "Identifier": "string",
+                                "RegisteredTime": 0,
+                                "UIVersion": "string"
+                              },
+                              "type": "RULE_BASED",
+                              "updated": "2017-08-28T17:11:47.499Z"
+                            },
+                            "updated": "2017-08-28T17:11:47.499Z"
+                          }
+                        ],
+                        "segment": {
+                          "created": "2017-08-28T17:11:47.499Z",
+                          "description": "string",
+                          "display_name": "string",
+                          "frontend_restriction": {
+                            "restriction": {
+                              "childMap": {},
+                              "children": [
+                                {
+                                  "childMap": {},
+                                  "children": [
+                                    {}
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "is_master_segment": true,
+                          "masterSegment": true,
+                          "name": "string",
+                          "restriction": {
+                            "childMap": {},
+                            "children": [
+                              {
+                                "childMap": {},
+                                "children": [
+                                  {}
+                                ]
+                              }
+                            ]
+                          },
+                          "updated": "2017-08-28T17:11:47.499Z"
+                        },
+                        "status": "ACTIVE",
+                        "tenant": {
+                          "DisplayName": "string",
+                          "Identifier": "string",
+                          "RegisteredTime": 0,
+                          "UIVersion": "string"
+                        },
+                        "type": "RULE_BASED",
+                        "updated": "2017-08-28T17:11:47.499Z"
+                      }
+                    ];
+
+                }
+            },
+            views: {
+                "summary@": {
+                    controller: 'RatingsEngineTabsController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ratingslist/ratingsenginetabs.component.html'
+                }
+            }
         })
         .state('home.ratingsengine.ratingslist', {
             url: '/ratings',
@@ -20,9 +156,23 @@ angular
             },
             views: {
                 "main@": {
-                    controller: 'RatingsEngineRatingsList',
+                    controller: 'RatingsEngineListController',
                     controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/ratingslist/ratingslist.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.creationhistory', {
+            url: '/creationhistory',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Creation History'
+            },
+            views: {
+                "main@": {
+                    controller: 'RatingsEngineCreationHistory',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ratingslist/creationhistory.component.html'
                 }
             }
         })
@@ -33,6 +183,10 @@ angular
                 pageTitle: 'Ratings Engine'
             },
             views: {
+                "summary@": {
+                    controller: '',
+                    templateUrl: ''
+                },
                 "navigation@": {
                     controller: function($scope, $stateParams, $state, $rootScope) {
                         $scope.stateName = function() {
