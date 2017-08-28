@@ -1648,12 +1648,83 @@
             }
         }
         .attribute-feedback-container {
-            padding: 20px;
             margin-top: 25px;
+            margin-bottom: 5px;
             max-width: 600px;
-            max-height: 500px;
+            max-height: 600px;
             overflow: hidden;
             overflow-y: auto;
+            .attribute-feedback-header {
+                padding: 10px 20px;
+            }
+            h1 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+            h2 {
+                text-align: center;
+                font-size: 15px;
+                white-space: nowrap;
+                padding: 10px 20px;
+                margin: 10px 0;
+                border-top: 1px solid #d0d1d0;
+                border-bottom: 1px solid #d0d1d0;
+                .icon {
+                    height: 40px;
+                    width: 40px;
+                    border-width: 1px;
+                    border-style: solid;
+                    border-color: #d0d1d0;
+                    padding: 10px;
+                    border-radius: 50%;
+                    margin: 0 auto;
+                    margin-bottom: 5px;
+                    img {
+                        display: block;
+                        margin: 0 auto;
+                        margin-bottom: 5px;
+                        height: 100%;
+                        width: 100%;
+                    }
+                }
+                .label {
+                    @include text-ellipsis();
+                    font-size: 16px;
+                    font-weight: bold;
+                }
+            }
+            h3 {
+                font-size: 16px;
+                text-align: center;
+                padding: 20px 20px;
+                border-bottom: 1px solid #d0d1d0;
+                text-transform: none;
+            }
+            .feedback {
+                padding: 20px;
+                label {
+                    display: block;
+                    font-weight: bold;
+                }
+                input, textarea {
+                    padding: 5px;
+                    width: 100%;
+                    border: 1px solid #d0d1d0;
+                }
+                & > li {
+                    margin-bottom: 10px;
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+            }
+            .attribute-feedback-footer {
+                padding: 10px 20px;
+                border-top: 1px solid #d0d1d0;
+                button:last-child {
+                    float: right;
+                }
+            }
         }
     }
     attribute-feedback-button {

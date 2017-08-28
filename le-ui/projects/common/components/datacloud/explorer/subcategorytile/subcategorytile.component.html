@@ -33,7 +33,14 @@
                 </div>
 
                 <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode">
-                    <div class="attribute-feedback-container"><attribute-feedback-button type="'infodot'" attribute="attribute" value="vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType)" ng-if="vm.hasCompanyInfo && vm.section != 'insights'" />
+                    <div class="attribute-feedback-container">
+                        <attribute-feedback-button 
+                            type="'infodot'" 
+                            attribute="attribute" 
+                            value="vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType)" 
+                            icon="vm.categoryIcon(vm.category)"
+                            categoryclass="vm.categoryClass(vm.category)"
+                            ng-if="vm.hasCompanyInfo && vm.section != 'insights'" />
                         {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}
                     </div>
                 </div>

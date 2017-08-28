@@ -2,7 +2,11 @@
     <ul class="info">
         <li>
             <h2 title="{{vm.company_info.LDC_Name}}">
-                <span class="attribute-feedback-container"><attribute-feedback-button type="'infodot'" attribute="vm.company_info" value="vm.company_info.LDC_Name" />
+                <span class="attribute-feedback-container">
+                    <attribute-feedback-button 
+                        type="'infodot'" 
+                        attribute="vm.company_info" 
+                        value="vm.company_info.LDC_Name" />
                     {{vm.company_info.LDC_Name}}
                 </span>
             </h2>
@@ -15,16 +19,28 @@
     <div class="details">
         <ul>
             <li ng-if="vm.company_info.LDC_DUNS"><h3>Duns Number</h3> 
-                <span class="attribute-feedback-container"><attribute-feedback-button type="'infodot'" attribute="vm.company_info" value="vm.company_info.LDC_DUNS" />
+                <span class="attribute-feedback-container">
+                    <attribute-feedback-button 
+                        type="'infodot'" 
+                        attribute="vm.company_info" 
+                        value="vm.company_info.LDC_DUNS" />
                     {{vm.company_info.LDC_DUNS}}</li>
                 </span>
             <li ng-if="vm.company_info.LE_NUMBER_OF_LOCATIONS"><h3>Locations</h3> 
-                <span class="attribute-feedback-container"><attribute-feedback-button type="'infodot'" attribute="vm.company_info" value="vm.company_info.LE_NUMBER_OF_LOCATIONS" />
+                <span class="attribute-feedback-container">
+                    <attribute-feedback-button 
+                        type="'infodot'" 
+                        attribute="vm.company_info" 
+                        value="vm.company_info.LE_NUMBER_OF_LOCATIONS" />
                     {{vm.company_info.LE_NUMBER_OF_LOCATIONS}}
                 </span>
             </li>
             <li ng-if="vm.company_info.LE_IS_PRIMARY_LOCATION"><h3>Primary Location</h3> 
-                <span class="attribute-feedback-container"><attribute-feedback-button type="'infodot'" attribute="vm.company_info" value="vm.company_info.LE_IS_PRIMARY_LOCATION" />
+                <span class="attribute-feedback-container">
+                    <attribute-feedback-button 
+                        type="'infodot'" 
+                        attribute="vm.company_info" 
+                        value="vm.company_info.LE_IS_PRIMARY_LOCATION" />
                     {{vm.company_info.LE_IS_PRIMARY_LOCATION}}
                 </span>
             </li>
@@ -32,7 +48,11 @@
 
         <div class="industry" ng-if="vm.company_info.LE_INDUSTRY">
             <h3>Industry</h3>
-            <span class="attribute-feedback-container"><attribute-feedback-button type="'infodot'" attribute="vm.company_info" value="vm.company_info.LE_INDUSTRY" />
+            <span class="attribute-feedback-container">
+                <attribute-feedback-button 
+                    type="'infodot'" 
+                    attribute="vm.company_info" 
+                    value="vm.company_info.LE_INDUSTRY" />
                 {{vm.company_info.LE_INDUSTRY}}
             </span>
         </div>
@@ -40,14 +60,22 @@
         <div class="sales-employees">
             <div class="sales" ng-if="vm.company_info.LE_REVENUE_RANGE">
                 <h3>Annual Sales</h3>
-                <span class="attribute-feedback-container"><attribute-feedback-button type="'infodot'" attribute="vm.company_info" value="vm.format('range', vm.company_info.LE_REVENUE_RANGE)" />
+                <span class="attribute-feedback-container">
+                    <attribute-feedback-button 
+                        type="'infodot'" 
+                        attribute="vm.company_info" 
+                        value="vm.format('range', vm.company_info.LE_REVENUE_RANGE)" />
                     {{vm.format('range', vm.company_info.LE_REVENUE_RANGE)}}
                 </span>
             </div>
 
             <div class="employees" ng-if="vm.company_info.LE_EMPLOYEE_RANGE">
                 <h3>Employees</h3>
-                    <span class="attribute-feedback-container"><attribute-feedback-button type="'infodot'" attribute="vm.company_info" value="vm.format('range', vm.company_info.LE_EMPLOYEE_RANGE)" />
+                    <span class="attribute-feedback-container">
+                        <attribute-feedback-button 
+                            type="'infodot'" 
+                            attribute="vm.company_info" 
+                            value="vm.format('range', vm.company_info.LE_EMPLOYEE_RANGE)" />
                         {{vm.format('range', vm.company_info.LE_EMPLOYEE_RANGE)}}
                     </span>
             </div>

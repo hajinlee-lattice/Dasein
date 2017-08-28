@@ -1,5 +1,28 @@
 <span ng-click="close()" class="close"><i class="fa fa-times"></i></span>
 <div class="attribute-feedback-container">
-    <h2>Attribute Feedback</h2>
-    <pre>{{report|json}}</pre>
+    <div class="attribute-feedback-header">
+        <h1>Report Inaccuracy</h1>
+        <p>
+            Let us know what is incorrect and the correct value, if you know it, and we will correct it as soon as we can.
+        </p>
+    </div>
+    <h2 ng-if="label">
+        <div class="icon" ng-if="icon"><img src="{{icon}}" /></div>
+        <div class="label" ng-if="label">{{label}}</div>
+    </h2>
+    <h3 class="{{categoryclass}} color">{{value}}</h3>
+    <ul class="feedback">
+        <li>
+            <label for="attribute-feedback-value">Correct Value (If Known)</label>
+            <input type="text" id="attribute-feedback-value" ng-model="input.value" />
+        </li>
+        <li>
+            <label for="attribute-feedback-comment">Comments</label>
+            <textarea id="attribute-feedback-comment" ng-model="input.comment"></textarea>
+        </li>
+    </ul>
+    <div class="attribute-feedback-footer">
+        <button class="button white-button" ng-click="close()">Cancel</button>
+        <button class="button blue-button" ng-click="report()">Report Inaccuracy</button>
+    </div>
 </div>

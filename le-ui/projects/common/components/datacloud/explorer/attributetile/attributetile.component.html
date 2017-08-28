@@ -2,7 +2,13 @@
 <div class="box-inner {{vm.categoryClass(enrichment.Category)}} color border-top round-box ngAnimate"
      ng-class="{'active': enrichment.IsSelected}">
 
-    <attribute-feedback-button type="'menu'" attribute="enrichment" value="enrichment.DisplayName" ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" />
+    <attribute-feedback-button 
+        type="'menu'" 
+        attribute="enrichment" 
+        value="enrichment.DisplayName" 
+        icon="vm.categoryIcon(enrichment.Category)"
+        categoryclass="vm.categoryClass(enrichment.Category)"
+        ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" />
 
     <div class="header">
         <h2 title="{{enrichment.DisplayName}}">

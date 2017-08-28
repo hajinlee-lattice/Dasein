@@ -1660,7 +1660,7 @@ angular.module('common.datacloud.explorer', [
         restrict: 'EA',
         templateUrl: '/components/datacloud/explorer/attributefeedback/attributefeedbackmodal.component.html',
         scope: {
-            lookup: '='
+            lookup: '=',
         },
         controller: ['$scope', '$document', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, LookupStore, DataCloudStore, BrowserStorageUtility) { 
             // test on LETest1503428538807_LPI
@@ -1679,6 +1679,15 @@ angular.module('common.datacloud.explorer', [
                 userInput: LookupStore.get('request'),
                 companyInfo: $scope.lookup
             };
+
+            $scope.icon = $scope.modal.context.icon;
+            $scope.label = $scope.modal.context.attribute.DisplayName;
+            $scope.value = $scope.modal.context.value;
+            $scope.categoryclass = $scope.modal.context.categoryclass;
+
+            $scope.report = function() {
+                DataCloudStore.sendFeedback($scope.input);
+            }
 
             $document.on('click', handleDocumentClick);
 
@@ -1705,9 +1714,13 @@ angular.module('common.datacloud.explorer', [
         scope: {
             type: '=?',
             attribute: '=',
-            value: '='
+            value: '=',
+            icon: '=?',
+            categoryclass: '=?'
         },
         controller: ['$scope', '$stateParams', 'DataCloudStore', function ($scope, $stateParams, DataCloudStore) {
+            $scope.type = $scope.type || 'infodot';
+
             $scope.menuClick = function($event) {
                 $event.stopPropagation();
                 $scope.showMenu = !$scope.showMenu;
@@ -1723,7 +1736,9 @@ angular.module('common.datacloud.explorer', [
                 $scope.closeMenu($event);
                 DataCloudStore.setFeedbackModal(true, {
                     attribute: $scope.attribute,
-                    value: $scope.value
+                    value: $scope.value,
+                    icon: $scope.icon,
+                    categoryclass: $scope.categoryclass
                 });
             }
         }]

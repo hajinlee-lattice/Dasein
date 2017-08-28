@@ -53,6 +53,10 @@ angular.module('common.datacloud')
         return this.feedbackModal.show = bool;
     }
 
+    this.sendFeedback = function(args) {
+        console.log(args);
+    }
+
     var getObj = function(path, obj) {
         return path.split('.').reduce(function(obj, i) {
             return obj[i];

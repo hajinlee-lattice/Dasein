@@ -68,28 +68,28 @@
                     <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.data.Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>
 
                     <div class="column data records" ng-if="!vm.lookupMode && !vm.inModel()">
-                        <strong ng-if="vm.section === 'segment.analysis'">
+                        <strong ng-if="vm.section === 'segment.analysis'" class="attribute-feedback-container">
                             <attribute-feedback-button 
                                 type="'infodot'" 
                                 attribute="attribute" 
-                                value="attribute.TopBkt.Cnt" 
+                                value="attribute.TopBkt.Cnt|number" 
                                 ng-if="
                                     vm.lookupMode && 
                                     vm.hasCompanyInfo && 
                                     vm.section != 'insights'"/>
-
                                 {{ attribute.TopBkt.Cnt|number }}
                         </strong>
-                        <strong ng-if="vm.section != 'segment.analysis'">
+                        <strong ng-if="vm.section != 'segment.analysis'" class="attribute-feedback-container">
                             <attribute-feedback-button 
                                 type="'infodot'" 
                                 attribute="attribute" 
-                                value="attribute.Count" 
+                                value="attribute.Count|number" 
+                                icon="vm.categoryIcon(category)"
+                                categoryclass="vm.categoryClass(category)"
                                 ng-if="
                                     vm.lookupMode && 
                                     vm.hasCompanyInfo && 
                                     vm.section != 'insights'"/>
-
                                 {{ attribute.Count |number }}
                         </strong>
                     </div>
@@ -97,7 +97,7 @@
                         class="column data values" 
                         ng-if="vm.lookupMode && vm.section != 'segment.analysis'">
                         
-                        <strong>
+                        <strong class="attribute-feedback-container">
                             <attribute-feedback-button 
                                 type="'infodot'" 
                                 attribute="attribute" 
