@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ReproduceDetailType")
 @JsonSubTypes({
@@ -18,24 +17,24 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 public abstract class ReproduceDetail {
 
     @JsonProperty("InputKeys")
-    Map<MatchKey, Object> inputKeys;
+    Map<String, String> inputKeys;
 
     @JsonProperty("MatchedKeys")
-    Map<MatchKey, Object> matchedKeys;
+    Map<String, String> matchedKeys;
 
-    public Map<MatchKey, Object> getInputKeys() {
+    public Map<String, String> getInputKeys() {
         return inputKeys;
     }
 
-    public void setInputKeys(Map<MatchKey, Object> inputKeys) {
+    public void setInputKeys(Map<String, String> inputKeys) {
         this.inputKeys = inputKeys;
     }
 
-    public Map<MatchKey, Object> getMatchedKeys() {
+    public Map<String, String> getMatchedKeys() {
         return matchedKeys;
     }
 
-    public void setMatchedKeys(Map<MatchKey, Object> matchedKeys) {
+    public void setMatchedKeys(Map<String, String> matchedKeys) {
         this.matchedKeys = matchedKeys;
     }
 

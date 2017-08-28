@@ -25,10 +25,10 @@ public class CustomerReportUnitTestNG {
         report.setSuggestedValue("test");
 
         IncorreceLookupReproduceDetail lookupDetail = new IncorreceLookupReproduceDetail();
-        Map<MatchKey, Object> inputKeys = new HashMap<>();
-        Map<MatchKey, Object> matchedKeys = new HashMap<>();
-        inputKeys.put(MatchKey.Country, "United States");
-        matchedKeys.put(MatchKey.City, "New York");
+        Map<String, String> inputKeys = new HashMap<>();
+        Map<String, String> matchedKeys = new HashMap<>();
+        inputKeys.put(MatchKey.Country.toString(), "United States");
+        matchedKeys.put(MatchKey.City.toString(), "New York");
         lookupDetail.setInputKeys(inputKeys);
         lookupDetail.setMatchedKeys(matchedKeys);
         report.setReproduceDetail(lookupDetail);
