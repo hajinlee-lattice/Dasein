@@ -21,11 +21,13 @@ public enum InterfaceName {
 
     FirstName, //
     LastName, //
+    Name, //
     Title, //
     Email, //
     Salutation, //
     BirthDate, //
     DoNotMail, //
+    ContactName, //
 
     City, //
     State, //
@@ -44,8 +46,12 @@ public enum InterfaceName {
     NumberOfEmployees, //
     YearStarted, //
 
+    TransactionType, //
+    TransactionTime, //
+    ProductName, //
     Quantity, //
-    Amount,
+    Amount, //
+    OrderId, //
 
     // CDL
     VdbAccountId, // account id whose uniqueness is managed by vdb

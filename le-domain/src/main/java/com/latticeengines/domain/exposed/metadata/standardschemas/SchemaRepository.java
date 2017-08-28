@@ -764,6 +764,14 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
+        table.addAttribute(attr(InterfaceName.ContactName.name()) //
+                .allowedDisplayNames(Sets.newHashSet("NAME", "CONTACT NAME", "CONTACT_NAME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Name) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
         table.addAttribute(attr(InterfaceName.FirstName.name()) //
                 .allowedDisplayNames(Sets.newHashSet("FIRSTNAME", "FIRST NAME")) //
                 .type(Schema.Type.STRING) //
@@ -959,7 +967,7 @@ public class SchemaRepository {
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
-        table.addAttribute(attr("Id") //
+        table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "PRODUCT_ID", "PRODUCT ID" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
@@ -968,7 +976,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
-        table.addAttribute(attr("Name") //
+        table.addAttribute(attr(InterfaceName.ProductName.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "NAME", "PRODUCT_NAME", "PRODUCT NAME" })) //
                 .type(Schema.Type.STRING) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1001,7 +1009,7 @@ public class SchemaRepository {
         table.setLastModifiedKey(createLastModifiedKey(InterfaceName.LastModifiedDate.name()));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
-        table.addAttribute(attr("Id") //
+        table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "TRANSACTION_ID", "TRANSACTION ID" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
@@ -1010,7 +1018,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
-        table.addAttribute(attr("AccountId") //
+        table.addAttribute(attr(InterfaceName.AccountId.name()) //
                 .allowedDisplayNames(Sets.newHashSet(
                         new String[] { "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT" })) //
                 .type(Schema.Type.STRING) //
@@ -1020,11 +1028,30 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
-        table.addAttribute(attr("ProductId") //
+        table.addAttribute(attr(InterfaceName.ContactId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        new String[] { "CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT" })) //
+                .type(Schema.Type.STRING) //
+                .required() //
+                .interfaceName(InterfaceName.ContactId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.ProductId.name()) //
                 .allowedDisplayNames(Sets
                         .newHashSet(new String[] { "PRODUCT_ID", "PRODUCTID", "PRODUCT_EXTERNAL_ID", "PRODUCT ID" })) //
                 .type(Schema.Type.STRING) //
-                .required().interfaceName(InterfaceName.ProductId) //
+                .required() //
+                .interfaceName(InterfaceName.ProductId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.OrderId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ORDER_ID", "ORDERID", "ORDER ID" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.OrderId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1039,22 +1066,40 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_YEAR) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
-        table.addAttribute(attr("Quantity") //
+        table.addAttribute(attr(InterfaceName.Quantity.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "QUANTITY" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.Quantity) //
                 .logicalType(LogicalDataType.Metric) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
-        table.addAttribute(attr("Amount") //
+        table.addAttribute(attr(InterfaceName.Amount.name()) //
                 .allowedDisplayNames(Sets.newHashSet(new String[] { "AMOUNT" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.Amount) //
                 .logicalType(LogicalDataType.Metric) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
+                .allowedDisplayNames(
+                        Sets.newHashSet(new String[] { "TIMESTAMP", "TRANSACTION_TIME", "TRANSACTION TIME" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionTime) //
+                .logicalType(LogicalDataType.Timestamp) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionType.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "TYPE", "TRANSACTION_TYPE", "TRANSACTION TYPE" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionType) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
         return table;
