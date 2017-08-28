@@ -20,7 +20,6 @@
         <microservice.docker.context>src/main/scripts/tomcat/le-microservice</microservice.docker.context>
         <admin.docker.context>src/main/scripts/tomcat/le-admin</admin.docker.context>
         <pls.docker.context>src/main/scripts/tomcat/le-pls</pls.docker.context>
-        <workflowapp.docker.context>src/main/scripts/workflowapp</workflowapp.docker.context>
     </properties>
 
     <parent>
@@ -140,10 +139,6 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/lp/target/le-lp-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/lp.war"
-                                      overwrite="true" />
-
-                                <copy file="${project.basedir}/../le-workflowapi/target/le-workflowapi-${project.version}-shaded.jar"
-                                      tofile="${project.basedir}/${workflowapp.docker.context}/workflowapp.jar"
                                       overwrite="true" />
                             </tasks>
                         </configuration>
