@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateTransactionDataStepConfiguration;
 
-@Component("consolidateContactData")
+@Component("consolidateTransactionData")
 public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateTransactionDataStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateTransactionData.class);
