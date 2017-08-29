@@ -54,6 +54,7 @@
                             ng-class="{'lookup-required': vm.requiredMissingField.CompanyName}"
                             name="CompanyName"
                             ng-model="vm.request.record.CompanyName"
+                            ng-disabled="vm.request.record.DUNS.length > 0"
                             placeholder="Please provide the full name for better match" />
                     </div>
 
@@ -102,6 +103,7 @@
                                 class="form-control"
                                 name="PostalCode"
                                 ng-model="vm.request.record.PostalCode"
+                                ng-disabled="vm.request.record.DUNS.length > 0"
                                 placeholder="Ex: 12345" />
                         </div>
                     </div>
@@ -126,6 +128,7 @@
                                 class="form-control"
                                 name="PhoneNumber"
                                 ng-model="vm.request.record.PhoneNumber"
+                                ng-disabled="vm.request.record.DUNS.length > 0"
                                 placeholder="Ex: 999-555-1234" />
                         </div>
                     </div>
