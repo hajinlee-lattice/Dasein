@@ -88,8 +88,6 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
     };
 
     vm.init = function($q) {
-        
-
         angular.forEach(PlayList, function(play) {
 
             vm.tileStates[play.name] = {
@@ -107,8 +105,9 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
                 play.hasSegment = true;
             };
         });
-
+        PlaybookWizardStore.clear();
     }
+
     vm.init();
 
     vm.customMenuClick = function ($event, play) {

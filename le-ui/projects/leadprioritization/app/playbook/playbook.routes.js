@@ -57,16 +57,17 @@ angular
             },
             views: {
                 "navigation@": {
-                    controller: function($scope, $stateParams, $state, $rootScope, Play) {
+                    controller: function($scope, $stateParams, $state, $rootScope, PlaybookWizardStore) {
+                        var play = PlaybookWizardStore.getCurrentPlay();
                         $scope.play_name = $stateParams.play_name || '';
-                        $scope.segment = Play.segment;
-                        $scope.targetsDisabled = (Play.segment ? false : true);
+                        $scope.segment = play.segment;
+                        $scope.targetsDisabled = (play.segment ? false : true);
                         $scope.stateName = function() {
                             return $state.current.name;
                         }
                         $rootScope.$broadcast('header-back', { 
                             path: '^home.playbook.dashboard',
-                            displayName: Play.displayName,
+                            displayName: play.displayName,
                             sref: 'home.playbook'
                         });
                     },
