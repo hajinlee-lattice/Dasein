@@ -128,6 +128,7 @@ def update_tasks_count(cluster_arn, service_arn, target_count):
         count = count_tasks_in_service(cluster_arn, service_arn)
     if count != target_count:
         raise Exception("Failed to wait for the tasks count to be come %d with in one hour" % target_count)
+    print "Task count of %s in %s is now %d" % (service_arn, cluster_arn, target_count)
 
 def register_task(name, containers, volumes):
     deregister_task(name)
