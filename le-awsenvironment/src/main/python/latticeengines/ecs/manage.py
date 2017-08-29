@@ -120,8 +120,6 @@ def update_tasks_count(cluster_arn, service_arn, target_count):
     sys.stdout.flush()
     ECS_CLIENT.update_service(cluster=cluster_arn, service=service_arn, desiredCount=target_count)
     time.sleep(10)
-    ECS_CLIENT.update_service(cluster=cluster_arn, service=service_arn, desiredCount=target_count)
-    time.sleep(10)
     count = count_tasks_in_service(cluster_arn, service_arn)
     t1 = time.clock()
     while count != target_count and time.clock() - t1 < 3600:
