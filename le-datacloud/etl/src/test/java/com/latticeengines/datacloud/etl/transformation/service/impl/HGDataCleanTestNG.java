@@ -63,7 +63,8 @@ public class HGDataCleanTestNG extends PipelineTransformationTestNGBase{
             step1.setTransformer(HGDataCleanFlow.TRANSFORMER_NAME);
             step1.setTargetSource(getTargetSourceName());
             String confParamStr1 = getHGDataCleanConfig();
-            step1.setConfiguration(setDataFlowEngine(confParamStr1, "TEZ"));
+            // step1.setConfiguration(setDataFlowEngine(confParamStr1, "TEZ"));
+            step1.setConfiguration(confParamStr1);
 
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();

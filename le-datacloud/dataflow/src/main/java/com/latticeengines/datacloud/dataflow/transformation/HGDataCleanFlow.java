@@ -29,6 +29,8 @@ public class HGDataCleanFlow extends ConfigurableFlowBase<HGDataCleanConfig> {
 
     private HGDataCleanConfig config;
 
+    private static final String ID = "_LDC_ID_";
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);
@@ -40,6 +42,8 @@ public class HGDataCleanFlow extends ConfigurableFlowBase<HGDataCleanConfig> {
                 new FieldList(config.getDateLastVerifiedField()),
                 new FieldMetadata(config.getDateLastVerifiedField(), Long.class));
 
+        source = source.addRowID(ID);
+
         FieldList contents = new FieldList(config.getDomainField(), config.getVendorField(), config.getProductField(),
                 config.getCategoryField(), config.getCategory2Field(), config.getCategoryParentField(),
                 config.getCategoryParent2Field());
@@ -47,10 +51,10 @@ public class HGDataCleanFlow extends ConfigurableFlowBase<HGDataCleanConfig> {
         FieldList contentsWithDate = contents.addAll(Collections.singletonList(config.getDateLastVerifiedField()));
 
         Node latest = source.groupByAndLimit(contents, new FieldList(config.getDateLastVerifiedField()), 1, true, true);
-        latest = latest.retain(contentsWithDate);
+        latest = latest.retain(ID);
         latest = latest.renamePipe("latest");
 
-        source = source.innerJoin(contentsWithDate, latest, contentsWithDate);
+        source = source.innerJoin(ID, latest, ID);
 
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation(config.getIntensityField(), "MaxIntensity", AggregationType.MAX));
