@@ -151,9 +151,11 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             switch (config.getStage()) {
             case DataCloudConstants.PROFILE_STAGE_SEGMENT:
                 dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+                break;
             case DataCloudConstants.PROFILE_STAGE_ENRICH:
                 dataCloudVersion = dataCloudVersionService
                         .nextMinorVersion(dataCloudVersionService.currentApprovedVersion().getVersion());
+                break;
             default:
                 throw new UnsupportedOperationException(String.format("Stage %s is not supported", config.getStage()));
             }
