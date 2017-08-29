@@ -13,9 +13,6 @@ public class IncorrectMatchedAttrReportRequest extends CustomerReportRequest {
     @JsonProperty("Attribute")
     private String attribute;
 
-    @JsonProperty("SuggestedValue")
-    private String suggestedValue;
-
     public String getAttribute() {
         return attribute;
     }

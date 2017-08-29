@@ -12,6 +12,9 @@ public abstract class CustomerReportRequest {
     @JsonProperty("MatchedKeys")
     private Map<String, String> matchedKeys;
 
+    @JsonProperty("CorrectedValue")
+    private String correctedValue;
+
     @JsonProperty("Comment")
     private String comment;
 
@@ -29,6 +32,14 @@ public abstract class CustomerReportRequest {
 
     public void setMatchedKeys(Map<String, String> matchedKeys) {
         this.matchedKeys = matchedKeys;
+    }
+
+    public String getCorrectedValue() {
+        return correctedValue;
+    }
+
+    public void setCorrectedValue(String correctedValue) {
+        this.correctedValue = correctedValue;
     }
 
     public String getComment() {
