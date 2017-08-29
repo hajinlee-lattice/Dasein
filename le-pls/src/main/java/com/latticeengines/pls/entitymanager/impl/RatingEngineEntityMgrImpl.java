@@ -92,6 +92,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             } else { // update an existing one by updating the delta passed from
                      // front end
                 updateExistingRatingEngine(retrievedRatingEngine, ratingEngine, tenantId);
+                inflateRatingModels(retrievedRatingEngine);
                 return retrievedRatingEngine;
             }
         }

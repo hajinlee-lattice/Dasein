@@ -60,7 +60,7 @@ public class RatingEngineResource {
     @ApiOperation(value = "Get a Rating Engine given its id")
     public RatingEngine getRatingEngine(@PathVariable String ratingEngineId, HttpServletRequest request,
             HttpServletResponse response) {
-        return ratingEngineService.getRatingEngineById(ratingEngineId);
+        return ratingEngineService.getFullRatingEngineById(ratingEngineId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

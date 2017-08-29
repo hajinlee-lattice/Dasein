@@ -78,6 +78,9 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 tenant.getId());
         log.info("Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
+        Assert.assertNotNull(createdRatingEngine.getRatingModels());
+        Assert.assertEquals(createdRatingEngine.getRatingModels().size(), 1);
+        Assert.assertNotNull(createdRatingEngine.getSegment());
         ratingEngineId = createdRatingEngine.getId();
         createdRatingEngine = ratingEngineEntityMgr.findById(createdRatingEngine.getId());
         Assert.assertNotNull(createdRatingEngine);
@@ -90,7 +93,6 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNull(createdRatingEngine.getNote());
         Assert.assertEquals(createdRatingEngine.getType(), RatingEngineType.RULE_BASED);
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
-        Assert.assertNotNull(createdRatingEngine.getRatingModels());
 
         // test lazy fetch
         createdRatingEngine = ratingEngineEntityMgr.findById(ratingEngineId, true, true, true);
@@ -119,6 +121,9 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         ratingEngine.setDisplayName(RATING_ENGINE_NAME);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
         createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
+        Assert.assertNotNull(createdRatingEngine.getRatingModels());
+        Assert.assertEquals(createdRatingEngine.getRatingModels().size(), 1);
+        Assert.assertNotNull(createdRatingEngine.getSegment());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
         Assert.assertEquals(RATING_ENGINE_NOTE, createdRatingEngine.getNote());
         System.out.println("update date is " + updatedDate);
@@ -130,6 +135,7 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(ratingEngineId, ratingEngineList.get(0).getId());
+        log.info("Rating Engine after update is " + createdRatingEngine.toString());
 
         // test deletion
         ratingEngineEntityMgr.deleteById(ratingEngineId);

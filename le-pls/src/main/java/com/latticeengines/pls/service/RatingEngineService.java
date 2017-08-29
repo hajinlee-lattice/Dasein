@@ -12,6 +12,8 @@ public interface RatingEngineService {
 
     RatingEngine getRatingEngineById(String id);
 
+    RatingEngine getFullRatingEngineById(String id);
+
     Set<RatingModel> getAllRatingModelsById(String id);
 
     Set<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId);

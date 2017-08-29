@@ -41,6 +41,11 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     }
 
     @Override
+    public RatingEngine getFullRatingEngineById(String id) {
+        return ratingEngineEntityMgr.findById(id, true, true, true);
+    }
+
+    @Override
     public RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId) {
         if (ratingEngine == null) {
             throw new NullPointerException("Entity is null when creating a rating engine.");
