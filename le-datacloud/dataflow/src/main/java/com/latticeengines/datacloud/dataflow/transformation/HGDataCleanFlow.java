@@ -43,19 +43,21 @@ public class HGDataCleanFlow extends ConfigurableFlowBase<HGDataCleanConfig> {
                 new FieldMetadata(config.getDateLastVerifiedField(), Long.class));
 
         source = source.addRowID(ID);
-
+        
         FieldList contents = new FieldList(config.getDomainField(), config.getVendorField(), config.getProductField(),
                 config.getCategoryField(), config.getCategory2Field(), config.getCategoryParentField(),
                 config.getCategoryParent2Field());
 
         FieldList contentsWithDate = contents.addAll(Collections.singletonList(config.getDateLastVerifiedField()));
 
-        Node latest = source.groupByAndLimit(contents, new FieldList(config.getDateLastVerifiedField()), 1, true, true);
+        Node latest = source.groupByAndLimit(contents, new FieldList(config.getDateLastVerifiedField()), 1, true,
+                false);
         latest = latest.retain(ID);
         latest = latest.renamePipe("latest");
 
         source = source.innerJoin(ID, latest, ID);
 
+        
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation(config.getIntensityField(), "MaxIntensity", AggregationType.MAX));
         aggregations.add(new Aggregation(config.getDomainField(), "LocationCount", AggregationType.COUNT));
