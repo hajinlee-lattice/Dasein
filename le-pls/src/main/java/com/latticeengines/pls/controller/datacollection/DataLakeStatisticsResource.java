@@ -1,7 +1,7 @@
 package com.latticeengines.pls.controller.datacollection;
 
-import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.service.DataLakeService;
 
 import io.swagger.annotations.Api;
@@ -30,6 +32,13 @@ public class DataLakeStatisticsResource {
     @ApiOperation(value = "Get flat attribute stats map")
     public StatsCube getStatsCube() {
         return dataLakeService.getStatsCube();
+    }
+
+    @RequestMapping(value = "/cubes", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get (entity, stats cube) pairs")
+    public Map<BusinessEntity, StatsCube> getStatsCubes() {
+        return dataLakeService.getStatsCubes();
     }
 
     @RequestMapping(value = "/topn", method = RequestMethod.GET, headers = "Accept=application/json")

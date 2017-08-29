@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -263,7 +264,6 @@ public class LatticeInsightsResource {
     // ------------END for Insights-------------------//
 
     // ------------START for statistics---------------------//
-    @Deprecated
     @RequestMapping(value = AM_STATS_PATH + "/cube", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Load account master cube", response = AccountMasterCube.class)
@@ -271,11 +271,11 @@ public class LatticeInsightsResource {
         return enrichmentService.getStatsCube();
     }
 
-    @RequestMapping(value = AM_STATS_PATH + "/cube2", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = AM_STATS_PATH + "/cubes", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Load account master cube based on dimension selection", response = AccountMasterCube.class)
-    public StatsCube getAMStatsCube() {
-        return enrichmentService.getStatsCube();
+    @ApiOperation(value = "Load account master cube as a map", response = AccountMasterCube.class)
+    public Map<BusinessEntity, StatsCube> getAMStatsCubes() {
+        return enrichmentService.getStatsCubes();
     }
 
     @RequestMapping(value = AM_STATS_PATH + "/topn", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -286,5 +286,5 @@ public class LatticeInsightsResource {
         boolean excludeInternalAttributes = !shouldConsiderInternalAttributes(tenant);
         return enrichmentService.getTopNTree(excludeInternalAttributes);
     }
-    
+
 }

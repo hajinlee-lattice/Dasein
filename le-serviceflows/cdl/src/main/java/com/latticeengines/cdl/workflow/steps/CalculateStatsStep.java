@@ -265,7 +265,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
     private void upsertTables(String customerSpace, String profileTableName) {
         Table profileTable = metadataProxy.getTable(customerSpace, profileTableName);
         if (profileTable == null) {
-            throw new RuntimeException("Failed to find profile table in customer " + customerSpace);
+            throw new RuntimeException("Failed to find profile table " + profileTableName + " in customer " + customerSpace);
         }
         DataCollection.Version inactiveVersion = dataCollectionProxy.getInactiveVersion(customerSpace);
         dataCollectionProxy.upsertTable(customerSpace, profileTableName, TableRoleInCollection.Profile, inactiveVersion);

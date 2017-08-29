@@ -20,6 +20,8 @@ public interface DataLakeService {
 
     StatsCube getStatsCube();
 
+    Map<BusinessEntity, StatsCube> getStatsCubes();
+
     AttributeStats getAttributeStats(BusinessEntity entity, String attribute);
 
 }

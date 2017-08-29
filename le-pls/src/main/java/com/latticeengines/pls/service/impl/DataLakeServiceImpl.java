@@ -116,6 +116,15 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
+    public Map<BusinessEntity, StatsCube> getStatsCubes() {
+        Statistics statistics = getStatistics();
+        if (statistics == null) {
+            return null;
+        }
+        return StatsCubeUtils.toStatsCubes(statistics);
+    }
+
+    @Override
     public TopNTree getTopNTree(boolean includeTopBkt) {
         Statistics statistics = getStatistics();
         if (statistics == null) {

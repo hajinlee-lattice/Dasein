@@ -236,6 +236,28 @@ public class StatsCubeUtils {
         return cube;
     }
 
+    public static Map<BusinessEntity, StatsCube> toStatsCubes(Statistics statistics) {
+        Map<BusinessEntity, Map<String, AttributeStats>> statsMap = new HashMap<>();
+        for (CategoryStatistics catStats: statistics.getCategories().values()) {
+            for (SubcategoryStatistics subCatStats: catStats.getSubcategories().values()) {
+                for (Map.Entry<AttributeLookup, AttributeStats> entry: subCatStats.getAttributes().entrySet()) {
+                    BusinessEntity entity = entry.getKey().getEntity();
+                    if (!statsMap.containsKey(entity)) {
+                        statsMap.put(entity, new HashMap<>());
+                    }
+                    statsMap.get(entity).put(entry.getKey().getAttribute(), retainTop5Bkts(entry.getValue()));
+                }
+            }
+        }
+        Map<BusinessEntity, StatsCube> cubes = new HashMap<>();
+        statsMap.forEach((entity, stats) -> {
+            StatsCube cube = new StatsCube();
+            cube.setStatistics(stats);
+            cubes.put(entity, cube);
+        });
+        return cubes;
+    }
+
     private static AttributeStats retainTop5Bkts(AttributeStats attributeStats) {
         if (attributeStats.getBuckets() != null && attributeStats.getBuckets().getBucketList() != null) {
             Buckets buckets = attributeStats.getBuckets();
