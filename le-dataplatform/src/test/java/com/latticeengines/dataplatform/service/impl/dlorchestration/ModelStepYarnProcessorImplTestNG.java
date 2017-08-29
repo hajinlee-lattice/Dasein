@@ -4,11 +4,11 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.zookeeper.ZooDefs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
@@ -64,7 +64,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
-    @Test(groups = "sqoop")
+    @Test(groups = "sqoop", enabled = false)
     public void testExecuteYarnStepsFeatureThreshold() throws Exception {
         cleanUpHdfs(CUSTOMER);
         cleanUpHdfs(CustomerSpace.parse(CUSTOMER).toString());
@@ -90,7 +90,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
-    @Test(groups = "sqoop")
+    @Test(groups = "sqoop", enabled = false)
     public void testModelSelectionUsingCamille() throws Exception {
         int featureThreshold = -1;
         String modelingServiceName = "Modeling";

@@ -8,14 +8,14 @@ import java.io.File;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
-
 
 @SuppressWarnings("unused")
 public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
@@ -72,7 +71,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         httpServer.stop();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testWriteStringToHdfs() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
@@ -104,7 +103,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testSuccessfulExecuteStep() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
@@ -135,7 +134,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         assertEquals(status, 3);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testMetadataDiagnosticJsonFormatAndExistsInHdfs() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
@@ -175,7 +174,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         HdfsUtils.rmdir(yarnConfiguration, hdfsPath);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testDoNotUploadMetadataDiagnosticJsonWhenValidationPasses() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         modelCommandEntityMgr.createOrUpdate(command);
@@ -199,7 +198,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         assertFalse(HdfsUtils.fileExists(yarnConfiguration, hdfsPath));
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testNoResponseExecuteStep() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
@@ -214,7 +213,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testEmptyResponseExecuteStep() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());

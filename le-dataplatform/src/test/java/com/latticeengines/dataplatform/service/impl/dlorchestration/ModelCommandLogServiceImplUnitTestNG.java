@@ -31,18 +31,18 @@ public class ModelCommandLogServiceImplUnitTestNG {
         ReflectionTestUtils.setField(modelCommandLogServiceImpl, "modelCommandLogEntityMgr", modelCommandLogEntityMgr);
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testLogBeginStep() { // This test just confirms execution with
                                      // no exceptions raised
-        ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix",
-                ModelCommandStatus.NEW, new ArrayList<ModelCommandParameter>(), ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
+        ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW,
+                new ArrayList<ModelCommandParameter>(), ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         modelCommandLogServiceImpl.logBeginStep(command, ModelCommandStep.LOAD_DATA);
         modelCommandLogServiceImpl.logCompleteStep(command, ModelCommandStep.LOAD_DATA, ModelCommandStatus.SUCCESS);
         modelCommandLogServiceImpl.logLedpException(command, new LedpException(LedpCode.LEDP_16000,
                 new IllegalArgumentException("Some test exception message"), new String[] { "sometext" }));
 
         modelCommandLogServiceImpl.logException(command, new IllegalArgumentException("Some test exception message"));
-        modelCommandLogServiceImpl.logException(command, "Some message", new IllegalArgumentException(
-                "Some test exception message"));
+        modelCommandLogServiceImpl.logException(command, "Some message",
+                new IllegalArgumentException("Some test exception message"));
     }
 }

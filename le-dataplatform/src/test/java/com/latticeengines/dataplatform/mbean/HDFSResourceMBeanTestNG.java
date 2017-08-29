@@ -24,7 +24,8 @@ public class HDFSResourceMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     public void testCheckHDFSResource() {
         String files = hdfsRcMBean.checkHDFSResource();
         String s = versionManager.getCurrentVersionInStack(stackName).equals("") ? "" : "/";
-        assertTrue(files.contains("/app/" + versionManager.getCurrentVersionInStack(stackName) + s + "conf/latticeengines.properties"));
+        assertTrue(files.contains(
+                "/app/" + versionManager.getCurrentVersionInStack(stackName) + s + "conf/latticeengines.properties"));
         assertTrue(files.contains("algorithm"));
         assertTrue(files.contains("launcher.py"));
         assertTrue(files.contains("leframework.tar.gz"));

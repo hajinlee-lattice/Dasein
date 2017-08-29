@@ -30,7 +30,7 @@ public class ModelCommandEntityMgrImplTestNG extends DataPlatformFunctionalTestN
     public void setup() throws Exception {
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testGetNewAndInProgress() throws Exception {
         List<ModelCommand> commands = modelCommandEntityMgr.getNewAndInProgress();
         assertEquals(commands.size(), 0);
@@ -48,5 +48,4 @@ public class ModelCommandEntityMgrImplTestNG extends DataPlatformFunctionalTestN
         assertEquals(commands.size(), 1);
     }
 
-    
 }

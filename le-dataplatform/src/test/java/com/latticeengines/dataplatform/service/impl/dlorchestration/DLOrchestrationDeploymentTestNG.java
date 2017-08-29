@@ -78,14 +78,14 @@ public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContext
         String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
         if (dbDriverName.contains("Microsoft")) {
             // Microsoft JDBC Driver 4.0 for SQL Server
-            dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE "
-                    + TEMP_EVENTTABLE);
+            dlOrchestrationJdbcTemplate
+                    .execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE " + TEMP_EVENTTABLE);
             dlOrchestrationJdbcTemplate.execute("select * into " + TEMP_EVENTTABLE + " from Q_EventTable_Nutanix");
         } else {
             // MySQL Connector Java
             dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE);
-            dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE
-                    + " select * from Q_EventTable_Nutanix");
+            dlOrchestrationJdbcTemplate
+                    .execute("create table " + TEMP_EVENTTABLE + " select * from Q_EventTable_Nutanix");
         }
     }
 
@@ -95,7 +95,7 @@ public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContext
         dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflow() throws Exception {
         // Note that this test changes the event table that is shared with first
         // test case and has to be run after
@@ -110,9 +110,16 @@ public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContext
         modelCommandEntityMgr.create(command);
         log.info("data populated, testing started.");
         int iterations = 0;
-        while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
-                && iterations < 100) { // Wait maximum of 25 minutes to process
-                                       // this command
+        while ((command.getCommandStatus() == ModelCommandStatus.NEW
+                || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS) && iterations < 100) { // Wait
+                                                                                                        // maximum
+                                                                                                        // of
+                                                                                                        // 25
+                                                                                                        // minutes
+                                                                                                        // to
+                                                                                                        // process
+                                                                                                        // this
+                                                                                                        // command
             iterations++;
             Thread.sleep(15000);
             command = modelCommandEntityMgr.findByKey(command);
@@ -142,9 +149,8 @@ public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContext
                 ModelCommandStep.LOAD_DATA, ModelCommandStep.GENERATE_SAMPLES, ModelCommandStep.PROFILE_DATA,
                 ModelCommandStep.SUBMIT_MODELS, ModelCommandStep.OUTPUT_COMMAND_RESULTS, ModelCommandStep.FINISH);
         for (ModelCommandStep step : steps) {
-            assertTrue(
-                    modelCommandStateEntityMgr.findByModelCommandAndStep(command, step).get(0).getStatus()
-                            .equals(FinalApplicationStatus.SUCCEEDED), String.format("%s is not successful", step));
+            assertTrue(modelCommandStateEntityMgr.findByModelCommandAndStep(command, step).get(0).getStatus()
+                    .equals(FinalApplicationStatus.SUCCEEDED), String.format("%s is not successful", step));
         }
         ModelCommandResult result = modelCommandResultEntityMgr.findByModelCommand(command);
         assertNotNull(result);

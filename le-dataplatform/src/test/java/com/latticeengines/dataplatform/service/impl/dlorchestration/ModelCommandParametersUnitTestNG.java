@@ -16,11 +16,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class ModelCommandParametersUnitTestNG {
 
     public ModelCommandParameters createModelCommandParameters() {
-        return new ModelCommandParameters(ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L)
-                .getCommandParameters());
+        return new ModelCommandParameters(
+                ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L).getCommandParameters());
     }
 
-    @Test(groups = "unit", expectedExceptions = LedpException.class)
+    @Test(groups = "unit", expectedExceptions = LedpException.class, enabled = false)
     public void testInvalidCommandParameters() throws Exception {
         try {
             new ModelCommandParameters(new ArrayList<ModelCommandParameter>());
@@ -37,7 +37,7 @@ public class ModelCommandParametersUnitTestNG {
         }
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testSplit() {
         List<String> splits = createModelCommandParameters().splitCommaSeparatedStringToList("one, two,  three, four");
         assertEquals(4, splits.size());
@@ -47,14 +47,14 @@ public class ModelCommandParametersUnitTestNG {
         assertEquals("four", splits.get(3));
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testGetEventColumnWithoutReadoutParams() {
         ModelCommand modelCommand = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
         assertEquals(commandParameters.getEventColumnName(), "P1_Event");
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testGetEventColumnWithReadoutParams() {
         ModelCommand modelCommand = ModelingServiceTestUtils.createModelCommandWithFewRowsAndReadoutTargets(1L,
                 "ModelCommandCallableTestNG_eventtable_fewrows", false, true);

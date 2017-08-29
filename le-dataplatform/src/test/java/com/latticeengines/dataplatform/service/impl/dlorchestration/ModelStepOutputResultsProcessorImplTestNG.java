@@ -71,8 +71,8 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private String scoreDerivationContents = "Deciles!";
     private String dataCompositionContents = "Transforms!";
     private String metadataDiagnosticsContents = "MDC";
-    private List<String> linkContents = Arrays.<String> asList(new String[] { "a", "b", "c", "d", "e",
-            modelSummaryContents });
+    private List<String> linkContents = Arrays
+            .<String> asList(new String[] { "a", "b", "c", "d", "e", modelSummaryContents });
 
     private String resultDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59abcde/";
     private String dataDiagnosticsPath = "/user/s-analytics/customers/Nutanix.Nutanix.Production/data/EventMetadata/diagnostics.json";
@@ -131,19 +131,19 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         modelCommandStateEntityMgr.createOrUpdate(commandState);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testExecutePostStep() throws Exception {
         createCommandAndParameters();
         modelStepOutputResultsProcessor.executeStep(command, commandParameters);
         String outputAlgorithm = "";
         if (dbDriverName.contains("Microsoft")) {
             // Microsoft JDBC Driver 4.0 for SQL Server
-            outputAlgorithm = dlOrchestrationJdbcTemplate.queryForObject(
-                    "select Algorithm from [" + command.getEventTable() + "]", String.class);
+            outputAlgorithm = dlOrchestrationJdbcTemplate
+                    .queryForObject("select Algorithm from [" + command.getEventTable() + "]", String.class);
         } else {
             // MySQL Connector Java
-            outputAlgorithm = dlOrchestrationJdbcTemplate.queryForObject(
-                    "select Algorithm from " + command.getEventTable() + "", String.class);
+            outputAlgorithm = dlOrchestrationJdbcTemplate
+                    .queryForObject("select Algorithm from " + command.getEventTable() + "", String.class);
         }
 
         assertEquals(outputAlgorithm, ModelStepOutputResultsProcessorImpl.RANDOM_FOREST);
@@ -162,7 +162,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         checkMetadataDiagnosticsExist();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testExecutePostStepWithoutMetadataDiagnosticsFile() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, metadataDirectory + METADATA_DIAGNOSTIC_FILE);
         createCommandAndParameters();

@@ -33,7 +33,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
         return new ModelCommandParameters(command.getCommandParameters());
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testGenerateSamplingConfiguration() {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         SamplingConfiguration samplingConfig = processor.generateSamplingConfiguration(
@@ -43,7 +43,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
         assertEquals(1, samplingConfig.getSamplingElements().size());
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testGenerateModel() {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L);
         Model model = processor.generateModel(ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix", command,
@@ -51,7 +51,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
         assertEquals(1, model.getModelDefinition().getAlgorithms().size());
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testCalculateSamplePercentages() {
         int numSamples = 0;
         List<Integer> samples = processor.calculateSamplePercentages(numSamples);
@@ -86,7 +86,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
         assertEquals(100, samples.get(5).intValue());
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testCalculatePriority() {
         assertEquals(0, processor.calculatePriority(0));
         assertEquals(1, processor.calculatePriority(1));
@@ -94,7 +94,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
         assertEquals(2, processor.calculatePriority(3));
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testParsingOfFeatureThreshold() {
         int featureThreshold = 30;
 
@@ -104,22 +104,23 @@ public class ModelStepYarnProcessorImplUnitTestNG {
         assertEquals(processor.generateFeatureThreshold(commandParameters), featureThreshold);
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testParsingOfSamplingPercentage() {
-        for(int numberOfSamples = 1; numberOfSamples < 5; numberOfSamples++) {
-            assertEquals(processor.getSamplePercentage(numberOfSamples), 100 / numberOfSamples );
+        for (int numberOfSamples = 1; numberOfSamples < 5; numberOfSamples++) {
+            assertEquals(processor.getSamplePercentage(numberOfSamples), 100 / numberOfSamples);
         }
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testSamplingPercentage() {
         int numSamples = 1;
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParametersNumSamples(1L, numSamples );
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParametersNumSamples(1L,
+                numSamples);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
         assertEquals(commandParameters.getNumSamples(), numSamples);
 
         numSamples = 3;
-        command = ModelingServiceTestUtils.createModelCommandWithCommandParametersNumSamples(1L, numSamples );
+        command = ModelingServiceTestUtils.createModelCommandWithCommandParametersNumSamples(1L, numSamples);
         commandParameters = new ModelCommandParameters(command.getCommandParameters());
         assertEquals(commandParameters.getNumSamples(), numSamples);
     }

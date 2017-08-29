@@ -93,10 +93,10 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         ((AlertServiceImpl) this.alertService).enableTestMode();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testHandleJobFailed() throws ParseException {
-        ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
-                ModelingServiceTestUtils.EVENT_TABLE);
+        ModelCommand command = new ModelCommand(1L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null,
+                ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         command.setModelCommandStep(ModelCommandStep.PROFILE_DATA);
         this.modelCommandEntityMgr.create(command);
 
@@ -138,10 +138,10 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         callable.handleJobFailed(failedAppIds);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void generateDataDiagnostics() throws Exception {
-        ModelCommand command = new ModelCommand(2L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
-                ModelingServiceTestUtils.EVENT_TABLE);
+        ModelCommand command = new ModelCommand(2L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null,
+                ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         command.setModelCommandStep(ModelCommandStep.SUBMIT_MODELS);
         this.modelCommandEntityMgr.create(command);
 
@@ -186,15 +186,15 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         Assert.assertEquals(logs.size(), 1);
         int warnIndex = logs.get(0).getMessage().contains("The number of skipped rows") ? 0 : 1;
         String warnLog = logs.get(warnIndex).getMessage();
-        Assert.assertTrue(warnLog.contains("IsPublicDomain")
-                && warnLog.contains("Detected abnormal positive event rate"));
+        Assert.assertTrue(
+                warnLog.contains("IsPublicDomain") && warnLog.contains("Detected abnormal positive event rate"));
         Assert.assertTrue(warnLog.contains("Uncertainty Coefficient"));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testFeatureSelection() throws Exception {
-        ModelCommand command = new ModelCommand(3L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
-                ModelingServiceTestUtils.EVENT_TABLE);
+        ModelCommand command = new ModelCommand(3L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null,
+                ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         command.setModelCommandStep(ModelCommandStep.SUBMIT_MODELS);
         this.modelCommandEntityMgr.create(command);
 
@@ -218,8 +218,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 .rowWarnThreshold(this.rowWarnThreshold) //
                 .positiveEventFailThreshold(this.positiveEventFailThreshold) //
                 .positiveEventWarnThreshold(this.positiveEventWarnThreshold) //
-                .featuresThreshold(30)
-                .dbMetadataService(this.dbMetadataService);
+                .featuresThreshold(30).dbMetadataService(this.dbMetadataService);
 
         ModelCommandCallable callable = new ModelCommandCallable(builder);
         ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
@@ -240,8 +239,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         Assert.assertEquals(logs.size(), 1);
         int warnIndex = logs.get(0).getMessage().contains("The number of skipped rows") ? 0 : 1;
         String warnLog = logs.get(warnIndex).getMessage();
-        Assert.assertTrue(warnLog.contains("IsPublicDomain")
-                && warnLog.contains("Detected abnormal positive event rate"));
+        Assert.assertTrue(
+                warnLog.contains("IsPublicDomain") && warnLog.contains("Detected abnormal positive event rate"));
         Assert.assertTrue(warnLog.contains("Uncertainty Coefficient"));
     }
 
