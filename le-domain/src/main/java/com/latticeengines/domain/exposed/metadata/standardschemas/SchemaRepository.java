@@ -414,152 +414,6 @@ public class SchemaRepository {
         return table;
     }
 
-    private Table getAccountSchema() {
-        Table table = createTable(SchemaInterpretation.Account);
-        table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
-        table.setPrimaryKey(createPrimaryKey("Id"));
-
-        table.addAttribute(attr(InterfaceName.Id.name()) //
-                .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
-                .type(Schema.Type.STRING) //
-                .required() //
-                .interfaceName(InterfaceName.Id) //
-                .logicalType(LogicalDataType.Id) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .build());
-        table.addAttribute(attr(InterfaceName.Website.name()) //
-                .allowedDisplayNames(Sets.newHashSet("WEBSITE", "URL")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Website) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.CompanyName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME", "DISPLAY_NAME", "DISPLAYNAME")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.CompanyName) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.City.name()) //
-                .allowedDisplayNames(Sets.newHashSet("CITY", "BILLING CITY")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.City) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.State.name()) //
-                .allowedDisplayNames(Sets.newHashSet("STATE", "STATE_PROVINCE", "STATEPROVINCE", "PROVINCE",
-                        "STATE OR PROVINCE", "BILLING STATE", "BILLING PROVINCE")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.State) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.Country.name()) //
-                .allowedDisplayNames(Sets.newHashSet("COUNTRY", "BILLING COUNTRY")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Country) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.PostalCode.name()) //
-                .allowedDisplayNames(Sets.newHashSet("POSTAL_CODE", "POSTALCODE", "ZIP", "POSTAL CODE", "BILLING ZIP")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.PostalCode) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.NUMERIC.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.DUNS.name()) //
-                .allowedDisplayNames(Sets.newHashSet("DUNS", "DUNS NUMBER")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.DUNS) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.NUMERIC.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.Industry.name()) //
-                .allowedDisplayNames(Sets.newHashSet("INDUSTRY")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Industry) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.AnnualRevenue.name()) //
-                .allowedDisplayNames(Sets.newHashSet("ANNUALREVENUE", "ANNUAL REVENUE")) //
-                .type(Schema.Type.DOUBLE) //
-                .interfaceName(InterfaceName.AnnualRevenue) //
-                .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.NUMERIC.name()) //
-                .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.NumberOfEmployees.name()) //
-                .allowedDisplayNames(Sets.newHashSet("NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "EMPLOYEES")) //
-                .type(Schema.Type.INT) //
-                .interfaceName(InterfaceName.NumberOfEmployees) //
-                .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.NUMERIC.name()) //
-                .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.CreatedDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED DATE")) //
-                .type(Schema.Type.LONG) //
-                .interfaceName(InterfaceName.CreatedDate) //
-                .logicalType(LogicalDataType.Date) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.YEAR.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED")) //
-                .type(Schema.Type.LONG) //
-                .interfaceName(InterfaceName.LastModifiedDate) //
-                .logicalType(LogicalDataType.Date) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.YEAR.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.YearStarted.name()) //
-                .allowedDisplayNames(Sets.newHashSet("YEARSTARTED", "YEAR STARTED")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.YearStarted) //
-                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.YEAR.name()) //
-                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.PhoneNumber.name()) //
-                .allowedDisplayNames(Sets.newHashSet("PHONE", "PHONE NUMBER")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.PhoneNumber) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(FundamentalType.ALPHA.name()) //
-                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.CRMId.name()) //
-                .allowedDisplayNames(
-                        Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "CRMID", "CRMLINK_ID", "CRM ID", "CRM_ID")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.CRMId) //
-                .logicalType(LogicalDataType.Id) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build());
-
-        return table;
-    }
-
     private Table getSalesforceLeadSchema() {
         Table table = createTable(SchemaInterpretation.SalesforceLead);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
@@ -750,6 +604,152 @@ public class SchemaRepository {
         return table;
     }
 
+    private Table getAccountSchema() {
+        Table table = createTable(SchemaInterpretation.Account);
+        table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
+        table.setPrimaryKey(createPrimaryKey("Id"));
+
+        table.addAttribute(attr(InterfaceName.Id.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
+                .type(Schema.Type.STRING) //
+                .required() //
+                .interfaceName(InterfaceName.AccountId) //
+                .logicalType(LogicalDataType.Id) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr(InterfaceName.Website.name()) //
+                .allowedDisplayNames(Sets.newHashSet("WEBSITE", "URL")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Website) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.CompanyName.name()) //
+                .allowedDisplayNames(Sets.newHashSet("COMPANY NAME", "ACCOUNT NAME", "DISPLAY_NAME", "DISPLAYNAME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CompanyName) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.City.name()) //
+                .allowedDisplayNames(Sets.newHashSet("CITY", "BILLING CITY")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.City) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.State.name()) //
+                .allowedDisplayNames(Sets.newHashSet("STATE", "STATE_PROVINCE", "STATEPROVINCE", "PROVINCE",
+                        "STATE OR PROVINCE", "BILLING STATE", "BILLING PROVINCE")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.State) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.Country.name()) //
+                .allowedDisplayNames(Sets.newHashSet("COUNTRY", "BILLING COUNTRY")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Country) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.PostalCode.name()) //
+                .allowedDisplayNames(Sets.newHashSet("POSTAL_CODE", "POSTALCODE", "ZIP", "POSTAL CODE", "BILLING ZIP")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PostalCode) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.NUMERIC.name()) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.DUNS.name()) //
+                .allowedDisplayNames(Sets.newHashSet("DUNS", "DUNS NUMBER")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.DUNS) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.NUMERIC.name()) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.Industry.name()) //
+                .allowedDisplayNames(Sets.newHashSet("INDUSTRY")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Industry) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.AnnualRevenue.name()) //
+                .allowedDisplayNames(Sets.newHashSet("ANNUALREVENUE", "ANNUAL REVENUE")) //
+                .type(Schema.Type.DOUBLE) //
+                .interfaceName(InterfaceName.AnnualRevenue) //
+                .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.NUMERIC.name()) //
+                .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.NumberOfEmployees.name()) //
+                .allowedDisplayNames(Sets.newHashSet("NUMBEROFEMPLOYEES", "NUMBER OF EMPLOYEES", "EMPLOYEES")) //
+                .type(Schema.Type.INT) //
+                .interfaceName(InterfaceName.NumberOfEmployees) //
+                .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.NUMERIC.name()) //
+                .statisticalType(ModelingMetadata.RATIO_STAT_TYPE) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.CreatedDate.name()) //
+                .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED DATE")) //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.CreatedDate) //
+                .logicalType(LogicalDataType.Date) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.YEAR.name()) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
+                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST MODIFIED DATE", "LASTMODIFIED")) //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.LastModifiedDate) //
+                .logicalType(LogicalDataType.Date) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.YEAR.name()) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.YearStarted.name()) //
+                .allowedDisplayNames(Sets.newHashSet("YEARSTARTED", "YEAR STARTED")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.YearStarted) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.YEAR.name()) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.PhoneNumber.name()) //
+                .allowedDisplayNames(Sets.newHashSet("PHONE", "PHONE NUMBER")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PhoneNumber) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .subcategory(ModelingMetadata.CATEGORY_LEAD_INFORMATION) //
+                .build());
+        table.addAttribute(attr(InterfaceName.CRMId.name()) //
+                .allowedDisplayNames(
+                        Sets.newHashSet("CRMACCOUNT_EXTERNAL_ID", "CRMID", "CRMLINK_ID", "CRM ID", "CRM_ID")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CRMId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+
+        return table;
+    }
+
     private Table getContactSchema() {
         Table table = createTable(SchemaInterpretation.Contact);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
@@ -765,25 +765,9 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.ContactName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("NAME", "CONTACT NAME", "CONTACT_NAME")) //
+                .allowedDisplayNames(Sets.newHashSet("NAME", "CONTACT NAME", "CONTACT_NAME", "DISPLAY_NAME")) //
                 .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.Name) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.FirstName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("FIRSTNAME", "FIRST NAME")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.FirstName) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-                .build());
-        table.addAttribute(attr(InterfaceName.LastName.name()) //
-                .allowedDisplayNames(Sets.newHashSet("LASTNAME", "LAST NAME")) //
-                .type(Schema.Type.STRING) //
-                .interfaceName(InterfaceName.LastName) //
+                .interfaceName(InterfaceName.ContactName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
