@@ -124,7 +124,7 @@ angular.module('lp.playbook')
 
     this.getRatings = function() {
         var data = [],
-            total = 5 ;//Math.floor(Math.random() * 10 + 3); // 3 - 10
+            total = 5;
 
         for (var i=0; i<total; i++) {
             var tmp = {

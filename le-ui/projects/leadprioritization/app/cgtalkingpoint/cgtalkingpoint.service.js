@@ -379,9 +379,9 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
 
     this.getDanteUrl = function(previewResources) {
         var deferred = $q.defer();
-        var sessionid = previewResources.oAuthToken, //'00D80000000KvZo!AR0AQBWNZUrIO9q.DjIjFdXYW0USIN0SBQWCVvx0hw6naKZrc374OdQVP24EvFxZiWbf00dNdHjlPGFEScO4BMstUYEJlvka',
-            preview_url = previewResources.danteUrl, //'https://localhost:44300/index.aspx',
-            server_url = 'https://testapi.lattice-engines.com/api',//previewResources.serverUrl, //https://leinstallation.na6.visual.force.com/services/Soap/u/9.0/00D80000000KvZo&CustomSettings={%22hideNavigation%22:true,%22HideTabs%22:true,%22HideHeader%22:true}&LpiPreview=true'
+        var sessionid = previewResources.oAuthToken,
+            preview_url = previewResources.danteUrl,
+            server_url = previewResources.serverUrl,
             custom_settings_json = {
                 hideNavigation: true,
                 HideTabs: true,
