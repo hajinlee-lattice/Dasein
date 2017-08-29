@@ -1602,6 +1602,13 @@ angular.module('common.datacloud.explorer', [
         };
     };
 
+    vm.selectRatingEngineAttribute = function(enrichment) {
+        DataCloudStore.selectRatingEngineAttribute(enrichment).then(function(response) {
+            enrichment.IsRatingEngineAttribute = !enrichment.IsRatingEngineAttribute;
+            console.log(response);
+        });
+    }
+
     vm.init();
 })
 .directive('fallbackSrc', function () {

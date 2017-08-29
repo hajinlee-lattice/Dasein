@@ -44,48 +44,6 @@ angular.module('common.datacloud')
 
     this.init();
 
-    this.getFeedbackModal = function() {
-        return this.feedbackModal;
-    }
-
-    this.setFeedbackModal = function(bool, obj) {
-        this.feedbackModal.context = obj;
-        return this.feedbackModal.show = bool;
-    }
-
-    this.sendFeedback = function(args, type) {
-        var deferred = $q.defer(),
-            date = new Date(),
-            report = {
-                "Comment": args.input.comment || '',
-                "CreatedTime": date.toISOString(),
-                "Id": "string", // ??
-                "MatchLog": args.companyInfo.MatchLogs,
-                "ReportedByTenant": args.clientSession.tenant,
-                "ReportedByUser": args.clientSession.email,
-                "ReproduceDetail": {
-                    "InputKeys": {
-                        "additionalProp1": {},
-                        "additionalProp2": {},
-                        "additionalProp3": {}
-                    },
-                    "MatchedKeys": {
-                        "additionalProp1": {},
-                        "additionalProp2": {},
-                        "additionalProp3": {}
-                    }
-                },
-                "SuggestedValue": args.input.value || '',
-                "Type": "LOOKUP" // ??
-            }
-
-        deferred.resolve(report);
-        // DataCloudService.sendFeedback(report, type).then(function(response){
-        //     deferred.resolve(response);
-        // });
-        return deferred.promise;
-    }
-
     var getObj = function(path, obj) {
         return path.split('.').reduce(function(obj, i) {
             return obj[i];
@@ -324,6 +282,56 @@ angular.module('common.datacloud')
 
     this.setCube = function(cube) {
         DataCloudStore.cube = cube;
+    }
+
+    this.getFeedbackModal = function() {
+        return this.feedbackModal;
+    }
+
+    this.setFeedbackModal = function(bool, obj) {
+        this.feedbackModal.context = obj;
+        return this.feedbackModal.show = bool;
+    }
+
+    this.sendFeedback = function(args, type) {
+        var deferred = $q.defer(),
+            date = new Date(),
+            report = {
+                "Comment": args.input.comment || '',
+                "CreatedTime": date.toISOString(),
+                "Id": "string", // ??
+                "MatchLog": args.companyInfo.MatchLogs,
+                "ReportedByTenant": args.clientSession.tenant,
+                "ReportedByUser": args.clientSession.email,
+                "ReproduceDetail": {
+                    "InputKeys": {
+                        "additionalProp1": {},
+                        "additionalProp2": {},
+                        "additionalProp3": {}
+                    },
+                    "MatchedKeys": {
+                        "additionalProp1": {},
+                        "additionalProp2": {},
+                        "additionalProp3": {}
+                    }
+                },
+                "SuggestedValue": args.input.value || '',
+                "Type": "LOOKUP" // ??
+            }
+
+        deferred.resolve(report);
+        // DataCloudService.sendFeedback(report, type).then(function(response){
+        //     deferred.resolve(response);
+        // });
+        return deferred.promise;
+    }
+
+    this.selectRatingEngineAttribute = function(enrichment) {
+        var deferred = $q.defer();
+        DataCloudService.selectRatingEngineAttribute(enrichment).then(function(response){
+            deferred.resolve(response);
+        });
+        return deferred.promise;
     }
 
 })
@@ -592,6 +600,17 @@ angular.module('common.datacloud')
             deferred.resolve(response.data);
         });
         
+        return deferred.promise;
+    }
+
+    this.selectRatingEngineAttribute = function(enrichment) {
+        var deferred = $q.defer(),
+            ret = {
+                ColumnId: enrichment.ColumnId,
+                enrichment: enrichment
+            };
+
+        deferred.resolve(ret);
         return deferred.promise;
     }
 });

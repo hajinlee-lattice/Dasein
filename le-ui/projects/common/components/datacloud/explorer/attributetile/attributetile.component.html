@@ -116,9 +116,11 @@
         </li>
 
         <li class="control ratings-selection" ng-if="vm.section == 'wizard.segment'">
-            <button class="button">
+            <button class="button"
+                    ng-class="{'selected': enrichment.IsRatingEngineAttribute}"
+                    ng-click="vm.selectRatingEngineAttribute(enrichment)">
                 <span>
-                    Select Attribute
+                    {{!enrichment.IsRatingEngineAttribute ? 'Select Attribute' : 'Remove Attribute'}}
                 </span>
             </button>
         </li>
