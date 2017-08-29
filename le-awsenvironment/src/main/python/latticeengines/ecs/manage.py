@@ -24,11 +24,26 @@ def stop_service(args):
     stop_service_internal(args.cluster, args.service)
 
 def stop_service_internal(cluster, service):
-    cluster_arn = find_cluster(cluster)
-    service_arn = find_service(cluster, service)
+    cluster_arns = find_clusters(cluster)
+    for cluster_arn in cluster_arns:
+        service_arn = find_service(cluster, cluster_arn, service)
+        count_tasks_in_service(cluster_arn, service_arn)
+        update_tasks_count(cluster_arn, service_arn, 0)
 
-    count_tasks_in_service(cluster_arn, service_arn)
-    update_tasks_count(cluster_arn, service_arn, 0)
+def find_service_by_cluster_arn(cluster, cluster_arn, service):
+    response = ECS_CLIENT.list_services(cluster=cluster_arn)
+    for s in response['serviceArns']:
+        service_name = s.split(':')[5].replace('service/', '')
+        if (service_name != service) and (cluster in service_name):
+            random_token = service_name.split('-')[-1]
+            service_name = service_name.replace(cluster + '-', '').replace('-' + random_token, '')
+        if service_name == service:
+            print "Found ecs service " + s
+            return s
+
+    sys.stdout.flush()
+
+    raise Exception("Cannot find the ecs service named " + service)
 
 def find_service(cluster, service):
     cluster_arn = find_cluster(cluster)
@@ -75,6 +90,23 @@ def find_cluster(cluster):
 
     if cluster_arn is not None:
         return cluster_arn
+
+    sys.stdout.flush()
+
+    raise Exception("Cannot find the ecs cluster named " + cluster)
+
+def find_clusters(cluster):
+    response = ECS_CLIENT.list_clusters()
+
+    cluster_arns = []
+    for c in response['clusterArns']:
+        cluster_name = c.split(':')[5].replace('cluster/', '')
+        cluster_name = cluster_name.split('-ecscluster-')[0]
+        if cluster_name == cluster:
+            cluster_arns.append(c)
+
+    if len(cluster_arns) > 0:
+        return cluster_arns
 
     sys.stdout.flush()
 
@@ -169,17 +201,19 @@ def create_service(cluster, service, task, count):
 
 def delete_service(cluster, service):
     print "looking for service %s in cluster %s" % (service, cluster)
-    cluster_arn = find_cluster(cluster)
-    try:
-        service_arn = find_service(cluster, service)
-        update_tasks_count(cluster_arn, service_arn, 0)
-        print "deleting service " + service_arn
-        ECS_CLIENT.delete_service(
-            cluster=cluster_arn,
-            service=service_arn
-        )
-    except Exception:
-        pass
+    cluster_arns = find_clusters(cluster)
+    for cluster_arn in cluster_arns:
+        try:
+            service_arn = find_service_by_cluster_arn(cluster, cluster_arn, service)
+            update_tasks_count(cluster_arn, service_arn, 0)
+            print "deleting service " + service_arn
+            ECS_CLIENT.delete_service(
+                cluster=cluster_arn,
+                service=service_arn
+            )
+        except Exception as e:
+            print e
+            pass
 
 
 def parse_args():
