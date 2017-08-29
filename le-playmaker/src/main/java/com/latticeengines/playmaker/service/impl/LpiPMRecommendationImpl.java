@@ -66,7 +66,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
                 if (accExtRec.containsKey(PlaymakerConstants.AccountID)) {
                     String accountId = (String) accExtRec.get(PlaymakerConstants.AccountID);
-                    if (StringUtils.isNumeric(accountId)) {
+                    if (StringUtils.isNotBlank(accountId) && StringUtils.isNumeric(accountId)) {
                         Long longAccId = Long.parseLong(accountId);
                         accExtRec.put(PlaymakerConstants.AccountID, longAccId);
                     }
