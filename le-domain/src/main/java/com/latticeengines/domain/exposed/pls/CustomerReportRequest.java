@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,6 +12,9 @@ public abstract class CustomerReportRequest {
 
     @JsonProperty("MatchedKeys")
     private Map<String, String> matchedKeys;
+
+    @JsonProperty("MatchLog")
+    private List<String> matchLog;
 
     @JsonProperty("CorrectValue")
     private String correctValue;
@@ -40,6 +44,14 @@ public abstract class CustomerReportRequest {
 
     public void setCorrectValue(String correctValue) {
         this.correctValue = correctValue;
+    }
+
+    public List<String> getMatchLog() {
+        return matchLog;
+    }
+
+    public void setMatchLog(List<String> matchLog) {
+        this.matchLog = matchLog;
     }
 
     public String getComment() {
