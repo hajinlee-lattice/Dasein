@@ -1,5 +1,5 @@
 <div class="enrichment-wizard-container container section-{{vm.section.replace('.','-')}}">
-    <attribute-feedback-modal ng-if="vm.feedbackModal.show" lookup="vm.LookupResponse" />
+    <attribute-feedback-modal ng-if="vm.feedbackModal.show" lookup-response="vm.LookupResponse" />
     <div ng-if="!vm.category" ng-init="vm.relanding()"></div>
     <div class="status-alert-box {{vm.status_alert.type}}" ng-if="vm.status_alert.show">
         <div class="icon"></div>

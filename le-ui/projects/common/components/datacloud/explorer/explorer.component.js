@@ -1660,40 +1660,53 @@ angular.module('common.datacloud.explorer', [
         restrict: 'EA',
         templateUrl: '/components/datacloud/explorer/attributefeedback/attributefeedbackmodal.component.html',
         scope: {
-            lookup: '=',
+            lookupResponse: '=?',
         },
         controller: ['$scope', '$document', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, LookupStore, DataCloudStore, BrowserStorageUtility) { 
             // test on LETest1503428538807_LPI
-            var userInput = LookupStore.get('request');
+            var vm = $scope,
+                lookupStore = LookupStore.get('request');
+
             $scope.modal = DataCloudStore.getFeedbackModal();
             $scope.close = function() {
                 DataCloudStore.setFeedbackModal(false);
             }
+
             var clientSession = BrowserStorageUtility.getClientSession();
 
-            $scope.showUserInput = $scope.modal.context.showUserInput;
-            if($scope.showUserInput) {
-                $scope.userInput = userInput;
+            $scope.showLookupStore = $scope.modal.context.showLookupStore;
+            if($scope.showLookupStore) {
+                $scope.lookupStore = lookupStore;
             }
 
-            $scope.report = {
-                context: $scope.modal.context,
-                clientSession: {
-                    email: clientSession.EmailAddress,
-                    tenant: clientSession.Tenant.Identifier
-                },
-                userInput: userInput,
-                companyInfo: $scope.lookup
-            };
 
             $scope.icon = $scope.modal.context.icon;
             $scope.label = $scope.modal.context.label || $scope.modal.context.attribute.DisplayName;
             $scope.value = $scope.modal.context.value;
             $scope.categoryClass = $scope.modal.context.categoryClass;
 
-
             $scope.report = function() {
-                DataCloudStore.sendFeedback($scope.input);
+                $scope.sendingReport = true;
+                var report = {
+                    context: $scope.modal.context,
+                    clientSession: {
+                        email: clientSession.EmailAddress,
+                        tenant: clientSession.Tenant.Identifier
+                    },
+                    lookupStore: lookupStore,
+                    input: $scope.input || {},
+                    companyInfo: $scope.lookupResponse
+                };
+
+                DataCloudStore.sendFeedback(report).then(function(response){
+                    //$scope.close();
+                    $scope.showDebug = true;
+                    $scope.sendingReport = false;
+                    $scope.debug = {
+                        response: response,
+                        report: report
+                    }
+                });
             }
 
             $document.on('click', handleDocumentClick);
@@ -1726,7 +1739,7 @@ angular.module('common.datacloud.explorer', [
             iconFont: '=?',
             categoryClass: '=?',
             label: '=?',
-            showUserInput: '=?'
+            showLookupStore: '=?'
         },
         controller: ['$scope', '$stateParams', 'DataCloudStore', function ($scope, $stateParams, DataCloudStore) {
             $scope.type = $scope.type || 'infodot';
@@ -1734,7 +1747,6 @@ angular.module('common.datacloud.explorer', [
             $scope.menuClick = function($event) {
                 $event.stopPropagation();
                 $scope.showMenu = !$scope.showMenu;
-
             }
 
             $scope.closeMenu = function($event) {
@@ -1753,7 +1765,7 @@ angular.module('common.datacloud.explorer', [
                     },
                     categoryClass: $scope.categoryClass,
                     label: $scope.label || '',
-                    showUserInput: $scope.showUserInput
+                    showLookupStore: $scope.showLookupStore
                 });
             }
         }]

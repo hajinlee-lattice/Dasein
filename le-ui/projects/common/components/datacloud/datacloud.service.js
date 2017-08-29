@@ -53,8 +53,37 @@ angular.module('common.datacloud')
         return this.feedbackModal.show = bool;
     }
 
-    this.sendFeedback = function(args) {
-        console.log(args);
+    this.sendFeedback = function(args, type) {
+        var deferred = $q.defer(),
+            date = new Date(),
+            report = {
+                "Comment": args.input.comment || '',
+                "CreatedTime": date.toISOString(),
+                "Id": "string", // ??
+                "MatchLog": args.companyInfo.MatchLogs,
+                "ReportedByTenant": args.clientSession.tenant,
+                "ReportedByUser": args.clientSession.email,
+                "ReproduceDetail": {
+                    "InputKeys": {
+                        "additionalProp1": {},
+                        "additionalProp2": {},
+                        "additionalProp3": {}
+                    },
+                    "MatchedKeys": {
+                        "additionalProp1": {},
+                        "additionalProp2": {},
+                        "additionalProp3": {}
+                    }
+                },
+                "SuggestedValue": args.input.value || '',
+                "Type": "LOOKUP" // ??
+            }
+
+        deferred.resolve(report);
+        // DataCloudService.sendFeedback(report, type).then(function(response){
+        //     deferred.resolve(response);
+        // });
+        return deferred.promise;
     }
 
     var getObj = function(path, obj) {
@@ -540,6 +569,25 @@ angular.module('common.datacloud')
                 subcategory: subcategoryName
             },
             data: flags
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+        
+        return deferred.promise;
+    }
+
+    this.sendFeedback = function(opts, type) {
+        var deferred = $q.defer(),
+            opts = opts || {},
+            type = type || 'incorrectmatchedattrs'; // incorrectmatchedattrs | incorrectlookups
+        
+        $http({
+            method: 'POST',
+            headers: {
+                'ErrorDisplayMethod': 'none' 
+            },
+            url: '/pls/datacloud/customerreports/' + type,
+            data: opts
         }).then(function(response){
             deferred.resolve(response.data);
         });
