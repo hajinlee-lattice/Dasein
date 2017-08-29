@@ -414,7 +414,7 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
                         .setRepositories(repositories).setId(i + "");
             }
             if (repositoryCount == 2) {
-                List<FabricStoreEnum> stores = Arrays.asList(FabricStoreEnum.HDFS, FabricStoreEnum.DYNAMO);
+                List<FabricStoreEnum> stores = Arrays.asList(FabricStoreEnum.HDFS);
                 List<String> repositories = Arrays.asList("testGenericFile" + type, "DataCloud");
                 recordRequest.setBatchId(batchId).setCustomerSpace("generic").setStores(stores)
                         .setRepositories(repositories).setId(i + "").setRecordType("DynamoConnector");
