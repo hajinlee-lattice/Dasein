@@ -337,6 +337,13 @@ def check_stack_not_exists(client, stackname):
     print 'Great! The name "%s" has not been used.' % stackname
     sys.stdout.flush()
 
+def get_stack_status(client, stackname):
+    response = client.list_stacks()
+    for stack in response['StackSummaries']:
+        if stack['StackStatus'] != 'DELETE_COMPLETE' and stack['StackName'] == stackname:
+            return stack['StackStatus']
+    return None
+
 def wait_for_stack_creation(client, stackname):
     print 'Waiting for the stack to be ready ...'
     sys.stdout.flush()
@@ -344,7 +351,7 @@ def wait_for_stack_creation(client, stackname):
     waiter = client.get_waiter('stack_create_complete')
     waiter.wait(StackName=stackname)
     t2 = time.time()
-    print 'Done. %.2f seconds.' % (t2 -t1)
+    print 'Done. %.2f seconds. Final Status = %s' % (t2 -t1, get_stack_status(client, stackname))
 
 def teardown_stack(client, stackname):
     client.delete_stack(StackName=stackname)
@@ -357,4 +364,4 @@ def wait_for_stack_teardown(client, stackname):
     waiter = client.get_waiter('stack_delete_complete')
     waiter.wait(StackName=stackname)
     t2 = time.time()
-    print 'Done. %.2f seconds.' % (t2 -t1)
+    print 'Done. %.2f seconds. Final Status = %s' % (t2 -t1, get_stack_status(client, stackname))
