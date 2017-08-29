@@ -109,7 +109,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(createdRatingEngine);
         List<RuleBasedModel> ruleBasedModelList = ruleBasedModelEntityMgr.findAllByRatingEngineId(ratingEngineId);
         Assert.assertNotNull(ruleBasedModelList);
-        Assert.assertEquals(1, ruleBasedModelList.size());
+        Assert.assertEquals(ruleBasedModelList.size(), 1);
         ruleBasedModel = ruleBasedModelList.get(0);
         assertDefaultRuleBasedModel(ruleBasedModel);
         ruleBasedModelId = ruleBasedModel.getId();
@@ -118,7 +118,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel(ruleBasedModel, ratingEngineId);
         ruleBasedModelList = ruleBasedModelEntityMgr.findAllByRatingEngineId(ratingEngineId);
         Assert.assertNotNull(ruleBasedModelList);
-        Assert.assertEquals(1, ruleBasedModelList.size());
+        Assert.assertEquals(ruleBasedModelList.size(), 1);
         assertUpdatedRuleBasedModel(ruleBasedModelList.get(0));
     }
 
@@ -136,7 +136,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(ruleBasedModel.getRatingEngine());
         Assert.assertEquals(ruleBasedModel.getRatingEngine().getId(), ratingEngineId);
         Assert.assertNotNull(ruleBasedModel.getRatingRule());
-        Assert.assertEquals(RatingRule.DEFAULT_BUCKET_NAME, ruleBasedModel.getRatingRule().getDefaultBucketName());
+        Assert.assertEquals(ruleBasedModel.getRatingRule().getDefaultBucketName(), RatingRule.DEFAULT_BUCKET_NAME);
     }
 
     private void assertUpdatedRuleBasedModel(RuleBasedModel ruleBasedModel) {
@@ -146,7 +146,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(ruleBasedModel.getRatingEngine());
         Assert.assertEquals(ruleBasedModel.getRatingEngine().getId(), ratingEngineId);
         Assert.assertNotNull(ruleBasedModel.getRatingRule());
-        Assert.assertEquals(RuleBucketName.D.getName(), ruleBasedModel.getRatingRule().getDefaultBucketName());
+        Assert.assertEquals(ruleBasedModel.getRatingRule().getDefaultBucketName(), RuleBucketName.D.getName());
     }
 
     private RatingRule generateRatingRule() {

@@ -1,13 +1,14 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -15,12 +16,14 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingRule;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
@@ -37,9 +40,6 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private SegmentService segmentService;
-
-    @Autowired
-    private TenantService tenantService;
 
     private RatingEngine ratingEngine;
     private String ratingEngineId;
@@ -73,8 +73,10 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testBasicOperations() {
+        // test creation
         RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine,
                 tenant.getId());
+        log.info("Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
         ratingEngineId = createdRatingEngine.getId();
         createdRatingEngine = ratingEngineEntityMgr.findById(createdRatingEngine.getId());
@@ -90,16 +92,37 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
         Assert.assertNotNull(createdRatingEngine.getRatingModels());
 
+        // test lazy fetch
+        createdRatingEngine = ratingEngineEntityMgr.findById(ratingEngineId, true, true, true);
+        MetadataSegment segment = createdRatingEngine.getSegment();
+        Assert.assertNotNull(segment);
+        Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
+
+        Set<RatingModel> ratingModels = createdRatingEngine.getRatingModels();
+        Assert.assertNotNull(ratingModels);
+        Assert.assertEquals(ratingModels.size(), 1);
+        Iterator<RatingModel> it = ratingModels.iterator();
+        RatingModel rm = it.next();
+        Assert.assertTrue(rm instanceof RuleBasedModel);
+        Assert.assertEquals(rm.getIteration(), 1);
+        Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(),
+                RatingRule.DEFAULT_BUCKET_NAME);
+        log.info("Rating Engine after findById is " + createdRatingEngine.toString());
+
+        // test find all
         List<RatingEngine> ratingEngineList = ratingEngineEntityMgr.findAll();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(ratingEngineId, ratingEngineList.get(0).getId());
 
+        // test update
         ratingEngine.setDisplayName(RATING_ENGINE_NAME);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
         createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, mainTestTenant.getId());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
         Assert.assertEquals(RATING_ENGINE_NOTE, createdRatingEngine.getNote());
+        System.out.println("update date is " + updatedDate);
+        System.out.println("The update date for the newly updated one is " + createdRatingEngine.getUpdated());
         Assert.assertTrue(createdRatingEngine.getUpdated().after(updatedDate));
         System.out.println("Created date is " + createdDate);
         System.out.println("The create date for the newly updated one is " + createdRatingEngine.getCreated());
@@ -108,6 +131,7 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(ratingEngineId, ratingEngineList.get(0).getId());
 
+        // test deletion
         ratingEngineEntityMgr.deleteById(ratingEngineId);
         ratingEngineList = ratingEngineEntityMgr.findAll();
         Assert.assertNotNull(ratingEngineList);
@@ -116,13 +140,6 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         createdRatingEngine = ratingEngineEntityMgr.findById(createdRatingEngine.getId());
         Assert.assertNull(createdRatingEngine);
 
-    }
-
-    @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
-        if (tenant != null) {
-            tenantService.discardTenant(tenant);
-        }
     }
 
 }

@@ -5,10 +5,15 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.AImodel;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.pls.service.AImodelService;
 
 @Component("aiModelService")
-public class AImodelServiceImpl implements AImodelService {
+public class AImodelServiceImpl extends RatingModelServiceBase<AImodel> implements AImodelService {
+
+    protected AImodelServiceImpl() {
+        super(RatingEngineType.AI_BASED);
+    }
 
     @Override
     public List<AImodel> getAllRatingModelsByRatingEngineId(String ratingEngineId) {

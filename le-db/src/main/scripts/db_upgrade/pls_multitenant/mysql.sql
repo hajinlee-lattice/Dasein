@@ -1,5 +1,7 @@
 USE `PLS_MultiTenant`;
 
+create table `hibernate_sequences` ( `sequence_name` varchar(255),  `sequence_next_hi_value` integer ) ;
+
 create table `RATING_ENGINE` (`PID` bigint not null auto_increment unique, `CREATED` datetime not null, `CREATED_BY` varchar(255) not null, `DISPLAY_NAME` varchar(255), `ID` varchar(255) not null unique, `note` varchar(2048), `STATUS` varchar(255) not null, `TYPE` varchar(255) not null, `UPDATED` datetime not null, FK_SEGMENT_ID bigint not null, FK_TENANT_ID bigint not null, primary key (`PID`)) ENGINE=InnoDB;ALTER TABLE `RATING_ENGINE` ADD index FKF5F72B24E88DD898 (FK_SEGMENT_ID), ADD CONSTRAINT FKF5F72B24E88DD898 FOREIGN KEY(FK_SEGMENT_ID) REFERENCES `METADATA_SEGMENT` (`PID`) ON DELETE CASCADE;
 alter table `RATING_ENGINE` add index FKF5F72B2436865BC (FK_TENANT_ID), add constraint FKF5F72B2436865BC foreign key (FK_TENANT_ID) references `TENANT` (`TENANT_PID`) on delete cascade;
 

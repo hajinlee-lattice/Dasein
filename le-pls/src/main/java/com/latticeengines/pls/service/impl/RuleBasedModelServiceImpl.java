@@ -7,12 +7,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.pls.entitymanager.RuleBasedModelEntityMgr;
 import com.latticeengines.pls.service.RuleBasedModelService;
 
 @Component("ruleBasedModelService")
-public class RuleBasedModelServiceImpl implements RuleBasedModelService {
+public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedModel> implements RuleBasedModelService {
+
+    protected RuleBasedModelServiceImpl() {
+        super(RatingEngineType.RULE_BASED);
+    }
 
     private static final Logger log = LoggerFactory.getLogger(RuleBasedModelServiceImpl.class);
 

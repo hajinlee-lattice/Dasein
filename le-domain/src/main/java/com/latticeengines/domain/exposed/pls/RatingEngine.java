@@ -26,6 +26,7 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,6 +43,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Table(name = "RATING_ENGINE")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
     public static final String RATING_ENGINE_PREFIX = "rating_engine";
@@ -61,7 +63,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @Column(name = "ID", unique = true, nullable = false)
     private String id;
 
-    @JsonProperty("tenant")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)

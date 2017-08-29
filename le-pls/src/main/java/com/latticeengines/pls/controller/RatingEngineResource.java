@@ -23,10 +23,8 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
-import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingEngineService;
-import com.latticeengines.pls.service.RuleBasedModelService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -42,9 +40,6 @@ public class RatingEngineResource {
 
     @Autowired
     private RatingEngineService ratingEngineService;
-
-    @Autowired
-    private RuleBasedModelService ruleBasedModelService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -117,7 +112,7 @@ public class RatingEngineResource {
     @ApiOperation(value = "Get Rating Models associated with a Rating Engine given its id")
     public Set<RatingModel> getRatingModels(@PathVariable String ratingEngineId, HttpServletRequest request,
             HttpServletResponse response) {
-        return createRatingModels();
+        return ratingEngineService.getRatingModelsByRatingEngineId(ratingEngineId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -127,7 +122,7 @@ public class RatingEngineResource {
             @PathVariable String ratingModelId, //
             HttpServletRequest request, //
             HttpServletResponse response) {
-        return ruleBasedModelService.geRatingModelById(ratingModelId);
+        return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/plays", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -137,12 +132,6 @@ public class RatingEngineResource {
             HttpServletRequest request, //
             HttpServletResponse response) {
         return createPlays();
-    }
-
-    private Set<RatingModel> createRatingModels() {
-        Set<RatingModel> set = new HashSet<>();
-        set.add(new RuleBasedModel());
-        return set;
     }
 
     private Set<Play> createPlays() {

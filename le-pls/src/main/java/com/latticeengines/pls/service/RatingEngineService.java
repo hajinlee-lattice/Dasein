@@ -14,6 +14,10 @@ public interface RatingEngineService {
 
     Set<RatingModel> getAllRatingModelsById(String id);
 
+    Set<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId);
+
+    RatingModel getRatingModel(String ratingEngineId, String ratingModelId);
+
     RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId);
 
     void deleteById(String Id);
