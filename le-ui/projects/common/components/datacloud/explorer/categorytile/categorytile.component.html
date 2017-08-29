@@ -27,13 +27,15 @@
                         ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
                     <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
-                    <div class="column data records" ng-if="!vm.lookupMode">{{ attribute.TopBkt.Cnt|number }}</div>
+
+                    <div class="column data records" ng-if="!vm.lookupMode && vm.section != 'segment.analysis'">{{ attribute.Count|number }}</div>
+
+                    <div class="column data records" ng-if="!vm.lookupMode && vm.section === 'segment.analysis'">{{ attribute.TopBkt.Cnt|number }}</div>
                 </li>
             </ul>
             <ul class="attributes noselect-children">
 
-                <li class="header" ng-show="vm.categoryAttributes.length > 0">
-                <!-- <li class="header"> -->
+                <li class="header" ng-show="categoryAttributes.length > 0">
                     <div class="column label">{{ vm.lookupMode ? 'Attribute' : vm.generateTileTableLabel(categoryAttributes) }}</div>
                     <div class="column data" ng-if="!highlightAttributes.length && vm.section == 'segment.analysis'">Value</div>
                     <div class="column data" ng-if="!highlightAttributes.length">{{ vm.lookupMode ? 'Value' : (vm.section == 'segment.analysis' && vm.inModel() ? 'Lift' : 'Records') }}</div>
@@ -55,12 +57,14 @@
                         ng-click="vm.selectSegmentAttribute(attribute)">
                     <div class="column label" title="{{attribute.DisplayName}}">
                         <input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" />
+                        
                         <input  type="checkbox" 
                                 ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]"
                                 ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
                                 name="{{attribute.Attribute || attribute.ColumnId}}" 
                                 id="{{attribute.Attribute || attribute.ColumnId}}" 
                                 ng-if="vm.section == 'segment.analysis' && attribute.TopBkt" />
+
                         {{ attribute.DisplayName }}
                     </div>
                     <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>

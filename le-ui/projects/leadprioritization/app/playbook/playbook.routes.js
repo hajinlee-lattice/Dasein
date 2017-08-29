@@ -163,6 +163,24 @@ angular
                 section: 'dashboard.targets'
             },
             resolve: {
+                Accounts: ['$q', 'QueryStore', function($q, QueryStore) {
+                    var deferred = $q.defer(),
+                        segment = QueryStore.getSegment(),
+                        restriction = QueryStore.getRestriction(),
+                        query = {
+                            free_form_text_search: '',
+                            frontend_restriction: restriction,
+                            page_filter: {
+                                num_rows: 10,
+                                row_offset: 0
+                            },
+                            restrict_with_sfdcid: false
+                        };
+                        deferred.resolve( QueryStore.GetDataByQuery('accounts', query, segment).then(function(data){ return data; }) );
+
+                    return deferred.promise;
+
+                }],
                 AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
                     var deferred = $q.defer(),
                         segment = QueryStore.getSegment(),
@@ -173,7 +191,7 @@ angular
                                 'free_form_text_search': '',
                                 'frontend_restriction': restriction,
                                 'page_filter': {
-                                    'num_rows': 10,
+                                    'num_rows': 15,
                                     'row_offset': 0
                                 }
                             };
@@ -182,7 +200,7 @@ angular
                                 'free_form_text_search': '',
                                 'frontend_restriction': segment.frontend_restriction,
                                 'page_filter': {
-                                    'num_rows': 10,
+                                    'num_rows': 15,
                                     'row_offset': 0
                                 }
                             };
@@ -202,7 +220,7 @@ angular
                                 'num_rows': 1000000,
                                 'row_offset': 0
                             },
-                            'restrict_without_sfdcid': true
+                            'restrict_with_sfdcid': false
                         };
 
                     QueryStore.GetCountByQuery('accounts', query).then(function(response){ 

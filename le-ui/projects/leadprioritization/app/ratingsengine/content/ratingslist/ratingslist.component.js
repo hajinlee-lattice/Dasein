@@ -49,9 +49,9 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
         RatingsEngineStore.clear();
         angular.forEach(RatingList, function(rating) {
 
-        vm.tileStates[rating.name] = {
-            showCustomMenu: false
-        };
+            vm.tileStates[rating.name] = {
+                showCustomMenu: false
+            };
 
 
         });

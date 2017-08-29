@@ -20,24 +20,24 @@
     <ul class="filters">
         <li class="query">
             <div class="ng-search">
-                <form ng-enter="vm.submitQuery()">
-                    <a class="button icon-button white-button" ng-click="vm.clearSearch()">
-                        <span 
-                            class="fa fa-search" 
-                            ng-show="!vm.search.length"></span>
-                        <span 
-                            class="fa fa-times" 
-                            ng-show="vm.search.length"></span>
-                    </a>
-                    <input 
-                        type="text" 
-                        name="SegmentResultSearch" 
-                        class="form-control" 
-                        placeholder="Search"
-                        ng-model="vm.search"
-                        ng-model-options="vm.searchOptions"
-                    />
-                </form>
+                <a class="button icon-button white-button" ng-click="vm.clearSearch()">
+                    <span 
+                        class="fa fa-search" 
+                        ng-show="!vm.search.length"></span>
+                    <span 
+                        class="fa fa-times" 
+                        ng-show="vm.search.length"></span>
+                </a>
+                <input 
+                    type="text" 
+                    name="SegmentResultSearch" 
+                    class="form-control" 
+                    placeholder="Search"
+                    ng-model="vm.search"
+                    ng-model-options='{ debounce: 1000 }'
+                    ng-change='vm.submitQuery()'
+                    ng-model-options="vm.searchOptions"
+                />
             </div>
         </li>
         <li class="buttons" ng-if="vm.section !== 'dashboard.targets' && vm.section !== 'wizard.targets'">
@@ -111,9 +111,11 @@
          Loading Accounts...
     </div>
 
-    <p ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts === []">No Records Found<p>
+    <div ng-if="vm.accounts.length === 0">
+        <p>No Accounts Found<p>
+    </div>
 
-    <ul class="filters pull-right" ng-if="!vm.loading && !vm.accounts || !vm.loading && vm.accounts != []">
+    <ul class="filters pull-right" ng-if="vm.accounts.length > 0">
         <li>
             <pd-pagination-controls
                 current="vm.current"

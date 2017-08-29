@@ -55,6 +55,7 @@
                                 !vm.lookupMode && ['wizard.segment'].indexOf(vm.section) == -1">
 <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
         <h5><label>Attribute range</label><label>Records</label></h5>
+        
         <ul class="attribute-stats">
             <li ng-repeat="stat in vm.cube.data.Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
                 class="attribute-stat"
@@ -63,7 +64,8 @@
                             'disabled-grayout': vm.section == 'segment.analysis' && !vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment,stat.Rng)]
                           }"
                 ng-click="vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'))">
-<!--'disable-bar': (vm.section != 'segment.analysis' && vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean')-->
+
+                <!--'disable-bar': (vm.section != 'segment.analysis' && vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean')-->
                 <ul class="graph">
                     <li class="label" title="{{stat.Lbl}}">
                         <input  type="checkbox"

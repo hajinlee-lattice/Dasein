@@ -323,6 +323,40 @@ angular
 
                     return deferred.promise;                    
                 }],
+                Accounts: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
+                    var deferred = $q.defer(),
+                        segmentName = $stateParams.segment,
+                        restriction = QueryStore.getRestriction();
+
+                    if(segmentName === "Create"){
+                        query = { 
+                            'free_form_text_search': '',
+                            'frontend_restriction': restriction,
+                            'page_filter': {
+                                'num_rows': 15,
+                                'row_offset': 0
+                            }
+                        };
+                        deferred.resolve( QueryStore.GetDataByQuery('accounts', query).then(function(data){ return data; }));
+                    } else {
+                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                            var segment = result;
+
+                            query = { 
+                                'free_form_text_search': '',
+                                'frontend_restriction': segment.frontend_restriction,
+                                'page_filter': {
+                                    'num_rows': 15,
+                                    'row_offset': 0
+                                }
+                            };
+                            deferred.resolve( QueryStore.GetDataByQuery('accounts', query, segment).then(function(data){ return data; }));
+                        });
+                    };
+
+                    return deferred.promise;
+
+                }],
                 AccountsCount: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
                     
                     var deferred = $q.defer(),
@@ -334,7 +368,7 @@ angular
                             'free_form_text_search': '',
                             'frontend_restriction': restriction,
                             'page_filter': {
-                                'num_rows': 10,
+                                'num_rows': 15,
                                 'row_offset': 0
                             }
                         };
@@ -349,7 +383,7 @@ angular
                                 'free_form_text_search': '',
                                 'frontend_restriction': segment.frontend_restriction,
                                 'page_filter': {
-                                    'num_rows': 10,
+                                    'num_rows': 15,
                                     'row_offset': 0
                                 }
                             };

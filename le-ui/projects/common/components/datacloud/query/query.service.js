@@ -165,7 +165,6 @@ angular.module('common.datacloud.query.service',[
             }
         }
 
-
         allRestrictions.splice(index, 1);
         this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
 

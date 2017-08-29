@@ -876,10 +876,19 @@ angular.module('common.datacloud.explorer', [
                             'SegmentChecked'
                         ];
 
+
+                    // console.log(enrichment);
+
                     if (enrichment) {
                         if(!vm.lookupMode) {
                             map.forEach(function(key){
+                                
+
+
                                 item[key] = enrichment[key];
+
+
+
                             });
 
                             enrichment.Count = item.Count;
@@ -1194,6 +1203,7 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.makeSegmentsRangeKey = function(enrichment, range, label){
+
         var fieldName = enrichment.Attribute || enrichment.ColumnId,
             values = ObjectValues(range),
             key = fieldName + (range ? values.join('') : label);
@@ -1201,37 +1211,6 @@ angular.module('common.datacloud.explorer', [
     }
 
     var getExplorerSegments = function(enrichments) {
-
-        // vm.clearExplorerSegments();
-        // var metadataSegments = vm.metadataSegments || QueryRestriction;
-        // for(var i in metadataSegments) {
-        //     var restrictions = metadataSegments[i];
-        //     for(var i in restrictions) {
-        //         var item = restrictions[i];
-        //         if(item.bucketRestriction) {
-        //             var restriction = item.bucketRestriction,
-        //                     key = restriction.lhs.columnLookup.column_name,
-        //                 range = restriction.bkt.Rng,
-        //                 enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
-        //                 fieldName = enrichment.ColumnId,
-        //                 category = enrichment.Category,
-        //                 index = vm.enrichmentsMap[fieldName];
-
-        //                 console.log(range, enrichment, fieldName, category, index);
-
-        //                 if(index || index === 0) {
-
-        //                     vm.enrichments[index].SegmentChecked = true;
-        //                     vm.enrichments[index].SegmentRangesChecked = {};
-        //                     vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
-        //                     vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range)] = true;
-        //                 }
-        //         }
-        //     }
-        // }
-
-
-        // console.log(vm.metadataSegments, QueryRestriction);
 
         vm.clearExplorerSegments();
 
@@ -1269,7 +1248,7 @@ angular.module('common.datacloud.explorer', [
                             index = vm.enrichmentsMap[key];
 
                         if(index || index === 0) {
-                            vm.enrichments[index].SegmentChecked = true;
+                            // vm.enrichments[index].SegmentChecked = true; PLS-4589
                             vm.enrichments[index].SegmentRangesChecked = {};
                             vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
                             vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
@@ -1409,23 +1388,28 @@ angular.module('common.datacloud.explorer', [
             return false;
         }
 
+        console.log(attribute);
+
         var attributeKey = attribute.Attribute || attribute.FieldName,
             stat = vm.getAttributeStat(attribute) || {};
 
-        if (!stat.Rng) {
-            return false;
-        }
+        // if (!stat.Rng) {
+        //     return false;
+        // }
         
-        var attributeRangeKey = (stat.Rng ? vm.makeSegmentsRangeKey(attribute, stat.Rng) : ''),
+        var attributeRangeKey = (stat.Lbl ? vm.makeSegmentsRangeKey(attribute, stat.Rng, stat.Lbl) : ''),
             index = vm.enrichmentsMap[attributeKey],
             enrichment = vm.enrichments[index],
             entity = enrichment.Entity,
-            topBkt = attribute.TopBkt
+            topBkt = attribute.TopBkt,
             segmentName = $stateParams.segment;
 
         if(entity === 'Transaction'){
             var entity = 'Account';
         }
+
+
+        // console.log(attributeRangeKey);
 
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
@@ -1455,10 +1439,20 @@ angular.module('common.datacloud.explorer', [
             attributeKey = enrichment.Attribute || enrichment.ColumnName,
             attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng, stat.Lbl),
             fieldName = enrichment.ColumnName,
-            entity = enrichment.Entity;
+            entity = enrichment.Entity,
+            segmentName = $stateParams.segment;
 
 
-        console.log(enrichment, stat, attributeRangeKey);
+        console.log(attributeRangeKey);
+
+        //     if(stat.Rng === undefined){
+    //         var attributeRangeKey = stat.Lbl;
+    //     } else {
+    //         var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
+    //     }
+
+
+        console.log(enrichment);
 
         if(disable) {
             return false;
@@ -1489,39 +1483,6 @@ angular.module('common.datacloud.explorer', [
             vm.checkSaveButtonState();
         }
     }
-
-
-    // vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
-    // vm.selectSegmentAttributeRange = function(enrichment, stat, disable) {
-
-
-    //     console.log(stat.Rng);
-
-    //     if(stat.Rng === undefined){
-    //         var attributeRangeKey = stat.Lbl;
-    //     } else {
-    //         var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
-    //     }
-
-
-    //     var disable = disable || false,
-            
-    //         attributeKey = enrichment.Attribute || enrichment.ColumnName,
-            
-    //         fieldName = enrichment.ColumnName,
-
-    //         index = vm.enrichmentsMap[attributeKey],
-    //         enrichment = vm.enrichments[index],
-    //         entity = enrichment.Entity,
-    //         topBkt = enrichment.TopBkt;
-
-    //     console.log(enrichment, stat, attributeKey, attributeRangeKey);
-
-
-
-
-    // }
-
 
     var getSegmentBucketInputs = function() {
         var buckets = {},

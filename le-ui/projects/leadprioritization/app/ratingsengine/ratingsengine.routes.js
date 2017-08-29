@@ -12,13 +12,11 @@ angular
     $stateProvider
         .state('home.ratingsengine', {
             url: '/ratings_engine',
-            redirectTo: 'home.ratingsengine.ratingslist',
             resolve: {
-                RatingList: function($q, RatingsEngineService) {
+                RatingList: function($q, RatingsEngineStore) {
                     // var deferred = $q.defer();
 
-                    // RatingsEngineService.getRatings().then(function(result) {
-                    //     console.log(result);
+                    // RatingsEngineStore.getRatings().then(function(result) {
                     //     deferred.resolve(result);
                     // });
 
@@ -136,9 +134,9 @@ angular
                         "type": "RULE_BASED",
                         "updated": "2017-08-28T17:11:47.499Z"
                       }
-                    ];
+                    ]
 
-                }
+                }   
             },
             views: {
                 "summary@": {
@@ -146,7 +144,8 @@ angular
                     controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/ratingslist/ratingsenginetabs.component.html'
                 }
-            }
+            },
+            redirectTo: 'home.ratingsengine.ratingslist'
         })
         .state('home.ratingsengine.ratingslist', {
             url: '/ratings',

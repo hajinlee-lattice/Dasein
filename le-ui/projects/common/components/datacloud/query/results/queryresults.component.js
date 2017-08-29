@@ -2,14 +2,14 @@ angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('QueryResultsCtrl', function($q, $scope, $state, $stateParams, $filter, 
-    BrowserStorageUtility, QueryStore, QueryService, SegmentService, SegmentStore, LookupStore, Config, AccountsCount, CountWithoutSalesForce) {
+    BrowserStorageUtility, QueryStore, QueryService, SegmentService, SegmentStore, LookupStore, Config, Accounts, AccountsCount, CountWithoutSalesForce) {
 
     var vm = this;
     angular.extend(vm, {
         resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
         modelId: $stateParams.modelId,
         inModel: $state.current.name.split('.')[1] === 'model',
-        accounts: [],
+        accounts: Accounts,
         accountsCount: AccountsCount,
         accountsWithoutSfId: CountWithoutSalesForce,
         loading: true,
@@ -17,7 +17,7 @@ angular.module('common.datacloud.query.results', [
         segment: QueryStore.getSegment(),
         restriction: QueryStore.getRestriction(),
         current: 1,
-        pagesize: 20,
+        pagesize: 15,
         search: '',
         searchOptions: {
             updateOn: 'default blur',
@@ -56,7 +56,6 @@ angular.module('common.datacloud.query.results', [
     };
 
 
-
     vm.excludeNonSalesForceCheckbox = function(excludeAccounts){
         excludeAccounts = !excludeAccounts;
 
@@ -72,8 +71,10 @@ angular.module('common.datacloud.query.results', [
 
     var prevQuery = vm.search;
     vm.submitQuery = function() {
+        
         vm.loading = true;
         vm.current = 1;
+
         if ((vm.search && prevQuery) && (vm.search.toUpperCase() === prevQuery.toUpperCase())) {
             return;
         }
@@ -199,14 +200,6 @@ angular.module('common.datacloud.query.results', [
         updatePage();
     });
 
-    $scope.$watch('vm.search', function (tmpStr){
-        if (!tmpStr || tmpStr.length == 0) {
-            return 0;
-            if (tmpStr === vm.search){
-              updatePage();
-            }
-        }
-    });
 
 });
 
