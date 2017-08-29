@@ -13,9 +13,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
-import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Field;
@@ -25,6 +23,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 
 public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -41,7 +40,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
-    @BeforeClass(groups = {"functional", "functional.production"})
+    @BeforeClass(groups = { "functional", "functional.production" })
     public void setup() {
 
         Classifier classifier = new Classifier();
@@ -102,8 +101,8 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         decisionTreeAlgorithm.setSampleName("s1");
 
         modelDef.setName("Model Definition_" + suffix);
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
-                logisticRegressionAlgorithm }));
+        modelDef.addAlgorithms(
+                Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm, logisticRegressionAlgorithm }));
         //
         // in the application, it is assumed that the model definition is
         // defined in the metadata db
@@ -119,8 +118,8 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelingJob.setModel(model);
     }
 
-    @AfterClass(groups = {"functional", "functional.production"})
-    public void tearDown(){
+    @AfterClass(groups = { "functional", "functional.production" })
+    public void tearDown() {
         modelEntityMgr.delete(model);
         modelDefinitionEntityMgr.delete(modelDef);
     }
@@ -135,29 +134,29 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(originalJob.getModel().getPid(), retrievedJob.getModel().getPid());
         assertEquals(originalJob.getParentPid(), retrievedJob.getParentPid());
 
-        assertEquals(modelingJob.getAppMasterPropertiesObject().getProperty("QUEUE"), retrievedJob
-                .getAppMasterPropertiesObject().getProperty("QUEUE"));
-        assertEquals(modelingJob.getContainerPropertiesObject().getProperty("METADATA"), retrievedJob
-                .getContainerPropertiesObject().getProperty("METADATA"));
+        assertEquals(modelingJob.getAppMasterPropertiesObject().getProperty("QUEUE"),
+                retrievedJob.getAppMasterPropertiesObject().getProperty("QUEUE"));
+        assertEquals(modelingJob.getContainerPropertiesObject().getProperty("METADATA"),
+                retrievedJob.getContainerPropertiesObject().getProperty("METADATA"));
 
     }
 
-    @Test(groups = {"functional", "functional.production"})
+    @Test(groups = { "functional", "functional.production" })
     public void testPersist() {
         jobEntityMgr.create(modelingJob);
     }
 
-    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
+    @Test(groups = { "functional", "functional.production" }, dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
         ModelingJob retrievedJob = new ModelingJob();
         retrievedJob.setPid(modelingJob.getPid());
-        retrievedJob = (ModelingJob)jobEntityMgr.findByKey((Job)retrievedJob); // /
-                                                             // getByKey(retrievedJob);
+        retrievedJob = (ModelingJob) jobEntityMgr.findByKey(retrievedJob); // /
+        // getByKey(retrievedJob);
         // assert for correctness
         assertJobsEqual(modelingJob, retrievedJob);
     }
 
-    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
+    @Test(groups = { "functional", "functional.production" }, dependsOnMethods = { "testPersist" })
     public void testUpdate() {
         assertNotNull(modelingJob.getPid());
         Properties appMasterProp = modelingJob.getAppMasterPropertiesObject();
@@ -169,7 +168,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         testRetrieval();
     }
 
-    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testUpdate" })
+    @Test(groups = { "functional", "functional.production" }, dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         jobEntityMgr.delete(modelingJob);
     }
