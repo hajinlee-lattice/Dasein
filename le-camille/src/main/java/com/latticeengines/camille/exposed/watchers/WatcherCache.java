@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.watchers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
@@ -117,7 +118,7 @@ public class WatcherCache<K, V> {
         if (cache != null) {
             long startTime = System.currentTimeMillis();
             log.info("Start refreshing the WatcherCache " + cacheName + " watching " + watcherName + " ...");
-            Collection<K> keys = refreshKeyResolver.apply(watchedData);
+            Collection<K> keys = new ArrayList<>(refreshKeyResolver.apply(watchedData));
             keys.retainAll(cache.asMap().keySet());
             log.info("Going to refresh " + keys.size() + " keys.");
             keys.forEach(this::loadKey);
