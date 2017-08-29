@@ -71,21 +71,6 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
         }
     }
 
-    private TransformationStepConfig mergeInputs() {
-        TransformationStepConfig step1 = new TransformationStepConfig();
-        List<String> baseSources = inputTableNames;
-        step1.setBaseSources(baseSources);
-
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        for (String inputTableName : inputTableNames) {
-            baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
-        }
-        step1.setBaseTables(baseTables);
-        step1.setTransformer("consolidateDataTransformer");
-        step1.setConfiguration(getConsolidateDataConfig());
-        return step1;
-    }
-
     private TransformationStepConfig mergeMaster() {
         List<String> baseSources;
         Map<String, SourceTable> baseTables;
@@ -151,7 +136,8 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
         return step4;
     }
 
-    private String getConsolidateDataConfig() {
+    @Override
+    protected String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedContact.getPrimaryKey().name());

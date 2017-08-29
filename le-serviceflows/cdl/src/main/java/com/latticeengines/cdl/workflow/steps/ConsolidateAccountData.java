@@ -106,19 +106,11 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         }
     }
 
-    private TransformationStepConfig mergeInputs() {
-        TransformationStepConfig step1 = new TransformationStepConfig();
-        List<String> baseSources = inputTableNames;
-        step1.setBaseSources(baseSources);
-
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        for (String inputTableName : inputTableNames) {
-            baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
-        }
-        step1.setBaseTables(baseTables);
-        step1.setTransformer("consolidateDataTransformer");
-        step1.setConfiguration(getConsolidateDataConfig());
-        return step1;
+    protected String getConsolidateDataConfig() {
+        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
+        config.setSrcIdField(srcIdField);
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        return appendEngineConf(config, lightEngineConfig());
     }
 
     private TransformationStepConfig mergeNew() {
@@ -255,19 +247,12 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         return step7;
     }
 
-    private String getConsolidateDataConfig() {
-        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(srcIdField);
-        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
-        return appendEngineConf(config, lightEngineConfig());
-    }
-
     private String getConsolidateDataMasterConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
         config.setCreateTimestampColumn(true);
-        config.setColumnsFromRight(new HashSet<String>(Arrays.asList("CREATION_DATE")));
+        config.setColumnsFromRight(new HashSet<String>(Arrays.asList(CREATION_DATE)));
         return appendEngineConf(config, lightEngineConfig());
     }
 

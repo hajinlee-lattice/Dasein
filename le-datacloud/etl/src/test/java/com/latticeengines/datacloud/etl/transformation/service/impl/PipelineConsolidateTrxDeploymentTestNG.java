@@ -14,6 +14,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -46,10 +47,10 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     private String aggregatedTableName1 = "AggregateTrxTable1";
     private String aggregatedTableName2 = "AggregateTrxTable2";
 
-    List<String> fieldNames = Arrays.asList("TransactionId", "AccountId", "ContactId", "EntityType", "TransactionType",
-            "ProductName", "Amount", "Quantity", "OrderId", "TransactionTime", "ExtensionAttr1");
-    List<Class<?>> clz = Arrays.asList((Class<?>) Long.class, Long.class, Long.class, String.class, String.class,
-            String.class, Float.class, Integer.class, String.class, Long.class, String.class);
+    List<String> fieldNames = Arrays.asList("TransactionId", "AccountId", "ContactId", "TransactionType", "ProductId",
+            "Amount", "Quantity", "OrderId", "TransactionTime", "ExtensionAttr1");
+    List<Class<?>> clz = Arrays.asList((Class<?>) Long.class, Long.class, Long.class, String.class, Long.class,
+            Float.class, Integer.class, String.class, Long.class, String.class);
 
     private static final CustomerSpace customerSpace = CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE);
 
@@ -61,7 +62,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         prepareCleanPod("PipelineConsolidateDeploymentTestNG");
     }
 
-//    @AfterMethod(groups = "deployment")
+    @AfterMethod(groups = "deployment")
     public void afterMethod() {
 
         cleanupProgressTables();
@@ -191,7 +192,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setCountField("Quantity");
         config.setSumField("Amount");
         config.setTrxDateField("TransactionDate");
-        config.setGoupByFields(Arrays.asList("AccountId", "ContactId", "EntityType", "ProductName", "TransactionType",
+        config.setGoupByFields(Arrays.asList("AccountId", "ContactId", "ProductId", "TransactionType",
                 "TransactionDate"));
 
         return JsonUtils.serialize(config);
@@ -203,7 +204,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setMasterIdField(TableRoleInCollection.ConsolidatedTransaction.getPrimaryKey().name());
         config.setCreateTimestampColumn(true);
         config.setColumnsFromRight(new HashSet<String>(Arrays.asList("CREATION_DATE")));
-        config.setCompositeKeys(Arrays.asList("AccountId", "ContactId", "EntityType", "ProductName", "TransactionType",
+        config.setCompositeKeys(Arrays.asList("AccountId", "ContactId", "ProductId", "TransactionType",
                 "TransactionTime"));
         return JsonUtils.serialize(config);
     }
@@ -233,20 +234,20 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
         GenericRecord record = recordMap.get("1");
         Assert.assertEquals(record.get("AccountId").toString(), "1");
-        Assert.assertEquals(record.get("ProductName").toString(), "Disk");
+        Assert.assertEquals(record.get("ProductId").toString(), "1");
         Assert.assertEquals(record.get("ExtensionAttr1").toString(), "Ext1");
 
         record = recordMap.get("3");
         Assert.assertEquals(record.get("AccountId").toString(), "2");
-        Assert.assertEquals(record.get("ProductName").toString(), "Disk");
+        Assert.assertEquals(record.get("ProductId").toString(), "1");
 
         record = recordMap.get("4");
         Assert.assertEquals(record.get("AccountId").toString(), "2");
-        Assert.assertEquals(record.get("ProductName").toString(), "Monitor");
+        Assert.assertEquals(record.get("ProductId").toString(), "2");
 
         record = recordMap.get("5");
         Assert.assertEquals(record.get("AccountId").toString(), "3");
-        Assert.assertEquals(record.get("ProductName").toString(), "Disk");
+        Assert.assertEquals(record.get("ProductId").toString(), "1");
         Assert.assertEquals(record.get("TransactionType").toString(), "PurchaseHistory");
         Assert.assertEquals(record.get("ExtensionAttr1").toString(), "Ext2");
         Assert.assertNotNull(record.get("CREATION_DATE"));
@@ -286,7 +287,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Assert.assertEquals(subRecords.size(), 1);
         GenericRecord genericRecord = subRecords.get(0);
         Assert.assertEquals(genericRecord.get("AccountId").toString(), "1");
-        Assert.assertEquals(genericRecord.get("ProductName").toString(), "Disk");
+        Assert.assertEquals(genericRecord.get("ProductId").toString(), "1");
     }
 
     private void assertAccount2(Map<String, List<GenericRecord>> recordMap) {
@@ -305,30 +306,28 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         GenericRecord diskRecord = null;
         GenericRecord keyboardRecord = null;
         for (GenericRecord record : subRecords) {
-            if (record.get("ProductName").toString().equals("Disk")) {
+            if (record.get("ProductId").toString().equals("1")) {
                 diskRecord = record;
             } else {
                 keyboardRecord = record;
             }
         }
         Assert.assertEquals(diskRecord.get("AccountId").toString(), "3");
-        Assert.assertEquals(diskRecord.get("EntityType").toString(), "Account");
         Assert.assertEquals(diskRecord.get("TransactionType").toString(), "PurchaseHistory");
         Assert.assertEquals(diskRecord.get("TransactionDate").toString(), "2017-08-17");
-        Assert.assertEquals(diskRecord.get("ProductName").toString(), "Disk");
+        Assert.assertEquals(diskRecord.get("ProductId").toString(), "1");
         Assert.assertEquals(diskRecord.get("TotalAmount").toString(), "30.0");
         Assert.assertEquals(diskRecord.get("TotalQuantity").toString(), "3");
 
         Assert.assertEquals(keyboardRecord.get("AccountId").toString(), "3");
-        Assert.assertEquals(keyboardRecord.get("EntityType").toString(), "Account");
         Assert.assertEquals(keyboardRecord.get("TransactionType").toString(), "PurchaseHistory");
         Assert.assertEquals(keyboardRecord.get("TransactionDate").toString(), "2017-08-17");
-        Assert.assertEquals(keyboardRecord.get("ProductName").toString(), "Keyboard");
+        Assert.assertEquals(keyboardRecord.get("ProductId").toString(), "3");
         Assert.assertEquals(keyboardRecord.get("TotalAmount").toString(), "10.0");
         Assert.assertEquals(keyboardRecord.get("TotalQuantity").toString(), "1");
     }
 
-    // @Test(groups = "deployment", enabled = true)
+//    @Test(groups = "deployment", enabled = true)
     public void createData() {
         uploadTable1();
         uploadTable2();
@@ -337,9 +336,9 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     private void uploadTable1() {
         Object[][] data = {
-                { 1L, 1L, null, "Account", "PurchaseHistory", "Disk", 10F, 1, "Order1", 1502755200L, "Ext1" }, //
-                { 3L, 2L, null, "Account", "PurchaseHistory", "Disk", 10F, 1, "Order1", 1502755200L, "Ext1" }, //
-                { 4L, 2L, null, "Account", "PurchaseHistory", "Monitor", 10F, 1, "Order1", 1502755200L, "Ext1" }, //
+                { 1L, 1L, null, "PurchaseHistory", 1L /* " Disk" */, 10F, 1, "Order1", 1502755200L, "Ext1" }, //
+                { 3L, 2L, null, "PurchaseHistory", 1L, 10F, 1, "Order1", 1502755200L, "Ext1" }, //
+                { 4L, 2L, null, "PurchaseHistory", 2L /* Monitor */, 10F, 1, "Order1", 1502755200L, "Ext1" }, //
         };
 
         uploadDataToHdfs(data, fieldNames, clz, "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName1
@@ -347,20 +346,18 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     }
 
     private void uploadTable2() {
-        Object[][] data = {
-                { 4L, 2L, null, "Account", "PurchaseHistory", "Monitor", 10F, 1, "Order1", 1502755200L, "Ext2" }, //
-                { 5L, 3L, null, "Account", "PurchaseHistory", "Disk", 10F, 1, "Order1", 1503001576L, "Ext2" }, //
+        Object[][] data = { { 4L, 2L, null, "PurchaseHistory", 2L, 10F, 1, "Order1", 1502755200L, "Ext2" }, //
+                { 5L, 3L, null, "PurchaseHistory", 1L, 10F, 1, "Order1", 1503001576L, "Ext2" }, //
         };
         uploadDataToHdfs(data, fieldNames, clz, "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName2
                 + ".avro", tableName2);
     }
 
     private void uploadTable3() {
-        Object[][] data = {
-                { 4L, 2L, null, "Account", "PurchaseHistory", "Monitor", 10F, 1, "Order1", 1503001576L, "Ext3" }, //
-                { 5L, 3L, null, "Account", "PurchaseHistory", "Disk", 10F, 1, "Order1", 1503001577L, "Ext3" }, //
-                { 6L, 3L, null, "Account", "PurchaseHistory", "Disk", 10F, 1, "Order1", 1503001578L, "Ext3" }, //
-                { 7L, 3L, null, "Account", "PurchaseHistory", "Keyboard", 10F, 1, "Order1", 1503001578L, "Ext3" }, //
+        Object[][] data = { { 4L, 2L, null, "PurchaseHistory", 2L, 10F, 1, "Order1", 1503001576L, "Ext3" }, //
+                { 5L, 3L, null, "PurchaseHistory", 1L, 10F, 1, "Order1", 1503001577L, "Ext3" }, //
+                { 6L, 3L, null, "PurchaseHistory", 1L, 10F, 1, "Order1", 1503001578L, "Ext3" }, //
+                { 7L, 3L, null, "PurchaseHistory", 3L /* Keyboard */, 10F, 1, "Order1", 1503001578L, "Ext3" }, //
         };
         uploadDataToHdfs(data, fieldNames, clz, "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName3
                 + ".avro", tableName3);

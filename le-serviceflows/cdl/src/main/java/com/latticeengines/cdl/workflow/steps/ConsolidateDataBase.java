@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -34,6 +36,8 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
 
     protected static final Logger log = LoggerFactory.getLogger(ConsolidateDataBase.class);
 
+    protected static final String CREATION_DATE = "CREATION_DATE";
+    
     protected CustomerSpace customerSpace = null;
 
     @Autowired
@@ -65,6 +69,22 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         initializeConfiguration();
         return generateWorkflowConf();
     }
+    
+    protected TransformationStepConfig mergeInputs() {
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources = inputTableNames;
+        step1.setBaseSources(baseSources);
+
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        for (String inputTableName : inputTableNames) {
+            baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
+        }
+        step1.setBaseTables(baseTables);
+        step1.setTransformer("consolidateDataTransformer");
+        step1.setConfiguration(getConsolidateDataConfig());
+        return step1;
+    }
+
 
     @Override
     protected void onPostTransformationCompleted() {
@@ -163,6 +183,8 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
 
     public abstract PipelineTransformationRequest getConsolidateRequest();
 
+    abstract String getConsolidateDataConfig();
+    
     public BusinessEntity getBusinessEntity() {
         return configuration.getBusinessEntity();
     }
