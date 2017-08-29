@@ -33,6 +33,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.BitCodeBookUtils;
 import com.latticeengines.datacloud.dataflow.transformation.Profile;
@@ -79,7 +80,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
-    SourceAttributeEntityMgr srcAttrEntityMgr;
+    private SourceAttributeEntityMgr srcAttrEntityMgr;
+
+    @Autowired
+    private DataCloudVersionService dataCloudVersionService;
 
     @Override
     protected String getDataFlowBeanName() {
@@ -142,8 +146,24 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             List<ProfileParameters.Attribute> attrsToRetain, List<ProfileParameters.Attribute> amAttrsToEnc,
             List<ProfileParameters.Attribute> exAttrsToEnc, Map<String, BitCodeBook> codeBookMap,
             Map<String, String> codeBookLookup) {
+        String dataCloudVersion = config.getDataCloudVersion();
+        if (dataCloudVersion == null) {
+            switch (config.getStage()) {
+            case DataCloudConstants.PROFILE_STAGE_SEGMENT:
+                dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+            case DataCloudConstants.PROFILE_STAGE_ENRICH:
+                dataCloudVersion = dataCloudVersionService
+                        .nextMinorVersion(dataCloudVersionService.currentApprovedVersion().getVersion());
+            default:
+                throw new UnsupportedOperationException(String.format("Stage %s is not supported", config.getStage()));
+            }
+        }
+        log.info("Profiling is based on datacloud version " + dataCloudVersion);
         List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
-                config.getTransformer());
+                config.getTransformer(), dataCloudVersion);
+        if (CollectionUtils.isEmpty(srcAttrs)) {
+            throw new RuntimeException("Fail to find configuration for profiling in SourceAttribute table");
+        }
         Map<String, SourceAttribute> amAttrConfig = new HashMap<>();    // attr name -> srcAttr
         srcAttrs.forEach(attr -> amAttrConfig.put(attr.getAttribute(), attr));
 

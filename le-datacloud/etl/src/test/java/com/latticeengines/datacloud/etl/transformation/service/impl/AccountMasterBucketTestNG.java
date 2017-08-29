@@ -48,6 +48,8 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
 
     private Long expectedCount;
 
+    private static final String DATA_CLOUD_VERSION = "2.0.5";
+
     @Test(groups = "functional")
     public void testTransformation() throws Exception {
         uploadBaseSourceFile(accountMaster.getSourceName(), "AMBucketTest_AM", baseSourceVersion);
@@ -132,7 +134,9 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
     }
 
     protected ProfileConfig constructProfileConfig() {
-        return new ProfileConfig();
+        ProfileConfig config = new ProfileConfig();
+        config.setDataCloudVersion(DATA_CLOUD_VERSION);
+        return config;
     }
 
     private TransformationStepConfig sortProfile() {

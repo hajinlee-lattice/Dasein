@@ -29,4 +29,10 @@ public class SourceAttributeEntityMgrImpl implements SourceAttributeEntityMgr {
     public List<SourceAttribute> getAttributes(String source, String stage, String transform) {
         return sourceAttributeDao.getAttributes(source, stage, transform);
     }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public List<SourceAttribute> getAttributes(String source, String stage, String transform, String dataCloudVersion) {
+        return sourceAttributeDao.getAttributes(source, stage, transform, dataCloudVersion);
+    }
 }

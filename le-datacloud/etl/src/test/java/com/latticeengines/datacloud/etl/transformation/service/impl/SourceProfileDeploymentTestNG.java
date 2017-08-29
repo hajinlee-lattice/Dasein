@@ -66,7 +66,9 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
     private ObjectMapper om = new ObjectMapper();
 
     @Autowired
-    SourceAttributeEntityMgr srcAttrEntityMgr;
+    private SourceAttributeEntityMgr srcAttrEntityMgr;
+
+    private static final String DATA_CLOUD_VERSION = "2.0.5";
 
     @Test(groups = "deployment")
     public void testTransformation() {
@@ -171,6 +173,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         conf.setMinBucketSize(2);
         conf.setRandSeed(RAND_SEED);
         conf.setMaxCat(10);
+        conf.setDataCloudVersion(DATA_CLOUD_VERSION);
         return om.writeValueAsString(conf);
     }
 
@@ -182,6 +185,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         conf.setRandSeed(RAND_SEED);
         conf.setStage(DataCloudConstants.PROFILE_STAGE_ENRICH);
         conf.setMaxCat(10);
+        conf.setDataCloudVersion(DATA_CLOUD_VERSION);
         return om.writeValueAsString(conf);
     }
 
@@ -318,7 +322,8 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                 log.info(String.format("Start to verify intermediate source %s", source));
                 Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
                 List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
-                        DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER);
+                        DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER,
+                        DATA_CLOUD_VERSION);
                 String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators" };
                 Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));
                 Map<String, Integer> expected = new HashMap<>();    // encAttr -> decAttr count
@@ -396,7 +401,8 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
             log.info("Start to verify records one by one.");
             Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
             List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
-                    DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER);
+                    DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER,
+                    DATA_CLOUD_VERSION);
             String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent",
                     "BmbrSurge_CompositeScore" };
             Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));

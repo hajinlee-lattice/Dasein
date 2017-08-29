@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "SourceAttribute", uniqueConstraints = {
-       @UniqueConstraint(columnNames = { "Source", "Stage", "Transformer", "Attribute"}) })
+        @UniqueConstraint(columnNames = { "Source", "Stage", "Transformer", "Attribute", "DataCloudVersion" }) })
 public class SourceAttribute implements HasPid, Serializable {
 
     private static final long serialVersionUID = 5143418326245069059L;
@@ -46,7 +46,6 @@ public class SourceAttribute implements HasPid, Serializable {
     @Column(name = "Arguments", length = 1024)
     private String arguments;
 
-    @Index(name = "IX_VERSION")
     @Column(name = "DataCloudVersion", length = 50)
     private String dataCloudVersion;
 

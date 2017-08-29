@@ -21,6 +21,11 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
     @JsonProperty("MinBucketSize")
     private int minBucketSize = 10; // only for numBucketEqualSized = false
 
+    @JsonProperty("DataCloudVersion")
+    private String dataCloudVersion; // by default, segmentation: use current
+                                     // approved version; enrichment: use a
+                                     // version next to current approved version
+
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose, leave it null for real use case
 
@@ -103,5 +108,12 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
         this.catAttrsNotEnc = catAttrsNotEnc;
     }
 
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
 
 }

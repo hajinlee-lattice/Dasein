@@ -8,4 +8,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 public interface SourceAttributeDao extends BaseDao<SourceAttribute> {
 
     List<SourceAttribute> getAttributes(String sourceName, String stage, String transformer);
+
+    List<SourceAttribute> getAttributes(String sourceName, String stage, String transformer, String dataCloudVersion);
 }
