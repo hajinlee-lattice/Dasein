@@ -26,7 +26,7 @@ def stop_service(args):
 def stop_service_internal(cluster, service):
     cluster_arns = find_clusters(cluster)
     for cluster_arn in cluster_arns:
-        service_arn = find_service(cluster, cluster_arn, service)
+        service_arn = find_service_by_cluster_arn(cluster, cluster_arn, service)
         count_tasks_in_service(cluster_arn, service_arn)
         update_tasks_count(cluster_arn, service_arn, 0)
 
