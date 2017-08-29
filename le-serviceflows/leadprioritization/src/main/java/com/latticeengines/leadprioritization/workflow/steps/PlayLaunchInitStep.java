@@ -333,6 +333,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                 playLaunch.setAccountsLaunched(launched.get());
                 playLaunch.setAccountsErrored(errored.get());
                 updateLaunchProgress(playLaunch);
+                log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");
             }
         }
     }
