@@ -1,17 +1,27 @@
 <span ng-click="close()" class="close"><i class="fa fa-times"></i></span>
 <div class="attribute-feedback-container">
-    <div class="attribute-feedback-header">
+    <div class="attribute-feedback-header section">
         <h1>Report Inaccuracy</h1>
         <p>
             Let us know what is incorrect and the correct value, if you know it, and we will correct it as soon as we can.
         </p>
     </div>
-    <h2 ng-if="label">
-        <div class="icon" ng-if="icon"><img src="{{icon}}" /></div>
+    <h2 class="section">
+        <div class="icon" ng-if="icon">
+            <img ng-if="icon.image" src="{{icon.image}}" />
+            <i class="{{icon.font}}"></i>
+        </div>
         <div class="label" ng-if="label">{{label}}</div>
     </h2>
-    <h3 class="{{categoryclass}} color">{{value}}</h3>
-    <ul class="feedback">
+    <h3 class="{{categoryClass}} color section">{{value}}</h3>
+    <div ng-if="userInput.record" class="user-input-record section">
+        <h4>Account Lookup Fields</h4>
+        <dl ng-repeat="(key, value) in userInput.record">
+            <dt>{{key}}</dt>
+            <dd class="{{categoryClass}} color ">{{value}}</dd>
+        </dl>
+    </div>
+    <ul class="feedback section">
         <li>
             <label for="attribute-feedback-value">Correct Value (If Known)</label>
             <input type="text" id="attribute-feedback-value" ng-model="input.value" />
@@ -21,7 +31,7 @@
             <textarea id="attribute-feedback-comment" ng-model="input.comment"></textarea>
         </li>
     </ul>
-    <div class="attribute-feedback-footer">
+    <div class="attribute-feedback-footer section">
         <button class="button white-button" ng-click="close()">Cancel</button>
         <button class="button blue-button" ng-click="report()">Report Inaccuracy</button>
     </div>

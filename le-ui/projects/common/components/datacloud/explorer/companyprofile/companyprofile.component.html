@@ -6,6 +6,10 @@
                     <attribute-feedback-button 
                         type="'infodot'" 
                         attribute="vm.company_info" 
+                        icon-font="'fa fa-search'"
+                        label="'Account Lookup'"
+                        category-class="'category-growth-trends'"
+                        show-user-input="true"
                         value="vm.company_info.LDC_Name" />
                     {{vm.company_info.LDC_Name}}
                 </span>
@@ -18,28 +22,40 @@
 
     <div class="details">
         <ul>
-            <li ng-if="vm.company_info.LDC_DUNS"><h3>Duns Number</h3> 
+            <li ng-if="vm.company_info.LDC_DUNS">
+                <h3>Duns Number</h3> 
                 <span class="attribute-feedback-container">
                     <attribute-feedback-button 
                         type="'infodot'" 
                         attribute="vm.company_info" 
+                        icon-font="'fa fa-search'"
+                        label="'Duns Number'"
+                        category-class="'category-growth-trends'"
                         value="vm.company_info.LDC_DUNS" />
                     {{vm.company_info.LDC_DUNS}}</li>
                 </span>
-            <li ng-if="vm.company_info.LE_NUMBER_OF_LOCATIONS"><h3>Locations</h3> 
+            <li ng-if="vm.company_info.LE_NUMBER_OF_LOCATIONS">
+                <h3>Locations</h3> 
                 <span class="attribute-feedback-container">
                     <attribute-feedback-button 
                         type="'infodot'" 
                         attribute="vm.company_info" 
+                        icon-font="'fa fa-search'"
+                        label="'Locations'"
+                        category-class="'category-growth-trends'"
                         value="vm.company_info.LE_NUMBER_OF_LOCATIONS" />
                     {{vm.company_info.LE_NUMBER_OF_LOCATIONS}}
                 </span>
             </li>
-            <li ng-if="vm.company_info.LE_IS_PRIMARY_LOCATION"><h3>Primary Location</h3> 
+            <li ng-if="vm.company_info.LE_IS_PRIMARY_LOCATION">
+                <h3>Primary Location</h3> 
                 <span class="attribute-feedback-container">
                     <attribute-feedback-button 
                         type="'infodot'" 
                         attribute="vm.company_info" 
+                        icon-font="'fa fa-search'"
+                        label="'Primary Location'"
+                        category-class="'category-growth-trends'"
                         value="vm.company_info.LE_IS_PRIMARY_LOCATION" />
                     {{vm.company_info.LE_IS_PRIMARY_LOCATION}}
                 </span>
@@ -52,6 +68,9 @@
                 <attribute-feedback-button 
                     type="'infodot'" 
                     attribute="vm.company_info" 
+                    icon-font="'fa fa-search'"
+                    label="'Industry'"
+                    category-class="'category-growth-trends'"
                     value="vm.company_info.LE_INDUSTRY" />
                 {{vm.company_info.LE_INDUSTRY}}
             </span>
@@ -64,6 +83,9 @@
                     <attribute-feedback-button 
                         type="'infodot'" 
                         attribute="vm.company_info" 
+                        icon-font="'fa fa-search'"
+                        label="'Annual Sales'"
+                        category-class="'category-growth-trends'"
                         value="vm.format('range', vm.company_info.LE_REVENUE_RANGE)" />
                     {{vm.format('range', vm.company_info.LE_REVENUE_RANGE)}}
                 </span>
@@ -75,6 +97,9 @@
                         <attribute-feedback-button 
                             type="'infodot'" 
                             attribute="vm.company_info" 
+                            icon-font="'Employees'"
+                            label="'Account Lookup'"
+                            category-class="'category-growth-trends'"
                             value="vm.format('range', vm.company_info.LE_EMPLOYEE_RANGE)" />
                         {{vm.format('range', vm.company_info.LE_EMPLOYEE_RANGE)}}
                     </span>

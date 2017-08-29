@@ -1664,11 +1664,17 @@ angular.module('common.datacloud.explorer', [
         },
         controller: ['$scope', '$document', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, LookupStore, DataCloudStore, BrowserStorageUtility) { 
             // test on LETest1503428538807_LPI
+            var userInput = LookupStore.get('request');
             $scope.modal = DataCloudStore.getFeedbackModal();
             $scope.close = function() {
                 DataCloudStore.setFeedbackModal(false);
             }
             var clientSession = BrowserStorageUtility.getClientSession();
+
+            $scope.showUserInput = $scope.modal.context.showUserInput;
+            if($scope.showUserInput) {
+                $scope.userInput = userInput;
+            }
 
             $scope.report = {
                 context: $scope.modal.context,
@@ -1676,14 +1682,15 @@ angular.module('common.datacloud.explorer', [
                     email: clientSession.EmailAddress,
                     tenant: clientSession.Tenant.Identifier
                 },
-                userInput: LookupStore.get('request'),
+                userInput: userInput,
                 companyInfo: $scope.lookup
             };
 
             $scope.icon = $scope.modal.context.icon;
-            $scope.label = $scope.modal.context.attribute.DisplayName;
+            $scope.label = $scope.modal.context.label || $scope.modal.context.attribute.DisplayName;
             $scope.value = $scope.modal.context.value;
-            $scope.categoryclass = $scope.modal.context.categoryclass;
+            $scope.categoryClass = $scope.modal.context.categoryClass;
+
 
             $scope.report = function() {
                 DataCloudStore.sendFeedback($scope.input);
@@ -1715,8 +1722,11 @@ angular.module('common.datacloud.explorer', [
             type: '=?',
             attribute: '=',
             value: '=',
-            icon: '=?',
-            categoryclass: '=?'
+            iconImage: '=?',
+            iconFont: '=?',
+            categoryClass: '=?',
+            label: '=?',
+            showUserInput: '=?'
         },
         controller: ['$scope', '$stateParams', 'DataCloudStore', function ($scope, $stateParams, DataCloudStore) {
             $scope.type = $scope.type || 'infodot';
@@ -1737,8 +1747,13 @@ angular.module('common.datacloud.explorer', [
                 DataCloudStore.setFeedbackModal(true, {
                     attribute: $scope.attribute,
                     value: $scope.value,
-                    icon: $scope.icon,
-                    categoryclass: $scope.categoryclass
+                    icon: {
+                        image: $scope.iconImage || '',
+                        font: $scope.iconFont || ''
+                    },
+                    categoryClass: $scope.categoryClass,
+                    label: $scope.label || '',
+                    showUserInput: $scope.showUserInput
                 });
             }
         }]

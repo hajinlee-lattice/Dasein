@@ -73,6 +73,8 @@
                                 type="'infodot'" 
                                 attribute="attribute" 
                                 value="attribute.TopBkt.Cnt|number" 
+                                icon-image="vm.categoryIcon(category)"
+                                category-class="vm.categoryClass(category)"
                                 ng-if="
                                     vm.lookupMode && 
                                     vm.hasCompanyInfo && 
@@ -84,8 +86,8 @@
                                 type="'infodot'" 
                                 attribute="attribute" 
                                 value="attribute.Count|number" 
-                                icon="vm.categoryIcon(category)"
-                                categoryclass="vm.categoryClass(category)"
+                                icon-image="vm.categoryIcon(category)"
+                                category-class="vm.categoryClass(category)"
                                 ng-if="
                                     vm.lookupMode && 
                                     vm.hasCompanyInfo && 
@@ -102,6 +104,8 @@
                                 type="'infodot'" 
                                 attribute="attribute" 
                                 value="vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType)" 
+                                icon-image="vm.categoryIcon(category)"
+                                category-class="vm.categoryClass(category)"
                                 ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" />
 
                             {{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}
