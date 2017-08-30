@@ -40,8 +40,6 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
-    private String LAUNCH_DESCRIPTION_1 = "playLaunch1 done on " + CURRENT_TIME_MILLIS;
-    private String LAUNCH_DESCRIPTION_2 = "playLaunch2 done on " + CURRENT_TIME_MILLIS;
     private String CREATED_BY = "lattice@lattice-engines.com";
 
     private Tenant tenant1;
@@ -68,13 +66,11 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         play = playEntityMgr.findByName(NAME);
 
         playLaunch1 = new PlayLaunch();
-        playLaunch1.setDescription(LAUNCH_DESCRIPTION_1);
         playLaunch1.setTenant(tenant1);
         playLaunch1.setLaunchState(LaunchState.Launching);
         playLaunch1.setPlay(play);
 
         playLaunch2 = new PlayLaunch();
-        playLaunch2.setDescription(LAUNCH_DESCRIPTION_2);
         playLaunch2.setTenant(tenant1);
         playLaunch2.setLaunchState(LaunchState.Launching);
         playLaunch2.setPlay(play);
@@ -106,7 +102,6 @@ public class PlayLaunchEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch2.getLaunchId());
         Assert.assertNotNull(retreivedPlayLaunch);
-        Assert.assertEquals(retreivedPlayLaunch.getDescription(), LAUNCH_DESCRIPTION_2);
         List<LaunchState> states = new ArrayList<>();
         states.add(LaunchState.Launched);
         states.add(LaunchState.Failed);

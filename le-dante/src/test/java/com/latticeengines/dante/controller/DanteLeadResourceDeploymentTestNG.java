@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -83,6 +84,7 @@ public class DanteLeadResourceDeploymentTestNG extends DanteTestNGBase {
         rec.setLikelihood(null);
         rec.setMonetaryValue(null);
         rec.setPlayId(testPlay.getName());
+        rec.setPriorityID(RuleBucketName.A);
         rec.setPriorityDisplayName("A");
         rec.setRecommendationId("10");
         rec.setSfdcAccountID("SomeAccountID");

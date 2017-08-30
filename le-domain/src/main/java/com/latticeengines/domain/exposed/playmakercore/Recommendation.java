@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
@@ -94,7 +95,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
 
     @Column(name = "PRIORITY_ID")
     @JsonProperty("priorityID")
-    private String priorityID;
+    private RuleBucketName priorityID;
 
     @Column(name = "PRIORITY_DISPLAY_NAME")
     @JsonProperty("priorityDisplayName")
@@ -222,21 +223,17 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
         this.sfdcAccountID = sfdcAccountID;
     }
 
-    public String getPriorityID() {
+    public RuleBucketName getPriorityID() {
         return priorityID;
     }
 
-    public void setPriorityID(String priorityID) {
+    public void setPriorityID(RuleBucketName priorityID) {
         this.priorityID = priorityID;
     }
 
-    public String getPriorityDisplayName() {
-        return priorityDisplayName;
-    }
+    public String getPriorityDisplayName() { return priorityID.getName(); }
 
-    public void setPriorityDisplayName(String priorityDisplayName) {
-        this.priorityDisplayName = priorityDisplayName;
-    }
+    public void setPriorityDisplayName(String name) { priorityDisplayName = name; }
 
     public String getMonetaryValueIso4217ID() {
         return monetaryValueIso4217ID;

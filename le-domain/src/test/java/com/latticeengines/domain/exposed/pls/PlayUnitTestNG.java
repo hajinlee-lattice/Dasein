@@ -36,7 +36,6 @@ public class PlayUnitTestNG {
         launchHistory.setNewAccountsNum(300L);
         launchHistory.setNewContactsNum(400L);
         PlayLaunch playLaunch = new PlayLaunch();
-        playLaunch.setDescription("Play Launch Name");
         playLaunch.setLaunchState(LaunchState.Launching);
         playLaunch.setPlay(play);
         launchHistory.setPlayLaunch(playLaunch);

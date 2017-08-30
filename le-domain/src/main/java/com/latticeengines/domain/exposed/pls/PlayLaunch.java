@@ -1,6 +1,9 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -17,14 +20,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -47,10 +53,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Index(name = "PLAY_LAUNCH_ID")
     @Column(name = "LAUNCH_ID", unique = true, nullable = false)
     private String launchId;
-
-    @JsonProperty("description")
-    @Column(name = "DESCRIPTION", nullable = true)
-    private String description;
 
     @JsonProperty("created")
     @Index(name = "PLAY_LAUNCH_CREATED")
@@ -76,7 +78,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Play play;
 
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
@@ -88,10 +90,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
-
-    @JsonIgnore
-    @Column(name = "TABLE_NAME", nullable = true)
-    private String tableName;
 
     @JsonProperty("launchCompletionPercent")
     @Column(name = "LAUNCH_COMPLETION_PERCENT")
@@ -112,6 +110,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("accountsErrored")
     @Column(name = "ACCOUNTS_ERRORED")
     private Long accountsErrored;
+
+    @JsonProperty("bucketsToLaunch")
+    @Column(name = "BUCKETS_TO_LAUNCH")
+    @Type(type = "text")
+    private String bucketsToLaunch = JsonUtils.serialize(RuleBucketName.values());
 
     @Override
     public Long getPid() {
@@ -139,14 +142,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Override
     public void setId(String launchId) {
         this.launchId = launchId;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public Date getCreated() {
@@ -222,7 +217,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.launchCompletionPercent = launchCompletionPercent;
     }
 
-
     public Long getAccountsLaunched() {
         return this.accountsLaunched;
     }
@@ -253,5 +247,18 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setAccountsErrored(Long accountsErrored) {
         this.accountsErrored = accountsErrored;
+    }
+
+    public Set<RuleBucketName> getBucketsToLaunch() {
+        if (StringUtils.isNotBlank(this.bucketsToLaunch)) {
+            List<?> attrListIntermediate = JsonUtils.deserialize(this.bucketsToLaunch, List.class);
+            return new HashSet<>(JsonUtils.convertList(attrListIntermediate, RuleBucketName.class));
+        }
+
+        return new HashSet<>();
+    }
+
+    public void setBucketsToLaunch(Set<RuleBucketName> bucketsToLaunch) {
+        this.bucketsToLaunch = JsonUtils.serialize(bucketsToLaunch);
     }
 }

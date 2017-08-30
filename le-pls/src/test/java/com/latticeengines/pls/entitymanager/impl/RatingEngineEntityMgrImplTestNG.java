@@ -43,9 +43,7 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     private RatingEngine ratingEngine;
     private String ratingEngineId;
-
     private MetadataSegment segment;
-
     private Tenant tenant;
 
     @BeforeClass(groups = "functional")
