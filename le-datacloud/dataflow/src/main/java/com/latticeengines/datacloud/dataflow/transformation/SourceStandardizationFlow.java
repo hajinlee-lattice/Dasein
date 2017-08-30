@@ -123,6 +123,9 @@ public class SourceStandardizationFlow
             case ADD_ID:
                 source = addId(source, parameters.getIdFields(), parameters.getIdStrategies());
                 break;
+            case COPY:
+                source = copy(source, parameters.getCopyFields());
+                break;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Standardization strategy %s is not supported", strategy.name()));
@@ -131,7 +134,21 @@ public class SourceStandardizationFlow
 
         return source;
     }
-    
+
+    private Node copy(Node source, String[][] copyFields) {
+        List<FieldMetadata> fms = source.getSchema();
+        for (String[] couple : copyFields) {    // couple[0]: fromField; couple[1]: toField
+            FieldMetadata newFM = null;
+            for (FieldMetadata fm : fms) {
+                if (fm.getFieldName().equals(couple[0])) {
+                    newFM = new FieldMetadata(couple[1], fm.getJavaType());
+                }
+            }
+            source = source.apply(couple[0], new FieldList(couple[0]), newFM);
+        }
+        return source;
+    }
+
     private Node addId(Node source, String[] idFields, IDStrategy[] idStrategies) {
         for (int i = 0; i < idFields.length; i++) {
             switch (idStrategies[i]) {

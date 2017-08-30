@@ -28,13 +28,13 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class LocationStandardizationServiceTestNG
+public class BasicStandardizationServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(LocationStandardizationServiceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(BasicStandardizationServiceTestNG.class);
 
-    GeneralSource source = new GeneralSource("LocationStandard");
+    GeneralSource source = new GeneralSource("Output");
 
-    GeneralSource baseSource = new GeneralSource("LocationInput");
+    GeneralSource baseSource = new GeneralSource("Input");
 
     ObjectMapper om = new ObjectMapper();
 
@@ -52,7 +52,7 @@ public class LocationStandardizationServiceTestNG
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("LocationStandardization");
+            configuration.setName("BasicStandardization");
             configuration.setVersion(targetVersion);
 
             TransformationStepConfig step1 = new TransformationStepConfig();
@@ -91,9 +91,11 @@ public class LocationStandardizationServiceTestNG
         conf.setIdFields(idFields);
         IDStrategy[] idStrategies = { IDStrategy.ROWID, IDStrategy.UUID };
         conf.setIdStrategies(idStrategies);
+        String[][] copyFields = { { "Name", "CopiedName" } };
+        conf.setCopyFields(copyFields);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.COUNTRY,
                 StandardizationStrategy.STATE, StandardizationStrategy.STRING, StandardizationStrategy.DUNS,
-                StandardizationStrategy.ADD_ID };
+                StandardizationStrategy.ADD_ID, StandardizationStrategy.COPY };
         conf.setSequence(sequence);
         return om.writeValueAsString(conf);
     }
@@ -139,10 +141,10 @@ public class LocationStandardizationServiceTestNG
     }
 
     private Object[][] expected = { //
-            { 1, "Name1", "USA", "CALIFORNIA", "94404", null }, //
-            { 2, "Name2", "UNITED KINGDOM", "SCOTLAND", null, "123456789" }, //
-            { 3, "Name3", null, null, null, "000006789" }, //
-            { 4, "Name4", "USA", null, null, null } //
+            { 1, "Name1", "USA", "CALIFORNIA", "94404", null, "Name1" }, //
+            { 2, "Name2", "UNITED KINGDOM", "SCOTLAND", null, "123456789", "Name2" }, //
+            { 3, "Name3", null, null, null, "000006789", "Name3" }, //
+            { 4, "Name4", "USA", null, null, null, "Name4" } //
     };
 
     @Override
@@ -164,6 +166,7 @@ public class LocationStandardizationServiceTestNG
             Assert.assertTrue(equals(record.get("State"), expectedResult[3]));
             Assert.assertTrue(equals(record.get("ZipCode"), expectedResult[4]));
             Assert.assertTrue(equals(record.get("DUNS"), expectedResult[5]));
+            Assert.assertTrue(equals(record.get("CopiedName"), expectedResult[6]));
             Assert.assertFalse(rowIdSet.contains((Long) record.get("RowId")));
             rowIdSet.add((Long) record.get("RowId"));
             Assert.assertFalse(uuidSet.contains(record.get("UUID").toString()));

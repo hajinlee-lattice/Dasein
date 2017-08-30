@@ -115,6 +115,9 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("IDStrategies")
     private IDStrategy[] idStrategies;
 
+    @JsonProperty("CopyFields")
+    private String[][] copyFields;
+
     @JsonProperty("StandardCountries")
     private Map<String, String> standardCountries;
 
@@ -404,6 +407,14 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setIdStrategies(IDStrategy[] idStrategies) {
         this.idStrategies = idStrategies;
+    }
+
+    public String[][] getCopyFields() {
+        return copyFields;
+    }
+
+    public void setCopyFields(String[][] copyFields) {
+        this.copyFields = copyFields;
     }
 
 }

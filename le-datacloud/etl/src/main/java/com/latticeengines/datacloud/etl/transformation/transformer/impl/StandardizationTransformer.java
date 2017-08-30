@@ -335,6 +335,21 @@ public class StandardizationTransformer
                     }
                 }
                 break;
+            case COPY:
+                if (config.getCopyFields() == null || config.getCopyFields().length == 0) {
+                    log.error(
+                            "Copy field mapping is required for copying field. Format: [[\"fromField1\", \"toField1\"],[\"fromField2\", \"toField2\"], ...]");
+                    return false;
+                }
+                for (String[] copyFieldMap : config.getCopyFields()) {
+                    if (copyFieldMap == null || copyFieldMap.length != 2 || StringUtils.isEmpty(copyFieldMap[0])
+                            || StringUtils.isEmpty(copyFieldMap[1])) {
+                        log.error(
+                                "Empty string or null is not allowed for copy fields. Format: [[\"fromField1\", \"toField1\"],[\"fromField2\", \"toField2\"], ...]");
+                        return false;
+                    }
+                }
+                break;
             default:
                 log.error(String.format("Standardization strategy %s is not supported", strategy.name()));
                 return false;
@@ -392,6 +407,7 @@ public class StandardizationTransformer
         parameters.setDunsFields(config.getDunsFields());
         parameters.setIdFields(config.getIdFields());
         parameters.setIdStrategies(config.getIdStrategies());
+        parameters.setCopyFields(config.getCopyFields());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 

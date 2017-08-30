@@ -8,10 +8,10 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private StandardizationStrategy[] sequence;     // Put operations in sequence array sequentially
 
     @JsonProperty("DomainFields")
-    private String[] domainFields; // for strategy DOMAIN
+    private String[] domainFields; // for strategy DOMAIN: standardize domain
 
     @JsonProperty("CountryFields")
-    private String[] countryFields; // for strategy COUNTRY
+    private String[] countryFields; // for strategy COUNTRY: standardize country
 
     @JsonProperty("StateFields")
     private String[] stateFields; // for strategy STATE (Country standardization
@@ -20,13 +20,15 @@ public class StandardizationTransformerConfig extends TransformerConfig {
                                   // country to standardize state)
 
     @JsonProperty("StringFields")
-    private String[] stringFields; // for strategy STRING
+    private String[] stringFields; // for strategy STRING: standardize string
 
     @JsonProperty("ConvertTypeFields")
-    private String[] convertTypeFields; // for strategy CONVERT_TYPE
+    private String[] convertTypeFields; // for strategy CONVERT_TYPE: convert to
+                                        // expected type
 
     @JsonProperty("ConvertTypeStrategies")
-    private TypeConvertStrategy[] convertTypeStrategies;    // for strategy CONVERT_TYPE
+    private TypeConvertStrategy[] convertTypeStrategies; // for strategy
+                                                         // CONVERT_TYPE
 
     @JsonProperty("DedupFields")
     private String[] dedupFields; // for strategy DEDUP
@@ -38,16 +40,17 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private String[] filterFields; // for strategy FILTER
 
     @JsonProperty("UploadTimestampField")
-    private String uploadTimestampField; // for strategy UPLOAD_TIMESTAMP
+    private String uploadTimestampField; // for strategy UPLOAD_TIMESTAMP: add a
+                                         // timestamp field
 
     @JsonProperty("MarkerExpression")
-    private String markerExpression; // for strategy MARKER
+    private String markerExpression; // for strategy MARKER: add a marker
 
     @JsonProperty("MarkerCheckFields")
-    private String[] markerCheckFields; // for strategy MARKER
+    private String[] markerCheckFields; // for strategy MARKER: add a marker
 
     @JsonProperty("MarkerField")
-    private String markerField; // for strategy MARKER
+    private String markerField; // for strategy MARKER: add a marker
 
     @JsonProperty("RenameFields")
     private String[][] renameFields; // for strategy RENAME (String[][0] is old
@@ -69,10 +72,12 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private FieldType[] addFieldTypes; // for strategy ADD_FIELD
 
     @JsonProperty("IsValidDomainField")
-    private String isValidDomainField; // for strategy VALID_DOMAIN
+    private String isValidDomainField; // for strategy VALID_DOMAIN: marker of
+                                       // whether domain is valid
 
     @JsonProperty("ValidDomainCheckField")
-    private String validDomainCheckField; // for strategy VALID_DOMAIN
+    private String validDomainCheckField; // for strategy VALID_DOMAIN: domain
+                                          // field to validate
 
     @JsonProperty("AddConsolidatedIndustryField")
     private String addConsolidatedIndustryField; // for strategy
@@ -107,16 +112,20 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private String[] rangeMapFileNames; // for strategy CONSOLIDATE_RANGE
 
     @JsonProperty("DunsFields")
-    private String[] dunsFields; // for strategy DUNS
+    private String[] dunsFields; // for strategy DUNS: standardize DUNS
 
     @JsonProperty("IDFields")
-    private String[] idFields; // for strategy ADD_ID
+    private String[] idFields; // for strategy ADD_ID: add id field
 
     @JsonProperty("IDStrategies")
     private IDStrategy[] idStrategies; // for strategy ADD_ID
 
+    @JsonProperty("CopyFields")
+    private String[][] copyFields; // for strategy COPY: String[][0] is
+                                   // fromField, String[][1] is toField
+
     public enum StandardizationStrategy {
-        ADD_ID, DOMAIN, DUNS, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE
+        ADD_ID, DOMAIN, DUNS, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE, COPY
     }
 
     public enum FieldType {
@@ -413,6 +422,14 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setIdStrategies(IDStrategy[] idStrategies) {
         this.idStrategies = idStrategies;
+    }
+
+    public String[][] getCopyFields() {
+        return copyFields;
+    }
+
+    public void setCopyFields(String[][] copyFields) {
+        this.copyFields = copyFields;
     }
 
 }
