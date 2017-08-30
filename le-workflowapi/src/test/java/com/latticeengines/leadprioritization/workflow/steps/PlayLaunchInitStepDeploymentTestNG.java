@@ -71,10 +71,11 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     @Mock
     TenantEntityMgr tenantEntityMgr;
 
+    String randId = UUID.randomUUID().toString();
+
     @BeforeClass(groups = "workflow")
     public void setup()
             throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-        String randId = UUID.randomUUID().toString();
         // this test tenant has account data loaded in CDL
         String tenantIdentifier = "Simon_0823.Simon_0823.Production";
         String playId = "play__" + randId;
@@ -228,6 +229,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         RuleBasedModel ruleBasedModel = new RuleBasedModel();
         RatingRule ratingRule = JsonUtils.deserialize(ratingRuleJson, RatingRule.class);
         ruleBasedModel.setRatingRule(ratingRule);
+        ruleBasedModel.setId(randId);
         ratingModels.add(ruleBasedModel);
         ratingEngine.setRatingModels(ratingModels);
         play.setRatingEngine(ratingEngine);

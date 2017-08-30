@@ -69,8 +69,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private static final String NAME_AS_PER_LATTICE_MATCH = "LDC_Name";
 
-    private static final String SCORING_FIELD_NAME = "__RuleModel_Score__";
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -149,6 +147,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             }
             accountFrontEndQuery.setLookups(lookups);
             RatingEngine ratingEngine = play.getRatingEngine();
+            String modelId = null;
+
             if (ratingEngine != null) {
                 if (ratingEngine.getSegment() != null) {
                     FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
@@ -161,17 +161,14 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                 List<RatingModel> ratingModels = new ArrayList<>();
                 for (RatingModel model : ratingEngine.getRatingModels()) {
                     ratingModels.add((RuleBasedModel) model);
+                    modelId = model.getId();
                     break;
                 }
                 accountFrontEndQuery.setRatingModels(ratingModels);
 
                 lookups = accountFrontEndQuery.getLookups();
-                Lookup lookup = new AttributeLookup(BusinessEntity.Rating, SCORING_FIELD_NAME);
+                Lookup lookup = new AttributeLookup(BusinessEntity.Rating, modelId);
                 lookups.add(lookup);
-
-                for (RatingModel ratingModel : accountFrontEndQuery.getRatingModels()) {
-                    ratingModel.setId(SCORING_FIELD_NAME);
-                }
             }
 
             if (accountFrontEndQuery.getAccountRestriction() == null) {
@@ -191,7 +188,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             contactFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
 
             executeLaunchActivity(tenant, playLaunch, config, accountFrontEndQuery, contactFrontEndQuery,
-                    modifiableAccountIdCollectionForContacts);
+                    modifiableAccountIdCollectionForContacts, modelId);
 
             internalResourceRestApiProxy.publishTalkingPoints(customerSpace, playName);
             internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
@@ -223,7 +220,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private void executeLaunchActivity(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
             FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
-            List<Object> modifiableAccountIdCollectionForContacts) {
+            List<Object> modifiableAccountIdCollectionForContacts, String modelId) {
 
         segmentAccountsCount = entityProxy.getCount( //
                 config.getCustomerSpace().toString(), //
@@ -287,7 +284,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                                 contactFrontEndQuery);
 
                         log.info("Got #" + contactPage.getData().size() + " contact elements in this loop");
-                        contactPage.getData().stream().map(contact -> {
+                        contactPage.getData().stream().forEach(contact -> {
                             Object accountIdObj = contact.get(InterfaceName.AccountId.name());
                             Long accountId = parseLong(accountIdObj);
 
@@ -298,20 +295,18 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                                 List<Map<String, String>> contacts = mapForAccountAndContactList.get(accountId);
                                 contacts.add(convertValuesToString(contact));
                             }
-
-                            return accountId;
-                        }).collect(Collectors.toList());
+                        });
 
                     } catch (Exception ex) {
                         log.error("Ignroing till contact data is available in cdl", ex);
                     }
 
                     parallelStream(accountList) //
-                            .map(account -> {
+                            .forEach(account -> {
                                 try {
                                     Recommendation recommendation = //
                                             prepareRecommendation(tenant, playLaunch, config, account,
-                                                    mapForAccountAndContactList);
+                                                    mapForAccountAndContactList, modelId);
                                     recommendationService.create(recommendation);
                                     try {
                                         danteLeadProxy.create(recommendation, config.getCustomerSpace().toString());
@@ -319,14 +314,12 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                                         log.error("Failed to publish lead to dante, ignoring", e);
                                     }
                                     launched.addAndGet(1);
-                                    return recommendation.getRecommendationId();
                                 } catch (Throwable th) {
                                     log.error(th.getMessage(), th);
                                     errored.addAndGet(1);
                                     throw th;
                                 }
-                            }) //
-                            .collect(Collectors.toList());
+                            });
                 }
                 processedSegmentAccountsCount += accountList.size();
                 playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / segmentAccountsCount);
@@ -379,7 +372,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private Recommendation prepareRecommendation(Tenant tenant, PlayLaunch playLauch,
             PlayLaunchInitStepConfiguration config, Map<String, Object> account,
-            Map<Long, List<Map<String, String>>> mapForAccountAndContactList) {
+            Map<Long, List<Map<String, String>>> mapForAccountAndContactList, String modelId) {
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
 
@@ -403,7 +396,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         recommendation.setTenantId(tenant.getPid());
         recommendation.setLikelihood(0.5D);
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
-        recommendation.setPriorityDisplayName(checkAndGet(account, SCORING_FIELD_NAME, "A"));
+        recommendation.setPriorityDisplayName(checkAndGet(account, modelId, "A"));
 
         Long accountId = parseLong(recommendation.getAccountId());
 
