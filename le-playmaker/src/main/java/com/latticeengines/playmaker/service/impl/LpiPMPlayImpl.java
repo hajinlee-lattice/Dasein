@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
@@ -112,6 +113,11 @@ public class LpiPMPlayImpl implements LpiPMPlay {
     public int getPlayCount(long start, List<Integer> playgroupIds) {
         List<Map<String, Object>> plays = getPlays(start, 0, Integer.MAX_VALUE, null);
         return plays.size();
+    }
+
+    @VisibleForTesting
+    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy2) {
+        this.internalResourceRestApiProxy = internalResourceRestApiProxy2;
     }
 
 }
