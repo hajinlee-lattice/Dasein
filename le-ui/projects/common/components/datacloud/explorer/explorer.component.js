@@ -302,6 +302,8 @@ angular.module('common.datacloud.explorer', [
             item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden === true ? true : false);
             item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : false);
 
+            item.IsRatingEngineAttribute = ratingsEngineAttributeState(item);
+
             obj[category][subcategory].push(index);
         });
 
@@ -537,6 +539,14 @@ angular.module('common.datacloud.explorer', [
         }
 
         return ret;
+    }
+
+    var ratingsEngineAttributeState = function(item) {
+        var selected = DataCloudStore.getRatingEngineAttributes();
+        if(selected.indexOf(item.ColumnId) >= 0) {
+            return true;
+        }
+        return false;
     }
 
     vm.getArray = function(number) {
