@@ -53,7 +53,7 @@ public abstract class BaseFrontEndEntityResource {
 
     public long getCount(FrontEndQuery frontEndQuery, String segment) {
         appendSegmentRestriction(frontEndQuery, segment);
-        optimizeRestriction(frontEndQuery);
+        optimizeRestrictions(frontEndQuery);
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return countCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
     }
@@ -68,23 +68,30 @@ public abstract class BaseFrontEndEntityResource {
 
     public long getCountForRestriction(FrontEndRestriction restriction) {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
+        BusinessEntity mainEntity = getMainEntity();
         if (restriction != null) {
-            frontEndQuery.setAccountRestriction(restriction);
+            if (BusinessEntity.Account == mainEntity) {
+                frontEndQuery.setAccountRestriction(restriction);
+            } else if (BusinessEntity.Contact == mainEntity){
+                frontEndQuery.setContactRestriction(restriction);
+            } else {
+                throw new RuntimeException("Entity " + mainEntity + " is not supported yet.");
+            }
         }
-        optimizeRestriction(frontEndQuery);
+        optimizeRestrictions(frontEndQuery);
         return getCount(frontEndQuery, null);
     }
 
     public DataPage getData(FrontEndQuery frontEndQuery, String segment) {
         appendSegmentRestriction(frontEndQuery, segment);
-        optimizeRestriction(frontEndQuery);
+        optimizeRestrictions(frontEndQuery);
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return dataCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
     }
 
     public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, String segment) {
         appendSegmentRestriction(frontEndQuery, segment);
-        optimizeRestriction(frontEndQuery);
+        optimizeRestrictions(frontEndQuery);
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return ratingCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
     }
@@ -132,11 +139,17 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
-    private void optimizeRestriction(FrontEndQuery frontEndQuery) {
+    private void optimizeRestrictions(FrontEndQuery frontEndQuery) {
         if (frontEndQuery.getAccountRestriction() != null) {
             Restriction restriction = frontEndQuery.getAccountRestriction().getRestriction();
             if (restriction != null) {
                 frontEndQuery.getAccountRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
+            }
+        }
+        if (frontEndQuery.getContactRestriction() != null) {
+            Restriction restriction = frontEndQuery.getContactRestriction().getRestriction();
+            if (restriction != null) {
+                frontEndQuery.getContactRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
             }
         }
     }
