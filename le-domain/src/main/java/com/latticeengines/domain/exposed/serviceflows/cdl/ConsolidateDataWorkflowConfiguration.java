@@ -57,6 +57,7 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
         public ConsolidateDataWorkflowConfiguration build() {
             configuration.add(consolidateAccountDataConfiguration);
             configuration.add(consolidateContactDataConfiguration);
+            configuration.add(consolidateTransactionDataConfiguration);
             return configuration;
         }
     }

@@ -33,7 +33,7 @@ public class ConsolidateDataWorkflow extends AbstractWorkflow<ConsolidateDataWor
         return new WorkflowBuilder() //
                 .next(consolidateAccountWrapper) //
                 .next(consolidateContactWrapper) //
-//                .next(consolidateTransactionWrapper) //
+                .next(consolidateTransactionWrapper) //
                 .build();
     }
 }
