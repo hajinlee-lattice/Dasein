@@ -12,6 +12,7 @@ public enum TableRoleInCollection {
     ConsolidatedTransaction, //
 
     Profile, //
+    ContactProfile, //
 
     BucketedAccount, //
     SortedContact, //

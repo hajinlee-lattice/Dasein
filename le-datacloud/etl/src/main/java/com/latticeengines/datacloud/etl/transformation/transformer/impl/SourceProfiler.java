@@ -131,7 +131,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         paras.setEncAttrPrefix(config.getEncAttrPrefix());
         paras.setMaxCats(config.getMaxCat());
         paras.setCatAttrsNotEnc(config.getCatAttrsNotEnc());
-        paras.setIdAttr(idAttrs.get(0));
+        if (CollectionUtils.isNotEmpty(idAttrs)) {
+            paras.setIdAttr(idAttrs.get(0));
+        }
         paras.setNumericAttrs(numericAttrs);
         paras.setCatAttrs(catAttrs);
         paras.setAttrsToRetain(attrsToRetain);
@@ -371,7 +373,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             postProcessProfiledAttrs(workflowDir, paras);
         }
         List<Object[]> result = new ArrayList<>();
-        result.add(profileIdAttr(paras.getIdAttr()));
+        if (paras.getIdAttr() != null) {
+            result.add(profileIdAttr(paras.getIdAttr()));
+        }
         for (ProfileParameters.Attribute attr : paras.getAttrsToRetain()) {
             result.add(profileAttrToRetain(attr));
         }
@@ -383,13 +387,13 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         switch (config.getStage()) {
         case DataCloudConstants.PROFILE_STAGE_ENRICH:
             log.info(String.format(
-                    "1 LatticeAccountId attr, %d numeric attrs(groupd into encode attrs and retain attrs), %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
+                    "%d numeric attrs(groupd into encode attrs and retain attrs), %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
                     paras.getNumericAttrs().size(), amAttrsToEnc.size(), exAttrsToEnc.size(),
                     paras.getAttrsToRetain().size()));
             break;
         case DataCloudConstants.PROFILE_STAGE_SEGMENT:
             log.info(String.format(
-                    "1 LatticeAccountId attr, %d numeric attrs, %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
+                    "%d numeric attrs, %d am attrs to encode, %d external attrs to encode, %d attrs to retain",
                     paras.getNumericAttrs().size(), amAttrsToEnc.size(), exAttrsToEnc.size(),
                     paras.getAttrsToRetain().size()));
             break;

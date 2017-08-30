@@ -26,8 +26,8 @@ public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2E
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         importedAccounts = importCsv(BusinessEntity.Account, 1);
         importedContacts = importCsv(BusinessEntity.Contact, 1);
-//        importedAccounts = mockCsvImport(BusinessEntity.Account, 1);
-//        importedContacts = mockCsvImport(BusinessEntity.Contact, 1);
+        // importedAccounts = mockCsvImport(BusinessEntity.Account, 1);
+        // importedContacts = mockCsvImport(BusinessEntity.Contact, 1);
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
@@ -40,8 +40,7 @@ public class CsvConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd2E
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact);
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), importedAccounts);
-        // Assert.assertEquals(countInRedshift(BusinessEntity.Contact),
-        // importedContacts);
+        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), importedContacts);
     }
 
 }
