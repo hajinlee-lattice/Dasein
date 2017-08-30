@@ -18,8 +18,8 @@ public class ContactQueryDecorator extends QueryDecorator {
 
     @Override
     public String[] getEntityLookups() {
-        return new String[] { InterfaceName.FirstName.toString(), InterfaceName.LastName.toString(),
-                InterfaceName.CompanyName.toString(), InterfaceName.Email.toString(), InterfaceName.CRMId.toString() };
+        return new String[] { InterfaceName.ContactName.toString(), InterfaceName.CompanyName.toString(),
+                InterfaceName.Email.toString(), InterfaceName.CRMId.toString() };
     }
 
     @Override
