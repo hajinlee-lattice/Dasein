@@ -63,7 +63,8 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
 
     private MatchCommand waitForMatchCommand(MatchCommand matchCommand) {
         String rootUid = matchCommand.getRootOperationUid();
-        log.info(String.format("Waiting for match command %s to complete", rootUid));
+        log.info(String.format("Waiting for match command %s to complete (%s)", rootUid,
+                matchCommand.getApplicationId()));
 
         Random random = new Random(System.currentTimeMillis());
         Level level = LogManager.getLogger(BaseRestApiProxy.class).getLevel();
