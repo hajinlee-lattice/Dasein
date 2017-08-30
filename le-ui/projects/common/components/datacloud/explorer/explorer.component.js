@@ -1658,6 +1658,7 @@ angular.module('common.datacloud.explorer', [
                 form_fields = $scope.input || {}
                 report = {
                     Attribute: $scope.modal.context.attributeKey || $scope.modal.context.attribute.ColumnId || '',
+                    MatchedValue: $scope.value,
                     CorrectValue: form_fields.value || '',
                     Comment: form_fields.comment || '',
                     InputKeys: lookupStore.record,
