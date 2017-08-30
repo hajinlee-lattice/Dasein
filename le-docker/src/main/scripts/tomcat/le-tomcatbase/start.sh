@@ -66,6 +66,10 @@ export CATALINA_PID=/var/run/tomcat
 term_handler() {
   if [ $pid -ne 0 ]; then
     echo 'in SIGTERM handler'
+    JACOCO_DEST_FILE="/mnt/efs/jacoco/${HOSTNAME}.exec"
+    if [ -f "${JACOCO_DEST_FILE}" ]; then
+        chmod a+r ${JACOCO_DEST_FILE}
+    fi
     kill -SIGTERM "$pid"
     wait "$pid"
   fi
