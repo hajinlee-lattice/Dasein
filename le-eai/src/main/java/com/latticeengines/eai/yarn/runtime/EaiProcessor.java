@@ -26,9 +26,7 @@ public class EaiProcessor extends SingleContainerYarnProcessor<EaiJobConfigurati
             setProgress((Float) progress);
             return null;
         });
-        // eaiRuntimeService.initailize(eaiJobConfig);
         eaiRuntimeService.invoke(eaiJobConfig);
-        // eaiRuntimeService.finalize(eaiJobConfig);
         return null;
     }
 }

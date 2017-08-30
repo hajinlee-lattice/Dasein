@@ -42,7 +42,7 @@ public class EaiImportJobDetailServiceImpl implements EaiImportJobDetailService 
 
     @Override
     public void createImportJobDetail(EaiImportJobDetail eaiImportJobDetail) {
-        eaiImportJobDetailEntityMgr.create(eaiImportJobDetail);
+        eaiImportJobDetailEntityMgr.createImportJobDetail(eaiImportJobDetail);
     }
 
     @Override

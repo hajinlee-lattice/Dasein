@@ -8,4 +8,6 @@ public interface EaiImportJobDetailEntityMgr extends BaseEntityMgr<EaiImportJobD
     EaiImportJobDetail findByCollectionIdentifier(String identifier);
 
     EaiImportJobDetail findByApplicationId(String appId);
+
+    void createImportJobDetail(EaiImportJobDetail eaiImportJobDetail);
 }

@@ -26,12 +26,31 @@ public class EaiImportJobDetailEntityMgrImpl extends BaseEntityMgrImpl<EaiImport
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public EaiImportJobDetail findByCollectionIdentifier(String identifier) {
-        return eaiImportJobDetailDao.findByField("COLLECTION_IDENTIFIER", identifier);
+        return eaiImportJobDetailDao.findMostRecentRecordByIdentifier(identifier);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public EaiImportJobDetail findByApplicationId(String appId) {
         return eaiImportJobDetailDao.findByField("LOAD_APPLICATION_ID", appId);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void createImportJobDetail(EaiImportJobDetail eaiImportJobDetail) {
+        EaiImportJobDetail lastDetail = eaiImportJobDetailDao.findMostRecentRecordByIdentifier(eaiImportJobDetail
+                .getCollectionIdentifier());
+        if (lastDetail == null) {
+            eaiImportJobDetail.setSequenceId(1L);
+            eaiImportJobDetailDao.create(eaiImportJobDetail);
+        } else {
+            if (lastDetail.getStatus().isTerminated()) {
+                eaiImportJobDetail.setSequenceId(lastDetail.getSequenceId() + 1);
+                eaiImportJobDetailDao.create(eaiImportJobDetail);
+            } else {
+                throw new RuntimeException(String.format("Only one running import is allowed for one data feed task. " +
+                        "%s", eaiImportJobDetail.getCollectionIdentifier()));
+            }
+        }
     }
 }

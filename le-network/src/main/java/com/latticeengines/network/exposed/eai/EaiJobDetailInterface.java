@@ -10,4 +10,6 @@ public interface EaiJobDetailInterface {
 
     EaiImportJobDetail getImportJobDetailByAppId(String applicationId);
 
+    void updateImportJobDetail(EaiImportJobDetail eaiImportJobDetail);
+
 }

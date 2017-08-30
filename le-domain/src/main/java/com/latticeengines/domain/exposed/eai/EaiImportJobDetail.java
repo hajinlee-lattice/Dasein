@@ -16,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -27,7 +28,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Entity
-@javax.persistence.Table(name = "EAI_IMPORT_JOB_DETAIL")
+@javax.persistence.Table(name = "EAI_IMPORT_JOB_DETAIL", uniqueConstraints = { @UniqueConstraint(columnNames = {
+        "COLLECTION_IDENTIFIER", "SEQUENCE_ID" }) })
 public class EaiImportJobDetail implements HasPid, Serializable {
 
     private static final long serialVersionUID = -1299972365295269629L;
@@ -39,10 +41,15 @@ public class EaiImportJobDetail implements HasPid, Serializable {
     @JsonProperty("pid")
     private Long pid;
 
-    @Column(name = "COLLECTION_IDENTIFIER", unique = true, nullable = false)
+    @Column(name = "COLLECTION_IDENTIFIER", nullable = false)
     @Index(name = "IX_COLLECTION_IDENTIFIER")
     @JsonProperty("collection_identifier")
     private String collectionIdentifier;
+
+    @Column(name = "SEQUENCE_ID", nullable = false)
+    @Index(name = "IX_SEQUENCE_ID")
+    @JsonProperty("sequence_id")
+    private Long sequenceId;
 
     @Column(name = "COLLECTION_TS", nullable = false)
     @JsonProperty("collection_ts")
@@ -92,6 +99,14 @@ public class EaiImportJobDetail implements HasPid, Serializable {
 
     public void setCollectionIdentifier(String collectionIdentifier) {
         this.collectionIdentifier = collectionIdentifier;
+    }
+
+    public Long getSequenceId() {
+        return sequenceId;
+    }
+
+    public void setSequenceId(Long sequenceId) {
+        this.sequenceId = sequenceId;
     }
 
     public Date getCollectionTimestamp() {

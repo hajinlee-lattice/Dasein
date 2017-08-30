@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
@@ -36,11 +35,7 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
         return map.get(clz);
     }
 
-    //public abstract void initailize(T config);
-
     public abstract void invoke(T config);
-
-    //public abstract void finalize(T config);
 
     public void setProgressReporter(Function<Float, Void> progressReporter) {
         this.progressReporter = progressReporter;
@@ -55,14 +50,23 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
                 .getImportJobDetailByCollectionIdentifier(jobIdentifier);
         if (jobDetail == null) {
             jobDetail = new EaiImportJobDetail();
-            jobDetail.setStatus(ImportStatus.SUBMITTED);
+            jobDetail.setStatus(ImportStatus.RUNNING);
             jobDetail.setSourceType(sourceType);
             jobDetail.setCollectionIdentifier(jobIdentifier);
             jobDetail.setProcessedRecords(0);
             jobDetail.setCollectionTimestamp(new Date());
             eaiImportJobDetailService.createImportJobDetail(jobDetail);
         } else {
-            jobDetail.setStatus(ImportStatus.SUBMITTED);
+            jobDetail.setStatus(ImportStatus.RUNNING);
+            eaiImportJobDetailService.updateImportJobDetail(jobDetail);
+        }
+    }
+
+    public void updateJobDetailStatus(String jobIdentifier, ImportStatus status) {
+        EaiImportJobDetail jobDetail = eaiImportJobDetailService
+                .getImportJobDetailByCollectionIdentifier(jobIdentifier);
+        if (jobDetail != null) {
+            jobDetail.setStatus(status);
             eaiImportJobDetailService.updateImportJobDetail(jobDetail);
         }
     }
@@ -72,9 +76,16 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
         EaiImportJobDetail jobDetail = eaiImportJobDetailService
                 .getImportJobDetailByCollectionIdentifier(jobIdentifier);
         if (jobDetail != null) {
+            int totalRecords = 0;
+            for (String processedRecord : processedRecords) {
+                totalRecords += Integer.parseInt(processedRecord);
+            }
+            jobDetail.setProcessedRecords(totalRecords);
             jobDetail.setTemplateName(templateName);
             jobDetail.setPathDetail(pathList);
             jobDetail.setPRDetail(processedRecords);
+            //when extract has processed records info means the import completed, waiting for register.
+            jobDetail.setStatus(ImportStatus.WAITINGREGISTER);
             eaiImportJobDetailService.updateImportJobDetail(jobDetail);
         }
     }

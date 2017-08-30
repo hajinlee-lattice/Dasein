@@ -29,4 +29,10 @@ public class EaiJobDetailProxy extends MicroserviceRestApiProxy implements EaiJo
         String url = constructUrl("/jobdetail/applicationId/{applicationId}", applicationId);
         return get("getEaiImportJobDetail", url, null, EaiImportJobDetail.class);
     }
+
+    @Override
+    public void updateImportJobDetail(EaiImportJobDetail eaiImportJobDetail) {
+        String url = constructUrl("/jobdetail/update");
+        post("updateImportJobDetail", url, eaiImportJobDetail, Void.class);
+    }
 }

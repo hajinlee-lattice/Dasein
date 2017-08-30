@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.ConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -62,55 +63,59 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
     @Override
     @SuppressWarnings("unchecked")
     public void invoke(CSVToHdfsConfiguration config) {
-        List<SourceImportConfiguration> sourceImportConfigs = config.getSourceConfigurations();
-        String customerSpace = config.getCustomerSpace().toString();
+        try {
+            List<SourceImportConfiguration> sourceImportConfigs = config.getSourceConfigurations();
+            String customerSpace = config.getCustomerSpace().toString();
 
-        ImportContext context = new ImportContext(yarnConfiguration);
-        context.setProperty(ImportProperty.CUSTOMER, customerSpace);
-        context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
-        context.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
-        context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
-        context.setProperty(ImportProperty.HDFSFILE, config.getFilePath());
-        context.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
-        context.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
-        context.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
-        if (dataFeedTask == null) {
-            throw new RuntimeException("Cannot find the dataFeed task for import!");
-        }
-        initJobDetail(config.getJobIdentifier(), SourceType.FILE);
-        Table template = dataFeedTask.getImportTemplate();
-        log.info(String.format("Modeling metadata for template: %s",
-                JsonUtils.serialize(template.getModelingMetadata())));
-        context.setProperty(ImportProperty.METADATA, JsonUtils.serialize(template.getModelingMetadata()));
-        String targetPath = createTargetPath(config.getCustomerSpace());
-        List<Table> tableMetadata = new ArrayList<>();
-        for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
-            log.info("Importing for " + sourceImportConfig.getSourceType());
-            context.setProperty(ImportProperty.TARGETPATH, targetPath);
-            sourceImportConfig.setTables(Arrays.asList(template));
-            Map<String, String> props = sourceImportConfig.getProperties();
-            log.info("Moving properties from import config to import context.");
-            for (Map.Entry<String, String> entry : props.entrySet()) {
-                log.info("Property " + entry.getKey() + " = " + entry.getValue());
-                context.setProperty(entry.getKey(), entry.getValue());
+            ImportContext context = new ImportContext(yarnConfiguration);
+            context.setProperty(ImportProperty.CUSTOMER, customerSpace);
+            context.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
+            context.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
+            context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
+            context.setProperty(ImportProperty.HDFSFILE, config.getFilePath());
+            context.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
+            context.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
+            context.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
+            if (dataFeedTask == null) {
+                throw new RuntimeException("Cannot find the dataFeed task for import!");
             }
-            sourceImportConfig.getProperties().put(ImportProperty.METADATA,
-                    JsonUtils.serialize(template.getModelingMetadata()));
-            sourceImportConfig.getProperties().put(ImportProperty.HDFSFILE, config.getFilePath());
-            ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
-            ConnectorConfiguration connectorConfiguration = importService.generateConnectorConfiguration("", context);
-            List<Table> metadata = importService.importMetadata(sourceImportConfig, context, connectorConfiguration);
-            tableMetadata.addAll(metadata);
+            initJobDetail(config.getJobIdentifier(), SourceType.FILE);
+            Table template = dataFeedTask.getImportTemplate();
+            log.info(String.format("Modeling metadata for template: %s",
+                    JsonUtils.serialize(template.getModelingMetadata())));
+            context.setProperty(ImportProperty.METADATA, JsonUtils.serialize(template.getModelingMetadata()));
+            String targetPath = createTargetPath(config.getCustomerSpace());
+            List<Table> tableMetadata = new ArrayList<>();
+            for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
+                log.info("Importing for " + sourceImportConfig.getSourceType());
+                context.setProperty(ImportProperty.TARGETPATH, targetPath);
+                sourceImportConfig.setTables(Arrays.asList(template));
+                Map<String, String> props = sourceImportConfig.getProperties();
+                log.info("Moving properties from import config to import context.");
+                for (Map.Entry<String, String> entry : props.entrySet()) {
+                    log.info("Property " + entry.getKey() + " = " + entry.getValue());
+                    context.setProperty(entry.getKey(), entry.getValue());
+                }
+                sourceImportConfig.getProperties().put(ImportProperty.METADATA,
+                        JsonUtils.serialize(template.getModelingMetadata()));
+                sourceImportConfig.getProperties().put(ImportProperty.HDFSFILE, config.getFilePath());
+                ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
+                ConnectorConfiguration connectorConfiguration = importService.generateConnectorConfiguration("", context);
+                List<Table> metadata = importService.importMetadata(sourceImportConfig, context, connectorConfiguration);
+                tableMetadata.addAll(metadata);
 
-            sourceImportConfig.setTables(metadata);
-            for (Table table : metadata) {
-                context.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class).put(table.getName(), Boolean.FALSE);
+                sourceImportConfig.setTables(metadata);
+                for (Table table : metadata) {
+                    context.getProperty(ImportProperty.MULTIPLE_EXTRACT, Map.class).put(table.getName(), Boolean.FALSE);
+                }
+                importService.importDataAndWriteToHdfs(sourceImportConfig, context, connectorConfiguration);
+
+                waitAndFinalizeJob(config, context, template.getName());
             }
-            importService.importDataAndWriteToHdfs(sourceImportConfig, context, connectorConfiguration);
-
-            waitAndFinalizeJob(config, context, template.getName());
-
+        } catch (RuntimeException e) {
+            updateJobDetailStatus(config.getJobIdentifier(), ImportStatus.FAILED);
+            throw e;
         }
     }
 

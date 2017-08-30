@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
+import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.ImportVdbTableConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -46,66 +47,71 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
     @Override
     public void invoke(VdbToHdfsConfiguration config) {
 
-        SourceImportConfiguration sourceImportConfiguration = config.getSourceConfigurations().get(0);
-        ImportService importService = ImportService.getImportService(sourceImportConfiguration.getSourceType());
-        ImportContext importContext = new ImportContext(yarnConfiguration);
-        String connectorStr = config.getProperty(ImportProperty.IMPORT_CONFIG_STR);
+        try {
+            SourceImportConfiguration sourceImportConfiguration = config.getSourceConfigurations().get(0);
+            ImportService importService = ImportService.getImportService(sourceImportConfiguration.getSourceType());
+            ImportContext importContext = new ImportContext(yarnConfiguration);
+            String connectorStr = config.getProperty(ImportProperty.IMPORT_CONFIG_STR);
 
-        String customerSpace = config.getCustomerSpace().toString();
-        importContext.setProperty(ImportProperty.CUSTOMER, customerSpace);
+            String customerSpace = config.getCustomerSpace().toString();
+            importContext.setProperty(ImportProperty.CUSTOMER, customerSpace);
 
-        importContext.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
-        importContext.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
-        importContext.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
-        importContext.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
-        importContext.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
-        String collectionIdentifiers = config.getProperty(ImportProperty.COLLECTION_IDENTIFIERS);
-        if (!StringUtils.isEmpty(collectionIdentifiers)) {
-            @SuppressWarnings("unchecked")
-            List<Object> identifiersRaw = JsonUtils.deserialize(collectionIdentifiers, List.class);
-            List<String> identifiers = JsonUtils.convertList(identifiersRaw, String.class);
+            importContext.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
+            importContext.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
+            importContext.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
+            importContext.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
+            importContext.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
+            String collectionIdentifiers = config.getProperty(ImportProperty.COLLECTION_IDENTIFIERS);
+            if (!StringUtils.isEmpty(collectionIdentifiers)) {
+                @SuppressWarnings("unchecked")
+                List<Object> identifiersRaw = JsonUtils.deserialize(collectionIdentifiers, List.class);
+                List<String> identifiers = JsonUtils.convertList(identifiersRaw, String.class);
 
-            VdbConnectorConfiguration vdbConnectorConfiguration = null;
-            try {
-                log.info("Start getting connector config.");
-                vdbConnectorConfiguration = (VdbConnectorConfiguration) importService
-                        .generateConnectorConfiguration(connectorStr, importContext);
-
+                VdbConnectorConfiguration vdbConnectorConfiguration = null;
                 try {
-                    log.info("Initialize import job detail record");
-                    initJobDetail(vdbConnectorConfiguration);
-                    log.info("Import metadata");
-                    HashMap<String, Table> tableTemplates = getTableMap(config.getCustomerSpace().toString(),
-                            identifiers);
+                    log.info("Start getting connector config.");
+                    vdbConnectorConfiguration = (VdbConnectorConfiguration) importService
+                            .generateConnectorConfiguration(connectorStr, importContext);
 
-                    List<Table> metadata = importService.prepareMetadata(new ArrayList<>(tableTemplates.values()));
-                    metadata = sortTable(metadata, vdbConnectorConfiguration);
+                    try {
+                        log.info("Initialize import job detail record");
+                        initJobDetail(vdbConnectorConfiguration);
+                        log.info("Import metadata");
+                        HashMap<String, Table> tableTemplates = getTableMap(config.getCustomerSpace().toString(),
+                                identifiers);
 
-                    sourceImportConfiguration.setTables(metadata);
+                        List<Table> metadata = importService.prepareMetadata(new ArrayList<>(tableTemplates.values()));
+                        metadata = sortTable(metadata, vdbConnectorConfiguration);
 
-                    log.info("Import table data");
-                    importService.importDataAndWriteToHdfs(sourceImportConfiguration, importContext,
-                            vdbConnectorConfiguration);
+                        sourceImportConfiguration.setTables(metadata);
 
-                    log.info("Finalize import job detail record");
-                    finalizeJobDetail(vdbConnectorConfiguration, tableTemplates, importContext);
+                        log.info("Import table data");
+                        importService.importDataAndWriteToHdfs(sourceImportConfiguration, importContext,
+                                vdbConnectorConfiguration);
+
+                        log.info("Finalize import job detail record");
+                        finalizeJobDetail(vdbConnectorConfiguration, tableTemplates, importContext);
+                    } catch (Exception e) {
+                        throw e;
+                    }
+                } catch (LedpException e) {
+                    switch (e.getCode()) {
+                    case LEDP_17011:
+                    case LEDP_17012:
+                    case LEDP_17013:
+                        log.error("Generate connector configuration error!");
+                        break;
+                    default:
+                        break;
+                    }
+
                 } catch (Exception e) {
                     throw e;
                 }
-            } catch (LedpException e) {
-                switch (e.getCode()) {
-                case LEDP_17011:
-                case LEDP_17012:
-                case LEDP_17013:
-                    log.error("Generate connector configuration error!");
-                    break;
-                default:
-                    break;
-                }
-
-            } catch (Exception e) {
-                throw e;
             }
+        } catch (Exception e) {
+            updateJobDetailStatus("", ImportStatus.FAILED);
+            throw e;
         }
 
     }

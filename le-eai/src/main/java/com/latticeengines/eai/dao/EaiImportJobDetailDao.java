@@ -5,4 +5,6 @@ import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 
 public interface EaiImportJobDetailDao extends BaseDao<EaiImportJobDetail> {
 
+    EaiImportJobDetail findMostRecentRecordByIdentifier(String identifier);
+
 }

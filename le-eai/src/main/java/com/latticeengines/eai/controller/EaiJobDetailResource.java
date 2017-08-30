@@ -2,6 +2,7 @@ package com.latticeengines.eai.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +34,12 @@ public class EaiJobDetailResource implements EaiJobDetailInterface {
     @ApiOperation(value = "Get an eai job detail")
     public EaiImportJobDetail getImportJobDetailByAppId(@PathVariable String applicationId) {
         return eaiImportJobDetailService.getImportJobDetailByAppId(applicationId);
+    }
+
+    @Override
+    @RequestMapping(value = "/jobdetail/update", method = RequestMethod.POST, headers = "Accept=application/json")
+    public void updateImportJobDetail(@RequestBody EaiImportJobDetail eaiImportJobDetail) {
+        eaiImportJobDetailService.updateImportJobDetail(eaiImportJobDetail);
     }
 
     @Override
