@@ -117,6 +117,7 @@ angular.module('common.datacloud.query.advanced', [
 
     vm.updateCount = function() {
         QueryStore.counts.accounts.loading = true;
+        vm.prevBucketCountAttr = null;
 
         QueryService.GetCountByQuery('accounts', SegmentStore.sanitizeSegment({ 
             'free_form_text_search': "",
