@@ -58,4 +58,27 @@ chmod a+w /var/log/ledp
 
 chmod +x /var/lib/jacocoagent.jar
 chown -R tomcat ${CATALINA_HOME}
-${CATALINA_HOME}/bin/catalina.sh run
+
+pid=0
+export CATALINA_PID=/var/run/tomcat
+
+# SIGTERM-handler
+term_handler() {
+  if [ $pid -ne 0 ]; then
+    echo 'in SIGTERM handler'
+    kill -SIGTERM "$pid"
+    wait "$pid"
+  fi
+  exit 143; # 128 + 15 -- SIGTERM
+}
+
+trap 'kill ${!}; term_handler' SIGTERM
+${CATALINA_HOME}/bin/catalina.sh run &
+pid="$!"
+echo "pid=${pid}"
+
+# wait forever
+while true
+do
+  tail -f ${CATALINA_HOME}/logs/catalina*.log & wait ${!}
+done
