@@ -1,4 +1,4 @@
-<div class="menu" ng-if="type == 'menu'" ng-mouseleave="closeMenu($event)">
+<div class="menu" ng-if="buttonType == 'menu'" ng-mouseleave="closeMenu($event)">
     <button 
         type="button"
         ng-click="menuClick($event)" 
@@ -10,6 +10,6 @@
         <li ng-click="open($event)">Report Inaccuracy</li>
     </ul>
 </div>
-<div class="infodot" ng-if="type == 'infodot'" ng-click="open($event)">
+<div class="infodot" ng-if="buttonType == 'infodot'" ng-click="open($event)">
     <i class="fa fa-info-circle"></i>
 </div>

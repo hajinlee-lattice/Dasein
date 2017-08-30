@@ -74,7 +74,7 @@
                     <div class="column data records" ng-if="!vm.lookupMode && !vm.inModel()">
                         <strong ng-if="vm.section === 'segment.analysis'" class="attribute-feedback-container">
                             <attribute-feedback-button 
-                                type="'infodot'" 
+                                button-type="'infodot'" 
                                 attribute="attribute" 
                                 value="attribute.TopBkt.Cnt|number" 
                                 icon-image="vm.categoryIcon(category)"
@@ -87,7 +87,7 @@
                         </strong>
                         <strong ng-if="vm.section != 'segment.analysis'" class="attribute-feedback-container">
                             <attribute-feedback-button 
-                                type="'infodot'" 
+                                button-type="'infodot'" 
                                 attribute="attribute" 
                                 value="attribute.Count|number" 
                                 icon-image="vm.categoryIcon(category)"
@@ -105,7 +105,7 @@
                         
                         <strong class="attribute-feedback-container">
                             <attribute-feedback-button 
-                                type="'infodot'" 
+                                button-type="'infodot'" 
                                 attribute="attribute" 
                                 value="vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType)" 
                                 icon-image="vm.categoryIcon(category)"

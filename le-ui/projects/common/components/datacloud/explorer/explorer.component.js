@@ -1656,6 +1656,7 @@ angular.module('common.datacloud.explorer', [
             $scope.report = function() {
                 $scope.sendingReport = true;
                 var report = {
+                    type: $scope.modal.context.type,
                     context: $scope.modal.context,
                     clientSession: {
                         email: clientSession.EmailAddress,
@@ -1663,7 +1664,7 @@ angular.module('common.datacloud.explorer', [
                     },
                     lookupStore: lookupStore,
                     input: $scope.input || {},
-                    companyInfo: $scope.lookupResponse
+                    companyInfo: $scope.lookupResponse,
                 };
 
                 DataCloudStore.sendFeedback(report).then(function(response){
@@ -1700,17 +1701,18 @@ angular.module('common.datacloud.explorer', [
         restrict: 'EA',
         templateUrl: '/components/datacloud/explorer/attributefeedback/attributefeedbackbutton.component.html',
         scope: {
-            type: '=?',
+            buttonType: '=?',
             attribute: '=',
             value: '=',
             iconImage: '=?',
             iconFont: '=?',
             categoryClass: '=?',
             label: '=?',
-            showLookupStore: '=?'
+            showLookupStore: '=?',
+            type: '=?'
         },
         controller: ['$scope', '$stateParams', 'DataCloudStore', function ($scope, $stateParams, DataCloudStore) {
-            $scope.type = $scope.type || 'infodot';
+            $scope.buttonType = $scope.buttonType || 'infodot';
 
             $scope.menuClick = function($event) {
                 $event.stopPropagation();
@@ -1720,7 +1722,6 @@ angular.module('common.datacloud.explorer', [
             $scope.closeMenu = function($event) {
                 $scope.showMenu = false;
             }
-
             $scope.open = function($event) {
                 $event.stopPropagation();
                 $scope.closeMenu($event);
@@ -1733,7 +1734,8 @@ angular.module('common.datacloud.explorer', [
                     },
                     categoryClass: $scope.categoryClass,
                     label: $scope.label || '',
-                    showLookupStore: $scope.showLookupStore
+                    showLookupStore: $scope.showLookupStore,
+                    type: $scope.type
                 });
             }
         }]
