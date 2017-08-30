@@ -40,7 +40,7 @@
                             value="vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType)" 
                             icon-image="vm.categoryIcon(vm.category)"
                             category-class="vm.categoryClass(vm.category)"
-                            ng-if="vm.hasCompanyInfo && vm.section != 'insights'" />
+                            ng-if="vm.lookupMode && vm.hasCompanyInfo" />
                         {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}
                     </div>
                 </div>

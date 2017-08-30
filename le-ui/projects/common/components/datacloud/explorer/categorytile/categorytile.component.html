@@ -79,10 +79,7 @@
                                 value="attribute.TopBkt.Cnt|number" 
                                 icon-image="vm.categoryIcon(category)"
                                 category-class="vm.categoryClass(category)"
-                                ng-if="
-                                    vm.lookupMode && 
-                                    vm.hasCompanyInfo && 
-                                    vm.section != 'insights'"/>
+                                ng-if=" vm.lookupMode && vm.hasCompanyInfo" />
                                 {{ attribute.TopBkt.Cnt|number }}
                         </strong>
                         <strong ng-if="vm.section != 'segment.analysis'" class="attribute-feedback-container">
@@ -92,10 +89,7 @@
                                 value="attribute.Count|number" 
                                 icon-image="vm.categoryIcon(category)"
                                 category-class="vm.categoryClass(category)"
-                                ng-if="
-                                    vm.lookupMode && 
-                                    vm.hasCompanyInfo && 
-                                    vm.section != 'insights'"/>
+                                ng-if="vm.lookupMode && vm.hasCompanyInfo" />
                                 {{ attribute.Count |number }}
                         </strong>
                     </div>
@@ -110,7 +104,7 @@
                                 value="vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType)" 
                                 icon-image="vm.categoryIcon(category)"
                                 category-class="vm.categoryClass(category)"
-                                ng-if="vm.lookupMode && vm.hasCompanyInfo && vm.section != 'insights'" />
+                                ng-if="vm.lookupMode && vm.hasCompanyInfo" />
 
                             {{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}
                         </strong>
