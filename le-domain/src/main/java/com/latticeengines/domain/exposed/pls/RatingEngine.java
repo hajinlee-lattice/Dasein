@@ -25,6 +25,7 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -73,7 +74,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     private String displayName;
 
     @JsonProperty("note")
-    @Column(name = "note", length = 2048, nullable = true)
+    @Column(name = "note", nullable = true)
+    @Type(type = "text")
     private String note;
 
     @JsonProperty("type")

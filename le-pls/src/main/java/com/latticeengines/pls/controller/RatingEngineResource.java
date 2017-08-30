@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -43,9 +44,9 @@ public class RatingEngineResource {
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all Rating Engines for a tenant")
-    public List<RatingEngine> getRatingEngines() {
-        return ratingEngineService.getAllRatingEngines();
+    @ApiOperation(value = "Get all Rating Engine summaries for a tenant")
+    public List<RatingEngineSummary> getRatingEngines() {
+        return ratingEngineService.getAllRatingEngineSummaries();
     }
 
     @RequestMapping(value = "/types", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -58,7 +59,9 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a Rating Engine given its id")
-    public RatingEngine getRatingEngine(@PathVariable String ratingEngineId, HttpServletRequest request,
+    public RatingEngine getRatingEngine( //
+            @PathVariable String ratingEngineId, //
+            HttpServletRequest request, //
             HttpServletResponse response) {
         return ratingEngineService.getFullRatingEngineById(ratingEngineId);
     }
@@ -67,7 +70,9 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Register a Rating Engine")
     @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
-    public RatingEngine createRatingEngine(@RequestBody RatingEngine ratingEngine, HttpServletRequest request) {
+    public RatingEngine createRatingEngine( //
+            @RequestBody RatingEngine ratingEngine, //
+            HttpServletRequest request) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.warn("Tenant is null for the request.");
@@ -87,6 +92,7 @@ public class RatingEngineResource {
             @RequestBody RatingEngine ratingEngine, //
             @PathVariable String ratingEngineId, //
             HttpServletRequest request) {
+        log.info(String.format("Update RatingEngine %s", ratingEngineId));
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.warn("Tenant is null for the request.");
@@ -95,6 +101,7 @@ public class RatingEngineResource {
         if (ratingEngine == null) {
             throw new NullPointerException("Rating Engine is null.");
         }
+        ratingEngine.setId(ratingEngineId);
         return ratingEngineService.createOrUpdate(ratingEngine, tenant.getId());
     }
 
@@ -102,7 +109,9 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
     @PreAuthorize("hasRole('Edit_PLS_RatingEngines')")
-    public Boolean deleteRatingEngine(@PathVariable String ratingEngineId, HttpServletRequest request) {
+    public Boolean deleteRatingEngine( //
+            @PathVariable String ratingEngineId, //
+            HttpServletRequest request) {
         ratingEngineService.deleteById(ratingEngineId);
         return true;
     }
@@ -110,7 +119,9 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get Rating Models associated with a Rating Engine given its id")
-    public Set<RatingModel> getRatingModels(@PathVariable String ratingEngineId, HttpServletRequest request,
+    public Set<RatingModel> getRatingModels( //
+            @PathVariable String ratingEngineId, //
+            HttpServletRequest request, //
             HttpServletResponse response) {
         return ratingEngineService.getRatingModelsByRatingEngineId(ratingEngineId);
     }
@@ -118,11 +129,23 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
-    public RatingModel getRatingModel(@PathVariable String ratingEngineId, //
+    public RatingModel getRatingModel( //
+            @PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId, //
             HttpServletRequest request, //
             HttpServletResponse response) {
         return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
+    public RatingModel updateRatingModel( //
+            @RequestBody RatingModel ratingModel, //
+            @PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            HttpServletRequest request, HttpServletResponse response) {
+        return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/plays", method = RequestMethod.GET, headers = "Accept=application/json")

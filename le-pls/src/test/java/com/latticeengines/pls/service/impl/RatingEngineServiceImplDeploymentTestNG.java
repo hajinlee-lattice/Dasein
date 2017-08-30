@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -16,6 +18,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingRule;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataSegmentService;
@@ -62,6 +68,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
 
     @Test(groups = "deployment")
     public void testBasicOperations() {
+        // test basic creation
         RatingEngine createdRatingEngine = ratingEngineService.createOrUpdate(ratingEngine, mainTestTenant.getId());
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getId());
@@ -77,15 +84,18 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(createdRatingEngine.getRatingModels());
         System.out.println("size of getRatingModels() " + createdRatingEngine.getRatingModels().size());
 
+        // test get a list
         List<RatingEngine> ratingEngineList = ratingEngineService.getAllRatingEngines();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(id, ratingEngineList.get(0).getId());
 
+        // test basic find
         createdRatingEngine = ratingEngineService.getRatingEngineById(id);
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertEquals(id, createdRatingEngine.getId());
 
+        // test update rating engine
         ratingEngine.setDisplayName(RATING_ENGINE_NAME);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
         createdRatingEngine = ratingEngineService.createOrUpdate(ratingEngine, mainTestTenant.getId());
@@ -99,6 +109,34 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(id, ratingEngineList.get(0).getId());
 
+        // test basic find rating models
+        Set<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(id);
+        Assert.assertNotNull(ratingModels);
+        Assert.assertEquals(ratingModels.size(), 1);
+        Iterator<RatingModel> it = ratingModels.iterator();
+        RatingModel rm = it.next();
+        Assert.assertTrue(rm instanceof RuleBasedModel);
+        Assert.assertEquals(rm.getIteration(), 1);
+        Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(),
+                RatingRule.DEFAULT_BUCKET_NAME);
+
+        String ratingModelId = rm.getId();
+        Assert.assertNotNull(ratingModelId);
+        // test get specific rating model
+        rm = ratingEngineService.getRatingModel(id, ratingModelId);
+        Assert.assertNotNull(rm);
+
+        // test update rating model
+        RuleBasedModel roleBasedModel = new RuleBasedModel();
+        RatingRule ratingRule = new RatingRule();
+        ratingRule.setDefaultBucketName(RuleBucketName.D.getName());
+        roleBasedModel.setRatingRule(ratingRule);
+        RatingModel retrievedRoleBasedModel = ratingEngineService.updateRatingModel(id, ratingModelId, roleBasedModel);
+        Assert.assertTrue(retrievedRoleBasedModel instanceof RuleBasedModel);
+        Assert.assertEquals(((RuleBasedModel) retrievedRoleBasedModel).getRatingRule().getDefaultBucketName(),
+                RuleBucketName.D.getName());
+
+        // test delete
         ratingEngineService.deleteById(createdRatingEngine.getId());
         ratingEngineList = ratingEngineService.getAllRatingEngines();
         Assert.assertNotNull(ratingEngineList);
@@ -106,7 +144,6 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
 
         createdRatingEngine = ratingEngineService.getRatingEngineById(createdRatingEngine.getId());
         Assert.assertNull(createdRatingEngine);
-
     }
 
 }

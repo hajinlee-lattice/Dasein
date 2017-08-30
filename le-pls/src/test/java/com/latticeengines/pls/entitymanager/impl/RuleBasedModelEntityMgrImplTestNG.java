@@ -3,6 +3,7 @@ package com.latticeengines.pls.entitymanager.impl;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -33,7 +33,6 @@ import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.entitymanager.RuleBasedModelEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
@@ -51,6 +50,10 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private static final Restriction C2 = bucket(Contact, 2);
     private static final Restriction C3 = bucket(Contact, 3);
 
+    private static final String ATTR1 = "Employ Number";
+    private static final String ATTR2 = "Revenue";
+    private static final String ATTR3 = "Has Cisco WebEx";
+
     @Autowired
     private SegmentService segmentService;
 
@@ -59,9 +62,6 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private RatingEngineEntityMgr ratingEngineEntityMgr;
-
-    @Autowired
-    private TenantService tenantService;
 
     private RatingEngine ratingEngine;
     private String ratingEngineId;
@@ -105,6 +105,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testBasicOperations() {
+        // default ruleBasedModel should have been persisted with rating engine
         RatingEngine createdRatingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
         Assert.assertNotNull(createdRatingEngine);
         List<RuleBasedModel> ruleBasedModelList = ruleBasedModelEntityMgr.findAllByRatingEngineId(ratingEngineId);
@@ -114,19 +115,14 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertDefaultRuleBasedModel(ruleBasedModel);
         ruleBasedModelId = ruleBasedModel.getId();
 
+        // update ruleBasedModel by updating its selected attributes and rules
         ruleBasedModel.setRatingRule(generateRatingRule());
+        ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
         ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel(ruleBasedModel, ratingEngineId);
         ruleBasedModelList = ruleBasedModelEntityMgr.findAllByRatingEngineId(ratingEngineId);
         Assert.assertNotNull(ruleBasedModelList);
         Assert.assertEquals(ruleBasedModelList.size(), 1);
         assertUpdatedRuleBasedModel(ruleBasedModelList.get(0));
-    }
-
-    @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
-        if (tenant != null) {
-            tenantService.discardTenant(tenant);
-        }
     }
 
     private void assertDefaultRuleBasedModel(RuleBasedModel ruleBasedModel) {
@@ -137,6 +133,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(ruleBasedModel.getRatingEngine().getId(), ratingEngineId);
         Assert.assertNotNull(ruleBasedModel.getRatingRule());
         Assert.assertEquals(ruleBasedModel.getRatingRule().getDefaultBucketName(), RatingRule.DEFAULT_BUCKET_NAME);
+        Assert.assertNull(ruleBasedModel.getSelectedAttributes());
     }
 
     private void assertUpdatedRuleBasedModel(RuleBasedModel ruleBasedModel) {
@@ -147,6 +144,11 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(ruleBasedModel.getRatingEngine().getId(), ratingEngineId);
         Assert.assertNotNull(ruleBasedModel.getRatingRule());
         Assert.assertEquals(ruleBasedModel.getRatingRule().getDefaultBucketName(), RuleBucketName.D.getName());
+
+        Assert.assertNotNull(ruleBasedModel.getSelectedAttributes());
+        Assert.assertTrue(ruleBasedModel.getSelectedAttributes().contains(ATTR1));
+        Assert.assertTrue(ruleBasedModel.getSelectedAttributes().contains(ATTR2));
+        Assert.assertTrue(ruleBasedModel.getSelectedAttributes().contains(ATTR3));
     }
 
     private RatingRule generateRatingRule() {
@@ -171,6 +173,14 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         rr.setBucketToRuleMap(bucketToRuleMap);
         log.info(String.format("Returned RatingRule is %s", rr.toString()));
         return rr;
+    }
+
+    private List<String> generateSeletedAttributes() {
+        List<String> selectedAttributes = new ArrayList<>();
+        selectedAttributes.add(ATTR1);
+        selectedAttributes.add(ATTR2);
+        selectedAttributes.add(ATTR3);
+        return selectedAttributes;
     }
 
     private static BucketRestriction bucket(BusinessEntity entity, int idx) {

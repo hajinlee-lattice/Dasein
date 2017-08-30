@@ -64,6 +64,9 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
         if (ruleBasedModel.getRatingRule() != null) {
             retrievedRuleBasedModel.setRatingRule(ruleBasedModel.getRatingRule());
         }
+        if (ruleBasedModel.getSelectedAttributes() != null) {
+            retrievedRuleBasedModel.setSelectedAttributes(ruleBasedModel.getSelectedAttributes());
+        }
     }
 
     @Override
