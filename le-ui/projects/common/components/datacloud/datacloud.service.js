@@ -293,21 +293,9 @@ angular.module('common.datacloud')
         return this.feedbackModal.show = bool;
     }
 
-    this.sendFeedback = function(args, type) {
+    this.sendFeedback = function(report, type) {
         var deferred = $q.defer(),
-            date = new Date(),
-            type = type || args.type || '',
-            report = {
-                "Attribute": args.context.attribute.ColumnId || '',
-                "Comment": args.input.comment || '',
-                "InputKeys": args.lookupStore.record,
-                "MatchedKeys": {
-                    "additionalProp1": "string",
-                    "additionalProp2": "string",
-                    "additionalProp3": "string"
-                },
-                "SuggestedValue": args.input.value || ''
-            };
+            type = type || '';
 
         DataCloudService.sendFeedback(report, type).then(function(response){
             deferred.resolve(response);
@@ -577,18 +565,17 @@ angular.module('common.datacloud')
         var deferred = $q.defer(),
             opts = opts || {},
             type = type || 'incorrectmatchedattrs'; // incorrectmatchedattrs | incorrectlookups
-            
-        deferred.resolve(opts);
-        // $http({
-        //     method: 'POST',
-        //     headers: {
-        //         'ErrorDisplayMethod': 'none' 
-        //     },
-        //     url: '/pls/datacloud/customerreports/' + type,
-        //     data: opts
-        // }).then(function(response){
-        //     deferred.resolve(response.data);
-        // });
+
+        $http({
+            method: 'POST',
+            headers: {
+                'ErrorDisplayMethod': 'none' 
+            },
+            url: '/pls/datacloud/customerreports/' + type,
+            data: opts
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
         
         return deferred.promise;
     }

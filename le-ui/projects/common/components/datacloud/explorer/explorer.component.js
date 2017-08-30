@@ -1655,26 +1655,27 @@ angular.module('common.datacloud.explorer', [
 
             $scope.report = function() {
                 $scope.sendingReport = true;
-                var report = {
-                    type: $scope.modal.context.type,
-                    context: $scope.modal.context,
-                    clientSession: {
-                        email: clientSession.EmailAddress,
-                        tenant: clientSession.Tenant.Identifier
+                form_fields = $scope.input || {}
+                report = {
+                    Attribute: $scope.modal.context.attributeKey || $scope.modal.context.attribute.ColumnId || '',
+                    CorrectValue: form_fields.value || '',
+                    Comment: form_fields.comment || '',
+                    InputKeys: lookupStore.record,
+                    MatchedKeys: {
+                        "LDC_Name": $scope.lookupResponse.attributes.LDC_Name,
+                        "LDC_Domain": $scope.lookupResponse.attributes.LDC_Domain,
+                        "LDC_City": $scope.lookupResponse.attributes.LDC_City,
+                        "LDC_State": $scope.lookupResponse.attributes.LDC_State,
+                        "LDC_ZipCode": $scope.lookupResponse.attributes.LDC_ZipCode,
+                        "LDC_Country": $scope.lookupResponse.attributes.LDC_Country,
+                        "LDC_DUNS": $scope.lookupResponse.attributes.LDC_DUNS
                     },
-                    lookupStore: lookupStore,
-                    input: $scope.input || {},
-                    companyInfo: $scope.lookupResponse,
+                    MatchLog: $scope.lookupResponse.matchLogs
                 };
 
-                DataCloudStore.sendFeedback(report).then(function(response){
-                    //$scope.close();
-                    $scope.showDebug = true;
+                DataCloudStore.sendFeedback(report, $scope.modal.context.type).then(function(response){
                     $scope.sendingReport = false;
-                    $scope.debug = {
-                        response: response,
-                        report: report
-                    }
+                    $scope.close();
                 });
             }
 
@@ -1703,6 +1704,7 @@ angular.module('common.datacloud.explorer', [
         scope: {
             buttonType: '=?',
             attribute: '=',
+            attributeKey: '=?',
             value: '=',
             iconImage: '=?',
             iconFont: '=?',
@@ -1727,6 +1729,7 @@ angular.module('common.datacloud.explorer', [
                 $scope.closeMenu($event);
                 DataCloudStore.setFeedbackModal(true, {
                     attribute: $scope.attribute,
+                    attributeKey: $scope.attributeKey,
                     value: $scope.value,
                     icon: {
                         image: $scope.iconImage || '',

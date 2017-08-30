@@ -35,10 +35,4 @@
         <button class="button white-button" ng-click="close()">Cancel</button>
         <button class="button blue-button" ng-click="report()" ng-disabled="sendingReport"><i ng-if="sendingReport" class="fa fa-spinner fa-spin fa-fw"></i> Report Inaccuracy</button>
     </div>
-    <div ng-if="showDebug" class="section">
-        <strong style="font-weight: bold;">Data to send to the API:</strong>
-        <pre style="background-color: #eee; padding: 5px;">{{debug.response|json}}</pre>
-        <strong style="font-weight: bold;">Avaliable data:</strong>
-        <pre style="background-color: #eee; padding: 5px;">{{debug.report|json}}</pre>
-    </div>
 </div>
