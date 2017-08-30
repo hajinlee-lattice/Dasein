@@ -18,11 +18,13 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.pls.service.RatingModelService;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("ratingEngineService")
 public class RatingEngineServiceImpl implements RatingEngineService {
@@ -45,13 +47,16 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     @Override
     public List<RatingEngineSummary> getAllRatingEngineSummaries() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        log.info(String.format("Get all the rating engine summaries for tenant %s", tenant.getId()));
         List<RatingEngineSummary> result = new ArrayList<>();
-        ratingEngineEntityMgr.findAll().stream().forEach(re -> result.add(constructRatingEngineSummary(re.getId())));
+        ratingEngineEntityMgr.findAll().stream()
+                .forEach(re -> result.add(constructRatingEngineSummary(re.getId(), tenant.getId())));
         return result;
     }
 
     @VisibleForTesting
-    RatingEngineSummary constructRatingEngineSummary(String ratingEngineId) {
+    RatingEngineSummary constructRatingEngineSummary(String ratingEngineId, String tenantId) {
         if (ratingEngineId == null) {
             return null;
         }
@@ -68,7 +73,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
         ratingEngineSummary.setCreated(ratingEngine.getCreated());
         ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
 
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(ratingEngine.getTenant().getId());
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(tenantId);
         ratingEngineSummary.setLastRefreshedDate(dataFeed.getLastPublished());
         return ratingEngineSummary;
     }
