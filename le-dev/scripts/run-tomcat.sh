@@ -21,7 +21,7 @@ export JAVA_OPTS="${JAVA_OPTS} -Dcom.sun.management.jmxremote -Dcom.sun.manageme
 if [ "${ENABLE_JACOCO}" == "true" ]; then
     JACOCO_DEST_FILE="${WSHOME}/jacoco/tomcat.exec"
     JACOCO_AGENT_FILE="${WSHOME}/le-dev/jacocoagent.jar"
-    export JAVA_OPTS="${JAVA_OPTS} -javaagent:${JACOCO_AGENT_FILE}=includes=com.latticeengines.*,destfile=${JACOCO_DEST_FILE},append=true"
+    export JAVA_OPTS="${JAVA_OPTS} -javaagent:${JACOCO_AGENT_FILE}=includes=com.latticeengines.*,destfile=${JACOCO_DEST_FILE},append=true,jmx=true"
 fi
 
 export CATALINA_CLASSPATH=$CLASSPATH:$TEZ_CONF_DIR:$HADOOP_HOME/etc/hadoop:$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common
