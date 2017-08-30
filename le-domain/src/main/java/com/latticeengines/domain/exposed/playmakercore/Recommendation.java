@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -94,6 +96,7 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
     private String sfdcAccountID;
 
     @Column(name = "PRIORITY_ID")
+    @Enumerated(EnumType.STRING)
     @JsonProperty("priorityID")
     private RuleBucketName priorityID;
 
@@ -231,9 +234,13 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
         this.priorityID = priorityID;
     }
 
-    public String getPriorityDisplayName() { return priorityID.getName(); }
+    public String getPriorityDisplayName() {
+        return priorityID.getName();
+    }
 
-    public void setPriorityDisplayName(String name) { priorityDisplayName = name; }
+    public void setPriorityDisplayName(String name) {
+        priorityDisplayName = name;
+    }
 
     public String getMonetaryValueIso4217ID() {
         return monetaryValueIso4217ID;
