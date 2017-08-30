@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.testng.annotations.Test;
 
@@ -25,20 +26,73 @@ public class QueryTranslatorUnitTestNG {
     @Test(groups = "unit")
     public void testTranslate() {
         FrontEndQuery query = new FrontEndQuery();
-        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        frontEndRestriction.setRestriction(createRestriction(Level.Simple));
-        query.setAccountRestriction(frontEndRestriction);
+        FrontEndRestriction accountRestriction = new FrontEndRestriction();
+        accountRestriction.setRestriction(createAccountRestriction(Level.Simple));
+        query.setAccountRestriction(accountRestriction);
         query.setMainEntity(BusinessEntity.Account);
 
         Query translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
         assertTrue(translated.getRestriction() instanceof LogicalRestriction);
-        validateTranslated(translated.getRestriction(), 6, 8);
+        validateTranslated(translated.getRestriction(), 6, 8, 0);
+        validateTranslatedLookups(translated, 0);
     }
 
-    private void validateTranslated(Restriction restriction, int numConcrete, int numTotalRestrictions) {
+    @Test(groups = "unit")
+    public void testContactTranslate() {
+        FrontEndQuery query = new FrontEndQuery();
+        FrontEndRestriction contactRestriction = new FrontEndRestriction();
+        contactRestriction.setRestriction(createContactRestriction(Level.Simple));
+        query.setContactRestriction(contactRestriction);
+        query.setMainEntity(BusinessEntity.Contact);
+
+        Query translated = QueryTranslator.translate(query, ContactQueryDecorator.WITHOUT_SELECTS);
+        assertTrue(translated.getRestriction() instanceof LogicalRestriction);
+        validateTranslated(translated.getRestriction(), 4, 6, 0);
+        validateTranslatedLookups(translated, 0);
+    }
+
+    @Test(groups = "unit")
+    public void testAccountAndContactTranslate() {
+        FrontEndQuery query = new FrontEndQuery();
+        FrontEndRestriction accountRestriction = new FrontEndRestriction();
+        accountRestriction.setRestriction(createAccountRestriction(Level.Simple));
+        query.setAccountRestriction(accountRestriction);
+        FrontEndRestriction contactRestriction = new FrontEndRestriction();
+        contactRestriction.setRestriction(createContactRestriction(Level.Simple));
+        query.setContactRestriction(contactRestriction);
+        query.setMainEntity(BusinessEntity.Account);
+
+        Query translated = QueryTranslator.translate(query, AccountQueryDecorator.WITHOUT_SELECTS);
+        assertTrue(translated.getRestriction() instanceof LogicalRestriction);
+        validateTranslated(translated.getRestriction(), 10, 16, 1);
+    }
+
+    @Test(groups = "unit")
+    public void testContactAndAccountTranslate() {
+        FrontEndQuery query = new FrontEndQuery();
+        FrontEndRestriction accountRestriction = new FrontEndRestriction();
+        accountRestriction.setRestriction(createAccountRestriction(Level.Simple));
+        query.setAccountRestriction(accountRestriction);
+        FrontEndRestriction contactRestriction = new FrontEndRestriction();
+        contactRestriction.setRestriction(createContactRestriction(Level.Simple));
+        query.setContactRestriction(contactRestriction);
+        query.setMainEntity(BusinessEntity.Contact);
+
+        Query translated = QueryTranslator.translate(query, ContactQueryDecorator.WITH_SELECTS);
+        assertTrue(translated.getRestriction() instanceof LogicalRestriction);
+        validateTranslated(translated.getRestriction(), 10, 16, 1);
+        validateTranslatedLookups(translated, 4);
+    }
+
+    private void validateTranslatedLookups(Query translated, int expectedLookups) {
+        assertEquals(translated.getLookups().size(), expectedLookups);
+    }
+
+    private void validateTranslated(Restriction restriction, int numConcrete, int numTotalRestrictions, int numExists) {
         BreadthFirstSearch search = new BreadthFirstSearch();
         final MutableInt concreteCounter = new MutableInt(0);
         final MutableInt totalCounter = new MutableInt(0);
+        final MutableInt existCounter = new MutableInt(0);
         search.run(restriction, (object, ctx) -> {
             if (object instanceof Restriction) {
                 totalCounter.increment();
@@ -47,18 +101,22 @@ public class QueryTranslatorUnitTestNG {
             if (object instanceof ConcreteRestriction) {
                 concreteCounter.increment();
             }
+            if (object instanceof ExistsRestriction) {
+                existCounter.increment();
+            }
         });
         assertEquals(concreteCounter.intValue(), numConcrete);
         assertEquals(totalCounter.intValue(), numTotalRestrictions);
+        assertEquals(existCounter.intValue(), numExists);
     }
 
     @Test(groups = "unit")
     public void testTranslateWithDecorator() {
         FrontEndQuery query = new FrontEndQuery();
         query.setFreeFormTextSearch("intel");
-        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        frontEndRestriction.setRestriction(createRestriction(Level.Simple));
-        query.setAccountRestriction(frontEndRestriction);
+        FrontEndRestriction accountRestriction = new FrontEndRestriction();
+        accountRestriction.setRestriction(createAccountRestriction(Level.Simple));
+        query.setAccountRestriction(accountRestriction);
         query.setMainEntity(BusinessEntity.Account);
 
         Query result = QueryTranslator.translate(query, AccountQueryDecorator.WITH_SELECTS);
@@ -70,7 +128,7 @@ public class QueryTranslatorUnitTestNG {
         Simple, Advanced
     }
 
-    private Restriction createRestriction(Level level) {
+    private Restriction createAccountRestriction(Level level) {
         BucketRestriction a = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "A"),
                 Bucket.rangeBkt(2, 3));
 
@@ -85,6 +143,30 @@ public class QueryTranslatorUnitTestNG {
 
         BucketRestriction e = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "E"),
                 Bucket.rangeBkt(10, 100));
+
+        if (level == Level.Simple) {
+            Restriction and = Restriction.builder().and(a, b).build();
+            Restriction or = Restriction.builder().or(c, d).build();
+            return Restriction.builder().and(and, or).build();
+        } else if (level == Level.Advanced) {
+            // AND1 (OR1 (AND2(OR2(A,B)), E), C)) D))
+            Restriction or2 = Restriction.builder().or(a, b).build();
+            Restriction and2 = Restriction.builder().and(or2, e).build();
+            Restriction or1 = Restriction.builder().or(and2, c).build();
+            Restriction and1 = Restriction.builder().and(or1, d).build();
+
+            return and1;
+        }
+
+        return null;
+    }
+
+    private Restriction createContactRestriction(Level level) {
+        Restriction a = Restriction.builder().let(BusinessEntity.Contact, "A").eq(1).build();
+        Restriction b = Restriction.builder().let(BusinessEntity.Contact, "B").eq(2).build();
+        Restriction c = Restriction.builder().let(BusinessEntity.Contact, "C").eq(3).build();
+        Restriction d = Restriction.builder().let(BusinessEntity.Contact, "D").eq(4).build();
+        Restriction e = Restriction.builder().let(BusinessEntity.Contact, "E").eq(5).build();
 
         if (level == Level.Simple) {
             Restriction and = Restriction.builder().and(a, b).build();

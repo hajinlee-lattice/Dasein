@@ -58,8 +58,16 @@ public class FrontEndQuery {
         return accountRestriction;
     }
 
+    public FrontEndRestriction getContactRestriction() {
+        return contactRestriction;
+    }
+
     public void setAccountRestriction(FrontEndRestriction frontEndRestriction) {
         this.accountRestriction = frontEndRestriction;
+    }
+
+    public void setContactRestriction(FrontEndRestriction contactRestriction) {
+        this.contactRestriction = contactRestriction;
     }
 
     public FrontEndSort getSort() {

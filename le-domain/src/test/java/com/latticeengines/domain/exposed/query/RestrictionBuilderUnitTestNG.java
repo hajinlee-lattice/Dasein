@@ -54,6 +54,12 @@ public class RestrictionBuilderUnitTestNG {
                 .let(BusinessEntity.Account, "A").in(Arrays.asList(3, 5)).build();
         verify(inCollection);
 
+        Restriction contactRestriction = Restriction.builder()
+                .let(BusinessEntity.Contact, "A").eq(2).build();
+        Restriction contactExists = Restriction.builder()
+                .exists(BusinessEntity.Contact).that(contactRestriction).build();
+        Restriction findAWithContact = Restriction.builder().and(aEq2, contactExists).build();
+        verify(findAWithContact);
     }
 
     private void verify(Restriction restriction) {

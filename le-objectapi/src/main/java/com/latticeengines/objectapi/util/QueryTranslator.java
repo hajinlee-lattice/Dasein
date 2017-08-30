@@ -32,16 +32,14 @@ public class QueryTranslator {
     private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
     public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
-        Restriction restriction = translateFrontEndRestriction(frontEndQuery.getAccountRestriction());
-        if (frontEndQuery.restrictNullSalesforceId()) {
-            Restriction sfidRestriction = Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID")
-                    .isNull().build();
-            restriction = Restriction.builder().and(restriction, sfidRestriction).build();
-        } else if (frontEndQuery.restrictNotNullSalesforceId()) {
-            Restriction sfidRestriction = Restriction.builder().let(BusinessEntity.Account, "SalesforceAccountID")
-                    .isNotNull().build();
-            restriction = Restriction.builder().and(restriction, sfidRestriction).build();
-        }
+        BusinessEntity mainEntity = frontEndQuery.getMainEntity();
+
+        Restriction restriction = translateFrontEndRestriction(
+                getEntityFrontEndRestriction(mainEntity, frontEndQuery));
+
+        restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
+
+        restriction = translateInnerRestriction(frontEndQuery, mainEntity, restriction);
 
         if (frontEndQuery.getPageFilter() == null) {
             frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
@@ -91,6 +89,67 @@ public class QueryTranslator {
         }
 
         return queryBuilder.build();
+    }
+
+    private static FrontEndRestriction getEntityFrontEndRestriction(BusinessEntity entity,
+                                                                    FrontEndQuery frontEndQuery) {
+        switch (entity) {
+            case Account:
+                return frontEndQuery.getAccountRestriction();
+            case Contact:
+                return frontEndQuery.getContactRestriction();
+            default:
+                return null;
+        }
+    }
+
+    private static Restriction translateSalesforceIdRestriction(FrontEndQuery frontEndQuery,
+                                                                BusinessEntity entity,
+                                                                Restriction restriction) {
+        // only add salesforce id restriction for account entity now
+        if (BusinessEntity.Account == entity) {
+            if (frontEndQuery.restrictNullSalesforceId()) {
+                Restriction sfidRestriction = Restriction.builder().let(entity, "SalesforceAccountID")
+                        .isNull().build();
+                restriction = Restriction.builder().and(restriction, sfidRestriction).build();
+            } else if (frontEndQuery.restrictNotNullSalesforceId()) {
+                Restriction sfidRestriction = Restriction.builder().let(entity, "SalesforceAccountID")
+                        .isNotNull().build();
+                restriction = Restriction.builder().and(restriction, sfidRestriction).build();
+            }
+        }
+        return restriction;
+    }
+
+    private static Restriction translateInnerRestriction(FrontEndQuery frontEndQuery,
+                                                         BusinessEntity outerEntity,
+                                                         Restriction outerRestriction) {
+        Restriction innerRestriction = null;
+        switch (outerEntity) {
+            case Contact:
+                FrontEndRestriction accountFrontEndRestriction =
+                        getEntityFrontEndRestriction(BusinessEntity.Account,frontEndQuery);
+                Restriction accountRestriction = translateFrontEndRestriction(accountFrontEndRestriction);
+                if (accountRestriction != null) {
+                    innerRestriction = Restriction.builder()
+                            .exists(BusinessEntity.Account).that(accountRestriction).build();
+                }
+                break;
+            case Account:
+                FrontEndRestriction contactFrontEndRestriction =
+                        getEntityFrontEndRestriction(BusinessEntity.Contact,frontEndQuery);
+                Restriction contactRestriction = translateFrontEndRestriction(contactFrontEndRestriction);
+                if (contactRestriction != null) {
+                    innerRestriction = Restriction.builder()
+                            .exists(BusinessEntity.Contact).that(contactRestriction).build();
+                }
+                break;
+            default:
+                break;
+        }
+        return (innerRestriction == null) ?
+                outerRestriction :
+                Restriction.builder().and(outerRestriction, innerRestriction).build();
     }
 
     private static Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
