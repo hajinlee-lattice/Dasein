@@ -13,11 +13,22 @@ public class IncorrectMatchedAttrReportRequest extends CustomerReportRequest {
     @JsonProperty("Attribute")
     private String attribute;
 
+    @JsonProperty("MatchedValue")
+    private String matchedValue;
+
     public String getAttribute() {
         return attribute;
     }
 
     public void setAttribute(String attribute) {
         this.attribute = attribute;
+    }
+
+    public String getMatchedValue() {
+        return matchedValue;
+    }
+
+    public void setMatchedValue(String matchedValue) {
+        this.matchedValue = matchedValue;
     }
 }
