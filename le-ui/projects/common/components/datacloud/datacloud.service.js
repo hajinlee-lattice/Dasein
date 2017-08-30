@@ -12,6 +12,7 @@ angular.module('common.datacloud')
         this.premiumSelectMaximum = null;
         this.topAttributes = null;
         this.cube = null;
+        this.ratingEngineAttributes = [];
         this.metadata = {
             current: 1,
             currentCategory: 1,
@@ -303,9 +304,23 @@ angular.module('common.datacloud')
         return deferred.promise;
     }
 
-    this.selectRatingEngineAttribute = function(enrichment) {
+    this.getRatingEngineAttributes = function() {
+        return this.ratingEngineAttributes;
+    }
+
+    this.setRatingEngineAttributes = function(attribute_id) {
+        var index = this.ratingEngineAttributes.indexOf(attribute_id);
+        if(index >= 0) {
+            this.ratingEngineAttributes.splice(index, 1);
+        } else {
+            this.ratingEngineAttributes.push(attribute_id)
+        }
+    }
+
+    this.selectRatingEngineAttribute = function(attribute) {
         var deferred = $q.defer();
-        DataCloudService.selectRatingEngineAttribute(enrichment).then(function(response){
+        this.setRatingEngineAttributes(attribute.ColumnId);
+        DataCloudService.selectRatingEngineAttribute(this.ratingEngineAttributes).then(function(response){
             deferred.resolve(response);
         });
         return deferred.promise;
@@ -580,14 +595,9 @@ angular.module('common.datacloud')
         return deferred.promise;
     }
 
-    this.selectRatingEngineAttribute = function(enrichment) {
-        var deferred = $q.defer(),
-            ret = {
-                ColumnId: enrichment.ColumnId,
-                enrichment: enrichment
-            };
-
-        deferred.resolve(ret);
+    this.selectRatingEngineAttribute = function(attributes) {
+        var deferred = $q.defer();
+        deferred.resolve(attributes);
         return deferred.promise;
     }
 });

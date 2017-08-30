@@ -1605,7 +1605,7 @@ angular.module('common.datacloud.explorer', [
     vm.selectRatingEngineAttribute = function(enrichment) {
         DataCloudStore.selectRatingEngineAttribute(enrichment).then(function(response) {
             enrichment.IsRatingEngineAttribute = !enrichment.IsRatingEngineAttribute;
-            console.log(response);
+            //console.log(response);
         });
     }
 
