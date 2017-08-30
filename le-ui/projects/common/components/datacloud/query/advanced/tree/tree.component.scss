@@ -100,11 +100,11 @@ div.advanced-query-builder {
             border-left: 5px solid #999;
             height: 3.5em;
             display: flex;
-            cursor: move;
+            cursor: default;
             z-index: 1;
             
             & * {
-                cursor: move;
+                cursor: default;
             }
             
             &.query-section-item-end {
@@ -146,6 +146,11 @@ div.advanced-query-builder {
                 padding-top: .9em;
                 text-align: center;
                 z-index: 1;
+                
+                &,
+                & * {
+                    cursor: move;
+                }
             }
             
             .query-section-item-content {
@@ -155,7 +160,12 @@ div.advanced-query-builder {
                 padding-left: 1em;
                 line-height: 1.3em;
                 
-                span {
+                &.cursor-pointer {
+                    cursor: pointer;
+                }
+                            
+                span.query-section-item-category,
+                span.query-section-item-displayname {
                     float: left;
                 }
 
@@ -171,7 +181,36 @@ div.advanced-query-builder {
                     }
 
                     .query-section-item-operation {
-                        margin: 0 1em;
+                        position: relative;
+                        display: inline-block;
+                        margin: -4px .5em 0;
+                        
+                        * {
+                            cursor: default;
+                        }
+
+                        select {
+                            height: 1.65em;
+                            margin-right: 1em;
+                        }
+
+                        span.operation-and {
+                            margin: .25em;
+                            font-weight: bold;
+                        }
+
+                        input {
+                            width: 5em;
+                            cursor: text;
+                        }
+                    }
+
+                    button.blue-button {
+                        float: right;
+                        margin: -0.9em 0 0 1em;
+                        padding: 0.3em 0.8em .2em;
+                        border-radius: 3px;
+                        font-size: 0.8em;
                     }
 
                     .query-section-item-value {
@@ -202,13 +241,13 @@ div.advanced-query-builder {
                     }
                 }
 
-                i {
+                i.fa-close {
                     position: absolute;
                     top: 0em;
                     right: 0em;
                     float: right;
                     cursor: pointer;
-                    padding: 1.1em .8em;
+                    padding: 1.2em .8em;
                 }
             }
 
@@ -311,23 +350,22 @@ div.advanced-query-builder {
                 }
             }
 
+            select.query-section-operator-dropdown {
+                font-size: 1.0em;
+                background: transparent;
+                border: none;
+                margin: 0.5em 0em;
+            }
+
             .query-section-label-text {
                 padding: 0.333em 0em .333em .25em;
                 display: inline-block;
             }
             
-            .fa {
-                font-size: .9em;
-                
-                &.fa-chevron-down {
-                    margin-left: .5em;
-                }
-            }
-
             .query-section-controls i.fa {
                 display: inline-block;
-                padding: 0.75em 0.5em;
-                margin-right: .5em;
+                padding: 0.7em 0.5em;
+                margin-right: .3em;
                 cursor: pointer;
             }
         }

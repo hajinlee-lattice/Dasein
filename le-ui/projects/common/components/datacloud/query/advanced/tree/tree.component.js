@@ -19,7 +19,11 @@ angular
                 parent: $scope.parent,
                 items: $scope.root.items,
                 enrichments: [],
-                enrichmentsMap: DataCloudStore.getEnrichmentsMap()
+                enrichmentsMap: DataCloudStore.getEnrichmentsMap(),
+                type: '',
+                label: '',
+                range: [],
+                operation: ''
             });
 
             vm.init = function (type, value) {
@@ -29,7 +33,119 @@ angular
                     vm.enrichments = enrichments;
                     
                     if (vm.tree.bucketRestriction) {
-                        vm.item = vm.enrichments[ vm.enrichmentsMap[ vm.tree.bucketRestriction.attr.split('.')[1] ] ]
+                        var bucket = vm.tree.bucketRestriction;
+                        
+                        vm.item = vm.enrichments[ vm.enrichmentsMap[ bucket.attr.split('.')[1] ] ]
+                        vm.root.pushItem(vm.item, vm.tree.bucketRestriction);
+                        vm.type = vm.item.cube.Bkts.Type;
+                        vm.label = vm.item.topbkt.Lbl;
+                        vm.range = vm.item.topbkt.Rng;
+                        
+                        vm.setOperation(vm.item, vm.type, vm.label, vm.range);
+                    }
+                });
+            }
+
+            vm.setOperation = function(item, type, label, range) {
+                if (type == 'Numerical') {
+                    if (range) {
+                        if (range[0] != null && range[1] != null && range[0] === range[1]) {
+                            vm.operation = 'is';
+                        } else if (range[0] != null && range[1] != null) {
+                            vm.operation = 'between';
+                        } else if (range[0] == null) {
+                            vm.operation = 'less';
+                        } else if (range[1] == null) {
+                            vm.operation = 'greater_equal';
+                        } else {
+                            vm.operation = 'empty';
+                        }
+                    } else {
+                        vm.operation = 'empty';
+                    }
+                }
+            }
+
+            vm.changeOperation = function() {
+                if (!vm.item.topbkt.Rng) {
+                    vm.item.topbkt.Rng = [null, null];
+                }
+
+                switch (vm.operation) {
+                    case 'is':
+                        vm.item.topbkt.Rng = [ vm.item.topbkt.Rng[0], vm.item.topbkt.Rng[0] ];
+                        vm.item.topbkt.Lbl = vm.item.topbkt.Rng[0];
+                        break;
+                    case 'between': 
+                        vm.item.topbkt.Lbl = vm.item.topbkt.Rng[0] + ' - ' + vm.item.topbkt.Rng[1];
+                        break;
+                    case 'less': 
+                        vm.item.topbkt.Rng[0] = null;
+                        vm.item.topbkt.Lbl = '< ' + vm.item.topbkt.Rng[1];
+                        break;
+                    case 'greater_equal': 
+                        vm.item.topbkt.Rng[1] = null;
+                        vm.item.topbkt.Lbl = '>= ' + vm.item.topbkt.Rng[0];
+                        break;
+                    case 'empty': 
+                        vm.item.topbkt.Rng = null;
+                        vm.item.topbkt.Lbl = null;
+                        break;
+                }
+
+                vm.updateBucketCount();
+                vm.range = vm.item.topbkt.Rng;
+            }
+
+            vm.getOperationLabel = function(operation) {
+                var map = {
+                    "Yes": "is",
+                    "No": "is not",
+                    "": "is empty",
+                    "is": "is",
+                    "empty": "is empty",
+                    "less": "is less than",
+                    "less_equal": "is less than",
+                    "greater": "is greater than",
+                    "greater_equal": "is greater than",
+                    "between": "is between"
+                };
+
+                switch (vm.type) {
+                    case 'Boolean': return map[vm.item.topbkt.Lbl];
+                    case 'Numerical': return map[vm.operation];
+                    case 'Enum': return 'has a value of';
+                    default: 
+                        console.log('unknown type', vm.type, vm.label, vm.operation, vm.item);
+                        return 'has a value of';
+                }
+            }
+
+            vm.setBucket = function($event) {
+                if (vm.editing) {
+                    vm.editing = false;
+                    
+                    vm.root.updateCount();
+                    vm.updateBucketCount();
+
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                }
+            }
+            
+            vm.editBucket = function() {
+                if (!vm.editing && (vm.type == 'Boolean' || vm.type == 'Numerical')) {
+                    this.root.saveState(true);
+                    vm.editing = true;
+                }
+            }
+
+            vm.updateBucketCount = function() {
+                vm.tree.bucketRestriction.bkt.Cnt = -1;
+
+                vm.root.updateBucketCount(vm.tree.bucketRestriction).then(function(data) {
+                    if (typeof data == 'number') {
+                        vm.tree.bucketRestriction.bkt.Cnt = data;
                     }
                 });
             }
@@ -54,13 +170,15 @@ angular
                 }
             }
 
-            this.clickOperator = function(value) {
+            this.clickOperator = function() {
                 this.root.saveState();
-                vm.tree.logicalRestriction.operator = value;
+
+                // vm.tree.logicalRestriction.operator = value;
             }
 
             this.clickCollapsed = function() {
-                this.root.saveState(true);
+                this.root.saveState(true); // true wont update counts
+
                 vm.tree.collapsed = !vm.tree.collapsed;
             }
 

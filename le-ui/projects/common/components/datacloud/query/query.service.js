@@ -284,19 +284,24 @@ angular.module('common.datacloud.query.service',[
 
 })
 .service('QueryService', function($http, $q) {
+    this.canceler = null;
 
-
-    var canceler = $q.defer();
-
-    this.GetCountByQuery = function(resourceType, query) {
-
-        canceler.resolve("cancelled");
+    this.GetCountByQuery = function(resourceType, query, cancelPrevious) {
+        if (this.canceler && cancelPrevious) {
+            this.canceler.resolve("cancelled");
+        }
+        
+        this.canceler = $q.defer(); 
         var deferred = $q.defer(); 
 
         $http({
             method: 'POST',
             url: '/pls/' + resourceType + '/count',
-            data: query
+            data: query,
+            timeout: this.canceler.promise,
+            headers: {
+                'ErrorDisplayMethod': 'none'
+            }
         }).success(function(result) {
             deferred.resolve(result);
         }).error(function(result) {

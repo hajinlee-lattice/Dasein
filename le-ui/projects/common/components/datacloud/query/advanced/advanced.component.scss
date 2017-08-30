@@ -13,9 +13,10 @@ div.advanced-query-builder {
         display: flex;
         
         .query-algorithm-display {
-            /*background: #fff;
-            border: 1px solid #d0d0d0;
-            border-radius: 5px;*/
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 4px 0.5em;
             width: 100%;
             margin-right: 0.25em;
         }

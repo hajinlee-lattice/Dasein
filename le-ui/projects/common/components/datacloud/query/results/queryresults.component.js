@@ -83,8 +83,8 @@ angular.module('common.datacloud.query.results', [
 
     vm.refineQuery = function() {
         return vm.inModel
-            ? 'home.model.analysis.explorer.query'
-            : 'home.segment.explorer.query'
+            ? 'home.model.analysis.explorer.query.advanced'
+            : 'home.segment.explorer.query.advanced'
     };
 
     vm.clearSearch = function() {

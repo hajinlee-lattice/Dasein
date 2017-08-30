@@ -7,13 +7,12 @@
 
     <div class="query-section-operator label-operator item-operator-and">and</div>
     <div class="query-section-operator label-operator item-operator-or">or</div>
-
     <div class="query-section-type-dotline"></div>
     
     <div class="query-section-label">
         <i class="query-section-label-expand fa fa-{{ vm.tree.collapsed ? 'plus' : 'minus' }}-square-o" ng-click="vm.clickCollapsed()"></i>
         
-        <div class="button-group" role="group" ng-click="vm.clickOperator(vm.tree.logicalRestriction.operator == 'AND' ? 'OR' : 'AND')">
+        <!--div class="button-group" role="group" ng-click="vm.clickOperator(vm.tree.logicalRestriction.operator == 'AND' ? 'OR' : 'AND')">
             <button type="button" 
                     class="button icon-button {{vm.tree.logicalRestriction.operator == 'AND' ? 'white' : 'light-gray'}}-button" 
                     value="{{vm.tree.logicalRestriction.operator == 'AND' ? 'All' : 'Any'}}">
@@ -26,11 +25,22 @@
                 <i class="fa fa-bars fa-rotate-90" ng-if="vm.tree.logicalRestriction.operator == 'AND'"></i>
                 <span ng-if="vm.tree.logicalRestriction.operator == 'OR'">Any</span>
             </button>
-        </div>
+        </div-->
 
-        <span class="query-section-label-text">
+        <select class="query-section-operator-dropdown" 
+                ng-model="vm.tree.logicalRestriction.operator"
+                ng-change="vm.clickOperator()">
+            <option value="OR">
+                Any of the selected attribute value combinations (OR)
+            </option>
+            <option value="AND">
+                All of the selected attribute value combinations (AND)
+            </option>
+        </select>
+
+        <!--span class="query-section-label-text">
             of the selected attribute value combinations ({{ vm.tree.logicalRestriction.operator }})
-        </span>
+        </span-->
 
         <div class="query-section-controls pull-right">
             <i class="fa fa-close" ng-click="vm.clickDelete()"></i>
@@ -48,18 +58,85 @@
         <strong>{{vm.root.getBucketLabel(vm.tree)}}</strong>
     </div>
 
-    <div class="query-section-item-content">
+    <div    class="query-section-item-content" 
+            ng-click="vm.editBucket()"
+            ng-class="{ 'cursor-pointer': vm.type != 'Enum' }">
         <span class="query-section-item-category">{{vm.item.Category}}{{vm.item.Subcategory != 'Other' ? ' - ' + vm.item.Subcategory : ''}}</span>
+        
         <span class="query-section-item-displayname">
             <span class="query-section-item-name"><strong>{{vm.item.DisplayName}}</strong></span>
-            <span class="query-section-item-operation">has a value of</span>
-            <span class="query-section-item-value"><strong>{{vm.tree.bucketRestriction.bkt.Lbl}}</strong></span>
+            
+            <span ng-if="vm.editing">
+                <span ng-if="vm.type == 'Boolean'" class="query-section-item-operation">
+                    <select ng-model="vm.item.topbkt.Lbl" ng-change="vm.updateBucketCount()">
+                        <option value="Yes">is</option>
+                        <option value="No">is not</option>
+                        <option value="">is empty</option>
+                    </select>
+
+                    <span class="query-section-item-value" ng-if="vm.item.topbkt.Lbl != ''">
+                        <strong>Yes</strong>
+                    </span>
+                </span>
+
+                <span ng-if="vm.type == 'Numerical'" class="query-section-item-operation">
+                    <select ng-model="vm.operation" ng-change="vm.changeOperation()">
+                        <option value="is">is</option>
+                        <option value="between">is between</option>
+                        <option value="less">is less than</option>
+                        <option value="greater_equal">is greater than</option>
+                        <option value="empty">is empty</option>
+                    </select>
+
+                    <input  ng-if="vm.operation != 'less' && vm.operation != 'empty'" 
+                            ng-model="vm.range[0]" 
+                            ng-keyup="vm.changeOperation()"
+                            ng-value="vm.range[0]"></input>
+
+                    <span ng-if="vm.operation == 'between'" class="operation-and">-</span>
+                    
+                    <input  ng-if="vm.operation != 'is' && vm.operation != 'empty' && vm.operation != '' && vm.operation != 'greater_equal'" 
+                            ng-model="vm.range[1]" 
+                            ng-keyup="vm.changeOperation()"
+                            ng-value="vm.range[1]"></input>
+                </span>
+
+                <button class="button blue-button" ng-click="vm.setBucket($event)">SET</button>
+            </span>
+
+            <span ng-if="!vm.editing">
+                <span class="query-section-item-operation">
+                    <span class="query-section-item-operation">{{vm.getOperationLabel()}}</span>
+
+                    <span class="query-section-item-value" ng-if="vm.type == 'Boolean' && vm.item.topbkt.Lbl != ''">
+                        <strong>Yes</strong>
+                    </span>
+
+                    <span class="query-section-item-value" ng-if="vm.type == 'Numerical'">
+                        <strong ng-if="vm.range[0] != null && vm.operation != 'empty'">{{vm.range[0]}}</strong>
+                        <span ng-if="(vm.range[0] != null && vm.range[1] != null) && vm.operation == 'between'" class="operation-and">-</span>
+                        <strong ng-if="vm.range[1] != null && vm.operation != 'empty' && vm.operation != 'is'">{{vm.range[1]}}</strong>
+                    </span>
+
+                    <span class="query-section-item-value" ng-if="vm.type == 'Enum'">
+                        <strong>{{vm.item.topbkt.Lbl}}</strong>
+                    </span>
+                </span>
+            </span>
         </span>
     </div>
 
     <div class="query-section-item-records">
         <span class="query-section-item-records-label">RECORDS</span>
-        <span class="query-section-item-records-number">{{vm.tree.bucketRestriction.bkt.Cnt}}</span>
+        
+        <span ng-if="vm.tree.bucketRestriction.bkt.Cnt >= 0" class="query-section-item-records-number">
+            {{vm.tree.bucketRestriction.bkt.Cnt}}
+        </span>
+
+        <span ng-if="vm.tree.bucketRestriction.bkt.Cnt < 0" class="query-section-item-records-number">
+            <i class="fa fa-spinner fa-spin"></i>
+        </span>
+        
         <i class="fa fa-close" ng-click="vm.clickDelete($parent)"></i>
     </div>
 </div>

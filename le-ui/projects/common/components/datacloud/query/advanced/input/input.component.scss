@@ -18,7 +18,7 @@ div.advanced-query-builder {
                 // font-weight: bold;
                 margin: 0px 0px;
                 display: inline-block;
-                width: 1.4em;
+                min-width: 1.1em;
                 text-align: center;
                 line-height: 1.2em;
                 cursor: default;
@@ -37,7 +37,12 @@ div.advanced-query-builder {
 
             span.query-input-operator {
                 text-transform: uppercase;
-                margin: 0 0em 0 0em;
+                font-weight: bold;
+                display: inline-block;
+                
+                div {
+                    font-size: 0.85em;
+                }
             }
 
             span.query-input-parenthesis {
@@ -47,16 +52,16 @@ div.advanced-query-builder {
             }
 
             span.query-input-parenthesis-label {
-                // font-size: 1.6em;
+                font-size: 1.1em;
                 line-height: 1em;
                 margin-top: 2px;
                 display: inline;
                 position: absolute;
-                margin-left: 3px;
+                margin-left: 2px;
             }
             
             span.query-input-section-end .query-input-parenthesis-label {
-                margin-left: -3px;
+                margin-left: -2px;
             }
         }
 

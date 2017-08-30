@@ -454,6 +454,19 @@ angular
                 section: 'query'
 
             },
+            resolve: {
+                Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
+                    var deferred = $q.defer();
+
+                    DataCloudStore.getCube().then(function(result) {
+                        if (result.data) {
+                            deferred.resolve(result.data.Stats);
+                        }
+                    });
+                    
+                    return deferred.promise;
+                }]
+            },
             views: {
                 "main@": {
                     controller: 'AdvancedQueryCtrl',

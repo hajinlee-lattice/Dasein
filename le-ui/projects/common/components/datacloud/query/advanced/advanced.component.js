@@ -2,8 +2,8 @@ angular.module('common.datacloud.query.advanced', [
     'common.datacloud.query.advanced.input',
     'common.datacloud.query.advanced.tree'
 ])
-.controller('AdvancedQueryCtrl', function($scope, $state, $stateParams, $timeout,
-    QueryRestriction, QueryStore, DataCloudStore, SegmentStore, QueryService,
+.controller('AdvancedQueryCtrl', function($scope, $state, $stateParams, $timeout, $q,
+    QueryRestriction, QueryStore, DataCloudStore, SegmentStore, QueryService, Cube,
     BucketRestriction, CurrentConfiguration, BrowserStorageUtility, QueryStore
 ) {
     var vm = this;
@@ -11,9 +11,11 @@ angular.module('common.datacloud.query.advanced', [
     angular.extend(this, {
         inModel: $state.current.name.split('.')[1] === 'model',
         state: $stateParams.state,
+        items: [],
         enrichments: [],
         enrichmentsMap: DataCloudStore.getEnrichmentsMap(),
         restriction: QueryStore.restriction,
+        cube: Cube,
         labelIncrementor: 0,
         history: QueryStore.history
     });
@@ -32,9 +34,15 @@ angular.module('common.datacloud.query.advanced', [
                 vm.enrichmentsMap[enrichment.ColumnId] = i;
             }
 
-            this.enrichments = enrichments;
+            vm.enrichments = enrichments;
 
             DataCloudStore.setEnrichmentsMap(vm.enrichmentsMap);
+
+            $timeout(function() {
+                console.log('-!- restrictions:', angular.copy(vm.restriction))
+                console.log('-!- items:', vm.items)
+                console.log('-!- cube:', vm.cube)
+            },1);
         });
 
         if (!QueryStore.currentSavedTree) {
@@ -46,6 +54,19 @@ angular.module('common.datacloud.query.advanced', [
         vm.tree = [ 
             vm.restriction.restriction.logicalRestriction.restrictions[0] 
         ];
+    }
+
+    vm.pushItem = function(item, tree) {
+        if (item) {
+            var cube = vm.cube[item.ColumnId];
+
+            item.cube = cube;
+            item.topbkt = tree.bkt;
+            //console.log(item, tree);
+
+
+            vm.items.push(item);
+        }
     }
 
     vm.setCurrentSavedTree = function() {
@@ -67,12 +88,20 @@ angular.module('common.datacloud.query.advanced', [
     vm.saveState = function(noCount) {
         vm.labelIncrementor = 0;
 
-        var tree = angular.copy(vm.tree);
+        var tree = angular.copy(vm.tree),
+            old = angular.copy(vm.history[vm.history.length -1]);
 
-        vm.history.push(tree);
+        // remove AQB properties like labelGlyph/collapse
+        SegmentStore.sanitizeSegmentRestriction([tree]);
+        SegmentStore.sanitizeSegmentRestriction([old]);
 
-        if (!noCount) {
-            vm.updateCount();
+        if (JSON.stringify(old) !== JSON.stringify(tree)) {
+            vm.history.push(tree);
+            console.log('save', vm.history.length, vm.history, tree, old);
+
+            if (!noCount) {
+                vm.updateCount();
+            }
         }
     }
 
@@ -82,6 +111,7 @@ angular.module('common.datacloud.query.advanced', [
         if (lastState) {
             vm.restriction.restriction.logicalRestriction.restrictions[0] = lastState[0];
             vm.tree = lastState;
+            vm.updateCount();
         }
     }
 
@@ -98,6 +128,25 @@ angular.module('common.datacloud.query.advanced', [
         })).then(function(result) {
             QueryStore.setResourceTypeCount('accounts', false, result);
         });
+    }
+
+    vm.updateBucketCount = function(bucketRestriction) {
+        var deferred = $q.defer();
+
+        QueryService.GetCountByQuery('accounts', {
+            "free_form_text_search": "",
+            "frontend_restriction": {
+                "restriction": {
+                    "bucketRestriction": bucketRestriction
+                }
+            }
+        }, bucketRestriction.attr == vm.prevBucketCountAttr).then(function(result) {
+            deferred.resolve(result);
+        });
+        
+        vm.prevBucketCountAttr = bucketRestriction.attr;
+
+        return deferred.promise;
     }
 
     vm.saveSegment = function() {
