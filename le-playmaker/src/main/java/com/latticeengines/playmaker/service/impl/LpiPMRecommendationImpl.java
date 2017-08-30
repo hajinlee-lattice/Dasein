@@ -10,10 +10,13 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
@@ -27,6 +30,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("lpiPMRecommendation")
 public class LpiPMRecommendationImpl implements LpiPMRecommendation {
+
+    private static final Logger log = LoggerFactory.getLogger(LpiPMRecommendationImpl.class);
 
     @Autowired
     private RecommendationEntityMgr recommendationEntityMgr;
@@ -72,29 +77,35 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                     }
                 }
 
-                String playName = (String) accExtRec.get(PlaymakerConstants.PlayID);
-
                 if (accExtRec.containsKey(PlaymakerConstants.PlayID)) {
-                    accExtRec.put(PlaymakerConstants.PlayID, playNameAndPidMap.get(playName).getLeft());
-                    accExtRec.put(PlaymakerConstants.PlayID + PlaymakerConstants.V2, playName);
-                    accExtRec.put(PlaymakerConstants.DisplayName, playNameAndPidMap.get(playName).getMiddle());
+                    String playName = (String) accExtRec.get(PlaymakerConstants.PlayID);
 
-                    if (accExtRec.get(PlaymakerConstants.Description) == null) {
-                        accExtRec.put(PlaymakerConstants.Description, playNameAndPidMap.get(playName).getRight());
-                    }
-                }
+                    if (playNameAndPidMap.containsKey(playName)) {
+                        accExtRec.put(PlaymakerConstants.PlayID, playNameAndPidMap.get(playName).getLeft());
+                        accExtRec.put(PlaymakerConstants.PlayID + PlaymakerConstants.V2, playName);
+                        accExtRec.put(PlaymakerConstants.DisplayName, playNameAndPidMap.get(playName).getMiddle());
 
-                if (accExtRec.containsKey(PlaymakerConstants.LaunchID)) {
-                    String launchName = (String) accExtRec.get(PlaymakerConstants.LaunchID);
-                    if (!playLaunchNameAndPidMap.containsKey(launchName)) {
-                        PlayLaunch launch = internalResourceRestApiProxy
-                                .getPlayLaunch(MultiTenantContext.getCustomerSpace(), playName, launchName);
-                        if (launch != null) {
-                            playLaunchNameAndPidMap.put(launchName, launch.getPid());
+                        if (accExtRec.get(PlaymakerConstants.Description) == null) {
+                            accExtRec.put(PlaymakerConstants.Description, playNameAndPidMap.get(playName).getRight());
                         }
+
+                        if (accExtRec.containsKey(PlaymakerConstants.LaunchID)) {
+                            String launchName = (String) accExtRec.get(PlaymakerConstants.LaunchID);
+                            if (!playLaunchNameAndPidMap.containsKey(launchName)) {
+                                PlayLaunch launch = internalResourceRestApiProxy
+                                        .getPlayLaunch(MultiTenantContext.getCustomerSpace(), playName, launchName);
+                                if (launch != null) {
+                                    playLaunchNameAndPidMap.put(launchName, launch.getPid());
+                                }
+                            }
+                            accExtRec.put(PlaymakerConstants.LaunchID, playLaunchNameAndPidMap.get(launchName));
+                            accExtRec.put(PlaymakerConstants.LaunchID + PlaymakerConstants.V2, launchName);
+                        }
+                    } else {
+                        log.error("Play info not found for recommendation - play: " + playName
+                                + ". Ignoring this error to get rest of the valid recommendations");
+
                     }
-                    accExtRec.put(PlaymakerConstants.LaunchID, playLaunchNameAndPidMap.get(launchName));
-                    accExtRec.put(PlaymakerConstants.LaunchID + PlaymakerConstants.V2, launchName);
                 }
 
                 if (accExtRec.containsKey(PlaymakerConstants.LaunchDate)) {
@@ -130,4 +141,13 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                 syncDestination.name(), playIds);
     }
 
+    @VisibleForTesting
+    void setRecommendationEntityMgr(RecommendationEntityMgr recommendationEntityMgr) {
+        this.recommendationEntityMgr = recommendationEntityMgr;
+    }
+
+    @VisibleForTesting
+    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
+        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
+    }
 }
