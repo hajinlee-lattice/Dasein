@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
 import com.latticeengines.playmaker.entitymgr.JdbcTemplateFactory;
-import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Component("jdbcTemplateFactory")

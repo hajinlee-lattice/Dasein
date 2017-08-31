@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
-import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
+import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
 import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
 

@@ -12,7 +12,7 @@
     <bean id="sessionFactoryOauth2" primary="true"
           class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourceOauth2"/>
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.oauth"/>
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.oauth, com.latticeengines.domain.exposed.playmaker"/>
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${oauth2.datasource.dialect}
@@ -26,6 +26,11 @@
     <bean id="oAuthUserDao"
           class="com.latticeengines.oauth2db.dao.impl.OAuthUserDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryOauth2"/>
+    </bean>
+
+    <bean id="playmakerTenantDao"
+          class="com.latticeengines.oauth2db.dao.impl.PlaymakerTenantDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryOauth2" />
     </bean>
 
     <bean id="transactionManagerOauth2"

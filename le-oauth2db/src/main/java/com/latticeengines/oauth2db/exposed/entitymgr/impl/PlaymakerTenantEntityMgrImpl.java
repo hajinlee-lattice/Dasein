@@ -1,19 +1,20 @@
-package com.latticeengines.playmaker.entitymgr.impl;
+package com.latticeengines.oauth2db.exposed.entitymgr.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2db.dao.PlaymakerTenantDao;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-import com.latticeengines.playmaker.dao.PlaymakerTenantDao;
-import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
 @Component("playmakerTenantEntityMgr")
 public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
@@ -27,13 +28,13 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     private OAuthUserEntityMgr userEngityMgr;
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
     public void executeUpdate(PlaymakerTenant tenant) {
         tenantDao.update(tenant);
     }
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2")
     public PlaymakerTenant create(PlaymakerTenant tenant) {
 
         PlaymakerTenant tenantInDb = tenantDao.findByTenantName(tenant.getTenantName());
@@ -78,13 +79,13 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     }
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PlaymakerTenant findByKey(PlaymakerTenant tenant) {
         return tenantDao.findByKey(tenant);
     }
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public PlaymakerTenant findByTenantName(String tenantName) {
         PlaymakerTenant tenant = tenantDao.findByTenantName(tenantName);
         if (tenant != null) {
@@ -92,6 +93,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
             try {
                 user = userEngityMgr.get(tenantName);
             } catch (Exception ex) {
+                log.warn("Error on getting oauth user " + tenantName, ex.getMessage());
             }
             if (user != null) {
                 tenant.setTenantPassword(user.getPassword());
@@ -99,12 +101,11 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
                 throw new LedpException(LedpCode.LEDP_22002, new String[] { tenantName });
             }
         }
-
         return tenant;
     }
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
     public void deleteByTenantName(String tenantName) {
         tenantDao.deleteByTenantName(tenantName);
         userEngityMgr.delete(tenantName);
@@ -112,7 +113,7 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     }
 
     @Override
-    @Transactional(value = "playmaker")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
     public void updateByTenantName(PlaymakerTenant tenant) {
         tenantDao.updateByTenantName(tenant);
         log.info("Updated the following tenantName=" + tenant.getTenantName());

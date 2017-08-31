@@ -48,7 +48,7 @@ public class Oauth2Resource {
             @RequestParam(value = "app_id", required = false) String appId,
             @RequestParam(value = "clientType", required = false) String clientType) {
         OauthClientType client = OauthClientType.LP;
-        if (clientType != null && !clientType.isEmpty()) {
+        if (StringUtils.isNotBlank(clientType)) {
             try {
                 client = OauthClientType.valueOf(clientType);
             } catch (Exception e) {

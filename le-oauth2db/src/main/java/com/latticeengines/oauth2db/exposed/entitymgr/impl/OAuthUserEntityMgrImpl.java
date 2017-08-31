@@ -2,15 +2,16 @@ package com.latticeengines.oauth2db.exposed.entitymgr.impl;
 
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
@@ -31,26 +32,26 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     private PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Override
-    @Transactional(value = "oauth2")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public OAuthUser get(String userId) {
         return userDao.get(userId);
     }
 
     @Override
-    @Transactional(value = "oauth2")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
     public void create(OAuthUser user) {
         user.setEncryptedPassword(encoder.encode(user.getPassword()));
         userDao.create(user);
     }
 
     @Override
-    @Transactional(value = "oauth2")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
     public void delete(String userId) {
         userDao.delete(userId);
     }
 
     @Override
-    @Transactional(value = "oauth2")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
     public void update(OAuthUser user) {
         if (user.getPassword() != null) {
             user.setEncryptedPassword(encoder.encode(user.getPassword()));
@@ -59,14 +60,13 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     }
 
     @Override
-    @Transactional(value = "oauth2")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public OAuthUser getByAccessToken(String token) {
-        OAuthUser user = userDao.getByAccessToken(token);
-        return user;
+        return userDao.getByAccessToken(token);
     }
 
     @Override
-    @Transactional(value = "oauth2")
+    @Transactional(value = "oauth2", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public String findTenantNameByAccessToken(String accessToken) {
         OAuthUser user = getByAccessToken(accessToken);
         if (user != null) {

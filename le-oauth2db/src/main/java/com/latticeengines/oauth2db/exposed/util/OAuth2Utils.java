@@ -133,7 +133,7 @@ public class OAuth2Utils {
             appList.add(appId);
             headers.put(APP_ID, appList);
             accessTokenRequest.setHeaders(headers);
-            accessTokenRequest.add(APP_ID,appId);
+            accessTokenRequest.add(APP_ID, appId);
         }
         OAuth2ClientContext context = new DefaultOAuth2ClientContext(accessTokenRequest);
         OAuth2RestTemplate newRestTemplate = new OAuth2RestTemplate(resource, context);

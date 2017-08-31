@@ -75,6 +75,7 @@ public class PlaymakerTenant implements HasPid {
         return tenantPassword;
     }
 
+    @JsonProperty("TenantPassword")
     public void setTenantPassword(String tenantPassword) {
         this.tenantPassword = tenantPassword;
     }

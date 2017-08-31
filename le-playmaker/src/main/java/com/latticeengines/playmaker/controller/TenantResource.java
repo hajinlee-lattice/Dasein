@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

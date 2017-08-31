@@ -32,7 +32,7 @@ public class TenantResourceDeploymentTestNG extends PlaymakerTestNGBase {
         try {
             newTenant = restTemplate.getForObject(url, PlaymakerTenant.class);
         } catch (Exception ex) {
-            Assert.assertEquals(ex.getMessage(), "401 Unauthorized");
+            Assert.assertTrue(ex.getMessage().startsWith("401"));
         }
         adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
                 newTenant.getTenantPassword(), "playmaker");

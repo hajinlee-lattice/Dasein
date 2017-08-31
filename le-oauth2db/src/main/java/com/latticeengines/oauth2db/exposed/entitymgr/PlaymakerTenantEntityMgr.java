@@ -1,11 +1,8 @@
-package com.latticeengines.playmaker.entitymgr;
+package com.latticeengines.oauth2db.exposed.entitymgr;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 
 public interface PlaymakerTenantEntityMgr {
-
-    public static final String TENANT_NAME_KEY = "tenant_name";
-    public static final String TENANT_PASSWORD_KEY = "tenant_password";
 
     void executeUpdate(PlaymakerTenant tenant);
 

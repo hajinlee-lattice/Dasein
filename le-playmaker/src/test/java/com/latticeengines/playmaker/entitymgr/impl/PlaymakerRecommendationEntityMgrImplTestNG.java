@@ -10,8 +10,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
-import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
 public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGBase {

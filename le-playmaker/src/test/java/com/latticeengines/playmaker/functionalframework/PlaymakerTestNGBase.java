@@ -8,7 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
+import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
 
 @ContextConfiguration(locations = { "classpath:test-playmaker-context.xml" })
 public class PlaymakerTestNGBase extends AbstractTestNGSpringContextTests {

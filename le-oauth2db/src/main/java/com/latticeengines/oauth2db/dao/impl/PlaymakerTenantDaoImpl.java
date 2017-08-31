@@ -1,4 +1,4 @@
-package com.latticeengines.playmaker.dao.impl;
+package com.latticeengines.oauth2db.dao.impl;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import org.hibernate.Session;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.playmaker.dao.PlaymakerTenantDao;
+import com.latticeengines.oauth2db.dao.PlaymakerTenantDao;
 
 public class PlaymakerTenantDaoImpl extends BaseDaoImpl<PlaymakerTenant> implements PlaymakerTenantDao {
 

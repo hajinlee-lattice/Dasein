@@ -1,4 +1,4 @@
-package com.latticeengines.playmaker.dao;
+package com.latticeengines.oauth2db.dao;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
