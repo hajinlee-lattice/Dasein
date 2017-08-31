@@ -3,10 +3,12 @@ package com.latticeengines.apps.cdl.workflow;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 @Component
 public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
@@ -27,6 +29,9 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 .microServiceHostPort(microserviceHostPort) //
                 .dataFeedTaskId(dataFeedTask.getUniqueId()) //
                 .importConfig(connectorConfig) //
+                .inputProperties(ImmutableMap.<String, String> builder()
+                        .put(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER, dataFeedTask.getUniqueId()) //
+                        .build())
                 .build();
     }
 }
