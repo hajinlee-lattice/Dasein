@@ -23,10 +23,12 @@ import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
  */
 public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
 
+    private static final String accountId = "12072224";
+
     @Test(groups = "functional")
     public void testEntityLookup() {
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, "AccountId").eq("900001501953029") //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(accountId) //
                 .build();
         Query query = Query.builder() //
                 .find(BusinessEntity.Account) //
@@ -34,23 +36,33 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .build();
         long count = queryEvaluatorService.getCount(attrRepo, query);
         Assert.assertEquals(count, 1);
+
+        restriction = Restriction.builder() //
+                .let(BusinessEntity.Contact, ATTR_ACCOUNT_ID).eq(accountId) //
+                .build();
+        query = Query.builder() //
+                .find(BusinessEntity.Contact) //
+                .where(restriction) //
+                .build();
+        count = queryEvaluatorService.getCount(attrRepo, query);
+        Assert.assertEquals(count, 1916);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testSelect() {
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Account, "AccountId").eq("900001501953029") //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(accountId) //
                 .build();
         Query query = Query.builder() //
-                .select(BusinessEntity.Account, "DisplayName", "Website") //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_WEBSITE) //
                 .select(BusinessEntity.Account, "LDC_Name", "LDC_City", "LDC_State") //
                 .where(restriction).build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), 1);
         for (Map<String, Object> row : results) {
             Assert.assertEquals(row.size(), 5);
-            Assert.assertTrue(row.containsKey("DisplayName"));
-            Assert.assertTrue(row.containsKey("Website"));
+            Assert.assertTrue(row.containsKey(ATTR_ACCOUNT_NAME));
+            Assert.assertTrue(row.containsKey(ATTR_ACCOUNT_WEBSITE));
             Assert.assertTrue(row.containsKey("LDC_Name"));
             Assert.assertTrue(row.containsKey("LDC_City"));
             Assert.assertTrue(row.containsKey("LDC_State"));
@@ -63,27 +75,27 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testRangeLookup() {
         Restriction range1 = Restriction.builder() //
-                .let(BusinessEntity.Account, "DisplayName").in("a", "z") //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("a", "z") //
                 .build();
         Query query1 = Query.builder().where(range1).build();
         long count1 = queryEvaluatorService.getCount(attrRepo, query1);
-        Assert.assertEquals(count1, 26382);
+        Assert.assertEquals(count1, 2331);
 
         Restriction range2 = Restriction.builder() //
                 .let(BusinessEntity.Account, "AlexaViewsPerUser").in(1.0, 3.5) //
                 .build();
         Query query2 = Query.builder().where(range2).build();
         long count2 = queryEvaluatorService.getCount(attrRepo, query2);
-        Assert.assertEquals(count2, 19661);
+        Assert.assertEquals(count2, 6317);
 
         query2 = Query.builder().where(range2).from(BusinessEntity.Account).build();
         count2 = queryEvaluatorService.getCount(attrRepo, query2);
-        Assert.assertEquals(count2, 19661);
+        Assert.assertEquals(count2, 6317);
 
         Restriction restriction = Restriction.builder().and(range1, range2).build();
         Query query = Query.builder().where(restriction).build();
         long count = queryEvaluatorService.getCount(attrRepo, query);
-        Assert.assertEquals(count, 4906);
+        Assert.assertEquals(count, 11);
         Assert.assertTrue(count <= count1 && count <= count2);
     }
 
@@ -110,14 +122,14 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testSortAndPage() {
         Restriction domainInRange = Restriction.builder() //
-                .let(BusinessEntity.Account, "LDC_Domain").in("aa", "ac") //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).in("c", "m") //
                 .build();
-        Query query1 = Query.builder().select(BusinessEntity.Account, "AccountId", "DisplayName", "City") //
+        Query query1 = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                 .where(domainInRange) //
-                .orderBy(BusinessEntity.Account, "DisplayName") //
+                .orderBy(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
                 .build();
         long countInRedshift = queryEvaluatorService.getCount(attrRepo, query1);
-        Assert.assertEquals(countInRedshift, 400);
+        Assert.assertEquals(countInRedshift, 234);
 
         List<Map<String, Object>> results;
         int offset = 0;
@@ -127,14 +139,14 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         String prevName = null;
         do {
             PageFilter pageFilter = new PageFilter(offset, pageSize);
-            Query query = Query.builder().select(BusinessEntity.Account, "AccountId", "DisplayName", "City") //
+            Query query = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                     .where(domainInRange) //
-                    .orderBy(BusinessEntity.Account, "DisplayName") //
+                    .orderBy(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
                     .page(pageFilter) //
                     .build();
             results = queryEvaluatorService.getData(attrRepo, query).getData();
             for (Map<String, Object> result : results) {
-                String name = (String) result.get("DisplayName");
+                String name = (String) result.get(ATTR_ACCOUNT_NAME);
                 if (name != null) {
                     if (prevName != null) {
                         Assert.assertTrue(prevName.compareTo(name) <= 0);
@@ -154,36 +166,36 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testFreeTextSearch() {
         Restriction nameInRange = Restriction.builder() //
-                .let(BusinessEntity.Account, "DisplayName").in("a", "d") //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("a", "e") //
                 .build();
 
         Query query = Query.builder() //
-                .select(BusinessEntity.Account, "AccountId", "DisplayName", "City") //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                 .where(nameInRange) //
                 .build();
 
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
-        Assert.assertEquals(results.size(), 6110);
+        Assert.assertEquals(results.size(), 641);
         long count = results.stream().filter(result -> {
-            String city = (String) result.get("City");
-            return city != null && city.toUpperCase().contains("EAST");
+            String city = (String) result.get(ATTR_ACCOUNT_CITY);
+            return city != null && city.toUpperCase().contains("HAM");
         }).count();
-        Assert.assertEquals(count, 3);
+        Assert.assertEquals(count, 34);
 
-        query = Query.builder().select(BusinessEntity.Account, "AccountId", "DisplayName", "City") //
+        query = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                 .where(nameInRange) //
-                .freeText("east", BusinessEntity.Account, "City") //
+                .freeText("ham", BusinessEntity.Account, ATTR_ACCOUNT_CITY) //
                 .build();
 
         results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), count);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testCaseLookup() {
         TreeMap<String, Restriction> cases = new TreeMap<>();
-        Restriction A = Restriction.builder().let(BusinessEntity.Account, "DisplayName").in("c", "d").build();
-        Restriction B = Restriction.builder().let(BusinessEntity.Account, "Website").in("a", "b").build();
+        Restriction A = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("c", "d").build();
+        Restriction B = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_WEBSITE).in("a", "b").build();
         Restriction C = Restriction.builder().let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq("No").build();
 
         cases.put("B", B);
