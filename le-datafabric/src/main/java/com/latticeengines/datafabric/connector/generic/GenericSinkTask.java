@@ -1,5 +1,7 @@
 package com.latticeengines.datafabric.connector.generic;
 
+import io.confluent.connect.avro.AvroData;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,11 +17,11 @@ import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.camille.exposed.CamilleConfiguration;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.datafabric.entitymanager.impl.GenericFabricEntityManagerImpl;
 import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
-
-import io.confluent.connect.avro.AvroData;
 
 public class GenericSinkTask extends SinkTask {
 
@@ -42,6 +44,7 @@ public class GenericSinkTask extends SinkTask {
     public void start(Map<String, String> props) {
         try {
             connectorConfig = new GenericSinkConnectorConfig(props);
+            startCamille(connectorConfig);
             avroData = connectorConfig.constructAvroData();
             String stack = connectorConfig.getProperty(GenericSinkConnectorConfig.STACK, String.class);
             String zkConnect = connectorConfig.getProperty(GenericSinkConnectorConfig.KAFKA_ZKCONNECT, String.class);
@@ -54,6 +57,18 @@ public class GenericSinkTask extends SinkTask {
         }
     }
 
+    private void startCamille(GenericSinkConnectorConfig config) {
+        try {
+            CamilleConfiguration camilleConf = new CamilleConfiguration();
+            camilleConf.setConnectionString(
+                    config.getProperty(GenericSinkConnectorConfig.CAMILLE_ZK_CONNECTION, String.class));
+            camilleConf.setPodId(config.getProperty(GenericSinkConnectorConfig.CAMILLE_ZK_POD_ID, String.class));
+            CamilleEnvironment.start(CamilleEnvironment.Mode.RUNTIME, camilleConf);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot bootstrap camille environment.", e);
+        }
+    }
+    
     @Override
     public void stop() throws ConnectException {
     }
