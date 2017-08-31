@@ -384,6 +384,7 @@
                                         <exclude>**/*Test*</exclude>
                                     </excludes>
                                     <propertyName>jacoco.agent.unitArgLine</propertyName>
+                                    <append>true</append>
                                 </configuration>
                             </execution>
                             <execution>
@@ -398,6 +399,7 @@
                                         <exclude>**/*Test*</exclude>
                                     </excludes>
                                     <propertyName>jacoco.agent.itArgLine</propertyName>
+                                    <append>true</append>
                                 </configuration>
                             </execution>
                         </executions>
