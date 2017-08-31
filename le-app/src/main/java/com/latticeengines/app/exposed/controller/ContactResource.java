@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,10 +34,9 @@ public class ContactResource extends BaseFrontEndEntityResource {
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public long getCount(@RequestBody FrontEndQuery frontEndQuery,
-            @RequestParam(value = "segment", required = false) String segment) {
+    public long getCount(@RequestBody FrontEndQuery frontEndQuery) {
         try {
-            return super.getCount(frontEndQuery, segment);
+            return super.getCount(frontEndQuery);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }
@@ -61,10 +59,9 @@ public class ContactResource extends BaseFrontEndEntityResource {
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getData(@RequestBody FrontEndQuery frontEndQuery,
-            @RequestParam(value = "segment", required = false) String segment) {
+    public DataPage getData(@RequestBody FrontEndQuery frontEndQuery) {
         try {
-            return super.getData(frontEndQuery, segment);
+            return super.getData(frontEndQuery);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }

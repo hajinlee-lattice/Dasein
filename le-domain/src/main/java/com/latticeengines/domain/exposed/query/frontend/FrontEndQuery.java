@@ -58,6 +58,9 @@ public class FrontEndQuery {
     @JsonProperty("main_entity")
     private BusinessEntity mainEntity;
 
+    @JsonProperty("preexisting_segment_name")
+    private String preexistingSegmentName;
+
     public FrontEndRestriction getAccountRestriction() {
         return accountRestriction;
     }
@@ -144,6 +147,14 @@ public class FrontEndQuery {
 
     public void setMainEntity(BusinessEntity mainEntity) {
         this.mainEntity = mainEntity;
+    }
+
+    public String getPreexistingSegmentName() {
+        return preexistingSegmentName;
+    }
+
+    public void setPreexistingSegmentName(String preexistingSegmentName) {
+        this.preexistingSegmentName = preexistingSegmentName;
     }
 
     public void addLookups(BusinessEntity businessEntity, String... attrNames) {

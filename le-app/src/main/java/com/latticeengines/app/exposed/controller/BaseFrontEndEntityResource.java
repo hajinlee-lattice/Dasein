@@ -51,8 +51,8 @@ public abstract class BaseFrontEndEntityResource {
                 .build(this::getRatingCountFromObjectApi);
     }
 
-    public long getCount(FrontEndQuery frontEndQuery, String segment) {
-        appendSegmentRestriction(frontEndQuery, segment);
+    public long getCount(FrontEndQuery frontEndQuery) {
+        appendSegmentRestriction(frontEndQuery);
         optimizeRestrictions(frontEndQuery);
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return countCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
@@ -79,18 +79,18 @@ public abstract class BaseFrontEndEntityResource {
             }
         }
         optimizeRestrictions(frontEndQuery);
-        return getCount(frontEndQuery, null);
+        return getCount(frontEndQuery);
     }
 
-    public DataPage getData(FrontEndQuery frontEndQuery, String segment) {
-        appendSegmentRestriction(frontEndQuery, segment);
+    public DataPage getData(FrontEndQuery frontEndQuery) {
+        appendSegmentRestriction(frontEndQuery);
         optimizeRestrictions(frontEndQuery);
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return dataCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
     }
 
-    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, String segment) {
-        appendSegmentRestriction(frontEndQuery, segment);
+    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery) {
+        appendSegmentRestriction(frontEndQuery);
         optimizeRestrictions(frontEndQuery);
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         return ratingCache.get(String.format("%s:%s", tenantId, JsonUtils.serialize(frontEndQuery)));
@@ -112,10 +112,10 @@ public abstract class BaseFrontEndEntityResource {
         return entityProxy.getRatingCount(tenantId, frontEndQuery);
     }
 
-    private void appendSegmentRestriction(FrontEndQuery frontEndQuery, String segment) {
+    private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {
         Restriction segmentRestriction = null;
-        if (StringUtils.isNotBlank(segment)) {
-            segmentRestriction = getSegmentRestriction(segment);
+        if (StringUtils.isNotBlank(frontEndQuery.getPreexistingSegmentName())) {
+            segmentRestriction = getSegmentRestriction(frontEndQuery.getPreexistingSegmentName());
         }
         Restriction frontEndRestriction = null;
         if (frontEndQuery.getAccountRestriction() != null) {
