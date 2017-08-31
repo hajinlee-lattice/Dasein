@@ -54,7 +54,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         MultiTenantContext.setTenant(mainTestTenant);
 
         segment = new MetadataSegment();
-        segment.setFrontEndRestriction(new FrontEndRestriction());
+        segment.setAccountRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
         Assert.assertNotNull(createdSegment);
@@ -196,7 +196,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     public void testDelete() {
         restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId());
         restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re2.getId());
-        List<RatingEngineSummary> ratingEngineSummaries = (List<RatingEngineSummary>) restTemplate
+        List<RatingEngineSummary> ratingEngineSummaries = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
