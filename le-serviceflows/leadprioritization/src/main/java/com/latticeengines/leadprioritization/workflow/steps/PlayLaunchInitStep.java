@@ -265,10 +265,13 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                             parallelStream(accountList) //
                                     .map(account -> //
                                     {
-                                        String accountIdStr = (String) account.get(InterfaceName.AccountId.name());
-                                        return StringUtils.isNotBlank(accountIdStr)
-                                                && StringUtils.isNumeric(accountIdStr) ? Long.parseLong(accountIdStr)
-                                                        : null;
+                                        Object accountIdObj = account.get(InterfaceName.AccountId.name());
+                                        if (accountIdObj instanceof Long) {
+                                            return (Long) accountIdObj;
+                                        }
+                                        return accountIdObj != null && StringUtils.isNotBlank(accountIdObj.toString())
+                                                && StringUtils.isNumeric(accountIdObj.toString())
+                                                        ? Long.parseLong(accountIdObj.toString()) : null;
                                     })//
                                     .collect(Collectors.toList());
 

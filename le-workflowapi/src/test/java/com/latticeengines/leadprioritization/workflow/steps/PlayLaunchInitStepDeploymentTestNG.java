@@ -77,7 +77,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     public void setup()
             throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         // this test tenant has account data loaded in CDL
-        String tenantIdentifier = "Simon_0823.Simon_0823.Production";
+        String tenantIdentifier = "Segment_M14.Segment_M14.Production";
         String playId = "play__" + randId;
         String playLaunchId = "launch__" + randId;
         long pageSize = 2L;
