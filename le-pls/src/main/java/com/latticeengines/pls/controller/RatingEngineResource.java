@@ -45,7 +45,7 @@ public class RatingEngineResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all Rating Engine summaries for a tenant")
-    public List<RatingEngineSummary> getRatingEngines() {
+    public List<RatingEngineSummary> getRatingEngineSummaries() {
         return ratingEngineService.getAllRatingEngineSummaries();
     }
 
@@ -68,7 +68,7 @@ public class RatingEngineResource {
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Register a Rating Engine")
+    @ApiOperation(value = "Register or update a Rating Engine")
     @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
     public RatingEngine createRatingEngine( //
             @RequestBody RatingEngine ratingEngine, //
@@ -81,27 +81,6 @@ public class RatingEngineResource {
         if (ratingEngine == null) {
             throw new NullPointerException("Rating Engine is null.");
         }
-        return ratingEngineService.createOrUpdate(ratingEngine, tenant.getId());
-    }
-
-    @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Update a Rating Engine given its id")
-    @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
-    public RatingEngine updateRatingEngine( //
-            @RequestBody RatingEngine ratingEngine, //
-            @PathVariable String ratingEngineId, //
-            HttpServletRequest request) {
-        log.info(String.format("Update RatingEngine %s", ratingEngineId));
-        Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant == null) {
-            log.warn("Tenant is null for the request.");
-            return null;
-        }
-        if (ratingEngine == null) {
-            throw new NullPointerException("Rating Engine is null.");
-        }
-        ratingEngine.setId(ratingEngineId);
         return ratingEngineService.createOrUpdate(ratingEngine, tenant.getId());
     }
 
@@ -137,7 +116,7 @@ public class RatingEngineResource {
         return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
     }
 
-    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
     public RatingModel updateRatingModel( //

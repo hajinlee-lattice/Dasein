@@ -6,8 +6,10 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonParser.Feature;
@@ -155,6 +157,17 @@ public class JsonUtils {
             return null;
         }
         List<T> output = new ArrayList<>();
+        for (Object elt : raw) {
+            output.add(convertValue(elt, elementClazz));
+        }
+        return output;
+    }
+
+    public static <T> Set<T> convertSet(Set<?> raw, Class<T> elementClazz) {
+        if (raw == null) {
+            return null;
+        }
+        Set<T> output = new HashSet<>();
         for (Object elt : raw) {
             output.add(convertValue(elt, elementClazz));
         }

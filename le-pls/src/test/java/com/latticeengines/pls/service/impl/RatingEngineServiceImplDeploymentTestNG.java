@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -90,10 +91,37 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(id, ratingEngineList.get(0).getId());
 
+        // test get a list of ratingEngine summaries
+        List<RatingEngineSummary> summaries = ratingEngineService.getAllRatingEngineSummaries();
+        log.info("ratingEngineSummaries is " + summaries);
+        Assert.assertNotNull(summaries);
+        Assert.assertEquals(summaries.size(), 1);
+        Assert.assertEquals(id, summaries.get(0).getId());
+        Assert.assertEquals(summaries.get(0).getSegmentDisplayName(), SEGMENT_NAME);
+
         // test basic find
         createdRatingEngine = ratingEngineService.getRatingEngineById(id);
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertEquals(id, createdRatingEngine.getId());
+
+        // test fetch with initialization
+        createdRatingEngine = ratingEngineService.getFullRatingEngineById(id);
+        Assert.assertNotNull(createdRatingEngine);
+        Assert.assertEquals(id, createdRatingEngine.getId());
+        MetadataSegment segment = createdRatingEngine.getSegment();
+        Assert.assertNotNull(segment);
+        Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
+
+        Set<RatingModel> ratingModels = createdRatingEngine.getRatingModels();
+        Assert.assertNotNull(ratingModels);
+        Assert.assertEquals(ratingModels.size(), 1);
+        Iterator<RatingModel> it = ratingModels.iterator();
+        RatingModel rm = it.next();
+        Assert.assertTrue(rm instanceof RuleBasedModel);
+        Assert.assertEquals(rm.getIteration(), 1);
+        Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(),
+                RatingRule.DEFAULT_BUCKET_NAME);
+        log.info("Rating Engine after findById is " + createdRatingEngine.toString());
 
         // test update rating engine
         ratingEngine.setDisplayName(RATING_ENGINE_NAME);
@@ -110,11 +138,11 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(id, ratingEngineList.get(0).getId());
 
         // test basic find rating models
-        Set<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(id);
+        ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(id);
         Assert.assertNotNull(ratingModels);
         Assert.assertEquals(ratingModels.size(), 1);
-        Iterator<RatingModel> it = ratingModels.iterator();
-        RatingModel rm = it.next();
+        it = ratingModels.iterator();
+        rm = it.next();
         Assert.assertTrue(rm instanceof RuleBasedModel);
         Assert.assertEquals(rm.getIteration(), 1);
         Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(),
