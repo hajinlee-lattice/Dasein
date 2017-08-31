@@ -30,6 +30,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -70,10 +71,20 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Type(type = "text")
     private String restrictionString;
 
-    @JsonProperty("frontend_restriction")
+    // TODO bernard add new restriction db columns
+
+    @JsonProperty("account_restriction")
     @Transient
-    @ApiModelProperty("Restriction for use in the front end")
-    private FrontEndRestriction frontEndRestriction;
+    @ApiModelProperty("Account restriction for use in the front end")
+    private FrontEndRestriction accountRestriction;
+
+    @JsonProperty("contact_restriction")
+    @Transient
+    @ApiModelProperty("Contact restriction for use in the front end")
+    private FrontEndRestriction contactRestriction;
+
+    @JsonProperty("account_contact_operator")
+    private LogicalOperator accountContactOperator;
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
@@ -143,12 +154,12 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         this.restrictionString = JsonUtils.serialize(restriction);
     }
 
-    public FrontEndRestriction getFrontEndRestriction() {
-        return frontEndRestriction;
+    public FrontEndRestriction getAccountRestriction() {
+        return accountRestriction;
     }
 
-    public void setFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
-        this.frontEndRestriction = frontEndRestriction;
+    public void setAccountRestriction(FrontEndRestriction accountRestriction) {
+        this.accountRestriction = accountRestriction;
     }
 
     public DataCollection getDataCollection() {

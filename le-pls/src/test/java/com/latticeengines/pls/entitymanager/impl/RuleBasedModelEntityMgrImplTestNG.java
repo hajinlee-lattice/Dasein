@@ -80,7 +80,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenant);
 
         segment = new MetadataSegment();
-        segment.setFrontEndRestriction(new FrontEndRestriction());
+        segment.setAccountRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentService
                 .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);

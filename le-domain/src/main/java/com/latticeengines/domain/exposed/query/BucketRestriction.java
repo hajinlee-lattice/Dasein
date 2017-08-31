@@ -40,6 +40,12 @@ public class BucketRestriction extends Restriction {
     @JsonProperty("bkt")
     private Bucket bkt;
 
+    @JsonProperty("comparator")
+    private ComparisonType comparisonType;
+
+    @JsonProperty("values")
+    private List<Object> values;
+
     public BucketRestriction(AttributeLookup attr, Bucket bkt) {
         this.attr = attr;
         this.bkt = bkt;

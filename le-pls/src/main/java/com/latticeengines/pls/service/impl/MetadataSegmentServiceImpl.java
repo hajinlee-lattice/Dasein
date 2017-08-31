@@ -69,9 +69,9 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private MetadataSegment translateForBackend(MetadataSegment segment) {
         try {
-            FrontEndRestriction frontEndRestriction = segment.getFrontEndRestriction();
+            FrontEndRestriction frontEndRestriction = segment.getAccountRestriction();
             segment.setRestriction(frontEndRestriction.getRestriction());
-            segment.setFrontEndRestriction(null);
+            segment.setAccountRestriction(null);
         } catch (Exception e) {
             log.error("Encountered error translating frontend restriction for segment with name " + segment.getName(), e);
         }
@@ -84,7 +84,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             if (restriction != null) {
                 FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
                 frontEndRestriction.setRestriction(restriction);
-                segment.setFrontEndRestriction(frontEndRestriction);
+                segment.setAccountRestriction(frontEndRestriction);
                 segment.setRestriction(null);
             }
             if (Boolean.FALSE.equals(segment.getMasterSegment())) {
