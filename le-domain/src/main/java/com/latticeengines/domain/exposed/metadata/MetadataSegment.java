@@ -84,6 +84,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     private FrontEndRestriction contactRestriction;
 
     @JsonProperty("account_contact_operator")
+    @Transient
     private LogicalOperator accountContactOperator;
 
     @JsonIgnore
