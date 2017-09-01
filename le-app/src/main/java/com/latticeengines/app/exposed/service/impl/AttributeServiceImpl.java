@@ -24,6 +24,7 @@ import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -178,13 +179,16 @@ public class AttributeServiceImpl implements AttributeService {
 
     protected Integer getSelectedAttrCount(Tenant tenant, Boolean countOnlySelectedPremiumAttr,
             Boolean considerInternalAttributes) {
+        DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
+        Set<String> premiumAttrs = columnMetadataProxy.premiumAttributes(dataCloudVersion.getVersion());
+
         List<LeadEnrichmentAttribute> attributeList = getAttributes(tenant, null, null, null, null,
                 null, null, considerInternalAttributes);
         int count = 0;
         for (LeadEnrichmentAttribute attr : attributeList) {
             if (attr.getIsSelected()) {
                 if (countOnlySelectedPremiumAttr == Boolean.TRUE) {
-                    if (attr.getIsPremium()) {
+                    if (premiumAttrs.contains(attr.getColumnId())) {
                         count++;
                     }
                 } else {
@@ -200,6 +204,8 @@ public class AttributeServiceImpl implements AttributeService {
         Map<String, Integer> limitationMap = new HashMap<>();
         int premiumAttributesLimitation = appTenantConfigService
                 .getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
+        // For future use case that we might have multiple sources of premium
+        // attrs. Fow now only attributes from HG are marked as premium.
         limitationMap.put("HGData_Pivoted_Source", premiumAttributesLimitation);
         return limitationMap;
     }

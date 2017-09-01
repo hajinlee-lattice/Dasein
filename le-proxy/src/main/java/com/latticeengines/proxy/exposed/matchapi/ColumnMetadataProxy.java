@@ -5,8 +5,10 @@ import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -35,6 +37,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private WatcherCache<String, List<ColumnMetadata>> segmentColumnsCache;
     private WatcherCache<String, DataCloudVersion> latestDataCloudVersionCache;
     private WatcherCache<String, Object> amStatsCache;
+    private WatcherCache<String, Set<String>> premiumColumnsCache;
 
 
     private Map<Predefined, WatcherCache<String, List<ColumnMetadata>>> columnCacheMap = new HashMap<>();
@@ -78,6 +81,13 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                 .load(key -> getStatsObjectViaREST((String) key)) //
                 .initKeys(new String[] { STATS_CUBE, TOPN_TREE }) //
                 .build();
+        premiumColumnsCache = WatcherCache.builder() //
+                .name("PremiumColumnsCache") //
+                .watch(AMApiUpdate) //
+                .maximum(20) //
+                .load(dataCloudVersion -> requestPremiumColumns((String) dataCloudVersion)) //
+                .initKeys(() -> new String[] { requestLatestVersion("").getVersion() }) //
+                .build();
     }
 
     public void scheduleDelayedInitOfEnrichmentColCache() {
@@ -85,8 +95,18 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             if (!scheduled) {
                 enrichmentColumnsCache.scheduleInit(10, TimeUnit.MINUTES);
                 segmentColumnsCache.scheduleInit(15, TimeUnit.MINUTES);
+                premiumColumnsCache.scheduleInit(12, TimeUnit.MINUTES);
                 scheduled = true;
             }
+        }
+    }
+
+    @Override
+    public Set<String> premiumAttributes(String dataCloudVersion) {
+        try {
+            return (Set<String>) premiumColumnsCache.get(dataCloudVersion);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get premium columns from watcher cache");
         }
     }
 
@@ -117,6 +137,17 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             throw new RuntimeException("Failed to get latest version for dataCloudVersion " //
                     + compatibleVersion + " from loading cache.", e);
         }
+    }
+
+    private Set<String> requestPremiumColumns(String dataCloudVersion) {
+        Set<String> premiumAttrs = new HashSet<>();
+        List<ColumnMetadata> columnSelection = requestColumnSelection(Predefined.Enrichment, dataCloudVersion);
+        columnSelection.forEach(column -> {
+            if (Boolean.TRUE.equals(column.isPremium())) {
+                premiumAttrs.add(column.getColumnId());
+            }
+        });
+        return premiumAttrs;
     }
 
     @SuppressWarnings({ "unchecked" })
