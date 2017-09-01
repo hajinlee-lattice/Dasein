@@ -52,7 +52,9 @@ def process_diff(diff_file):
             flags['alter_table_drop_events'] = False
             if '# WARNING: Objects in server1' in line:
                 flags['table_missing_on_local'] = True
+                flags['table_missing_on_remote'] = False
             elif '# WARNING: Objects in server2' in line:
+                flags['table_missing_on_local'] = False
                 flags['table_missing_on_remote'] = True
             elif 'ALTER TABLE' in line:
                 flags['alter_table_block'] = True
@@ -196,6 +198,7 @@ def cleanup_script(outfile):
 def process_ddl(ddl_file):
     global TABLE_TO_CREATE
     global LINES_TO_FILE
+    print 'tables to create: ', TABLE_TO_CREATE
     with open(ddl_file, 'r') as file:
         seen_first_create = False
         for line in file:
