@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.latticeengines.domain.exposed.dante.multitenant.TalkingPoint;
 
 public class PlayUnitTestNG {
 

@@ -13,7 +13,7 @@ import com.latticeengines.dante.dao.TalkingPointDao;
 import com.latticeengines.dante.entitymgr.TalkingPointEntityMgr;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.pls.TalkingPoint;
+import com.latticeengines.domain.exposed.dante.multitenant.TalkingPoint;
 
 @Controller("talkingPointEntityMgr")
 public class TalkingPointEntityMgrImpl extends BaseEntityMgrImpl<TalkingPoint> implements TalkingPointEntityMgr {

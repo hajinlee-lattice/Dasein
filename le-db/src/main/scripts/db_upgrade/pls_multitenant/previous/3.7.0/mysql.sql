@@ -39,6 +39,8 @@ CREATE TABLE `PLS_MultiTenant`.`TALKINGPOINT` (
   `PLAY_ID` bigint not null,
   primary key (`PID`)) ENGINE=InnoDB;
 
-ALTER TABLE `PLS_MultiTenant`.`TALKINGPOINT` add index FK85460B9AB11F603 (PLAY_ID), add constraint FK85460B9AB11F603 foreign key (PLAY_ID) references `PLAY` (`PID`) on delete cascade;
+ALTER TABLE `PLS_MultiTenant`.`TALKINGPOINT`
+    add index FK85460B9AB11F603 (PLAY_ID),
+    add constraint FK85460B9AB11F603 foreign key (PLAY_ID) references `PLAY` (`PID`) on delete cascade;
 
 ALTER TABLE oauth2.oauth_access_token ADD CONSTRAINT UNIQUE(authentication_id);

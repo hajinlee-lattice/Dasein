@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dante.dao.TalkingPointDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.pls.TalkingPoint;
+import com.latticeengines.domain.exposed.dante.multitenant.TalkingPoint;
 
 @Component("talkingPointDao")
 public class TalkingPointDaoImpl extends BaseDaoImpl<TalkingPoint> implements TalkingPointDao {

@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.TalkingPoint;
+import com.latticeengines.domain.exposed.dante.multitenant.TalkingPoint;
 
 public class DanteTalkingPointValue {
     @JsonProperty(value = "BaseExternalID", index = 1)
@@ -32,7 +32,8 @@ public class DanteTalkingPointValue {
     private String title;
 
     // for jackson
-    private DanteTalkingPointValue() {}
+    private DanteTalkingPointValue() {
+    }
 
     public DanteTalkingPointValue(TalkingPoint tp) {
         baseExternalID = tp.getName();

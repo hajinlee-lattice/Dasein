@@ -24,9 +24,9 @@ import com.latticeengines.dante.testFramework.testDao.TestPlayDao;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
+import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
@@ -196,7 +196,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         Assert.assertNotNull(preview.getNotionObject());
         Assert.assertNotNull(preview.getNotionObject().getTalkingPoints());
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().size(), tps.size());
-        Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(), tp.getName());
+        Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(), testtp.getName());
 
         talkingPointService.publish(tp.getPlayName(), mainTestCustomerSpace.toString());
         List<DanteTalkingPoint> dtps = danteTalkingPointEntityMgr.findAllByPlayID(tp.getPlayName());
@@ -242,6 +242,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         play.setTenantId(mainTestTenant.getPid());
         play.setUpdated(new Date());
         play.setCreated(new Date());
+        play.setName(play.generateNameStr());
 
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);

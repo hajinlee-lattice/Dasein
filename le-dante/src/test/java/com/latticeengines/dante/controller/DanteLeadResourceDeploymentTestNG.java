@@ -73,6 +73,7 @@ public class DanteLeadResourceDeploymentTestNG extends DanteTestNGBase {
 
     private Recommendation getTestRecommendation() {
         Recommendation rec = new Recommendation();
+        rec.setPid(12312L);
         rec.setAccountId("SomeAccountID");
         rec.setCompanyName("Some Company Name");
         rec.setRecommendationId(UUID.randomUUID().toString());

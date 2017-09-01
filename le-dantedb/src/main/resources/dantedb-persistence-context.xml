@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
@@ -19,6 +20,7 @@
     <bean id="danteSessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="danteDataSource"/>
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.dante"/>
+        <property name="entityTypeFilters" ref="ignoreMultitenantEntitiesRegexPattern"/>
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
@@ -37,4 +39,9 @@
 
     <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
           p:dataSource-ref="danteDataSource"/>
+
+    <bean id="ignoreMultitenantEntitiesRegexPattern"
+          class="org.springframework.core.type.filter.RegexPatternTypeFilter">
+        <constructor-arg index="0" value="^(?!com.latticeengines.domain.exposed.dante.multitenant).*"/>
+    </bean>
 </beans>

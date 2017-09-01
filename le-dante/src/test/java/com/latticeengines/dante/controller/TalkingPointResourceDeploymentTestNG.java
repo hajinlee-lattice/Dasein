@@ -27,9 +27,9 @@ import com.latticeengines.dante.testFramework.testDao.TestPlayDao;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
+import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.pls.TalkingPointDTO;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 
 public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
@@ -123,7 +123,7 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
         Assert.assertNotNull(tpPreview);
         Assert.assertEquals(tpPreview.getNotionObject().getTalkingPoints().size(), 2);
         Assert.assertEquals(tpPreview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(),
-                tps.get(0).getName());
+                tps.get(1).getName());
 
         // publish
         talkingPointProxy.publish(testPlay.getName(), mainTestCustomerSpace.toString());

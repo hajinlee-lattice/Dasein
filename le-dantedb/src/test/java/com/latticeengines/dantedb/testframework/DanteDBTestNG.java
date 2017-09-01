@@ -38,7 +38,7 @@ public class DanteDBTestNG extends AbstractTestNGSpringContextTests {
 
         String deleteTPSql = "DELETE FROM [TalkingPointCache]\n" + "WHERE External_ID = :externalID";
 
-        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
+        PlatformTransactionManager ptm = applicationContext.getBean("danteTransactionManager",
                 PlatformTransactionManager.class);
         TransactionTemplate txnTemplate = new TransactionTemplate(ptm);
 

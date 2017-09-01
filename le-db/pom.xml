@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-db</artifactId>
@@ -36,6 +36,7 @@
                             <mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
                             <arguments>
                                 <argument>PLS_MultiTenant</argument>
+                                <argument>com.latticeengines.domain.exposed.dante.multitenant</argument>
                                 <argument>com.latticeengines.domain.exposed.dataflow</argument>
                                 <argument>com.latticeengines.domain.exposed.dataloader</argument>
                                 <argument>com.latticeengines.domain.exposed.dataplatform</argument>
@@ -51,6 +52,7 @@
                                 <argument>com.latticeengines.domain.exposed.security</argument>
                                 <argument>com.latticeengines.domain.exposed.ulysses</argument>
                                 <argument>com.latticeengines.domain.exposed.workflow</argument>
+
                             </arguments>
                         </configuration>
                     </execution>

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.pls;
+package com.latticeengines.domain.exposed.dante.multitenant;
 
 import java.util.Date;
 import java.util.UUID;
@@ -22,9 +22,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.pls.Play;
 
 @Entity
-@Table(name = "TALKINGPOINT")
+@Table(name = "DANTE_TALKINGPOINT")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     public static final String TALKING_POINT_NAME_PREFIX = "TP";
