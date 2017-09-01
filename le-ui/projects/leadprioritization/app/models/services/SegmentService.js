@@ -44,7 +44,7 @@ angular
             segment = {
                 'name': 'segment' + ts,
                 'display_name': 'segment' + ts,
-                'frontend_restriction': restriction,
+                'account_restriction': restriction,
                 'page_filter': {
                     'row_offset': 0,
                     'num_rows': 10
@@ -54,7 +54,7 @@ angular
             segment = {
                 'name': segment.name,
                 'display_name': segment.display_name,
-                'frontend_restriction': restriction || segment.frontend_restriction,
+                'account_restriction': restriction || segment.account_restriction,
                 'page_filter': {
                     'row_offset': 0,
                     'num_rows': 10
@@ -68,9 +68,9 @@ angular
     };
 
     this.sanitizeSegment = function(segment) {
-        var restriction = segment.frontend_restriction.restriction.logicalRestriction;
+        var restriction = segment.account_restriction.restriction;
 
-        this.sanitizeSegmentRestriction(restriction.restrictions);
+        this.sanitizeSegmentRestriction([ restriction ]);
 
         return segment;
     }

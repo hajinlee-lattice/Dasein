@@ -3,9 +3,123 @@
 
 div.advanced-query-builder {
     position: relative;
-    
+
     strong {
         font-weight: bold;
+    }
+    
+    div.query-rules-header {
+
+        div.query-rules-header-infotext {
+            margin-top: .5em;
+        }
+
+        div.query-rules-header-defaultbucket {
+            margin: .5em 0;
+            
+            select {
+                margin-left: .5em;
+            }
+        }
+    }
+
+    ul.query-rules-buckets-container {
+        display: block;
+
+        li.query-rules-buckets-bucket {
+            display: inline-block;
+            text-align: center;
+            width: 15%;
+            margin: 2em 1%;
+            
+            &:first-child {
+                margin-left: 0;
+            }
+            
+            &:last-child {
+                margin-right: 0;
+            }
+
+            &.active div.bucket-box {
+                position: relative;
+                background: white;
+                box-shadow: 0px 0px 11px 2px rgba(0,255,224,0.33);
+                border-color: #33bdb7;
+                
+                &:before {
+                    box-shadow: inherit;
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    left: calc(50% - 10px);
+                    bottom: -11px;
+                    height: 20px;
+                    width: 20px;
+                    background: inherit;
+                    transform: rotate(45deg);
+                    z-index: -1;
+                }
+
+                &:after {
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    left: calc(50% - 10px);
+                    bottom: -11px;
+                    height: 20px;
+                    width: 20px;
+                    background: inherit;
+                    transform: rotate(45deg);
+                    border-bottom-width: 1px;
+                    border-bottom-style: solid;
+                    border-right-width: 1px;
+                    border-right-style: solid;
+                    border-color: inherit;
+                    z-index: 0;
+                }
+            }
+
+            div.bucket-box {
+                background: #fafafa;
+                padding: 1.5em 0;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+
+                .bucket-label {
+
+                }
+
+                .bucket-resource {
+                    text-transform: uppercase;
+                    font-size: 0.85em;
+                }
+
+                .bucket-resource-count {
+
+                    .count-number {
+
+                    }
+
+                    .count-percentage {
+
+                    }
+                }
+            }
+
+            div.bucket-rulecount {
+                margin: 2em 0 1em;
+            }
+        }
+    }
+
+    h2 {
+        display: block;
+        margin-bottom: .4em;
+        
+        span.query-rules-count {
+            display: inline-block;
+            margin: 0 .1em;
+        }
     }
 
     .query-algorithm {

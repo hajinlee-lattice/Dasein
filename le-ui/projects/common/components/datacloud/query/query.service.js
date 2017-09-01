@@ -94,11 +94,11 @@ angular.module('common.datacloud.query.service',[
         if (segment != null) {
 
             // Set variables so I can manipulate later when unchecking box.
-            allRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[0].logicalRestriction.restrictions;
-            anyRestrictions = segment.frontend_restriction.restriction.logicalRestriction.restrictions[1].logicalRestriction.restrictions;
+            allRestrictions = segment.account_restriction.restriction.logicalRestriction.restrictions;
+            anyRestrictions = segment.account_restriction.restriction.logicalRestriction.restrictions;
 
             // Set restriction to get counts and data as part of the query.
-            deferred.resolve( this.setRestriction(segment.frontend_restriction) );
+            deferred.resolve( this.setRestriction(segment.account_restriction) );
 
         } else {
 
@@ -218,7 +218,7 @@ angular.module('common.datacloud.query.service',[
             if(query === undefined || query === ''){
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
-                    'frontend_restriction': restriction,
+                    'account_restriction': restriction,
                     'page_filter': {
                         'num_rows': 20,
                         'row_offset': 0
@@ -228,7 +228,7 @@ angular.module('common.datacloud.query.service',[
             } else {
                 var queryWithRestriction = { 
                     'free_form_text_search': query.free_form_text_search,
-                    'frontend_restriction': restriction,
+                    'account_restriction': restriction,
                     'page_filter': {
                         'num_rows': query.page_filter.num_rows,
                         'row_offset': query.page_filter.row_offset
@@ -255,7 +255,7 @@ angular.module('common.datacloud.query.service',[
             if(query === undefined || query === ''){
                 var queryWithRestriction = { 
                     'free_form_text_search': '',
-                    'frontend_restriction': restriction,
+                    'account_restriction': restriction,
                     'page_filter': {
                         'num_rows': 20,
                         'row_offset': 0
@@ -264,7 +264,7 @@ angular.module('common.datacloud.query.service',[
             } else {
                 var queryWithRestriction = { 
                     'free_form_text_search': query.free_form_text_search,
-                    'frontend_restriction': restriction,
+                    'account_restriction': restriction,
                     'page_filter': {
                         'num_rows': query.page_filter.num_rows,
                         'row_offset': query.page_filter.row_offset

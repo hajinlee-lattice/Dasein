@@ -217,7 +217,8 @@ angular
                 WizardProgressItems: function(RatingsEngineStore) {
                     return [
                         { label: 'Segment', state: 'segment' },
-                        { label: 'Attributes', state: 'segment.attributes' }
+                        { label: 'Attributes', state: 'segment.attributes' },
+                        { label: 'Rules', state: 'segment.attributes.rules' }
                     ];
                 }
             },
@@ -329,7 +330,7 @@ angular
 
                     return deferred.promise;
                 }],
-                // below resolves are needed. Do not removed
+                // below resolves are needed. Do not remove
                 // override at child state when needed
                 SegmentServiceProxy: function() {
                     return null;
@@ -356,5 +357,33 @@ angular
                 //     templateUrl: 'app/ratingsengine/content/attributes/attributes.component.html'
                 // }
             },
+        })
+        .state('home.ratingsengine.wizard.segment.attributes.rules', {
+            url: '/rules/:mode',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Create Ratings Engine',
+                mode: 'rules'
+            },
+            resolve: {
+                Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
+                    var deferred = $q.defer();
+
+                    DataCloudStore.getCube().then(function(result) {
+                        if (result.data) {
+                            deferred.resolve(result.data.Stats);
+                        }
+                    });
+                    
+                    return deferred.promise;
+                }]
+            },
+            views: {
+                'wizard_content@home.ratingsengine.wizard': {
+                    controller: 'AdvancedQueryCtrl',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
+                }
+            }
         });
 });

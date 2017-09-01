@@ -42,6 +42,11 @@ angular
                         vm.range = vm.item.topbkt.Rng;
                         
                         vm.setOperation(vm.item, vm.type, vm.label, vm.range);
+
+                        if (!vm.tree.bucketRestriction.bkt.Id) {
+                            vm.tree.bucketRestriction.bkt.Id = vm.tree.labelGlyph;
+                            vm.unused = true;
+                        }
                     }
                 });
             }
@@ -124,6 +129,7 @@ angular
             vm.setBucket = function($event) {
                 if (vm.editing) {
                     vm.editing = false;
+                    vm.unused = false;
                     
                     vm.root.updateCount();
                     vm.updateBucketCount();

@@ -1,12 +1,46 @@
 <div class="container advanced-query-builder">
     <div class="columns twelve">
-        <ul class="row controls">
-            <li class="buttons pull-right">
-                <!-- <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}"
-                    class="button icon-button white-button" target="_self" download>
-                    <i class="fa fa-download"></i>
-                </a> -->
+        <div class="query-rules-header" ng-if="vm.mode == 'rules'">
+            <h2>
+                <i class="fa fa-random"></i> Rules - Define the rules for your targets
+            </h2>
+            
+            <div class="query-rules-header-infotext">
+                A record will always get the highest rating it is eligibnle for.
+            </div>
 
+            <div class="query-rules-header-defaultbucket">
+                If a record doesn't match any rules, it should be given this rating:
+                
+                <select>
+                    <option ng-repeat="bucket in vm.buckets" ng-value="bucket.label">{{ bucket.label }}</option>
+                </select>
+            </div>
+        </div>
+        
+        <ul class="query-rules-buckets-container" ng-if="vm.mode == 'rules'">
+            <li     ng-repeat="bucket in vm.buckets" 
+                    ng-class="{ 'active': bucket.active }"
+                    class="query-rules-buckets-bucket">
+                <div class="bucket-box">
+                    <div class="bucket-label"><h2>{{ bucket.label }}</h2></div>
+                    <div class="bucket-resource">{{ bucket.resource }}</div>
+                    <div class="bucket-resource-count">
+                        <span class="count-number">{{ bucket.count }}</span>
+                        <span class="count-percentage">({{ bucket.percentage }}%)</span>
+                    </div>
+                </div>
+
+                <div  class="bucket-rulecount">0 Rules</div>
+            </li>
+        </ul>
+        
+        <ul class="row controls">
+            <li class="" ng-if="vm.mode == 'rules'">
+                <h2>Rules (<span class="query-rules-count">0</span>)</h2>
+                Query expression of the rules you've created:
+            </li>
+            <li class="buttons pull-right" ng-if="vm.mode == 'segment'">
                 <button class="button icon-button white-button" ng-click="vm.goAttributes()" ng-disabled="vm.saving">Add Attributes</button>
                 <button class="button icon-button blue-button"
                         ng-if="!vm.saving" 
@@ -37,7 +71,7 @@
             </button>
         </div>
         
-        <div class="row query-helper-text-one">
+        <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
             <span>
                 Build a segment with <strong>accounts</strong> that have:
             </span>

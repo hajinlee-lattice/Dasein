@@ -5,7 +5,8 @@ angular.module('lp.ratingsengine')
     this.init = function() {
         this.validation = {
             segment: true,
-            attributes: true
+            attributes: true,
+            rules: true
         }
         this.currentRating = {};
     }

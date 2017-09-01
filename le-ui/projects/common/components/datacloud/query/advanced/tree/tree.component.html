@@ -66,7 +66,7 @@
         <span class="query-section-item-displayname">
             <span class="query-section-item-name"><strong>{{vm.item.DisplayName}}</strong></span>
             
-            <span ng-if="vm.editing">
+            <span ng-if="vm.editing && !vm.unused">
                 <span ng-if="vm.type == 'Boolean'" class="query-section-item-operation">
                     <select ng-model="vm.item.topbkt.Lbl" ng-change="vm.updateBucketCount()">
                         <option value="Yes">is</option>
@@ -104,7 +104,7 @@
                 <button class="button blue-button" ng-click="vm.setBucket($event)">SET</button>
             </span>
 
-            <span ng-if="!vm.editing">
+            <span ng-if="!vm.editing && !vm.unused">
                 <span class="query-section-item-operation">
                     <span class="query-section-item-operation">{{vm.getOperationLabel()}}</span>
 
@@ -126,7 +126,7 @@
         </span>
     </div>
 
-    <div class="query-section-item-records">
+    <div class="query-section-item-records" ng-if="!vm.unused">
         <span class="query-section-item-records-label">RECORDS</span>
         
         <span ng-if="vm.tree.bucketRestriction.bkt.Cnt >= 0" class="query-section-item-records-number">
@@ -138,6 +138,10 @@
         </span>
         
         <i class="fa fa-close" ng-click="vm.clickDelete($parent)"></i>
+    </div>
+
+    <div if="vm.unused">
+        UNUSED
     </div>
 </div>
 

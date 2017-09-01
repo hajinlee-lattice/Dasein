@@ -446,13 +446,11 @@ angular
             }
         },
         advquery: {
-            url: '/advanced/:state',
+            url: '/advanced/:mode',
             params: {
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Analysis',
-                state: 'tree1',
-                section: 'query'
-
+                mode: 'segment'
             },
             resolve: {
                 Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
