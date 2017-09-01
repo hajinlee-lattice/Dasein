@@ -24,6 +24,17 @@ public class AggregateLookup extends Lookup {
     @JsonProperty("alias")
     private String alias;
 
+    public static AggregateLookup create(Lookup mixin, Aggregator aggregator) {
+        switch(aggregator) {
+            case COUNT:
+                return AggregateLookup.count();
+            case SUM:
+                return AggregateLookup.sum(mixin);
+            default:
+                throw new UnsupportedOperationException("Unsupported aggregator " + aggregator);
+        }
+    }
+
     public static AggregateLookup count() {
         AggregateLookup lookup1 = new AggregateLookup();
         lookup1.setAggregator(COUNT);

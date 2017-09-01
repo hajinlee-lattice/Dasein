@@ -9,9 +9,13 @@ import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.StringPath;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 public class AggregateResolver extends BaseLookupResolver<AggregateLookup>
@@ -27,7 +31,20 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup>
     @SuppressWarnings("unchecked")
     @Override
     public List<ComparableExpression<String>> resolveForCompare(AggregateLookup lookup) {
-        throw new UnsupportedOperationException("Does not support aggregator in where clause yet.");
+        throw new UnsupportedOperationException("Does not support aggregator in where clause.");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ComparableExpression<Comparable>> resolveForAggregateCompare(AggregateLookup lookup) {
+        switch (lookup.getAggregator()) {
+            case SUM:
+                return sumExpressionForCompare(lookup);
+            default:
+                throw new UnsupportedOperationException(
+                        "Does not support aggregator " + lookup.getAggregator() + "in where clause yet."
+                );
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -37,13 +54,19 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup>
             case COUNT:
                 return countExpression(lookup, asAlias);
             case SUM:
-                return sumExpression(lookup, asAlias);
+                return sumExpressionForSelect(lookup, asAlias);
             default:
-                throw new RuntimeException("Unknown aggregator");
+                throw new RuntimeException("Unsupported aggregator " + lookup.getAggregator());
         }
     }
 
-    private Expression<?> sumExpression(AggregateLookup lookup, boolean asAlias) {
+    @SuppressWarnings("unchecked")
+    private List<ComparableExpression<Comparable>> sumExpressionForCompare(AggregateLookup lookup) {
+        NumberExpression sumExpression = (NumberExpression) sumExpressionForSelect(lookup, false);
+        return Collections.singletonList(Expressions.asComparable(sumExpression));
+    }
+
+    private Expression<?> sumExpressionForSelect(AggregateLookup lookup, boolean asAlias) {
         if (lookup.getLookup() == null) {
             throw new RuntimeException("Sum aggregation cannot be applied for empty lookup.");
         }
