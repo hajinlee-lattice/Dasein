@@ -20,8 +20,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
@@ -188,7 +191,16 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         MatchTransformerConfig config = new MatchTransformerConfig();
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(customerSpace.toString()));
-        matchInput.setPredefinedSelection(ColumnSelection.Predefined.Segment);
+        UnionSelection us = new UnionSelection();
+        Map<Predefined, String> ps = new HashMap<>();
+        ps.put(Predefined.Segment, "2.0");
+        ColumnSelection cs = new ColumnSelection();
+        List<Column> cols = Arrays.asList(new Column(DataCloudConstants.ATTR_LDC_DOMAIN),
+                new Column(DataCloudConstants.ATTR_LDC_NAME));
+        cs.setColumns(cols);
+        us.setPredefinedSelections(ps);
+        us.setCustomSelection(cs);
+        matchInput.setUnionSelection(us);
 
         Map<MatchKey, List<String>> keyMap = new TreeMap<>();
         keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));

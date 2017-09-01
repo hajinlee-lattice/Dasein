@@ -22,6 +22,8 @@ public final class DataCloudConstants {
     public static final String ATTR_NUM_EMP_RANGE = "LE_EMPLOYEE_RANGE";
     public static final String ATTR_REV_RANGE = "LE_REVENUE_RANGE";
     public static final String ATTR_NUM_LOC_RANGE = "LE_NUMBER_OF_LOCATIONS";
+    public static final String ATTR_LDC_NAME = "LDC_Name";
+    public static final String ATTR_LDC_DOMAIN = "LDC_Domain";
 
     public static final String PROFILE_STAGE_SEGMENT = "SEGMENT";
     public static final String PROFILE_STAGE_ENRICH = "ENRICH";
