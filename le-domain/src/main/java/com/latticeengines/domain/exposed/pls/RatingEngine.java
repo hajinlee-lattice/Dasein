@@ -89,7 +89,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     private RatingEngineStatus status = RatingEngineStatus.INACTIVE;
 
     @JsonProperty("segment")
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_SEGMENT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MetadataSegment segment;
@@ -109,7 +109,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     private String createdBy;
 
     @JsonProperty("ratingModels")
-    @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "ratingEngine", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE,
+            CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RatingModel> ratingModels = new HashSet<>();
 

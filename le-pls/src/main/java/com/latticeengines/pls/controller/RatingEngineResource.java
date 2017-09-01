@@ -63,7 +63,7 @@ public class RatingEngineResource {
             @PathVariable String ratingEngineId, //
             HttpServletRequest request, //
             HttpServletResponse response) {
-        return ratingEngineService.getFullRatingEngineById(ratingEngineId);
+        return ratingEngineService.getRatingEngineById(ratingEngineId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

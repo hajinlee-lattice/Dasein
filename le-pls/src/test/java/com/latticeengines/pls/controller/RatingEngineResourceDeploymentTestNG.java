@@ -120,7 +120,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         MetadataSegment segment = ratingEngine.getSegment();
         Assert.assertNotNull(segment);
         log.info("After loading, ratingEngine is " + ratingEngine);
-        // Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
+        Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
 
         Set<RatingModel> ratingModels = ratingEngine.getRatingModels();
         Assert.assertNotNull(ratingModels);

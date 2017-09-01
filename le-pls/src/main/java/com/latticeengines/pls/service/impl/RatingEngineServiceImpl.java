@@ -51,16 +51,15 @@ public class RatingEngineServiceImpl implements RatingEngineService {
         log.info(String.format("Get all the rating engine summaries for tenant %s", tenant.getId()));
         List<RatingEngineSummary> result = new ArrayList<>();
         ratingEngineEntityMgr.findAll().stream()
-                .forEach(re -> result.add(constructRatingEngineSummary(re.getId(), tenant.getId())));
+                .forEach(re -> result.add(constructRatingEngineSummary(re, tenant.getId())));
         return result;
     }
 
     @VisibleForTesting
-    RatingEngineSummary constructRatingEngineSummary(String ratingEngineId, String tenantId) {
-        if (ratingEngineId == null) {
+    RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId) {
+        if (ratingEngine == null) {
             return null;
         }
-        RatingEngine ratingEngine = getFullRatingEngineById(ratingEngineId);
         RatingEngineSummary ratingEngineSummary = new RatingEngineSummary();
         ratingEngineSummary.setId(ratingEngine.getId());
         ratingEngineSummary.setDisplayName(ratingEngine.getDisplayName());
@@ -84,11 +83,6 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     }
 
     @Override
-    public RatingEngine getFullRatingEngineById(String id) {
-        return ratingEngineEntityMgr.findById(id, true, true, true);
-    }
-
-    @Override
     public RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId) {
         if (ratingEngine == null) {
             throw new NullPointerException("Entity is null when creating a rating engine.");
@@ -108,7 +102,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     @Override
     public Set<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId) {
-        RatingEngine ratingEngine = getFullRatingEngineById(ratingEngineId);
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId);
         return ratingEngine.getRatingModels();
     }
 

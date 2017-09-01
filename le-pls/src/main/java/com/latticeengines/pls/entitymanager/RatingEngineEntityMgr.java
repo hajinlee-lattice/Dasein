@@ -12,8 +12,6 @@ public interface RatingEngineEntityMgr {
 
     RatingEngine findById(String id);
 
-    RatingEngine findById(String id, boolean inflateSegment, boolean inflateRatingModels, boolean inflatePlays);
-
     void deleteById(String id);
 
     void deleteRatingEngine(RatingEngine ratingEngine);

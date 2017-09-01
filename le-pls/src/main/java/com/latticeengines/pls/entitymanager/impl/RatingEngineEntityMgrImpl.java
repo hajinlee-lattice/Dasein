@@ -2,9 +2,7 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
-import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -52,7 +49,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public RatingEngine findById(String id) {
-        return findById(id, false, false, false);
+        return ratingEngineDao.findById(id);
     }
 
     @Override
@@ -92,7 +89,6 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             } else { // update an existing one by updating the delta passed from
                      // front end
                 updateExistingRatingEngine(retrievedRatingEngine, ratingEngine, tenantId);
-                inflateRatingModels(retrievedRatingEngine);
                 return retrievedRatingEngine;
             }
         }
@@ -114,6 +110,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         if (ratingEngine.getStatus() != null) {
             retrievedRatingEngine.setStatus(ratingEngine.getStatus());
         }
+        retrievedRatingEngine.setUpdated(new Date());
         ratingEngineDao.update(retrievedRatingEngine);
     }
 
@@ -148,33 +145,4 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         }
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public RatingEngine findById(String id, boolean inflateSegment, boolean inflateRatingModels, boolean inflatePlays) {
-        RatingEngine ratingEngine = ratingEngineDao.findById(id);
-        if (inflateSegment) {
-            inflateSegment(ratingEngine);
-        }
-        if (inflateRatingModels) {
-            inflateRatingModels(ratingEngine);
-        }
-        if (inflatePlays) {
-            inflatePlays(ratingEngine);
-        }
-        return ratingEngine;
-    }
-
-    private void inflateSegment(RatingEngine ratingEngine) {
-        MetadataSegment segment = ratingEngine.getSegment();
-        Hibernate.initialize(segment);
-    }
-
-    private void inflateRatingModels(RatingEngine ratingEngine) {
-        Set<RatingModel> ratingModels = ratingEngine.getRatingModels();
-        Hibernate.initialize(ratingModels);
-    }
-
-    private void inflatePlays(RatingEngine ratingEngine) {
-        // TODO assocaite Play object with Rating Engine object
-    }
 }

@@ -217,4 +217,9 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         isMasterSegment = masterSegment;
     }
 
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
 }

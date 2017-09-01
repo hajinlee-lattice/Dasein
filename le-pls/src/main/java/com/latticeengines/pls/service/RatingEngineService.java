@@ -15,8 +15,6 @@ public interface RatingEngineService {
 
     RatingEngine getRatingEngineById(String id);
 
-    RatingEngine getFullRatingEngineById(String id);
-
     RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId);
 
     void deleteById(String Id);
