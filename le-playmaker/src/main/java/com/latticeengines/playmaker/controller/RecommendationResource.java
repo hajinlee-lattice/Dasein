@@ -279,4 +279,11 @@ public class RecommendationResource {
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getPlayGroups(tenantName, lookupSource, start, offset, maximum);
     }
+
+    @RequestMapping(value = "/oauthtotenant", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get tenant info from OAuth token")
+    public String getOauthTokenToTenant(HttpServletRequest request) {
+        return OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+    }
 }

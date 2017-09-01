@@ -18,10 +18,12 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
 
     private OAuth2RestTemplate restTemplate = null;
 
+    private PlaymakerTenant newTenant = null;
+
     @BeforeClass(groups = "deployment")
     public void beforeClass() {
         super.beforeClass();
-        PlaymakerTenant newTenant = playMakerEntityMgr.create(tenant);
+        newTenant = playMakerEntityMgr.create(tenant);
         restTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
                 newTenant.getTenantPassword(), "playmaker");
     }
@@ -144,7 +146,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
-    
+
     @Test(groups = "deployment")
     public void getPlayValues() {
         String url = apiHostPort + "/playmaker/playvalues?start=1&offset=1&maximum=100";
@@ -178,5 +180,13 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         List<Map<String, Object>> result = restTemplate.getForObject(url, List.class);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.size() > 0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "getPlayGroups")
+    public void getOauthTokenToTenant() {
+        String url = apiHostPort + "/playmaker/oauthtotenant";
+        String tenantNameViaToken = restTemplate.getForObject(url, String.class);
+        Assert.assertNotNull(tenantNameViaToken);
+        Assert.assertEquals(tenantNameViaToken, newTenant.getTenantName());
     }
 }
