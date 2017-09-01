@@ -34,6 +34,7 @@ public class Job implements HasId<Long>, HasName {
     private Map<String, String> outputs;
     private LedpCode errorCode;
     private String errorMsg;
+    private Integer numDisplayedSteps;
 
     @Override
     @JsonProperty
@@ -187,6 +188,16 @@ public class Job implements HasId<Long>, HasName {
     @JsonProperty
     public void setErrorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
+    }
+
+    @JsonProperty
+    public Integer getNumDisplayedSteps() {
+        return numDisplayedSteps;
+    }
+
+    @JsonProperty
+    public void setNumDisplayedSteps(Integer numDisplayedSteps) {
+        this.numDisplayedSteps = numDisplayedSteps;
     }
 
     @Override

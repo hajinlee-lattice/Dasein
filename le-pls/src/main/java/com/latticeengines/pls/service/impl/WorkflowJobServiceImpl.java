@@ -1,10 +1,15 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
+import com.latticeengines.domain.exposed.pls.frontend.JobStepDisplayInfoMapping;
+import com.latticeengines.domain.exposed.workflow.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -17,10 +22,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
@@ -32,6 +33,13 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobService.class);
+    private static final String[] NONDISPLAYED_JOB_TYPE_VALUES = new String[] {
+            "bulkmatchworkflow",
+            "playlaunchworkflow",
+            "consolidateandpublishworkflow",
+            "profileandpublishworkflow"
+    };
+    private static final Set<String> NONDISPLAYED_JOB_TYPES = new HashSet<>(Arrays.asList(NONDISPLAYED_JOB_TYPE_VALUES));
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -82,6 +90,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public Job find(String jobId) {
         Job job = workflowProxy.getWorkflowExecution(jobId);
         updateJobWithModelSummary(job);
+        updateStepDisplayNameAndNumSteps(job);
+        updateJobDisplayNameAndDescription(job);
         return job;
     }
 
@@ -94,8 +104,48 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return Collections.emptyList();
         }
 
+        jobs.removeIf(job -> NONDISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()));
+        for (Job job : jobs) {
+            updateStepDisplayNameAndNumSteps(job);
+            updateJobDisplayNameAndDescription(job);
+        }
+
         updateAllJobsWithModelModelSummaries(jobs);
         return jobs;
+    }
+
+    private void updateStepDisplayNameAndNumSteps(Job job) {
+        if (job == null) {
+            return;
+        }
+
+        List<JobStep> steps = job.getSteps();
+        if (steps != null) {
+            int count = 0;
+            String previousStepDisplayName = "";
+            for (JobStep step : steps) {
+                String stepDisplayName =
+                        JobStepDisplayInfoMapping.getMappedName(job.getJobType(), step.getJobStepType());
+                String stepDescription =
+                        JobStepDisplayInfoMapping.getMappedDescription(job.getJobType(), step.getJobStepType());
+                step.setName(stepDisplayName);
+                step.setDescription(stepDescription);
+                if (!stepDisplayName.equalsIgnoreCase(previousStepDisplayName)) {
+                    count++;
+                    previousStepDisplayName = stepDisplayName;
+                }
+            }
+            job.setNumDisplayedSteps(count);
+        }
+    }
+
+    private void updateJobDisplayNameAndDescription(Job job) {
+        if (job == null) {
+            return;
+        }
+
+        job.setName(job.getJobType());
+        job.setDescription(job.getJobType());
     }
 
     private void updateAllJobsWithModelModelSummaries(List<Job> jobs) {
