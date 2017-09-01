@@ -62,6 +62,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILER;
     public static final String AM_PROFILE = "AMProfile";
     public static final String IS_PROFILE = "IsProfile";
+    public static final String NO_BUCKET = "NoBucket";
     public static final String DECODE_STRATEGY = "DecodeStrategy";
     public static final String ENCODED_COLUMN = "EncodedColumn";
     public static final String NUM_BITS = "NumBits";
@@ -236,12 +237,21 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     continue;
                 }
                 boolean isProfile = true;
+                boolean noBucket = false;
                 if (amAttrConfig.containsKey(field.name())) {
                     JsonNode arg = om.readTree(amAttrConfig.get(field.name()).getArguments());
                     isProfile = arg.get(IS_PROFILE).asBoolean();
+                    if (arg.hasNonNull(NO_BUCKET)) {
+                        noBucket = arg.get(NO_BUCKET).asBoolean();
+                    }
                 }
                 if (!isProfile) {
                     log.info(String.format("Discarded attr: %s", field.name()));
+                    continue;
+                }
+                if (noBucket) {
+                    log.info(String.format("Retained attr: %s (unencode)", field.name()));
+                    attrsToRetain.add(new ProfileParameters.Attribute(field.name(), null, null, null));
                     continue;
                 }
                 if (encAttrMap.containsKey(field.name())) {
