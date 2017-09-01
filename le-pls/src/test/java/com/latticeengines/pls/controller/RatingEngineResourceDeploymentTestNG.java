@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -37,6 +38,10 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     private static final String RATING_ENGINE_NOTE_2 = "This is a Rating Engine that covers East Asia market";
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+
+    private static final String ATTR1 = "Employ Number";
+    private static final String ATTR2 = "Revenue";
+    private static final String ATTR3 = "Has Cisco WebEx";
 
     @Autowired
     private MetadataSegmentService metadataSegmentService;
@@ -179,16 +184,28 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(),
                 RatingRule.DEFAULT_BUCKET_NAME);
 
-        RuleBasedModel roleBasedModel = new RuleBasedModel();
+        RuleBasedModel ruleBasedModel = new RuleBasedModel();
         RatingRule ratingRule = new RatingRule();
         ratingRule.setDefaultBucketName(RuleBucketName.D.getName());
-        roleBasedModel.setRatingRule(ratingRule);
+        ruleBasedModel.setRatingRule(ratingRule);
+        ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
         rm = restTemplate.postForObject(
                 getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId() + "/ratingmodels/" + ratingModelId,
-                roleBasedModel, RatingModel.class);
+                ruleBasedModel, RatingModel.class);
         Assert.assertNotNull(rm);
         Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(), RuleBucketName.D.getName());
+        Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR1));
+        Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR2));
+        Assert.assertTrue(((RuleBasedModel) rm).getSelectedAttributes().contains(ATTR3));
 
+    }
+
+    private List<String> generateSeletedAttributes() {
+        List<String> selectedAttributes = new ArrayList<>();
+        selectedAttributes.add(ATTR1);
+        selectedAttributes.add(ATTR2);
+        selectedAttributes.add(ATTR3);
+        return selectedAttributes;
     }
 
     @SuppressWarnings("unchecked")

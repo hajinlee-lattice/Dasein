@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,6 +50,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     public static final String RATING_ENGINE_PREFIX = "rating_engine";
     public static final String RATING_ENGINE_FORMAT = "%s__%s";
+    public static final String DEFAULT_NAME_PATTERN = "RATING ENGINE -- %s";
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     public RatingEngine() {
     }

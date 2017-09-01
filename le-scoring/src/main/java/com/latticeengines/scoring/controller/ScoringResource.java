@@ -36,6 +36,7 @@ public class ScoringResource {
     @Autowired
     private JobService jobService;
 
+    @Deprecated
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a scoring job")
@@ -43,6 +44,7 @@ public class ScoringResource {
         return new AppSubmission(Arrays.<ApplicationId> asList(scoringJobService.score(scoringConfig)));
     }
 
+    @Deprecated
     @RequestMapping(value = "/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get status for submitted import job")

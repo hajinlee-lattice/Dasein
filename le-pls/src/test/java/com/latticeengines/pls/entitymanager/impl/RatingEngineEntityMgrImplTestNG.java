@@ -89,7 +89,7 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Date createdDate = createdRatingEngine.getCreated();
         Assert.assertNotNull(createdRatingEngine.getUpdated());
         Date updatedDate = createdRatingEngine.getUpdated();
-        Assert.assertNull(createdRatingEngine.getDisplayName());
+        Assert.assertNotNull(createdRatingEngine.getDisplayName());
         Assert.assertNull(createdRatingEngine.getNote());
         Assert.assertEquals(createdRatingEngine.getType(), RatingEngineType.RULE_BASED);
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
