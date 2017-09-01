@@ -27,9 +27,13 @@
                     | limitTo: 5))"
                     ng-class="{'ignore-ngclick': vm.section !== 'segment.analysis'}"
                     ng-click="vm.selectSegmentAttribute(attribute)">
+
                 <div class="column label" title="{{attribute.DisplayName}}">
                     <input ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]" ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" name="{{attribute.Attribute || attribute.ColumnId}}" id="{{attribute.Attribute || attribute.ColumnId}}" type="checkbox" ng-if="vm.section == 'segment.analysis'" />
-                    {{ attribute.DisplayName }}
+
+                    <div ng-if="attribute.DisplayName">{{ attribute.DisplayName }}</div>
+                    <div ng-if="!attribute.DisplayName">{{ attribute.Attribute }}</div>
+
                 </div>
 
                 <div class="column data data-value-{{ attribute.Value == 'Yes' ? 'yes' : 'no' }} values" ng-if="vm.lookupMode">
@@ -41,12 +45,17 @@
                             icon-image="vm.categoryIcon(vm.category)"
                             category-class="vm.categoryClass(vm.category)"
                             ng-if="vm.lookupMode && vm.hasCompanyInfo" />
+
                         {{ vm.filterLookupFiltered(attribute.Value, attribute.FundamentalType) }}
+
                     </div>
                 </div>
+
                 <div class="column data records" ng-if="!vm.lookupMode">
-                    {{ attribute.TopBkt.Cnt|number }}
+                    <div ng-if="vm.section != 'section.analysis'">{{ attribute.Count | number }}</div>
+                    <div ng-if="vm.section == 'section.analysis'">{{ attribute.TopBkt.Cnt | number }}</div>
                 </div>
+
             </li>
         </ul>
 
