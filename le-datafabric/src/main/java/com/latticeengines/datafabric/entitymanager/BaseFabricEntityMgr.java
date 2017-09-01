@@ -48,4 +48,5 @@ public interface BaseFabricEntityMgr<T> {
 
     String getRecordType();
 
+    void close();
 }

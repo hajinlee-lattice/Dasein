@@ -18,4 +18,6 @@ public interface FabricMessageProducer {
 
     Future<RecordMetadata> send(GenericRecordRequest recordRequest, GenericRecord value);
 
+    void close();
+
 }

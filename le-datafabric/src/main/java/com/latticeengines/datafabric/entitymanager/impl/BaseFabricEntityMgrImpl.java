@@ -18,9 +18,9 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.AvroReflectionUtils;
@@ -468,6 +468,11 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     @Override
     public Map<String, Object> findAttributesByKey(String id) {
         return dataStore.findAttributes(id);
+    }
+
+    @Override
+    public void close() {
+        producer.close();
     }
 
 }

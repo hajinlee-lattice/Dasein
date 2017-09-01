@@ -32,8 +32,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 @Component("genericFabricEntityManager")
 @Lazy
-public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends BaseFabricEntityMgrImpl<T> implements
-        GenericFabricEntityManager<T> {
+public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends BaseFabricEntityMgrImpl<T>
+        implements GenericFabricEntityManager<T> {
 
     private static final int TEN_MINUTES = 600_000;
 
@@ -280,8 +280,8 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             status.setProgress(1.0f);
             return;
         }
-        float result = fabricNode.getFinishedCount() == fabricNode.getTotalCount() ? 1.0f : 1.0f
-                * fabricNode.getFinishedCount() / fabricNode.getTotalCount();
+        float result = fabricNode.getFinishedCount() == fabricNode.getTotalCount() ? 1.0f
+                : 1.0f * fabricNode.getFinishedCount() / fabricNode.getTotalCount();
         status.setProgress(result);
     }
 
@@ -310,26 +310,24 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             return;
         }
 
-        messageService.incrementalUpdate(
-                batchId,
-                (origData) -> {
-                    try {
-                        if (StringUtils.isBlank(origData)) {
-                            return resetCount(delta, isFinished);
-                        }
-                        if (delta <= 0) {
-                            return origData;
-                        }
-                        GenericFabricNode node = addCount(delta, isFinished, origData);
-                        setEnable();
-                        return JsonUtils.serialize(node);
-                    } catch (Exception ex) {
-                        log.error("Failed to update, batchIdName=" + batchId + " delta=" + delta
-                                + " disable the entity manager!");
-                        setDisable();
-                        return origData;
-                    }
-                });
+        messageService.incrementalUpdate(batchId, (origData) -> {
+            try {
+                if (StringUtils.isBlank(origData)) {
+                    return resetCount(delta, isFinished);
+                }
+                if (delta <= 0) {
+                    return origData;
+                }
+                GenericFabricNode node = addCount(delta, isFinished, origData);
+                setEnable();
+                return JsonUtils.serialize(node);
+            } catch (Exception ex) {
+                log.error("Failed to update, batchIdName=" + batchId + " delta=" + delta
+                        + " disable the entity manager!");
+                setDisable();
+                return origData;
+            }
+        });
     }
 
     private String resetCount(long delta, boolean isFinished) {
@@ -374,6 +372,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
                     disabled = true;
                     lastCheckTime = System.currentTimeMillis();
                     log.error("Set GenericFabricEntityManagerImpl to be Disabled!");
+                    close();
                 }
             }
         } else {
@@ -387,6 +386,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
                 if (disabled) {
                     disabled = false;
                     lastCheckTime = System.currentTimeMillis();
+                    init();
                     log.warn("Set GenericFabricEntityManagerImpl to be Enabled!");
                 }
             }

@@ -145,4 +145,11 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
             return this;
         }
     }
+
+    @Override
+    public void close() {
+        if (producer != null) {
+            producer.close();
+        }
+    }
 }
