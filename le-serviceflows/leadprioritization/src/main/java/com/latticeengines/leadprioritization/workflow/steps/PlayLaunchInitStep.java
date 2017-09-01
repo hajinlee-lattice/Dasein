@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -137,64 +138,93 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             FrontEndQuery contactFrontEndQuery = new FrontEndQuery();
             List<Object> modifiableAccountIdCollectionForContacts = new ArrayList<>();
 
-            accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
-            contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
-
-            List<Lookup> lookups = fields.stream()
-                    .map(fieldName -> new AttributeLookup(BusinessEntity.Account, fieldName))
-                    .collect(Collectors.toList());
-
-            accountFrontEndQuery.setLookups(lookups);
-            RatingEngine ratingEngine = play.getRatingEngine();
-            String modelId = null;
-
-            if (ratingEngine != null) {
-                if (ratingEngine.getSegment() != null) {
-                    FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
-                            ratingEngine.getSegment().getAccountRestriction());
-                    accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
-                    contactFrontEndQuery.setAccountRestriction(
-                            prepareContactRestriction(frontEndRestriction, modifiableAccountIdCollectionForContacts));
-                }
-
-                List<RatingModel> ratingModels = new ArrayList<>();
-                for (RatingModel model : ratingEngine.getRatingModels()) {
-                    ratingModels.add(model);
-                    modelId = model.getId();
-                    break;
-                }
-                accountFrontEndQuery.setRatingModels(ratingModels);
-
-                lookups = accountFrontEndQuery.getLookups();
-                Lookup lookup = new AttributeLookup(BusinessEntity.Rating, modelId);
-                lookups.add(lookup);
-            }
-
-            if (accountFrontEndQuery.getAccountRestriction() == null) {
-
-                Restriction segmentRestriction = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
-                        segmentName);
-
-                log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestriction));
-
-                FrontEndRestriction frontEndRestriction = new FrontEndRestriction(segmentRestriction);
-                accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
-                contactFrontEndQuery.setAccountRestriction(
-                        prepareContactRestriction(frontEndRestriction, modifiableAccountIdCollectionForContacts));
-            }
-
-            accountFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
-            contactFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
+            String modelId = prepareFrontEndQueries(customerSpace, play, segmentName, accountFrontEndQuery,
+                    contactFrontEndQuery, modifiableAccountIdCollectionForContacts);
 
             executeLaunchActivity(tenant, playLaunch, config, accountFrontEndQuery, contactFrontEndQuery,
                     modifiableAccountIdCollectionForContacts, modelId);
 
-            internalResourceRestApiProxy.publishTalkingPoints(customerSpace, playName);
-            internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
+            successUpdates(customerSpace, playName, playLaunchId);
         } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
-            internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
+            failureUpdates(customerSpace, playName, playLaunchId, ex);
         }
+    }
+
+    private void failureUpdates(CustomerSpace customerSpace, String playName, String playLaunchId, Exception ex) {
+        log.error(ex.getMessage(), ex);
+        internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
+    }
+
+    private void successUpdates(CustomerSpace customerSpace, String playName, String playLaunchId) {
+        internalResourceRestApiProxy.publishTalkingPoints(customerSpace, playName);
+        internalResourceRestApiProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
+    }
+
+    private String prepareFrontEndQueries(CustomerSpace customerSpace, Play play, String segmentName,
+            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
+            List<Object> modifiableAccountIdCollectionForContacts) throws JsonProcessingException {
+        accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
+        contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
+
+        List<Lookup> lookups = fields.stream().map(fieldName -> new AttributeLookup(BusinessEntity.Account, fieldName))
+                .collect(Collectors.toList());
+
+        accountFrontEndQuery.setLookups(lookups);
+        RatingEngine ratingEngine = play.getRatingEngine();
+        String modelId = null;
+
+        if (ratingEngine != null) {
+            modelId = prepareQueryUsingRatingsDefn(accountFrontEndQuery, contactFrontEndQuery,
+                    modifiableAccountIdCollectionForContacts, ratingEngine, modelId);
+        }
+
+        if (accountFrontEndQuery.getAccountRestriction() == null) {
+            prepareQueryUsingSegmentDefn(customerSpace, segmentName, accountFrontEndQuery, contactFrontEndQuery,
+                    modifiableAccountIdCollectionForContacts);
+        }
+
+        accountFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
+        contactFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
+        return modelId;
+    }
+
+    private void prepareQueryUsingSegmentDefn(CustomerSpace customerSpace, String segmentName,
+            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
+            List<Object> modifiableAccountIdCollectionForContacts) throws JsonProcessingException {
+        Restriction segmentRestriction = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
+                segmentName);
+
+        log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestriction));
+
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction(segmentRestriction);
+        accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
+        contactFrontEndQuery.setAccountRestriction(
+                prepareContactRestriction(frontEndRestriction, modifiableAccountIdCollectionForContacts));
+    }
+
+    private String prepareQueryUsingRatingsDefn(FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
+            List<Object> modifiableAccountIdCollectionForContacts, RatingEngine ratingEngine, String modelId) {
+        List<Lookup> lookups;
+        if (ratingEngine.getSegment() != null) {
+            FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
+                    ratingEngine.getSegment().getAccountRestriction());
+            accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
+            contactFrontEndQuery.setAccountRestriction(
+                    prepareContactRestriction(frontEndRestriction, modifiableAccountIdCollectionForContacts));
+        }
+
+        List<RatingModel> ratingModels = new ArrayList<>();
+        for (RatingModel model : ratingEngine.getRatingModels()) {
+            ratingModels.add(model);
+            modelId = model.getId();
+            break;
+        }
+        accountFrontEndQuery.setRatingModels(ratingModels);
+
+        lookups = accountFrontEndQuery.getLookups();
+        Lookup lookup = new AttributeLookup(BusinessEntity.Rating, modelId);
+        lookups.add(lookup);
+        return modelId;
     }
 
     private FrontEndRestriction prepareContactRestriction(FrontEndRestriction frontEndRestriction,
@@ -247,91 +277,134 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             for (int pageNo = 0; pageNo < pages; pageNo++) {
                 log.info("Loop #" + pageNo);
 
-                long expectedPageSize = Math.min(pageSize, (segmentAccountsCount - processedSegmentAccountsCount));
+                DataPage accountPage = fetchAccounts(config, accountFrontEndQuery);
 
-                accountFrontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
+                processAccounts(tenant, playLaunch, config, contactFrontEndQuery, //
+                        modifiableAccountIdCollectionForContacts, modelId, //
+                        launched, errored, suppressed, accountPage);
 
-                DataPage accountPage = entityProxy.getData( //
-                        config.getCustomerSpace().toString(), //
-                        accountFrontEndQuery);
-
-                log.info("Got #" + accountPage.getData().size() + " elements in this loop");
-
-                List<Map<String, Object>> accountList = accountPage.getData();
-
-                if (CollectionUtils.isNotEmpty(accountList)) {
-
-                    List<Long> accountIds = //
-                            parallelStream(accountList) //
-                                    .map(account -> //
-                                    {
-                                        Object accountIdObj = account.get(InterfaceName.AccountId.name());
-                                        if (accountIdObj instanceof Long) {
-                                            return (Long) accountIdObj;
-                                        }
-                                        return accountIdObj != null && StringUtils.isNotBlank(accountIdObj.toString())
-                                                && StringUtils.isNumeric(accountIdObj.toString())
-                                                        ? Long.parseLong(accountIdObj.toString()) : null;
-                                    })//
-                                    .collect(Collectors.toList());
-
-                    log.info("Extracting contacts for accountIds: "
-                            + Arrays.deepToString(accountIds.toArray(new Long[accountIds.size()])));
-
-                    modifiableAccountIdCollectionForContacts.clear();
-                    modifiableAccountIdCollectionForContacts.addAll(accountIds);
-                    Map<Long, List<Map<String, String>>> mapForAccountAndContactList = new HashMap<>();
-
-                    try {
-                        DataPage contactPage = entityProxy.getData( //
-                                config.getCustomerSpace().toString(), //
-                                contactFrontEndQuery);
-
-                        log.info("Got #" + contactPage.getData().size() + " contact elements in this loop");
-                        contactPage.getData().stream().forEach(contact -> {
-                            Object accountIdObj = contact.get(InterfaceName.AccountId.name());
-                            Long accountId = parseLong(accountIdObj);
-
-                            if (accountId != null) {
-                                if (!mapForAccountAndContactList.containsKey(accountId)) {
-                                    mapForAccountAndContactList.put(accountId, new ArrayList<>());
-                                }
-                                List<Map<String, String>> contacts = mapForAccountAndContactList.get(accountId);
-                                contacts.add(convertValuesToString(contact));
-                            }
-                        });
-
-                    } catch (Exception ex) {
-                        log.error("Ignoring till contact data is available in cdl", ex);
-                    }
-
-                    parallelStream(accountList) //
-                            .forEach(account -> {
-                                try {
-                                    Recommendation recommendation = //
-                                            prepareRecommendation(tenant, playLaunch, config, account,
-                                                    mapForAccountAndContactList, modelId);
-                                    if (playLaunch.getBucketsToLaunch().contains(recommendation.getPriorityID())) {
-                                        recommendationService.create(recommendation);
-                                        danteLeadProxy.create(recommendation, config.getCustomerSpace().toString());
-                                        launched.addAndGet(1);
-                                    } else {
-                                        suppressed.addAndGet(1);
-                                    }
-                                } catch (Throwable th) {
-                                    log.error(th.getMessage(), th);
-                                    errored.addAndGet(1);
-                                    throw th;
-                                }
-                            });
-                }
-                processedSegmentAccountsCount += accountList.size();
-                playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / segmentAccountsCount);
-                playLaunch.setAccountsLaunched(launched.get());
-                playLaunch.setAccountsErrored(errored.get());
-                updateLaunchProgress(playLaunch);
-                log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");
+                updateLaunchProgress(playLaunch, launched, errored);
             }
+        }
+    }
+
+    private void updateLaunchProgress(PlayLaunch playLaunch, AtomicLong launched, AtomicLong errored) {
+        playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / segmentAccountsCount);
+        playLaunch.setAccountsLaunched(launched.get());
+        playLaunch.setAccountsErrored(errored.get());
+        updateLaunchProgress(playLaunch);
+        log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");
+    }
+
+    private DataPage fetchAccounts(PlayLaunchInitStepConfiguration config, FrontEndQuery accountFrontEndQuery) {
+        long expectedPageSize = Math.min(pageSize, (segmentAccountsCount - processedSegmentAccountsCount));
+
+        accountFrontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
+
+        DataPage accountPage = entityProxy.getData( //
+                config.getCustomerSpace().toString(), //
+                accountFrontEndQuery);
+
+        log.info("Got #" + accountPage.getData().size() + " elements in this loop");
+        return accountPage;
+    }
+
+    private void processAccounts(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
+            FrontEndQuery contactFrontEndQuery, List<Object> modifiableAccountIdCollectionForContacts, String modelId,
+            AtomicLong launched, AtomicLong errored, AtomicLong suppressed, DataPage accountPage) {
+        List<Map<String, Object>> accountList = accountPage.getData();
+
+        if (CollectionUtils.isNotEmpty(accountList)) {
+
+            List<Long> accountIds = getAccountsIds(accountList);
+
+            modifiableAccountIdCollectionForContacts.clear();
+            modifiableAccountIdCollectionForContacts.addAll(accountIds);
+            Map<Long, List<Map<String, String>>> mapForAccountAndContactList = new HashMap<>();
+
+            fetchContacts(config, contactFrontEndQuery, mapForAccountAndContactList);
+
+            generateRecommendations(tenant, playLaunch, config, modelId, //
+                    launched, errored, suppressed, accountList, //
+                    mapForAccountAndContactList);
+        }
+        processedSegmentAccountsCount += accountList.size();
+    }
+
+    private List<Long> getAccountsIds(List<Map<String, Object>> accountList) {
+        List<Long> accountIds = //
+                parallelStream(accountList) //
+                        .map(account -> //
+                        {
+                            Object accountIdObj = account.get(InterfaceName.AccountId.name());
+                            if (accountIdObj instanceof Long) {
+                                return (Long) accountIdObj;
+                            }
+                            return accountIdObj != null && StringUtils.isNotBlank(accountIdObj.toString())
+                                    && StringUtils.isNumeric(accountIdObj.toString())
+                                            ? Long.parseLong(accountIdObj.toString()) : null;
+                        })//
+                        .collect(Collectors.toList());
+
+        log.info("Extracting contacts for accountIds: "
+                + Arrays.deepToString(accountIds.toArray(new Long[accountIds.size()])));
+        return accountIds;
+    }
+
+    private void fetchContacts(PlayLaunchInitStepConfiguration config, FrontEndQuery contactFrontEndQuery,
+            Map<Long, List<Map<String, String>>> mapForAccountAndContactList) {
+        try {
+            DataPage contactPage = entityProxy.getData( //
+                    config.getCustomerSpace().toString(), //
+                    contactFrontEndQuery);
+
+            log.info("Got #" + contactPage.getData().size() + " contact elements in this loop");
+            contactPage.getData().stream().forEach(contact -> {
+                Object accountIdObj = contact.get(InterfaceName.AccountId.name());
+                Long accountId = parseLong(accountIdObj);
+
+                if (accountId != null) {
+                    if (!mapForAccountAndContactList.containsKey(accountId)) {
+                        mapForAccountAndContactList.put(accountId, new ArrayList<>());
+                    }
+                    List<Map<String, String>> contacts = mapForAccountAndContactList.get(accountId);
+                    contacts.add(convertValuesToString(contact));
+                }
+            });
+
+        } catch (Exception ex) {
+            log.error("Ignoring till contact data is available in cdl", ex);
+        }
+    }
+
+    private void generateRecommendations(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
+            String modelId, AtomicLong launched, AtomicLong errored, AtomicLong suppressed,
+            List<Map<String, Object>> accountList, Map<Long, List<Map<String, String>>> mapForAccountAndContactList) {
+        parallelStream(accountList) //
+                .forEach(account -> {
+                    try {
+                        processSingleAccount(tenant, playLaunch, config, //
+                                modelId, launched, errored, suppressed, //
+                                mapForAccountAndContactList, account);
+                    } catch (Throwable th) {
+                        log.error(th.getMessage(), th);
+                        errored.addAndGet(1);
+                        throw th;
+                    }
+                });
+    }
+
+    private void processSingleAccount(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
+            String modelId, AtomicLong launched, AtomicLong errored, AtomicLong suppressed,
+            Map<Long, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account) {
+        Recommendation recommendation = //
+                prepareRecommendation(tenant, playLaunch, config, account, mapForAccountAndContactList, modelId);
+        if (playLaunch.getBucketsToLaunch().contains(recommendation.getPriorityID())) {
+            recommendationService.create(recommendation);
+            danteLeadProxy.create(recommendation, config.getCustomerSpace().toString());
+            launched.addAndGet(1);
+        } else {
+            suppressed.addAndGet(1);
         }
     }
 
