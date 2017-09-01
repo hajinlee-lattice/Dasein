@@ -65,6 +65,10 @@ angular
                         $scope.stateName = function() {
                             return $state.current.name;
                         }
+                        var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
+                        if(!launchedStatus.hasLaunched) {
+                            $scope.menuDisabled = true;
+                        }
                         $rootScope.$broadcast('header-back', { 
                             path: '^home.playbook.dashboard',
                             displayName: play.displayName,

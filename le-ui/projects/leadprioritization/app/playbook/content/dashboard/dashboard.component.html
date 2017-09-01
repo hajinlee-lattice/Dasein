@@ -57,7 +57,9 @@
                     </div>
                     <div class="dashboard-section-content">
                         <div class="dashboard-section-content-subsection talking-points has-icon">
-                            <h5>{{vm.play.talkingPoints.length||'No'}} talking points have been created</h5>
+                            <h5 ng-if="vm.play.talkingPoints.length < 1">No talking points have been created</h5>
+                            <h5 ng-if="vm.play.talkingPoints.length == 1">1 talking point has been created</h5>
+                            <h5 ng-if="vm.play.talkingPoints.length > 1">{{vm.play.talkingPoints.length}} talking points have been created</h5>
                             <!--
                             <ul class="controls">
                                 <li ng-if="!vm.play.talkingPoints.length"><a ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create</a></li>

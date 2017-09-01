@@ -30,7 +30,7 @@
                         startFrom: (current - 1) * pagesize |
                         limitTo: pagesize"
                     data="play"
-                    ng-click="vm.tileClick($event, play.name)"
+                    ng-click="vm.tileClick($event, play)"
                     ng-mouseleave="vm.tileStates[play.name].showCustomMenu ? vm.customMenuClick($event, play) : null"
                     ng-if="vm.plays.length > 0"
                     ng-class="{editing: vm.tileStates[play.name].editPlay}">

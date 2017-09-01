@@ -136,10 +136,14 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
         }
     };
 
-    vm.tileClick = function ($event, playName) {
+    vm.tileClick = function ($event, play) {
         $event.preventDefault();
-        //$state.go('home.playbook.wizard.settings', {play_name: playName} );
-        $state.go('home.playbook.dashboard', {play_name: playName} );
+        var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
+        if(launchedStatus.hasLaunched) {
+            $state.go('home.playbook.dashboard', {play_name: play.name} );
+        } else {
+            $state.go('home.playbook.wizard.settings', {play_name: play.name} );
+        }
     };
 
     var oldPlayDisplayName = '';

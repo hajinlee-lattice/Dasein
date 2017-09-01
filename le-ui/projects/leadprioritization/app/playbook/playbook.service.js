@@ -261,6 +261,15 @@ angular.module('lp.playbook')
         
         return launchButton;
     }
+
+    this.getLaunchedStatus = function(play) {
+        var launchedState = (play.launchHistory.playLaunch ? play.launchHistory.playLaunch.launchState : null),
+            hasLaunched = (launchedState === 'Launched' ? true : false);
+        return {
+            launchedState: launchedState,
+            hasLaunched: hasLaunched
+        };
+    }
 })
 .service('PlaybookWizardService', function($q, $http, $state) {
     this.host = '/pls'; //default
