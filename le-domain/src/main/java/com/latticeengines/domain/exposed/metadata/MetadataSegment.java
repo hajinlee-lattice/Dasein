@@ -91,7 +91,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Column(name = "ACCOUNT_CONTACT_OPERATOR", nullable = true)
     @JsonProperty("account_contact_operator")
     @Enumerated(EnumType.STRING)
-    private LogicalOperator accountContactOperator;
+    private LogicalOperator accountContactOperator = LogicalOperator.AND; // default to AND
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)

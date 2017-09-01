@@ -30,7 +30,7 @@ public class FrontEndQuery {
     private FrontEndRestriction contactRestriction;
 
     @JsonProperty("account_contact_operator")
-    private LogicalOperator accountContactOperator;
+    private LogicalOperator accountContactOperator = LogicalOperator.AND; // default to AND
 
     @JsonProperty("sort")
     private FrontEndSort sort;
