@@ -11,8 +11,9 @@ source $WSHOME/le-dev/aliases
 
 pushd le-coverage
 mvn -Pmerge verify
-pod
+popd
 
 pushd le-coverage
 mvn -Preport verify
-pod
+echo "You can find the HTML report at ${PWD}/target/coverage-report/html"
+popd

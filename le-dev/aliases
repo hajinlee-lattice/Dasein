@@ -143,6 +143,9 @@ alias conda-off='source $ANACONDA_HOME/bin/deactivate'
 alias dbdiff-qa='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh qa && popd'
 alias dbdiff-prod='pushd $WSHOME/le-dev/scripts && bash dbdiff.sh prod && popd'
 
+alias cc-clear='find . -name "*.exec" -type f -delete'
+alias cc-report='bash $WSHOME/le-dev/scripts/code_coverage.sh'
+
 alias dk-setupenv='source $WSHOME/le-dev/scripts/setup_dkenv.sh'
 alias dk-up='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml up -d --remove-orphan'
 alias dk-down='docker-compose -p lattice -f $WSHOME/le-dev/scripts/docker-compose.yml down'
