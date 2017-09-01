@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -99,6 +100,8 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         MetadataSegment segment = createdRatingEngine.getSegment();
         Assert.assertNotNull(segment);
         Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
+        DataCollection dc = segment.getDataCollection();
+        log.info("dc is " + dc);
 
         Set<RatingModel> ratingModels = createdRatingEngine.getRatingModels();
         Assert.assertNotNull(ratingModels);
