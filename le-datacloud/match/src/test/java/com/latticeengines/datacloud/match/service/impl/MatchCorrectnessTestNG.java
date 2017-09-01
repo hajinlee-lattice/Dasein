@@ -22,7 +22,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
     private static final String[] inputFields = new String[] { "Id", "Domain", "Name", "City", "State", "ZipCode", "Country", "PhoneNumber" };
 
     // up to 1000 input
-    // domain, name, city, state, country +
+    // domain, name, city, state, zipcode, country, phonenumber
     // expectedDomain, expectedName, expectedState, expectedCountry,
     // expectedEmp, expectedRev
     private static final Object[][] TEST_DATA = new Object[][] {
@@ -56,7 +56,8 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             // { null, "Apple", null, "CA", null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
 
             // oversea head quarter
-            { null, "Royal Dutch Shell", null, null, null, "Netherlands", null, "shell.com", "ROYAL DUTCH SHELL plc", "ZUID HOLLAND", "NETHERLANDS", ">10,000", "0-1M" },
+            { null, "Royal Dutch Shell", null, null, null, "Netherlands", null, "shell.com", "ROYAL DUTCH SHELL plc",
+                    "ZUID HOLLAND", "NETHERLANDS", ">10,000", ">10B" },
 
             // us head quarter, oversea domestic ultimate
             { null, "Google UK", null, null, null, "UK", null, "google.co.uk", "GOOGLE UK LIMITED", "LONDON", "UNITED KINGDOM", "1001-2500", "1-5B" },
@@ -67,7 +68,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
             { null, "Eversource Energy", "Springfield", "MA", "273608923", "US", "3368895000", "eversource.com",
                     "EVERSOURCE ENERGY", "MASSACHUSETTS", "USA", "5001-10,000", "5B-10B" },
-            { null, "Queens College", "Queens", "NY", "11367-1597", "US", "7189975000", "queensknights.com", "Department of Media Studies", "New York", "USA", "11-50", "0-1M" },
+            //{ null, "Queens College", "Queens", "NY", "11367-1597", "US", "7189975000", "queensknights.com", "Department of Media Studies", "New York", "USA", "11-50", "0-1M" },
             { null, "Edison47", "Port Orchard", "WA", "98367", "US", "3608746772", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
             // { null, "SS&C Advent", "San Francisco", "CA", "950142083", "US", "4089961010", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
     };
