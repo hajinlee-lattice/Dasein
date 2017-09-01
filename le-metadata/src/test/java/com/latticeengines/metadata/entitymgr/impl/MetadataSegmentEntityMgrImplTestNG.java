@@ -76,7 +76,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         METADATA_SEGMENT.setDescription(SEGMENT_DESCRIPTION);
         METADATA_SEGMENT.setUpdated(new Date());
         METADATA_SEGMENT.setCreated(new Date());
-        METADATA_SEGMENT.setRestriction(
+        METADATA_SEGMENT.setAccountRestriction(
                 Restriction.builder().let(BusinessEntity.Account, arbitraryAttribute.getName()).eq(null).build());
         METADATA_SEGMENT.setDataCollection(dataCollection);
         segmentEntityMgr.createOrUpdate(METADATA_SEGMENT);
@@ -85,7 +85,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         assertNotNull(retrieved);
         assertEquals(retrieved.getName(), METADATA_SEGMENT.getName());
         assertEquals(retrieved.getDisplayName(), METADATA_SEGMENT.getDisplayName());
-        assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(), ComparisonType.EQUAL);
+        assertEquals(((ConcreteRestriction) retrieved.getAccountRestriction()).getRelation(), ComparisonType.EQUAL);
         assertFalse(retrieved.getMasterSegment());
     }
 
@@ -99,7 +99,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends DataCollectionFunctional
         UPDATED_SEGMENT.setCreated(new Date());
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Hello")
                 .build();
-        UPDATED_SEGMENT.setRestriction(restriction);
+        UPDATED_SEGMENT.setAccountRestriction(restriction);
         UPDATED_SEGMENT.setDataCollection(dataCollection);
         segmentEntityMgr.createOrUpdate(UPDATED_SEGMENT);
 

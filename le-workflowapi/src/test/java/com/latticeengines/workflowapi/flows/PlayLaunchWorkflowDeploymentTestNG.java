@@ -136,7 +136,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
         MetadataSegment segment = new MetadataSegment();
         segment.setName("PlayLaunchWorkflowTestSegment");
         segment.setDisplayName("TestSegment");
-        segment.setRestriction(Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").isNull().build());
+        segment.setAccountRestriction(Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").isNull().build());
 
         restTemplate.postForObject(getPLSRestAPIHostPort() + "/pls/datacollection/segments", segment,
                 MetadataSegment.class);

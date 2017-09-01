@@ -151,7 +151,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             if (ratingEngine != null) {
                 if (ratingEngine.getSegment() != null) {
                     FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
-                            ratingEngine.getSegment().getRestriction());
+                            ratingEngine.getSegment().getAccountRestriction());
                     accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
                     contactFrontEndQuery.setAccountRestriction(
                             prepareContactRestriction(frontEndRestriction, modifiableAccountIdCollectionForContacts));

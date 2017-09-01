@@ -132,7 +132,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
     }
 
     private MetadataSegment cloneForUpdate(MetadataSegment existing, MetadataSegment incoming) {
-        existing.setRestriction(incoming.getRestriction());
+        existing.setAccountRestriction(incoming.getAccountRestriction());
+        existing.setContactRestriction(incoming.getContactRestriction());
+        existing.setAccountContactOperator(incoming.getAccountContactOperator());
         existing.setMasterSegment(incoming.getMasterSegment());
         existing.setDisplayName(incoming.getDisplayName());
         existing.setDescription(incoming.getDescription());

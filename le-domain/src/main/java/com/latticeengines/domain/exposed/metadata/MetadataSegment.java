@@ -6,6 +6,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -67,24 +69,28 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     private String description;
 
     @JsonIgnore
-    @Column(name = "RESTRICTION")
+    @Column(name = "RESTRICTION", nullable = true)
     @Type(type = "text")
     private String restrictionString;
 
-    // TODO bernard add new restriction db columns
+    @JsonIgnore
+    @Column(name = "CONTACT_RESTRICTION", nullable = true)
+    @Type(type = "text")
+    private String contactRestrictionString;
 
     @JsonProperty("account_restriction")
     @Transient
     @ApiModelProperty("Account restriction for use in the front end")
-    private FrontEndRestriction accountRestriction;
+    private FrontEndRestriction accountFrontEndRestriction;
 
     @JsonProperty("contact_restriction")
     @Transient
     @ApiModelProperty("Contact restriction for use in the front end")
-    private FrontEndRestriction contactRestriction;
+    private FrontEndRestriction contactFrontEndRestriction;
 
+    @Column(name = "ACCOUNT_CONTACT_OPERATOR", nullable = true)
     @JsonProperty("account_contact_operator")
-    @Transient
+    @Enumerated(EnumType.STRING)
     private LogicalOperator accountContactOperator;
 
     @JsonIgnore
@@ -145,22 +151,61 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         this.description = description;
     }
 
-    @JsonProperty("restriction")
-    public Restriction getRestriction() {
+    @JsonIgnore
+    public void setAccountContactOperator(String operatorString) {
+        LogicalOperator logicalOperator = null;
+        try {
+            logicalOperator = LogicalOperator.valueOf(operatorString);
+        } catch (Exception e) {
+            // pass
+        }
+        if (logicalOperator != null) {
+            setAccountContactOperator(logicalOperator);
+        }
+    }
+
+    public LogicalOperator getAccountContactOperator() {
+        return accountContactOperator;
+    }
+
+    public void setAccountContactOperator(LogicalOperator accountContactOperator) {
+        this.accountContactOperator = accountContactOperator;
+    }
+
+    @JsonProperty("account_raw_restriction")
+    public Restriction getAccountRestriction() {
         return JsonUtils.deserialize(restrictionString, Restriction.class);
     }
 
-    @JsonProperty("restriction")
-    public void setRestriction(Restriction restriction) {
+    @JsonProperty("account_raw_restriction")
+    public void setAccountRestriction(Restriction restriction) {
         this.restrictionString = JsonUtils.serialize(restriction);
     }
 
-    public FrontEndRestriction getAccountRestriction() {
-        return accountRestriction;
+    @JsonProperty("contact_raw_restriction")
+    public Restriction getContactRestriction() {
+        return JsonUtils.deserialize(contactRestrictionString, Restriction.class);
     }
 
-    public void setAccountRestriction(FrontEndRestriction accountRestriction) {
-        this.accountRestriction = accountRestriction;
+    @JsonProperty("contact_raw_restriction")
+    public void setContactRestriction(Restriction restriction) {
+        this.contactRestrictionString = JsonUtils.serialize(restriction);
+    }
+
+    public FrontEndRestriction getAccountFrontEndRestriction() {
+        return accountFrontEndRestriction;
+    }
+
+    public void setAccountFrontEndRestriction(FrontEndRestriction accountFrontEndRestriction) {
+        this.accountFrontEndRestriction = accountFrontEndRestriction;
+    }
+
+    public FrontEndRestriction getContactFrontEndRestriction() {
+        return contactFrontEndRestriction;
+    }
+
+    public void setContactFrontEndRestriction(FrontEndRestriction contactFrontEndRestriction) {
+        this.contactFrontEndRestriction = contactFrontEndRestriction;
     }
 
     public DataCollection getDataCollection() {

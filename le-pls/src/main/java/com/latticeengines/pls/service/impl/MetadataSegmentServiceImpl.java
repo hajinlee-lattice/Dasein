@@ -69,9 +69,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private MetadataSegment translateForBackend(MetadataSegment segment) {
         try {
-            FrontEndRestriction frontEndRestriction = segment.getAccountRestriction();
-            segment.setRestriction(frontEndRestriction.getRestriction());
-            segment.setAccountRestriction(null);
+            FrontEndRestriction accountFrontEndRestriction = segment.getAccountFrontEndRestriction();
+            segment.setAccountRestriction(accountFrontEndRestriction.getRestriction());
+            segment.setAccountFrontEndRestriction(null);
+            FrontEndRestriction contactFrontEndRestriction = segment.getContactFrontEndRestriction();
+            segment.setContactRestriction(contactFrontEndRestriction.getRestriction());
+            segment.setContactFrontEndRestriction(null);
         } catch (Exception e) {
             log.error("Encountered error translating frontend restriction for segment with name " + segment.getName(), e);
         }
@@ -80,13 +83,21 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private MetadataSegment translateForFrontend(MetadataSegment segment) {
         try {
-            Restriction restriction = segment.getRestriction();
-            if (restriction != null) {
-                FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-                frontEndRestriction.setRestriction(restriction);
-                segment.setAccountRestriction(frontEndRestriction);
-                segment.setRestriction(null);
+            Restriction accountRestriction = segment.getAccountRestriction();
+            if (accountRestriction != null) {
+                FrontEndRestriction accountFrontEndRestriction = new FrontEndRestriction();
+                accountFrontEndRestriction.setRestriction(accountRestriction);
+                segment.setAccountFrontEndRestriction(accountFrontEndRestriction);
+                segment.setAccountRestriction(null);
             }
+            Restriction contactRestriction = segment.getContactRestriction();
+            if (contactRestriction != null) {
+                FrontEndRestriction contactFrontEndRestriction = new FrontEndRestriction();
+                contactFrontEndRestriction.setRestriction(contactRestriction);
+                segment.setContactFrontEndRestriction(contactFrontEndRestriction);
+                segment.setContactRestriction(null);
+            }
+
             if (Boolean.FALSE.equals(segment.getMasterSegment())) {
                 segment.setMasterSegment(null);
             }

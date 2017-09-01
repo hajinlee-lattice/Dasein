@@ -1359,7 +1359,7 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
         MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentName, false);
         if (segment != null) {
-            return segment.getRestriction();
+            return segment.getAccountRestriction();
         } else {
             return null;
         }

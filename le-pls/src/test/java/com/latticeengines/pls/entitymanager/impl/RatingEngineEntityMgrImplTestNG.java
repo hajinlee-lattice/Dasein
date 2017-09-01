@@ -55,7 +55,7 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenant);
 
         segment = new MetadataSegment();
-        segment.setAccountRestriction(new FrontEndRestriction());
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentService
                 .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);

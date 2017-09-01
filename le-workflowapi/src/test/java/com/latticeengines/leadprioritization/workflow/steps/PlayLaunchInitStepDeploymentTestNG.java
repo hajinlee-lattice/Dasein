@@ -222,7 +222,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         RatingEngine ratingEngine = new RatingEngine();
         MetadataSegment segment = new MetadataSegment();
         Restriction restriction = JsonUtils.deserialize(restrictionJson, Restriction.class);
-        segment.setRestriction(restriction);
+        segment.setAccountRestriction(restriction);
 
         ratingEngine.setSegment(segment);
         Set<RatingModel> ratingModels = new HashSet<>();

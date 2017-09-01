@@ -129,11 +129,12 @@ public abstract class BaseFrontEndEntityResource {
         }
     }
 
+    // TODO Bernard JiunJiun - handle contactRestriction
     private Restriction getSegmentRestriction(String segmentName) {
         MetadataSegment segment = segmentProxy
                 .getMetadataSegmentByName(MultiTenantContext.getCustomerSpace().toString(), segmentName);
         if (segment != null) {
-            return segment.getRestriction();
+            return segment.getAccountRestriction();
         } else {
             return null;
         }

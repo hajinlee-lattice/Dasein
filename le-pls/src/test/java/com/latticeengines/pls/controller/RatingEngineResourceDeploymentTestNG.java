@@ -54,7 +54,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         MultiTenantContext.setTenant(mainTestTenant);
 
         segment = new MetadataSegment();
-        segment.setAccountRestriction(new FrontEndRestriction());
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
         Assert.assertNotNull(createdSegment);

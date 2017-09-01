@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 
@@ -42,7 +43,10 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
         METADATA_SEGMENT.setUpdated(CREATED_UPDATED_DATE);
         METADATA_SEGMENT.setCreated(CREATED_UPDATED_DATE);
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").isNull().build();
-        METADATA_SEGMENT.setRestriction(restriction);
+        METADATA_SEGMENT.setAccountRestriction(restriction);
+        METADATA_SEGMENT
+                .setContactRestriction(Restriction.builder().let(BusinessEntity.Contact, "EMAIL").isNull().build());
+        METADATA_SEGMENT.setAccountContactOperator(LogicalOperator.AND);
         METADATA_SEGMENT.setDataCollection(DATA_COLLECTION);
     }
 
@@ -55,8 +59,10 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
                 MetadataSegment.class);
         assertNotNull(retrieved);
         assertEquals(retrieved.getName(), METADATA_SEGMENT_NAME);
+        assertEquals(retrieved.getAccountContactOperator(), LogicalOperator.AND);
         assertEquals(retrieved.getDisplayName(), METADATA_SEGMENT_DISPLAY_NAME);
-        assertEquals(((ConcreteRestriction) retrieved.getRestriction()).getRelation(), ComparisonType.EQUAL);
+        assertEquals(((ConcreteRestriction) retrieved.getAccountRestriction()).getRelation(), ComparisonType.EQUAL);
+        assertEquals(((ConcreteRestriction) retrieved.getContactRestriction()).getRelation(), ComparisonType.EQUAL);
     }
 
     @SuppressWarnings("unchecked")
