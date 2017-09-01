@@ -184,7 +184,8 @@ VALUES
   ('2.0.2', '2016-12-15', '2.0', 'APPROVED', NOW()),
   ('2.0.3', '2017-02-14', '2.0', 'APPROVED', NOW()),
   ('2.0.4', '2017-05-22', '2.0', 'APPROVED', NOW()),
-  ('2.0.5', '2017-06-29', '2.0', 'APPROVED', NOW());
+  ('2.0.5', '2017-06-29', '2.0', 'APPROVED', NOW()),
+  ('2.0.6', '2017-09-01', '2.0', 'APPROVED', NOW());
 
 UPDATE `DataCloudVersion`
 SET
@@ -231,5 +232,14 @@ SET
   `DynamoTableSignature_Lookup` = '20170629',
   `EnrichmentStatsVersion`      = '2017-07-22_04-52-07_UTC'
 WHERE `Version` = '2.0.5';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2017-08-30_11-20-17_UTC',
+  `AccountLookupHdfsVersion` = '2017-08-30_06-53-34_UTC',
+  `DynamoTableSignature`        = '20170830',
+  `DynamoTableSignature_Lookup` = '20170830',
+  `EnrichmentStatsVersion`      = '2017-08-30_16-45-58_UTC'
+WHERE `Version` = '2.0.6';
 
 SET SQL_SAFE_UPDATES = 1;
