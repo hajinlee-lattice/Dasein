@@ -6,11 +6,13 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +53,34 @@ public class AttributeUtils {
                 }
             }
         }
+    }
+
+    public static HashSet<String> diffBetweenAttributes(Attribute base, Attribute target) {
+        HashSet<String> diffFields = new HashSet<>();
+        PropertyDescriptor[] descriptors = getPropertyDescriptors();
+        for (PropertyDescriptor descriptor : descriptors) {
+            if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null && !isPropertyBag(descriptor)) {
+                Object targetValue = getValue(target, descriptor);
+                Object baseValue = getValue(base, descriptor);
+                boolean targetValueEmpty = targetValue == null
+                        || (targetValue instanceof List && ((List<?>) targetValue).size() == 0)
+                        || (targetValue instanceof Set && ((Set<?>) targetValue).size() == 0);
+                boolean baseValueEmpty = baseValue == null
+                        || (baseValue instanceof List && ((List<?>) baseValue).size() == 0)
+                        || (baseValue instanceof Set && ((Set<?>) baseValue).size() == 0);
+                if (!targetValueEmpty) {
+                    if (baseValueEmpty) {
+                        diffFields.add(descriptor.getDisplayName().toLowerCase());
+                    } else {
+                        boolean equal = EqualsBuilder.reflectionEquals(targetValue, baseValue);
+                        if (!equal) {
+                            diffFields.add(descriptor.getDisplayName().toLowerCase());
+                        }
+                    }
+                }
+            }
+        }
+        return diffFields;
     }
 
     public static void setFieldMetadataFromAttribute(Attribute source, FieldMetadata fm) {

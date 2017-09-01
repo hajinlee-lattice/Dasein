@@ -51,6 +51,46 @@ public class VdbMetadataUtils {
         }
     }
 
+    public static boolean isAcceptableDataType(String srcType, String destType) {
+        if (StringUtils.isEmpty(srcType) || StringUtils.isEmpty(destType)) {
+            return false;
+        }
+        if (!StringUtils.equalsIgnoreCase(srcType, destType)) {
+            if (srcType.equalsIgnoreCase("int")) {
+                if (!destType.equalsIgnoreCase("long")) {
+                    return false;
+                }
+            } else if (srcType.equalsIgnoreCase("long")) {
+                if (!destType.equalsIgnoreCase("int")) {
+                    return false;
+                }
+            } else if (srcType.equalsIgnoreCase("float")) {
+                if (!destType.equalsIgnoreCase("double")) {
+                    return false;
+                }
+            } else if (srcType.equalsIgnoreCase("double")) {
+                if (!destType.equalsIgnoreCase("float")) {
+                    return false;
+                }
+            } else if (srcType.equalsIgnoreCase("string")) {
+                if (!destType.toLowerCase().startsWith("varchar") && !destType.toLowerCase().startsWith("nvarchar")) {
+                    return false;
+                }
+            } else if (srcType.toLowerCase().startsWith("varchar")) {
+                if (!destType.equalsIgnoreCase("string") && !destType.toLowerCase().startsWith("nvarchar")) {
+                    return false;
+                }
+            } else if (srcType.toLowerCase().startsWith("nvarchar")) {
+                if (!destType.equalsIgnoreCase("string") && !destType.toLowerCase().startsWith("varchar")) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static FundamentalType resolveFundamentalType(VdbSpecMetadata metadata) {
         String vdbFundamentalType = metadata.getFundamentalType();
         if (StringUtils.isBlank(vdbFundamentalType)) {

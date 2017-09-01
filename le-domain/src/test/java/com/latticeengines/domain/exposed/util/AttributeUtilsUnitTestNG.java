@@ -2,9 +2,12 @@ package com.latticeengines.domain.exposed.util;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
@@ -39,6 +42,45 @@ public class AttributeUtilsUnitTestNG {
         assertEquals(dest.getLogicalDataType(), LogicalDataType.Reference);
         assertEquals(dest.getDataQuality(), "Foo");
         assertEquals(dest.getInterfaceName(), InterfaceName.CompanyName);
+    }
+
+    @Test(groups = "unit")
+    public void testDiff() {
+        Attribute base = new Attribute();
+        base.setDisplayName("foo");
+        base.setSourceLogicalDataType("int");
+        base.setNullable(true);
+        base.setLogicalDataType(LogicalDataType.Reference);
+        base.setDataQuality("Foo");
+        base.setInterfaceName(InterfaceName.CompanyName);
+        base.setFundamentalType("alpha");
+        base.setStatisticalType("ratio");
+        base.setApprovedUsage(Arrays.asList(new String[] {"abc", "def"}));
+        base.setDataSource(Arrays.asList(new String[] {"abc", "vdb"}));
+        base.setTags(Arrays.asList(new String[] {"abc", "def"}));
+
+        Attribute target = new Attribute();
+        target.setDisplayName("Foo");
+        target.setSourceLogicalDataType("int");
+        target.setNullable(true);
+        target.setLogicalDataType(LogicalDataType.Reference);
+        target.setDataQuality(null);
+        target.setDescription("xxx");
+        target.setFundamentalType("alpha");
+        target.setDisplayDiscretizationStrategy("strategy");
+        target.setCategory("");
+        target.setApprovedUsage(Arrays.asList(new String[] {"abc", "def"}));
+        target.setDataSource(Arrays.asList(new String[] {"abc", "csv"}));
+        target.setTags(Arrays.asList(new String[] {"def", "abc"}));
+
+        HashSet<String> diffFields = AttributeUtils.diffBetweenAttributes(base, target);
+        Assert.assertEquals(diffFields.size(), 6);
+        Assert.assertTrue(diffFields.contains("displayname"));
+        Assert.assertTrue(diffFields.contains("category"));
+        Assert.assertTrue(diffFields.contains("displaydiscretizationstrategy"));
+        Assert.assertTrue(diffFields.contains("datasource"));
+        Assert.assertTrue(diffFields.contains("description"));
+        Assert.assertTrue(diffFields.contains("tags"));
     }
 
     @Test(groups = "unit")

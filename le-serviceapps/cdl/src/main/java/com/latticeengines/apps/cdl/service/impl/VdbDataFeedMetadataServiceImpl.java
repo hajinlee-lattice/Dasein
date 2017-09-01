@@ -23,11 +23,18 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("vdbDataFeedMetadataService")
 public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     private static final Logger log = LoggerFactory.getLogger(VdbDataFeedMetadataServiceImpl.class);
+
+    private static final String[] VDB_ATTR_FIELDS = {"DisplayName", "SourceLogicalDataType", "Description",
+            "FundamentalType", "StatisticalType", "DisplayDiscretizationStrategy", "DataQuality", "DataSource",
+            "ApprovedUsage", "Tags"};
 
     public VdbDataFeedMetadataServiceImpl() {
         super(SourceType.VISIDB.getName());
@@ -173,8 +180,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         for (Attribute attr : targetTable.getAttributes()) {
             if (srcAttrs.containsKey(attr.getName())) {
-                if (!StringUtils.equals(srcAttrs.get(attr.getName()).getSourceLogicalDataType(),
-                        attr.getSourceLogicalDataType())) {
+                if (!compareAttribute(srcAttrs.get(attr.getName()), attr)) {
                     result = false;
                     break;
                 }
@@ -186,6 +192,20 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         return result;
     }
 
+    private boolean compareAttribute(Attribute srcAttr, Attribute destAttr) {
+        HashSet<String> diffFields = AttributeUtils.diffBetweenAttributes(srcAttr, destAttr);
+        if (diffFields == null || diffFields.size() == 0) {
+            return true;
+        } else {
+            for (String field : VDB_ATTR_FIELDS) {
+                if (diffFields.contains(field.toLowerCase())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
     private boolean validateAttribute(Table srcTable, Table targetTable) {
         HashMap<String, Attribute> srcAttrs = new HashMap<>();
         for (Attribute attr : srcTable.getAttributes()) {
@@ -193,8 +213,8 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         for (Attribute attr : targetTable.getAttributes()) {
             if (srcAttrs.containsKey(attr.getName())) {
-                if (!StringUtils.equals(srcAttrs.get(attr.getName()).getSourceLogicalDataType(),
-                        attr.getSourceLogicalDataType())) {
+                if (!VdbMetadataUtils.isAcceptableDataType(srcAttrs.get(attr.getName()).getSourceLogicalDataType
+                        (), attr.getSourceLogicalDataType())) {
                     log.error(String.format("Field %s should have the type %s, not %s", attr.getName(),
                             srcAttrs.get(attr.getName()).getSourceLogicalDataType(), attr.getSourceLogicalDataType()));
                     return false;

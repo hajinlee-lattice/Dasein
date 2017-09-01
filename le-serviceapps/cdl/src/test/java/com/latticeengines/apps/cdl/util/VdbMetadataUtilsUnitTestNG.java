@@ -87,6 +87,31 @@ public class VdbMetadataUtilsUnitTestNG {
         }
     }
 
+    @Test(groups = "unit", dataProvider = "acceptableTestData")
+    public void testIsAcceptableDataType(String srcType, String destType, boolean expected) {
+        boolean result = VdbMetadataUtils.isAcceptableDataType(srcType, destType);
+        Assert.assertEquals(result, expected);
+    }
+
+    @DataProvider(name = "acceptableTestData")
+    public Object[][] acceptableTestDataProvider() {
+        return new Object[][]{
+                {"int", "Long", true},
+                {"long", "Int", true},
+                {"Float", "double", true},
+                {"Double", "float", true},
+                {"string", "VARCHAR(100)", true},
+                {"nvarchar(max)", "string", true},
+                {"varchar(10)", "NVARCHAR(200)", true},
+                {"Nvarchar(max)", "varchar(max)", true},
+                {"int", "string", false},
+                {"float", "VARCHAR(100)", false},
+                {"bit", "int", false},
+                {"Double", "BYTE", false},
+                {"short", "dateTime", false},
+        };
+    }
+
     private VdbSpecMetadata createVdbMetadata() {
         VdbSpecMetadata metadata = new VdbSpecMetadata();
         metadata.setColumnName("HG_CLOUD_INFRASTRUCTURE_COMPUTI_EB4A8EFFF7");
