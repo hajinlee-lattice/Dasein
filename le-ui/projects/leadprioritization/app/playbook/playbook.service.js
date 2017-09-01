@@ -194,6 +194,7 @@ angular.module('lp.playbook')
         var deferred = $q.defer();
         var ClientSession = BrowserStorageUtility.getClientSession();
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
+        console.log(opts);
         PlaybookWizardService.savePlay(opts).then(function(data){
             deferred.resolve(data);
             PlaybookWizardStore.setPlay(data);
@@ -371,6 +372,8 @@ angular.module('lp.playbook')
                 launchStates: launch_state
             }
         }).then(function(response){
+            deferred.resolve(response.data);
+        }, function(response) {
             deferred.resolve(response.data);
         });
         return deferred.promise;

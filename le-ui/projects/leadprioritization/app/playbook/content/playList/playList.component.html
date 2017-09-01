@@ -115,6 +115,7 @@
                             type="button"
                             class="button blue-button pull-right"
                             ng-if="play.launchHistory.playLaunch == null && play.segment != null && vm.tileStates[play.name].launching == false"
+                            ng-disabled="vm.lockLaunching"
                             ng-click="vm.launchPlay($event, play)">
                             Launch
                         </button>

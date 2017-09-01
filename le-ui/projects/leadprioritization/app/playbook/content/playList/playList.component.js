@@ -14,6 +14,7 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
         tileStates: {},
         TimestampIntervalUtility: TimestampIntervalUtility,
         NumberUtility: NumberUtility,
+        lockLaunching: false,
         query: '',
         header: {
             sort: {
@@ -61,16 +62,19 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
         }
     });
 
+    var checkLaunchState = {};
     vm.checkLaunchStateInterval = function(play){
-        var checkLaunchState = $interval(function() {
+        checkLaunchState[play.name] = $interval(function() {
             PlaybookWizardStore.getPlayLaunches(play.name).then(function(result) {
-
-                console.log(play.displayName, result[0].launchState);
-                if(result[0].launchState === 'Launched' || result[0].launchState === 'Failed') {
-                    $interval.cancel(checkLaunchState);
-                    play.launchHistory.mostRecentLaunch.launchState = result[0].launchState;
-                    vm.tileStates[play.name].launching == false;
-                }
+                if(result.errorCode) {
+                    $interval.cancel(checkLaunchState[play.name]);
+                } else if(result && result[0]) {
+                    if(result[0].launchState === 'Launched' || result[0].launchState === 'Failed') {
+                        $interval.cancel(checkLaunchState[play.name]);
+                        play.launchHistory.mostRecentLaunch.launchState = result[0].launchState;
+                        vm.tileStates[play.name].launching == false;
+                    }
+                } 
 
                 // var result = results[0];
                 // vm.launchHistory = results;
@@ -182,7 +186,7 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
     };
 
     vm.launchPlay = function($event, play) {
-
+        vm.lockLaunching = true;
         $event.stopPropagation();
 
         var tileState = vm.tileStates[play.name];
@@ -217,8 +221,10 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
 
     $scope.$on('$destroy', function() {
         onpage = false;
-        $interval.cancel(checkLaunchState);
-        checkLaunchState = null;
+        for(var i in checkLaunchState) {
+            $interval.cancel(checkLaunchState[i]);
+        }
+        checkLaunchState = {};
     });
 
     

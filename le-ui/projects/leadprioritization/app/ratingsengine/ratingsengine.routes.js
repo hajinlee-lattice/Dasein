@@ -14,128 +14,13 @@ angular
             url: '/ratings_engine',
             resolve: {
                 RatingList: function($q, RatingsEngineStore) {
-                    // var deferred = $q.defer();
+                    var deferred = $q.defer();
 
-                    // RatingsEngineStore.getRatings().then(function(result) {
-                    //     deferred.resolve(result);
-                    // });
+                    RatingsEngineStore.getRatings().then(function(result) {
+                        deferred.resolve(result);
+                    });
 
-                    // return deferred.promise;
-
-                    return [
-                      {
-                        "created": "2017-08-28T17:11:47.490Z",
-                        "createdBy": "string",
-                        "displayName": "Jon Test Rating Engine",
-                        "id": "1234",
-                        "note": "string",
-                        "pid": 0,
-                        "ratingModels": [
-                          {
-                            "created": "2017-08-28T17:11:47.490Z",
-                            "id": "string",
-                            "iteration": 0,
-                            "ratingEngine": {
-                              "created": "2017-08-28T17:11:47.490Z",
-                              "createdBy": "string",
-                              "displayName": "string",
-                              "id": "string",
-                              "note": "string",
-                              "pid": 0,
-                              "ratingModels": [
-                                {}
-                              ],
-                              "segment": {
-                                "created": "2017-08-28T17:11:47.490Z",
-                                "description": "string",
-                                "display_name": "string",
-                                "frontend_restriction": {
-                                  "restriction": {
-                                    "childMap": {},
-                                    "children": [
-                                      {
-                                        "childMap": {},
-                                        "children": [
-                                          {}
-                                        ]
-                                      }
-                                    ]
-                                  }
-                                },
-                                "is_master_segment": true,
-                                "masterSegment": true,
-                                "name": "string",
-                                "restriction": {
-                                  "childMap": {},
-                                  "children": [
-                                    {
-                                      "childMap": {},
-                                      "children": [
-                                        {}
-                                      ]
-                                    }
-                                  ]
-                                },
-                                "updated": "2017-08-28T17:11:47.499Z"
-                              },
-                              "status": "ACTIVE",
-                              "tenant": {
-                                "DisplayName": "string",
-                                "Identifier": "string",
-                                "RegisteredTime": 0,
-                                "UIVersion": "string"
-                              },
-                              "type": "RULE_BASED",
-                              "updated": "2017-08-28T17:11:47.499Z"
-                            },
-                            "updated": "2017-08-28T17:11:47.499Z"
-                          }
-                        ],
-                        "segment": {
-                          "created": "2017-08-28T17:11:47.499Z",
-                          "description": "string",
-                          "display_name": "string",
-                          "frontend_restriction": {
-                            "restriction": {
-                              "childMap": {},
-                              "children": [
-                                {
-                                  "childMap": {},
-                                  "children": [
-                                    {}
-                                  ]
-                                }
-                              ]
-                            }
-                          },
-                          "is_master_segment": true,
-                          "masterSegment": true,
-                          "name": "string",
-                          "restriction": {
-                            "childMap": {},
-                            "children": [
-                              {
-                                "childMap": {},
-                                "children": [
-                                  {}
-                                ]
-                              }
-                            ]
-                          },
-                          "updated": "2017-08-28T17:11:47.499Z"
-                        },
-                        "status": "ACTIVE",
-                        "tenant": {
-                          "DisplayName": "string",
-                          "Identifier": "string",
-                          "RegisteredTime": 0,
-                          "UIVersion": "string"
-                        },
-                        "type": "RULE_BASED",
-                        "updated": "2017-08-28T17:11:47.499Z"
-                      }
-                    ]
-
+                    return deferred.promise;
                 }   
             },
             views: {
@@ -152,6 +37,17 @@ angular
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Ratings Engine'
+            },
+            resolve: {
+                RatingsList: function($q, RatingsEngineStore) {
+                    var deferred = $q.defer();
+
+                    RatingsEngineStore.getRatings().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
             },
             views: {
                 "main@": {
@@ -216,7 +112,7 @@ angular
                 },
                 WizardProgressItems: function(RatingsEngineStore) {
                     return [
-                        { label: 'Segment', state: 'segment' },
+                        { label: 'Segment', state: 'segment', nextFn: RatingsEngineStore.nextSaveGeneric },
                         { label: 'Attributes', state: 'segment.attributes' },
                         { label: 'Rules', state: 'segment.attributes.rules' }
                     ];
