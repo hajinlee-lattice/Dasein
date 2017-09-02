@@ -6,13 +6,13 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_COUNT;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
 
-import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 @Component(BEAN_NAME)
 public class AMStatsReport extends ConfigurableFlowBase<TransformerConfig> {
@@ -23,7 +23,7 @@ public class AMStatsReport extends ConfigurableFlowBase<TransformerConfig> {
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         Node stats = addSource(parameters.getBaseTables().get(0));
-        stats = stats.filter(String.format("%s == \"%s\"", STATS_ATTR_NAME, InterfaceName.LatticeAccountId.name()), new FieldList(STATS_ATTR_NAME));
+        stats = stats.filter(String.format("\"%s\".equals(%s)", InterfaceName.LatticeAccountId.name(), STATS_ATTR_NAME), new FieldList(STATS_ATTR_NAME));
         stats = stats.discard(STATS_ATTR_NAME, STATS_ATTR_BKTS, STATS_ATTR_ALGO);
         stats = stats.rename(new FieldList(STATS_ATTR_COUNT), new FieldList("RecordCount"));
         return stats;

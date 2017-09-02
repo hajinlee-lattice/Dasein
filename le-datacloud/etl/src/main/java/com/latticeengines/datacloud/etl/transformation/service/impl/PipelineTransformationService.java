@@ -59,7 +59,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 /**
  * This transformation service allows parameterizing the source and target,
- * pipelining the tranformation process.
+ * pipelining the transformation process.
  */
 @Component("pipelineTransformationService")
 public class PipelineTransformationService extends AbstractTransformationService<PipelineTransformationConfiguration>

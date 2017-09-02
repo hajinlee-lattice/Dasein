@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.dataflow.transformation.AMStatsHQDuns;
+import com.latticeengines.datacloud.dataflow.transformation.AMStatsReport;
 import com.latticeengines.datacloud.dataflow.transformation.ExtractCube;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -86,6 +87,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             TransformationStepConfig bucket = bucket();
             TransformationStepConfig hqduns = hqduns();
             TransformationStepConfig calcStats = calcStats();
+            TransformationStepConfig report = report();
             TransformationStepConfig extractTopCube = extractTopCube();
             // -----------
             List<TransformationStepConfig> steps = Arrays.asList( //
@@ -93,6 +95,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
                     bucket, //
                     hqduns, //
                     calcStats, //
+                    report,
                     extractTopCube);
             // -----------
             steps.get(steps.size() - 1).setTargetSource(getTargetSourceName());
@@ -145,7 +148,17 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         config.setDedupFields(Arrays.asList(HQ_DUNS, HQ_DUNS_DOMAIN));
         String confStr = setDataFlowEngine(JsonUtils.serialize(config), "TEZ");
         step.setConfiguration(confStr);
-        step.setTargetSource("AccountMasterStatistics");
+        step.setTargetSource("AccountMasterStats");
+        return step;
+    }
+
+
+    private TransformationStepConfig report() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(3));
+        step.setTransformer(AMStatsReport.TRANSFORMER_NAME);
+        step.setConfiguration("{}");
+        step.setTargetSource("AccountMasterReport");
         return step;
     }
 
