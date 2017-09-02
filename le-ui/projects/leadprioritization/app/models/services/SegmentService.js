@@ -65,7 +65,7 @@ angular
         this.sanitizeSegment(segment);
 
         return SegmentService.CreateOrUpdateSegment(segment);
-    };
+    }
 
     this.sanitizeSegment = function(segment) {
         var restriction = segment.account_restriction.restriction;

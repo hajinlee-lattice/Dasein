@@ -23,7 +23,8 @@ angular
                 type: '',
                 label: '',
                 range: [],
-                operation: ''
+                operation: '',
+                unused: false
             });
 
             vm.init = function (type, value) {
@@ -42,8 +43,8 @@ angular
                         vm.range = vm.item.topbkt.Rng;
                         
                         vm.setOperation(vm.item, vm.type, vm.label, vm.range);
-
-                        if (!vm.tree.bucketRestriction.bkt.Id) {
+console.log(typeof vm.tree.bucketRestriction.bkt.Id, vm.tree.bucketRestriction.bkt.Id, vm.tree)
+                        if (typeof vm.tree.bucketRestriction.bkt.Id != "number") {
                             vm.tree.bucketRestriction.bkt.Id = vm.tree.labelGlyph;
                             vm.unused = true;
                         }

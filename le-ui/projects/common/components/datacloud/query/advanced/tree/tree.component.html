@@ -140,7 +140,7 @@
         <i class="fa fa-close" ng-click="vm.clickDelete($parent)"></i>
     </div>
 
-    <div if="vm.unused">
+    <div ng-if="vm.unused === true" class="query-section-item-unused">
         UNUSED
     </div>
 </div>

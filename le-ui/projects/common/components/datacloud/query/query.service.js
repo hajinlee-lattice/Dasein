@@ -11,9 +11,19 @@ angular.module('common.datacloud.query.service',[
     this.history = [];
 
     this.validContexts = ['accounts', 'contacts'];
+
     var allRestrictions = [];
     var anyRestrictions = [];
-    this.restriction = {restriction: {logicalRestriction: {operator: "AND",restrictions: [{logicalRestriction: {operator: "AND",restrictions: allRestrictions}},{logicalRestriction: {operator: "OR",restrictions: anyRestrictions}}]}}};
+
+    this.restriction = {
+        "restriction": {
+            "logicalRestriction": {
+                "operator": "AND",
+                "restrictions": allRestrictions 
+            }
+        }
+    };
+
     this.counts = {
         accounts: {
             value: 0,
@@ -24,6 +34,7 @@ angular.module('common.datacloud.query.service',[
             loading: false
         }
     };
+    
     this.accounts = [];
 
     this.setResourceTypeCount = function(resourceType, loading, value) {
@@ -94,8 +105,8 @@ angular.module('common.datacloud.query.service',[
         if (segment != null) {
 
             // Set variables so I can manipulate later when unchecking box.
-            allRestrictions = segment.account_restriction.restriction.logicalRestriction.restrictions;
-            anyRestrictions = segment.account_restriction.restriction.logicalRestriction.restrictions;
+            allRestrictions = [segment.account_restriction.restriction];
+            anyRestrictions = [segment.account_restriction.restriction];
 
             // Set restriction to get counts and data as part of the query.
             deferred.resolve( this.setRestriction(segment.account_restriction) );
@@ -106,7 +117,16 @@ angular.module('common.datacloud.query.service',[
             allRestrictions = [];
 
             // default state. restriction is empty.
-            deferred.resolve( this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}})   );
+            deferred.resolve(
+                this.setRestriction({
+                    "restriction": {
+                        "logicalRestriction": {
+                            "operator": "AND",
+                            "restrictions": allRestrictions 
+                        }
+                    }
+                })
+            );
         }
 
         return deferred.promise;
@@ -141,7 +161,14 @@ angular.module('common.datacloud.query.service',[
             bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
 
-        this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
+        this.setRestriction({
+            "restriction": {
+                "logicalRestriction": {
+                    "operator": "AND",
+                    "restrictions": allRestrictions 
+                }
+            }
+        });
 
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
@@ -166,7 +193,14 @@ angular.module('common.datacloud.query.service',[
         }
 
         allRestrictions.splice(index, 1);
-        this.setRestriction({"restriction": {"logicalRestriction": {"operator": "AND","restrictions": [{"logicalRestriction": {"operator": "AND","restrictions": allRestrictions }},{"logicalRestriction": {"operator": "OR","restrictions": anyRestrictions }}]}}});
+        this.setRestriction({
+            "restriction": {
+                "logicalRestriction": {
+                    "operator": "AND",
+                    "restrictions": allRestrictions 
+                }
+            }
+        });
 
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){

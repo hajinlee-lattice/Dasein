@@ -108,6 +108,7 @@ div.advanced-query-builder {
             }
             
             &.query-section-item-end {
+                background: #fafafa;
                 border: none;
                 cursor: default;
             
@@ -150,6 +151,13 @@ div.advanced-query-builder {
                 & * {
                     cursor: move;
                 }
+            }
+
+            .query-section-item-unused {
+                margin-top: 0.85em;
+                margin-right: 7em;
+                color: red;
+                font-weight: bold;
             }
             
             .query-section-item-content {
@@ -415,4 +423,17 @@ div.advanced-query-builder {
             }
         }
     }
+}
+
+div.wizard-content div.advanced-query-builder {
+    .query-section {
+        .query-section-item.query-section-item-end {
+            background: white;
+        }
+
+        .query-section-item-content {
+            border-right-color:  white;
+        }
+    }
+
 }

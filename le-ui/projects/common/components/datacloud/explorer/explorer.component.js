@@ -1221,54 +1221,38 @@ angular.module('common.datacloud.explorer', [
     }
 
     var getExplorerSegments = function(enrichments) {
-
         vm.clearExplorerSegments();
 
-        if(vm.metadataSegment != undefined){
-            var metadataSegments = vm.metadataSegments.restriction.logicalRestriction.restrictions;
+        if (vm.metadataSegment != undefined){
+            var restrictions = vm.metadataSegments.restriction.logicalRestriction.restrictions;
         } else {
-            var metadataSegments = QueryRestriction.restriction.logicalRestriction.restrictions;
+            var restrictions = QueryRestriction.restriction.logicalRestriction.restrictions;
         };
 
         if (vm.addBucketTreeRoot) {
             return;
         }
-        // console.log("!!!!!!!!!!!!!!!!!!", metadataSegments);
-        for(var i in metadataSegments) {
-            var restrictions = metadataSegments[i];
 
+        // FIXME: this should be recursive... -Lazarus
+        for (var i=0; i < restrictions.length; i++) {
+            var restriction = restrictions[i];
 
-            // console.log("Restrictions:", restrictions);
-            for(var i in restrictions) {
-                var item = restrictions[i].restrictions;
+            if (restriction.bucketRestriction) {
+                var restriction = restriction.bucketRestriction,
+                    range = restriction.bkt.Rng,
+                    label = restriction.bkt.Lbl,
+                    key = restriction.attr.split(".")[1],
+                    enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
+                    index = vm.enrichmentsMap[key];
 
-
-                // console.log("Item:", item);
-                for(var i in item) {
-                    var bucketRestriction = item[i];
-
-
-                    // console.log("Bucket:", bucketRestriction);
-                    if(bucketRestriction.bucketRestriction) {
-                        var restriction = bucketRestriction.bucketRestriction,
-                            range = restriction.bkt.Rng,
-                            label = restriction.bkt.Lbl,
-                            key = restriction.attr.split(".")[1],
-                            enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
-                            index = vm.enrichmentsMap[key];
-
-                        if(index || index === 0) {
-                            // vm.enrichments[index].SegmentChecked = true; PLS-4589
-                            vm.enrichments[index].SegmentRangesChecked = {};
-                            vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
-                            vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
-                        }
-                    }
+                if (index || index === 0) {
+                    // vm.enrichments[index].SegmentChecked = true; PLS-4589
+                    vm.enrichments[index].SegmentRangesChecked = {};
+                    vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
+                    vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
                 }
             }
         }
-
-
     }
 
     vm.clearExplorerSegments = function() {
@@ -1540,11 +1524,19 @@ angular.module('common.datacloud.explorer', [
         var segmentName = $stateParams.segment;
 
         if (segmentName === 'Create') {
-             $stateParams.defaultSegmentRestriction = JSON.stringify({restriction:{logicalRestriction:{operator:"AND",restrictions:[{logicalRestriction:{operator:"AND",restrictions:[]}},{logicalRestriction:{operator:"OR",restrictions:[]}}]}}});
-             vm.checkSaveButtonState();
+             $stateParams.defaultSegmentRestriction = JSON.stringify({
+                "restriction": {
+                    "logicalRestriction": {
+                        "operator": "AND",
+                        "restrictions": []
+                    }
+                }
+            });
+            
+            vm.checkSaveButtonState();
         } else {
             SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                $stateParams.defaultSegmentRestriction = JSON.stringify(result.frontend_restriction);
+                $stateParams.defaultSegmentRestriction = JSON.stringify(result.account_restriction);
                 vm.checkSaveButtonState();
             });
         };
@@ -1578,14 +1570,12 @@ angular.module('common.datacloud.explorer', [
                     segment = SegmentStore.sanitizeSegment({
                         'name': 'segment' + ts,
                         'display_name': 'segment' + ts,
-                        'frontend_restriction': restriction,
+                        'account_restriction': restriction,
                         'page_filter': {
                             'row_offset': 0,
                             'num_rows': 10
                         }
                     });
-
-                SegmentStore.sanitizeSegment(restriction);
 
                 SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
                     vm.saveSegmentEnabled = false;
@@ -1597,16 +1587,12 @@ angular.module('common.datacloud.explorer', [
                         segment = SegmentStore.sanitizeSegment({
                             'name': segmentData.name,
                             'display_name': segmentData.display_name,
-                            'frontend_restriction': restriction,
+                            'account_restriction': restriction,
                             'page_filter': {
                                 'row_offset': 0,
                                 'num_rows': 10
                             }
                         });
-
-                    SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
-                        vm.saveSegmentEnabled = false;
-                    });
                 });
             };
         };

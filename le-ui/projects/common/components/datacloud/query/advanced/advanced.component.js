@@ -3,7 +3,7 @@ angular.module('common.datacloud.query.advanced', [
     'common.datacloud.query.advanced.tree'
 ])
 .controller('AdvancedQueryCtrl', function(
-    $state, $stateParams, $timeout, $q, QueryStore, 
+    $state, $stateParams, $timeout, $q, QueryStore, $scope,
     QueryService, SegmentStore, DataCloudStore, Cube
 ) {
     var vm = this;
@@ -29,7 +29,7 @@ angular.module('common.datacloud.query.advanced', [
     });
 
     vm.init = function() {
-
+        
         DataCloudStore.getEnrichments().then(function(enrichments) {
             for (var i=0, enrichment; i<enrichments.length; i++) {
                 enrichment = enrichments[i];
@@ -46,9 +46,7 @@ angular.module('common.datacloud.query.advanced', [
             DataCloudStore.setEnrichmentsMap(vm.enrichmentsMap);
 
             $timeout(function() {
-                vm.tree = vm.getTree();
-
-                console.log('[AQB] init:', vm);
+        vm.tree = vm.getTree();
                 console.log('[AQB] restriction:', angular.copy(vm.restriction));
                 console.log('[AQB] items:', vm.items);
                 console.log('[AQB] cube:', vm.cube);
@@ -65,7 +63,7 @@ angular.module('common.datacloud.query.advanced', [
         //vm.generateRulesTree();
         switch (vm.mode) {
             case 'segment':
-                return vm.restriction.restriction.logicalRestriction.restrictions;
+                return [ vm.restriction.restriction ];
             case 'rules':
                 return vm.generateRulesTree();
         }
@@ -79,22 +77,21 @@ angular.module('common.datacloud.query.advanced', [
             'LE_NUMBER_OF_LOCATIONS',
             'AlexaReachPerMillion',
         ];
-        var items = DataCloudStore.getRatingEngineAttributes();
-        var bucketRestrictions = [];
 
-        //console.log(DataCloudStore.getRatingEngineAttributes(), items);
-        
+        //var items = DataCloudStore.getRatingEngineAttributes();
+        var bucketRestrictions = [];
         items.forEach(function(value, index) {
             var item = vm.enrichments[vm.enrichmentsMap[value]]
-            //console.log(index, value, item.Entity, item, vm);
-            bucketRestrictions.push({
-                bucketRestriction: {
-                    attr: item.Entity + '.' + value,
-                    bkt: {}
-                }
-            })
-        });
 
+            if (item) {
+                bucketRestrictions.push({
+                    bucketRestriction: {
+                        attr: item.Entity + '.' + value,
+                        bkt: {}
+                    }
+                })
+            }
+        });
 
         return {
             restriction: {
@@ -112,15 +109,13 @@ angular.module('common.datacloud.query.advanced', [
 
             item.cube = cube;
             item.topbkt = tree.bkt;
-            //console.log(item, tree);
-
 
             vm.items.push(item);
         }
     }
 
     vm.setCurrentSavedTree = function() {
-        QueryStore.currentSavedTree = angular.copy(vm.restriction.restriction.logicalRestriction.restrictions);
+        QueryStore.currentSavedTree = angular.copy(vm.tree);
     }
 
     vm.getBucketLabel = function(bucket) {
@@ -139,15 +134,14 @@ angular.module('common.datacloud.query.advanced', [
         vm.labelIncrementor = 0;
 
         var tree = angular.copy(vm.tree),
-            old = angular.copy(vm.history[vm.history.length -1]);
+            old = angular.copy(vm.history[vm.history.length -1]) || [];
 
         // remove AQB properties like labelGlyph/collapse
-        SegmentStore.sanitizeSegmentRestriction([tree]);
-        SegmentStore.sanitizeSegmentRestriction([old]);
+        SegmentStore.sanitizeSegmentRestriction(tree);
+        SegmentStore.sanitizeSegmentRestriction(old);
 
         if (JSON.stringify(old) !== JSON.stringify(tree)) {
             vm.history.push(tree);
-            console.log('save', vm.history.length, vm.history, tree, old);
 
             if (!noCount) {
                 vm.updateCount();
@@ -159,7 +153,10 @@ angular.module('common.datacloud.query.advanced', [
         var lastState = vm.history.pop();
 
         if (lastState) {
-            vm.restriction.restriction.logicalRestriction.restrictions = lastState;
+            vm.restriction = {
+                restriction: lastState[0]
+            };
+
             vm.tree = lastState;
             vm.updateCount();
         }
@@ -216,13 +213,13 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.checkDisableSave = function() {
-        var old = angular.copy(QueryStore.currentSavedTree),
-            current = angular.copy(vm.tree[0]);
+        var old = angular.copy(QueryStore.currentSavedTree.restriction),
+            current = angular.copy(vm.tree.restriction);
 
         // remove AQB properties like labelGlyph/collapse
         SegmentStore.sanitizeSegmentRestriction([old]);
         SegmentStore.sanitizeSegmentRestriction([current]);
-        
+
         return (JSON.stringify(old) === JSON.stringify(current));
     }
 
