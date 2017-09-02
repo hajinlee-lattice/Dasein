@@ -24,7 +24,7 @@ public class CustomerReportUnitTestNG {
         report.setReportedByUser("penglong.liu@lattice-engines.com");
         report.setSuggestedValue("test");
 
-        IncorreceLookupReproduceDetail lookupDetail = new IncorreceLookupReproduceDetail();
+        IncorrectLookupReproduceDetail lookupDetail = new IncorrectLookupReproduceDetail();
         Map<String, String> inputKeys = new HashMap<>();
         Map<String, String> matchedKeys = new HashMap<>();
         inputKeys.put(MatchKey.Country.toString(), "United States");
@@ -38,9 +38,9 @@ public class CustomerReportUnitTestNG {
 
         Assert.assertEquals(id, equalReport.getId());
         Assert.assertEquals(CustomerReportType.LOOkUP, equalReport.getType());
-        Assert.assertTrue(equalReport.getReproduceDetail() instanceof IncorreceLookupReproduceDetail);
+        Assert.assertTrue(equalReport.getReproduceDetail() instanceof IncorrectLookupReproduceDetail);
 
-        IncorrectMatchedAtttributeReproduceDetail matchDetail = new IncorrectMatchedAtttributeReproduceDetail();
+        IncorrectMatchedAttributeReproduceDetail matchDetail = new IncorrectMatchedAttributeReproduceDetail();
         matchDetail.setInputKeys(inputKeys);
         matchDetail.setMatchedKeys(matchedKeys);
         matchDetail.setAttribute("Country");
@@ -48,6 +48,6 @@ public class CustomerReportUnitTestNG {
         report.setReproduceDetail(matchDetail);
         String json1 = JsonUtils.serialize(report);
         CustomerReport equalReport1 = JsonUtils.deserialize(json1, CustomerReport.class);
-        Assert.assertTrue(equalReport1.getReproduceDetail() instanceof IncorrectMatchedAtttributeReproduceDetail);
+        Assert.assertTrue(equalReport1.getReproduceDetail() instanceof IncorrectMatchedAttributeReproduceDetail);
     }
 }

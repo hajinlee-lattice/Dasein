@@ -18,7 +18,7 @@
 
     <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="propDataManage"/>
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage"/>
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.manage, com.latticeengines.domain.exposed.datacloud.customer"/>
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">${datacloud.manage.dialect}</prop>
@@ -57,4 +57,7 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="customerReportDao" class="com.latticeengines.datacloud.core.dao.impl.CustomerReportDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
 </beans>

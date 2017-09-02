@@ -14,7 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Type;
 
@@ -42,7 +41,8 @@ public class CustomerReport implements HasId<String>, HasPid{
     @JsonProperty("Type")
     private CustomerReportType type;
 
-    private ReproduceDetail reproduceDetail;
+    @JsonIgnore
+    private String reproduceDetail;
 
     @JsonProperty("SuggestedValue")
     private String suggestedValue;
@@ -102,34 +102,30 @@ public class CustomerReport implements HasId<String>, HasPid{
     @Transient
     @JsonProperty("ReproduceDetail")
     public ReproduceDetail getReproduceDetail() {
-        return reproduceDetail;
+        String detail = getReproduceDetailAsString();
+        if (detail == null) {
+            return null;
+        } else {
+            return JsonUtils.deserialize(detail, ReproduceDetail.class);
+        }
     }
 
     @Transient
     @JsonProperty("ReproduceDetail")
     public void setReproduceDetail(ReproduceDetail reproduceDetail) {
-        this.reproduceDetail = reproduceDetail;
+        setReproduceDetailAsString(JsonUtils.serialize(reproduceDetail));
     }
 
     @Column(name = "REPRODUCEDETAIL")
     @Type(type = "text")
     @JsonIgnore
     private String getReproduceDetailAsString() {
-        ReproduceDetail detail = getReproduceDetail();
-        if (detail == null) {
-            return null;
-        } else {
-            return JsonUtils.serialize(detail);
-        }
+        return reproduceDetail;
     }
 
     @JsonIgnore
     private void setReproduceDetailAsString(String reproduceDetailString) {
-        if (StringUtils.isEmpty(reproduceDetailString)) {
-            return ;
-        } else {
-            setReproduceDetail(JsonUtils.deserialize(reproduceDetailString, ReproduceDetail.class));
-        }
+        this.reproduceDetail = reproduceDetailString;
     }
 
     @Column(name = "SUGGESTED_VALUE")

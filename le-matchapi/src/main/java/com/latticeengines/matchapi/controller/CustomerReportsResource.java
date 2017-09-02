@@ -1,7 +1,8 @@
-package com.latticeengines.datacloudapi.api.controller;
+package com.latticeengines.matchapi.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
+import com.latticeengines.matchapi.service.CustomerReportService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,20 +22,15 @@ import io.swagger.annotations.ApiOperation;
 public class CustomerReportsResource {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerReportsResource.class);
+    @Autowired
+    private CustomerReportService customerReportService;
 
-    @RequestMapping(value = "/incorrectlookups", method = RequestMethod.POST)
+    @RequestMapping(value = "/", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert one customer report")
     public ResponseDocument<String> createLookupCustomerReport(@RequestBody CustomerReport report) {
         log.debug(String.format("customer report %s is created", report));
-        return null;
-    }
-
-    @RequestMapping(value = "/incorrectmatchedattrs", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Insert one customer report")
-    public ResponseDocument<String> createMatchedAttrsCustomerReport(@RequestBody CustomerReport report) {
-        log.debug(String.format("customer report %s is created", report));
-        return null;
+        customerReportService.saveReport(report);
+        return ResponseDocument.successResponse(report.getId());
     }
 }

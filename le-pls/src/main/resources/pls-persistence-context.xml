@@ -49,4 +49,37 @@
         <property name="sessionFactory" ref="sessionFactoryAccountMaster"/>
     </bean>
 
+    <bean name="propDataManage" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${pls.manage.driver}"/>
+        <property name="jdbcUrl" value="${pls.manage.url}"/>
+        <property name="user" value="${pls.manage.user}" />
+        <property name="password" value="${pls.manage.password.encrypted}" />
+        <property name="acquireIncrement" value="2"/>
+        <property name="maxPoolSize" value="8"/>
+        <property name="checkoutTimeout" value="10000"/>
+        <property name="idleConnectionTestPeriod" value="10"/>
+        <property name="maxIdleTime" value="30"/>
+    </bean>
+
+    <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="propDataManage"/>
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud.customer"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${pls.manage.dialect}</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManagerPropDataManage" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+          p:sessionFactory-ref="sessionFactoryPropDataManage">
+        <qualifier value="propDataManage"/>
+    </bean>
+
+   <tx:annotation-driven/>
+    <bean id="dataCloudDao" class="com.latticeengines.pls.dao.impl.DataCloudDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
+    </bean>
 </beans>
