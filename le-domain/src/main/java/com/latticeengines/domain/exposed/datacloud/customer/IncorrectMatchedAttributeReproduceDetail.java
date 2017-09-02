@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.customer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class IncorrectMatchedAtttributeReproduceDetail extends ReproduceDetail{
+public class IncorrectMatchedAttributeReproduceDetail extends ReproduceDetail{
 
     @JsonProperty("Attribute")
     private String attribute;
