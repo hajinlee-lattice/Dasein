@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ReproduceDetailType")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = IncorrectLookupReproduceDetail.class, name = "IncorrectLookupReproduceDetail"),
-        @JsonSubTypes.Type(value = IncorrectMatchedAttributeReproduceDetail.class, name = "IncorrectMatchedAttributeReproduceDetail"),
+        @JsonSubTypes.Type(value = IncorrectMatchedAtttributeReproduceDetail.class, name = "IncorrectMatchedAttributeReproduceDetail"),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class ReproduceDetail {
