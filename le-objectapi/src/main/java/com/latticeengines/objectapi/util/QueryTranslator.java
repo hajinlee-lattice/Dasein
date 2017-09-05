@@ -3,6 +3,7 @@ package com.latticeengines.objectapi.util;
 import java.util.List;
 import java.util.TreeMap;
 
+import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +35,7 @@ public class QueryTranslator {
     public static Query translate(FrontEndQuery frontEndQuery, QueryDecorator decorator) {
         BusinessEntity mainEntity = frontEndQuery.getMainEntity();
 
-        Restriction restriction = translateFrontEndRestriction(
-                getEntityFrontEndRestriction(mainEntity, frontEndQuery));
+        Restriction restriction = translateFrontEndRestriction(getEntityFrontEndRestriction(mainEntity, frontEndQuery));
 
         restriction = translateSalesforceIdRestriction(frontEndQuery, mainEntity, restriction);
 
@@ -92,64 +92,64 @@ public class QueryTranslator {
     }
 
     private static FrontEndRestriction getEntityFrontEndRestriction(BusinessEntity entity,
-                                                                    FrontEndQuery frontEndQuery) {
+            FrontEndQuery frontEndQuery) {
         switch (entity) {
-            case Account:
-                return frontEndQuery.getAccountRestriction();
-            case Contact:
-                return frontEndQuery.getContactRestriction();
-            default:
-                return null;
+        case Account:
+            return frontEndQuery.getAccountRestriction();
+        case Contact:
+            return frontEndQuery.getContactRestriction();
+        default:
+            return null;
         }
     }
 
-    private static Restriction translateSalesforceIdRestriction(FrontEndQuery frontEndQuery,
-                                                                BusinessEntity entity,
-                                                                Restriction restriction) {
+    private static Restriction translateSalesforceIdRestriction(FrontEndQuery frontEndQuery, BusinessEntity entity,
+            Restriction restriction) {
         // only add salesforce id restriction for account entity now
         if (BusinessEntity.Account == entity) {
             if (frontEndQuery.restrictNullSalesforceId()) {
-                Restriction sfidRestriction = Restriction.builder().let(entity, "SalesforceAccountID")
-                        .isNull().build();
+                Restriction sfidRestriction = Restriction.builder().let(entity, "SalesforceAccountID").isNull().build();
                 restriction = Restriction.builder().and(restriction, sfidRestriction).build();
             } else if (frontEndQuery.restrictNotNullSalesforceId()) {
-                Restriction sfidRestriction = Restriction.builder().let(entity, "SalesforceAccountID")
-                        .isNotNull().build();
+                Restriction sfidRestriction = Restriction.builder().let(entity, "SalesforceAccountID").isNotNull()
+                        .build();
                 restriction = Restriction.builder().and(restriction, sfidRestriction).build();
             }
         }
         return restriction;
     }
 
-    private static Restriction translateInnerRestriction(FrontEndQuery frontEndQuery,
-                                                         BusinessEntity outerEntity,
-                                                         Restriction outerRestriction) {
+    private static Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
+            Restriction outerRestriction) {
         Restriction innerRestriction = null;
+        BusinessEntity innerEntity = null;
         switch (outerEntity) {
-            case Contact:
-                FrontEndRestriction accountFrontEndRestriction =
-                        getEntityFrontEndRestriction(BusinessEntity.Account,frontEndQuery);
-                Restriction accountRestriction = translateFrontEndRestriction(accountFrontEndRestriction);
-                if (accountRestriction != null) {
-                    innerRestriction = Restriction.builder()
-                            .exists(BusinessEntity.Account).that(accountRestriction).build();
-                }
-                break;
-            case Account:
-                FrontEndRestriction contactFrontEndRestriction =
-                        getEntityFrontEndRestriction(BusinessEntity.Contact,frontEndQuery);
-                Restriction contactRestriction = translateFrontEndRestriction(contactFrontEndRestriction);
-                if (contactRestriction != null) {
-                    innerRestriction = Restriction.builder()
-                            .exists(BusinessEntity.Contact).that(contactRestriction).build();
-                }
-                break;
-            default:
-                break;
+        case Contact:
+            innerEntity = BusinessEntity.Account;
+            FrontEndRestriction accountFrontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account,
+                    frontEndQuery);
+            innerRestriction = translateFrontEndRestriction(accountFrontEndRestriction);
+            break;
+        case Account:
+            innerEntity = BusinessEntity.Contact;
+            FrontEndRestriction contactFrontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Contact,
+                    frontEndQuery);
+            innerRestriction = translateFrontEndRestriction(contactFrontEndRestriction);
+            break;
+        default:
+            break;
         }
-        return (innerRestriction == null) ?
-                outerRestriction :
-                Restriction.builder().and(outerRestriction, innerRestriction).build();
+        return translateInnerRestriction(outerRestriction, innerEntity, innerRestriction);
+    }
+
+    private static Restriction translateInnerRestriction(Restriction outerRestriction, BusinessEntity innerEntity,
+            Restriction innerRestriction) {
+        Restriction existsRestriction = null;
+        if (innerRestriction != null) {
+            existsRestriction = Restriction.builder().exists(innerEntity).that(innerRestriction).build();
+        }
+        return (existsRestriction == null) ? outerRestriction
+                : Restriction.builder().and(outerRestriction, existsRestriction).build();
     }
 
     private static Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
@@ -190,21 +190,44 @@ public class QueryTranslator {
     }
 
     public static CaseLookup translateRatingRule(BusinessEntity entity, RatingRule ratingRule, String alias) {
-        // TODO: only handles account restriction now
+        //TODO: only support ACCOUNT_RULE for now
         TreeMap<String, Restriction> cases = new TreeMap<>();
         ratingRule.getBucketToRuleMap().forEach((key, val) -> {
             FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(RatingRule.ACCOUNT_RULE));
-            cases.put(key, translateFrontEndRestriction(frontEndRestriction));
+            Restriction accountRestriction = translateFrontEndRestriction(frontEndRestriction);
+
+            frontEndRestriction = new FrontEndRestriction();
+            frontEndRestriction.setRestriction(val.get(RatingRule.CONTACT_RULE));
+            Restriction contactRestriction = translateFrontEndRestriction(frontEndRestriction);
+
+            BusinessEntity innerEntity;
+            Restriction outerRestriction, innerRestriction;
+            if (BusinessEntity.Account.equals(entity)) {
+                innerEntity = BusinessEntity.Contact;
+                outerRestriction = accountRestriction;
+                innerRestriction = null;
+            } else if (BusinessEntity.Contact.equals(entity)) {
+                innerEntity = BusinessEntity.Account;
+                outerRestriction = contactRestriction;
+                innerRestriction = null;
+            } else {
+                throw new RuntimeException("Cannot determine inner entity based on main entity " + entity);
+            }
+
+            cases.put(key, translateInnerRestriction(outerRestriction, innerEntity, innerRestriction));
         });
         return new CaseLookup(cases, ratingRule.getDefaultBucketName(), alias);
     }
 
-    private static CaseLookup parseRatingLookup(BusinessEntity entity, AttributeLookup lookup, List<RatingModel> models) {
+    private static CaseLookup parseRatingLookup(BusinessEntity entity, AttributeLookup lookup,
+            List<RatingModel> models) {
         if (models == null) {
-            throw new RuntimeException("You specified a rating lookup " + lookup + " but no rating models, cannot parse the lookup.");
+            throw new RuntimeException(
+                    "You specified a rating lookup " + lookup + " but no rating models, cannot parse the lookup.");
         }
-        RatingModel model = models.stream().filter(m -> lookup.getAttribute().equalsIgnoreCase(m.getId())).findFirst().orElse(null);
+        RatingModel model = models.stream().filter(m -> lookup.getAttribute().equalsIgnoreCase(m.getId())).findFirst()
+                .orElse(null);
         if (model != null) {
             if (models.get(0) instanceof RuleBasedModel) {
                 RatingRule ratingRule = ((RuleBasedModel) models.get(0)).getRatingRule();

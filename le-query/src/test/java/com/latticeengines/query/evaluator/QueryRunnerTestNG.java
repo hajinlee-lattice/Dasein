@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.querydsl.sql.SQLQuery;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -73,6 +74,23 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testExistsRestriction() {
+        Restriction inner1 = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).eq("Director of IT")
+                .build();
+        Restriction inner2 = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_COUNTRY).eq("United States")
+                .build();
+        Restriction inner = Restriction.builder().and(inner1, inner2).build();
+        Restriction restriction = Restriction.builder() //
+                .exists(BusinessEntity.Contact) //
+                .that(inner) //
+                .build();
+        Query query = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_NAME).from(BusinessEntity.Account)
+                .where(restriction).build();
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
+        Assert.assertEquals(results.size(), 5);
+    }
+
+    @Test(groups = "functional")
     public void testRangeLookup() {
         Restriction range1 = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("a", "z") //
@@ -82,21 +100,21 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count1, 2331);
 
         Restriction range2 = Restriction.builder() //
-                .let(BusinessEntity.Account, "AlexaViewsPerUser").in(1.0, 3.5) //
+                .let(BusinessEntity.Account, "AlexaViewsPerUser").in(1.0, 9.5) //
                 .build();
         Query query2 = Query.builder().where(range2).build();
         long count2 = queryEvaluatorService.getCount(attrRepo, query2);
-        Assert.assertEquals(count2, 6317);
+        Assert.assertEquals(count2, 306);
 
         query2 = Query.builder().where(range2).from(BusinessEntity.Account).build();
         count2 = queryEvaluatorService.getCount(attrRepo, query2);
-        Assert.assertEquals(count2, 6317);
+        Assert.assertEquals(count2, 306);
 
         Restriction restriction = Restriction.builder().and(range1, range2).build();
         Query query = Query.builder().where(restriction).build();
         long count = queryEvaluatorService.getCount(attrRepo, query);
-        Assert.assertEquals(count, 11);
         Assert.assertTrue(count <= count1 && count <= count2);
+        Assert.assertEquals(count, 1);
     }
 
     @Test(groups = "functional", dataProvider = "bitEncodedData")
@@ -112,11 +130,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
 
     @DataProvider(name = "bitEncodedData", parallel = true)
     private Object[][] provideBitEncodedData() {
-        return new Object[][] {
-            { "Yes", BUCKETED_YES_IN_CUSTOEMR },
-            { "No", BUCKETED_NO_IN_CUSTOEMR },
-            { null, BUCKETED_NULL_IN_CUSTOEMR }
-        };
+        return new Object[][] { { "Yes", BUCKETED_YES_IN_CUSTOEMR }, { "No", BUCKETED_NO_IN_CUSTOEMR },
+                { null, BUCKETED_NULL_IN_CUSTOEMR } };
     }
 
     @Test(groups = "functional")
@@ -124,7 +139,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Restriction domainInRange = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).in("c", "m") //
                 .build();
-        Query query1 = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
+        Query query1 = Query.builder()
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                 .where(domainInRange) //
                 .orderBy(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
                 .build();
@@ -139,7 +155,8 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         String prevName = null;
         do {
             PageFilter pageFilter = new PageFilter(offset, pageSize);
-            Query query = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
+            Query query = Query.builder()
+                    .select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_CITY) //
                     .where(domainInRange) //
                     .orderBy(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
                     .page(pageFilter) //

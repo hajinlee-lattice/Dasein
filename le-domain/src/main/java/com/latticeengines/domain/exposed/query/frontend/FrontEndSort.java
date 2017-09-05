@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.query.frontend;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -20,7 +21,7 @@ public class FrontEndSort {
     private Boolean descending;
 
     public FrontEndSort(List<AttributeLookup> lookups, Boolean descending) {
-        this.attributes = lookups;
+        this.attributes = new ArrayList<>(lookups);
         setDescending(descending);
     }
 

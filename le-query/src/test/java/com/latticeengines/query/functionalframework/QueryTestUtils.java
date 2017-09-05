@@ -1,28 +1,28 @@
 package com.latticeengines.query.functionalframework;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 
 public class QueryTestUtils {
 
-    private static AttributeRepository amAttrRepo;
-    private static AttributeRepository customAttrRepo;
+    private static AttributeRepository attrRepo;
 
     public static AttributeRepository getCustomerAttributeRepo() {
-        if (customAttrRepo == null) {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("attrrepo.json");
-            customAttrRepo = JsonUtils.deserialize(is, AttributeRepository.class);
+        if (attrRepo == null) {
+            synchronized (QueryTestUtils.class) {
+                try {
+                    InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("attrrepo.json.gz");
+                    GZIPInputStream gis = new GZIPInputStream(is);
+                    attrRepo = JsonUtils.deserialize(gis, AttributeRepository.class);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to read attrrepo.json.gz");
+                }
+            }
         }
-        return customAttrRepo;
-    }
-
-    public static AttributeRepository getAMAttributeRepo() {
-        if (amAttrRepo == null) {
-            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("am_attrrepo.json");
-            amAttrRepo = JsonUtils.deserialize(is, AttributeRepository.class);
-        }
-        return amAttrRepo;
+        return attrRepo;
     }
 }

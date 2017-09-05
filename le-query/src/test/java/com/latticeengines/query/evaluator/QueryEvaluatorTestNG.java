@@ -24,6 +24,7 @@ import com.querydsl.sql.SQLQuery;
 public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
     private static final String ACCOUNT = BusinessEntity.Account.name();
+    private static final String CONTACT = BusinessEntity.Contact.name();
 
     @Test(groups = "functional")
     public void testAutowire() {
@@ -52,8 +53,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .select(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR) //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("select (%s.%s&?)>>? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR,
-                BUCKETED_NOMINAL_ATTR));
+        sqlContains(sqlQuery,
+                String.format("select (%s.%s&?)>>? as %s", ACCOUNT, BUCKETED_PHYSICAL_ATTR, BUCKETED_NOMINAL_ATTR));
     }
 
     @Test(groups = "functional")
@@ -131,6 +132,24 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("%s.%s >= ?", ACCOUNT, ATTR_ACCOUNT_NAME));
         sqlContains(sqlQuery, String.format("%s.AlexaViewsPerUser < ?", ACCOUNT));
+    }
+
+    @Test(groups = "functional")
+    public void testExistsRestriction() {
+        Restriction inner1 = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_TITLE).eq("Director of IT").build();
+        Restriction inner2 = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_COUNTRY).eq("United States").build();
+        Restriction inner = Restriction.builder().and(inner1, inner2).build();
+        Restriction restriction = Restriction.builder() //
+                .exists(BusinessEntity.Contact) //
+                .that(inner) //
+                .build();
+        Query query = Query.builder().from(BusinessEntity.Account).where(restriction).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, "where exists");
+        sqlContains(sqlQuery, String.format("%s.%s = ?", CONTACT, ATTR_CONTACT_TITLE));
+        sqlContains(sqlQuery, String.format("%s.%s = ?", CONTACT, ATTR_CONTACT_COUNTRY));
+        sqlContains(sqlQuery, String.format("%s.%s = %s.%s", ACCOUNT, ATTR_ACCOUNT_ID, CONTACT, ATTR_ACCOUNT_ID));
+        sqlNotContain(sqlQuery, "left join");
     }
 
     @Test(groups = "functional", dataProvider = "bitEncodedData")
@@ -255,8 +274,10 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("when (%s.%s&?)>>? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
         sqlContains(sqlQuery, "else ? end");
         sqlContains(sqlQuery, "as Score");
-        Assert.assertTrue(sqlQuery.toString().indexOf(ATTR_ACCOUNT_NAME) < sqlQuery.toString().indexOf(ATTR_ACCOUNT_WEBSITE));
-        Assert.assertTrue(sqlQuery.toString().indexOf(ATTR_ACCOUNT_WEBSITE) < sqlQuery.toString().indexOf(BUCKETED_PHYSICAL_ATTR));
+        Assert.assertTrue(
+                sqlQuery.toString().indexOf(ATTR_ACCOUNT_NAME) < sqlQuery.toString().indexOf(ATTR_ACCOUNT_WEBSITE));
+        Assert.assertTrue(sqlQuery.toString().indexOf(ATTR_ACCOUNT_WEBSITE) < sqlQuery.toString()
+                .indexOf(BUCKETED_PHYSICAL_ATTR));
 
         // sub query
         SubQuery subQuery = new SubQuery(query, "Alias");

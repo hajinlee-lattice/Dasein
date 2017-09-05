@@ -116,7 +116,7 @@ public class QueryProcessor {
             }
             // JOIN T1
             EntityPath<String> targetTableName = AttrRepoUtils.getTablePathBuilder(repository, target);
-            sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(target.name()));
+            sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(target.name()));
             joinKeys.addAll(QueryUtils.getJoinPredicates(relationship));
             joinedEntities.add(target);
         }

@@ -1,13 +1,18 @@
 package com.latticeengines.query.exposed.evaluator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
@@ -15,6 +20,8 @@ import com.querydsl.sql.SQLQuery;
 
 @Component("queryEvaluatorService")
 public class QueryEvaluatorService {
+
+    private static final Logger log = LoggerFactory.getLogger(QueryEvaluatorService.class);
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy; // attr repo cached in this proxy
@@ -41,6 +48,19 @@ public class QueryEvaluatorService {
 
     public DataPage getData(AttributeRepository attrRepo, Query query) {
         DataPage dataPage = null;
+        List<Lookup> filteredLookups = new ArrayList<>();
+        for (Lookup lookup: query.getLookups()) {
+            if (lookup instanceof AttributeLookup) {
+                if (attrRepo.getColumnMetadata((AttributeLookup) lookup) != null) {
+                    filteredLookups.add(lookup);
+                } else {
+                    log.warn("Cannot find metadata for attribute lookup " + lookup.toString() + ", skip it.");
+                }
+            } else {
+                filteredLookups.add(lookup);
+            }
+        }
+        query.setLookups(filteredLookups);
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         try (PerformanceTimer timer = new PerformanceTimer(timerMessage("getData", attrRepo, sqlQuery))) {
             List<Map<String, Object>> results = queryEvaluator.run(sqlQuery, attrRepo, query).getData();

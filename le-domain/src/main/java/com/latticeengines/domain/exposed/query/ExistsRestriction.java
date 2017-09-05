@@ -1,10 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -115,17 +112,13 @@ public class ExistsRestriction extends Restriction {
 
     @Override
     public Collection<? extends GraphNode> getChildren() {
-        List<GraphNode> children = new ArrayList<>();
-        children.add(restriction);
-        return children;
+        return Collections.emptyList();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Collection<? extends GraphNode>> getChildMap() {
-        Map<String, Collection<? extends GraphNode>> map = new HashMap<>();
-        map.put("restrictions", Collections.singletonList(restriction));
-        return map;
+        return Collections.emptyMap();
     }
 
     @Override
