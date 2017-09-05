@@ -39,6 +39,8 @@ public class AccountResource extends BaseFrontEndEntityResource {
     public long getCount(@RequestBody FrontEndQuery frontEndQuery) {
         try {
             return super.getCount(frontEndQuery);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }
@@ -51,6 +53,8 @@ public class AccountResource extends BaseFrontEndEntityResource {
     public long getCountForRestriction(@RequestBody FrontEndRestriction restriction) {
         try {
             return super.getCountForRestriction(restriction);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }
@@ -63,6 +67,8 @@ public class AccountResource extends BaseFrontEndEntityResource {
     public DataPage getData(@RequestBody FrontEndQuery frontEndQuery) {
         try {
             return super.getData(frontEndQuery);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }
@@ -75,6 +81,8 @@ public class AccountResource extends BaseFrontEndEntityResource {
     public Map<String, Long> getRatingCount(@RequestBody FrontEndQuery frontEndQuery) {
         try {
             return super.getRatingCount(frontEndQuery);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }

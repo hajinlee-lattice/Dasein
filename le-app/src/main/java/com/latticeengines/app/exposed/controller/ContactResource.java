@@ -37,6 +37,8 @@ public class ContactResource extends BaseFrontEndEntityResource {
     public long getCount(@RequestBody FrontEndQuery frontEndQuery) {
         try {
             return super.getCount(frontEndQuery);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }
@@ -50,6 +52,8 @@ public class ContactResource extends BaseFrontEndEntityResource {
     public long getCountForRestriction(@RequestBody FrontEndRestriction restriction) {
         try {
             return super.getCountForRestriction(restriction);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }
@@ -62,6 +66,8 @@ public class ContactResource extends BaseFrontEndEntityResource {
     public DataPage getData(@RequestBody FrontEndQuery frontEndQuery) {
         try {
             return super.getData(frontEndQuery);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_36002, e);
         }
