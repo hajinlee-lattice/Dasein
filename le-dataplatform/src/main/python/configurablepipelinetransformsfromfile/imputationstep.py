@@ -8,6 +8,10 @@ from pipelinefwk import PipelineStep
 from pipelinefwk import create_column
 from pipelinefwk import get_logger
 
+try:
+    from precisionutil import PrecisionUtil
+except ImportError as e:
+    from leframework.util.precisionutil import PrecisionUtil
 
 logger = get_logger("pipeline")
 
@@ -226,4 +230,4 @@ class ImputationStep(PipelineStep):
 
             imputedValue = self.__matchValue(xList_notmissing_ord, eventList_notmissing_ord, binIndex, rate_null)
             
-        return imputedValue
+        return PrecisionUtil.setPlatformStandardPrecision(imputedValue)

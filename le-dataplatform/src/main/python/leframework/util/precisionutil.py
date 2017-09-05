@@ -1,5 +1,6 @@
 import numpy as np
 import numbers
+import math
 
 class PrecisionUtil(object):
 
@@ -13,11 +14,18 @@ class PrecisionUtil(object):
     def setPrecisionOfValue(cls, x, precision):
         if x is None or not isinstance(x, float) or np.isnan(x) or x == 0.0:
             return x
+        value = format(x, '.' + str(precision) + 'g')
+        return float(value)
+
+    @classmethod
+    def setPrecisionOfValue_Old(cls, x, precision):
+        if x is None or not isinstance(x, float) or np.isnan(x) or x == 0.0:
+            return x
         l = np.log10(np.fabs(x))
         e = np.int64(l)
         n = precision if l < 0.0 else precision - 1
-        m = round(float(x) / 10.0**e, n)
-        return m*10.0**e
+        m = round(float(x) / 10.0 ** e, n)
+        return m * 10.0 ** e
 
     @classmethod
     def setPrecisionOfNPArray(cls, a, precision):
