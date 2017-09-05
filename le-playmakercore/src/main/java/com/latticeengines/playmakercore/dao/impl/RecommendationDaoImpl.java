@@ -94,7 +94,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT new map " //
                 + "( " //
-                + "  recommendationId AS " + PlaymakerConstants.ID //
+                + "  pid AS " + PlaymakerConstants.ID //
+                // + " recommendationId AS " + PlaymakerConstants.ID //
                 + ", accountId AS " + PlaymakerConstants.AccountID //
                 + ", leAccountExternalID AS " + PlaymakerConstants.LEAccountExternalID //
                 + ", playId AS " + PlaymakerConstants.PlayID //
