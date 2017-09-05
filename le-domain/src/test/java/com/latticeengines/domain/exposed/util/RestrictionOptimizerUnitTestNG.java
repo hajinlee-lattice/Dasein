@@ -113,7 +113,7 @@ public class RestrictionOptimizerUnitTestNG {
     }
 
     private static BucketRestriction bucket(BusinessEntity entity, int idx) {
-        return BucketRestriction.from(Restriction.builder() //
+        return BucketRestrictionUtils.from(Restriction.builder() //
                 .let(entity, entity.name().substring(0, 1)) //
                 .eq(String.valueOf(idx)) //
                 .build());

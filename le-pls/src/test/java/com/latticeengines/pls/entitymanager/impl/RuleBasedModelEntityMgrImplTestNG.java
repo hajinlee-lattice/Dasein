@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.BucketRestrictionUtils;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.entitymanager.RuleBasedModelEntityMgr;
@@ -72,6 +73,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private Tenant tenant;
     private String ruleBasedModelId;
 
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
 
@@ -184,7 +186,7 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     private static BucketRestriction bucket(BusinessEntity entity, int idx) {
-        return BucketRestriction.from(Restriction.builder() //
+        return BucketRestrictionUtils.from(Restriction.builder() //
                 .let(entity, entity.name().substring(0, 1)) //
                 .eq(String.valueOf(idx)) //
                 .build());
