@@ -175,7 +175,9 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         if (ratingEngine != null) {
             modelId = prepareQueryUsingRatingsDefn(accountFrontEndQuery, contactFrontEndQuery,
-                    modifiableAccountIdCollectionForContacts, ratingEngine, modelId);
+                    modifiableAccountIdCollectionForContacts, ratingEngine);
+        } else {
+            log.error(String.format("Rating Engine is not set for the play %s", play.getName()));
         }
 
         if (accountFrontEndQuery.getAccountRestriction() == null) {
@@ -203,7 +205,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     private String prepareQueryUsingRatingsDefn(FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
-            List<Object> modifiableAccountIdCollectionForContacts, RatingEngine ratingEngine, String modelId) {
+            List<Object> modifiableAccountIdCollectionForContacts, RatingEngine ratingEngine) {
         List<Lookup> lookups;
         if (ratingEngine.getSegment() != null) {
             FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
@@ -212,7 +214,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             contactFrontEndQuery.setAccountRestriction(
                     prepareContactRestriction(frontEndRestriction, modifiableAccountIdCollectionForContacts));
         }
-
+        String modelId = null;
         List<RatingModel> ratingModels = new ArrayList<>();
         for (RatingModel model : ratingEngine.getRatingModels()) {
             ratingModels.add(model);
