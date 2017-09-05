@@ -54,7 +54,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             DataCollection.Version version) {
         DataCollection collection = getDataCollection(customerSpace, collectionName);
         collection.setVersion(version);
-        log.info("Switching " + collectionName + " in " + customerSpace + " to " + version);
+        log.info("Switching " + collection.getName() + " in " + customerSpace + " to " + version);
         dataCollectionEntityMgr.update(collection);
         DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
         notifyCacheWatchers(customerSpace);
@@ -133,6 +133,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (StringUtils.isBlank(collectionName)) {
             DataCollection collection = getOrCreateDefaultCollection(customerSpace);
             collectionName = collection.getName();
+        }
+        if (version == null) {
+            // by default get active version
+            version = dataCollectionEntityMgr.getActiveVersion();
         }
         return statisticsContainerEntityMgr.findInMasterSegment(collectionName, version);
     }
