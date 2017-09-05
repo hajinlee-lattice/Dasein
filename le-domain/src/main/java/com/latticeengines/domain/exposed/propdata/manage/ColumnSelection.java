@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -99,12 +97,22 @@ public class ColumnSelection {
     }
 
     public static ColumnSelection combine(Collection<ColumnSelection> selectionCollection) {
-        Set<Column> columns = new HashSet<>();
+        List<Column> columns = new ArrayList<>();
         for (ColumnSelection selection : selectionCollection) {
-            columns.addAll(selection.getColumns());
+            if (columns.isEmpty()) {
+                columns.addAll(selection.getColumns());
+            } else {
+                List<Column> incremental = new ArrayList<>();
+                selection.getColumns().forEach(col -> {
+                    if (!columns.contains(col)) {
+                        incremental.add(col);
+                    }
+                });
+                columns.addAll(incremental);
+            }
         }
         ColumnSelection columnSelection = new ColumnSelection();
-        columnSelection.setColumns(new ArrayList<Column>(columns));
+        columnSelection.setColumns(columns);
         return columnSelection;
     }
 
