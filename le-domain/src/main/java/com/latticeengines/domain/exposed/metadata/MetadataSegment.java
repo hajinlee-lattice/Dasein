@@ -6,8 +6,6 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -32,7 +30,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -87,11 +84,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Transient
     @ApiModelProperty("Contact restriction for use in the front end")
     private FrontEndRestriction contactFrontEndRestriction;
-
-    @Column(name = "ACCOUNT_CONTACT_OPERATOR", nullable = true)
-    @JsonProperty("account_contact_operator")
-    @Enumerated(EnumType.STRING)
-    private LogicalOperator accountContactOperator = LogicalOperator.AND; // default to AND
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
@@ -149,27 +141,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @JsonIgnore
-    public void setAccountContactOperator(String operatorString) {
-        LogicalOperator logicalOperator = null;
-        try {
-            logicalOperator = LogicalOperator.valueOf(operatorString);
-        } catch (Exception e) {
-            // pass
-        }
-        if (logicalOperator != null) {
-            setAccountContactOperator(logicalOperator);
-        }
-    }
-
-    public LogicalOperator getAccountContactOperator() {
-        return accountContactOperator;
-    }
-
-    public void setAccountContactOperator(LogicalOperator accountContactOperator) {
-        this.accountContactOperator = accountContactOperator;
     }
 
     @JsonProperty("account_raw_restriction")

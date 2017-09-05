@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 
@@ -28,9 +27,6 @@ public class FrontEndQuery {
 
     @JsonProperty("contact_restriction")
     private FrontEndRestriction contactRestriction;
-
-    @JsonProperty("account_contact_operator")
-    private LogicalOperator accountContactOperator = LogicalOperator.AND; // default to AND
 
     @JsonProperty("sort")
     private FrontEndSort sort;
@@ -75,14 +71,6 @@ public class FrontEndQuery {
 
     public void setContactRestriction(FrontEndRestriction contactRestriction) {
         this.contactRestriction = contactRestriction;
-    }
-
-    public LogicalOperator getAccountContactOperator() {
-        return accountContactOperator;
-    }
-
-    public void setAccountContactOperator(LogicalOperator accountContactOperator) {
-        this.accountContactOperator = accountContactOperator;
     }
 
     public FrontEndSort getSort() {
