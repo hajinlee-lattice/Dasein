@@ -81,7 +81,7 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     @Transient
     private RatingObject rating;
 
-    @JsonIgnore
+    @JsonProperty("ratingEngine")
     @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = true)
     private RatingEngine ratingEngine;
