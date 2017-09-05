@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.query.ExistsRestriction;
 import com.latticeengines.domain.exposed.query.JoinSpecification;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.evaluator.lookup.LookupResolverFactory;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.exposed.factory.QueryFactory;
@@ -18,13 +19,17 @@ public final class RestrictionResolverFactory {
     private LookupResolverFactory lookupFactory;
     private List<JoinSpecification> existsJoins;
     private QueryFactory queryFactory;
+    private QueryProcessor queryProcessor;
     private Map<String, RestrictionResolver> resolvers = new HashMap<>();
 
     public RestrictionResolverFactory(LookupResolverFactory lookupFactory,
-            List<JoinSpecification> existsJoins, QueryFactory queryFactory) {
+                                      List<JoinSpecification> existsJoins,
+                                      QueryFactory queryFactory,
+                                      QueryProcessor queryProcessor) {
         this.lookupFactory = lookupFactory;
         this.existsJoins = existsJoins;
         this.queryFactory = queryFactory;
+        this.queryProcessor = queryProcessor;
     }
 
     @SuppressWarnings("unchecked")
@@ -57,6 +62,10 @@ public final class RestrictionResolverFactory {
 
     List<JoinSpecification> getExistsJoins() {
         return existsJoins;
+    }
+
+    public QueryProcessor getQueryProcessor() {
+        return queryProcessor;
     }
 
     QueryFactory getQueryFactory() {

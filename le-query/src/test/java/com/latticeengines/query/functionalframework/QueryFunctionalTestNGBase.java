@@ -29,6 +29,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     protected static AttributeRepository attrRepo;
     protected static String accountTableName;
+    protected static String contactTableName;
 
     protected static final String BUCKETED_NOMINAL_ATTR = "TechIndicator_AdobeCreativeSuite";
     protected static final String BUCKETED_PHYSICAL_ATTR = "EAttr220";
@@ -44,6 +45,8 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static final String ATTR_CONTACT_COUNTRY = InterfaceName.Country.name();
 
     protected static final String ATTR_ACCOUNT_ID = InterfaceName.AccountId.name();
+    protected static final String ATTR_CONTACT_ID = InterfaceName.AccountId.name();
+    protected static final String ATTR_CONTACT_EMAIL = InterfaceName.Email.name();
 
     @BeforeClass(groups = "functional")
     public void setupBase() {
@@ -55,6 +58,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
             attrRepo = QueryTestUtils.getCustomerAttributeRepo();
             synchronized (QueryFunctionalTestNGBase.class) {
                 accountTableName = attrRepo.getTableName(TableRoleInCollection.BucketedAccount);
+                contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
             }
         }
         return attrRepo;

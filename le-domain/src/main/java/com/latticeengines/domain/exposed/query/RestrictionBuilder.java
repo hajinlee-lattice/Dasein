@@ -129,13 +129,30 @@ public class RestrictionBuilder {
         return in(null, max);
     }
 
-    public RestrictionBuilder in(Collection<Object> collection) {
+    public RestrictionBuilder inCollection(Collection<Object> collection) {
         if (collection == null) {
-            throw new RuntimeException("collection cannot be null");
+            throw new IllegalArgumentException("collection cannot be null");
+        }
+        if (collection.stream().anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("object in collection cannot be null.");
         }
         operator = ComparisonType.IN_COLLECTION;
         negate = false;
         rhsLookup = new CollectionLookup(collection);
+        completeConcrete();
+        return this;
+    }
+
+    public RestrictionBuilder inCollection(SubQuery subQuery, String subQueryAttrName) {
+        if (subQuery == null) {
+            throw new IllegalArgumentException("subquery cannot be null");
+        }
+        if (subQueryAttrName == null) {
+            throw new IllegalArgumentException("subquery attribute name cannot be null");
+        }
+        operator = ComparisonType.IN_COLLECTION;
+        negate = false;
+        rhsLookup = new SubQueryAttrLookup(subQuery, subQueryAttrName);
         completeConcrete();
         return this;
     }

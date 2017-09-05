@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
+import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.evaluator.restriction.RestrictionResolverFactory;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 
@@ -21,9 +22,11 @@ public final class LookupResolverFactory {
     private AttributeRepository attrRepo;
     private Map<String, LookupResolver> resolvers = new HashMap<>();
     private RestrictionResolverFactory restrictionResolverFactory;
+    private QueryProcessor queryProcessor;
 
-    public LookupResolverFactory(AttributeRepository attrRepo) {
+    public LookupResolverFactory(AttributeRepository attrRepo, QueryProcessor queryProcessor) {
         this.attrRepo = attrRepo;
+        this.queryProcessor = queryProcessor;
     }
 
     @SuppressWarnings("unchecked")
@@ -40,7 +43,7 @@ public final class LookupResolverFactory {
             return;
         }
         if (lookupType.isAssignableFrom(SubQueryAttrLookup.class)) {
-            resolvers.put(lookupType.getSimpleName(), new SubQueryAttrResolver(attrRepo));
+            resolvers.put(lookupType.getSimpleName(), new SubQueryAttrResolver(attrRepo, queryProcessor));
             return;
         }
         if (lookupType.isAssignableFrom(EntityLookup.class)) {

@@ -51,7 +51,7 @@ public class RestrictionBuilderUnitTestNG {
         verify(finalAnd);
 
         Restriction inCollection = Restriction.builder() //
-                .let(BusinessEntity.Account, "A").in(Arrays.asList(3, 5)).build();
+                .let(BusinessEntity.Account, "A").inCollection(Arrays.asList(3, 5)).build();
         verify(inCollection);
 
         Restriction contactRestriction = Restriction.builder()

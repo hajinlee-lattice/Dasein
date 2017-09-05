@@ -10,6 +10,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.query.AggregateLookup;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
@@ -71,6 +72,32 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
             Assert.assertEquals(row.get("LDC_Name").toString(), "Universal One Publishing");
             Assert.assertEquals(row.get("LDC_State").toString().toUpperCase(), "MARYLAND");
         }
+    }
+
+    @Test(groups = "functional")
+    public void testAccountWithSelectedContact() {
+        String subSelectAlias = "alias";
+        AttributeLookup accountIdAttrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_ID);
+        Restriction contactRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_EMAIL)
+                .eq("avelayudham@worldbank.org.kb").build();
+        Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .eq(1802).build();
+
+        Query innerQuery = Query.builder().from(BusinessEntity.Contact)
+                .where(contactRestriction).select(BusinessEntity.Contact, ATTR_ACCOUNT_ID).build();
+        SubQuery subQuery = new SubQuery(innerQuery, subSelectAlias);
+        Restriction subQueryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .inCollection(subQuery, ATTR_ACCOUNT_ID).build();
+
+        Restriction accountWithSelectedContact =
+                Restriction.builder().and(accountIdRestriction, subQueryRestriction).build();
+        Query query = Query.builder().where(accountWithSelectedContact)
+                .select(accountIdAttrLookup)
+                .from(BusinessEntity.Account) //
+                .build();
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
+        Assert.assertEquals(results.size(), 1);
+
     }
 
     @Test(groups = "functional")

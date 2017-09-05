@@ -8,7 +8,7 @@ import com.latticeengines.query.util.AttrRepoUtils;
 
 public abstract class BaseLookupResolver<T extends Lookup> {
 
-    private AttributeRepository repository;
+    protected AttributeRepository repository;
 
     BaseLookupResolver(AttributeRepository repository) {
         this.repository = repository;

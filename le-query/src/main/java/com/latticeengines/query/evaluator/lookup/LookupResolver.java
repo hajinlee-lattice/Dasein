@@ -11,7 +11,11 @@ public interface LookupResolver<T extends Lookup> {
         throw new UnsupportedOperationException("Resolve for aggregate compare not supported yet");
     }
 
-    List<ComparableExpression<String>> resolveForCompare(T lookup);
+    default List<ComparableExpression<String>> resolveForCompare(T lookup) {
+        throw new UnsupportedOperationException("Resolve for compare is not supported yet");
+    }
 
-    Expression<?> resolveForSelect(T lookup, boolean asAlias);
+    default Expression<?> resolveForSelect(T lookup, boolean asAlias) {
+        throw new UnsupportedOperationException("Resolve for select is not supported yet");
+    }
 }

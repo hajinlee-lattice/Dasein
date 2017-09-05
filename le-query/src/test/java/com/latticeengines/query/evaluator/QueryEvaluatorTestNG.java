@@ -95,14 +95,14 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
 
         // collection look up with 2 elements
         Restriction inCollection = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME)
-                .in(Arrays.asList('a', 'c')).build();
+                .inCollection(Arrays.asList('a', 'c')).build();
         query = Query.builder().where(inCollection).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("%s.%s in (?, ?)", ACCOUNT, ATTR_ACCOUNT_NAME));
 
         // collection look up with 1 element, corner case
         Restriction inCollection1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME)
-                .in(Collections.singleton('a')).build();
+                .inCollection(Collections.singleton('a')).build();
         query = Query.builder().where(inCollection1).build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("%s.%s = ?", ACCOUNT, ATTR_ACCOUNT_NAME));
@@ -251,6 +251,58 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("select %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
         sqlContains(sqlQuery, "sum(Account.AlexaRank)");
         sqlContains(sqlQuery, String.format("group by %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
+    }
+
+    @Test(groups = "functional")
+    public void testContactExistsJoin() {
+        AttributeLookup contactIdAttrLookup = new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_ID);
+        AttributeLookup contactEmailAttrLookup = new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_EMAIL);
+        Restriction accountNameRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).eq(
+                "INTERNATIONAL BANK FOR RECONSTRUCTION & DEVELOPMEN").build();
+        Restriction existsRestriction = Restriction.builder()
+                .exists(BusinessEntity.Account).that(accountNameRestriction).build();
+        Restriction contactRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_EMAIL)
+                .eq("avelayudham@worldbank.org.kb").build();
+        Restriction existsContactWithAccount = Restriction.builder().and(contactRestriction, existsRestriction).build();
+        Query query = Query.builder().where(existsContactWithAccount)
+                .select(contactIdAttrLookup, contactEmailAttrLookup)
+                .from(BusinessEntity.Contact) //
+                .build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("select %s.%s", CONTACT, ATTR_CONTACT_ID));
+
+    }
+
+    @Test(groups = "functional")
+    public void testAccountWithSelectedContact() {
+        String subSelectAlias = "alias";
+        AttributeLookup accountIdAttrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_ID);
+        Restriction contactRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_EMAIL)
+                .eq("avelayudham@worldbank.org.kb").build();
+        Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .eq(1802).build();
+
+        Query innerQuery = Query.builder().from(BusinessEntity.Contact)
+                .where(contactRestriction).select(BusinessEntity.Contact, ATTR_ACCOUNT_ID).build();
+        SubQuery subQuery = new SubQuery(innerQuery, subSelectAlias);
+        Restriction subQueryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .inCollection(subQuery, ATTR_ACCOUNT_ID).build();
+
+        Restriction accountWithSelectedContact =
+                Restriction.builder().and(accountIdRestriction, subQueryRestriction).build();
+        Query query = Query.builder().where(accountWithSelectedContact)
+                .select(accountIdAttrLookup)
+                .from(BusinessEntity.Account) //
+                .build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("select %s.%s", ACCOUNT, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
+        sqlContains(sqlQuery, String.format("where %s.%s = ? ", ACCOUNT, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("%s.%s in (", ACCOUNT, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("(select %s.%s", subSelectAlias, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("from %s as %s", contactTableName, CONTACT));
+        sqlContains(sqlQuery, String.format("where %s.%s = ?)", CONTACT, ATTR_CONTACT_EMAIL));
+
     }
 
     @Test(groups = "functional", enabled = false)

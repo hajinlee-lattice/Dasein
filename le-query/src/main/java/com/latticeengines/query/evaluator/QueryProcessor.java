@@ -47,9 +47,10 @@ public class QueryProcessor {
     public SQLQuery<?> process(AttributeRepository repository, Query query) {
         query.analyze();
 
-        LookupResolverFactory resolverFactory = new LookupResolverFactory(repository);
-        RestrictionResolverFactory rrFactory = new RestrictionResolverFactory(resolverFactory, query.getExistsJoins(),
-                queryFactory);
+        LookupResolverFactory resolverFactory = new LookupResolverFactory(repository, this);
+        RestrictionResolverFactory rrFactory = new RestrictionResolverFactory(
+                resolverFactory, query.getExistsJoins(),
+                queryFactory, this);
         resolverFactory.setRestrictionResolverFactory(rrFactory);
 
         SQLQuery<?> sqlQuery = from(repository, query);
@@ -85,7 +86,9 @@ public class QueryProcessor {
         SubQuery subQuery = query.getSubQuery();
         SQLQuery<?> sqlQuery;
         if (subQuery != null) {
-            Expression<?> subQueryExpression = process(repository, subQuery.getQuery()).as(subQuery.getAlias());
+            Expression<?> subQueryExpression = (subQuery.getAlias() == null) ?
+                    process(repository, subQuery.getQuery()):
+                    process(repository, subQuery.getQuery()).as(subQuery.getAlias());
             sqlQuery = queryFactory.getQuery(repository).from(subQueryExpression);
         } else {
             BusinessEntity mainEntity = query.getMainEntity();
@@ -144,7 +147,7 @@ public class QueryProcessor {
     private BooleanExpression processRestriction(Restriction restriction, LookupResolverFactory resolverFactory,
             List<JoinSpecification> existsJoins) {
         RestrictionResolverFactory factory = new RestrictionResolverFactory(resolverFactory, existsJoins,
-                queryFactory);
+                queryFactory, this);
         RestrictionResolver resolver = factory.getRestrictionResolver(restriction.getClass());
         return resolver.resolve(restriction);
     }
