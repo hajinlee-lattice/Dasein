@@ -64,7 +64,9 @@ angular.module('lp.ratingsengine')
             opts = opts || {},
             ClientSession = BrowserStorageUtility.getClientSession();
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
-        opts.type = opts.type || 'RULE_BASED';
+        opts.type = opts.type || 'RULE_BASED',
+        opts.displayName = 'testing making new engine';
+        opts.segment = {"pid":1838,"name":"segment1504299116731","display_name":"Yunlong_test_segment1","updated":1504299200000,"created":1503964326000,"is_master_segment":false};
         RatingsEngineService.saveRating(opts).then(function(data){
             deferred.resolve(data);
             RatingsEngineStore.setRating(data);
@@ -74,7 +76,7 @@ angular.module('lp.ratingsengine')
 
     this.getRatings = function() {
         var deferred = $q.defer();
-        RatingsEngineService.getRatingsStub().then(function(data) {
+        RatingsEngineService.getRatings().then(function(data) {
             RatingsEngineStore.ratings = data;
             deferred.resolve(data);
         });

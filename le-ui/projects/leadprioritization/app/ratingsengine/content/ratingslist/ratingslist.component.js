@@ -42,18 +42,13 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
     });
 
     vm.init = function($q) {
-
-
         // console.log(vm.ratings);
         var checkLaunchState;
         RatingsEngineStore.clear();
         angular.forEach(RatingList, function(rating) {
-
             vm.tileStates[rating.name] = {
                 showCustomMenu: false
             };
-
-
         });
 
     }
