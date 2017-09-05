@@ -90,7 +90,7 @@ public class ProcessorContext {
 
     @Value("${datacloud.yarn.fetchonly.num.threads:12}")
     private int fetchonlyThreadPool;
-    
+
     @Value("${datacloud.yarn.actors.group.size}")
     private int actorsGroupSize;
 
@@ -391,7 +391,8 @@ public class ProcessorContext {
         // am output attr -> dedupe -> debug
         // the same sequence will be used in writeDataToAvro
         log.info("Need to prepare for dedupe: " + originalInput.isPrepareForDedupe());
-        if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource()) && originalInput.isPrepareForDedupe()) {
+        if (MatchRequestSource.MODELING.equals(originalInput.getRequestSource())
+                && originalInput.isPrepareForDedupe()) {
             outputSchema = appendDedupeHelpers(outputSchema);
         }
 
@@ -453,8 +454,11 @@ public class ProcessorContext {
         Schema outputSchema;
         ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
         if (columnSelection == null) {
+            log.info("Generating output schema using predefined selection " + predefinedSelection);
             outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
         } else {
+            log.info("Generating output schema using custom/union selection with " + columnSelection.getColumns().size()
+                    + " columns");
             List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
             outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
                     dataCloudVersion);
