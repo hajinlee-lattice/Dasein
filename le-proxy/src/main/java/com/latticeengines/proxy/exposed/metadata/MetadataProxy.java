@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
@@ -69,6 +70,19 @@ public class MetadataProxy extends MicroserviceRestApiProxy implements MetadataI
     public void deleteImportTable(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}", customerSpace, tableName);
         delete("deleteImportTable", url);
+    }
+
+    @Override
+    public ModelingMetadata getTableMetadata(String customerSpace, String tableName){
+        String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}/metadata", customerSpace,
+                tableName);
+        return get("getTableMetadata", url, ModelingMetadata.class);
+    }
+
+    @Override
+    public void updateImportTable(String customerSpace, String tableName, Table table){
+        String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}", customerSpace, tableName);
+        put("updateTable", url, table);
     }
 
     @Override

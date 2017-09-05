@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public interface MetadataInterface {
 
@@ -18,6 +19,10 @@ public interface MetadataInterface {
     void deleteTable(String customerSpace, String tableName);
 
     void deleteImportTable(String customerSpace, String tableName);
+
+    ModelingMetadata getTableMetadata(String customerSpace, String tableName);
+
+    void updateImportTable(String customerSpace, String tableName, Table table);
 
     List<String> getTableNames(String customerSpace);
 
