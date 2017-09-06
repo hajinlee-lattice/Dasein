@@ -400,13 +400,15 @@
                         &:hover {
                             attribute-feedback-button {
                                 display: block;
+                                .feedback-tooltip {
+                                }
                             }
                         }
                     }
                     .info {
                         margin-bottom: 10px;
                     }
-                    .details { //ben
+                    .details {
                         font-size: 12px;
                         h3 {
                             font-weight: bold;
@@ -998,9 +1000,9 @@
                     &.data {
                         @include flex-item(0 1 auto);
                         text-align: right;
-                        text-overflow: ellipsis;
-                        overflow: hidden;
                         height: 1.3em;
+                        text-overflow: ellipsis; //ben
+                        overflow: hidden;
                         min-width: 20%;
                         /*
                         &:not(.records) {
@@ -1743,6 +1745,47 @@
     attribute-feedback-button {
         .infodot {
             line-height: 11px;
+            &:hover {
+                .feedback-tooltip {
+                    opacity: 1;
+                }
+            }
+        }
+        .feedback-tooltip {
+            position: absolute; 
+            top: -39px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            &:not(.for-specificity) {
+                transition: opacity 2500ms;
+            }
+            div.cover:not(.for-specificity) {
+                background-color: black;
+                color: #f1f1f1;
+                white-space: nowrap;
+                padding: 8px;
+            }
+            &:before,
+            &:after {
+                content: '';
+                display: block;
+                position: absolute;
+                left: calc(50% - 7px);
+                bottom: -7px;
+                height: 15px;
+                width: 15px;
+                transform: rotate(45deg);
+            }
+            &:before {
+                box-shadow: inherit;
+                background: #222831;
+                z-index: -10;
+            }
+            &:after {
+                background: inherit;
+                z-index: 10;
+            }
         }
         .menu {
             position: relative;

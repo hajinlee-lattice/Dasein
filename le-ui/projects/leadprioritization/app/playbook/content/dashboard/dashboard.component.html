@@ -30,10 +30,10 @@
                         </div>
                         <div class="dashboard-section-content-subsection segment has-icon">
                             <h4>Segment</h4>
-                            <h5>{{vm.play.segment}}</h5>
+                            <h5>{{vm.play.rating.segmentDisplayName}}</h5>
                             <ul class="controls">
-                                <li ng-if="!vm.play.segment"><a ui-sref="home.playbook.dashboard.segment({play_name: vm.play.name})">Add</a></li>
                                 <!--
+                                <li ng-if="!vm.play.segment"><a ui-sref="home.playbook.dashboard.segment({play_name: vm.play.name})">Add</a></li>
                                 <li ng-if="vm.play.segment"><a ui-sref="home.playbook.dashboard.segment({play_name: vm.play.name})">Change</a></li>
                                 <li ng-if="vm.play.segment" ng-init="showRemoveSegmentModal = false">
                                     <button class="button white-button" ng-click="showRemoveSegmentModal = !showRemoveSegmentModal">X</button>

@@ -71,7 +71,7 @@ angular.module('lp.playbook.wizard.rating', [])
         PlaybookWizardStore.setValidation('rating', form.$valid);
         if(vm.stored.rating_selection) {
             PlaybookWizardStore.setSettings({
-                rating: vm.stored.rating_selection
+                ratingEngine: Ratings.filter(obj => obj.id === vm.stored.rating_selection)[0]
             });
         }
     }

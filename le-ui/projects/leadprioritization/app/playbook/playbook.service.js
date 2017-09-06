@@ -138,7 +138,7 @@ angular.module('lp.playbook')
                 PlaybookWizardStore.savePlay({
                     displayName: play.displayName,
                     name: play.name,
-                    rating: rating.id
+                    ratingEngine: rating
                 }).then(function(response){
                     PlaybookWizardStore.setSegment(segment);
                 });
@@ -433,6 +433,7 @@ angular.module('lp.playbook')
     }
 
     this.getRatingsCounts = function(ratings) {
+        ///pls/ratingengines/coverage
         var deferred = $q.defer();
 
         var ret = {};

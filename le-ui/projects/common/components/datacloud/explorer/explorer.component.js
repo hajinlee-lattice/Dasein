@@ -1630,7 +1630,7 @@ angular.module('common.datacloud.explorer', [
         scope: {
             lookupResponse: '=?',
         },
-        controller: ['$scope', '$document', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, LookupStore, DataCloudStore, BrowserStorageUtility) { 
+        controller: ['$scope', '$document', '$timeout', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, $timeout, LookupStore, DataCloudStore, BrowserStorageUtility) { 
             // test on LETest1503428538807_LPI
             var vm = $scope,
                 lookupStore = LookupStore.get('request');
@@ -1652,6 +1652,7 @@ angular.module('common.datacloud.explorer', [
             $scope.label = $scope.modal.context.label || $scope.modal.context.attribute.DisplayName;
             $scope.value = $scope.modal.context.value;
             $scope.categoryClass = $scope.modal.context.categoryClass;
+            $scope.reported = false;
 
             $scope.report = function() {
                 $scope.sendingReport = true;
@@ -1676,7 +1677,10 @@ angular.module('common.datacloud.explorer', [
 
                 DataCloudStore.sendFeedback(report, $scope.modal.context.type).then(function(response){
                     $scope.sendingReport = false;
-                    $scope.close();
+                    $scope.reported = true;
+                    $timeout(function() {
+                        $scope.close();
+                    }, 5 * 1000);
                 });
             }
 

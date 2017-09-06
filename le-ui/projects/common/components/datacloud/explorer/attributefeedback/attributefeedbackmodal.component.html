@@ -1,5 +1,5 @@
 <span ng-click="close()" class="close"><i class="fa fa-times"></i></span>
-<div class="attribute-feedback-container">
+<div class="attribute-feedback-container" ng-if="!reported" ng-class="{reported:reported}">
     <div class="attribute-feedback-header section">
         <h1>Report Inaccuracy</h1>
         <p>
@@ -34,5 +34,14 @@
     <div class="attribute-feedback-footer section">
         <button class="button white-button" ng-click="close()">Cancel</button>
         <button class="button blue-button" ng-click="report()" ng-disabled="sendingReport"><i ng-if="sendingReport" class="fa fa-spinner fa-spin fa-fw"></i> Report Inaccuracy</button>
+    </div>
+
+</div>
+<div class="attribute-feedback-container" ng-if="reported" ng-class="{reported:reported}">
+    <div class="attribute-feedback-header section">
+        <h1>Incorrect Data Reported</h1>
+        <p>
+        Thank you for reporting the inaccuracy.  We use this information to improve Lattice Data Cloud.
+        </p>
     </div>
 </div>
