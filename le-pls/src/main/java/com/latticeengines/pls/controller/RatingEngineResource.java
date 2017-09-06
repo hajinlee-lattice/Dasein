@@ -24,7 +24,10 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
+import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -41,6 +44,9 @@ public class RatingEngineResource {
 
     @Autowired
     private RatingEngineService ratingEngineService;
+
+    @Autowired
+    private RatingCoverageService ratingCoverageService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -93,6 +99,14 @@ public class RatingEngineResource {
             HttpServletRequest request) {
         ratingEngineService.deleteById(ratingEngineId);
         return true;
+    }
+
+    @RequestMapping(value = "/coverage", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
+    public RatingsCountResponse getRatingEngineCoverageInfo( //
+            @RequestBody RatingsCountRequest ratingModelSegmentIds) {
+        return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")
