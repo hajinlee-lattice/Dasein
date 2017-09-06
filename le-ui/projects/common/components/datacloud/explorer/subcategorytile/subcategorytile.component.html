@@ -31,8 +31,8 @@
                 <div class="column label" title="{{attribute.DisplayName}}">
                     <input ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]" ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" name="{{attribute.Attribute || attribute.ColumnId}}" id="{{attribute.Attribute || attribute.ColumnId}}" type="checkbox" ng-if="vm.section == 'segment.analysis'" />
 
-                    <div ng-if="attribute.DisplayName">{{ attribute.DisplayName }}</div>
-                    <div ng-if="!attribute.DisplayName">{{ attribute.Attribute }}</div>
+                    <strong ng-if="attribute.DisplayName">{{ attribute.DisplayName }}</strong>
+                    <strong ng-if="!attribute.DisplayName">{{ attribute.Attribute }}</strong>
 
                 </div>
 
@@ -52,8 +52,8 @@
                 </div>
 
                 <div class="column data records" ng-if="!vm.lookupMode">
-                    <div ng-if="vm.section != 'section.analysis'">{{ attribute.Count | number }}</div>
-                    <div ng-if="vm.section == 'section.analysis'">{{ attribute.TopBkt.Cnt | number }}</div>
+                    <strong ng-if="vm.section != 'section.analysis'">{{ attribute.Count | number }}</strong>
+                    <strong ng-if="vm.section == 'section.analysis'">{{ attribute.TopBkt.Cnt | number }}</strong>
                 </div>
 
             </li>
