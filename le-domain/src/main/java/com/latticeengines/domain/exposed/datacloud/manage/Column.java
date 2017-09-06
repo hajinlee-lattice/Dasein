@@ -16,7 +16,7 @@ public class Column {
     }
 
     public Column(String externalColumnId) {
-        setExternalColumnId(externalColumnId);
+        this(externalColumnId, externalColumnId);
     }
 
     public Column(String externalColumnId, String columnName) {

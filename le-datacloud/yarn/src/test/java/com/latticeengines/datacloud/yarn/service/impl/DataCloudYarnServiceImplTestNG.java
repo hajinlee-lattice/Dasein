@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.yarn.service.impl;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import javax.annotation.Resource;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -29,7 +31,9 @@ import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService
 import com.latticeengines.datacloud.yarn.exposed.service.DataCloudYarnService;
 import com.latticeengines.datacloud.yarn.testframework.DataCloudYarnFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -66,7 +70,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         }
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testMatchBlockInYarnContainer() throws Exception {
         String fileName = "BulkMatchInput.avro";
         cleanupAvroDir(avroDir);
@@ -84,7 +88,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         verifyDedupeHelpers(jobConfiguration);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testRTSNoMatch() throws Exception {
         String fileName = "BulkMatchInput_NoMatch.avro";
         cleanupAvroDir(avroDir);
@@ -133,6 +137,52 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         }
     }
 
+    @Test(groups = "functional")
+    public void testSegment() throws Exception {
+        String fileName = "BulkMatchInput.avro";
+        cleanupAvroDir(avroDir);
+        uploadDataCsv(avroDir, fileName);
+        String avroPath = avroDir + "/" + fileName;
+
+        DataCloudJobConfiguration jobConfiguration = jobConfiguration(avroPath);
+
+        UnionSelection unionSelection = new UnionSelection();
+        unionSelection.setPredefinedSelections(ImmutableMap.of(Predefined.Segment, "2.0"));
+        ColumnSelection cs = new ColumnSelection();
+        List<Column> cols = Arrays.asList(new Column(DataCloudConstants.ATTR_LDC_DOMAIN),
+                new Column(DataCloudConstants.ATTR_LDC_NAME));
+        cs.setColumns(cols);
+        unionSelection.setCustomSelection(cs);
+        jobConfiguration.getMatchInput().setPredefinedSelection(null);
+        jobConfiguration.getMatchInput().setUnionSelection(unionSelection);
+
+        ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
+        FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        String avroGlob = getBlockOutputDir(jobConfiguration) + "/*.avro";
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroGlob);
+        Long count = 0L;
+        Long notNullLdcDomain = 0L;
+        Long notNullLdcName = 0L;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            count++;
+            if (record.get(DataCloudConstants.ATTR_LDC_NAME) != null
+                    && StringUtils.isNotBlank(record.get(DataCloudConstants.ATTR_LDC_NAME).toString())) {
+                notNullLdcName++;
+            }
+            if (record.get(DataCloudConstants.ATTR_LDC_DOMAIN) != null
+                    && StringUtils.isNotBlank(record.get(DataCloudConstants.ATTR_LDC_DOMAIN).toString())) {
+                notNullLdcDomain++;
+            }
+        }
+        Assert.assertTrue(notNullLdcDomain.doubleValue() / count.doubleValue() > 0.9, String.format(
+                "Only %.2f %% records has LDC_Domain", 100 * notNullLdcDomain.doubleValue() / count.doubleValue()));
+        Assert.assertTrue(notNullLdcName.doubleValue() / count.doubleValue() > 0.9, String
+                .format("Only %.2f %% records has LDC_Name", 100 * notNullLdcName.doubleValue() / count.doubleValue()));
+    }
+
     private void verifyDedupeHelpers(DataCloudJobConfiguration jobConfiguration) throws Exception {
         String rootUid = jobConfiguration.getRootOperationUid();
         String blockUid = jobConfiguration.getBlockOperationUid();
@@ -159,7 +209,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(schema);
 
         MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant("DCTest"));
+        matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_TENANT));
         matchInput.setPredefinedSelection(Predefined.RTS);
         matchInput.setDataCloudVersion(versionEntityMgr.currentApprovedVersionAsString());
         matchInput.setKeyMap(keyMap);
