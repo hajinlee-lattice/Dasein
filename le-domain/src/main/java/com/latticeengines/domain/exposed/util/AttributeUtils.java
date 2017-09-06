@@ -72,7 +72,12 @@ public class AttributeUtils {
                     if (baseValueEmpty) {
                         diffFields.add(descriptor.getDisplayName().toLowerCase());
                     } else {
-                        boolean equal = EqualsBuilder.reflectionEquals(targetValue, baseValue);
+                        boolean equal;
+                        if (targetValue instanceof String) {
+                            equal = StringUtils.equals((String)targetValue, (String)baseValue);
+                        } else {
+                            equal = EqualsBuilder.reflectionEquals(targetValue, baseValue);
+                        }
                         if (!equal) {
                             diffFields.add(descriptor.getDisplayName().toLowerCase());
                         }

@@ -25,8 +25,6 @@ import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 @Component("vdbDataFeedMetadataService")
 public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
@@ -34,7 +32,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     private static final String[] VDB_ATTR_FIELDS = {"DisplayName", "SourceLogicalDataType", "Description",
             "FundamentalType", "StatisticalType", "DisplayDiscretizationStrategy", "DataQuality", "DataSource",
-            "ApprovedUsage", "Tags"};
+            "ApprovedUsage", "Tags", "SourceAttrName"};
 
     public VdbDataFeedMetadataServiceImpl() {
         super(SourceType.VISIDB.getName());
