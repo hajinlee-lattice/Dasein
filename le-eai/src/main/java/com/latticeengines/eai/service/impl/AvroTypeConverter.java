@@ -3,10 +3,9 @@ package com.latticeengines.eai.service.impl;
 import org.apache.avro.Schema.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
+
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.eai.service.ValueConverter;
 
@@ -54,22 +53,17 @@ public abstract class AvroTypeConverter {
                 break;
             case LONG:
                 targetType = Long.class;
-                DateTimeFormatter dtf = null;
-
-                if (attr.getSourceLogicalDataType().equalsIgnoreCase("Date")) {
-                    dtf = ISODateTimeFormat.dateElementParser();
-                } else if (attr.getSourceLogicalDataType().equalsIgnoreCase("Datetime")
+                if (attr.getSourceLogicalDataType().equalsIgnoreCase("Date")
+                        || attr.getSourceLogicalDataType().equalsIgnoreCase("Datetime")
                         || attr.getSourceLogicalDataType().equalsIgnoreCase("Timestamp")
                         || attr.getSourceLogicalDataType().equalsIgnoreCase("DateTimeOffset")) {
-                    dtf = ISODateTimeFormat.dateTimeParser();
+                    try {
+                        return TimeStampConvertUtils.convertToLong((String) value);
+                    } catch (Exception e) {
+                        log.warn(String.format("Error parsing date for column %s with value %s.", attr.getName(), value));
+                    }
                 } else {
                     break;
-                }
-                try {
-                    DateTime dateTime = dtf.parseDateTime((String) value);
-                    return dateTime.getMillis();
-                } catch (Exception e) {
-                    log.warn(String.format("Error parsing date for column %s with value %s.", attr.getName(), value));
                 }
             case STRING:
                 targetType = String.class;
