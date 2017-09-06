@@ -43,7 +43,7 @@ angular
                         vm.range = vm.item.topbkt.Rng;
                         
                         vm.setOperation(vm.item, vm.type, vm.label, vm.range);
-console.log(typeof vm.tree.bucketRestriction.bkt.Id, vm.tree.bucketRestriction.bkt.Id, vm.tree)
+
                         if (typeof vm.tree.bucketRestriction.bkt.Id != "number") {
                             vm.tree.bucketRestriction.bkt.Id = vm.tree.labelGlyph;
                             vm.unused = true;
@@ -122,7 +122,7 @@ console.log(typeof vm.tree.bucketRestriction.bkt.Id, vm.tree.bucketRestriction.b
                     case 'Numerical': return map[vm.operation];
                     case 'Enum': return 'has a value of';
                     default: 
-                        console.log('unknown type', vm.type, vm.label, vm.operation, vm.item);
+                        //console.log('unknown type', vm.type, vm.label, vm.operation, vm.item);
                         return 'has a value of';
                 }
             }
@@ -177,14 +177,13 @@ console.log(typeof vm.tree.bucketRestriction.bkt.Id, vm.tree.bucketRestriction.b
                 }
             }
 
-            this.clickOperator = function() {
+            this.clickOperator = function($element) {
                 this.root.saveState();
-
-                // vm.tree.logicalRestriction.operator = value;
             }
 
             this.clickCollapsed = function() {
-                this.root.saveState(true); // true wont update counts
+                // FIXME - collapsed property is weeded out of equivalency check
+                //this.root.saveState(true); // true wont update counts
 
                 vm.tree.collapsed = !vm.tree.collapsed;
             }

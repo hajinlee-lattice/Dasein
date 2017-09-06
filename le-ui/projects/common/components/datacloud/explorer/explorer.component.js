@@ -1564,7 +1564,6 @@ angular.module('common.datacloud.explorer', [
         if (Object.keys(vm.segmentAttributeInput).length || Object.keys(vm.segmentAttributeInputRange).length) {
             var segmentName = $stateParams.segment,
                 ts = new Date().getTime();
-
             if (segmentName === 'Create') {
                 var restriction = QueryStore.getRestriction(),
                     segment = SegmentStore.sanitizeSegment({
@@ -1577,8 +1576,12 @@ angular.module('common.datacloud.explorer', [
                         }
                     });
 
+                console.log('saveSegment new', segmentName, ts, segment)
                 SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
                     vm.saveSegmentEnabled = false;
+
+                    // update state param to remove "Create"
+                    $state.go('.', { segment: 'segment' + ts }, { notify: false });
                 });
             } else {
                 SegmentStore.getSegmentByName(segmentName).then(function(result) {
@@ -1593,6 +1596,7 @@ angular.module('common.datacloud.explorer', [
                                 'num_rows': 10
                             }
                         });
+                    console.log('saveSegment existing', segmentData, segment)
                 });
             };
         };

@@ -46,17 +46,13 @@ angular.module('common.datacloud.query.advanced', [
             DataCloudStore.setEnrichmentsMap(vm.enrichmentsMap);
 
             $timeout(function() {
-        vm.tree = vm.getTree();
+                vm.tree = vm.getTree();
+                vm.setCurrentSavedTree();
                 console.log('[AQB] restriction:', angular.copy(vm.restriction));
                 console.log('[AQB] items:', vm.items);
                 console.log('[AQB] cube:', vm.cube);
             }, 1);
         });
-
-
-        if (!QueryStore.currentSavedTree) {
-            vm.setCurrentSavedTree();
-        }
     }
 
     vm.getTree = function() {
@@ -65,7 +61,7 @@ angular.module('common.datacloud.query.advanced', [
             case 'segment':
                 return [ vm.restriction.restriction ];
             case 'rules':
-                return vm.generateRulesTree();
+                return [ vm.generateRulesTree().restriction ];
         }
     }
 
@@ -78,7 +74,7 @@ angular.module('common.datacloud.query.advanced', [
             'AlexaReachPerMillion',
         ];
 
-        //var items = DataCloudStore.getRatingEngineAttributes();
+        var items = DataCloudStore.getRatingEngineAttributes();
         var bucketRestrictions = [];
         items.forEach(function(value, index) {
             var item = vm.enrichments[vm.enrichmentsMap[value]]
@@ -115,6 +111,7 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.setCurrentSavedTree = function() {
+        console.log('SAVE CURRENT TREE', angular.copy(vm.tree))
         QueryStore.currentSavedTree = angular.copy(vm.tree);
     }
 
@@ -133,15 +130,13 @@ angular.module('common.datacloud.query.advanced', [
     vm.saveState = function(noCount) {
         vm.labelIncrementor = 0;
 
-        var tree = angular.copy(vm.tree),
+        var current = angular.copy(vm.tree),
             old = angular.copy(vm.history[vm.history.length -1]) || [];
 
-        // remove AQB properties like labelGlyph/collapse
-        SegmentStore.sanitizeSegmentRestriction(tree);
-        SegmentStore.sanitizeSegmentRestriction(old);
+        console.log('saveState', vm.compareTree(old, current), current, old);
 
-        if (JSON.stringify(old) !== JSON.stringify(tree)) {
-            vm.history.push(tree);
+        if (!vm.compareTree(old, current)) {
+            vm.history.push(current);
 
             if (!noCount) {
                 vm.updateCount();
@@ -150,16 +145,33 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.clickUndo = function() {
-        var lastState = vm.history.pop();
+        var lastState;
 
-        if (lastState) {
+        while (lastState = vm.history.pop()) {
+            console.log('clickUndo', vm.tree, lastState);
+            
+            if (vm.setState(lastState)) {
+                vm.updateCount();
+
+                break;
+            }
+        }
+    }
+
+    vm.setState = function(newState) {
+        if (!vm.compareTree(newState, angular.copy(vm.tree))) {
+            vm.labelIncrementor = 0;
+            
             vm.restriction = {
-                restriction: lastState[0]
+                restriction: newState[0]
             };
 
-            vm.tree = lastState;
-            vm.updateCount();
+            vm.tree = newState;
+
+            return true;
         }
+
+        return false;
     }
 
     vm.updateCount = function() {
@@ -212,15 +224,23 @@ angular.module('common.datacloud.query.advanced', [
         });
     }
 
-    vm.checkDisableSave = function() {
-        var old = angular.copy(QueryStore.currentSavedTree.restriction),
-            current = angular.copy(vm.tree.restriction);
-
+    vm.compareTree = function(old, current) {
         // remove AQB properties like labelGlyph/collapse
-        SegmentStore.sanitizeSegmentRestriction([old]);
-        SegmentStore.sanitizeSegmentRestriction([current]);
+        SegmentStore.sanitizeSegmentRestriction(old);
+        SegmentStore.sanitizeSegmentRestriction(current);
 
         return (JSON.stringify(old) === JSON.stringify(current));
+    }
+
+    vm.checkDisableSave = function() {
+        if (!QueryStore.currentSavedTree || !vm.tree) {
+            return true;
+        }
+
+        var old = angular.copy(QueryStore.currentSavedTree),
+            current = angular.copy(vm.tree);
+
+        return vm.compareTree(old, current);
     }
 
     vm.goAttributes = function() {

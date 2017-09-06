@@ -62,6 +62,7 @@ angular
             };
         }
 
+        // remove Advanced Query Builder-specific temp properties
         this.sanitizeSegment(segment);
 
         return SegmentService.CreateOrUpdateSegment(segment);
