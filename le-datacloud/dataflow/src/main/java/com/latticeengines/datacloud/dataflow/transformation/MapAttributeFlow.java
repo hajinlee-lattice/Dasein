@@ -218,44 +218,37 @@ public class MapAttributeFlow extends TblDrivenFlowBase<MapAttributeConfig, MapA
 
         FieldList seedJoinFields = new FieldList(seedJoinKey.toArray(new String[seedJoinKey.size()]));
 
-        if (nodes.size() > 1) { 
+        String[] seedAttrs = new String[seedJoinKey.size() + 1];
+        String[] seedOutputAttrs = new String[seedJoinKey.size() + 1];
+        String[] seedJoinAttrs = new String[seedJoinKey.size()];
 
+        String seedOutputId = newJoinKey();
+        seedAttrs[0] = seedId;
+        seedOutputAttrs[0] = seedOutputId;
 
-            String[] seedAttrs = new String[seedJoinKey.size() + 1];
-            String[] seedOutputAttrs = new String[seedJoinKey.size() + 1];
-            String[] seedJoinAttrs = new String[seedJoinKey.size()];
-
-            String seedOutputId = newJoinKey();
-            seedAttrs[0] = seedId;
-            seedOutputAttrs[0] = seedOutputId;
-
-            String filterString = "((" + seedJoinKey.get(0) + " != null)";
-            seedAttrs[1] = seedJoinKey.get(0);
-            seedOutputAttrs[1] = seedOutputId + JOIN_KEY_SUFFIX + 1;
-            seedJoinAttrs[0] = seedOutputAttrs[1];
-            for (int i = 1; i < seedJoinKey.size(); i++) {
-                filterString += "|| (" + seedJoinKey.get(i) + " != null)";
-                seedAttrs[i + 1] = seedJoinKey.get(i);
-                seedOutputAttrs[i + 1] = seedOutputId + JOIN_KEY_SUFFIX + (i + 1);
-                seedJoinAttrs[i] = seedOutputAttrs[i + 1];
-            }
-            filterString += ")";
-
-            FieldList seedFields = new FieldList(seedAttrs);
-            Node filteredSeed = seed.filter(filterString, seedFields);
-
-            FieldList seedOutputFields = new FieldList(seedOutputAttrs);
-            Node renamedSeed = filteredSeed.rename(seedFields, seedOutputFields);
-            Node retainedSeed = renamedSeed.retain(seedOutputFields);
-
-            Node coGrouped = retainedSeed.coGroup(new FieldList(seedJoinAttrs), nodes, joinFieldLists, JoinType.OUTER);
-
-            Node filtered = coGrouped.filter(seedOutputId + " != null", new FieldList(seedOutputId));
-            joined = joined.leftJoin(new FieldList(seedId), filtered, new FieldList(seedOutputId));
-
-        } else {
-            joined = joined.leftJoin(seedJoinFields, nodes.get(0), joinFieldLists.get(0));
+        String filterString = "((" + seedJoinKey.get(0) + " != null)";
+        seedAttrs[1] = seedJoinKey.get(0);
+        seedOutputAttrs[1] = seedOutputId + JOIN_KEY_SUFFIX + 1;
+        seedJoinAttrs[0] = seedOutputAttrs[1];
+        for (int i = 1; i < seedJoinKey.size(); i++) {
+            filterString += "|| (" + seedJoinKey.get(i) + " != null)";
+            seedAttrs[i + 1] = seedJoinKey.get(i);
+            seedOutputAttrs[i + 1] = seedOutputId + JOIN_KEY_SUFFIX + (i + 1);
+            seedJoinAttrs[i] = seedOutputAttrs[i + 1];
         }
+        filterString += ")";
+
+        FieldList seedFields = new FieldList(seedAttrs);
+        Node filteredSeed = seed.filter(filterString, seedFields);
+
+        FieldList seedOutputFields = new FieldList(seedOutputAttrs);
+        Node renamedSeed = filteredSeed.rename(seedFields, seedOutputFields);
+        Node retainedSeed = renamedSeed.retain(seedOutputFields);
+
+        Node coGrouped = retainedSeed.coGroup(new FieldList(seedJoinAttrs), nodes, joinFieldLists, JoinType.OUTER);
+
+        Node filtered = coGrouped.filter(seedOutputId + " != null", new FieldList(seedOutputId));
+        joined = joined.leftJoin(new FieldList(seedId), filtered, new FieldList(seedOutputId));
 
         return joined;
 
