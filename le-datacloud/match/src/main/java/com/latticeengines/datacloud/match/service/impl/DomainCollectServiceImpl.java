@@ -12,6 +12,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -39,12 +40,13 @@ public class DomainCollectServiceImpl implements DomainCollectService {
             "[External_ID]", //
             "[Name_Category]", //
             "[Domain_Name]", //
-            "[Row_Num]",
+            "[Row_Num]", //
             "[Creation_Date]");
     private static final Set<String> domainSet = new ConcurrentSkipListSet<>();
-    public static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss.SSS";
-    public static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss.SSS";
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
     private static final int BUFFER_SIZE = 800;
+    private static final int MAX_DUMP_SIZE = 120000;
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -80,17 +82,25 @@ public class DomainCollectServiceImpl implements DomainCollectService {
         if (domainCollectEnabled) {
             Set<String> domains = new HashSet<>();
             synchronized (domainSet) {
-                domains.addAll(domainSet);
-                domainSet.clear();
+                if (domainSet.size() > MAX_DUMP_SIZE) {
+                    domains.addAll(domainSet.stream().limit(MAX_DUMP_SIZE).collect(Collectors.toList()));
+                    domainSet.removeAll(domains);
+                    log.warn(String.format("Too many domains (%d) to dump, keep only %d, drop the remaining.",
+                            domainSet.size() + domains.size(), domains.size()));
+                } else {
+                    domains.addAll(domainSet);
+                    domainSet.clear();
+                }
             }
             if (!domains.isEmpty()) {
                 Set<String> domainBuffer = new HashSet<>();
                 String transferId = UUID.randomUUID().toString();
                 log.info("Splitting " + domains.size() + " domains to be inserted into collector's url stream.");
-                for (String domain: domains) {
+                for (String domain : domains) {
                     domainBuffer.add(domain);
                     if (domainBuffer.size() >= BUFFER_SIZE) {
-                        log.info("Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
+                        log.info(
+                                "Dumping " + domainBuffer.size() + " domains in the buffer to collector's url stream.");
                         putDomainsInAccountTransferTable(transferId, domainBuffer);
                         domainBuffer = new HashSet<>();
                     }
@@ -131,7 +141,7 @@ public class DomainCollectServiceImpl implements DomainCollectService {
         Date date = new Date(System.currentTimeMillis());
         String createDate = dateFormat.format(date);
 
-        for (String domain: domains) {
+        for (String domain : domains) {
             if (StringUtils.isNotBlank(domain)) {
                 values.add(convertToValue(domain, transferId, rowNum++, createDate));
             }
