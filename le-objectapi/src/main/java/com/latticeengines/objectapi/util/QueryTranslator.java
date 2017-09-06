@@ -201,7 +201,7 @@ public class QueryTranslator {
 
     private static Sort translateFrontEndSort(FrontEndSort frontEndSort) {
         if (frontEndSort != null) {
-            return new Sort(frontEndSort.getAttributes(), frontEndSort.getDescending());
+            return new Sort(frontEndSort.getAttributes(), Boolean.TRUE.equals(frontEndSort.getDescending()));
         } else {
             return null;
         }

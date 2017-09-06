@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -150,6 +152,27 @@ public class FrontEndQuery {
                 .map((attrName) -> new AttributeLookup(businessEntity, attrName)) //
                 .collect(Collectors.toList());
         lookups.addAll(moreLookups);
+    }
+
+    public static FrontEndQuery fromSegment(MetadataSegment segment) {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction accountRestriction = null;
+        if (segment.getAccountRestriction() != null) {
+            accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+        } else if (segment.getAccountFrontEndRestriction() != null) {
+            accountRestriction = segment.getAccountFrontEndRestriction();
+        }
+        frontEndQuery.setAccountRestriction(accountRestriction);
+
+        FrontEndRestriction contactRestriction = null;
+        if (segment.getContactRestriction() != null) {
+            contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
+        } else if (segment.getContactFrontEndRestriction() != null) {
+            contactRestriction = segment.getContactFrontEndRestriction();
+        }
+        frontEndQuery.setContactRestriction(contactRestriction);
+
+        return frontEndQuery;
     }
 
 }

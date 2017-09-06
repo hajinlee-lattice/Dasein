@@ -2,18 +2,14 @@ package com.latticeengines.objectapi.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +19,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -40,7 +37,6 @@ import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestN
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
-import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
@@ -92,6 +88,54 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         count = entityQueryService.getCount(frontEndQuery);
         Assert.assertNotNull(count);
         Assert.assertEquals(count, new Long(42L));
+    }
+
+    @Test(groups = "functional")
+    public void testContactDataWithAccountIds() {
+        // mimic a segment get from metadata api
+        MetadataSegment segment = new MetadataSegment();
+        Restriction accountRestrictionInternal = Restriction.builder().let(BusinessEntity.Account, "CompanyName")
+                .gte("a").build();
+        segment.setAccountRestriction(accountRestrictionInternal);
+        Restriction contactRestrictionInternal = Restriction.builder().let(BusinessEntity.Contact, "Title").gte("VP")
+                .build();
+        segment.setContactRestriction(contactRestrictionInternal);
+
+        // front end query from segment restrictions
+        FrontEndQuery queryFromSegment = FrontEndQuery.fromSegment(segment);
+
+        // get account ids first
+        queryFromSegment.setMainEntity(BusinessEntity.Account);
+        queryFromSegment.setLookups( //
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name())));
+        queryFromSegment.setSort(new FrontEndSort(
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name())),
+                false));
+        queryFromSegment.setPageFilter(new PageFilter(0, 10));
+        DataPage dataPage = entityQueryService.getData(queryFromSegment);
+        List<Object> accountIds = dataPage.getData().stream().map(m -> m.get(InterfaceName.AccountId.name())) //
+                .collect(Collectors.toList());
+        Assert.assertEquals(accountIds.size(), 10);
+
+        // extract contact restriction
+        Restriction extractedContactRestriction = queryFromSegment.getContactRestriction().getRestriction();
+        Restriction accountIdRestriction = Restriction.builder()
+                .let(BusinessEntity.Contact, InterfaceName.AccountId.name()).inCollection(accountIds).build();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
+                Restriction.builder().and(extractedContactRestriction, accountIdRestriction).build());
+        FrontEndQuery contactQuery = new FrontEndQuery();
+        contactQuery.setMainEntity(BusinessEntity.Contact);
+        contactQuery.setContactRestriction(frontEndRestriction);
+        contactQuery.setLookups(Arrays.asList( //
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.AccountId.name()),
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactId.name())));
+        contactQuery.setPageFilter(new PageFilter(0, 100));
+        dataPage = entityQueryService.getData(contactQuery);
+        Assert.assertEquals(dataPage.getData().size(), 19);
+        for (Map<String, Object> contact : dataPage.getData()) {
+            Object accountId = contact.get(InterfaceName.AccountId.name());
+            Assert.assertTrue(accountIds.contains(accountId));
+        }
     }
 
     @Test(groups = "functional")
