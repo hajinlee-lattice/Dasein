@@ -23,8 +23,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteAccount;
 import com.latticeengines.proxy.exposed.dante.DanteAccountProxy;
 
-@TestExecutionListeners({DirtiesContextTestExecutionListener.class})
-@ContextConfiguration(locations = {"classpath:test-dante-context.xml"})
+@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+@ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
 public class DanteAccountResourceDeploymentTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     private DanteAccountProxy danteAccountProxy;
@@ -35,10 +35,10 @@ public class DanteAccountResourceDeploymentTestNG extends AbstractTestNGSpringCo
     private List<DanteAccount> accounts;
     private static final String customerId = "DEPTestTenant";
 
-    @BeforeClass
+    @BeforeClass(groups = "deployment")
     public void setup() throws IOException {
         String accountsRaw = FileUtils.readFileToString(new File(
-                        ClassLoader.getSystemResource("com/latticeengines/dante/testframework/TestAccounts.json").getFile()),
+                ClassLoader.getSystemResource("com/latticeengines/dante/testframework/TestAccounts.json").getFile()),
                 Charset.defaultCharset());
         accounts = JsonUtils.deserialize(accountsRaw, new TypeReference<List<DanteAccount>>() {
         });
@@ -55,7 +55,7 @@ public class DanteAccountResourceDeploymentTestNG extends AbstractTestNGSpringCo
         Assert.assertEquals(result.size(), 10);
     }
 
-    @AfterClass
+    @AfterClass(groups = "deployment")
     public void cleanup() {
         for (DanteAccount account : accounts) {
             danteAccountEntityMgr.delete(account);
