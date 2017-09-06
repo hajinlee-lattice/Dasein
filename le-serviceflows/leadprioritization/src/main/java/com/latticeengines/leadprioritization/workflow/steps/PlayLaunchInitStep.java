@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -46,8 +47,6 @@ import com.latticeengines.domain.exposed.query.CollectionLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.domain.exposed.query.LogicalOperator;
-import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -124,16 +123,16 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.info("Inside PlayLaunchInitStep execute()");
             tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
 
-            log.info("For tenant: " + customerSpace.toString());
-            log.info("For playId: " + playName);
-            log.info("For playLaunchId: " + playLaunchId);
+            log.info(String.format("For tenant: %s", customerSpace.toString()));
+            log.info(String.format("For playId: %s", playName));
+            log.info(String.format("For playLaunchId: %s", playLaunchId));
 
             PlayLaunch playLaunch = internalResourceRestApiProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
             Play play = internalResourceRestApiProxy.findPlayByName(customerSpace, playName);
             playLaunch.setPlay(play);
 
             String segmentName = play.getSegmentName();
-            log.info("Processing segment: " + segmentName);
+            log.info(String.format("Processing segment: %s", segmentName));
             FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
             FrontEndQuery contactFrontEndQuery = new FrontEndQuery();
             List<Object> modifiableAccountIdCollectionForContacts = new ArrayList<>();
@@ -175,7 +174,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         if (ratingEngine != null) {
             modelId = prepareQueryUsingRatingsDefn(accountFrontEndQuery, contactFrontEndQuery,
-                    modifiableAccountIdCollectionForContacts, ratingEngine);
+                    modifiableAccountIdCollectionForContacts, ratingEngine, modelId);
         } else {
             log.error(String.format("Rating Engine is not set for the play %s", play.getName()));
         }
@@ -196,25 +195,30 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         Restriction segmentRestriction = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
                 segmentName);
 
-        log.info("Processing restriction: " + objectMapper.writeValueAsString(segmentRestriction));
+        log.info(String.format("Processing restriction: %s", objectMapper.writeValueAsString(segmentRestriction)));
 
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction(segmentRestriction);
         accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
-        contactFrontEndQuery.setAccountRestriction(
-                prepareContactRestriction(frontEndRestriction, modifiableAccountIdCollectionForContacts));
+        contactFrontEndQuery.setAccountRestriction(prepareContactRestriction(modifiableAccountIdCollectionForContacts));
     }
 
     private String prepareQueryUsingRatingsDefn(FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
-            List<Object> modifiableAccountIdCollectionForContacts, RatingEngine ratingEngine) {
+            List<Object> modifiableAccountIdCollectionForContacts, RatingEngine ratingEngine, String modelId) {
         List<Lookup> lookups;
         if (ratingEngine.getSegment() != null) {
-            FrontEndRestriction frontEndRestriction = new FrontEndRestriction(
+            FrontEndRestriction accountRestriction = new FrontEndRestriction(
                     ratingEngine.getSegment().getAccountRestriction());
-            accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
-            contactFrontEndQuery.setAccountRestriction(
-                    prepareContactRestriction(frontEndRestriction, modifiableAccountIdCollectionForContacts));
+            FrontEndRestriction contactRestriction = new FrontEndRestriction(
+                    ratingEngine.getSegment().getContactRestriction());
+
+            accountFrontEndQuery.setAccountRestriction(accountRestriction);
+            accountFrontEndQuery.setContactRestriction(contactRestriction);
+
+            contactFrontEndQuery
+                    .setAccountRestriction(prepareContactRestriction(modifiableAccountIdCollectionForContacts));
+            contactFrontEndQuery.setContactRestriction(contactRestriction);
         }
-        String modelId = null;
+
         List<RatingModel> ratingModels = new ArrayList<>();
         for (RatingModel model : ratingEngine.getRatingModels()) {
             ratingModels.add(model);
@@ -229,23 +233,16 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         return modelId;
     }
 
-    private FrontEndRestriction prepareContactRestriction(FrontEndRestriction frontEndRestriction,
-            Collection<Object> modifiableAccountIdCollection) {
+    private FrontEndRestriction prepareContactRestriction(Collection<Object> modifiableAccountIdCollection) {
         FrontEndRestriction wrapperFrontEndRestriction = new FrontEndRestriction();
-        LogicalRestriction wrapperRestriction = new LogicalRestriction();
-        wrapperRestriction.setOperator(LogicalOperator.AND);
-        List<Restriction> restrictions = new ArrayList<>();
-        restrictions.add(frontEndRestriction.getRestriction());
         AttributeLookup accountIdLookup = new AttributeLookup();
         accountIdLookup.setEntity(BusinessEntity.Account);
         accountIdLookup.setAttribute(InterfaceName.AccountId.name());
         CollectionLookup accountIdListLookup = new CollectionLookup(modifiableAccountIdCollection);
         ConcreteRestriction collectionRestriction = new ConcreteRestriction(false, accountIdLookup,
                 ComparisonType.IN_COLLECTION, accountIdListLookup);
-        restrictions.add(collectionRestriction);
-        wrapperRestriction.setRestrictions(restrictions);
 
-        wrapperFrontEndRestriction.setRestriction(wrapperRestriction);
+        wrapperFrontEndRestriction.setRestriction(collectionRestriction);
         return wrapperFrontEndRestriction;
     }
 
@@ -256,7 +253,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         segmentAccountsCount = entityProxy.getCount( //
                 config.getCustomerSpace().toString(), //
                 accountFrontEndQuery);
-        log.info("Total records in segment: " + segmentAccountsCount);
+        log.info(String.format("Total records in segment: %d", segmentAccountsCount));
 
         long suppressedAccounts = 0;
         if (accountFrontEndQuery.restrictNotNullSalesforceId()) {
@@ -277,7 +274,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.info("Number of required loops: " + pages + ", with pageSize: " + pageSize);
 
             for (int pageNo = 0; pageNo < pages; pageNo++) {
-                log.info("Loop #" + pageNo);
+                log.info(String.format("Loop #%d", pageNo));
 
                 DataPage accountPage = fetchAccounts(config, accountFrontEndQuery);
 
@@ -303,11 +300,13 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         accountFrontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
 
+        log.info(String.format("Account query => %s", JsonUtils.serialize(accountFrontEndQuery)));
+
         DataPage accountPage = entityProxy.getData( //
                 config.getCustomerSpace().toString(), //
                 accountFrontEndQuery);
 
-        log.info("Got #" + accountPage.getData().size() + " elements in this loop");
+        log.info(String.format("Got # %d elements in this loop", accountPage.getData().size()));
         return accountPage;
     }
 
@@ -348,19 +347,20 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
                         })//
                         .collect(Collectors.toList());
 
-        log.info("Extracting contacts for accountIds: "
-                + Arrays.deepToString(accountIds.toArray(new Long[accountIds.size()])));
+        log.info(String.format("Extracting contacts for accountIds: %s",
+                Arrays.deepToString(accountIds.toArray(new Long[accountIds.size()]))));
         return accountIds;
     }
 
     private void fetchContacts(PlayLaunchInitStepConfiguration config, FrontEndQuery contactFrontEndQuery,
             Map<Long, List<Map<String, String>>> mapForAccountAndContactList) {
         try {
+            log.info(String.format("Contact query => %s", JsonUtils.serialize(contactFrontEndQuery)));
             DataPage contactPage = entityProxy.getData( //
                     config.getCustomerSpace().toString(), //
                     contactFrontEndQuery);
 
-            log.info("Got #" + contactPage.getData().size() + " contact elements in this loop");
+            log.info(String.format("Got # %d contact elements in this loop", contactPage.getData().size()));
             contactPage.getData().stream().forEach(contact -> {
                 Object accountIdObj = contact.get(InterfaceName.AccountId.name());
                 Long accountId = parseLong(accountIdObj);
