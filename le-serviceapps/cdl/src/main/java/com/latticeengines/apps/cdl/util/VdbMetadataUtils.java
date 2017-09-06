@@ -77,11 +77,13 @@ public class VdbMetadataUtils {
                     return false;
                 }
             } else if (srcType.toLowerCase().startsWith("varchar")) {
-                if (!destType.equalsIgnoreCase("string") && !destType.toLowerCase().startsWith("nvarchar")) {
+                if (!destType.equalsIgnoreCase("string") && !destType.toLowerCase().startsWith("nvarchar")
+                        && !destType.toLowerCase().startsWith("varchar")) {
                     return false;
                 }
             } else if (srcType.toLowerCase().startsWith("nvarchar")) {
-                if (!destType.equalsIgnoreCase("string") && !destType.toLowerCase().startsWith("varchar")) {
+                if (!destType.equalsIgnoreCase("string") && !destType.toLowerCase().startsWith("varchar")
+                        && !destType.toLowerCase().startsWith("nvarchar")) {
                     return false;
                 }
             } else {

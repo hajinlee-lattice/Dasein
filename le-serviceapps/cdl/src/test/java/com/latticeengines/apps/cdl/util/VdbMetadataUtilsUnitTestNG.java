@@ -104,6 +104,8 @@ public class VdbMetadataUtilsUnitTestNG {
                 {"nvarchar(max)", "string", true},
                 {"varchar(10)", "NVARCHAR(200)", true},
                 {"Nvarchar(max)", "varchar(max)", true},
+                {"NVarChar(256)", "NVarChar(100)", true},
+                {"NVarChar(1900)", "Nvarchar(3800)", true},
                 {"int", "string", false},
                 {"float", "VARCHAR(100)", false},
                 {"bit", "int", false},
