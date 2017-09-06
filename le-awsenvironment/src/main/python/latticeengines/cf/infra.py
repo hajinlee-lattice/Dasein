@@ -32,6 +32,7 @@ TOMCAT_APP_HEALTH_MAP = {
     "objectapi": "/objectapi/health",
     "cdl": "/cdl/health",
     "lp": "/lp/health",
+    "dante": "/dante/health",
 
     "scoringapi": "/score/health",
     "matchapi": "/match/health",
