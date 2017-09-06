@@ -186,15 +186,16 @@ $stateParams, $interval, PlayList, PlaybookWizardService, PlaybookWizardStore, T
     };
 
     vm.launchPlay = function($event, play) {
-        vm.lockLaunching = true;
+        vm.lockLaunching = false;
         $event.stopPropagation();
 
         var tileState = vm.tileStates[play.name];
         tileState.launching = !tileState.launching;
 
         PlaybookWizardStore.launchPlay(play).then(function(data) {
-            PlaybookWizardStore.clear();
-            $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
+            vm.lockLaunching = false;
+            //PlaybookWizardStore.clear();
+            //$state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
         });
 
     }

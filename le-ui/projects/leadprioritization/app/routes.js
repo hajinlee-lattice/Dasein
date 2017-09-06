@@ -116,8 +116,9 @@ angular
                                 var flags = FeatureFlagService.Flags();
 
                                 if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
-                                    $state.go('home.segments', {
-                                        tenantName: Tenant.DisplayName
+                                    $state.go('home.segment.explorer.attributes', {
+                                        tenantName: Tenant.DisplayName,
+                                        segment: 'Create'
                                     });
                                 } else {
                                     $state.go('home.models', {

@@ -52,27 +52,27 @@ section.playbook.container {
                     text-transform: uppercase;
                     border-bottom: 2px solid #d8d9d8; 
                 }
+                &.selected {
+                    label {
+                        color: #498ad4;
+                        background-color: transparent;
+                    }
+                }
                 ul {
                     @include flex-container;
                     & > li {
-                        @include flex-item(0 1 auto);
+                        @include flex-item(1 1 auto);
                         width: 10%;
                         margin-left: 10px;
                         padding: 10px 5px;
                         @include text-ellipsis();
-                        &:first-child {
-                            @include flex-item(1 0 auto);
-                            margin-left: 0;
-                        }
                         input[type="radio"] {
                             vertical-align: middle;
                             position: relative;
                             top: -3px;
-                            &:checked ~ label {
-                                background-color: transparent;
-                            }
                         }
                         label {
+                            display: inline;
                             width: auto;
                             margin-left: 3px;
                         }

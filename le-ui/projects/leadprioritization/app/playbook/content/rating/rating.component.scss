@@ -1,8 +1,27 @@
-.playbook-ratings {
-	.header {
-		h2 {
-			background-image: url('/assets/images/ico-ratings.png');
-			padding-left: 27px;
-		}
-	}
+.playbook-content.container,
+section.playbook.container {
+    .playbook-ratings {
+    	.header {
+    		h2 {
+    			//background-image: url('/assets/images/ico-ratings.png');
+    			//padding-left: 27px;
+                background-image: url('/assets/images/ico-segments.png');
+    		}
+    	}
+        .content-body {
+            .list {
+                .item {
+                    ul {
+                        & > li {
+                            &.accounts,
+                            &.contacts {
+                                @include flex-item(0 1 auto);
+                                text-align: right;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

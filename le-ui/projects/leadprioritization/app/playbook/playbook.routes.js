@@ -6,7 +6,6 @@ angular
     'lp.playbook.dashboard',
     'lp.playbook.dashboard.launch_history',
     'lp.playbook.wizard.settings',
-    'lp.playbook.wizard.segment',
     'lp.playbook.wizard.rating',
     'lp.playbook.wizard.targets',
     'lp.playbook.wizard.insights',
@@ -332,12 +331,11 @@ angular
                 WizardProgressItems: function(PlaybookWizardStore) {
                     return [
                         { label: 'Settings', state: 'settings', nextFn: PlaybookWizardStore.nextSaveGeneric },
-                        { label: 'Segment', state: 'settings.segment', nextFn: PlaybookWizardStore.nextSaveGeneric },
-                        { label: 'Rating', state: 'settings.segment.rating' },
-                        { label: 'Targets', state: 'settings.segment.rating.targets' },
-                        { label: 'Insights', state: 'settings.segment.rating.targets.insights', nextFn: PlaybookWizardStore.nextSaveInsight },
-                        { label: 'Preview', state: 'settings.segment.rating.targets.insights.preview' },
-                        { label: 'Launch', state: 'settings.segment.rating.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
+                        { label: 'Rating', state: 'settings.rating', nextFn: PlaybookWizardStore.nextSaveGeneric },
+                        { label: 'Targets', state: 'settings.rating.targets' },
+                        { label: 'Insights', state: 'settings.rating.targets.insights', nextFn: PlaybookWizardStore.nextSaveInsight },
+                        { label: 'Preview', state: 'settings.rating.targets.insights.preview' },
+                        { label: 'Launch', state: 'settings.rating.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
                     ];
                 }
             },
@@ -393,22 +391,7 @@ angular
                 }
             },
         })
-        .state('home.playbook.wizard.settings.segment', {
-            url: '/segment',
-            resolve: {
-                Segments: function(SegmentService) {
-                    return SegmentService.GetSegments();
-                }
-            },
-            views: {
-                'wizard_content@home.playbook.wizard': {
-                    controller: 'PlaybookWizardSegment',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/playbook/content/segment/segment.component.html'
-                }
-            }
-        })
-        .state('home.playbook.wizard.settings.segment.rating', {
+        .state('home.playbook.wizard.settings.rating', {
             url: '/rating',
             resolve: {
                 Ratings: function(PlaybookWizardStore) {
@@ -423,7 +406,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.settings.segment.rating.targets', {
+        .state('home.playbook.wizard.settings.rating.targets', {
             url: '/targets',
             resolve: {
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
@@ -514,7 +497,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.settings.segment.rating.targets.insights', {
+        .state('home.playbook.wizard.settings.rating.targets.insights', {
             url: '/insights',
             params: {
                 section: 'wizard.insights'
@@ -545,7 +528,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.settings.segment.rating.targets.insights.preview', {
+        .state('home.playbook.wizard.settings.rating.targets.insights.preview', {
             url: '/preview',
             resolve: {
                 Play: function(PlaybookWizardStore) {
@@ -563,7 +546,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.settings.segment.rating.targets.insights.preview.launch', {
+        .state('home.playbook.wizard.settings.rating.targets.insights.preview.launch', {
             url: '/launch',
             views: {
                 'wizard_content@home.playbook.wizard': {

@@ -1,48 +1,72 @@
-<div class="playbook-ratings container" ng-class="{'dashboard-content': vm.stateParams.section.indexOf('dashboard.') !== -1}">
+<div class="playbook-ratings playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
     <form name="rating_form">
-    <div class="header">
-        <h2>Rating
-            <span class="more-info">&#105;
-                <div class="tooltip_">
-                    <div class="cover">
-                        <h3>Stuff about ratings</h3>
-                        <p>
-                            Rating stuff long text or something here
-                        </p>
+        <div class="header">
+            <h2>Segment
+<!--                 <span class="more-info">&#105;
+                    <div class="tooltip_">
+                        <div class="cover">
+                            <h3>Stuff about ratings</h3>
+                            <p>
+                                Rating stuff long text or something here
+                            </p>
+                        </div>
                     </div>
-                </div>
-            </span>
-        </h2>
-    </div>
-    <div class="content-body">
-        <div class="filters">
-            <div class="ng-search">
-            <input type="text" class="form-control" placeholder="Search {{vm.ratings.length}} Ratings" ng-model="search" />
-                <a class="button icon-button white-button" ng-click="search.length ? search = '' : ''">
-                    <span class="fa fa-search" ng-show="!search.length"></span>
-                    <span class="fa fa-times" ng-show="search.length"></span>
-                </a>
-            </div>
+                </span>
+ -->            </h2>
         </div>
-        <ul class="list">
-            <li class="item header rating_">
-                <ul>
-                    <li class="name">Rating</li>
-                </ul>
-            </li>
-            <li ng-repeat="rating in vm.ratings| filter: {'Name': search}" class="item rating_">
-                <ul>
-                    <li class="name">
-                    <input  type="radio" 
-                            id="rating{{$index}}" 
-                            name="rating{{$index}}" 
-                            ng-value="rating.Name"
-                            ng-change="vm.checkValid(rating_form)"
-                            ng-model="vm.stored.rating_selection" />
-                    <label for="rating{{$index}}">{{rating.Name}}</label></li>
-                </ul>
-            </li>
-        </ul>
-    </div>
+        <div class="content-body">
+            <div class="filters">
+                <div class="ng-search">
+                <input type="text" class="form-control" placeholder="Search {{vm.ratings.length}} Ratings" ng-model="vm.search" />
+                    <a class="button icon-button white-button" ng-click="vm.search.length ? vm.search = '' : ''">
+                        <span class="fa fa-search" ng-show="!vm.search.length"></span>
+                        <span class="fa fa-times" ng-show="vm.search.length"></span>
+                    </a>
+                </div>
+            </div>
+            <ul class="list">
+                <li class="item header rating_">
+                    <ul>
+                        <li class="name">Segment</li>
+                        <li class="ratingengine">Rating</li>
+                        <li class="accounts">Accounts</li> 
+                        <li class="contacts">Contacts</li>
+                    </ul>
+                </li>
+                <li 
+                    ng-repeat="rating in (filteredList = (vm.ratings| filter: vm.searchFields)) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
+                    ng-class="{selected: vm.stored.rating_selection == rating.id}"
+                    class="item rating_">
+                    <ul>
+                        <li class="segment">
+                            <input 
+                                type="radio" 
+                                id="rating{{$index}}" 
+                                name="rating{{$index}}" 
+                                ng-value="rating.id"
+                                ng-change="vm.checkValid(rating_form)"
+                                ng-click="vm.saveRating(rating)"
+                                ng-model="vm.stored.rating_selection" />
+                            <label for="rating{{$index}}">{{rating.segmentDisplayName}}</label>
+                        </li>
+                        <li class="ratingengine">
+                            <label for="rating{{$index}}">{{rating.displayName}}</label>
+                        </li>
+                        <li class="accounts">
+                            <i ng-if="!vm.ratingsCounts[rating.id].accounts" class="fa fa-spinner fa-spin"></i>
+                            <label ng-if="vm.ratingsCounts[rating.id].accounts" for="rating{{$index}}">{{vm.ratingsCounts[rating.id].accounts|number}}</label>
+                        </li>
+                        <li class="contacts">
+                            <i ng-if="!vm.ratingsCounts[rating.id].contacts" class="fa fa-spinner fa-spin"></i>
+                            <label ng-if="vm.ratingsCounts[rating.id].contacts" for="rating{{$index}}">{{vm.ratingsCounts[rating.id].contacts|number}}</label>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <pd-pagination-controls
+                current="vm.currentPage"
+                max="filteredList.length / vm.pageSize">
+            </pd-pagination-controls>
+        </div>
     </form>
 </div>

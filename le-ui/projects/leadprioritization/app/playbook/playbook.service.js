@@ -2,37 +2,29 @@ angular.module('lp.playbook')
 .service('PlaybookWizardStore', function($q, $state, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility){
     var PlaybookWizardStore = this;
 
-    this.settings = this.settings || {};
-    this.rating = this.rating || {};
-    this.savedSegment = this.savedSegment || null;
-    this.currentPlay = this.currentPlay || null;
-    this.playLaunches = this.playLaunches || null;
-    this.savedTalkingPoints = this.savedTalkingPoints || null;
-
     this.init = function() {
-        PlaybookWizardStore.settings = {};
-        PlaybookWizardStore.rating = {};
-        PlaybookWizardStore.savedSegment = null;
-        PlaybookWizardStore.currentPlay = null;
-        PlaybookWizardStore.playLaunches = null;
-        PlaybookWizardStore.savedTalkingPoints = null;
+        this.settings = {};
+        this.savedRating = null;
+        this.savedSegment = null;
+        this.currentPlay = null;
+        this.playLaunches = null;
+        this.savedTalkingPoints = null;
 
-        PlaybookWizardStore.settings_form = {
+        this.settings_form = {
             play_display_name: '',
             play_description: ''
         }
 
-        PlaybookWizardStore.segment_form = {
+        this.segment_form = {
             segment_selection: ''
         }
 
-        PlaybookWizardStore.rating_form = {
+        this.rating_form = {
             rating_selection: ''
         }
 
-        PlaybookWizardStore.validation = {
+        this.validation = {
             settings: false,
-            segment: false,
             rating: false,
             targets: true,
             insights: false,
@@ -114,28 +106,49 @@ angular.module('lp.playbook')
         return this.savedTalkingPoints;
     }
 
-    this.setRating = function(rating) {
-        this.rating = rating;
-    }
-
-    this.getRating = function() {
-        return this.rating;
-    }
-
     this.getRatings = function() {
-        var data = [],
-            total = 5;
+        var deferred = $q.defer();
+        PlaybookWizardService.getRatings().then(function(data) {
+            deferred.resolve(data);
+        });
+        return deferred.promise;
+    }
 
-        for (var i=0; i<total; i++) {
-            var tmp = {
-                Name: 'Rating Name ' + (i + 1)
-            };
-
-            data.push(tmp);
+    this.getRatingsCounts = function(Ratings) {
+        var deferred = $q.defer(),
+            ratings_ids = [];
+        if(Ratings && typeof Ratings === 'object') {
+            Ratings.forEach(function(value, key) {
+                ratings_ids.push(value.id);
+            });
+            PlaybookWizardService.getRatingsCounts(ratings_ids).then(function(data) {
+                deferred.resolve(data);
+            });
         }
+        return deferred.promise;
+    }
 
-        return data;
-    };
+    this.setRating = function(rating) {
+        this.savedRating = rating;
+    }
+
+    this.saveRating = function(rating, play_name) {
+        if (rating) {
+            this.getPlay(play_name).then(function(play){
+                PlaybookWizardStore.savePlay({
+                    displayName: play.displayName,
+                    name: play.name,
+                    rating: rating.id
+                }).then(function(response){
+                    PlaybookWizardStore.setSegment(segment);
+                });
+            });
+        }
+    }
+
+    this.getSavedRating = function() {
+        return this.savedRating;
+    }
 
     this.setSegment = function(segment) {
         this.savedSegment = segment;
@@ -272,7 +285,7 @@ angular.module('lp.playbook')
         };
     }
 })
-.service('PlaybookWizardService', function($q, $http, $state) {
+.service('PlaybookWizardService', function($q, $http, $state, $timeout) {
     this.host = '/pls'; //default
 
     this.getPlays = function() {
@@ -393,4 +406,47 @@ angular.module('lp.playbook')
         });
         return deferred.promise;
     }
+
+    this.getRatings = function() {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/ratingengines',
+            headers: {
+                'Accept': 'application/json'
+            }
+        }).then(
+            function onSuccess(response) {
+                result = response.data;
+                deferred.resolve(result);
+
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorMsg = response.data.errorMsg || 'unspecified error';
+                deferred.reject(errorMsg);
+            }
+        );
+        return deferred.promise;
+    }
+
+    this.getRatingsCounts = function(ratings) {
+        var deferred = $q.defer();
+
+        var ret = {};
+        for(var i in ratings) {
+            var rating = ratings[i];
+            ret[rating] = {
+                accounts: Math.floor((Math.random()*1000000)+1),
+                contacts: Math.floor((Math.random()*1000000)+1)
+            } 
+        }
+        $timeout(function() {
+            deferred.resolve(ret);
+        }, 5 * 1000);
+        return deferred.promise;
+    }
+
 });

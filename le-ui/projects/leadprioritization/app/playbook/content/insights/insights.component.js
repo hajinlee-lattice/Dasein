@@ -72,17 +72,14 @@ angular.module('lp.playbook.wizard.insights', [])
             });
         talkingPoint.IsNew = true;
         vm.talkingPoints.push(talkingPoint);
-        CgTalkingPointStore.setEditedTalkingPoint(talkingPoint);
+        CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints).then(function(results){
+            vm.talkingPoints = results;
+            CgTalkingPointStore.setEditedTalkingPoint(results.slice(-1)[0]);
+        });
     }
 
     vm.addTalkingPoint = function() {
-        if(vm.talkingPoints.length) {
-            CgTalkingPointStore.saveTalkingPoints(vm.talkingPoints).then(function(results){
-                newTalkingPoint();
-            });
-        } else {
-            newTalkingPoint();
-        }
+        newTalkingPoint();
     };
 
     vm.saveTalkingPoints = function() {
