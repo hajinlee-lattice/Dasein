@@ -383,7 +383,7 @@
                         .attribute-feedback-container {
                             display: inline;
                             position: relative;
-                            padding-right: 15px;
+                            padding-right: 17px;
                             attribute-feedback-button {
                                 display: none;
                                 pointer-events: auto;
@@ -444,7 +444,7 @@
                         .attribute-feedback-container {
                             display: inline;
                             position: relative;
-                            padding-left: 15px;
+                            padding-left: 17px;
                             attribute-feedback-button {
                                 display: none;
                                 pointer-events: auto;
@@ -462,7 +462,7 @@
                         .industry {
                             .attribute-feedback-container {
                                 padding-left: 0;
-                                padding-right: 15px;
+                                padding-right: 17px;
                                 attribute-feedback-button {
                                     left: auto;
                                     right: 2px;
@@ -977,8 +977,8 @@
                         display: none;
                         pointer-events: auto;
                         position: absolute;
-                        top: 0;
-                        left: 2px;
+                        top: -1px;
+                        left: 0;
                         div.infodot {
                             color: #0c8bc7;
                         }

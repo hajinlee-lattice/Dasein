@@ -26,7 +26,18 @@
                         class="attribute"
                         ng-class="{'has-highlight': attribute.HighlightHighlighted,'no-highlight': !attribute.HighlightHighlighted}">
                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
-                    <div class="column data values" ng-if="vm.lookupMode">{{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}</div>
+                    <div class="column data values" ng-if="vm.lookupMode">
+                        <strong class="attribute-feedback-container">
+                            <attribute-feedback-button 
+                                button-type="'infodot'" 
+                                attribute="attribute" 
+                                value="vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType)" 
+                                icon-image="vm.categoryIcon(category)"
+                                category-class="vm.categoryClass(category)"
+                                ng-if=" vm.lookupMode && vm.hasCompanyInfo" />
+                                {{ vm.filterLookupFiltered(attribute.AttributeValue, attribute.FundamentalType) }}
+                        </strong>
+                    </div>
 
                     <div class="column data records" ng-if="!vm.lookupMode && vm.section != 'segment.analysis'">{{ attribute.Count|number }}</div>
 
