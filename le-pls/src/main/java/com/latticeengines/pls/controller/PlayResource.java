@@ -100,14 +100,6 @@ public class PlayResource {
         if (play != null) {
             playLaunch = new PlayLaunch();
             playLaunch.setLaunchState(LaunchState.Launching);
-            // ----------------------------------------------------------------------------------------------
-            // TODO in M14, we will use objectapi to get the number of contacts
-            // and
-            // accounts for a given play
-            // for now, just mock them
-            playLaunch.setAccountsLaunched(4000L);
-            playLaunch.setContactsLaunched(5000L);
-            // ----------------------------------------------------------------------------------------------
             playLaunch.setPlay(play);
             playLaunchService.create(playLaunch);
             String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();

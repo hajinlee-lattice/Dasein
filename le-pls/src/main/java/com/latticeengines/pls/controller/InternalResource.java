@@ -1328,6 +1328,7 @@ public class InternalResource extends InternalResourceBase {
             @PathVariable("launchId") String launchId, //
             @RequestParam("launchCompletionPercent") double launchCompletionPercent, //
             @RequestParam("accountsLaunched") long accountsLaunched, //
+            @RequestParam("contactsLaunched") long contactsLaunched, //
             @RequestParam("accountsErrored") long accountsErrored, //
             @RequestParam("accountsSuppressed") long accountsSuppressed) {
         log.debug(String.format("Record play launch progress for %s launchId", launchId));
@@ -1336,6 +1337,7 @@ public class InternalResource extends InternalResourceBase {
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
         playLaunch.setAccountsLaunched(accountsLaunched);
         playLaunch.setAccountsErrored(accountsErrored);
+        playLaunch.setContactsLaunched(contactsLaunched);
         playLaunch.setLaunchCompletionPercent(launchCompletionPercent);
         playLaunch.setAccountsSuppressed(accountsSuppressed);
         return playLaunchService.update(playLaunch);

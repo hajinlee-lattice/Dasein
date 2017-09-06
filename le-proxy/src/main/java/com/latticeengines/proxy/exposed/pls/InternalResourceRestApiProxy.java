@@ -505,11 +505,13 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             String launchId, //
             double launchCompletionPercent, //
             long accountsLaunched, //
+            long contactsLaunched, //
             long accountsErrored, //
             long accountsSuppressed) {
         String url = constructUrl("pls/internal/plays/" + playName + "/launches/" + launchId, customerSpace);
         url += "?launchCompletionPercent=" + launchCompletionPercent;
         url += "&accountsLaunched=" + accountsLaunched;
+        url += "&contactsLaunched=" + contactsLaunched;
         url += "&accountsErrored=" + accountsErrored;
         url += "&accountsSuppressed=" + accountsSuppressed;
         restTemplate.patchForObject(url, null, String.class);

@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.pls.service.RatingCoverageService;
 
-@Component
+@Component("ratingCoverageService")
 public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     @Override

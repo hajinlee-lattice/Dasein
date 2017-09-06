@@ -1,8 +1,10 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.codehaus.plexus.util.StringUtils;
@@ -15,15 +17,21 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.BucketInformation;
 import com.latticeengines.domain.exposed.pls.BucketName;
+import com.latticeengines.domain.exposed.pls.CoverageInfo;
 import com.latticeengines.domain.exposed.pls.LaunchHistory;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingBucketCoverage;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingObject;
+import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
+import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.PlayEntityMgr;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
+import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
@@ -43,6 +51,9 @@ public class PlayServiceImpl implements PlayService {
 
     @Autowired
     PlayLaunchService playLaunchService;
+
+    @Autowired
+    RatingCoverageService ratingCoverageService;
 
     @Override
     public Play createOrUpdate(Play play, String tenantId) {
@@ -91,16 +102,35 @@ public class PlayServiceImpl implements PlayService {
         launchHistory.setPlayLaunch(playLaunch);
         launchHistory.setMostRecentLaunch(mostRecentPlayLaunch);
         play.setLaunchHistory(launchHistory);
-        // ----------------------------------------------------------------------------------------------
-        // TODO in M14, we will contact Redshift to get new contacts number and
-        // accounts number
-        // for now, just mock them
-        launchHistory.setNewAccountsNum(5000L);
-        launchHistory.setNewContactsNum(6000L);
+
+        RatingEngine ratingEngine = play.getRatingEngine();
+        if (ratingEngine == null || ratingEngine.getId() == null) {
+            // TODO comment this for now, will enable this after play is fully
+            // integrated with Rating Engine.
+            // throw new NullPointerException(
+            // String.format("Rating Engine for Play %s is not defined.",
+            // ratingEngine.getId()));
+        } else {
+            RatingsCountRequest request = new RatingsCountRequest();
+            request.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
+            RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+            Map<String, CoverageInfo> ratingEngineIdCoverageMap = response.getSegmentIdCoverageMap();
+            long accountCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount();
+            long contactCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount();
+            List<RatingBucketCoverage> bucketCoverageCounts = ratingEngineIdCoverageMap.get(ratingEngine.getId())
+                    .getBucketCoverageCounts();
+            log.info(String.format("For play %s, new account number and contact number are %d and %d, respectively",
+                    play.getName(), accountCount, contactCount));
+
+            long mostRecentSucessfulLaunchAccountNum = playLaunch == null ? 0 : playLaunch.getAccountsLaunched();
+            long mostRecentSucessfulLaunchContactNum = playLaunch == null ? 0 : playLaunch.getContactsLaunched();
+            launchHistory.setNewAccountsNum(accountCount - mostRecentSucessfulLaunchAccountNum);
+            launchHistory.setNewContactsNum(contactCount - mostRecentSucessfulLaunchContactNum);
+        }
         // ----------------------------------------------------------------------------------------------
 
         // ----------------------------------------------------------------------------------------------
-        // TODO in M14, we will get real data for AccountRatingMap
+        // TODO in M15, we will get real data for AccountRatingMap
         // for now, just mock them
         RatingObject rating = new RatingObject();
         List<BucketInformation> accountRatingList = new ArrayList<>();

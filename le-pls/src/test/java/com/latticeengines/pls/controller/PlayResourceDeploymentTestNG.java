@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -12,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -133,6 +133,10 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getPlayLaunch());
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getMostRecentLaunch());
+        // TODO will change to NotNull after integration with RatingEngine is
+        // fully done
+        Assert.assertNull(retrievedFullPlay.getLaunchHistory().getNewAccountsNum());
+        Assert.assertNull(retrievedFullPlay.getLaunchHistory().getNewContactsNum());
         System.out.println("retrievedPlayOverview is " + retrievedFullPlay);
 
         List<Play> retrievedFullPlayList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play", List.class);

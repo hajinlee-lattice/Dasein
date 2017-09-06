@@ -174,7 +174,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         if (ratingEngine != null) {
             modelId = prepareQueryUsingRatingsDefn(accountFrontEndQuery, contactFrontEndQuery,
-                    modifiableAccountIdCollectionForContacts, ratingEngine, modelId);
+                    modifiableAccountIdCollectionForContacts, ratingEngine);
         } else {
             log.error(String.format("Rating Engine is not set for the play %s", play.getName()));
         }
@@ -203,7 +203,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     private String prepareQueryUsingRatingsDefn(FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
-            List<Object> modifiableAccountIdCollectionForContacts, RatingEngine ratingEngine, String modelId) {
+            List<Object> modifiableAccountIdCollectionForContacts, RatingEngine ratingEngine) {
         List<Lookup> lookups;
         if (ratingEngine.getSegment() != null) {
             FrontEndRestriction accountRestriction = new FrontEndRestriction(
@@ -219,6 +219,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             contactFrontEndQuery.setContactRestriction(contactRestriction);
         }
 
+        String modelId = null;
         List<RatingModel> ratingModels = new ArrayList<>();
         for (RatingModel model : ratingEngine.getRatingModels()) {
             ratingModels.add(model);
@@ -265,9 +266,10 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         playLaunch.setAccountsSuppressed(suppressedAccounts);
 
         if (segmentAccountsCount > 0) {
-            AtomicLong launched = new AtomicLong();
-            AtomicLong errored = new AtomicLong();
-            AtomicLong suppressed = new AtomicLong(suppressedAccounts);
+            AtomicLong accountLaunched = new AtomicLong();
+            AtomicLong contactLaunched = new AtomicLong();
+            AtomicLong accountErrored = new AtomicLong();
+            AtomicLong accountSuppressed = new AtomicLong(suppressedAccounts);
 
             int pages = (int) Math.ceil((segmentAccountsCount * 1.0D) / pageSize);
 
@@ -280,17 +282,19 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
                 processAccounts(tenant, playLaunch, config, contactFrontEndQuery, //
                         modifiableAccountIdCollectionForContacts, modelId, //
-                        launched, errored, suppressed, accountPage);
+                        accountLaunched, contactLaunched, accountErrored, accountSuppressed, accountPage);
 
-                updateLaunchProgress(playLaunch, launched, errored);
+                updateLaunchProgress(playLaunch, accountLaunched, contactLaunched, accountErrored);
             }
         }
     }
 
-    private void updateLaunchProgress(PlayLaunch playLaunch, AtomicLong launched, AtomicLong errored) {
+    private void updateLaunchProgress(PlayLaunch playLaunch, AtomicLong accountLaunched, AtomicLong contactLaunched,
+            AtomicLong accountErrored) {
         playLaunch.setLaunchCompletionPercent(100 * processedSegmentAccountsCount / segmentAccountsCount);
-        playLaunch.setAccountsLaunched(launched.get());
-        playLaunch.setAccountsErrored(errored.get());
+        playLaunch.setAccountsLaunched(accountLaunched.get());
+        playLaunch.setContactsLaunched(contactLaunched.get());
+        playLaunch.setAccountsErrored(accountErrored.get());
         updateLaunchProgress(playLaunch);
         log.info("launch progress: " + playLaunch.getLaunchCompletionPercent() + "% completed");
     }
@@ -312,7 +316,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private void processAccounts(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
             FrontEndQuery contactFrontEndQuery, List<Object> modifiableAccountIdCollectionForContacts, String modelId,
-            AtomicLong launched, AtomicLong errored, AtomicLong suppressed, DataPage accountPage) {
+            AtomicLong accountLaunched, AtomicLong contactLaunched, AtomicLong accountErrored,
+            AtomicLong accountSuppressed, DataPage accountPage) {
         List<Map<String, Object>> accountList = accountPage.getData();
 
         if (CollectionUtils.isNotEmpty(accountList)) {
@@ -326,7 +331,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             fetchContacts(config, contactFrontEndQuery, mapForAccountAndContactList);
 
             generateRecommendations(tenant, playLaunch, config, modelId, //
-                    launched, errored, suppressed, accountList, //
+                    accountLaunched, contactLaunched, accountErrored, accountSuppressed, accountList, //
                     mapForAccountAndContactList);
         }
         processedSegmentAccountsCount += accountList.size();
@@ -380,33 +385,37 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
     }
 
     private void generateRecommendations(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
-            String modelId, AtomicLong launched, AtomicLong errored, AtomicLong suppressed,
-            List<Map<String, Object>> accountList, Map<Long, List<Map<String, String>>> mapForAccountAndContactList) {
+            String modelId, AtomicLong accountLaunched, AtomicLong contactLaunched, AtomicLong accountErrored,
+            AtomicLong accountSuppressed, List<Map<String, Object>> accountList,
+            Map<Long, List<Map<String, String>>> mapForAccountAndContactList) {
         parallelStream(accountList) //
                 .forEach(account -> {
                     try {
                         processSingleAccount(tenant, playLaunch, config, //
-                                modelId, launched, errored, suppressed, //
+                                modelId, accountLaunched, contactLaunched, accountErrored, accountSuppressed, //
                                 mapForAccountAndContactList, account);
                     } catch (Throwable th) {
                         log.error(th.getMessage(), th);
-                        errored.addAndGet(1);
+                        accountErrored.addAndGet(1);
                         throw th;
                     }
                 });
     }
 
     private void processSingleAccount(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
-            String modelId, AtomicLong launched, AtomicLong errored, AtomicLong suppressed,
-            Map<Long, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account) {
+            String modelId, AtomicLong accountLaunched, AtomicLong contactLaunched, AtomicLong accountErrored,
+            AtomicLong accountSuppressed, Map<Long, List<Map<String, String>>> mapForAccountAndContactList,
+            Map<String, Object> account) {
         Recommendation recommendation = //
                 prepareRecommendation(tenant, playLaunch, config, account, mapForAccountAndContactList, modelId);
         if (playLaunch.getBucketsToLaunch().contains(recommendation.getPriorityID())) {
             recommendationService.create(recommendation);
             danteLeadProxy.create(recommendation, config.getCustomerSpace().toString());
-            launched.addAndGet(1);
+            contactLaunched.addAndGet(
+                    recommendation.getExpandedContacts() != null ? recommendation.getExpandedContacts().size() : 0);
+            accountLaunched.addAndGet(1);
         } else {
-            suppressed.addAndGet(1);
+            accountSuppressed.addAndGet(1);
         }
     }
 
@@ -442,7 +451,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         try {
             internalResourceRestApiProxy.updatePlayLaunchProgress(getConfiguration().getCustomerSpace().toString(), //
                     playLaunch.getPlay().getName(), playLaunch.getLaunchId(), playLaunch.getLaunchCompletionPercent(),
-                    playLaunch.getAccountsLaunched(), playLaunch.getAccountsErrored(),
+                    playLaunch.getAccountsLaunched(), playLaunch.getContactsLaunched(), playLaunch.getAccountsErrored(),
                     playLaunch.getAccountsSuppressed());
         } catch (Exception e) {
             log.error("Unable to update launch progress.", e);
