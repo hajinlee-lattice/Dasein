@@ -44,12 +44,12 @@ import org.apache.avro.mapred.FsInput;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StreamUtils;
@@ -116,8 +116,8 @@ public class AvroUtils {
         }
 
         if (!errorMsgs.isEmpty()) {
-            throw new IllegalArgumentException("Shuffled and ordered schemas do not match, cannot align.\n"
-                    + StringUtils.join(errorMsgs, "\n"));
+            throw new IllegalArgumentException(
+                    "Shuffled and ordered schemas do not match, cannot align.\n" + StringUtils.join(errorMsgs, "\n"));
         }
 
         shuffledJson.set("fields", newFields);
@@ -145,6 +145,15 @@ public class AvroUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static List<String> getSchemaFields(Configuration config, String path) {
+        Schema schema = getSchemaFromGlob(config, path);
+        List<String> fields = new ArrayList<>();
+        for (Field field : schema.getFields()) {
+            fields.add(field.name());
+        }
+        return fields;
     }
 
     public static Schema getSchema(File file) {

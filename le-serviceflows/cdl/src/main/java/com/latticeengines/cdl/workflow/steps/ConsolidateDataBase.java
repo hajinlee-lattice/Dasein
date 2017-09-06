@@ -49,6 +49,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
     protected List<String> inputTableNames = new ArrayList<>();
     protected Boolean isActive = false;
     protected String inputMasterTableName;
+    protected Table masterTable;
     protected String profileTableName;
 
     protected String servingStoreTablePrefix;
@@ -158,7 +159,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
             inputTableNames.add(table.getName());
         }
 
-        Table masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore);
+        masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore);
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {
             log.info("There has been no master table for this data collection. Creating a new one");
         } else {

@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -113,6 +114,11 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        if (inputMasterTableName != null) {
+            List<String> fields = AvroUtils.getSchemaFields(yarnConfiguration,
+                    masterTable.getExtracts().get(0).getPath());
+            config.setOrigMasterFields(fields);
+        }
         return appendEngineConf(config, lightEngineConfig());
     }
 

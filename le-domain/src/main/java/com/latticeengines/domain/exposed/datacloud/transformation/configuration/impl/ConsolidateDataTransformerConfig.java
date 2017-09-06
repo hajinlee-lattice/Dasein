@@ -12,6 +12,7 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     private Set<String> columnsFromRight;
     private List<String> compositeKeys;
+    private List<String> origMasterFields;
 
     public String getSrcIdField() {
         return srcIdField;
@@ -51,6 +52,14 @@ public class ConsolidateDataTransformerConfig extends TransformerConfig {
 
     public void setCompositeKeys(List<String> compositeKeys) {
         this.compositeKeys = compositeKeys;
+    }
+
+    public List<String> getOrigMasterFields() {
+        return origMasterFields;
+    }
+
+    public void setOrigMasterFields(List<String> origMasterFields) {
+        this.origMasterFields = origMasterFields;
     }
 
 }

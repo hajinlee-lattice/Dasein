@@ -20,6 +20,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -88,7 +89,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         targetVersion = HdfsPathBuilder.dateFormat.format(new Date());
         uploadAndRegisterTableSource(tableName1, tableName1, "ID", null);
         uploadAndRegisterTableSource(tableName2, tableName2, "ID", null);
-        uploadAndRegisterTableSource(masterTableName, masterTableName, "ID", null);
+        uploadAndRegisterTableSource(masterTableName, masterTableName, "AccountId", null);
         currentConfig = getConcolidateConfig();
 
         TransformationProgress progress = createNewProgress();
@@ -103,9 +104,8 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     }
 
     private void verifyDeltaTable() {
-        targetTableSource = convertTargetTableSource(deltaTableName);
         String deltaTableFullName = TableSource.getFullTableName(deltaTableName, targetVersion);
-        verifyRegisteredTable(deltaTableFullName, 8);
+        verifyRegisteredTable(deltaTableFullName, 5);
     }
 
     private void verifyMergedTable() {
@@ -114,7 +114,6 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         verifyRecordsInMergedTable(mergedTableFullName);
     }
 
-   
     @Override
     protected String getTargetSourceName() {
         return masterTableName;
@@ -127,6 +126,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
 
     @Override
     protected TableSource getTargetTableSource() {
+        targetTableSource = convertTargetTableSource(deltaTableName);
         return targetTableSource;
     }
 
@@ -166,18 +166,10 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
 
             /* Step 2: Delta New */
             TransformationStepConfig step2 = new TransformationStepConfig();
-            Table masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
-            if (masterTable != null) {
-                baseSources = Arrays.asList(masterTableName);
-                baseTables = new HashMap<>();
-                SourceTable sourceMasterTable = new SourceTable(masterTableName, customerSpace);
-                baseTables.put(masterTableName, sourceMasterTable);
-                step2.setBaseSources(baseSources);
-                step2.setBaseTables(baseTables);
-            }
+            Table masterTable = setupMasterTable(step2);
             step2.setInputSteps(Collections.singletonList(0));
             step2.setTransformer("consolidateDeltaNewTransformer");
-            step2.setConfiguration(getConsolidateDeltaConfig());
+            step2.setConfiguration(getConsolidateDeltaConfig(null));
 
             targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
@@ -192,14 +184,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
 
             /* Step 4: Upsert to Master table */
             TransformationStepConfig step4 = new TransformationStepConfig();
-            if (masterTable != null) {
-                baseSources = Arrays.asList(masterTableName);
-                baseTables = new HashMap<>();
-                SourceTable sourceMasterTable = new SourceTable(masterTableName, customerSpace);
-                baseTables.put(masterTableName, sourceMasterTable);
-                step4.setBaseSources(baseSources);
-                step4.setBaseTables(baseTables);
-            }
+            setupMasterTable(step4);
             // step 2 output
             step4.setInputSteps(Arrays.asList(0, 2));
             step4.setTransformer("consolidateDataTransformer");
@@ -212,10 +197,11 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
 
             /* Step 5: Leftjoin for Delta */
             TransformationStepConfig step5 = new TransformationStepConfig();
+
             // step 1, 4 output
             step5.setInputSteps(Arrays.asList(0, 3));
             step5.setTransformer("consolidateDeltaTransformer");
-            step5.setConfiguration(getConsolidateDeltaConfig());
+            step5.setConfiguration(getConsolidateDeltaConfig(masterTable));
 
             targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
@@ -231,6 +217,21 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Table setupMasterTable(TransformationStepConfig step) {
+        List<String> baseSources;
+        Map<String, SourceTable> baseTables;
+        Table masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
+        if (masterTable != null) {
+            baseSources = Arrays.asList(masterTableName);
+            baseTables = new HashMap<>();
+            SourceTable sourceMasterTable = new SourceTable(masterTableName, customerSpace);
+            baseTables.put(masterTableName, sourceMasterTable);
+            step.setBaseSources(baseSources);
+            step.setBaseTables(baseTables);
+        }
+        return masterTable;
     }
 
     private String getConsolidateDataConfig() {
@@ -249,10 +250,15 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         return JsonUtils.serialize(config);
     }
 
-    private String getConsolidateDeltaConfig() {
+    private String getConsolidateDeltaConfig(Table masterTable) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField("ID");
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        if (masterTable != null) {
+            List<String> fields = AvroUtils.getSchemaFields(yarnConfiguration,
+                    masterTable.getExtracts().get(0).getPath());
+            config.setOrigMasterFields(fields);
+        }
         return JsonUtils.serialize(config);
     }
 
@@ -289,7 +295,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     private void cleanupRegisteredTable(String tableName) {
         metadataProxy.deleteTable(customerSpace.toString(), tableName);
     }
-    
+
     private void verifyRecordsInMergedTable(String mergedTableFullName) {
         List<GenericRecord> records = getRecordFromTable(mergedTableFullName);
         log.info("Start to verify records one by one.");
@@ -327,7 +333,6 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         Assert.assertEquals(record.get("FirstName"), null);
     }
 
-
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
 
@@ -343,37 +348,39 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         Assert.assertEquals(rowCount, new Integer(5));
         GenericRecord record = recordMap.get("1");
         Assert.assertEquals(record.get("Domain").toString(), "google.com");
-        Assert.assertEquals(record.get("Email").toString(), "123@google.com");
+        // Assert.assertEquals(record.get("Email").toString(),
+        // "123@google.com");
         Assert.assertEquals(record.get("FirstName").toString(), "John");
         Assert.assertEquals(record.get("LastName"), null);
-        Assert.assertEquals(record.get("LatticeAccountId").toString(), "320001703404");
-        Assert.assertNotNull(record.get("CREATION_DATE"));
-        Assert.assertNotNull(record.get("UPDATE_DATE"));
+        Assert.assertEquals(record.get("LatticeAccountId").toString(), "260002248202");
+        // Assert.assertNotNull(record.get("CREATION_DATE"));
+        // Assert.assertNotNull(record.get("UPDATE_DATE"));
 
         record = recordMap.get("2");
         Assert.assertEquals(record.get("Domain").toString(), "oracle.com");
-        Assert.assertEquals(record.get("Email").toString(), "234@oracle.com");
+        // Assert.assertEquals(record.get("Email").toString(),
+        // "234@oracle.com");
         Assert.assertEquals(record.get("FirstName").toString(), "Smith");
         Assert.assertEquals(record.get("LastName").toString(), "last2");
         Assert.assertEquals(record.get("LatticeAccountId").toString(), "22");
 
         record = recordMap.get("3");
         Assert.assertEquals(record.get("Domain").toString(), "salesforce.com");
-        Assert.assertEquals(record.get("Email"), null);
+        // Assert.assertEquals(record.get("Email"), null);
         Assert.assertEquals(record.get("FirstName"), null);
         Assert.assertEquals(record.get("LastName"), null);
-        Assert.assertEquals(record.get("LatticeAccountId").toString(), "530003080572");
+        Assert.assertEquals(record.get("LatticeAccountId").toString(), "440000526702");
 
         record = recordMap.get("4");
         Assert.assertEquals(record.get("Domain").toString(), "microsoft.com");
-        Assert.assertEquals(record.get("Email").toString(), "234@d.com");
+        // Assert.assertEquals(record.get("Email").toString(), "234@d.com");
         Assert.assertEquals(record.get("FirstName").toString(), "Marry");
         Assert.assertEquals(record.get("LastName").toString(), "last4");
-        Assert.assertEquals(record.get("LatticeAccountId").toString(), "370002605834");
+        Assert.assertEquals(record.get("LatticeAccountId").toString(), "240002064089");
 
         record = recordMap.get("5");
         Assert.assertEquals(record.get("Domain").toString(), "faceboook.com");
-        Assert.assertEquals(record.get("Email"), null);
+        // Assert.assertEquals(record.get("Email"), null);
         Assert.assertEquals(record.get("FirstName").toString(), "faceboookFirst");
         Assert.assertEquals(record.get("LastName").toString(), "last5");
         Assert.assertEquals(record.get("LatticeAccountId").toString(), "55");
@@ -419,7 +426,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
                 { 5, null, "faceboookFirst", "last5", "55" }, //
                 { 6, "facebookdummy.com", "facebookFirstDummy", "last6", "66" } //
         };
-        List<String> fieldNames = Arrays.asList("ID", "Domain", "FirstName", "LastName", "LatticeAccountId");
+        List<String> fieldNames = Arrays.asList("AccountId", "Domain", "FirstName", "LastName", "LatticeAccountId");
         List<Class<?>> clz = Arrays.asList((Class<?>) Integer.class, String.class, String.class, String.class,
                 String.class);
         uploadDataToHdfs(data, fieldNames, clz,
