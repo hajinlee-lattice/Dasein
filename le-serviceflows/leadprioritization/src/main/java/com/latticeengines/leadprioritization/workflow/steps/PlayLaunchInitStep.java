@@ -471,11 +471,29 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         recommendation.setSfdcAccountID(checkAndGet(account, InterfaceName.SalesforceAccountID.name()));
         Double value = 0D;
         recommendation.setMonetaryValue(value);
+
+        // give preference to company name from customer data itself. If not
+        // found then try to get company name from lattice data cloud field
+        // LDC_Name
         recommendation.setCompanyName(checkAndGet(account, InterfaceName.CompanyName.name()));
+        if (recommendation.getCompanyName() == null) {
+            recommendation.setCompanyName(checkAndGet(account, NAME_AS_PER_LATTICE_MATCH));
+        }
+
         recommendation.setTenantId(tenant.getPid());
         recommendation.setLikelihood(0.5D);
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
-        recommendation.setPriorityID(RuleBucketName.valueOf(checkAndGet(account, modelId, "A")));
+
+        String bucketName = checkAndGet(account, modelId, "A");
+        RuleBucketName bucket = null;
+        bucket = RuleBucketName.getRuleBucketName(bucketName);
+
+        if (bucket == null) {
+            bucket = RuleBucketName.valueOf(bucketName);
+        }
+
+        recommendation.setPriorityID(bucket);
+        recommendation.setPriorityDisplayName(bucket.getName());
 
         Long accountId = parseLong(recommendation.getAccountId());
 

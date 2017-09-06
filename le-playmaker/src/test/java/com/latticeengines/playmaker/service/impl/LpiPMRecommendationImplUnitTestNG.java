@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -108,6 +109,7 @@ public class LpiPMRecommendationImplUnitTestNG {
     }
 
     private List<Map<String, Object>> createDummyRecommendationResult(int count) {
+        RuleBucketName[] buckets = new RuleBucketName[] { RuleBucketName.A, RuleBucketName.A_MINUS };
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
@@ -120,6 +122,10 @@ public class LpiPMRecommendationImplUnitTestNG {
             accExtRec.put(PlaymakerConstants.LaunchID, playLaunchId);
 
             accExtRec.put(PlaymakerConstants.LaunchDate, 100L);
+
+            accExtRec.put(PlaymakerConstants.PriorityDisplayName, buckets[i % buckets.length].getName());
+
+            accExtRec.put(PlaymakerConstants.PriorityID, buckets[i % buckets.length].name());
 
             accExtRec.put(PlaymakerConstants.Contacts,
                     "[{\"Email\":\"FirstName4679@ort.com\",\"Address\":\"Marine Corps Personnel Support Dr\","

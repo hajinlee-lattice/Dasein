@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.playmaker.service.LpiPMRecommendation;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -113,7 +114,15 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                             (long) accExtRec.get(PlaymakerConstants.LaunchDate) + 8000000L);
                 }
 
-                accExtRec.put(PlaymakerConstants.PriorityID, 25);
+                Object bucketEnumObj = accExtRec.get(PlaymakerConstants.PriorityID);
+                if (bucketEnumObj != null && StringUtils.isNotBlank(bucketEnumObj.toString())) {
+                    String bucketEnumString = bucketEnumObj.toString();
+                    RuleBucketName bucket = RuleBucketName.valueOf(bucketEnumString);
+                    accExtRec.put(PlaymakerConstants.PriorityID, bucket.ordinal());
+                } else {
+                    accExtRec.put(PlaymakerConstants.PriorityID, 25);
+                }
+
                 accExtRec.put(PlaymakerConstants.SfdcContactID, "");
 
                 List<Map<String, String>> contactList = PlaymakerUtils

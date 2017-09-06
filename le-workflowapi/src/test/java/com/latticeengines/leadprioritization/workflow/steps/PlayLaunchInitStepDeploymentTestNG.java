@@ -378,7 +378,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     String ratingRuleJson = //
             " { " //
                     + "   \"bucketToRuleMap\": { " //
-                    + "     \"A\": { " //
+                    + "     \"A-\": { " //
                     + "       \"accountRule\": { " //
                     + "         \"concreteRestriction\": { " //
                     + "           \"negate\": false, " //
@@ -398,7 +398,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "         } " //
                     + "       } " //
                     + "     }, " //
-                    + "     \"A-\": { " //
+                    + "     \"A\": { " //
                     + "       \"contactRule\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
