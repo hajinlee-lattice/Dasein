@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.http.message.BasicNameValuePair;
@@ -62,22 +63,32 @@ public class ScoringApiExceptionHandler {
     public ExceptionHandlerErrors handleException(UncheckedExecutionException ex) {
         Throwable cause = ex.getCause();
         if (cause instanceof ScoringApiException) {
-            ScoringApiException scoringEx = (ScoringApiException) cause;
-            return handleScoringApiException(scoringEx);
+            return handleScoringApiException((ScoringApiException) cause);
         } else if (cause instanceof LedpException) {
-            LedpException ledpEx = (LedpException) cause;
-            return handleLedpException(ledpEx);
+            return handleLedpException((LedpException) cause);
         } else {
             return generateExceptionResponse("general_error", ex, true);
         }
     }
 
-    private ExceptionHandlerErrors handleScoringApiException(ScoringApiException ex) {
-        return generateExceptionResponse(ex.getCode().getExternalCode(), ex, false, false, false);
+    @ExceptionHandler
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionHandlerErrors handleException(HttpMessageNotReadableException ex) {
+        ScoringApiException exception = new ScoringApiException(
+                LedpCode.LEDP_31111,  new String[] { "message_not_readable" }, ex.getMessage());
+        exception.setStackTrace(ex.getStackTrace());
+        return handleScoringApiException(exception);
     }
 
-    private ExceptionHandlerErrors handleLedpException(LedpException ex) {
-        return generateExceptionResponse("api_error", ex, true);
+    @ExceptionHandler
+    @ResponseBody
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ExceptionHandlerErrors handleException(RateLimitException ex) {
+        ScoringApiException exception = new ScoringApiException(
+                LedpCode.LEDP_31111, new String[] { "too_many_requests" }, ex.getMessage());
+        exception.setStackTrace(ex.getStackTrace());
+        return handleScoringApiException(exception);
     }
 
     @ExceptionHandler
@@ -91,28 +102,20 @@ public class ScoringApiExceptionHandler {
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionHandlerErrors handleException(Exception ex) {
-        return generateExceptionResponse("general_error", ex, true);
-    }
-
-    @ExceptionHandler
-    @ResponseBody
-    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
-    public ExceptionHandlerErrors handleException(RateLimitException ex) {
-        return generateExceptionResponseNoAlert("too_many_requests", ex);
-    }
-
-    @ExceptionHandler
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionHandlerErrors handleException(HttpMessageNotReadableException ex) {
-        return generateExceptionResponseNoAlert("message_not_readable", ex);
+        ScoringApiException exception = new ScoringApiException(
+                LedpCode.LEDP_31111, new String[] { "general_error" }, ex.getMessage());
+        exception.setStackTrace(ex.getStackTrace());
+        return handleScoringApiException(exception);
     }
 
     @ExceptionHandler
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionHandlerErrors handleException(HttpMessageNotWritableException ex) {
-        return generateExceptionResponseNoAlert("message_not_writable", ex);
+        ScoringApiException exception = new ScoringApiException(
+                LedpCode.LEDP_31111, new String[] { "message_not_writable" }, ex.getMessage());
+        exception.setStackTrace(ex.getStackTrace());
+        return handleScoringApiException(exception);
     }
 
     @ExceptionHandler
@@ -127,6 +130,14 @@ public class ScoringApiExceptionHandler {
         }
     }
 
+    private ExceptionHandlerErrors handleScoringApiException(ScoringApiException ex) {
+        return generateExceptionResponse(ex.getCode().getExternalCode(), ex, false, false, false);
+    }
+
+    private ExceptionHandlerErrors handleLedpException(LedpException ex) {
+        return generateExceptionResponse("api_error", ex, true);
+    }
+
     private ExceptionHandlerErrors generateExceptionResponseNoAlert(String code, Exception ex) {
         return generateExceptionResponse(code, ex, false);
     }
@@ -138,7 +149,7 @@ public class ScoringApiExceptionHandler {
     private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex, boolean fireAlert,
             boolean includeErrors, boolean includeTrace) {
         ExceptionHandlerErrors exceptionHandlerErrors = new ExceptionHandlerErrors();
-        List<String> errorMessages = new ArrayList<String>();
+        List<String> errorMessages = new ArrayList<>();
         Throwable cause = ex;
         while (cause != null) {
             errorMessages.add(cause.getMessage());
@@ -159,7 +170,12 @@ public class ScoringApiExceptionHandler {
         }
 
         String exceptionHandlerErrorsMsg = JsonUtils.serialize(exceptionHandlerErrors);
-        String errorMsg = exceptionHandlerErrorsMsg + "\n" + trace;
+        String errorMsg;
+        if (ex instanceof ScoringApiException) {
+            errorMsg = exceptionHandlerErrorsMsg + "\n" + ((ScoringApiException) ex).getDetailedMessage() + trace;
+        } else {
+            errorMsg = exceptionHandlerErrorsMsg + "\n" + trace;
+        }
         log.error(errorMsg);
 
         if (fireAlert) {
@@ -191,10 +207,8 @@ public class ScoringApiExceptionHandler {
     }
 
     private String getStackTraceAsString(Exception ex) {
-        String trace = "";
         StringWriter sw = new StringWriter();
         ex.printStackTrace(new PrintWriter(sw));
-        trace = sw.toString();
-        return trace;
+        return sw.toString();
     }
 }
