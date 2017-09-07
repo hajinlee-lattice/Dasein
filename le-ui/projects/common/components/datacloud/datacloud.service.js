@@ -586,7 +586,7 @@ angular.module('common.datacloud')
             headers: {
                 'ErrorDisplayMethod': 'none' 
             },
-            url: '/pls/datacloud/customerreports/' + type,
+            url: this.host + '/datacloud/customerreports/' + type,
             data: opts
         }).then(function(response){
             deferred.resolve(response.data);
