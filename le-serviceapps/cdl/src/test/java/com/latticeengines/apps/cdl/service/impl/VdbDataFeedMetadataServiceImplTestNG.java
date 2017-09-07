@@ -28,6 +28,8 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
 
     private String testVdbMetadata;
 
+    private String errorVdbMetadata;
+
     private Table testTable;
 
     private Table resolvedTable;
@@ -41,15 +43,19 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         testVdbMetadata = IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("metadata/vdb/testmetadata.json"),
                 "UTF-8");
+        errorVdbMetadata = IOUtils.toString(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(
+                        "metadata/vdb/testmetadata_error.json"), "UTF-8");
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", expectedExceptions = RuntimeException.class)
     public void testGetMetadata() {
         testTable = vdbDataFeedMetadataService.getMetadata(testVdbMetadata);
         Assert.assertNotNull(testTable);
         Assert.assertEquals(testTable.getName(), "FS_Data_For_Dante_Accounts_1000");
         Attribute requiredField = testTable.getAttribute("Account");
         Assert.assertNotNull(requiredField);
+        Table error = vdbDataFeedMetadataService.getMetadata(errorVdbMetadata);
     }
 
     @Test(groups = "functional")

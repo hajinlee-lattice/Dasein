@@ -1,0 +1,640 @@
+{
+  "batch_size": 1000,
+  "create_table_rule": "CREATE",
+  "data_category": "LPILeadExtensions",
+  "get_query_data_endpoint": "http://10.61.0.58:8888/DLRestService/GetVisiDBQueryData",
+  "launch_id": "5486_Job_66325",
+  "merge_rule": "UPSERT",
+  "report_status_endpoint": "http://10.61.0.58:8888/DLRestService/SetLoadDataJobStatus_DP",
+  "table_name": "FS_Data_For_Dante_Accounts_1000",
+  "tenant_id": "DellEB",
+  "total_rows": 1000,
+  "vdb_query_handle": "1585",
+  "vdb_spec_metadata": [
+    {
+      "approved_usage": null,
+      "column_name": "Account",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Account",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Address1",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Address1",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Address2",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Address2",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Address_Street_1",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Address_Street_1",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "BestLikelihood",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "BestLikelihood",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "City",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "City",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Contact",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Contact",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Country",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Country",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "CrmAccount_External_ID",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "CrmAccount_External_ID",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "DisplayName",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "DisplayName",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Display_Name",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Display_Name",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "EstimatedRevenue",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "EstimatedRevenue",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "LEAccountIDLong",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "LEAccountIDLong",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "LastModified",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "LastModified",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "LeadCount",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "LeadCount",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "NAICSCode",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "NAICSCode",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "NumberOfEmployees",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "NumberOfEmployees",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "OwnerDisplayName",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "OwnerDisplayName",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "SICCode",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "SICCode",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Siccode",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "SICCode",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "S_Data_For_Dante_Accounts_1000",
+      "data_quality": null,
+      "data_source": null,
+      "data_type": "Int",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "S_Data_For_Dante_Accounts_1000",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "SalesforceAccountID",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "SalesforceAccountID",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "StateProvince",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "StateProvince",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "State_Province",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "State_Province",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "TRANSACTION_ID",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "TRANSACTION_ID",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Territory",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Territory",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Territory_External_ID",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Territory_External_ID",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "TopLeads",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "TopLeads",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "TotalMonetaryValue",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "TotalMonetaryValue",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "URL",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "URL",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Vertical",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Vertical",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "Zip",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "NVarChar(256)",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "Zip",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    },
+    {
+      "approved_usage": null,
+      "column_name": "fnLEAccountIDLong",
+      "data_quality": null,
+      "data_source": [
+        "S_Data_For_Dante_Accounts_1000_Import"
+      ],
+      "data_type": "Long",
+      "description": "",
+      "display_discretization_strategy": null,
+      "display_name": "fnLEAccountIDLong",
+      "extensions": null,
+      "fundamental_type": "Unknown",
+      "key_column": false,
+      "last_time_source_updated": null,
+      "most_recent_update_date": "1/1/0001 12:00:00 AM +00:00",
+      "statistical_type": null,
+      "tags": null
+    }
+  ]
+}

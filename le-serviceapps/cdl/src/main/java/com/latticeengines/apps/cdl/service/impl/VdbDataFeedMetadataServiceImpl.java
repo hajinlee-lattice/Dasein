@@ -54,7 +54,11 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         metaTable.setPrimaryKey(null);
         metaTable.setName(vdbLoadTableConfig.getTableName());
         metaTable.setDisplayName(vdbLoadTableConfig.getTableName());
-        return metaTable;
+        if (VdbMetadataUtils.validateVdbTable(metaTable)) {
+            return metaTable;
+        } else {
+            throw new RuntimeException("The metadata from vdb is not valid! ");
+        }
     }
 
     @Override

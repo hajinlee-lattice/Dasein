@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 
 public class VdbMetadataUtils {
@@ -49,6 +50,26 @@ public class VdbMetadataUtils {
             // see the log to add unit test
             throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.serialize(metadata)), e);
         }
+    }
+
+    public static boolean validateVdbTable(Table vdbTable) {
+        boolean valid = true;
+        if (vdbTable == null) {
+            valid = false;
+        } else {
+            HashSet<String> attrNames = new HashSet<>();
+            for (Attribute attribute : vdbTable.getAttributes()) {
+                if (attrNames.contains(attribute.getName().toLowerCase())) {
+                    log.error(String.format("Table already have attribute with same name %s (case insensitive)",
+                            attribute.getName()));
+                    valid = false;
+                    break;
+                } else {
+                    attrNames.add(attribute.getName().toLowerCase());
+                }
+            }
+        }
+        return valid;
     }
 
     public static boolean isAcceptableDataType(String srcType, String destType) {

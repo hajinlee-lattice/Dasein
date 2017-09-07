@@ -7,10 +7,12 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 
 public class VdbMetadataUtilsUnitTestNG {
@@ -85,6 +87,35 @@ public class VdbMetadataUtilsUnitTestNG {
             runBasicVerification(attribute);
             Assert.assertNull(attribute.getFundamentalType());
         }
+    }
+
+    @Test(groups = "unit")
+    public void testValidateVdbTable() {
+        Table vdbTable = new Table();
+        vdbTable.setName("VdbTable");
+        Attribute a1 = new Attribute();
+        a1.setName(AvroUtils.getAvroFriendlyString("Attr_1"));
+        a1.setDisplayName(a1.getName());
+        a1.setSourceLogicalDataType("varchar(100)");
+        vdbTable.addAttribute(a1);
+
+        Attribute a2 = new Attribute();
+        a2.setName(AvroUtils.getAvroFriendlyString("Attr_2"));
+        a2.setDisplayName(a2.getName());
+        a2.setSourceLogicalDataType("nvarchar(100)");
+        vdbTable.addAttribute(a2);
+
+        Assert.assertTrue(VdbMetadataUtils.validateVdbTable(vdbTable));
+
+        Attribute a3 = new Attribute();
+        a3.setName(AvroUtils.getAvroFriendlyString("attr_2"));
+        a3.setDisplayName(a3.getName());
+        a3.setSourceLogicalDataType("nvarchar(100)");
+        vdbTable.addAttribute(a3);
+        vdbTable.addAttribute(a3);
+
+        Assert.assertFalse(VdbMetadataUtils.validateVdbTable(vdbTable));
+
     }
 
     @Test(groups = "unit", dataProvider = "acceptableTestData")
