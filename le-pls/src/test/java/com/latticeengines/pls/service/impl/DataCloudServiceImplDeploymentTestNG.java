@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -16,25 +15,13 @@ import com.latticeengines.domain.exposed.datacloud.customer.IncorrectMatchedAttr
 import com.latticeengines.domain.exposed.pls.CustomerReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.DataCloudService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 
-public class DataCloudServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class DataCloudServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    @Autowired
-    private TenantService tenantService;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    private Tenant tenant;
-
-    private static String tenantName = DataCloudServiceImplTestNG.class.getSimpleName();
     private static String suggestedValue = "test";
     private static String comment = "this is test!";
     private static List<String> matchLog = Collections.singletonList("[00:00:00.000] Started the journey. TravelerId=e19a76d9-c8b5-4751-9de1-bf77cf377017");
@@ -48,29 +35,17 @@ public class DataCloudServiceImplTestNG extends PlsFunctionalTestNGBase {
     IncorrectMatchedAttrReportRequest matchedRequest = new IncorrectMatchedAttrReportRequest();
     private CustomerReport lookupCustomerReport;
     private CustomerReport matchedCustomerReport;
+
     @Autowired
     private DataCloudService dataCloudService;
-    @Override
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        tenant = tenantService.findByTenantId(tenantName);
-
-        if (tenant != null) {
-            tenantService.discardTenant(tenant);
-        }
-        tenant = new Tenant();
-        tenant.setId(tenantName);
-        tenant.setName(tenantName);
-        tenantEntityMgr.create(tenant);
-        MultiTenantContext.setTenant(tenant);
+        setupTestEnvironmentWithOneTenant();
+        mainTestTenant = testBed.getMainTestTenant();
+        MultiTenantContext.setTenant(mainTestTenant);
+        switchToSuperAdmin();
         createCustomerReport(CustomerReportType.LOOkUP);
         createCustomerReport(CustomerReportType.MATCHEDATTRIBUTE);
-    }
-
-    @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
-        tenant = tenantService.findByTenantId(tenantName);
-        tenantService.discardTenant(tenant);
     }
 
     private void createCustomerReport(CustomerReportType type) {
@@ -94,8 +69,9 @@ public class DataCloudServiceImplTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testCustomerReport() {
+        setupSecurityContext(mainTestTenant);
         lookupCustomerReport = dataCloudService.findById(lookupCustomerReport.getId());
         Assert.assertNotNull(lookupCustomerReport);
         Assert.assertEquals(comment, lookupCustomerReport.getComment());

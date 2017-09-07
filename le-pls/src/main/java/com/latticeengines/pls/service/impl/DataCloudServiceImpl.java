@@ -15,8 +15,8 @@ import com.latticeengines.domain.exposed.datacloud.customer.IncorrectLookupRepro
 import com.latticeengines.domain.exposed.datacloud.customer.IncorrectMatchedAttributeReproduceDetail;
 import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
-import com.latticeengines.pls.entitymanager.DataCloudEntityMgr;
 import com.latticeengines.pls.service.DataCloudService;
+import com.latticeengines.proxy.exposed.matchapi.MatchCustomerReportProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Service("dataCloudService")
@@ -24,7 +24,7 @@ public class DataCloudServiceImpl implements DataCloudService {
 
     private static final Logger log = LoggerFactory.getLogger(DataCloudServiceImpl.class);
     @Autowired
-    private DataCloudEntityMgr dataCloudEntityMgr;
+    private MatchCustomerReportProxy matchCustomerReportProxy;
     @Override
     public CustomerReport reportIncorrectLookup(IncorrectLookupReportRequest reportRequest) {
         log.info("Received customer report \n" + JsonUtils.pprint(reportRequest));
@@ -44,7 +44,7 @@ public class DataCloudServiceImpl implements DataCloudService {
         detail.setMatchedKeys(reportRequest.getMatchedKeys());
         customerReport.setReproduceDetail(detail);
 
-        dataCloudEntityMgr.create(customerReport);
+        matchCustomerReportProxy.matchCreateCustomerReport(customerReport);
         return customerReport;
     }
 
@@ -69,13 +69,13 @@ public class DataCloudServiceImpl implements DataCloudService {
         detail.setMatchedValue(reportRequest.getMatchedValue());
         customerReport.setReproduceDetail(detail);
 
-        dataCloudEntityMgr.create(customerReport);
+        matchCustomerReportProxy.matchCreateCustomerReport(customerReport);
         return customerReport;
     }
 
     @Override
     public CustomerReport findById(String id) {
-        return dataCloudEntityMgr.findById(id);
+        return matchCustomerReportProxy.matchFindById(id);
     }
 
 }
