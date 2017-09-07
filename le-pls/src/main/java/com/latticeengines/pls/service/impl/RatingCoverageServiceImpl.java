@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +37,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("ratingCoverageService")
 public class RatingCoverageServiceImpl implements RatingCoverageService {
+
+    private static Logger log = LoggerFactory.getLogger(RatingCoverageServiceImpl.class);
 
     @Autowired
     private RatingEngineService ratingEngineService;
@@ -120,140 +124,154 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private void processSingleSegmentId(Tenant tenent, Map<String, CoverageInfo> segmentIdCoverageMap, String segmentId,
             boolean isRestrictNotNullSalesforceId) {
-        MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentId);
-        FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
-        accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
+        try {
+            MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentId);
+            FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
+            accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
 
-        FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
-        FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
+            FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+            FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
 
-        accountFrontEndQuery.setAccountRestriction(accountRestriction);
-        accountFrontEndQuery.setContactRestriction(contactRestriction);
-        accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+            accountFrontEndQuery.setAccountRestriction(accountRestriction);
+            accountFrontEndQuery.setContactRestriction(contactRestriction);
+            accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
 
-        Long accountCount = entityProxy.getCount( //
-                tenent.getId(), //
-                accountFrontEndQuery);
+            Long accountCount = entityProxy.getCount( //
+                    tenent.getId(), //
+                    accountFrontEndQuery);
 
-        CoverageInfo coverageInfo = new CoverageInfo();
-        // TODO - fix it to read contact count from redshift
-        Long contactCount = 7000L;
-        contactCount += rand.nextInt(500);
+            CoverageInfo coverageInfo = new CoverageInfo();
+            // TODO - fix it to read contact count from redshift
+            Long contactCount = 7000L;
+            contactCount += rand.nextInt(500);
 
-        coverageInfo.setAccountCount(accountCount);
-        coverageInfo.setContactCount(contactCount);
+            coverageInfo.setAccountCount(accountCount);
+            coverageInfo.setContactCount(contactCount);
 
-        segmentIdCoverageMap.put(segmentId, coverageInfo);
+            segmentIdCoverageMap.put(segmentId, coverageInfo);
+        } catch (Exception ex) {
+            log.info("Ignoring exception in getting coverage info for segment id: " + segmentId, ex);
+        }
     }
 
     private void processSingleRatingId(Tenant tenent, Map<String, CoverageInfo> ratingEngineIdCoverageMap,
             String ratingEngineId, boolean isRestrictNotNullSalesforceId) {
-        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
-        FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
-        accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
+        try {
+            RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
+            FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
+            accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
 
-        FrontEndRestriction accountRestriction = new FrontEndRestriction(
-                ratingEngine.getSegment().getAccountRestriction());
-        FrontEndRestriction contactRestriction = new FrontEndRestriction(
-                ratingEngine.getSegment().getContactRestriction());
+            FrontEndRestriction accountRestriction = new FrontEndRestriction(
+                    ratingEngine.getSegment().getAccountRestriction());
+            FrontEndRestriction contactRestriction = new FrontEndRestriction(
+                    ratingEngine.getSegment().getContactRestriction());
 
-        accountFrontEndQuery.setAccountRestriction(accountRestriction);
-        accountFrontEndQuery.setContactRestriction(contactRestriction);
-        accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+            accountFrontEndQuery.setAccountRestriction(accountRestriction);
+            accountFrontEndQuery.setContactRestriction(contactRestriction);
+            accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
 
-        List<RatingModel> ratingModels = new ArrayList<>();
-        for (RatingModel model : ratingEngine.getRatingModels()) {
-            ratingModels.add(model);
-            break;
-        }
-        accountFrontEndQuery.setRatingModels(ratingModels);
-
-        Map<String, Long> countInfo = entityProxy.getRatingCount( //
-                tenent.getId(), //
-                accountFrontEndQuery);
-        Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
-                .reduce((x, y) -> x + y);
-        Long accountCount = accountCountOption.get();
-
-        CoverageInfo coverageInfo = new CoverageInfo();
-        // TODO - fix it to read contact count from redshift
-        Long contactCount = 7000L;
-        contactCount += rand.nextInt(500);
-
-        coverageInfo.setAccountCount(accountCount);
-        coverageInfo.setContactCount(contactCount);
-
-        List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
-        for (RuleBucketName bucket : RuleBucketName.values()) {
-            Long countInBucket = 0L;
-
-            if (countInfo.containsKey(bucket.getName())) {
-                countInBucket = countInfo.get(bucket.getName());
-            } else if (countInfo.containsKey(bucket.name())) {
-                countInBucket = countInfo.get(bucket.name());
+            List<RatingModel> ratingModels = new ArrayList<>();
+            for (RatingModel model : ratingEngine.getRatingModels()) {
+                ratingModels.add(model);
+                break;
             }
+            accountFrontEndQuery.setRatingModels(ratingModels);
 
-            RatingBucketCoverage coveragePair = new RatingBucketCoverage();
-            coveragePair.setBucket(bucket.getName());
-            coveragePair.setCount(countInBucket);
-            bucketCoverageCounts.add(coveragePair);
+            Map<String, Long> countInfo = entityProxy.getRatingCount( //
+                    tenent.getId(), //
+                    accountFrontEndQuery);
+            Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
+                    .reduce((x, y) -> x + y);
+            Long accountCount = accountCountOption.get();
+
+            CoverageInfo coverageInfo = new CoverageInfo();
+            // TODO - fix it to read contact count from redshift
+            Long contactCount = 7000L;
+            contactCount += rand.nextInt(500);
+
+            coverageInfo.setAccountCount(accountCount);
+            coverageInfo.setContactCount(contactCount);
+
+            List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
+            for (RuleBucketName bucket : RuleBucketName.values()) {
+                Long countInBucket = 0L;
+
+                if (countInfo.containsKey(bucket.getName())) {
+                    countInBucket = countInfo.get(bucket.getName());
+                } else if (countInfo.containsKey(bucket.name())) {
+                    countInBucket = countInfo.get(bucket.name());
+                }
+
+                RatingBucketCoverage coveragePair = new RatingBucketCoverage();
+                coveragePair.setBucket(bucket.getName());
+                coveragePair.setCount(countInBucket);
+                bucketCoverageCounts.add(coveragePair);
+            }
+            coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
+            ratingEngineIdCoverageMap.put(ratingEngineId, coverageInfo);
+        } catch (Exception ex) {
+            log.info("Ignoring exception in getting coverage info for rating id: " + ratingEngineId, ex);
         }
-        coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
-        ratingEngineIdCoverageMap.put(ratingEngineId, coverageInfo);
+
     }
 
     private void processSingleSegmentIdModelRulesPair(Tenant tenent,
             Map<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdModelRulesCoverageMap,
             SegmentIdAndModelRulesPair segmentIdModelRulesPair, boolean isRestrictNotNullSalesforceId) {
-        MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentIdModelRulesPair.getSegmentId());
-        FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
-        accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
+        try {
+            MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentIdModelRulesPair.getSegmentId());
+            FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
+            accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
 
-        FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
-        FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
+            FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+            FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
 
-        accountFrontEndQuery.setAccountRestriction(accountRestriction);
-        accountFrontEndQuery.setContactRestriction(contactRestriction);
-        accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+            accountFrontEndQuery.setAccountRestriction(accountRestriction);
+            accountFrontEndQuery.setContactRestriction(contactRestriction);
+            accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
 
-        List<RatingModel> ratingModels = new ArrayList<>();
-        RuleBasedModel ratingModelWrapper = new RuleBasedModel();
-        ratingModelWrapper.setRatingRule(segmentIdModelRulesPair.getRatingRule());
-        ratingModels.add(ratingModelWrapper);
-        accountFrontEndQuery.setRatingModels(ratingModels);
+            List<RatingModel> ratingModels = new ArrayList<>();
+            RuleBasedModel ratingModelWrapper = new RuleBasedModel();
+            ratingModelWrapper.setRatingRule(segmentIdModelRulesPair.getRatingRule());
+            ratingModels.add(ratingModelWrapper);
+            accountFrontEndQuery.setRatingModels(ratingModels);
 
-        Map<String, Long> countInfo = entityProxy.getRatingCount( //
-                tenent.getId(), //
-                accountFrontEndQuery);
-        Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
-                .reduce((x, y) -> x + y);
-        Long accountCount = accountCountOption.get();
+            Map<String, Long> countInfo = entityProxy.getRatingCount( //
+                    tenent.getId(), //
+                    accountFrontEndQuery);
+            Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
+                    .reduce((x, y) -> x + y);
+            Long accountCount = accountCountOption.get();
 
-        CoverageInfo coverageInfo = new CoverageInfo();
-        // TODO - fix it to read contact count from redshift
-        Long contactCount = 7000L;
-        contactCount += rand.nextInt(500);
+            CoverageInfo coverageInfo = new CoverageInfo();
+            // TODO - fix it to read contact count from redshift
+            Long contactCount = 7000L;
+            contactCount += rand.nextInt(500);
 
-        coverageInfo.setAccountCount(accountCount);
-        coverageInfo.setContactCount(contactCount);
+            coverageInfo.setAccountCount(accountCount);
+            coverageInfo.setContactCount(contactCount);
 
-        List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
-        for (RuleBucketName bucket : RuleBucketName.values()) {
-            Long countInBucket = 0L;
+            List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
+            for (RuleBucketName bucket : RuleBucketName.values()) {
+                Long countInBucket = 0L;
 
-            if (countInfo.containsKey(bucket.getName())) {
-                countInBucket = countInfo.get(bucket.getName());
-            } else if (countInfo.containsKey(bucket.name())) {
-                countInBucket = countInfo.get(bucket.name());
+                if (countInfo.containsKey(bucket.getName())) {
+                    countInBucket = countInfo.get(bucket.getName());
+                } else if (countInfo.containsKey(bucket.name())) {
+                    countInBucket = countInfo.get(bucket.name());
+                }
+
+                RatingBucketCoverage coveragePair = new RatingBucketCoverage();
+                coveragePair.setBucket(bucket.getName());
+                coveragePair.setCount(countInBucket);
+                bucketCoverageCounts.add(coveragePair);
             }
-
-            RatingBucketCoverage coveragePair = new RatingBucketCoverage();
-            coveragePair.setBucket(bucket.getName());
-            coveragePair.setCount(countInBucket);
-            bucketCoverageCounts.add(coveragePair);
+            coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
+            segmentIdModelRulesCoverageMap.put(segmentIdModelRulesPair, coverageInfo);
+        } catch (Exception ex) {
+            log.info("Ignoring exception in getting coverage info for segmentIdModelRulesPair: "
+                    + segmentIdModelRulesPair, ex);
         }
-        coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
-        segmentIdModelRulesCoverageMap.put(segmentIdModelRulesPair, coverageInfo);
     }
 
     private RatingsCountResponse processRatingIdsDummy(RatingsCountRequest request) {
