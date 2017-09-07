@@ -53,7 +53,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     @Override
     public RatingsCountResponse getCoverageInfo(RatingsCountRequest request) {
-        return getCoverageInfo(request, true);
+        return getCoverageInfo(request, false);
     }
 
     @Override
