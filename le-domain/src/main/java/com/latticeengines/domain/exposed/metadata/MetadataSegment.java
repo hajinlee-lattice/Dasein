@@ -48,7 +48,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
+    @JsonProperty("pid")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;

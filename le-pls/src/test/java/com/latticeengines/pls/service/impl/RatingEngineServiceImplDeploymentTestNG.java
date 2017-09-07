@@ -56,6 +56,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         switchToSuperAdmin();
         segment = new MetadataSegment();
         segment.setAccountFrontEndRestriction(new FrontEndRestriction());
+        segment.setContactFrontEndRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
         Assert.assertNotNull(createdSegment);
