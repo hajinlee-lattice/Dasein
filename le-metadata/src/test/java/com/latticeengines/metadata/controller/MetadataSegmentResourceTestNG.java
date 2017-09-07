@@ -6,6 +6,9 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -16,6 +19,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 
 public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase {
 
@@ -23,6 +27,7 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
     private static final DataCollection DATA_COLLECTION = new DataCollection();
 
     private static final String METADATA_SEGMENT_NAME = "NAME";
+    private static final String METADATA_SEGMENT_NAME_2 = "NAME";
     private static final String METADATA_SEGMENT_DISPLAY_NAME = "DISPLAY_NAME";
     private static final String METADATA_SEGMENT_DESCRIPTION = "SEGMENT_DESCRIPTION";
     private static final Date CREATED_UPDATED_DATE = new Date();
@@ -30,12 +35,13 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
     private static final String BASE_URL_DATA_COLLECTION = "/metadata/customerspaces/%s/datacollections/";
     private static final String BASE_URL_METADATA_SEGMENTS = "/metadata/customerspaces/%s/segments/";
 
+    @Inject
+    private SegmentProxy segmentProxy;
+
     @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
-        restTemplate.postForObject(String.format(getRestAPIHostPort() + BASE_URL_DATA_COLLECTION, customerSpace1),
-                DATA_COLLECTION, DataCollection.class);
         METADATA_SEGMENT.setName(METADATA_SEGMENT_NAME);
         METADATA_SEGMENT.setDisplayName(METADATA_SEGMENT_DISPLAY_NAME);
         METADATA_SEGMENT.setDescription(METADATA_SEGMENT_DESCRIPTION);
@@ -48,28 +54,55 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
         METADATA_SEGMENT.setDataCollection(DATA_COLLECTION);
     }
 
-    @Test(groups = "functional", enabled = false)
-    public void createMetadataSegment_assertCreated() {
-        restTemplate.postForObject(String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS, customerSpace1),
-                METADATA_SEGMENT, MetadataSegment.class);
-        MetadataSegment retrieved = restTemplate.getForObject(String.format(getRestAPIHostPort()
-                + BASE_URL_METADATA_SEGMENTS + "/name/%s", customerSpace1, METADATA_SEGMENT_NAME),
-                MetadataSegment.class);
+    @Test(groups = "functional")
+    public void testCrud() {
+        testCreate();
+        testUpdate();
+        testDuplicate();
+        testDelete();
+    }
+
+    private void testCreate() {
+        MetadataSegment retrieved = segmentProxy.createOrUpdateSegment(customerSpace1, METADATA_SEGMENT);
         assertNotNull(retrieved);
         assertEquals(retrieved.getName(), METADATA_SEGMENT_NAME);
         assertEquals(retrieved.getDisplayName(), METADATA_SEGMENT_DISPLAY_NAME);
-        assertEquals(((ConcreteRestriction) retrieved.getAccountRestriction()).getRelation(), ComparisonType.EQUAL);
-        assertEquals(((ConcreteRestriction) retrieved.getContactRestriction()).getRelation(), ComparisonType.EQUAL);
+        assertEquals(((ConcreteRestriction) retrieved.getAccountRestriction()).getRelation(), ComparisonType.IS_NULL);
+        assertEquals(((ConcreteRestriction) retrieved.getContactRestriction()).getRelation(), ComparisonType.IS_NULL);
     }
 
-    @SuppressWarnings("unchecked")
-    @Test(groups = "functional", dependsOnMethods = "createMetadataSegment_assertCreated", enabled = false)
-    public void deleteMetadataSegment_assertDeleted() {
-        restTemplate.delete(String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS + "/%s", customerSpace1,
-                METADATA_SEGMENT_NAME));
+    private void testUpdate() {
+        MetadataSegment retrieved = segmentProxy.getMetadataSegmentByName(customerSpace1, METADATA_SEGMENT.getName());
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Alphabet Inc.").build();
+        retrieved.setAccountRestriction(restriction);
+        retrieved.setCreated(null);
+        MetadataSegment updated = segmentProxy.createOrUpdateSegment(customerSpace1, retrieved);
+        assertNotNull(updated);
+        assertEquals(updated.getName(), METADATA_SEGMENT_NAME);
+        assertEquals(updated.getDisplayName(), METADATA_SEGMENT_DISPLAY_NAME);
+        assertEquals(((ConcreteRestriction) updated.getAccountRestriction()).getRelation(), ComparisonType.EQUAL);
+        assertEquals(((ConcreteRestriction) updated.getContactRestriction()).getRelation(), ComparisonType.IS_NULL);
+    }
 
-        List<MetadataSegment> retrieved = restTemplate.getForObject(
-                String.format(getRestAPIHostPort() + BASE_URL_METADATA_SEGMENTS + "/all", customerSpace1), List.class);
+    private void testDuplicate() {
+        MetadataSegment retrieved = segmentProxy.getMetadataSegmentByName(customerSpace1, METADATA_SEGMENT.getName());
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Alphabet Inc.").build();
+        retrieved.setAccountRestriction(restriction);
+        retrieved.setName(METADATA_SEGMENT_NAME_2);
+
+        MetadataSegment duplicated = segmentProxy.createOrUpdateSegment(customerSpace1, retrieved);
+        assertNotNull(duplicated);
+        assertEquals(duplicated.getName(), METADATA_SEGMENT_NAME_2);
+        assertEquals(duplicated.getDisplayName(), METADATA_SEGMENT_DISPLAY_NAME);
+        assertEquals(((ConcreteRestriction) duplicated.getAccountRestriction()).getRelation(), ComparisonType.EQUAL);
+        assertEquals(((ConcreteRestriction) duplicated.getContactRestriction()).getRelation(), ComparisonType.IS_NULL);
+        Assert.assertTrue(duplicated.getCreated().after(CREATED_UPDATED_DATE));
+    }
+
+    private void testDelete() {
+        segmentProxy.deleteSegmentByName(customerSpace1, METADATA_SEGMENT_NAME);
+        segmentProxy.deleteSegmentByName(customerSpace1, METADATA_SEGMENT_NAME_2);
+        List<MetadataSegment> retrieved = segmentProxy.getMetadataSegments(customerSpace1);
         assertEquals(retrieved.size(), 0);
     }
 }
