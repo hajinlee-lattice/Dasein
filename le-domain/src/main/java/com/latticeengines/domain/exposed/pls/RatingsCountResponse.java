@@ -13,6 +13,8 @@ public class RatingsCountResponse {
 
     private Map<RatingModelIdPair, CoverageInfo> ratingEngineModelIdCoverageMap;
 
+    private Map<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdModelRulesCoverageMap;
+
     public Map<String, CoverageInfo> getSegmentIdCoverageMap() {
         return segmentIdCoverageMap;
     }
@@ -35,6 +37,15 @@ public class RatingsCountResponse {
 
     public void setRatingEngineModelIdCoverageMap(Map<RatingModelIdPair, CoverageInfo> ratingEngineModelIdCoverageMap) {
         this.ratingEngineModelIdCoverageMap = ratingEngineModelIdCoverageMap;
+    }
+
+    public Map<SegmentIdAndModelRulesPair, CoverageInfo> getSegmentIdModelRulesCoverageMap() {
+        return segmentIdModelRulesCoverageMap;
+    }
+
+    public void setSegmentIdModelRulesCoverageMap(
+            Map<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdModelRulesCoverageMap) {
+        this.segmentIdModelRulesCoverageMap = segmentIdModelRulesCoverageMap;
     }
 
 }

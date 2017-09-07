@@ -12,8 +12,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.RatingModelIdPair;
+import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
+import com.latticeengines.domain.exposed.pls.SegmentIdAndModelRulesPair;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -41,6 +43,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends PlsDeploymentTest
         Assert.assertNotNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNull(response.getRatingEngineModelIdCoverageMap());
         Assert.assertNull(response.getSegmentIdCoverageMap());
+        Assert.assertNull(response.getSegmentIdModelRulesCoverageMap());
 
         Assert.assertEquals(response.getRatingEngineIdCoverageMap().size(), ratingEngineIds.size());
 
@@ -60,6 +63,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends PlsDeploymentTest
         Assert.assertNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNull(response.getRatingEngineModelIdCoverageMap());
         Assert.assertNotNull(response.getSegmentIdCoverageMap());
+        Assert.assertNull(response.getSegmentIdModelRulesCoverageMap());
 
         Assert.assertEquals(response.getSegmentIdCoverageMap().size(), segmentIds.size());
 
@@ -85,12 +89,37 @@ public class RatingCoverageServiceImplDeploymentTestNG extends PlsDeploymentTest
         Assert.assertNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNotNull(response.getRatingEngineModelIdCoverageMap());
         Assert.assertNull(response.getSegmentIdCoverageMap());
+        Assert.assertNull(response.getSegmentIdModelRulesCoverageMap());
 
         Assert.assertEquals(response.getRatingEngineModelIdCoverageMap().size(), ratingEngineModelIds.size());
 
         for (RatingModelIdPair ratingModelId : ratingEngineModelIds) {
             Assert.assertTrue(response.getRatingEngineModelIdCoverageMap().containsKey(ratingModelId));
             Assert.assertNotNull(response.getRatingEngineModelIdCoverageMap().get(ratingModelId));
+        }
+    }
+
+    @Test(groups = "deployment")
+    public void testSegmentIdModelRulesCoverage() {
+        RatingsCountRequest request = new RatingsCountRequest();
+        SegmentIdAndModelRulesPair r1 = new SegmentIdAndModelRulesPair();
+        r1.setSegmentId("sg1");
+        RatingRule ratingRule = new RatingRule();
+        r1.setRatingRule(ratingRule);
+        List<SegmentIdAndModelRulesPair> segmentIdModelRules = Arrays.asList(new SegmentIdAndModelRulesPair[] { r1 });
+        request.setSegmentIdModelRules(segmentIdModelRules);
+        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request, true);
+        Assert.assertNotNull(response);
+        Assert.assertNull(response.getRatingEngineIdCoverageMap());
+        Assert.assertNull(response.getRatingEngineModelIdCoverageMap());
+        Assert.assertNull(response.getSegmentIdCoverageMap());
+        Assert.assertNotNull(response.getSegmentIdModelRulesCoverageMap());
+
+        Assert.assertEquals(response.getSegmentIdModelRulesCoverageMap().size(), segmentIdModelRules.size());
+
+        for (SegmentIdAndModelRulesPair segmentIdModelPair : segmentIdModelRules) {
+            Assert.assertTrue(response.getSegmentIdModelRulesCoverageMap().containsKey(segmentIdModelPair));
+            Assert.assertNotNull(response.getSegmentIdModelRulesCoverageMap().get(segmentIdModelPair));
         }
     }
 }

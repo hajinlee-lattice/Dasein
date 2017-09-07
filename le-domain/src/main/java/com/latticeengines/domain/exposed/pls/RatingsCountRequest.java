@@ -12,6 +12,10 @@ public class RatingsCountRequest {
 
     private List<RatingModelIdPair> ratingEngineModelIds;
 
+    private List<SegmentIdAndModelRulesPair> segmentIdModelRules;
+
+    private boolean restrictNotNullSalesforceId;
+
     public List<String> getSegmentIds() {
         return segmentIds;
     }
@@ -36,4 +40,19 @@ public class RatingsCountRequest {
         this.ratingEngineModelIds = ratingEngineModelIds;
     }
 
+    public List<SegmentIdAndModelRulesPair> getSegmentIdModelRules() {
+        return segmentIdModelRules;
+    }
+
+    public void setSegmentIdModelRules(List<SegmentIdAndModelRulesPair> segmentIdModelRules) {
+        this.segmentIdModelRules = segmentIdModelRules;
+    }
+
+    public boolean isRestrictNotNullSalesforceId() {
+        return restrictNotNullSalesforceId;
+    }
+
+    public void setRestrictNotNullSalesforceId(boolean restrictNotNullSalesforceId) {
+        this.restrictNotNullSalesforceId = restrictNotNullSalesforceId;
+    }
 }

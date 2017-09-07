@@ -19,7 +19,9 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelIdPair;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.pls.SegmentIdAndModelRulesPair;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -57,6 +59,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             return getDummyCoverage ? processSegmentIdsDummy(request) : processSegmentIds(request);
         } else if (request.getRatingEngineModelIds() != null) {
             return processRatingEngineModelIds(request);
+        } else if (request.getSegmentIdModelRules() != null) {
+            return getDummyCoverage ? processSegmentIdModelRulesDummy(request) : processSegmentIdModelRules(request);
         }
 
         return null;
@@ -73,7 +77,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                 .stream().parallel() //
                 .forEach( //
                         ratingEngineId -> //
-                        processSingleRatingId(tenent, ratingEngineIdCoverageMap, ratingEngineId));
+                        processSingleRatingId(tenent, ratingEngineIdCoverageMap, //
+                                ratingEngineId, request.isRestrictNotNullSalesforceId()));
 
         return result;
     }
@@ -89,15 +94,33 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                 .stream().parallel() //
                 .forEach( //
                         ratingEngineId -> //
-                        processSingleSegmentId(tenent, segmentIdCoverageMap, ratingEngineId));
+                        processSingleSegmentId(tenent, segmentIdCoverageMap, //
+                                ratingEngineId, request.isRestrictNotNullSalesforceId()));
 
         result.setSegmentIdCoverageMap(segmentIdCoverageMap);
 
         return result;
     }
 
-    private void processSingleSegmentId(Tenant tenent, Map<String, CoverageInfo> segmentIdCoverageMap,
-            String segmentId) {
+    private RatingsCountResponse processSegmentIdModelRules(RatingsCountRequest request) {
+        Tenant tenent = MultiTenantContext.getTenant();
+
+        RatingsCountResponse result = new RatingsCountResponse();
+        Map<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdModelRulesCoverageMap = new ConcurrentHashMap<>();
+        result.setSegmentIdModelRulesCoverageMap(segmentIdModelRulesCoverageMap);
+
+        request.getSegmentIdModelRules() //
+                .stream().parallel() //
+                .forEach( //
+                        segmentIdModelRulesPair -> //
+                        processSingleSegmentIdModelRulesPair(tenent, segmentIdModelRulesCoverageMap, //
+                                segmentIdModelRulesPair, request.isRestrictNotNullSalesforceId()));
+
+        return result;
+    }
+
+    private void processSingleSegmentId(Tenant tenent, Map<String, CoverageInfo> segmentIdCoverageMap, String segmentId,
+            boolean isRestrictNotNullSalesforceId) {
         MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentId);
         FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
         accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -107,6 +130,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
         accountFrontEndQuery.setAccountRestriction(accountRestriction);
         accountFrontEndQuery.setContactRestriction(contactRestriction);
+        accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
 
         Long accountCount = entityProxy.getCount( //
                 tenent.getId(), //
@@ -124,7 +148,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     private void processSingleRatingId(Tenant tenent, Map<String, CoverageInfo> ratingEngineIdCoverageMap,
-            String ratingEngineId) {
+            String ratingEngineId, boolean isRestrictNotNullSalesforceId) {
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
         FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
         accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -136,6 +160,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
         accountFrontEndQuery.setAccountRestriction(accountRestriction);
         accountFrontEndQuery.setContactRestriction(contactRestriction);
+        accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
 
         List<RatingModel> ratingModels = new ArrayList<>();
         for (RatingModel model : ratingEngine.getRatingModels()) {
@@ -176,6 +201,60 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
         coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
         ratingEngineIdCoverageMap.put(ratingEngineId, coverageInfo);
+    }
+
+    private void processSingleSegmentIdModelRulesPair(Tenant tenent,
+            Map<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdModelRulesCoverageMap,
+            SegmentIdAndModelRulesPair segmentIdModelRulesPair, boolean isRestrictNotNullSalesforceId) {
+        MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentIdModelRulesPair.getSegmentId());
+        FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
+        accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
+
+        FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+        FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
+
+        accountFrontEndQuery.setAccountRestriction(accountRestriction);
+        accountFrontEndQuery.setContactRestriction(contactRestriction);
+        accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+
+        List<RatingModel> ratingModels = new ArrayList<>();
+        RuleBasedModel ratingModelWrapper = new RuleBasedModel();
+        ratingModelWrapper.setRatingRule(segmentIdModelRulesPair.getRatingRule());
+        ratingModels.add(ratingModelWrapper);
+        accountFrontEndQuery.setRatingModels(ratingModels);
+
+        Map<String, Long> countInfo = entityProxy.getRatingCount( //
+                tenent.getId(), //
+                accountFrontEndQuery);
+        Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
+                .reduce((x, y) -> x + y);
+        Long accountCount = accountCountOption.get();
+
+        CoverageInfo coverageInfo = new CoverageInfo();
+        // TODO - fix it to read contact count from redshift
+        Long contactCount = 7000L;
+        contactCount += rand.nextInt(500);
+
+        coverageInfo.setAccountCount(accountCount);
+        coverageInfo.setContactCount(contactCount);
+
+        List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
+        for (RuleBucketName bucket : RuleBucketName.values()) {
+            Long countInBucket = 0L;
+
+            if (countInfo.containsKey(bucket.getName())) {
+                countInBucket = countInfo.get(bucket.getName());
+            } else if (countInfo.containsKey(bucket.name())) {
+                countInBucket = countInfo.get(bucket.name());
+            }
+
+            RatingBucketCoverage coveragePair = new RatingBucketCoverage();
+            coveragePair.setBucket(bucket.getName());
+            coveragePair.setCount(countInBucket);
+            bucketCoverageCounts.add(coveragePair);
+        }
+        coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
+        segmentIdModelRulesCoverageMap.put(segmentIdModelRulesPair, coverageInfo);
     }
 
     private RatingsCountResponse processRatingIdsDummy(RatingsCountRequest request) {
@@ -280,4 +359,43 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         return result;
     }
 
+    private RatingsCountResponse processSegmentIdModelRulesDummy(RatingsCountRequest request) {
+        RatingsCountResponse result = new RatingsCountResponse();
+        HashMap<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdAndModelRulesPairCoverageMap = new HashMap<>();
+        result.setSegmentIdModelRulesCoverageMap(segmentIdAndModelRulesPairCoverageMap);
+
+        Random rand = new Random(System.currentTimeMillis());
+
+        for (SegmentIdAndModelRulesPair segmentIdAndModelRulesPair : request.getSegmentIdModelRules()) {
+            CoverageInfo coverageInfo = new CoverageInfo();
+            Long accountCount = 5000L;
+            accountCount += rand.nextInt(1000);
+            Long contactCount = 7000L;
+            contactCount += rand.nextInt(500);
+
+            coverageInfo.setAccountCount(accountCount);
+            coverageInfo.setContactCount(contactCount);
+
+            List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
+            long totalSum = 0;
+            int totalParts = 21;
+            for (RuleBucketName bucket : RuleBucketName.values()) {
+                int partsInBucket = bucket.ordinal() + 1;
+                long countInBucket = (accountCount * partsInBucket) / totalParts;
+                if (bucket == RuleBucketName.F) {
+                    countInBucket = accountCount - totalSum;
+                } else {
+                    totalSum += countInBucket;
+                }
+
+                RatingBucketCoverage coveragePair = new RatingBucketCoverage();
+                coveragePair.setBucket(bucket.getName());
+                coveragePair.setCount(countInBucket);
+                bucketCoverageCounts.add(coveragePair);
+            }
+            coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
+            segmentIdAndModelRulesPairCoverageMap.put(segmentIdAndModelRulesPair, coverageInfo);
+        }
+        return result;
+    }
 }
