@@ -58,6 +58,24 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testLookupWithJoin() {
+        Restriction restriction = Restriction.builder() //
+                .let(BusinessEntity.Contact, "ContactId").eq("01B8CAA6F252E5333F722FD8C9DA1707") //
+                .build();
+        Query query = Query.builder().from(BusinessEntity.Contact)
+                .select(BusinessEntity.Contact, ATTR_CONTACT_ID, ATTR_CONTACT_EMAIL) //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
+                .where(restriction)
+                .build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        sqlContains(sqlQuery, String.format("select %s.%s, %s.%s", CONTACT, ATTR_CONTACT_ID, CONTACT, ATTR_CONTACT_EMAIL));
+        sqlContains(sqlQuery, String.format("from %s as %s", contactTableName, CONTACT));
+        sqlContains(sqlQuery, String.format("join %s as %s", accountTableName, ACCOUNT));
+        sqlContains(sqlQuery, String.format("on %s.%s = %s.%s", CONTACT, ATTR_ACCOUNT_ID, ACCOUNT, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("where %s.%s = ?", CONTACT, ATTR_CONTACT_ID));
+    }
+
+    @Test(groups = "functional")
     public void testRestriction() {
         // simple where clause
         Restriction restriction = Restriction.builder() //

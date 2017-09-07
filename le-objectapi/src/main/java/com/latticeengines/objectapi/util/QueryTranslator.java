@@ -53,7 +53,7 @@ public class QueryTranslator {
             }
         }
 
-        QueryBuilder queryBuilder = Query.builder().where(restriction) //
+        QueryBuilder queryBuilder = Query.builder().from(mainEntity).where(restriction) //
                 .orderBy(translateFrontEndSort(frontEndQuery.getSort())) //
                 .page(frontEndQuery.getPageFilter());
 
