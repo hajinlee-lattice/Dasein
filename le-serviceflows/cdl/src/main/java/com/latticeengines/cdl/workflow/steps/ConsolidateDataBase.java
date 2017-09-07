@@ -82,7 +82,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         }
         step1.setBaseTables(baseTables);
         step1.setTransformer("consolidateDataTransformer");
-        step1.setConfiguration(getConsolidateDataConfig());
+        step1.setConfiguration(getConsolidateDataConfig(true));
         return step1;
     }
 
@@ -185,7 +185,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
 
     public abstract PipelineTransformationRequest getConsolidateRequest();
 
-    abstract String getConsolidateDataConfig();
+    abstract String getConsolidateDataConfig(boolean isDedupeSource);
 
     public BusinessEntity getBusinessEntity() {
         return configuration.getBusinessEntity();

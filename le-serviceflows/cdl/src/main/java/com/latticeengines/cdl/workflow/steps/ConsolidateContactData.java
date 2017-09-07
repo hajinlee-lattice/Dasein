@@ -89,7 +89,7 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
         }
         step2.setInputSteps(Collections.singletonList(mergeStep));
         step2.setTransformer("consolidateDataTransformer");
-        step2.setConfiguration(getConsolidateDataConfig());
+        step2.setConfiguration(getConsolidateDataConfig(false));
 
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -137,10 +137,11 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
     }
 
     @Override
-    protected String getConsolidateDataConfig() {
+    protected String getConsolidateDataConfig(boolean isDedupeSource) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedContact.getPrimaryKey().name());
+        config.setDedupeSource(isDedupeSource);
         return appendEngineConf(config, lightEngineConfig());
     }
 

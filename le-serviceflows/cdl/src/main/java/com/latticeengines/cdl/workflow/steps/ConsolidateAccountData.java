@@ -110,7 +110,8 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         }
     }
 
-    protected String getConsolidateDataConfig() {
+    @Override
+    protected String getConsolidateDataConfig(boolean isDedupeSource) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
@@ -119,6 +120,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
                     masterTable.getExtracts().get(0).getPath());
             config.setOrigMasterFields(fields);
         }
+        config.setDedupeSource(isDedupeSource);
         return appendEngineConf(config, lightEngineConfig());
     }
 
@@ -127,7 +129,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         setupMasterTable(step2);
         step2.setInputSteps(Collections.singletonList(mergeStep));
         step2.setTransformer("consolidateDeltaNewTransformer");
-        step2.setConfiguration(getConsolidateDataConfig());
+        step2.setConfiguration(getConsolidateDataConfig(false));
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(newRecordsTablePrefix);
@@ -184,7 +186,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         TransformationStepConfig step5 = new TransformationStepConfig();
         step5.setInputSteps(Arrays.asList(mergeStep, upsertMasterStep));
         step5.setTransformer("consolidateDeltaTransformer");
-        step5.setConfiguration(getConsolidateDataConfig());
+        step5.setConfiguration(getConsolidateDataConfig(false));
         return step5;
     }
 

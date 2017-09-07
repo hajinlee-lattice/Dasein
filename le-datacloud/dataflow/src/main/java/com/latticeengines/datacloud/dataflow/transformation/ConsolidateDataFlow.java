@@ -37,6 +37,7 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         if (config.isCreateTimestampColumn()) {
             createTimestampColumns(config, sources);
         }
+        dedupeSource(config, sources, groupByKey);
         if (sources.size() <= 1) {
             return sources.get(0);
         }
@@ -64,6 +65,16 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
 
         result = result.retain(new FieldList(fieldToRetain));
         return result;
+    }
+
+    private void dedupeSource(ConsolidateDataTransformerConfig config, List<Node> sources, String groupByKey) {
+        if (!config.isDedupeSource()) {
+            return;
+        }
+        for (int i = 0; i < sources.size(); i++) {
+            Node newSource = sources.get(i).groupByAndLimit(new FieldList(groupByKey), 1);
+            sources.set(i, newSource);
+        }
     }
 
     @Override

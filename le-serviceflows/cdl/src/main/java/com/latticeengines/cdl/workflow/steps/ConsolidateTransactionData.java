@@ -105,7 +105,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         ConsolidatePartitionConfig config = new ConsolidatePartitionConfig();
         config.setNamePrefix(batchStoreTablePrefix);
         config.setTimeField(InterfaceName.TransactionTime.name());
-        config.setConsolidateDateConfig(getConsolidateDataConfig());
+        config.setConsolidateDateConfig(getConsolidateDataConfig(false));
         config.setAggregateConfig(getAggregateConfig());
         return appendEngineConf(config, lightEngineConfig());
     }
@@ -121,7 +121,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     }
 
     @Override
-    protected String getConsolidateDataConfig() {
+    protected String getConsolidateDataConfig(boolean isDedupeSource) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
         config.setMasterIdField(TableRoleInCollection.ConsolidatedTransaction.getPrimaryKey().name());
@@ -130,6 +130,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         config.setCompositeKeys(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.TransactionTime.name()));
+        config.setDedupeSource(isDedupeSource);
         return JsonUtils.serialize(config);
     }
 

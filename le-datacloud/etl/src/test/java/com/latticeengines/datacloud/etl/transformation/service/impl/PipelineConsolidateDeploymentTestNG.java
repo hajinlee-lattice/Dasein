@@ -20,7 +20,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -238,6 +237,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField("ID");
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        config.setDedupeSource(true);
         return JsonUtils.serialize(config);
     }
 
@@ -255,8 +255,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         config.setSrcIdField("ID");
         config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
         if (masterTable != null) {
-            List<String> fields = AvroUtils.getSchemaFields(yarnConfiguration,
-                    masterTable.getExtracts().get(0).getPath());
+            List<String> fields = Arrays.asList(masterTable.getAttributeNames());
             config.setOrigMasterFields(fields);
         }
         return JsonUtils.serialize(config);
