@@ -24,6 +24,7 @@ import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.MapAttributeFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.MapAttributeTransformer;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MapAttributeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -131,6 +132,9 @@ public class AccountMasterRebuildRefreshTestNG
         } else {
             config.setStage(MapAttributeFlow.REFRESH_STAGE);
             config.setJoinConfigs(createJoinConfigs(keyMapRefresh));
+            DataCloudVersion currentVersion = dataCloudVersionService.currentApprovedVersion();
+            String nextVersion = dataCloudVersionService.nextMinorVersion(currentVersion.getVersion());
+            config.setDataCloudVersion(nextVersion);
         }
 
         return JsonUtils.serialize(config);
@@ -419,7 +423,7 @@ public class AccountMasterRebuildRefreshTestNG
         String currentVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
         String nextVersion = dataCloudVersionService.nextMinorVersion(currentVersion);
         Assert.assertEquals(rebuildSchema.getProp(MapAttributeTransformer.DATA_CLOUD_VERSION), nextVersion);
-        Assert.assertEquals(refreshSchema.getProp(MapAttributeTransformer.DATA_CLOUD_VERSION), currentVersion);
+        Assert.assertEquals(refreshSchema.getProp(MapAttributeTransformer.DATA_CLOUD_VERSION), nextVersion);
     }
 
     @Override
