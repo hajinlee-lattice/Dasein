@@ -297,9 +297,4 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         return JsonUtils.serialize(config);
     }
 
-    @Override
-    public boolean isBucketing() {
-        return Boolean.TRUE.equals(isActive);
-    }
-
 }

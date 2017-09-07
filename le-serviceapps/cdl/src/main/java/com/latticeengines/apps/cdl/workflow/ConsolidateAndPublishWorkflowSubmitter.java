@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -30,6 +32,8 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateAndPublishWorkflowSubmitter.class);
+
+    private final DataCollectionProxy dataCollectionProxy;
 
     private final DataFeedProxy dataFeedProxy;
 
@@ -42,7 +46,9 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
     protected int workflowMemMb;
 
     @Inject
-    public ConsolidateAndPublishWorkflowSubmitter(DataFeedProxy dataFeedProxy, WorkflowProxy workflowProxy) {
+    public ConsolidateAndPublishWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy,
+            WorkflowProxy workflowProxy) {
+        this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
     }
@@ -124,8 +130,13 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, initialDataFeedStatus.getName()) //
                         .build()) //
                 .accountIdField(InterfaceName.Id.name()) //
+                .bucketAccount(
+                        dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.Profile) != null) //
                 .contactIdField(InterfaceName.Id.name()) //
+                .bucketContact(dataCollectionProxy.getTable(customerSpace.toString(),
+                        TableRoleInCollection.ContactProfile) != null) //
                 .transactionIdField(InterfaceName.Id.name()) //
+                .bucketTransaction(false) //
                 .workflowContainerMem(workflowMemMb) //
                 .build();
     }

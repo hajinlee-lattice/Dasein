@@ -21,8 +21,8 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
         public ConsolidateTransactionDataStepConfiguration consolidateTransactionDataConfiguration = new ConsolidateTransactionDataStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration
-                    .setContainerConfiguration("consolidateDataWorkflow", customerSpace, "consolidateDataWorkflow");
+            configuration.setContainerConfiguration("consolidateDataWorkflow", customerSpace,
+                    "consolidateDataWorkflow");
             consolidateAccountDataConfiguration.setCustomerSpace(customerSpace);
             consolidateContactDataConfiguration.setCustomerSpace(customerSpace);
             return this;
@@ -46,6 +46,21 @@ public class ConsolidateDataWorkflowConfiguration extends BaseCDLWorkflowConfigu
 
         public Builder transactionIdField(String idField) {
             consolidateTransactionDataConfiguration.setIdField(idField);
+            return this;
+        }
+
+        public Builder bucketAccount(boolean bucketAccount) {
+            consolidateAccountDataConfiguration.setBucketing(bucketAccount);
+            return this;
+        }
+
+        public Builder bucketContact(boolean bucketContact) {
+            consolidateContactDataConfiguration.setBucketing(bucketContact);
+            return this;
+        }
+
+        public Builder bucketTransaction(boolean bucketTransaction) {
+            consolidateTransactionDataConfiguration.setBucketing(bucketTransaction);
             return this;
         }
 

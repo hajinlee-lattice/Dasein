@@ -144,9 +144,4 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
         return appendEngineConf(config, lightEngineConfig());
     }
 
-    @Override
-    public boolean isBucketing() {
-        return Boolean.TRUE.equals(isActive);
-    }
-
 }

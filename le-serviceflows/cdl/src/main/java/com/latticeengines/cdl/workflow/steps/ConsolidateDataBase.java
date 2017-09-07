@@ -31,13 +31,13 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
-public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfiguration> extends
-        BaseTransformWrapperStep<T> {
+public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfiguration>
+        extends BaseTransformWrapperStep<T> {
 
     protected static final Logger log = LoggerFactory.getLogger(ConsolidateDataBase.class);
 
     protected static final String CREATION_DATE = "CREATION_DATE";
-    
+
     protected CustomerSpace customerSpace = null;
 
     @Autowired
@@ -70,7 +70,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         initializeConfiguration();
         return generateWorkflowConf();
     }
-    
+
     protected TransformationStepConfig mergeInputs() {
         TransformationStepConfig step1 = new TransformationStepConfig();
         List<String> baseSources = inputTableNames;
@@ -85,7 +85,6 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         step1.setConfiguration(getConsolidateDataConfig());
         return step1;
     }
-
 
     @Override
     protected void onPostTransformationCompleted() {
@@ -123,8 +122,8 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
             Table newRecordsTable = metadataProxy.getTable(customerSpace.toString(),
                     TableUtils.getFullTableName(newRecordsTablePrefix, pipelineVersion));
             ObjectNode json = JsonUtils.createObjectNode();
-            json.put(getBusinessEntity().getBatchStore().name() + "_New", newRecordsTable.getExtracts().get(0)
-                    .getProcessedRecords());
+            json.put(getBusinessEntity().getBatchStore().name() + "_New",
+                    newRecordsTable.getExtracts().get(0).getProcessedRecords());
             report(ReportPurpose.CONSOLIDATE_NEW_RECORDS_COUNT_SUMMARY, UUID.randomUUID().toString(), json.toString());
             metadataProxy.deleteTable(customerSpace.toString(), newRecordsTable.getName());
         }
@@ -151,10 +150,10 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         if (inputTables == null || inputTables.isEmpty()) {
             throw new RuntimeException("There is no input tables to consolidate.");
         }
-        inputTables.sort(Comparator.comparing(
-                (Table t) -> t.getLastModifiedKey() == null ? -1
-                        : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1 : t.getLastModifiedKey()
-                                .getLastModifiedTimestamp()).reversed());
+        inputTables.sort(Comparator.comparing((Table t) -> t.getLastModifiedKey() == null ? -1
+                : t.getLastModifiedKey().getLastModifiedTimestamp() == null ? -1
+                        : t.getLastModifiedKey().getLastModifiedTimestamp())
+                .reversed());
         for (Table table : inputTables) {
             inputTableNames.add(table.getName());
         }
@@ -180,12 +179,14 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 
-    public abstract boolean isBucketing();
+    public boolean isBucketing() {
+        return configuration.isBucketing();
+    }
 
     public abstract PipelineTransformationRequest getConsolidateRequest();
 
     abstract String getConsolidateDataConfig();
-    
+
     public BusinessEntity getBusinessEntity() {
         return configuration.getBusinessEntity();
     }

@@ -68,6 +68,21 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
+        public Builder bucketAccount(boolean bucketAccount) {
+            consolidateDataConfigurationBuilder.bucketAccount(bucketAccount);
+            return this;
+        }
+
+        public Builder bucketContact(boolean bucketContact) {
+            consolidateDataConfigurationBuilder.bucketContact(bucketContact);
+            return this;
+        }
+
+        public Builder bucketTransaction(boolean bucketTransaction) {
+            consolidateDataConfigurationBuilder.bucketTransaction(bucketTransaction);
+            return this;
+        }
+
         public Builder matchKeyMap(Map<MatchKey, List<String>> matchKeyMap) {
             consolidateDataConfigurationBuilder.matchKeyMap(matchKeyMap);
             return this;

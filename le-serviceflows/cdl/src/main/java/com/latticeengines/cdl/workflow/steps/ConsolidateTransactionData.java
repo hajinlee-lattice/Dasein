@@ -134,11 +134,6 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     }
 
     @Override
-    public boolean isBucketing() {
-        return Boolean.TRUE.equals(isActive);
-    }
-
-    @Override
     protected void onPostTransformationCompleted() {
         String aggrTableName = TableUtils.getFullTableName(batchStoreTablePrefix + AGGREGATE_SUFFIX, pipelineVersion);
         Table aggregateTable = metadataProxy.getTable(customerSpace.toString(), aggrTableName);
