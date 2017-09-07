@@ -109,7 +109,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         Tenant tenent = MultiTenantContext.getTenant();
 
         RatingsCountResponse result = new RatingsCountResponse();
-        Map<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdModelRulesCoverageMap = new ConcurrentHashMap<>();
+        Map<String, CoverageInfo> segmentIdModelRulesCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdModelRulesCoverageMap(segmentIdModelRulesCoverageMap);
 
         request.getSegmentIdModelRules() //
@@ -216,7 +216,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     private void processSingleSegmentIdModelRulesPair(Tenant tenent,
-            Map<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdModelRulesCoverageMap,
+            Map<String, CoverageInfo> segmentIdModelRulesCoverageMap,
             SegmentIdAndModelRulesPair segmentIdModelRulesPair, boolean isRestrictNotNullSalesforceId) {
         try {
             MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentIdModelRulesPair.getSegmentId());
@@ -267,7 +267,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                 bucketCoverageCounts.add(coveragePair);
             }
             coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
-            segmentIdModelRulesCoverageMap.put(segmentIdModelRulesPair, coverageInfo);
+            segmentIdModelRulesCoverageMap.put(segmentIdModelRulesPair.getSegmentId(), coverageInfo);
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for segmentIdModelRulesPair: "
                     + segmentIdModelRulesPair, ex);
@@ -338,7 +338,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private RatingsCountResponse processRatingEngineModelIds(RatingsCountRequest request) {
         RatingsCountResponse result = new RatingsCountResponse();
-        HashMap<RatingModelIdPair, CoverageInfo> ratingEngineModelIdCoverageMap = new HashMap<>();
+        HashMap<String, CoverageInfo> ratingEngineModelIdCoverageMap = new HashMap<>();
         result.setRatingEngineModelIdCoverageMap(ratingEngineModelIdCoverageMap);
 
         Random rand = new Random(System.currentTimeMillis());
@@ -371,14 +371,14 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                 bucketCoverageCounts.add(coveragePair);
             }
             coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
-            ratingEngineModelIdCoverageMap.put(ratingModelSegmentId, coverageInfo);
+            ratingEngineModelIdCoverageMap.put(ratingModelSegmentId.getRatingModelId(), coverageInfo);
         }
         return result;
     }
 
     private RatingsCountResponse processSegmentIdModelRulesDummy(RatingsCountRequest request) {
         RatingsCountResponse result = new RatingsCountResponse();
-        HashMap<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdAndModelRulesPairCoverageMap = new HashMap<>();
+        HashMap<String, CoverageInfo> segmentIdAndModelRulesPairCoverageMap = new HashMap<>();
         result.setSegmentIdModelRulesCoverageMap(segmentIdAndModelRulesPairCoverageMap);
 
         Random rand = new Random(System.currentTimeMillis());
@@ -411,7 +411,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                 bucketCoverageCounts.add(coveragePair);
             }
             coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
-            segmentIdAndModelRulesPairCoverageMap.put(segmentIdAndModelRulesPair, coverageInfo);
+            segmentIdAndModelRulesPairCoverageMap.put(segmentIdAndModelRulesPair.getSegmentId(), coverageInfo);
         }
         return result;
     }

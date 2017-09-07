@@ -11,9 +11,9 @@ public class RatingsCountResponse {
 
     private Map<String, CoverageInfo> ratingEngineIdCoverageMap;
 
-    private Map<RatingModelIdPair, CoverageInfo> ratingEngineModelIdCoverageMap;
+    private Map<String, CoverageInfo> ratingEngineModelIdCoverageMap;
 
-    private Map<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdModelRulesCoverageMap;
+    private Map<String, CoverageInfo> segmentIdModelRulesCoverageMap;
 
     public Map<String, CoverageInfo> getSegmentIdCoverageMap() {
         return segmentIdCoverageMap;
@@ -31,20 +31,19 @@ public class RatingsCountResponse {
         this.ratingEngineIdCoverageMap = ratingEngineIdCoverageMap;
     }
 
-    public Map<RatingModelIdPair, CoverageInfo> getRatingEngineModelIdCoverageMap() {
+    public Map<String, CoverageInfo> getRatingEngineModelIdCoverageMap() {
         return ratingEngineModelIdCoverageMap;
     }
 
-    public void setRatingEngineModelIdCoverageMap(Map<RatingModelIdPair, CoverageInfo> ratingEngineModelIdCoverageMap) {
+    public void setRatingEngineModelIdCoverageMap(Map<String, CoverageInfo> ratingEngineModelIdCoverageMap) {
         this.ratingEngineModelIdCoverageMap = ratingEngineModelIdCoverageMap;
     }
 
-    public Map<SegmentIdAndModelRulesPair, CoverageInfo> getSegmentIdModelRulesCoverageMap() {
+    public Map<String, CoverageInfo> getSegmentIdModelRulesCoverageMap() {
         return segmentIdModelRulesCoverageMap;
     }
 
-    public void setSegmentIdModelRulesCoverageMap(
-            Map<SegmentIdAndModelRulesPair, CoverageInfo> segmentIdModelRulesCoverageMap) {
+    public void setSegmentIdModelRulesCoverageMap(Map<String, CoverageInfo> segmentIdModelRulesCoverageMap) {
         this.segmentIdModelRulesCoverageMap = segmentIdModelRulesCoverageMap;
     }
 
