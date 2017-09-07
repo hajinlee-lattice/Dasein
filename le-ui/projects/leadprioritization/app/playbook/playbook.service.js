@@ -436,6 +436,13 @@ angular.module('lp.playbook')
         ///pls/ratingengines/coverage
         var deferred = $q.defer();
 
+        $http({
+            method: 'GET',
+            url: this.host + '/ratingengines/coverage'
+        }).then(function(response) {
+            console.log(response.data);
+        });
+
         var ret = {};
         for(var i in ratings) {
             var rating = ratings[i];

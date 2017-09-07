@@ -24,6 +24,11 @@ angular.module('lp.playbook.wizard.rating', [])
         }
         if($stateParams.play_name) {
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+                if(play.ratingEngine) {
+                    vm.stored.rating_selection = play.ratingEngine.id;
+                    PlaybookWizardStore.setValidation('rating', true);
+                }
+
             });
         }
         PlaybookWizardStore.getRatingsCounts(Ratings).then(function(result){
@@ -71,7 +76,9 @@ angular.module('lp.playbook.wizard.rating', [])
         PlaybookWizardStore.setValidation('rating', form.$valid);
         if(vm.stored.rating_selection) {
             PlaybookWizardStore.setSettings({
-                ratingEngine: Ratings.filter(obj => obj.id === vm.stored.rating_selection)[0]
+                ratingEngine: Ratings.filter(function(_obj) { 
+                    return (_obj.id === vm.stored.rating_selection);
+                })[0]
             });
         }
     }
