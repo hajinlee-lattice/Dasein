@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -105,8 +106,11 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
     public RatingsCountResponse getRatingEngineCoverageInfo( //
-            @RequestBody RatingsCountRequest ratingModelSegmentIds) {
-        return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds);
+            @RequestBody RatingsCountRequest ratingModelSegmentIds,
+            @RequestParam(value = "getDummyCoverage", required = false) Boolean getDummyCoverage) {
+        // TODO - anoop - this is only temporary, will remove it in next merge
+        getDummyCoverage = getDummyCoverage == null ? true : getDummyCoverage;
+        return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds, getDummyCoverage);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")

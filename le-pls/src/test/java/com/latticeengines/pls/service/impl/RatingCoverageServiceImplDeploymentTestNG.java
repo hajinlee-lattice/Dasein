@@ -36,7 +36,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends PlsDeploymentTest
         RatingsCountRequest request = new RatingsCountRequest();
         List<String> ratingEngineIds = Arrays.asList(new String[] { "a1", "a2", "a3" });
         request.setRatingEngineIds(ratingEngineIds);
-        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request, true);
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNull(response.getRatingEngineModelIdCoverageMap());
@@ -55,7 +55,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends PlsDeploymentTest
         RatingsCountRequest request = new RatingsCountRequest();
         List<String> segmentIds = Arrays.asList(new String[] { "s1", "s2", "s3" });
         request.setSegmentIds(segmentIds);
-        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request, true);
         Assert.assertNotNull(response);
         Assert.assertNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNull(response.getRatingEngineModelIdCoverageMap());
@@ -80,7 +80,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends PlsDeploymentTest
         p2.setRatingModelId("m2");
         List<RatingModelIdPair> ratingEngineModelIds = Arrays.asList(new RatingModelIdPair[] { p1, p2 });
         request.setRatingEngineModelIds(ratingEngineModelIds);
-        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request, true);
         Assert.assertNotNull(response);
         Assert.assertNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNotNull(response.getRatingEngineModelIdCoverageMap());

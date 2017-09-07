@@ -4,5 +4,9 @@ import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 
 public interface RatingCoverageService {
+    
     RatingsCountResponse getCoverageInfo(RatingsCountRequest request);
+
+    RatingsCountResponse getCoverageInfo(RatingsCountRequest request, boolean getDummyCoverage);
+    
 }
