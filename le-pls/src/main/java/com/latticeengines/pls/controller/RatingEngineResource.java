@@ -27,9 +27,12 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineService;
+import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
@@ -48,6 +51,9 @@ public class RatingEngineResource {
 
     @Autowired
     private RatingCoverageService ratingCoverageService;
+
+    @Autowired
+    private RatingEntityPreviewService ratingEntityPreviewService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -71,6 +77,26 @@ public class RatingEngineResource {
             HttpServletRequest request, //
             HttpServletResponse response) {
         return ratingEngineService.getRatingEngineById(ratingEngineId);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/entitypreview", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get preview of Account and Contact as related to Rating Engine given its id")
+    public DataPage getEntityPreview( //
+            @PathVariable String ratingEngineId, //
+            @RequestParam(value = "offset", required = true) long offset, //
+            @RequestParam(value = "maximum", required = true) long maximum, //
+            @RequestParam(value = "entityType", required = true) BusinessEntity entityType, //
+            @RequestParam(value = "sortBy", required = false) String sortBy, //
+            @RequestParam(value = "bucketFieldName", required = false) String bucketFieldName, //
+            @RequestParam(value = "descending", required = false) Boolean descending, //
+            @RequestParam(value = "lookupFieldNames", required = false) List<String> lookupFieldNames, //
+            @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId) {
+        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
+        descending = descending == null ? false : descending;
+        restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
+        return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
+                descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
