@@ -16,22 +16,22 @@ import java.util.Collection;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CollectionLookup extends Lookup {
-    @JsonProperty("collection")
-    private Collection<Object> collection;
+    @JsonProperty("values")
+    private Collection<Object> values;
 
-    public CollectionLookup(Collection<Object> collection) {
-        this.collection = collection;
+    public CollectionLookup(Collection<Object> values) {
+        this.values = values;
     }
 
     public CollectionLookup() {
     }
 
-    public Collection<Object> getCollection() {
-        return collection;
+    public Collection<Object> getValues() {
+        return values;
     }
 
-    public void setCollection(Collection<Object> collection) {
-        this.collection = collection;
+    public void setValues(Collection<Object> values) {
+        this.values = values;
     }
 
     @Override

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -44,6 +45,12 @@ public class Bucket implements Serializable {
     @JsonProperty("Lift")
     private Double lift;
 
+    @JsonProperty("comparator")
+    private ComparisonType comparisonType;
+
+    @JsonProperty("values")
+    private List<Object> values;
+
     public static Bucket nullBkt() {
         return new Bucket();
     }
@@ -59,6 +66,13 @@ public class Bucket implements Serializable {
         if (StringUtils.isNotBlank(value)) {
             bucket.setLabel(value);
         }
+        return bucket;
+    }
+
+    public static Bucket valueBkt(ComparisonType comparisonType, List<Object> values) {
+        Bucket bucket =  new Bucket();
+        bucket.setComparisonType(comparisonType);
+        bucket.setValues(values);
         return bucket;
     }
 
@@ -86,6 +100,9 @@ public class Bucket implements Serializable {
         if (bucket.lift != null) {
             this.lift = new Double(bucket.lift);
         }
+
+        this.comparisonType = bucket.getComparisonType();
+        this.values = bucket.getValues();
     }
 
     public String getLabel() {
@@ -118,6 +135,22 @@ public class Bucket implements Serializable {
 
     public void setEncodedCountList(Long[] encodedCountList) {
         this.encodedCountList = encodedCountList;
+    }
+
+    public ComparisonType getComparisonType() {
+        return comparisonType;
+    }
+
+    public void setComparisonType(ComparisonType comparisonType) {
+        this.comparisonType = comparisonType;
+    }
+
+    public List<Object> getValues() {
+        return values;
+    }
+
+    public void setValues(List<Object> values) {
+        this.values = values;
     }
 
     @JsonIgnore

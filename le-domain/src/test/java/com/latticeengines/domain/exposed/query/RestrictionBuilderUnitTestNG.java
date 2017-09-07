@@ -17,6 +17,16 @@ public class RestrictionBuilderUnitTestNG {
                 .build();
         verify(aEq2);
 
+        Restriction aGt2 = Restriction.builder().let(BusinessEntity.Account, "A")
+                .gte(2)
+                .build();
+        verify(aGt2);
+
+        Restriction aLte3 = Restriction.builder().let(BusinessEntity.Account, "A")
+                .lte(3)
+                .build();
+        verify(aLte3);
+
         Restriction bNeqHello = Restriction.builder() //
                 .let(BusinessEntity.Account, "B") //
                 .neq("hello") //

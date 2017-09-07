@@ -28,14 +28,21 @@ public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<ComparableExpression<String>> resolveForCompare(SubQueryAttrLookup lookup) {
+    public ComparableExpression<String> resolveForSubselect(SubQueryAttrLookup lookup) {
         SubQuery subQuery = lookup.getSubQuery();
         SQLQuery<?> sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery());
         String alias = subQuery.getAlias();
         StringPath subQueryPath = QueryUtils.getAttributePath(lookup.getSubQuery(), lookup.getAttribute());
         ComparableExpression<String> s =
                 Expressions.asComparable(SQLExpressions.select(subQueryPath).from(sqlSubQuery.as(alias)));
-        return Collections.singletonList(s);
+        return s;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ComparableExpression<String>> resolveForCompare(SubQueryAttrLookup lookup) {
+        return Collections
+                .singletonList(Expressions.asComparable((Expression<String>) resolveForSelect(lookup, false)));
     }
 
     @Override

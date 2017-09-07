@@ -17,6 +17,10 @@ public class AttrRepoUtils {
         return attrRepo.getColumnMetadata(attributeLookup);
     }
 
+    public static StringPath getTablePath(String tableName) {
+        return Expressions.stringPath(tableName);
+    }
+
     public static StringPath getTablePath(AttributeRepository repository, BusinessEntity entity) {
         String tableName = getTableName(repository, entity);
         return Expressions.stringPath(tableName);

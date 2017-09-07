@@ -276,24 +276,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testAccountWithSelectedContact() {
         String subSelectAlias = "alias";
-        AttributeLookup accountIdAttrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_ID);
-        Restriction contactRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_EMAIL)
-                .eq("avelayudham@worldbank.org.kb").build();
-        Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
-                .eq(1802).build();
+        Query query = generateAccountWithSelectedContactQuery(subSelectAlias);
 
-        Query innerQuery = Query.builder().from(BusinessEntity.Contact)
-                .where(contactRestriction).select(BusinessEntity.Contact, ATTR_ACCOUNT_ID).build();
-        SubQuery subQuery = new SubQuery(innerQuery, subSelectAlias);
-        Restriction subQueryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
-                .inCollection(subQuery, ATTR_ACCOUNT_ID).build();
-
-        Restriction accountWithSelectedContact =
-                Restriction.builder().and(accountIdRestriction, subQueryRestriction).build();
-        Query query = Query.builder().where(accountWithSelectedContact)
-                .select(accountIdAttrLookup)
-                .from(BusinessEntity.Account) //
-                .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("select %s.%s", ACCOUNT, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));

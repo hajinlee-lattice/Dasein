@@ -10,34 +10,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class SubQuery {
+public class SubQueryLookup extends Lookup {
+    @JsonProperty("subquery")
+    private SubQuery subQuery;
 
-    @JsonProperty("query")
-    private Query query;
+    private SubQueryLookup() {}
 
-    @JsonProperty("alias")
-    private String alias;
-
-    private SubQuery() {}
-
-    public SubQuery(Query query, String alias) {
-        this.query = query;
-        this.alias = alias;
+    public SubQueryLookup(SubQuery subQuery) {
+        this.subQuery = subQuery;
     }
 
-    public Query getQuery() {
-        return query;
+    public SubQuery getSubQuery() {
+        return subQuery;
     }
 
-    public void setQuery(Query query) {
-        this.query = query;
+    public void setSubQuery(SubQuery subQuery) {
+        this.subQuery = subQuery;
     }
 
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
 }

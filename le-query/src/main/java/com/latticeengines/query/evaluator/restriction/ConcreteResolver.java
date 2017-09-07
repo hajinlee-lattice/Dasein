@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.ValueLookup;
-import com.latticeengines.query.evaluator.QueryProcessor;
 import com.latticeengines.query.evaluator.lookup.LookupResolver;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -94,7 +93,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 break;
             case IN_COLLECTION:
                 if (rhs instanceof SubQueryAttrLookup) {
-                    booleanExpression = lhsPaths.get(0).in(rhsPaths.get(0));
+                    ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
+                    booleanExpression = lhsPaths.get(0).in(subselect);
                 } else {
                     // when there's only 1 element in the collection, querydsl generates something
                     // like "attr in ?", which is not a valid syntax so we treat it differently

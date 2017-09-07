@@ -1,19 +1,20 @@
 package com.latticeengines.query.functionalframework;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.zip.GZIPInputStream;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.SubQuery;
+import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
@@ -51,6 +52,29 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     @BeforeClass(groups = "functional")
     public void setupBase() {
         attrRepo = getCustomerAttributeRepo();
+    }
+
+    protected Query generateAccountWithSelectedContactQuery(String subSelectAlias) {
+
+        AttributeLookup accountIdAttrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_ID);
+        Restriction contactRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_EMAIL)
+                .eq("avelayudham@worldbank.org.kb").build();
+        Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .eq(1802).build();
+
+        Query innerQuery = Query.builder().from(BusinessEntity.Contact)
+                .where(contactRestriction).select(BusinessEntity.Contact, ATTR_ACCOUNT_ID).build();
+        SubQuery subQuery = new SubQuery(innerQuery, subSelectAlias);
+        Restriction subQueryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .inCollection(subQuery, ATTR_ACCOUNT_ID).build();
+
+        Restriction accountWithSelectedContact =
+                Restriction.builder().and(accountIdRestriction, subQueryRestriction).build();
+        Query query = Query.builder().where(accountWithSelectedContact)
+                .select(accountIdAttrLookup)
+                .from(BusinessEntity.Account) //
+                .build();
+        return query;
     }
 
     private static AttributeRepository getCustomerAttributeRepo() {

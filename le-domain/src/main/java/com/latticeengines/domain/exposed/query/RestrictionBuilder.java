@@ -121,12 +121,28 @@ public class RestrictionBuilder {
         return this.not().eq(entity, attrName);
     }
 
+    public RestrictionBuilder gt(Object value) {
+        operator = ComparisonType.GREATER_THAN;
+        negate = false;
+        rhsLookup = new ValueLookup(value);
+        completeConcrete();
+        return this;
+    }
+
     public RestrictionBuilder gte(Object min) {
         return in(min, null);
     }
 
     public RestrictionBuilder lt(Object max) {
         return in(null, max);
+    }
+
+    public RestrictionBuilder lte(Object value) {
+        operator = ComparisonType.LESS_OR_EQUAL;
+        negate = false;
+        rhsLookup = new ValueLookup(value);
+        completeConcrete();
+        return this;
     }
 
     public RestrictionBuilder inCollection(Collection<Object> collection) {

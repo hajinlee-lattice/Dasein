@@ -1,7 +1,6 @@
 package com.latticeengines.query.evaluator.lookup;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,7 @@ public class CollectionResolver extends BaseLookupResolver<CollectionLookup>
 
     @Override
     public List<ComparableExpression<String>> resolveForCompare(CollectionLookup lookup) {
-        Collection<Object> collection = lookup.getCollection();
+        Collection<Object> collection = lookup.getValues();
         if (collection == null || collection.isEmpty()) {
             throw new QueryEvaluationException("Collection lookup must have at least one element.");
         }
