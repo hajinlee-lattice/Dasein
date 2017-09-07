@@ -44,6 +44,9 @@ public class Diff extends TransformationFlowBase<BasicTransformationConfiguratio
                 new FieldMetadata(CHECK_SUM, String.class));
         srcCompared = srcCompared.apply(new AddMD5Hash(new Fields(CHECK_SUM), excludeFields, 1000, true),
                 new FieldList(srcCompared.getFieldNames()), new FieldMetadata(CHECK_SUM, String.class));
+        List<String> compareRetFlds = new ArrayList<>(Arrays.asList(parameters.getKeys()));
+        compareRetFlds.add(CHECK_SUM);
+        srcCompared = srcCompared.retain(new FieldList(compareRetFlds));
         srcCompared = renameCompared(srcCompared);
         Node joined = src.join(new FieldList(parameters.getKeys()), srcCompared,
                 new FieldList(renameCompKeys(parameters.getKeys())), JoinType.LEFT);
