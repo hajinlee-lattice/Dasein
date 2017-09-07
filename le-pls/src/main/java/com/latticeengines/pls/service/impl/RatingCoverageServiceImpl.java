@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.CoverageInfo;
 import com.latticeengines.domain.exposed.pls.RatingBucketCoverage;
@@ -88,7 +89,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
         RatingsCountResponse result = new RatingsCountResponse();
         Map<String, CoverageInfo> segmentIdCoverageMap = new ConcurrentHashMap<>();
-        result.setRatingEngineIdCoverageMap(segmentIdCoverageMap);
+        result.setSegmentIdCoverageMap(segmentIdCoverageMap);
 
         request.getSegmentIds() //
                 .stream().parallel() //
@@ -96,8 +97,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                         ratingEngineId -> //
                         processSingleSegmentId(tenent, segmentIdCoverageMap, //
                                 ratingEngineId, request.isRestrictNotNullSalesforceId()));
-
-        result.setSegmentIdCoverageMap(segmentIdCoverageMap);
 
         return result;
     }
@@ -397,5 +396,20 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             segmentIdAndModelRulesPairCoverageMap.put(segmentIdAndModelRulesPair, coverageInfo);
         }
         return result;
+    }
+
+    @VisibleForTesting
+    void setRatingEngineService(RatingEngineService ratingEngineService) {
+        this.ratingEngineService = ratingEngineService;
+    }
+
+    @VisibleForTesting
+    void setMetadataSegmentService(MetadataSegmentService metadataSegmentService) {
+        this.metadataSegmentService = metadataSegmentService;
+    }
+
+    @VisibleForTesting
+    void setEntityProxy(EntityProxy entityProxy) {
+        this.entityProxy = entityProxy;
     }
 }
