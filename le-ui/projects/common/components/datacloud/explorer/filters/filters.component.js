@@ -27,7 +27,8 @@ angular
                 sortPrefix: '+',
                 view: 'list',
                 queryText: '',
-                QueryStore: QueryStore
+                QueryStore: QueryStore,
+                saved: false
             });
 
             // remove highlighting
@@ -193,6 +194,10 @@ angular
                 } else {
                     vm.metadata.toggle.show.enabled = '';
                 }
+            }
+
+            vm.hideMessage = function() {
+                vm.saved = false;
             }
 
             vm.sortOrder = function() {

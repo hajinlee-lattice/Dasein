@@ -5,7 +5,7 @@
     </div>
     <div 
         class="exclude-filter"
-        ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
+        ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets' && vm.page === 'Accounts'">
         <label>
             <input 
                 type="checkbox" 
@@ -15,6 +15,11 @@
                 ng-change="vm.excludeNonSalesForceCheckbox(excludeAccounts)" />
             Exclude accounts without SalesForceID (<span class="orange-text">{{ vm.accountsWithoutSfId | number }}</span>)
         </label>
+    </div>
+
+    <div class="success-message" ng-if="vm.section != 'dashboard.targets' || vm.section != 'wizard.targets' && vm.saved === true">
+        <h3>Your segment was saved successfully!</h3>
+        <i class="fa fa-times fa-inverse" data-ng-click="vm.hideMessage()"></i>
     </div>
 
     <ul class="filters">
@@ -53,7 +58,7 @@
         </li>
     </ul>
 
-    <table class="list-table">
+    <table class="list-table" ng-if="vm.page === 'Accounts'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
                 <th class="sortable" ng-click="sortType = 'LDC_Name'; sortReverse = !sortReverse">
@@ -78,7 +83,6 @@
                     <span ng-show="sortType == 'LDC_Country' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <th>SalesForce ID</th>
-
             </tr>
         </thead>
         <tbody ng-if="!vm.loading">
@@ -86,7 +90,6 @@
                 ng-repeat=" account in vm.accounts | 
                             orderBy:sortType:sortReverse | 
                             filter:vm.search">
-
                 <td>{{account.LDC_Name}}</td>
                 <td>{{account.LDC_Domain}}</td>
                 <td>{{account.LDC_City}}</td>
@@ -107,15 +110,45 @@
         </tbody>
     </table>
 
+    <table class="list-table" ng-if="vm.page === 'Contacts'">
+        <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
+            <tr>
+                <th class="sortable" ng-click="sortType = 'CompanyName'; sortReverse = !sortReverse">
+                    Company Name
+                    <span ng-show="sortType == 'CompanyName' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'CompanyName' && sortReverse" class="fa fa-caret-up"></span>
+                </th>
+                <th>Email</th>
+                <th class="sortable" ng-click="sortType = 'ContactName'; sortReverse = !sortReverse">
+                    Contact Name
+                    <span ng-show="sortType == 'ContactName' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'ContactName' && sortReverse" class="fa fa-caret-up"></span>
+                </th>
+            </tr>
+        </thead>
+        <tbody ng-if="!vm.loading">
+            <tr 
+                ng-repeat=" contact in vm.contacts | 
+                            orderBy:sortType:sortReverse | 
+                            filter:vm.search">
+                <td>{{contact.CompanyName}}</td>
+                <td>{{contact.Email}}</td>
+                <td>{{contact.ContactName}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+
     <div class="loading" ng-if="vm.loading">
-         Loading Accounts...
+         Loading {{vm.page}}...
     </div>
 
-    <div ng-if="vm.accounts.length === 0">
-        <p>No Accounts Found<p>
+    <div ng-if="vm.accounts.length === 0 || vm.contacts.length === 0">
+        <p>No {{vm.page}} Found<p>
     </div>
 
-    <ul class="filters pull-right" ng-if="vm.accounts.length > 0">
+
+    <ul class="filters pull-right" ng-if="vm.page === 'Accounts' && vm.accounts.length > 0">
         <li>
             <pd-pagination-controls
                 current="vm.current"
@@ -123,5 +156,14 @@
             </pd-pagination-controls>
         </li>
     </ul>
+    <ul class="filters pull-right" ng-if="vm.page === 'Contacts' && vm.contacts.length > 0">
+        <li>
+            <pd-pagination-controls
+                current="vm.current"
+                max="vm.contactsCount / vm.pagesize">
+            </pd-pagination-controls>
+        </li>
+    </ul>
+
 
 </div>

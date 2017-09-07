@@ -1224,9 +1224,9 @@ angular.module('common.datacloud.explorer', [
         vm.clearExplorerSegments();
 
         if (vm.metadataSegment != undefined){
-            var restrictions = vm.metadataSegments.restriction.logicalRestriction.restrictions;
+            var restrictions = vm.metadataSegments.restriction;
         } else {
-            var restrictions = QueryRestriction.restriction.logicalRestriction.restrictions;
+            var restrictions = QueryRestriction.restriction;
         };
 
         if (vm.addBucketTreeRoot) {
@@ -1398,13 +1398,6 @@ angular.module('common.datacloud.explorer', [
             topBkt = attribute.TopBkt,
             segmentName = $stateParams.segment;
 
-        if(entity === 'Transaction'){
-            var entity = 'Account';
-        }
-
-
-        // console.log(attributeRangeKey);
-
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         DataCloudStore.setMetadata('segmentAttributeInput', vm.segmentAttributeInput);
 
@@ -1412,10 +1405,13 @@ angular.module('common.datacloud.explorer', [
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
 
+        QueryStore.counts.accounts.loading = true;
+        QueryStore.counts.contacts.loading = true;
+
         if (vm.segmentAttributeInput[attributeKey] === true) {
-            QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+            QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
         } else {
-            QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+            QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
         }
 
         if (segmentName === 'Create') {
@@ -1440,11 +1436,10 @@ angular.module('common.datacloud.explorer', [
         console.log(attributeRangeKey);
 
         //     if(stat.Rng === undefined){
-    //         var attributeRangeKey = stat.Lbl;
-    //     } else {
-    //         var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
-    //     }
-
+        //         var attributeRangeKey = stat.Lbl;
+        //     } else {
+        //         var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
+        //     }
 
         console.log(enrichment);
 
@@ -1459,9 +1454,9 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         
         if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-            QueryStore.addRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+            QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
         } else {
-            QueryStore.removeRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+            QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
         }
         /*
          * Rebuild the tile table items
@@ -1500,9 +1495,9 @@ angular.module('common.datacloud.explorer', [
         
         vm.saveSegmentEnabled = true;
         if (vm.segmentBucketInput[bucketId] === true) {
-            QueryStore.addRestriction({columnName: id, range: range});
+            QueryStore.addAccountRestriction({columnName: id, range: range});
         } else {
-            QueryStore.removeRestriction({columnName: id, range: range});
+            QueryStore.removeAccountRestriction({columnName: id, range: range});
         }
 
     }
@@ -1524,7 +1519,8 @@ angular.module('common.datacloud.explorer', [
         var segmentName = $stateParams.segment;
 
         if (segmentName === 'Create') {
-             $stateParams.defaultSegmentRestriction = JSON.stringify({
+
+            var accountRestriction = JSON.stringify({
                 "restriction": {
                     "logicalRestriction": {
                         "operator": "AND",
@@ -1532,11 +1528,28 @@ angular.module('common.datacloud.explorer', [
                     }
                 }
             });
+            var contactRestriction = JSON.stringify({
+                "restriction": {
+                    "logicalRestriction": {
+                        "operator": "AND",
+                        "restrictions": []
+                    }
+                }
+            });
+
+            $stateParams.defaultSegmentRestriction = accountRestriction + contactRestriction;
             
             vm.checkSaveButtonState();
+
         } else {
+
             SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                $stateParams.defaultSegmentRestriction = JSON.stringify(result.account_restriction);
+
+                var accountRestriction = JSON.stringify(result.account_restriction),
+                    contactRestriction = JSON.stringify(result.contact_restriction);
+                
+                $stateParams.defaultSegmentRestriction = accountRestriction + contactRestriction;
+                
                 vm.checkSaveButtonState();
             });
         };
@@ -1545,14 +1558,12 @@ angular.module('common.datacloud.explorer', [
 
     vm.checkSaveButtonState = function(){
 
-        //console.log($stateParams);
+        var oldVal = $stateParams.defaultSegmentRestriction,
+            newAccountVal = JSON.stringify(QueryStore.getAccountRestriction()),
+            newContactVal = JSON.stringify(QueryStore.getContactRestriction()),
+            newVal = newAccountVal + newContactVal;
 
-        var newVal = JSON.stringify(QueryStore.getRestriction());
-
-        //console.log($stateParams.defaultSegmentRestriction);
-        //console.log(newVal);
-
-        if($stateParams.defaultSegmentRestriction === newVal){
+        if(oldVal === newVal){
             vm.saveSegmentEnabled = false;
         } else {
             vm.saveSegmentEnabled = true;
@@ -1565,11 +1576,13 @@ angular.module('common.datacloud.explorer', [
             var segmentName = $stateParams.segment,
                 ts = new Date().getTime();
             if (segmentName === 'Create') {
-                var restriction = QueryStore.getRestriction(),
+                var accountRestriction = QueryStore.getAccountRestriction(),
+                    contactRestriction = QueryStore.getContactRestriction(),
                     segment = SegmentStore.sanitizeSegment({
                         'name': 'segment' + ts,
                         'display_name': 'segment' + ts,
-                        'account_restriction': restriction,
+                        'account_restriction': accountRestriction,
+                        'contact_restriction': contactRestriction,
                         'page_filter': {
                             'row_offset': 0,
                             'num_rows': 10
@@ -1582,21 +1595,35 @@ angular.module('common.datacloud.explorer', [
 
                     // update state param to remove "Create"
                     $state.go('.', { segment: 'segment' + ts }, { notify: false });
+
+                    vm.saved = true;
+
                 });
             } else {
                 SegmentStore.getSegmentByName(segmentName).then(function(result) {
                     var segmentData = result,
-                        restriction = QueryStore.getRestriction(),
+                        accountRestriction = QueryStore.getAccountRestriction(),
+                        contactRestriction = QueryStore.getContactRestriction(),
                         segment = SegmentStore.sanitizeSegment({
                             'name': segmentData.name,
                             'display_name': segmentData.display_name,
-                            'account_restriction': restriction,
+                            'account_restriction': accountRestriction,
+                            'contact_restriction': contactRestriction,
                             'page_filter': {
                                 'row_offset': 0,
                                 'num_rows': 10
                             }
                         });
                     console.log('saveSegment existing', segmentData, segment)
+                    SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
+                        vm.saveSegmentEnabled = false;
+
+                        // update state param to remove "Create"
+                        $state.go('.', { segment: 'segment' + ts }, { notify: false });
+
+                        vm.saved = true;
+
+                    });
                 });
             };
         };

@@ -34,7 +34,6 @@
                     ng-mouseleave="vm.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
                     ng-if="vm.ratings.length > 0"
                     ng-class="{editing: vm.tileStates[rating.id].editrating}">
-                    
 
                     <div class="tile-header" ng-if="!vm.tileStates[rating.id].editrating">
                         <h2 title="{{rating.displayName}}">{{rating.displayName | limitTo: 30 }}{{rating.displayName.length > 30 ? '&hellip;' : ''}}</h2>
@@ -47,7 +46,11 @@
                             </button>
                             <ul class="model-menu" ng-show="vm.tileStates[rating.name].showCustomMenu">
                                 <li data-ng-click="vm.editRatingClick($event, rating)">
-                                    <a href="javascript:void(0)">Edit</a>
+                                    <a href="javascript:void(0)">Deactivate</a>
+                                    <i class="fa fa-power-off"></i>
+                                </li>
+                                <li data-ng-click="vm.editRatingClick($event, rating)">
+                                    <a href="javascript:void(0)">Rename</a>
                                     <i class="fa fa-edit"></i>
                                 </li>
                                 <li data-ng-click="vm.showDeleteRatingModalClick($event, rating)">
@@ -70,23 +73,10 @@
                                 <span ng-if="play.segment == null" class="gray-text">Segment not selected</span>
                             </li>
                             <li>
-                                Last Launched: 
-                                <span ng-if="play.launchHistory.playLaunch == null && play.segment == null"><span class="error-text">Not launched yet</span></span>
-                                <span ng-if="play.launchHistory.playLaunch == null && play.segment != null && play.launchHistory.mostRecentLaunch.launchState != 'Launching'"><span class="blue-text">Ready for launch</span></span>
-                                <span ng-if="vm.tileStates[play.name].launching == true" class="error-text">Currently Launching</span>
-                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">Launched {{play.updated | date}}</span></span>
-                            </li>
-                            <li>
-                                Insights: 
-                                <span ng-if="play.launchHistory.playLaunch == null && play.segment == null"><span class="error-text">None created</span></span>
-                                <span ng-if="play.launchHistory.playLaunch == null && play.segment != null"><span class="blue-text">
-                                    {{play.talkingPoints.length}} Talking Points created
-                                </span></span>
-                                <span ng-if="play.launchHistory.playLaunch != null && play.segment != null"><span class="blue-text">
-                                    {{play.talkingPoints.length}} Talking Points - 
-                                    <strong ng-if="play.lastTalkingPointPublishTime">Published {{play.lastTalkingPointPublishTime | date}}</strong>
-                                    <strong ng-if="!play.lastTalkingPointPublishTime" class="error-text">Not Published</strong>
-                                </span></span>
+                                Last Data Refresh: 
+                                <span>
+                                    <span class="blue-text">{{rating.lastDataRefresh | date}}</span>
+                                </span>
                             </li>
                         </ul>
 
@@ -95,6 +85,13 @@
 
                         <div ng-if="rating.ratingModels != []">
                             <h4>Account Ratings</h4>
+                            <ul class="barChart ratings">
+                               <li ng-repeat="bucket in rating.bucketInformation">
+                                    <div class="value">{{bucket.count}}</div>
+                                    <div class="rating-bar" ng-style="{ height: ((10 / bucket.count) * 1000) }"></div>
+                                    <div class="meta">{{bucket.bucket}}</div>
+                                </li> 
+                            </ul>
                         </div>
 
                     </div><!-- End .tile-body -->

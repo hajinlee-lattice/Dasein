@@ -171,105 +171,26 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer(),
             stub = [{
             "created": "2017-08-28T17:11:47.490Z",
-            "createdBy": "string",
+            "createdBy": "Jon Hadden",
             "displayName": "Jon Test Rating Engine",
             "id": "1234",
             "note": "string",
             "pid": 0,
-            "ratingModels": [
-            {
-                "created": "2017-08-28T17:11:47.490Z",
-                "id": "string",
-                "iteration": 0,
-                "ratingEngine": {
-                    "created": "2017-08-28T17:11:47.490Z",
-                    "createdBy": "string",
-                    "displayName": "string",
-                    "id": "string",
-                    "note": "string",
-                    "pid": 0,
-                    "ratingModels": [
-                    {}
-                    ],
-                    "segment": {
-                        "created": "2017-08-28T17:11:47.490Z",
-                        "description": "string",
-                        "display_name": "string",
-                        "frontend_restriction": {
-                            "restriction": {
-                                "childMap": {},
-                                "children": [
-                                {
-                                    "childMap": {},
-                                    "children": [
-                                    {}
-                                    ]
-                                }
-                                ]
-                            }
-                        },
-                        "is_master_segment": true,
-                        "masterSegment": true,
-                        "name": "string",
-                        "restriction": {
-                            "childMap": {},
-                            "children": [
-                            {
-                                "childMap": {},
-                                "children": [
-                                {}
-                                ]
-                            }
-                            ]
-                        },
-                        "updated": "2017-08-28T17:11:47.499Z"
-                    },
-                    "status": "ACTIVE",
-                    "tenant": {
-                        "DisplayName": "string",
-                        "Identifier": "string",
-                        "RegisteredTime": 0,
-                        "UIVersion": "string"
-                    },
-                    "type": "RULE_BASED",
-                    "updated": "2017-08-28T17:11:47.499Z"
+            "lastDataRefresh": "2017-08-28T17:11:47.490Z",
+            "bucketInformation": [
+                {
+                    bucket: "A",
+                    count: 500
                 },
-                "updated": "2017-08-28T17:11:47.499Z"
-            }
+                {
+                    bucket: "B",
+                    count: 500
+                },
+                {
+                    bucket: "C",
+                    count: 500
+                }
             ],
-            "segment": {
-                "created": "2017-08-28T17:11:47.499Z",
-                "description": "string",
-                "display_name": "string",
-                "frontend_restriction": {
-                    "restriction": {
-                        "childMap": {},
-                        "children": [
-                        {
-                            "childMap": {},
-                            "children": [
-                            {}
-                            ]
-                        }
-                        ]
-                    }
-                },
-                "is_master_segment": true,
-                "masterSegment": true,
-                "name": "string",
-                "restriction": {
-                    "childMap": {},
-                    "children": [
-                    {
-                        "childMap": {},
-                        "children": [
-                        {}
-                        ]
-                    }
-                    ]
-                },
-                "updated": "2017-08-28T17:11:47.499Z"
-            },
             "status": "ACTIVE",
             "tenant": {
                 "DisplayName": "string",

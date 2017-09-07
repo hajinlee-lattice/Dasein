@@ -88,9 +88,7 @@
             &.disabled {
                 display: none;
             }
-            &.tab-edit {
-                min-width: 289px;
-                .enrichmentCounts {
+            .enrichmentCounts {
                     white-space: nowrap;
                     text-transform: uppercase;
                     .count {
@@ -102,10 +100,8 @@
                         }
                     }
                 }
-            }
             & > .tab-container > h2 {
                 position: relative;
-                padding-left: 28px;
                 &:after {
                     content: '';
                     display: block;
