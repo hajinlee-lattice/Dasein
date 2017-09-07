@@ -464,7 +464,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role);
         ExportConfiguration exportConfiguration = setupExportConfig(table, table.getName(), role);
         AppSubmission submission = eaiProxy.submitEaiJob(exportConfiguration);
-        int timeout = new Long(TimeUnit.MINUTES.toSeconds(30)).intValue();
+        int timeout = new Long(TimeUnit.MINUTES.toSeconds(60)).intValue();
         logger.info("Waiting for " + submission.getApplicationIds().get(0));
         Level jobServiceLogLevel = LogManager.getLogger(JobServiceImpl.class).getLevel();
         LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);

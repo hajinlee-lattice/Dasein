@@ -409,6 +409,7 @@ public class CheckpointService {
 
     private void downloadHdfsData(String checkpoint) throws IOException {
         String localDir = "checkpoints/" + checkpoint + "/hdfs/Data";
+        FileUtils.deleteQuietly(new File(localDir));
         FileUtils.forceMkdirParent(new File(localDir));
         CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
         String targetPath = PathBuilder.buildCustomerSpacePath(podId, cs).append("Data").toString();
