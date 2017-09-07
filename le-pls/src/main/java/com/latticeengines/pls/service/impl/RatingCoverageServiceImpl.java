@@ -182,7 +182,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     accountFrontEndQuery);
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
                     .reduce((x, y) -> x + y);
-            Long accountCount = accountCountOption.get();
+            Long accountCount = accountCountOption.orElse(0L);
 
             CoverageInfo coverageInfo = new CoverageInfo();
             // TODO - fix it to read contact count from redshift
@@ -241,7 +241,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     accountFrontEndQuery);
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
                     .reduce((x, y) -> x + y);
-            Long accountCount = accountCountOption.get();
+            Long accountCount = accountCountOption.orElse(0L);
 
             CoverageInfo coverageInfo = new CoverageInfo();
             // TODO - fix it to read contact count from redshift
