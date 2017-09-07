@@ -135,7 +135,7 @@ public class RatingEngineResource {
             @RequestBody RatingsCountRequest ratingModelSegmentIds,
             @RequestParam(value = "getDummyCoverage", required = false) Boolean getDummyCoverage) {
         // TODO - anoop - this is only temporary, will remove it in next merge
-        getDummyCoverage = getDummyCoverage == null ? true : getDummyCoverage;
+        getDummyCoverage = getDummyCoverage == null ? false : getDummyCoverage;
         return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds, getDummyCoverage);
     }
 
