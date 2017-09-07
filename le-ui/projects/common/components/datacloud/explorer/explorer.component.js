@@ -1630,10 +1630,11 @@ angular.module('common.datacloud.explorer', [
         scope: {
             lookupResponse: '=?',
         },
-        controller: ['$scope', '$document', '$timeout', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, $timeout, LookupStore, DataCloudStore, BrowserStorageUtility) { 
+        controller: ['$scope', '$document', '$timeout', '$window', 'LookupStore', 'DataCloudStore', 'BrowserStorageUtility', function ($scope, $document, $timeout, $window, LookupStore, DataCloudStore, BrowserStorageUtility) { 
             // test on LETest1503428538807_LPI
             var vm = $scope,
-                lookupStore = LookupStore.get('request');
+                lookupStore = LookupStore.get('request'),
+                $modal = angular.element('attribute-feedback-modal');
 
             $scope.modal = DataCloudStore.getFeedbackModal();
             $scope.close = function() {
@@ -1646,7 +1647,6 @@ angular.module('common.datacloud.explorer', [
             if($scope.showLookupStore) {
                 $scope.lookupStore = lookupStore;
             }
-
 
             $scope.icon = $scope.modal.context.icon;
             $scope.label = $scope.modal.context.label || $scope.modal.context.attribute.DisplayName;
@@ -1675,13 +1675,29 @@ angular.module('common.datacloud.explorer', [
                     MatchLog: $scope.lookupResponse.matchLogs
                 };
 
-                DataCloudStore.sendFeedback(report, $scope.modal.context.type).then(function(response){
-                    $scope.sendingReport = false;
-                    $scope.reported = true;
-                    $timeout(function() {
-                        $scope.close();
-                    }, 5 * 1000);
-                });
+                $scope.sendingReport = false;
+                $scope.reported = true;
+                $timeout(function() {
+                    $scope.close();
+                }, 1000 * 5);
+                DataCloudStore.sendFeedback(report, $scope.modal.context.type);
+            }
+            
+            var setHeight = function() {
+                var height = $(window).height() -20;
+                $modal.css({maxHeight: height});
+                $modal.find('.attribute-feedback-container').css({maxHeight: height});
+            }
+
+            $scope.setHeight = function() { // gets called by ng-inits so that the data is there and heights make sense
+                setHeight();
+            }
+
+            var _handleDocumentResize = _.debounce(handleDocumentResize, 300);
+            $(window).on('resize', _handleDocumentResize);
+
+            function handleDocumentResize(evt) {
+                setHeight();
             }
 
             $document.on('click', handleDocumentClick);
@@ -1698,6 +1714,7 @@ angular.module('common.datacloud.explorer', [
 
             $scope.$on('$destroy', function() {
                 $document.off('click', handleDocumentClick);
+                $(window).off('resize', _handleDocumentResize)
             });
         }]
     };

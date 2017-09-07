@@ -1,43 +1,44 @@
 <span ng-click="close()" class="close"><i class="fa fa-times"></i></span>
-<div class="attribute-feedback-container" ng-if="!reported" ng-class="{reported:reported}">
+<div class="attribute-feedback-container" ng-show="!reported" ng-class="{reported:reported}" ng-init="setHeight()">
     <div class="attribute-feedback-header section">
         <h1>Report Inaccuracy</h1>
         <p>
             Let us know what is incorrect and the correct value, if you know it, and we will correct it as soon as we can.
         </p>
     </div>
-    <h2 class="section">
-        <div class="icon" ng-if="icon">
-            <img ng-if="icon.image" src="{{icon.image}}" />
-            <i class="{{icon.font}}"></i>
+    <div class="middle section">
+        <h2 class="sub-section">
+            <div class="icon" ng-if="icon">
+                <img ng-if="icon.image" src="{{icon.image}}" />
+                <i class="{{icon.font}}"></i>
+            </div>
+            <div class="label" ng-if="label">{{label}}</div>
+        </h2>
+        <h3 class="{{categoryClass}} color section">{{value}}</h3>
+        <div ng-if="lookupStore.record" class="user-input-record section" ng-init="setHeight()">
+            <h4>Account Lookup Fields</h4>
+            <dl ng-repeat="(key, value) in lookupStore.record">
+                <dt>{{key}}</dt>
+                <dd class="{{categoryClass}} color ">{{value}}</dd>
+            </dl>
         </div>
-        <div class="label" ng-if="label">{{label}}</div>
-    </h2>
-    <h3 class="{{categoryClass}} color section">{{value}}</h3>
-    <div ng-if="lookupStore.record" class="user-input-record section">
-        <h4>Account Lookup Fields</h4>
-        <dl ng-repeat="(key, value) in lookupStore.record">
-            <dt>{{key}}</dt>
-            <dd class="{{categoryClass}} color ">{{value}}</dd>
-        </dl>
+        <ul class="feedback sub-section">
+            <li>
+                <label for="attribute-feedback-value">Correct Value (If Known)</label>
+                <input type="text" id="attribute-feedback-value" ng-model="input.value" />
+            </li>
+            <li>
+                <label for="attribute-feedback-comment">Comments</label>
+                <textarea id="attribute-feedback-comment" ng-model="input.comment"></textarea>
+            </li>
+        </ul>
     </div>
-    <ul class="feedback section">
-        <li>
-            <label for="attribute-feedback-value">Correct Value (If Known)</label>
-            <input type="text" id="attribute-feedback-value" ng-model="input.value" />
-        </li>
-        <li>
-            <label for="attribute-feedback-comment">Comments</label>
-            <textarea id="attribute-feedback-comment" ng-model="input.comment"></textarea>
-        </li>
-    </ul>
     <div class="attribute-feedback-footer section">
         <button class="button white-button" ng-click="close()">Cancel</button>
         <button class="button blue-button" ng-click="report()" ng-disabled="sendingReport"><i ng-if="sendingReport" class="fa fa-spinner fa-spin fa-fw"></i> Report Inaccuracy</button>
     </div>
-
 </div>
-<div class="attribute-feedback-container" ng-if="reported" ng-class="{reported:reported}">
+<div class="attribute-feedback-container" ng-show="reported" ng-class="{reported:reported}" ng-init="setHeight()">
     <div class="attribute-feedback-header section">
         <h1>Incorrect Data Reported</h1>
         <p>

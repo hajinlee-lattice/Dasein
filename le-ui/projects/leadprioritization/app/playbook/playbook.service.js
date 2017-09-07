@@ -440,7 +440,7 @@ angular.module('lp.playbook')
             method: 'GET',
             url: this.host + '/ratingengines/coverage'
         }).then(function(response) {
-            console.log(response.data);
+            console.log('/ratingengines/coverage:', response.data);
         });
 
         var ret = {};
