@@ -1,6 +1,9 @@
 package com.latticeengines.eai.service.impl;
 
 import org.apache.avro.Schema.Type;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,17 +56,30 @@ public abstract class AvroTypeConverter {
                 break;
             case LONG:
                 targetType = Long.class;
-                if (attr.getSourceLogicalDataType().equalsIgnoreCase("Date")
-                        || attr.getSourceLogicalDataType().equalsIgnoreCase("Datetime")
+                DateTimeFormatter dtf = null;
+
+                if (attr.getSourceLogicalDataType().equalsIgnoreCase("Date")) {
+                    dtf = ISODateTimeFormat.dateElementParser();
+                } else if (attr.getSourceLogicalDataType().equalsIgnoreCase("Datetime")
                         || attr.getSourceLogicalDataType().equalsIgnoreCase("Timestamp")
                         || attr.getSourceLogicalDataType().equalsIgnoreCase("DateTimeOffset")) {
-                    try {
-                        return TimeStampConvertUtils.convertToLong((String) value);
-                    } catch (Exception e) {
-                        log.warn(String.format("Error parsing date for column %s with value %s.", attr.getName(), value));
-                    }
+                    dtf = ISODateTimeFormat.dateTimeParser();
                 } else {
                     break;
+                }
+                try {
+                    DateTime dateTime = dtf.parseDateTime((String) value);
+                    return dateTime.getMillis();
+                } catch (Exception e) {
+                    log.warn(String.format("Error parsing date using ISODateTimeFormat for column %s with value %s.",
+                                attr.getName(), value));
+                    try {
+                        return TimeStampConvertUtils.convertToLong((String) value);
+                    } catch (Exception exp) {
+                        log.error(String.format(
+                                "Error parsing date using TimeStampConvertUtils for column %s with value %s.",
+                                attr.getName(), value));
+                    }
                 }
             case STRING:
                 targetType = String.class;
