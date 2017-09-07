@@ -111,21 +111,27 @@ public class PlayServiceImpl implements PlayService {
             // String.format("Rating Engine for Play %s is not defined.",
             // ratingEngine.getId()));
         } else {
-            RatingsCountRequest request = new RatingsCountRequest();
-            request.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
-            RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
-            Map<String, CoverageInfo> ratingEngineIdCoverageMap = response.getSegmentIdCoverageMap();
-            long accountCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount();
-            long contactCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount();
-            List<RatingBucketCoverage> bucketCoverageCounts = ratingEngineIdCoverageMap.get(ratingEngine.getId())
-                    .getBucketCoverageCounts();
-            log.info(String.format("For play %s, new account number and contact number are %d and %d, respectively",
-                    play.getName(), accountCount, contactCount));
+            try {
+                RatingsCountRequest request = new RatingsCountRequest();
+                request.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
+                RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+                Map<String, CoverageInfo> ratingEngineIdCoverageMap = response.getRatingEngineIdCoverageMap();
+                long accountCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount();
+                long contactCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount();
+                List<RatingBucketCoverage> bucketCoverageCounts = ratingEngineIdCoverageMap.get(ratingEngine.getId())
+                        .getBucketCoverageCounts();
+                log.info(String.format("For play %s, new account number and contact number are %d and %d, respectively",
+                        play.getName(), accountCount, contactCount));
 
-            long mostRecentSucessfulLaunchAccountNum = playLaunch == null ? 0 : playLaunch.getAccountsLaunched();
-            long mostRecentSucessfulLaunchContactNum = playLaunch == null ? 0 : playLaunch.getContactsLaunched();
-            launchHistory.setNewAccountsNum(accountCount - mostRecentSucessfulLaunchAccountNum);
-            launchHistory.setNewContactsNum(contactCount - mostRecentSucessfulLaunchContactNum);
+                long mostRecentSucessfulLaunchAccountNum = playLaunch == null ? 0 : playLaunch.getAccountsLaunched();
+                long mostRecentSucessfulLaunchContactNum = playLaunch == null ? 0 : playLaunch.getContactsLaunched();
+                launchHistory.setNewAccountsNum(accountCount - mostRecentSucessfulLaunchAccountNum);
+                launchHistory.setNewContactsNum(contactCount - mostRecentSucessfulLaunchContactNum);
+            } catch (Exception ex) {
+                // any exception in getting count info should not block
+                // rendering of play listing
+                log.info("Ignoring exception in get cont info", ex);
+            }
         }
         // ----------------------------------------------------------------------------------------------
 
