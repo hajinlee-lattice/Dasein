@@ -69,7 +69,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
                 tenent.getId(), //
                 entityFrontEndQuery);
 
-        if (entityType == BusinessEntity.Account) {
+        if (entityType == BusinessEntity.Account && StringUtils.isNotBlank(bucketFieldName)) {
             postProcessDataPage(dataPage, model.getId(), bucketFieldName);
         }
 
