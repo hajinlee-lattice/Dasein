@@ -302,7 +302,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
         matchContext.getOutput().setResult(outputRecords);
         matchContext.getOutput().getStatistics().setRowsMatched(totalMatched);
-        matchContext.getOutput().getStatistics().setColumnMatchCount(Arrays.asList(columnMatchCount));
+        if (columnMatchCount.length <= 10000) {
+            matchContext.getOutput().getStatistics().setColumnMatchCount(Arrays.asList(columnMatchCount));
+        }
 
         return matchContext;
     }
