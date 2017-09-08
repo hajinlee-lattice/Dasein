@@ -170,61 +170,77 @@ angular
                 Accounts: ['$q', 'QueryStore', function($q, QueryStore) {
                     var deferred = $q.defer(),
                         segment = QueryStore.getSegment(),
-                        restriction = QueryStore.getRestriction(),
-                        query = {
-                            free_form_text_search: '',
-                            frontend_restriction: restriction,
-                            page_filter: {
-                                num_rows: 10,
-                                row_offset: 0
-                            },
-                            restrict_with_sfdcid: false
+                        accountRestriction = QueryStore.getAccountRestriction(),
+                        contactRestriction = QueryStore.getContactRestriction(),
+                        query = { 
+                            'free_form_text_search': '',
+                            'account_restriction': accountRestriction,
+                            'contact_restriction': contactRestriction,
+                            'preexisting_segment_name': segment.name,
+                            'restrict_with_sfdcid': false
+                            'page_filter': {
+                                'num_rows': 15,
+                                'row_offset': 0
+                            }
                         };
-                        deferred.resolve( QueryStore.GetDataByQuery('accounts', query, segment).then(function(data){ return data; }) );
+                    
+                    deferred.resolve( QueryStore.GetDataByQuery('accounts', query).then(function(data){ return data; }));
 
                     return deferred.promise;
 
                 }],
                 AccountsCount: ['$q', 'QueryStore', function($q, QueryStore) {
+                    
                     var deferred = $q.defer(),
                         segment = QueryStore.getSegment(),
-                        restriction = QueryStore.getRestriction();
+                        accountRestriction = QueryStore.getAccountRestriction(),
+                        contactRestriction = QueryStore.getContactRestriction();
 
-                        if (segment === null) {                     
-                            query = { 
-                                'free_form_text_search': '',
-                                'frontend_restriction': restriction,
-                                'page_filter': {
-                                    'num_rows': 15,
-                                    'row_offset': 0
-                                }
-                            };
-                        } else {
-                            query = { 
-                                'free_form_text_search': '',
-                                'frontend_restriction': segment.frontend_restriction,
-                                'page_filter': {
-                                    'num_rows': 15,
-                                    'row_offset': 0
-                                }
-                            };
+                    if(segmentName === null){
+                        query = { 
+                            'free_form_text_search': '',
+                            'account_restriction': accountRestriction,
+                            'contact_restriction': contactRestriction,
+                            'page_filter': {
+                                'num_rows': 15,
+                                'row_offset': 0
+                            }
                         };
 
-                    deferred.resolve( QueryStore.GetCountByQuery('accounts', query, segment).then(function(data){ return data; }));
+                        deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
+
+                    } else {
+                        query = { 
+                            'free_form_text_search': '',
+                            'account_restriction': segment.account_restriction,
+                            'contact_restriction': segment.contact_restriction,
+                            'preexisting_segment_name': segment.name,
+                            'page_filter': {
+                                'num_rows': 15,
+                                'row_offset': 0
+                            }
+                        };
+
+                        deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
+
+                    };
+                        
                     return deferred.promise;
                 }],
                 CountWithoutSalesForce: ['$q', 'QueryStore', function($q, QueryStore){
 
                     var deferred = $q.defer(),
-                        restriction = QueryStore.getRestriction(),
+                        accountRestriction = QueryStore.getAccountRestriction(),
+                        contactRestriction = QueryStore.getContactRestriction(),
                         query = {
                             'free_form_text_search': '',
-                            'frontend_restriction': restriction,
+                            'account_restriction': accountRestriction,
+                            'contact_restriction': contactRestriction,
+                            'restrict_with_sfdcid': false,
                             'page_filter': {
                                 'num_rows': 1000000,
                                 'row_offset': 0
-                            },
-                            'restrict_with_sfdcid': false
+                            }
                         };
 
                     QueryStore.GetCountByQuery('accounts', query).then(function(response){ 
