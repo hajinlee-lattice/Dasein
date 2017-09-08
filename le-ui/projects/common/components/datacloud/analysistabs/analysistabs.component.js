@@ -15,23 +15,27 @@ angular.module('common.datacloud.analysistabs', [
         segment: $stateParams.segment,
         section: $stateParams.section,
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
-        restriction: QueryStore.getRestriction() || null,
+        accountRestriction: QueryStore.getAccountRestriction() || null,
+        contactRestriction: QueryStore.getContactRestriction() || null,
         counts: QueryStore.getCounts(),
-        accountsCount: 0
+        accountsCount: 0,
+        contactsCount: 0
     });
 
     vm.init = function() {
 
-        vm.counts.accounts.loading = true;
-
         $timeout(function(){
             QueryStore.setResourceTypeCount('accounts', false, vm.accountsCount);
+            QueryStore.setResourceTypeCount('contacts', false, vm.contactsCount);
         }, 2000);
 
         QueryStore.history = [];
 
         QueryStore.GetCountByQuery('accounts').then(function(data){ 
             vm.accountsCount = data;
+        });
+        QueryStore.GetCountByQuery('contacts').then(function(data){ 
+            vm.contactsCount = data;
         });
 
         if(vm.segment === 'Create'){
