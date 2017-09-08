@@ -271,6 +271,12 @@ angular
                     });
                     return deferred.promise;
                 }],
+                Contacts: [function(){
+                    return null;
+                }],
+                ContactsCount: [function(){
+                    return null;
+                }],
             },
             views: {
                 'main@': {
