@@ -73,6 +73,8 @@ angular.module('lp.models.segments', [
 
         $event.preventDefault();
         if ($state.current.name == 'home.segments') {
+            //fixes PLS-4836 (go to tab) but does it break anything else?
+            //$state.go('home.segment.accounts', {segment: segment.name, pageTitle: segment.name}, { reload: true } );
             $state.go('home.segment.explorer.attributes', {segment: segment.name}, { reload: true } );
         } else {
             $state.go('home.model.analysis', {segment: segment.name}, { reload: true } );

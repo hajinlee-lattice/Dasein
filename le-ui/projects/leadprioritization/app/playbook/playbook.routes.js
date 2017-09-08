@@ -177,7 +177,7 @@ angular
                             'account_restriction': accountRestriction,
                             'contact_restriction': contactRestriction,
                             'preexisting_segment_name': segment.name,
-                            'restrict_with_sfdcid': false
+                            'restrict_with_sfdcid': false,
                             'page_filter': {
                                 'num_rows': 15,
                                 'row_offset': 0
