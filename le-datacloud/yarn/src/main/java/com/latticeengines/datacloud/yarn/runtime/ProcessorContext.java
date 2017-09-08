@@ -88,7 +88,7 @@ public class ProcessorContext {
     @Value("${datacloud.yarn.actors.num.threads}")
     private int actorsThreadPool;
 
-    @Value("${datacloud.yarn.fetchonly.num.threads:12}")
+    @Value("${datacloud.yarn.fetchonly.num.threads:16}")
     private int fetchonlyThreadPool;
 
     @Value("${datacloud.yarn.actors.group.size}")
@@ -285,6 +285,10 @@ public class ProcessorContext {
         this.partialMatch = partialMatch;
     }
 
+    public ColumnSelection getColumnSelection() {
+        return columnSelection;
+    }
+
     public void initialize(DataCloudProcessor dataCloudProcessor, DataCloudJobConfiguration jobConfiguration)
             throws Exception {
         this.jobConfiguration = jobConfiguration;
@@ -367,8 +371,14 @@ public class ProcessorContext {
             if (useRemoteDnB) {
                 groupSize = 128;
             } else if (originalInput.getFetchOnly()) {
-                groupSize = 128;
+                groupSize = 100;
                 numThreads = fetchonlyThreadPool;
+                if (columnSelection != null && columnSelection.getColumns().size() > 10000) {
+                    numThreads = Math.max(fetchonlyThreadPool / 2, 4);
+                    log.warn(String.format(
+                            "Since there are too many columns to be fetched (%d), reduce num threads to %d",
+                            columnSelection.getColumns().size(), numThreads));
+                }
             }
         } else {
             if (groupSize == null || groupSize < 1) {

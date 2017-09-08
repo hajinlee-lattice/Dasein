@@ -98,6 +98,13 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         // make a deep copy of original input
         MatchInput matchInput = processorContext.getOriginalInput().configurationDeepCopy();
 
+        // replace column selection
+        if (processorContext.getColumnSelection() != null) {
+            matchInput.setPredefinedSelection(null);
+            matchInput.setUnionSelection(null);
+            matchInput.setCustomSelection(processorContext.getColumnSelection());
+        }
+
         // overwrite fields in match input
         // TODO: many of these copy overs can be eliminated
         matchInput.setRootOperationUid(processorContext.getRootOperationUid());

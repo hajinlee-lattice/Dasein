@@ -18,8 +18,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -88,14 +86,7 @@ public class SqlServerHelper implements DbHelper {
     private DomainCollectService domainCollectService;
 
     private boolean fetchersInitiated = false;
-
-    @PostConstruct
-    private void postConstruct() {
-        buildSourceColumnMapCache();
-        if (enableFetchers) {
-            initExecutors();
-        }
-    }
+    private boolean initialized = false;
 
     private void buildSourceColumnMapCache() {
         tableColumnsCache = CacheBuilder.newBuilder().concurrencyLevel(4).weakKeys()
@@ -117,6 +108,20 @@ public class SqlServerHelper implements DbHelper {
                 });
     }
 
+    private void init() {
+        if (!initialized) {
+            synchronized (this) {
+                if (!initialized) {
+                    buildSourceColumnMapCache();
+                    if (enableFetchers) {
+                        initExecutors();
+                    }
+                    initialized = true;
+                }
+            }
+        }
+    }
+
     @Override
     public boolean accept(String version) {
         return MatchUtils.isValidForRTSBasedMatch(version);
@@ -134,6 +139,7 @@ public class SqlServerHelper implements DbHelper {
     @Override
     public MatchContext fetch(MatchContext matchContext) {
         if (enableFetchers) {
+            init();
             queue.add(matchContext);
             return waitForResult(matchContext.getOutput().getRootOperationUID());
         } else {
@@ -143,6 +149,7 @@ public class SqlServerHelper implements DbHelper {
 
     @Override
     public MatchContext fetchSync(MatchContext context) {
+        init();
         if (context.getDomains().isEmpty() && context.getNameLocations().isEmpty()) {
             log.info("Noting to fetch.");
             context.setResultSet(Collections.emptyList());
@@ -207,6 +214,7 @@ public class SqlServerHelper implements DbHelper {
 
     @Override
     public void fetchIdResult(MatchContext context) {
+        init();
     }
 
     @Override
@@ -217,6 +225,7 @@ public class SqlServerHelper implements DbHelper {
 
         log.info("Enter executeBulk for " + contexts.size() + " match contexts.");
 
+        init();
         List<String> rootUids = enqueue(contexts);
         return waitForResult(rootUids);
     }
@@ -273,6 +282,7 @@ public class SqlServerHelper implements DbHelper {
 
     @Override
     public MatchContext fetchAsync(MatchContext context) {
+        init();
         return context;
     }
 

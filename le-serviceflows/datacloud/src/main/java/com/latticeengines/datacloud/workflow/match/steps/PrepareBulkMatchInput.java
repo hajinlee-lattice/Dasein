@@ -93,8 +93,8 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     private Integer determineNumBlocksForAM(Long count) {
         Integer numBlocks = 1;
-        Integer averageBlockSize = 100_000;
-        while (count >= averageBlockSize * numBlocks && numBlocks < 6) {
+        Integer averageBlockSize = 1_000_000;
+        while (count >= averageBlockSize * numBlocks && numBlocks < maxNumBlocks) {
             numBlocks++;
         }
         return numBlocks;

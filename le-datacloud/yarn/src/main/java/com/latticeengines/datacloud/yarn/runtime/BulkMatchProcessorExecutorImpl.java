@@ -7,18 +7,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.service.impl.MatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 
@@ -68,6 +66,8 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
 
         log.info(String.format("Finished matching %d rows in %.2f minutes.", processorContext.getBlockSize(),
                 (System.currentTimeMillis() - startTime) / 60000.0));
+
+        System.gc();
     }
 
     private void consumeFutures(ProcessorContext processorContext, Collection<Future<MatchContext>> futures) {
