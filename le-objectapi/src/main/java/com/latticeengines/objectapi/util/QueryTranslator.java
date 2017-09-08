@@ -1,11 +1,10 @@
 package com.latticeengines.objectapi.util;
 
-import java.util.Date;
 import java.util.List;
 import java.util.TreeMap;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.query.SubQuery;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,47 +120,23 @@ public class QueryTranslator {
         return restriction;
     }
 
-    private static String generateEntityAlias(BusinessEntity entity) {
-        String alias = String.valueOf(new Date().getTime());
-        return entity.name().concat(alias);
-    }
-
     private static Restriction translateInnerRestriction(FrontEndQuery frontEndQuery,
                                                          BusinessEntity outerEntity,
                                                          Restriction outerRestriction) {
         BusinessEntity innerEntity = null;
-        String joinEntityKey = null;
         switch (outerEntity) {
             case Contact:
                 innerEntity = BusinessEntity.Account;
-                joinEntityKey = InterfaceName.AccountId.name();
                 break;
             case Account:
                 innerEntity = BusinessEntity.Contact;
-                joinEntityKey = InterfaceName.AccountId.name();
                 break;
             default:
                 break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity,frontEndQuery);
         Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction);
-        return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction, joinEntityKey);
-    }
-
-    private static Restriction addSubselectRestriction(BusinessEntity outerEntity,
-                                                       Restriction outerRestriction,
-                                                       BusinessEntity innerEntity,
-                                                       Restriction innerRestriction,
-                                                       String joinEntityKey) {
-        if (innerRestriction != null) {
-            Query innerQuery = Query.builder().from(innerEntity)
-                    .where(innerRestriction)
-                    .select(innerEntity, joinEntityKey).build();
-            SubQuery subQuery = new SubQuery(innerQuery, generateEntityAlias(innerEntity));
-            innerRestriction = Restriction.builder().let(outerEntity, joinEntityKey)
-                    .inCollection(subQuery, joinEntityKey).build();
-        }
-        return joinRestrictions(outerRestriction, innerRestriction);
+        return addExistsRestriction(outerRestriction, innerEntity, innerRestriction);
     }
 
     private static Restriction joinRestrictions(Restriction outerRestriction, Restriction innerRestriction) {
