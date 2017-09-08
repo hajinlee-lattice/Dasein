@@ -10,14 +10,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -31,7 +29,9 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestNGBase;
 import com.latticeengines.objectapi.service.EntityQueryService;
@@ -212,14 +212,14 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         RatingRule rule = new RatingRule();
 
         Map<String, Restriction> ruleA = new HashMap<>();
-        ruleA.put(RatingRule.ACCOUNT_RULE,
+        ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("b", "g").build());
-        ruleA.put(RatingRule.CONTACT_RULE,
+        ruleA.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
                 Restriction.builder().let(BusinessEntity.Contact, "Title").in("a", "n").build());
         rule.getBucketToRuleMap().put(RuleBucketName.A.getName(), ruleA);
 
         Map<String, Restriction> ruleC = new HashMap<>();
-        ruleC.put(RatingRule.ACCOUNT_RULE,
+        ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("h", "n").build());
         rule.getBucketToRuleMap().put(RuleBucketName.C.getName(), ruleC);
 

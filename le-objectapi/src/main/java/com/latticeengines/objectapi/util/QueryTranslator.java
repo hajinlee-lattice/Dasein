@@ -3,8 +3,6 @@ package com.latticeengines.objectapi.util;
 import java.util.List;
 import java.util.TreeMap;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +21,7 @@ import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
@@ -120,29 +119,27 @@ public class QueryTranslator {
         return restriction;
     }
 
-    private static Restriction translateInnerRestriction(FrontEndQuery frontEndQuery,
-                                                         BusinessEntity outerEntity,
-                                                         Restriction outerRestriction) {
+    private static Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
+            Restriction outerRestriction) {
         BusinessEntity innerEntity = null;
         switch (outerEntity) {
-            case Contact:
-                innerEntity = BusinessEntity.Account;
-                break;
-            case Account:
-                innerEntity = BusinessEntity.Contact;
-                break;
-            default:
-                break;
+        case Contact:
+            innerEntity = BusinessEntity.Account;
+            break;
+        case Account:
+            innerEntity = BusinessEntity.Contact;
+            break;
+        default:
+            break;
         }
-        FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity,frontEndQuery);
+        FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
         Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction);
         return addExistsRestriction(outerRestriction, innerEntity, innerRestriction);
     }
 
     private static Restriction joinRestrictions(Restriction outerRestriction, Restriction innerRestriction) {
-        return (innerRestriction == null) ?
-                outerRestriction :
-                Restriction.builder().and(outerRestriction, innerRestriction).build();
+        return (innerRestriction == null) ? outerRestriction
+                : Restriction.builder().and(outerRestriction, innerRestriction).build();
     }
 
     private static Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction) {
@@ -183,7 +180,7 @@ public class QueryTranslator {
     }
 
     private static Restriction addExistsRestriction(Restriction outerRestriction, BusinessEntity innerEntity,
-                                                    Restriction innerRestriction) {
+            Restriction innerRestriction) {
         Restriction existsRestriction = null;
         if (innerRestriction != null) {
             existsRestriction = Restriction.builder().exists(innerEntity).that(innerRestriction).build();
@@ -192,15 +189,15 @@ public class QueryTranslator {
     }
 
     public static CaseLookup translateRatingRule(BusinessEntity entity, RatingRule ratingRule, String alias) {
-        //TODO: only support ACCOUNT_RULE for now
+        // TODO: only support ACCOUNT_RULE for now
         TreeMap<String, Restriction> cases = new TreeMap<>();
         ratingRule.getBucketToRuleMap().forEach((key, val) -> {
             FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-            frontEndRestriction.setRestriction(val.get(RatingRule.ACCOUNT_RULE));
+            frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
             Restriction accountRestriction = translateFrontEndRestriction(frontEndRestriction);
 
             frontEndRestriction = new FrontEndRestriction();
-            frontEndRestriction.setRestriction(val.get(RatingRule.CONTACT_RULE));
+            frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.CONTACT_RESTRICTION));
             Restriction contactRestriction = translateFrontEndRestriction(frontEndRestriction);
 
             BusinessEntity innerEntity;
@@ -222,11 +219,14 @@ public class QueryTranslator {
         return new CaseLookup(cases, ratingRule.getDefaultBucketName(), alias);
     }
 
-    private static CaseLookup parseRatingLookup(BusinessEntity entity, AttributeLookup lookup, List<RatingModel> models) {
+    private static CaseLookup parseRatingLookup(BusinessEntity entity, AttributeLookup lookup,
+            List<RatingModel> models) {
         if (models == null) {
-            throw new RuntimeException("You specified a rating lookup " + lookup + " but no rating models, cannot parse the lookup.");
+            throw new RuntimeException(
+                    "You specified a rating lookup " + lookup + " but no rating models, cannot parse the lookup.");
         }
-        RatingModel model = models.stream().filter(m -> lookup.getAttribute().equalsIgnoreCase(m.getId())).findFirst().orElse(null);
+        RatingModel model = models.stream().filter(m -> lookup.getAttribute().equalsIgnoreCase(m.getId())).findFirst()
+                .orElse(null);
         if (model != null) {
             if (models.get(0) instanceof RuleBasedModel) {
                 RatingRule ratingRule = ((RuleBasedModel) models.get(0)).getRatingRule();
