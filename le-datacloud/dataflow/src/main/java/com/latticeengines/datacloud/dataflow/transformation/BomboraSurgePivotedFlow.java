@@ -40,12 +40,13 @@ public class BomboraSurgePivotedFlow extends ConfigurableFlowBase<BomboraSurgeCo
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);
         Map<Range<Integer>, String> intentMap = FileParser.parseBomboraIntent();
-        Node bomburaSurge = addSource(parameters.getBaseTables().get(0));
-        bomburaSurge = bomburaSurge.groupByAndLimit(new FieldList(groupByFields), 1);
-        bomburaSurge = addIntent(bomburaSurge, intentMap);
+        Node bomboraSurge = addSource(parameters.getBaseTables().get(0));
+        bomboraSurge = bomboraSurge.groupByAndLimit(new FieldList(groupByFields), 1);
+        bomboraSurge = bomboraSurge.checkpoint();
+        bomboraSurge = addIntent(bomboraSurge, intentMap);
 
         List<SourceColumn> sourceColumns = parameters.getColumns();
-        Node encoded = BitEncodeUtils.encode(bomburaSurge, groupByFieldsForEncode, sourceColumns);
+        Node encoded = BitEncodeUtils.encode(bomboraSurge, groupByFieldsForEncode, sourceColumns);
         return encoded;
     }
 
