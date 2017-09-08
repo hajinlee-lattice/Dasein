@@ -1,13 +1,15 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.app.exposed.service.impl;
 
 import java.util.Date;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.app.exposed.service.DataCloudService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReportType;
@@ -15,7 +17,6 @@ import com.latticeengines.domain.exposed.datacloud.customer.IncorrectLookupRepro
 import com.latticeengines.domain.exposed.datacloud.customer.IncorrectMatchedAttributeReproduceDetail;
 import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
-import com.latticeengines.pls.service.DataCloudService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCustomerReportProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -23,8 +24,14 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class DataCloudServiceImpl implements DataCloudService {
 
     private static final Logger log = LoggerFactory.getLogger(DataCloudServiceImpl.class);
-    @Autowired
-    private MatchCustomerReportProxy matchCustomerReportProxy;
+
+    private final MatchCustomerReportProxy matchCustomerReportProxy;
+
+    @Inject
+    public DataCloudServiceImpl(MatchCustomerReportProxy matchCustomerReportProxy) {
+        this.matchCustomerReportProxy = matchCustomerReportProxy;
+    }
+
     @Override
     public CustomerReport reportIncorrectLookup(IncorrectLookupReportRequest reportRequest) {
         log.info("Received customer report \n" + JsonUtils.pprint(reportRequest));
