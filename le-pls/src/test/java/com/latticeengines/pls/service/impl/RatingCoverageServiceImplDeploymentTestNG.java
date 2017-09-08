@@ -94,8 +94,9 @@ public class RatingCoverageServiceImplDeploymentTestNG extends PlsDeploymentTest
         Assert.assertEquals(response.getRatingEngineModelIdCoverageMap().size(), ratingEngineModelIds.size());
 
         for (RatingModelIdPair ratingModelId : ratingEngineModelIds) {
-            Assert.assertTrue(response.getRatingEngineModelIdCoverageMap().containsKey(ratingModelId));
-            Assert.assertNotNull(response.getRatingEngineModelIdCoverageMap().get(ratingModelId));
+            Assert.assertTrue(
+                    response.getRatingEngineModelIdCoverageMap().containsKey(ratingModelId.getRatingModelId()));
+            Assert.assertNotNull(response.getRatingEngineModelIdCoverageMap().get(ratingModelId.getRatingModelId()));
         }
     }
 
@@ -118,8 +119,9 @@ public class RatingCoverageServiceImplDeploymentTestNG extends PlsDeploymentTest
         Assert.assertEquals(response.getSegmentIdModelRulesCoverageMap().size(), segmentIdModelRules.size());
 
         for (SegmentIdAndModelRulesPair segmentIdModelPair : segmentIdModelRules) {
-            Assert.assertTrue(response.getSegmentIdModelRulesCoverageMap().containsKey(segmentIdModelPair));
-            Assert.assertNotNull(response.getSegmentIdModelRulesCoverageMap().get(segmentIdModelPair));
+            Assert.assertTrue(
+                    response.getSegmentIdModelRulesCoverageMap().containsKey(segmentIdModelPair.getSegmentId()));
+            Assert.assertNotNull(response.getSegmentIdModelRulesCoverageMap().get(segmentIdModelPair.getSegmentId()));
         }
     }
 }
