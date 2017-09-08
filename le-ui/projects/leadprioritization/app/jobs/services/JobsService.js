@@ -322,7 +322,7 @@ angular
         if (job.steps) {
             for (var i = 0; i < job.steps.length; i++) {
                 if (job.steps[i].stepStatus === "Failed" || job.steps[i].stepStatus === "Cancelled") {
-                    return job.steps[i].displayName;
+                    return job.steps[i].name;
                 }
             }
         }
@@ -339,7 +339,7 @@ angular
         }
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus === "Running") {
-                return job.steps[i].displayName;
+                return job.steps[i].name;
             }
         }
         return null;
@@ -353,7 +353,7 @@ angular
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus === "Completed") {
-                var stepCompleted = job.steps[i].displayName;
+                var stepCompleted = job.steps[i].name;
 
                 if ((stepCompleted === "generate_insights" || stepCompleted === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     numStepsInGroup.score_training_set += 1;
