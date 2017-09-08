@@ -126,12 +126,10 @@ angular
                                 }
                             });
                         }
-                        $scope.isStateName = function() {
-                            var state_names = (arguments ? Array.from(arguments) : []);
-                            if(state_names.indexOf($state.current.name) !== -1) {
-                                return true;
-                            }
-                            return false; 
+                        $scope.state = $state;
+                        $scope.isStateName = function(state_names) {
+                            var state_names = state_names || [];
+                            return state_names.indexOf($state.current.name) !== -1; 
                         }
                     },
                     templateUrl: 'app/navigation/sidebar/RootView.html'
