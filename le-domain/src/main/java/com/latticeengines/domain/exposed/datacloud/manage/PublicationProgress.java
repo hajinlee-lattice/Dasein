@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestin
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "PublicationProgress")
-@FilterDef(name = "hdfsPodFilter", parameters = {@ParamDef(name="hdfsPod", type="string")})
+@FilterDef(name = "hdfsPodFilter", parameters = { @ParamDef(name = "hdfsPod", type = "string") })
 @Filter(name = "hdfsPodFilter", condition = "HdfsPod = :hdfsPod")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -41,7 +41,7 @@ public class PublicationProgress implements Progress {
     @Column(name = "PID", nullable = false)
     private Long pid;
 
-    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
+    @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_Publication", nullable = false)
     private Publication publication;
 
@@ -106,7 +106,7 @@ public class PublicationProgress implements Progress {
 
     @JsonProperty("PublicationName")
     private String getPublicationName() {
-        return publication == null ? null: publication.getPublicationName();
+        return publication == null ? null : publication.getPublicationName();
     }
 
     @JsonProperty("SourceVersion")

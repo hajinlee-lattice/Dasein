@@ -42,7 +42,7 @@ public class DataRule implements HasName, HasPid, Serializable, GraphNode {
     private Long pid;
 
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
+    @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_TABLE_ID", nullable = false)
     private Table table;
 

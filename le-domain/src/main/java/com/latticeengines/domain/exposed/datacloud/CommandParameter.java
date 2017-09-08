@@ -27,7 +27,7 @@ public class CommandParameter implements HasPid {
     @Column(name = "MatchFramework_CommandParameter_ID", unique = true, nullable = false)
     private Long pid;
 
-    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
+    @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "Command_ID", nullable = false)
     private Commands command;
 

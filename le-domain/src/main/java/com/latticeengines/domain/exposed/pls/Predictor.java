@@ -129,7 +129,7 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
     }
 
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
+    @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_MODELSUMMARY_ID", nullable = false)
     public ModelSummary getModelSummary() {
         return modelSummary;
@@ -188,8 +188,8 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
     public int compareTo(Predictor predictor) {
         // descending order
         return ObjectUtils.compare(
-                predictor != null && predictor.getUncertaintyCoefficient() != null ? predictor
-                        .getUncertaintyCoefficient() : null,
+                predictor != null && predictor.getUncertaintyCoefficient() != null
+                        ? predictor.getUncertaintyCoefficient() : null,
                 uncertaintyCoefficient != null ? uncertaintyCoefficient : null);
     }
 
