@@ -57,7 +57,7 @@ public class VdbMetadataUtils {
         if (vdbTable == null) {
             valid = false;
         } else {
-            HashSet<String> attrNames = new HashSet<>();
+            Set<String> attrNames = new HashSet<>();
             for (Attribute attribute : vdbTable.getAttributes()) {
                 if (attrNames.contains(attribute.getName().toLowerCase())) {
                     log.error(String.format("Table already have attribute with same name %s (case insensitive)",
