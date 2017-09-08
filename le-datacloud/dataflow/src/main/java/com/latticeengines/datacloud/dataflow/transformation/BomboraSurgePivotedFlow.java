@@ -41,8 +41,8 @@ public class BomboraSurgePivotedFlow extends ConfigurableFlowBase<BomboraSurgeCo
         config = getTransformerConfig(parameters);
         Map<Range<Integer>, String> intentMap = FileParser.parseBomboraIntent();
         Node bomboraSurge = addSource(parameters.getBaseTables().get(0));
-        bomboraSurge = bomboraSurge.groupByAndLimit(new FieldList(groupByFields), 1);
-        bomboraSurge = bomboraSurge.checkpoint();
+        //bomboraSurge = bomboraSurge.groupByAndLimit(new FieldList(groupByFields), 1);
+        //bomboraSurge = bomboraSurge.checkpoint();
         bomboraSurge = addIntent(bomboraSurge, intentMap);
 
         List<SourceColumn> sourceColumns = parameters.getColumns();
