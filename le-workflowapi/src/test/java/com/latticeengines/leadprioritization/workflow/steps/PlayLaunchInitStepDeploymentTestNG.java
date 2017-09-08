@@ -220,8 +220,10 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         play.setName(playId);
         RatingEngine ratingEngine = new RatingEngine();
         MetadataSegment segment = new MetadataSegment();
-        Restriction restriction = JsonUtils.deserialize(restrictionJson, Restriction.class);
-        segment.setAccountRestriction(restriction);
+        Restriction accountRestriction = JsonUtils.deserialize(accountRestrictionJson, Restriction.class);
+        Restriction contactRestriction = JsonUtils.deserialize(contactRestrictionJson, Restriction.class);
+        segment.setAccountRestriction(accountRestriction);
+        segment.setContactRestriction(contactRestriction);
 
         ratingEngine.setSegment(segment);
         Set<RatingModel> ratingModels = new HashSet<>();
@@ -251,7 +253,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         return new DataPage(dataList);
     }
 
-    String restrictionJson = //
+    String accountRestrictionJson = //
             "{ " //
                     + "      \"logicalRestriction\": { " //
                     + "        \"operator\": \"AND\", " //
@@ -288,34 +290,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "                      \"Id\": 562 " //
                     + "                    }, " //
                     + "                    \"attr\": \"Account.LDC_State\" " //
-                    + "                  } " //
-                    + "                }, " //
-                    + "                { " //
-                    + "                  \"bucketRestriction\": { " //
-                    + "                    \"bkt\": { " //
-                    + "                      \"Lbl\": \"0 - 1\", " //
-                    + "                      \"Cnt\": 99983, " //
-                    + "                      \"Id\": 2, " //
-                    + "                      \"Rng\": [ " //
-                    + "                        0, " //
-                    + "                        1 " //
-                    + "                      ] " //
-                    + "                    }, " //
-                    + "                    \"attr\": \"Account.PD_DC_FEATURETERMSELLTICKETS_0E0936B53D\" " //
-                    + "                  } " //
-                    + "                }, " //
-                    + "                { " //
-                    + "                  \"bucketRestriction\": { " //
-                    + "                    \"bkt\": { " //
-                    + "                      \"Lbl\": \"0 - 10\", " //
-                    + "                      \"Cnt\": 98353, " //
-                    + "                      \"Id\": 2, " //
-                    + "                      \"Rng\": [ " //
-                    + "                        0, " //
-                    + "                        10 " //
-                    + "                      ] " //
-                    + "                    }, " //
-                    + "                    \"attr\": \"Account.ACCT_I_RANK_PCTCHANGE_6MONTH_470ECBCC2A\" " //
                     + "                  } " //
                     + "                }, " //
                     + "                { " //
@@ -374,11 +348,15 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "    } " //
                     + "} ";
 
+    String contactRestrictionJson = //
+            "{ " //
+                    + "      \"logicalRestriction\": {}} ";
+
     String ratingRuleJson = //
             " { " //
                     + "   \"bucketToRuleMap\": { " //
                     + "     \"A-\": { " //
-                    + "       \"accountRule\": { " //
+                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
                     + "         \"concreteRestriction\": { " //
                     + "           \"negate\": false, " //
                     + "           \"lhs\": { " //
@@ -398,13 +376,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"A\": { " //
-                    + "       \"contactRule\": { " //
+                    + "       \"" + RatingRule.CONTACT_RULE + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
                     + "         } " //
                     + "       }, " //
-                    + "       \"accountRule\": { " //
+                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
@@ -412,13 +390,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"B\": { " //
-                    + "       \"contactRule\": { " //
+                    + "       \"" + RatingRule.CONTACT_RULE + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
                     + "         } " //
                     + "       }, " //
-                    + "       \"accountRule\": { " //
+                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
@@ -426,7 +404,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"C\": { " //
-                    + "       \"accountRule\": { " //
+                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
                     + "         \"concreteRestriction\": { " //
                     + "           \"negate\": false, " //
                     + "           \"lhs\": { " //
@@ -446,13 +424,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"D\": { " //
-                    + "       \"contactRule\": { " //
+                    + "       \"" + RatingRule.CONTACT_RULE + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
                     + "         } " //
                     + "       }, " //
-                    + "       \"accountRule\": { " //
+                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
                     + "         \"concreteRestriction\": { " //
                     + "           \"negate\": false, " //
                     + "           \"lhs\": { " //
@@ -472,13 +450,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"F\": { " //
-                    + "       \"contactRule\": { " //
+                    + "       \"" + RatingRule.CONTACT_RULE + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
                     + "         } " //
                     + "       }, " //
-                    + "       \"accountRule\": { " //
+                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
