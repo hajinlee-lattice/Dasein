@@ -64,7 +64,7 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     private Date updated;
 
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     protected RatingEngine ratingEngine;

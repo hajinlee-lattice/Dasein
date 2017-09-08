@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -34,7 +35,6 @@ import com.latticeengines.domain.exposed.dante.multitenant.TalkingPoint;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -47,6 +47,8 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
 
     public static final String PLAY_NAME_PREFIX = "play";
     public static final String PLAY_NAME_FORMAT = "%s__%s";
+    public static final String DEFAULT_NAME_PATTERN = "PLAY -- %s";
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     public Play() {
     }
@@ -69,21 +71,14 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     @Column(name = "DESCRIPTION", length = 8192, nullable = true)
     private String description;
 
-    @JsonProperty("segment")
-    @Column(name = "SEGMENT_NAME", nullable = true)
-    private String segmentName;
-
-    @JsonIgnore
+    @JsonProperty("ratings")
     @Transient
-    private MetadataSegment segment;
-
-    @JsonProperty("rating")
-    @Transient
-    private RatingObject rating;
+    private List<RatingBucketCoverage> ratings;
 
     @JsonProperty("ratingEngine")
-    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private RatingEngine ratingEngine;
 
     @JsonProperty("launchHistory")
@@ -163,39 +158,12 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
         this.description = description;
     }
 
-    public String getSegmentName() {
-        return segmentName;
-    }
-
-    public void setSegmentName(String segmentName) {
-        this.segmentName = segmentName;
-    }
-
-    public MetadataSegment getSegment() {
-        return segment;
-    }
-
-    public void setSegment(MetadataSegment segment) {
-        this.segment = segment;
-        if (segment != null) {
-            setSegmentName(segment.getName());
-        }
-    }
-
     public RatingEngine getRatingEngine() {
         return ratingEngine;
     }
 
     public void setRatingEngine(RatingEngine ratingEngine) {
         this.ratingEngine = ratingEngine;
-    }
-
-    public RatingObject getRating() {
-        return rating;
-    }
-
-    public void setRating(RatingObject rating) {
-        this.rating = rating;
     }
 
     public List<TalkingPoint> getTalkingPoints() {
@@ -277,6 +245,14 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
 
     public void setLastTalkingPointPublishTime(Date lastTalkingPointPublishTime) {
         this.lastTalkingPointPublishTime = lastTalkingPointPublishTime;
+    }
+
+    public List<RatingBucketCoverage> getRatings() {
+        return this.ratings;
+    }
+
+    public void setRatings(List<RatingBucketCoverage> ratings) {
+        this.ratings = ratings;
     }
 
     @Override

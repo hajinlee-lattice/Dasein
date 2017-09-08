@@ -1,5 +1,6 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -12,8 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.pls.dao.PlayDao;
 import com.latticeengines.pls.entitymanager.PlayEntityMgr;
+import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 
 @Component("playEntityMgr")
 public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEntityMgr {
@@ -22,6 +25,9 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
 
     @Autowired
     private PlayDao playDao;
+
+    @Autowired
+    private RatingEngineEntityMgr ratingEngineEntityMgr;
 
     @Override
     public BaseDao<Play> getDao() {
@@ -32,7 +38,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
     @Transactional(propagation = Propagation.REQUIRED)
     public Play createOrUpdatePlay(Play play) {
         if (play.getName() == null) {
-            play.setName(play.generateNameStr());
+            createNewPlay(play);
             playDao.create(play);
             return play;
         } else {
@@ -48,7 +54,22 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
                 return retrievedPlay;
             }
         }
+    }
 
+    private void createNewPlay(Play play) {
+        if (play.getRatingEngine() != null) {
+            play.setRatingEngine(findRatingEngine(play));
+        }
+        play.setName(play.generateNameStr());
+        play.setDisplayName(String.format(Play.DEFAULT_NAME_PATTERN, Play.DATE_FORMAT.format(new Date())));
+    }
+
+    private RatingEngine findRatingEngine(Play play) {
+        String ratingEngineId = play.getRatingEngine().getId();
+        if (ratingEngineId == null) {
+            throw new NullPointerException("Rating Engine Id cannot be null.");
+        }
+        return ratingEngineEntityMgr.findById(ratingEngineId);
     }
 
     private void updateExistingPlay(Play existingPlay, Play play) {
@@ -58,14 +79,11 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
         if (play.getDescription() != null) {
             existingPlay.setDescription(play.getDescription());
         }
-        if (play.getSegmentName() != null) {
-            existingPlay.setSegmentName(play.getSegmentName());
-        }
-        if (play.getSegment() != null) {
-            existingPlay.setSegment(play.getSegment());
-        }
         if (play.getExcludeItemsWithoutSalesforceId() != null) {
             existingPlay.setExcludeItemsWithoutSalesforceId(play.getExcludeItemsWithoutSalesforceId());
+        }
+        if (play.getRatingEngine() != null) {
+            play.setRatingEngine(findRatingEngine(play));
         }
     }
 

@@ -18,12 +18,18 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DanteAttribute;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
-import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
+import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.metadata.service.SegmentService;
+import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -39,12 +45,39 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static Play play;
 
     @Autowired
+    private SegmentService segmentService;
+
+    private RatingEngine ratingEngine1;
+    private MetadataSegment segment;
+
+    @Autowired
     private PlayService playService;
+
+    @Autowired
+    private RatingEngineEntityMgr ratingEngineEntityMgr;
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
         MultiTenantContext.setTenant(mainTestTenant);
+        segment = new MetadataSegment();
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction());
+        segment.setDisplayName(SEGMENT_NAME);
+        MetadataSegment createdSegment = segmentService
+                .createOrUpdateSegment(CustomerSpace.parse(mainTestTenant.getId()).toString(), segment);
+        MetadataSegment retrievedSegment = segmentService
+                .findByName(CustomerSpace.parse(mainTestTenant.getId()).toString(), createdSegment.getName());
+        Assert.assertNotNull(retrievedSegment);
+
+        ratingEngine1 = new RatingEngine();
+        ratingEngine1.setSegment(retrievedSegment);
+        ratingEngine1.setCreatedBy(CREATED_BY);
+        ratingEngine1.setType(RatingEngineType.RULE_BASED);
+        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine1,
+                mainTestTenant.getId());
+        Assert.assertNotNull(createdRatingEngine);
+        ratingEngine1.setId(createdRatingEngine.getId());
+
         play = createDefaultPlay();
         playService.createOrUpdate(play, mainTestTenant.getId());
         switchToExternalUser();
@@ -195,7 +228,6 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
                 null, String.class);
     }
 
-    @SuppressWarnings({ "unchecked" })
     @Test(groups = { "deployment" }, dependsOnMethods = { "testPreviewAndPublish" })
     public void testDantePreviewResources() {
         String raw = restTemplate.getForObject( //
@@ -225,12 +257,11 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private Play createDefaultPlay() {
         Play play = new Play();
-        MetadataSegment segment = new MetadataSegment();
-        segment.setDisplayName(SEGMENT_NAME);
         play.setDisplayName(PLAY_DISPLAY_NAME);
-        play.setSegment(segment);
-        play.setSegmentName(SEGMENT_NAME);
         play.setCreatedBy(CREATED_BY);
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setId(ratingEngine1.getId());
+        play.setRatingEngine(ratingEngine);
         return play;
     }
 

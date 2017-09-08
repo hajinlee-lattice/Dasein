@@ -1,11 +1,15 @@
 package com.latticeengines.domain.exposed.pls;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RatingBucketCoverage {
-    private String bucket;
 
+    @JsonProperty("bucket")
+    private String bucket;
+    @JsonProperty("count")
     private Long count;
 
     public String getBucket() {
@@ -22,6 +26,11 @@ public class RatingBucketCoverage {
 
     public void setCount(Long count) {
         this.count = count;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

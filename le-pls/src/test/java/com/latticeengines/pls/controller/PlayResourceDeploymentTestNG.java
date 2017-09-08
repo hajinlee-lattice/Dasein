@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -16,29 +17,62 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.metadata.service.SegmentService;
+import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final String PLAY_DISPLAY_NAME = "play hard";
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
     private Play play;
     private String name;
     private PlayLaunch playLaunch;
 
+    private Tenant tenant;
+
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
+    @Autowired
+    private SegmentService segmentService;
+
+    private RatingEngine ratingEngine1;
+    private MetadataSegment segment;
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
+
+    @Autowired
+    private RatingEngineEntityMgr ratingEngineEntityMgr;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
-        mainTestTenant = testBed.getMainTestTenant();
+        tenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+
+        segment = new MetadataSegment();
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction());
+        segment.setDisplayName(SEGMENT_NAME);
+        MetadataSegment createdSegment = segmentService
+                .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
+        MetadataSegment retrievedSegment = segmentService.findByName(CustomerSpace.parse(tenant.getId()).toString(),
+                createdSegment.getName());
+        Assert.assertNotNull(retrievedSegment);
+
+        ratingEngine1 = new RatingEngine();
+        ratingEngine1.setSegment(retrievedSegment);
+        ratingEngine1.setCreatedBy(CREATED_BY);
+        ratingEngine1.setType(RatingEngineType.RULE_BASED);
+        RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine1,
+                tenant.getId());
+        Assert.assertNotNull(createdRatingEngine);
+        ratingEngine1.setId(createdRatingEngine.getId());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -91,7 +125,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(launchList);
         Assert.assertEquals(launchList.size(), 0);
 
-        internalResourceRestApiProxy.updatePlayLaunch(CustomerSpace.parse(mainTestTenant.getId()), name,
+        internalResourceRestApiProxy.updatePlayLaunch(CustomerSpace.parse(tenant.getId()), name,
                 playLaunch.getLaunchId(), LaunchState.Launched);
 
         launchList = (List) restTemplate.getForObject(getRestAPIHostPort() + //
@@ -135,8 +169,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getMostRecentLaunch());
         // TODO will change to NotNull after integration with RatingEngine is
         // fully done
-        Assert.assertNull(retrievedFullPlay.getLaunchHistory().getNewAccountsNum());
-        Assert.assertNull(retrievedFullPlay.getLaunchHistory().getNewContactsNum());
+        // Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getNewAccountsNum());
+        // Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getNewContactsNum());
         System.out.println("retrievedPlayOverview is " + retrievedFullPlay);
 
         List<Play> retrievedFullPlayList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play", List.class);
@@ -195,12 +229,10 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private Play createDefaultPlay() {
         Play play = new Play();
-        MetadataSegment segment = new MetadataSegment();
-        segment.setDisplayName(SEGMENT_NAME);
-        play.setDisplayName(PLAY_DISPLAY_NAME);
-        play.setSegment(segment);
-        play.setSegmentName(SEGMENT_NAME);
         play.setCreatedBy(CREATED_BY);
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setId(ratingEngine1.getId());
+        play.setRatingEngine(ratingEngine);
         return play;
     }
 
@@ -229,7 +261,5 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private void assertPlay(Play play) {
         Assert.assertNotNull(play);
         Assert.assertEquals(play.getName(), name);
-        Assert.assertEquals(play.getDisplayName(), PLAY_DISPLAY_NAME);
-        Assert.assertEquals(play.getSegmentName(), SEGMENT_NAME);
     }
 }

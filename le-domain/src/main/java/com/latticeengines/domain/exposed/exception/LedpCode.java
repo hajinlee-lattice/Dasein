@@ -259,7 +259,7 @@ public enum LedpCode {
     LEDP_18146("Play Launch not found for {0}"), //
     LEDP_18147("User {0} do not have access for tenant {1}"), //
     LEDP_18148("Your file has {0} million rows. Please reduce number of rows to below 1 million."), //
-    LEDP_18149("Play {0} cannot be launched since it does not have segment specified."), //
+    LEDP_18149("Play {0} cannot be launched since it does not have Rating Engine specified."), //
     LEDP_18150("Cannot get tenant configuration."), //
     LEDP_18151("Play not found for {0}."), //
     LEDP_18152("Failed to submit a customer report on matching issue."), //

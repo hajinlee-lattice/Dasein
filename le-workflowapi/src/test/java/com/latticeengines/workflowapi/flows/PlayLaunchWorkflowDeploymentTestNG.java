@@ -113,8 +113,6 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
     private Play createTestPlay() {
         Play play = new Play();
         play.setDisplayName("WorkFlowTestPlay");
-        play.setSegment(segment);
-        play.setSegmentName("TestSegment");
         play.setCreatedBy("iamatest");
         play.setTenantId(mainTestTenant.getPid());
         play.setTenant(mainTestTenant);
@@ -136,7 +134,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
         MetadataSegment segment = new MetadataSegment();
         segment.setName("PlayLaunchWorkflowTestSegment");
         segment.setDisplayName("TestSegment");
-        segment.setAccountRestriction(Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").isNull().build());
+        segment.setAccountRestriction(
+                Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").isNull().build());
 
         restTemplate.postForObject(getPLSRestAPIHostPort() + "/pls/datacollection/segments", segment,
                 MetadataSegment.class);

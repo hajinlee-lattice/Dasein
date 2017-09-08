@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
@@ -131,7 +132,17 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             Play play = internalResourceRestApiProxy.findPlayByName(customerSpace, playName);
             playLaunch.setPlay(play);
 
-            String segmentName = play.getSegmentName();
+            RatingEngine ratingEngine = play.getRatingEngine();
+            if (ratingEngine == null) {
+                throw new NullPointerException(
+                        String.format("Rating Engine for play %s cannot be null", play.getName()));
+            }
+            MetadataSegment segment = ratingEngine.getSegment();
+            if (segment == null) {
+                throw new NullPointerException(
+                        String.format("Segment for Rating Engine %s cannot be null", ratingEngine.getId()));
+            }
+            String segmentName = segment.getName();
             log.info(String.format("Processing segment: %s", segmentName));
             FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
             FrontEndQuery contactFrontEndQuery = new FrontEndQuery();

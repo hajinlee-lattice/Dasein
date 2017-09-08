@@ -113,10 +113,9 @@ public class PlayResource {
     }
 
     private void validatePlayBeforeLaunch(Play play) {
-        if (play.getSegmentName() == null) {
+        if (play.getRatingEngine() == null) {
             throw new LedpException(LedpCode.LEDP_18149, new String[] { play.getName() });
         }
-        // TODO in M14, we are going to check Rating as well
     }
 
     @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)

@@ -218,7 +218,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     private Play createPlay(String playId) {
         Play play = new Play();
         play.setName(playId);
-        play.setSegmentName("SegmentName");
         RatingEngine ratingEngine = new RatingEngine();
         MetadataSegment segment = new MetadataSegment();
         Restriction restriction = JsonUtils.deserialize(restrictionJson, Restriction.class);

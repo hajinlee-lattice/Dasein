@@ -29,7 +29,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -116,10 +115,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
             CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RatingModel> ratingModels = new HashSet<>();
-
-    @JsonIgnore
-    @OneToMany(cascade = { CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.LAZY)
-    private Set<Play> plays;
 
     @Override
     public Long getPid() {
@@ -233,14 +228,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         }
         ratingModel.setRatingEngine(this);
         this.ratingModels.add(ratingModel);
-    }
-
-    public void setPlays(Set<Play> plays) {
-        this.plays = plays;
-    }
-
-    public Set<Play> getPlays() {
-        return this.plays;
     }
 
     @Override

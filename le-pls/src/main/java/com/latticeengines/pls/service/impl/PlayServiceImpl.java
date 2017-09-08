@@ -15,8 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.BucketInformation;
-import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.CoverageInfo;
 import com.latticeengines.domain.exposed.pls.LaunchHistory;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -24,7 +22,6 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingObject;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -57,8 +54,7 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public Play createOrUpdate(Play play, String tenantId) {
-        log.info(String.format("Creating play with name: %s, segment name: %s, on tenant %s", play.getName(),
-                play.getSegmentName(), tenantId));
+        log.info(String.format("Creating play with name: %s, on tenant %s", play.getName(), tenantId));
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         play.setTenant(tenant);
         Play retrievedPlay = playEntityMgr.createOrUpdatePlay(play);
@@ -105,62 +101,37 @@ public class PlayServiceImpl implements PlayService {
 
         RatingEngine ratingEngine = play.getRatingEngine();
         if (ratingEngine == null || ratingEngine.getId() == null) {
-            // TODO comment this for now, will enable this after play is fully
-            // integrated with Rating Engine.
-            // throw new NullPointerException(
-            // String.format("Rating Engine for Play %s is not defined.",
-            // ratingEngine.getId()));
-        } else {
-            long accountCount = 0;
-            long contactCount = 0;
-            try {
-                RatingsCountRequest request = new RatingsCountRequest();
-                request.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
-                RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
-                Map<String, CoverageInfo> ratingEngineIdCoverageMap = response.getRatingEngineIdCoverageMap();
-                accountCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount();
-                contactCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount();
-                List<RatingBucketCoverage> bucketCoverageCounts = ratingEngineIdCoverageMap.get(ratingEngine.getId())
-                        .getBucketCoverageCounts();
-                log.info(String.format("For play %s, new account number and contact number are %d and %d, respectively",
-                        play.getName(), accountCount, contactCount));
-            } catch (Exception ex) {
-                // any exception in getting count info should not block
-                // rendering of play listing
-                log.info("Ignoring exception in get cont info", ex);
-            }
-            long mostRecentSucessfulLaunchAccountNum = playLaunch == null ? 0 : playLaunch.getAccountsLaunched();
-            long mostRecentSucessfulLaunchContactNum = playLaunch == null ? 0 : playLaunch.getContactsLaunched();
-            launchHistory.setNewAccountsNum(accountCount - mostRecentSucessfulLaunchAccountNum);
-            launchHistory.setNewContactsNum(contactCount - mostRecentSucessfulLaunchContactNum);
-
+            throw new NullPointerException(
+                    String.format("Rating Engine for Play %s is not defined.", ratingEngine.getId()));
         }
-        // ----------------------------------------------------------------------------------------------
+        try {
+            RatingsCountRequest request = new RatingsCountRequest();
+            request.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
+            RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+            Map<String, CoverageInfo> ratingEngineIdCoverageMap = response.getRatingEngineIdCoverageMap();
+            Long accountCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount() == null ? 0L
+                    : ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount();
+            Long contactCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount() == null ? 0L
+                    : ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount();
+            List<RatingBucketCoverage> ratingBucketCoverage = ratingEngineIdCoverageMap.get(ratingEngine.getId())
+                    .getBucketCoverageCounts();
+            play.setRatings(ratingBucketCoverage);
+            log.info(String.format("For play %s, new account number and contact number are %d and %d, respectively",
+                    play.getName(), accountCount, contactCount));
+            Long mostRecentSucessfulLaunchAccountNum = playLaunch == null ? 0l : playLaunch.getAccountsLaunched();
+            Long mostRecentSucessfulLaunchContactNum = playLaunch == null ? 0l : playLaunch.getContactsLaunched();
+            Long newAccountsNum = mostRecentSucessfulLaunchAccountNum == null ? accountCount
+                    : accountCount - mostRecentSucessfulLaunchAccountNum;
+            Long newContactsNum = mostRecentSucessfulLaunchContactNum == null ? contactCount
+                    : contactCount - mostRecentSucessfulLaunchContactNum;
+            launchHistory.setNewAccountsNum(newAccountsNum);
+            launchHistory.setNewContactsNum(newContactsNum);
+        } catch (Exception ex) {
+            // any exception in getting count info should not block
+            // rendering of play listing
+            log.info("Ignoring exception in get cont info", ex);
+        }
 
-        // ----------------------------------------------------------------------------------------------
-        // TODO in M15, we will get real data for AccountRatingMap
-        // for now, just mock them
-        RatingObject rating = new RatingObject();
-        List<BucketInformation> accountRatingList = new ArrayList<>();
-        BucketInformation aBucket = new BucketInformation();
-        aBucket.setBucket(BucketName.A.name());
-        aBucket.setBucketCount(500);
-        BucketInformation bBucket = new BucketInformation();
-        bBucket.setBucket(BucketName.B.name());
-        bBucket.setBucketCount(500);
-        BucketInformation cBucket = new BucketInformation();
-        cBucket.setBucket(BucketName.C.name());
-        cBucket.setBucketCount(500);
-        BucketInformation dBucket = new BucketInformation();
-        dBucket.setBucket(BucketName.D.name());
-        dBucket.setBucketCount(500);
-        accountRatingList.add(aBucket);
-        accountRatingList.add(bBucket);
-        accountRatingList.add(cBucket);
-        accountRatingList.add(dBucket);
-        rating.setBucketInfoList(accountRatingList);
-        play.setRating(rating);
-        // ----------------------------------------------------------------------------------------------
         return play;
     }
 
