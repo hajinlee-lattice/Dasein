@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
 
     @Override
-    @BeforeClass(groups = {"deployment", "am"})
+    @BeforeClass(groups = { "deployment", "am", "am_all" })
     public void setup() throws Exception {
         namedModelRunEntityNames.add("ModelQualityDeploymentTest-AccountMaster");
         namedModelRunEntityNames.add("ModelQualityDeploymentTest-DerivedColumn");
@@ -35,7 +35,7 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
     }
 
     @Override
-    @AfterClass(groups = {"deployment", "am"})
+    @AfterClass(groups = { "deployment", "am", "am_all" })
     public void tearDown() throws Exception {
         deleteLocalEntities();
         super.tearDown();
@@ -52,7 +52,7 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
         }
     }
 
-    @Test(groups = "deployment", enabled = false, dataProvider = "getAccountMasterLocationCsvFile")
+    @Test(groups = { "am_all" }, enabled = true, dataProvider = "getAccountMasterLocationCsvFile")
     public void runModelAccountMasterLocation(String dataSetName, String csvFile) {
         runModelAccountMaster(dataSetName, csvFile);
     }
