@@ -21,7 +21,6 @@ import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTes
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.domain.exposed.datafabric.CompositeFabricEntity;
 import com.latticeengines.domain.exposed.datafabric.CompositeGraphEntity;
-import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 
 public class TestDynamoGraphEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
@@ -56,8 +55,8 @@ public class TestDynamoGraphEntityMgrTestNG extends DataFabricFunctionalTestNGBa
 
         BaseFabricEntityMgrImpl.Builder builder = new BaseFabricEntityMgrImpl.Builder()
                 .messageService(messageService).dataService(dataService) //
-                .recordType(RECORD_TYPE).topic("TestDynamoEntity") //
-                .scope(TopicScope.ENVIRONMENT_PRIVATE).store("DYNAMO").repository(repo);
+                .recordType(RECORD_TYPE) //
+                .store("DYNAMO").repository(repo);
 
 
         log.info("AccountEntityMgr");

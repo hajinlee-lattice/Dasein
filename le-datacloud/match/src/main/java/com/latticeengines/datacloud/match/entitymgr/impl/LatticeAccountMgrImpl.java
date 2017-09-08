@@ -5,7 +5,6 @@ import com.latticeengines.datafabric.entitymanager.impl.BaseFabricEntityMgrImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
-import com.latticeengines.domain.exposed.datafabric.TopicScope;
 
 public class LatticeAccountMgrImpl extends BaseFabricEntityMgrImpl<LatticeAccount> implements LatticeAccountMgr {
     public LatticeAccountMgrImpl(FabricMessageService messageService, FabricDataService dataService, String version) {
@@ -13,8 +12,6 @@ public class LatticeAccountMgrImpl extends BaseFabricEntityMgrImpl<LatticeAccoun
                 .messageService(messageService) //
                 .dataService(dataService) //
                 .recordType("LatticeAccount" + version) //
-                .topic("LatticeAccount") //
-                .scope(TopicScope.ENVIRONMENT_PRIVATE) //
                 .store(BaseFabricEntityMgrImpl.STORE_DYNAMO) //
                 .enforceRemoteDynamo(true) //
                 .repository("DataCloud"));

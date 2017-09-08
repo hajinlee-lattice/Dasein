@@ -49,7 +49,7 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
         messageService.createTopic(topicToConnect, TopicScope.PRIVATE, 1, 1);
 
         SampleFabricEntityMgr.Builder builder = new SampleFabricEntityMgr.Builder().messageService(messageService)
-                .dataService(dataService).topic(topic).store(store).repository(repository).recordType(recordType);
+                .dataService(dataService).store(store).repository(repository).recordType(recordType);
 
         entityManager = new SampleFabricEntityMgr(builder);
         entityManager.init();

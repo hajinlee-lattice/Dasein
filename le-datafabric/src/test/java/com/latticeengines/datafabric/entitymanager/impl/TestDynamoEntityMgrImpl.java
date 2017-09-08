@@ -10,7 +10,7 @@ class TestDynamoEntityMgrImpl extends BaseFabricEntityMgrImpl<TestDynamoEntity> 
 
     TestDynamoEntityMgrImpl(FabricMessageService messageService, FabricDataService dataService, String repo) {
         super(new BaseFabricEntityMgrImpl.Builder().messageService(messageService).dataService(dataService) //
-                .recordType(RECORD_TYPE).topic("TestDynamoEntity") //
+                .recordType(RECORD_TYPE) //
                 .scope(TopicScope.ENVIRONMENT_PRIVATE).store("DYNAMO").repository(repo));
     }
 
