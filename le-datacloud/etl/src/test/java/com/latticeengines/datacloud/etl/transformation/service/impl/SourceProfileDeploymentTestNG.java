@@ -339,7 +339,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                 List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
                         DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER,
                         DATA_CLOUD_VERSION);
-                String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators" };
+                String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent" };
                 Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));
                 Map<String, Integer> expected = new HashMap<>();    // encAttr -> decAttr count
                 for (SourceAttribute srcAttr : srcAttrs) {
@@ -386,9 +386,37 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                         if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
                             expected.remove(bitDecodeStrategy.getEncodedColumn());
                         }
-                        Assert.assertNotNull(bktAlgo);
-                        BooleanBucket algo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
-                        Assert.assertNotNull(algo);
+                        switch (bitDecodeStrategy.getEncodedColumn()) {
+                        case "HGData_SupplierTechIndicators":
+                        case "BuiltWith_TechIndicators":
+                            Assert.assertNotNull(bktAlgo);
+                            BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
+                            Assert.assertNotNull(boolAlgo);
+                            break;
+                        case "BmbrSurge_Intent":
+                            Assert.assertNotNull(bktAlgo);
+                            CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo,
+                                    CategoricalBucket.class);
+                            Assert.assertNotNull(catAlgo);
+                            Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
+                            Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
+                                    "null,Very Low,Low,Medium,High,Very High");
+                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
+                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
+                            break;
+                        case "BmbrSurge_CompositeScore":
+                            if (bktAlgo == null) {
+                                continue;
+                            }
+                            IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
+                            Assert.assertNotNull(intAlgo);
+                            // log.info((String) attr + ": " + JsonUtils.serialize(intAlgo));
+                            break;
+                        default:
+                            throw new RuntimeException(String.format("Unrecognized encoded attribute %s",
+                                    bitDecodeStrategy.getEncodedColumn()));
+                        }
                     } else { // Flat attributes
                         log.info(record.toString());
                         Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));

@@ -258,7 +258,8 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     for (ProfileParameters.Attribute attr : encAttrMap.get(field.name())) {
                         switch (config.getStage()) {
                         case DataCloudConstants.PROFILE_STAGE_SEGMENT:
-                            if (attr.getAlgo() instanceof BooleanBucket) {
+                            if (attr.getAlgo() instanceof BooleanBucket
+                                    || attr.getAlgo() instanceof CategoricalBucket) {
                                 log.info(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
                                         attr.getAttr()));
                                 amAttrsToEnc.add(attr); // No external attrs needs to decode
