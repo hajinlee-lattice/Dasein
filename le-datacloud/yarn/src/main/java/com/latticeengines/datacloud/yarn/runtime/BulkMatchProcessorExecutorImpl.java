@@ -53,7 +53,6 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
             }
             if (futures.size() >= processorContext.getNumThreads()) {
                 consumeFutures(processorContext, futures);
-                System.gc();
             }
         }
 
@@ -101,7 +100,9 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
             log.info("Processed " + rows + " out of " + processorContext.getBlockSize() + " rows.");
         }
 
+        log.info(String.format("%d out of %d futures are finished.", toDelete.size(), futures.size()));
         futures.removeAll(toDelete);
+        System.gc();
     }
 
 }
