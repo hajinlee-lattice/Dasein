@@ -10,7 +10,7 @@
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="contextPath">/sqoop</Set>
-    <Set name="war"><Property name="jetty.webapps" default="."/>/le-sqoop-3.8.0-SNAPSHOT.war</Set>
+    <Set name="war"><Property name="jetty.webapps" default="."/>/le-sqoop-3.9.0-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->

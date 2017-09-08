@@ -9,9 +9,9 @@
 
     <properties>
         <component-name>microservice</component-name>
-        <le.dataplatform.version>3.8.0-SNAPSHOT</le.dataplatform.version>
-        <le.domain.version>3.8.0-SNAPSHOT</le.domain.version>
-        <le.monitor.version>3.8.0-SNAPSHOT</le.monitor.version>
+        <le.dataplatform.version>3.9.0-SNAPSHOT</le.dataplatform.version>
+        <le.domain.version>3.9.0-SNAPSHOT</le.domain.version>
+        <le.monitor.version>3.9.0-SNAPSHOT</le.monitor.version>
         <jetty.port>8080</jetty.port>
         <jett.stop.port>10980</jett.stop.port>
         <jetty.dir>test</jetty.dir>
@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>3.8.0-SNAPSHOT</version>
+        <version>3.9.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
