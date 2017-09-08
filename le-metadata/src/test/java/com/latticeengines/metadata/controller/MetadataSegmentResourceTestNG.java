@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -73,7 +74,14 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
 
     private void testUpdate() {
         MetadataSegment retrieved = segmentProxy.getMetadataSegmentByName(customerSpace1, METADATA_SEGMENT.getName());
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Alphabet Inc.").build();
+        MetadataSegmentDTO retrievedDTO = segmentProxy.getMetadataSegmentWithPidByName(customerSpace1,
+                METADATA_SEGMENT.getName());
+        Assert.assertNotNull(retrievedDTO.getPrimaryKey());
+        Assert.assertNotNull(retrievedDTO.getMetadataSegment());
+        Assert.assertEquals(retrievedDTO.getMetadataSegment().getDisplayName(), retrieved.getDisplayName());
+        System.out.println("retrievedDTO is " + retrievedDTO);
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Alphabet Inc.")
+                .build();
         retrieved.setAccountRestriction(restriction);
         retrieved.setCreated(null);
         MetadataSegment updated = segmentProxy.createOrUpdateSegment(customerSpace1, retrieved);
@@ -86,7 +94,8 @@ public class MetadataSegmentResourceTestNG extends MetadataFunctionalTestNGBase 
 
     private void testDuplicate() {
         MetadataSegment retrieved = segmentProxy.getMetadataSegmentByName(customerSpace1, METADATA_SEGMENT.getName());
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Alphabet Inc.").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Alphabet Inc.")
+                .build();
         retrieved.setAccountRestriction(restriction);
         retrieved.setName(METADATA_SEGMENT_NAME_2);
 

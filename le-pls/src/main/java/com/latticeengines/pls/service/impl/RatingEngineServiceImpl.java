@@ -13,6 +13,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
@@ -88,8 +89,10 @@ public class RatingEngineServiceImpl implements RatingEngineService {
             throw new NullPointerException("Entity is null when creating a rating engine.");
         }
         if (ratingEngine.getSegment() != null) {
-            MetadataSegment segment = metadataSegmentService.getSegmentByName(ratingEngine.getSegment().getName(),
-                    false);
+            MetadataSegmentDTO segmentDTO = metadataSegmentService
+                    .getSegmentDTOByName(ratingEngine.getSegment().getName(), false);
+            MetadataSegment segment = segmentDTO.getMetadataSegment();
+            segment.setPid(segmentDTO.getPrimaryKey());
             ratingEngine.setSegment(segment);
         }
         return ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenantId);

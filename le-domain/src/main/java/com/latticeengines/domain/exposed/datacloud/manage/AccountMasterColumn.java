@@ -83,7 +83,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     private String approvedUsage;
 
     @Index(name = "IX_GROUPS")
-    @Column(name = "Groups", nullable = false, length = 700)
+    @Column(name = "Groups", nullable = false, length = 250)
     private String groups;
 
     @Column(name = "IsInternalEnrichment", nullable = false)
@@ -355,8 +355,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setDecodeStrategy(getDecodeStrategy());
 
         if (approvedUsages != null) {
-            if (approvedUsages.contains(ApprovedUsage.MODEL)
-                    || approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
+            if (approvedUsages.contains(ApprovedUsage.MODEL) || approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
                     || approvedUsages.contains(ApprovedUsage.MODEL_MODELINSIGHTS)) {
                 metadata.setCanModel(true);
                 if (approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)

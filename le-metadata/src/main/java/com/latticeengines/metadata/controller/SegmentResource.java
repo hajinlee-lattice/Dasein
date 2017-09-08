@@ -2,7 +2,6 @@ package com.latticeengines.metadata.controller;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.metadata.service.SegmentService;
 
@@ -43,6 +44,18 @@ public class SegmentResource {
     public MetadataSegment getSegment(@PathVariable String customerSpace, @PathVariable String segmentName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return segmentService.findByName(customerSpace, segmentName);
+    }
+
+    @RequestMapping(value = "/pid/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get segment with pid by name")
+    public MetadataSegmentDTO getSegmentWithPid(@PathVariable String customerSpace, @PathVariable String segmentName) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        MetadataSegmentDTO metadataSegmentDTO = new MetadataSegmentDTO();
+        MetadataSegment segment = segmentService.findByName(customerSpace, segmentName);
+        metadataSegmentDTO.setMetadataSegment(segment);
+        metadataSegmentDTO.setPrimaryKey(segment.getPid());
+        return metadataSegmentDTO;
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

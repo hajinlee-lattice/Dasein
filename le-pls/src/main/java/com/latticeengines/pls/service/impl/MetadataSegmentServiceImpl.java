@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.service.MetadataSegmentService;
@@ -55,6 +56,16 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     @Override
+    public MetadataSegmentDTO getSegmentDTOByName(String name, boolean shouldTransateForFrontend) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(customerSpace, name);
+        if (shouldTransateForFrontend) {
+            segmentDTO.setMetadataSegment(translateForFrontend(segmentDTO.getMetadataSegment()));
+        }
+        return segmentDTO;
+    }
+
+    @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         translateForBackend(segment);
@@ -76,7 +87,8 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             segment.setContactRestriction(contactFrontEndRestriction.getRestriction());
             segment.setContactFrontEndRestriction(null);
         } catch (Exception e) {
-            log.error("Encountered error translating frontend restriction for segment with name " + segment.getName(), e);
+            log.error("Encountered error translating frontend restriction for segment with name " + segment.getName(),
+                    e);
         }
         return segment;
     }
@@ -102,7 +114,8 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 segment.setMasterSegment(null);
             }
         } catch (Exception e) {
-            log.error("Encountered error translating backend restriction for segment with name  " + segment.getName(), e);
+            log.error("Encountered error translating backend restriction for segment with name  " + segment.getName(),
+                    e);
         }
         return segment;
     }

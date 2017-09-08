@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("segmentProxy")
@@ -27,6 +28,12 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}", //
                 shortenCustomerSpace(customerSpace), segmentName);
         return get("getSegment", url, MetadataSegment.class);
+    }
+
+    public MetadataSegmentDTO getMetadataSegmentWithPidByName(String customerSpace, String segmentName) {
+        String url = constructUrl("/{customerSpace}/segments/pid/{segmentName}", //
+                shortenCustomerSpace(customerSpace), segmentName);
+        return get("getSegmentWithPid", url, MetadataSegmentDTO.class);
     }
 
     @SuppressWarnings("rawtypes")
