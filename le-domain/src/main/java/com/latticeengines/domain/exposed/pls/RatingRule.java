@@ -8,11 +8,12 @@ import java.util.TreeMap;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 
 public class RatingRule {
 
-    public static final String ACCOUNT_RULE = "accountRule";
-    public static final String CONTACT_RULE = "contactRule";
+    public static final String ACCOUNT_RULE = FrontEndQueryConstants.ACCOUNT_RESTRICTION;
+    public static final String CONTACT_RULE = FrontEndQueryConstants.CONTACT_RESTRICTION;
     public static final String DEFAULT_BUCKET_NAME = RuleBucketName.C.getName();
 
     @JsonProperty("bucketToRuleMap")

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -24,39 +23,39 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class FrontEndQuery {
 
-    @JsonProperty("account_restriction")
+    @JsonProperty(FrontEndQueryConstants.ACCOUNT_RESTRICTION)
     private FrontEndRestriction accountRestriction;
 
-    @JsonProperty("contact_restriction")
+    @JsonProperty(FrontEndQueryConstants.CONTACT_RESTRICTION)
     private FrontEndRestriction contactRestriction;
 
-    @JsonProperty("sort")
+    @JsonProperty(FrontEndQueryConstants.SORT)
     private FrontEndSort sort;
 
-    @JsonProperty("page_filter")
+    @JsonProperty(FrontEndQueryConstants.PAGE_FILTER)
     private PageFilter pageFilter;
 
-    @JsonProperty("rating_models")
+    @JsonProperty(FrontEndQueryConstants.RATING_MODELS)
     private List<RatingModel> ratingModels;
 
-    @JsonProperty("free_form_text_search")
+    @JsonProperty(FrontEndQueryConstants.FREE_FORM_TEXT_SEARCH)
     private String freeFormTextSearch;
 
-    @JsonProperty("restrict_without_sfdcid")
+    @JsonProperty(FrontEndQueryConstants.RESTRICT_WITHOUT_SFDCID)
     @ApiModelProperty("Restrict to accounts without Salesforce id.")
     private boolean restrictNullSalesforceId = false;
 
-    @JsonProperty("restrict_with_sfdcid")
+    @JsonProperty(FrontEndQueryConstants.RESTRICT_WITH_SFDCID)
     @ApiModelProperty("Restrict to accounts with Salesforce id.")
     private boolean restrictNotNullSalesforceId = false;
 
-    @JsonProperty("lookups")
+    @JsonProperty(FrontEndQueryConstants.LOOKUPS)
     private List<Lookup> lookups = new ArrayList<>();
 
-    @JsonProperty("main_entity")
+    @JsonProperty(FrontEndQueryConstants.MAIN_ENTITY)
     private BusinessEntity mainEntity;
 
-    @JsonProperty("preexisting_segment_name")
+    @JsonProperty(FrontEndQueryConstants.PREEXISTING_SEGMENT_NAME)
     private String preexistingSegmentName;
 
     public FrontEndRestriction getAccountRestriction() {
