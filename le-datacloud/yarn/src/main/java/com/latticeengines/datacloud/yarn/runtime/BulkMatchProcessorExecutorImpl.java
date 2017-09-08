@@ -53,6 +53,7 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
             }
             if (futures.size() >= processorContext.getNumThreads()) {
                 consumeFutures(processorContext, futures);
+                System.gc();
             }
         }
 
@@ -66,8 +67,6 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
 
         log.info(String.format("Finished matching %d rows in %.2f minutes.", processorContext.getBlockSize(),
                 (System.currentTimeMillis() - startTime) / 60000.0));
-
-        System.gc();
     }
 
     private void consumeFutures(ProcessorContext processorContext, Collection<Future<MatchContext>> futures) {
