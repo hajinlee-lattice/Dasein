@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.app.exposed.service.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -9,18 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.app.exposed.service.DataCloudService;
+import com.latticeengines.app.testframework.AppTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReportType;
 import com.latticeengines.domain.exposed.datacloud.customer.IncorrectMatchedAttributeReproduceDetail;
-import com.latticeengines.domain.exposed.pls.CustomerReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.pls.service.DataCloudService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 
-public class DataCloudServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class DataCloudServiceImplDeploymentTestNG extends AppTestNGBase {
 
     private static String suggestedValue = "test";
     private static String comment = "this is test!";
@@ -30,7 +29,6 @@ public class DataCloudServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
     private static String attribute = "LDC_PrimaryIndustry";
     private static String matchedValue = "Bad Industry";
 
-    CustomerReportRequest customerReportRequest;
     IncorrectLookupReportRequest lookupRequest = new IncorrectLookupReportRequest();
     IncorrectMatchedAttrReportRequest matchedRequest = new IncorrectMatchedAttrReportRequest();
     private CustomerReport lookupCustomerReport;
@@ -38,14 +36,33 @@ public class DataCloudServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Autowired
     private DataCloudService dataCloudService;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenant();
-        mainTestTenant = testBed.getMainTestTenant();
+        mainTestTenant = globalAuthFunctionalTestBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
-        switchToSuperAdmin();
         createCustomerReport(CustomerReportType.LOOkUP);
         createCustomerReport(CustomerReportType.MATCHEDATTRIBUTE);
+    }
+
+    @Test(groups = "deployment", enabled = false)
+    public void testCustomerReport() {
+        MultiTenantContext.setTenant(mainTestTenant);
+        lookupCustomerReport = dataCloudService.findById(lookupCustomerReport.getId());
+        Assert.assertNotNull(lookupCustomerReport);
+        Assert.assertEquals(comment, lookupCustomerReport.getComment());
+        Assert.assertNotNull(lookupCustomerReport.getReproduceDetail());
+        Assert.assertEquals(inputKeys, lookupCustomerReport.getReproduceDetail().getInputKeys());
+
+        matchedCustomerReport = dataCloudService.findById(matchedCustomerReport.getId());
+        Assert.assertNotNull(matchedCustomerReport);
+        Assert.assertEquals(suggestedValue, matchedCustomerReport.getSuggestedValue());
+        Assert.assertNotNull(matchedCustomerReport.getReproduceDetail());
+        Assert.assertTrue(matchedCustomerReport.getReproduceDetail() instanceof IncorrectMatchedAttributeReproduceDetail);
+        IncorrectMatchedAttributeReproduceDetail detail = (IncorrectMatchedAttributeReproduceDetail) matchedCustomerReport.getReproduceDetail();
+        Assert.assertEquals(matchedKeys, detail.getMatchedKeys());
+        Assert.assertEquals(attribute,  detail.getAttribute());
     }
 
     private void createCustomerReport(CustomerReportType type) {
@@ -67,24 +84,5 @@ public class DataCloudServiceImplDeploymentTestNG extends PlsDeploymentTestNGBas
         } else {
             matchedCustomerReport = dataCloudService.reportIncorrectMatchedAttr(matchedRequest);
         }
-    }
-
-    @Test(groups = "deployment")
-    public void testCustomerReport() {
-        setupSecurityContext(mainTestTenant);
-        lookupCustomerReport = dataCloudService.findById(lookupCustomerReport.getId());
-        Assert.assertNotNull(lookupCustomerReport);
-        Assert.assertEquals(comment, lookupCustomerReport.getComment());
-        Assert.assertNotNull(lookupCustomerReport.getReproduceDetail());
-        Assert.assertEquals(inputKeys, lookupCustomerReport.getReproduceDetail().getInputKeys());
-
-        matchedCustomerReport = dataCloudService.findById(matchedCustomerReport.getId());
-        Assert.assertNotNull(matchedCustomerReport);
-        Assert.assertEquals(suggestedValue, matchedCustomerReport.getSuggestedValue());
-        Assert.assertNotNull(matchedCustomerReport.getReproduceDetail());
-        Assert.assertTrue(matchedCustomerReport.getReproduceDetail() instanceof IncorrectMatchedAttributeReproduceDetail);
-        IncorrectMatchedAttributeReproduceDetail detail = (IncorrectMatchedAttributeReproduceDetail) matchedCustomerReport.getReproduceDetail();
-        Assert.assertEquals(matchedKeys, detail.getMatchedKeys());
-        Assert.assertEquals(attribute,  detail.getAttribute());
     }
 }

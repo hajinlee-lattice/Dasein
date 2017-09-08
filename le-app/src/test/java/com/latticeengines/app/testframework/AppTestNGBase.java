@@ -1,5 +1,9 @@
 package com.latticeengines.app.testframework;
 
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
@@ -10,7 +14,9 @@ import org.testng.annotations.Listeners;
 
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 import com.latticeengines.aws.dynamo.DynamoService;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
@@ -30,6 +36,15 @@ public class AppTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Value("${common.le.stack}")
     private String leStack;
+
+    protected Tenant mainTestTenant;
+
+    protected void setupTestEnvironmentWithOneTenant()
+            throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        SSLUtils.turnOffSSL();
+        globalAuthFunctionalTestBed.bootstrap(1);
+        mainTestTenant = globalAuthFunctionalTestBed.getMainTestTenant();
+    }
 
     protected void createTable(String repository, String recordType) {
         String tableName = DynamoDataStoreImpl.buildTableName(repository, recordType);
