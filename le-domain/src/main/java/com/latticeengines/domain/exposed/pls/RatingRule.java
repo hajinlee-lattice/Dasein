@@ -12,8 +12,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 
 public class RatingRule {
 
-    public static final String ACCOUNT_RULE = FrontEndQueryConstants.ACCOUNT_RESTRICTION;
-    public static final String CONTACT_RULE = FrontEndQueryConstants.CONTACT_RESTRICTION;
     public static final String DEFAULT_BUCKET_NAME = RuleBucketName.C.getName();
 
     @JsonProperty("bucketToRuleMap")
@@ -54,8 +52,8 @@ public class RatingRule {
 
     private Map<String, Restriction> generateDefaultAccountAndContactBuckets() {
         Map<String, Restriction> map = new HashMap<>();
-        map.put(ACCOUNT_RULE, Restriction.builder().and(Collections.emptyList()).build());
-        map.put(CONTACT_RULE, Restriction.builder().and(Collections.emptyList()).build());
+        map.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, Restriction.builder().and(Collections.emptyList()).build());
+        map.put(FrontEndQueryConstants.CONTACT_RESTRICTION, Restriction.builder().and(Collections.emptyList()).build());
         return map;
     }
 

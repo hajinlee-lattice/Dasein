@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
@@ -356,7 +357,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
             " { " //
                     + "   \"bucketToRuleMap\": { " //
                     + "     \"A-\": { " //
-                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
                     + "         \"concreteRestriction\": { " //
                     + "           \"negate\": false, " //
                     + "           \"lhs\": { " //
@@ -376,13 +377,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"A\": { " //
-                    + "       \"" + RatingRule.CONTACT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.CONTACT_RESTRICTION + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
                     + "         } " //
                     + "       }, " //
-                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
@@ -390,13 +391,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"B\": { " //
-                    + "       \"" + RatingRule.CONTACT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.CONTACT_RESTRICTION + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
                     + "         } " //
                     + "       }, " //
-                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
@@ -404,7 +405,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"C\": { " //
-                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
                     + "         \"concreteRestriction\": { " //
                     + "           \"negate\": false, " //
                     + "           \"lhs\": { " //
@@ -424,13 +425,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"D\": { " //
-                    + "       \"" + RatingRule.CONTACT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.CONTACT_RESTRICTION + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
                     + "         } " //
                     + "       }, " //
-                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
                     + "         \"concreteRestriction\": { " //
                     + "           \"negate\": false, " //
                     + "           \"lhs\": { " //
@@ -450,13 +451,13 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                     + "       } " //
                     + "     }, " //
                     + "     \"F\": { " //
-                    + "       \"" + RatingRule.CONTACT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.CONTACT_RESTRICTION + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
                     + "         } " //
                     + "       }, " //
-                    + "       \"" + RatingRule.ACCOUNT_RULE + "\": { " //
+                    + "       \"" + FrontEndQueryConstants.ACCOUNT_RESTRICTION + "\": { " //
                     + "         \"logicalRestriction\": { " //
                     + "           \"operator\": \"AND\", " //
                     + "           \"restrictions\": [] " //
