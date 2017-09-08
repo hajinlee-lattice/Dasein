@@ -104,13 +104,12 @@ angular
                     templateUrl: 'app/navigation/header/views/MainHeaderView.html'
                 },
                 "navigation": {
-                    controller: function($rootScope, $stateParams, $state, Tenant, FeatureFlagService) {
+                    controller: function($scope, $rootScope, $stateParams, $state, Tenant, FeatureFlagService) {
                         var tenantName = $stateParams.tenantName;
 
                         if (tenantName != Tenant.DisplayName) {
                             $rootScope.tenantName = window.escape(Tenant.DisplayName);
                             $rootScope.tenantId = window.escape(Tenant.Identifier);
-
 
                             FeatureFlagService.GetAllFlags().then(function(result) {
                                 var flags = FeatureFlagService.Flags();
@@ -126,8 +125,13 @@ angular
                                     });
                                 }
                             });
-
-
+                        }
+                        $scope.isStateName = function() {
+                            var state_names = (arguments ? Array.from(arguments) : []);
+                            if(state_names.indexOf($state.current.name) !== -1) {
+                                return true;
+                            }
+                            return false; 
                         }
                     },
                     templateUrl: 'app/navigation/sidebar/RootView.html'

@@ -22,11 +22,13 @@ angular.module('common.datacloud.analysistabs', [
         contactsCount: 0
     });
 
-    $rootScope.$broadcast('header-back', { 
-        path: '^home.segment.accounts',
-        displayName: vm.segment,
-        sref: 'home.segments'
-    });
+    if($state.current.name === 'home.segment.accounts') {
+        $rootScope.$broadcast('header-back', { 
+            path: '^home.segment.accounts',
+            displayName: vm.segment,
+            sref: 'home.segments'
+        });
+    }
 
     vm.init = function() {
 

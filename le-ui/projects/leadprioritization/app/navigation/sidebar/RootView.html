@@ -5,9 +5,8 @@
         </a>
     </div>
     <ul class="menu">
-        <li ng-if="showAnalysisPage" role="presentation" ui-sref-active="active">
+        <li ng-if="showAnalysisPage" role="presentation" ng-class="{active: isStateName('home.segment.explorer.attributes','home.segment.accounts','home.segment.contacts')}" xui-sref-active="active">
             <a 
-                
                 ui-sref="home.segment.explorer.attributes({segment:'Create'})"
                 ui-sref-opts="{reload: true}"
                 analytics-on="click"
