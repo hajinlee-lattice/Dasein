@@ -133,12 +133,16 @@ angular.module('common.datacloud.query.service',[
         var self = this,
             deferred = $q.defer();
 
+        console.log("!!!!!!!!!!!!!!!      "+segment);
+
         this.setSegment(segment);
 
         if (segment != null) {
 
-            accountRestriction = [segment.account_restriction.restriction];
-            contactRestriction = [segment.contact_restriction.restriction];
+            console.log("??????????????????           "+segment);
+
+            accountRestriction = segment.account_restriction ? [segment.account_restriction.restriction] : [];
+            contactRestriction = segment.contact_restriction ? [segment.contact_restriction.restriction] : [];
 
             this.setAccountRestriction(segment.account_restriction);
             this.setContactRestriction(segment.contact_restriction);
@@ -146,6 +150,8 @@ angular.module('common.datacloud.query.service',[
             deferred.resolve();
 
         } else {
+
+            console.log("??????????????????           "+segment);
 
             accountRestriction = [];
             contactRestriction = [];

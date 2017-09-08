@@ -189,8 +189,6 @@ angular.module('common.datacloud.query.results', [
     }
 
     vm.saveSegment = function() {
-        
-        console.log("save");
 
         var segmentName = $stateParams.segment,
             ts = new Date().getTime();
@@ -210,24 +208,19 @@ angular.module('common.datacloud.query.results', [
                     }
                 };
 
-            console.log(accountRestriction);
-            console.log(contactRestriction);
-
             SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
+
+                QueryStore.setupStore(result.data);
+
                 vm.saveSegmentEnabled = false;
-
-                // update state param to remove "Create"
                 $state.go('.', { segment: 'segment' + ts }, { notify: false });
-
                 vm.saved = true;
-            });
 
+            });
 
         } else {
             
             SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
-                console.log(result);
 
                 var segmentData = result,
                     accountRestriction = QueryStore.getAccountRestriction(),
@@ -243,16 +236,14 @@ angular.module('common.datacloud.query.results', [
                         }
                     };
 
-                console.log(accountRestriction);
-                console.log(contactRestriction);
-
                 SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
+                    
+                    QueryStore.setupStore(result.data);
+                    
                     vm.saveSegmentEnabled = false;
-
-                    // update state param to remove "Create"
                     $state.go('.', { segment: 'segment' + ts }, { notify: false });
-
                     vm.saved = true;
+
                 });
 
             });

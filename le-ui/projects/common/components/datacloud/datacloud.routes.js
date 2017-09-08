@@ -295,16 +295,14 @@ angular
                         modelId = $stateParams.modelId,
                         tenantName = $stateParams.tenantName;
 
-                    console.log("[resolve]     Restriction");
 
-                    QueryStore.setupStore(null).then(function(){
 
                         if(segmentName === 'Create'){
 
-                            QueryStore.getAccountRestriction();
-                            QueryStore.getContactRestriction();
+                            var accountRestriction = QueryStore.getAccountRestriction(),
+                                contactRestriction = QueryStore.getContactRestriction();
 
-                            deferred.resolve();
+                            deferred.resolve([accountRestriction,contactRestriction]);
 
                         } else {
                             
@@ -316,20 +314,19 @@ angular
                                         $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
                                     }
                                 } else {
-                                    console.log("[setup store]       ", result);
-
                                     return QueryStore.setupStore(result);
                                 }
                             }).then(function() {
                                 
-                                QueryStore.getAccountRestriction();
-                                QueryStore.getContactRestriction();
+                                var accountRestriction = QueryStore.getAccountRestriction(),
+                                    contactRestriction = QueryStore.getContactRestriction();
 
-                                deferred.resolve();
+                                deferred.resolve([accountRestriction,contactRestriction]);
+
                             });
                         }
 
-                    });
+                    
 
                     return deferred.promise;                    
                 }],

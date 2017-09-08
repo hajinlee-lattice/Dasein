@@ -110,6 +110,9 @@ angular.module('common.datacloud.explorer', [
         }
 
         if (vm.section === 'segment.analysis') {
+
+            console.log(QueryRestriction);
+
             vm.setCurrentRestrictionForSaveButton();
             vm.metadataSegments = QueryRestriction;
         }
@@ -1226,7 +1229,7 @@ angular.module('common.datacloud.explorer', [
         if (vm.metadataSegment != undefined){
             var restrictions = vm.metadataSegments.restriction;
         } else {
-            var restrictions = QueryRestriction.restriction;
+            var restrictions = QueryRestriction;
         };
 
         if (vm.addBucketTreeRoot) {
@@ -1589,13 +1592,12 @@ angular.module('common.datacloud.explorer', [
                         }
                     });
 
-                console.log('saveSegment new', segmentName, ts, segment)
+                // console.log('saveSegment new', segmentName, ts, segment);
+
                 SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
+                    
                     vm.saveSegmentEnabled = false;
-
-                    // update state param to remove "Create"
                     $state.go('.', { segment: 'segment' + ts }, { notify: false });
-
                     vm.saved = true;
 
                 });
@@ -1614,19 +1616,19 @@ angular.module('common.datacloud.explorer', [
                                 'num_rows': 10
                             }
                         });
-                    console.log('saveSegment existing', segmentData, segment)
+                    // console.log('saveSegment existing', segmentData, segment)
+
                     SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
+
                         vm.saveSegmentEnabled = false;
-
-                        // update state param to remove "Create"
-                        $state.go('.', { segment: 'segment' + ts }, { notify: false });
-
+                        $state.go('.', { segment: 'segment' + ts }, { notify: false }, { reload: true });
                         vm.saved = true;
 
                     });
                 });
             };
         };
+
     };
 
     vm.selectRatingEngineAttribute = function(enrichment) {
