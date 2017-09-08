@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -32,7 +33,10 @@ public class ModelCopyServiceImpl implements ModelCopyService {
         }
         String modelTypeStr = modelSummary != null ? modelSummary.getModelType() : ModelType.PYTHONMODEL.getModelType();
         ModelService modelService = ModelServiceBase.getModelService(modelTypeStr);
-        return modelService.copyModel(modelSummary, sourceTenantId, targetTenantId);
+
+        try (PerformanceTimer timer = new PerformanceTimer("Copy model function")) {
+            return modelService.copyModel(modelSummary, sourceTenantId, targetTenantId);
+        }
     }
 
     @Override

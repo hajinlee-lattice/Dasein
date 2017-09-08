@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.util.ModelingHdfsUtils;
@@ -92,8 +93,10 @@ public abstract class ModelServiceBase implements ModelService {
         String sourceCustomerRoot = customerBaseDir + sourceTenantId;
         String targetCustomerRoot = customerBaseDir + targetTenantId;
 
-        ModelingHdfsUtils.copyModelingDataDirectory(sourceCustomerRoot, targetCustomerRoot, eventTableName,
-                cpEventTableName, yarnConfiguration);
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory")){
+            ModelingHdfsUtils.copyModelingDataDirectory(sourceCustomerRoot, targetCustomerRoot, eventTableName,
+                    cpEventTableName, yarnConfiguration);
+        }
 
         String sourceModelRoot = sourceCustomerRoot + "/models/" + eventTableName + "/"
                 + UuidUtils.extractUuid(modelSummary.getId());
@@ -103,8 +106,12 @@ public abstract class ModelServiceBase implements ModelService {
         String sourceModelLocalRoot = new Path(sourceModelDirPath).getName();
         String modelSummaryLocalPath = sourceModelLocalRoot + "/enhancements/modelsummary.json";
 
-        FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
-        HdfsUtils.copyHdfsToLocal(yarnConfiguration, sourceModelDirPath, ".");
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete directory")){
+            FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
+        }
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy hdfs to local")) {
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, sourceModelDirPath, ".");
+        }
 
         Module module = null;
         if (StringUtils.isNotEmpty(modelSummary.getModuleName())) {
@@ -121,31 +128,50 @@ public abstract class ModelServiceBase implements ModelService {
         String newModuleName = "cp_module_" + UUID.randomUUID().toString();
         if (module != null) {
             CustomerSpace customerSpace = CustomerSpace.parse(targetTenantId);
-            newArtifactsMap = ModelingHdfsUtils.copyArtifactsInModule(yarnConfiguration, module.getArtifacts(),
-                    customerSpace, newModuleName);
+            try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy artifacts in module")) {
+                newArtifactsMap = ModelingHdfsUtils.copyArtifactsInModule(yarnConfiguration, module.getArtifacts(),
+                        customerSpace, newModuleName);
+            }
             for (Artifact artifact : newArtifactsMap.values()) {
                 metadataProxy.createArtifact(customerSpace.toString(), newModuleName, artifact.getName(), artifact);
             }
         }
         String contents = FileUtils.readFileToString(new File(modelSummaryLocalPath), "UTF-8");
         SourceFile sourceFile = sourceFileEntityMgr.getByTableName(cpTrainingTableName);
-        JsonNode newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId,
-                cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap,
-                newModuleName, sourceFile);
+
+        JsonNode newModelSummary = null;
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Construct new model summary")) {
+            newModelSummary = ModelingHdfsUtils.constructNewModelSummary(contents, targetTenantId,
+                    cpTrainingTableName, cpEventTableName, uuid, modelSummary.getDisplayName(), newArtifactsMap,
+                    newModuleName, sourceFile);
+        }
 
         String modelFileName = ModelingHdfsUtils.getModelFileNameFromLocalDir(sourceModelLocalRoot);
-        JsonNode newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName,
-                "ms__" + uuid + "-PLSModel");
-        FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/enhancements/.modelsummary.json.crc"));
-        FileUtils.write(new File(modelSummaryLocalPath), newModelSummary.toString(), "UTF-8", false);
+        JsonNode newModel = null;
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Construct new model")) {
+            newModel = ModelingHdfsUtils.constructNewModel(sourceModelLocalRoot + "/" + modelFileName,
+                    "ms__" + uuid + "-PLSModel");
+        }
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete quietly and write")) {
+            FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/enhancements/.modelsummary.json.crc"));
+            FileUtils.write(new File(modelSummaryLocalPath), newModelSummary.toString(), "UTF-8", false);
+        }
 
         String targetModelRoot = targetCustomerRoot + "/models/" + cpEventTableName + "/" + uuid;
 
-        FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/." + modelFileName + ".crc"));
-        FileUtils.write(new File(sourceModelLocalRoot + "/" + modelFileName), newModel.toString(), "UTF-8", false);
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete quietly and write")) {
+            FileUtils.deleteQuietly(new File(sourceModelLocalRoot + "/." + modelFileName + ".crc"));
+            FileUtils.write(new File(sourceModelLocalRoot + "/" + modelFileName), newModel.toString(), "UTF-8", false);
+        }
 
-        HdfsUtils.mkdir(yarnConfiguration, targetModelRoot);
-        HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, targetModelRoot);
-        FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: mkdir")) {
+            HdfsUtils.mkdir(yarnConfiguration, targetModelRoot);
+        }
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy from local to hdfs")) {
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, sourceModelLocalRoot, targetModelRoot);
+        }
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Delete directory")) {
+            FileUtils.deleteDirectory(new File(sourceModelLocalRoot));
+        }
     }
 }
