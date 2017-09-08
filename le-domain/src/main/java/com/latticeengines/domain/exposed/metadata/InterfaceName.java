@@ -48,9 +48,12 @@ public enum InterfaceName {
 
     TransactionType, //
     TransactionTime, //
+    TransactionDate, //
     ProductName, //
     Quantity, //
+    TotalQuantity, //
     Amount, //
+    TotalAmount, //
     OrderId, //
 
     // CDL

@@ -13,7 +13,8 @@ public enum SchemaInterpretation {
     TimeSeries, //
     Category, //
     Profile, //
-    AccountMaster;
+    AccountMaster, //
+    TransactionDailyAggregation;
 
     public void apply(SchemaInterpretationFunctionalInterface function) {
         InterfaceName name = null;

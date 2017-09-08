@@ -68,6 +68,8 @@ public class SchemaRepository {
             return getCategorySchema();
         case Transaction:
             return getTransactionSchema();
+        case TransactionDailyAggregation:
+            return getTransactionDailyAggregationSchema();
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
         }
@@ -1089,6 +1091,72 @@ public class SchemaRepository {
         return table;
     }
 
+    private Table getTransactionDailyAggregationSchema() {
+        Table table = createTable(SchemaInterpretation.TransactionDailyAggregation);
+        table.addAttribute(attr(InterfaceName.AccountId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        new String[] { "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT" })) //
+                .type(Schema.Type.STRING) //
+                .required() //
+                .interfaceName(InterfaceName.AccountId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.ContactId.name()) //
+                .allowedDisplayNames(Sets.newHashSet(
+                        new String[] { "CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT" })) //
+                .type(Schema.Type.STRING) //
+                .required() //
+                .interfaceName(InterfaceName.ContactId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.Id.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "ID", "PRODUCT_ID", "PRODUCT ID" })) //
+                .type(Schema.Type.STRING) //
+                .required() //
+                .interfaceName(InterfaceName.ProductId) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionType.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "TYPE", "TRANSACTION_TYPE", "TRANSACTION TYPE" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionType) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TransactionDate.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "DATE", "TRANSACTION_DATE", "TRANSACTION DATE" })) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.TransactionDate) //
+                .logicalType(LogicalDataType.Date) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TotalAmount.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "AMOUNT", "TOTAL AMOUNT" })) //
+                .type(Schema.Type.DOUBLE) //
+                .required() //
+                .interfaceName(InterfaceName.TotalAmount) //
+                .logicalType(LogicalDataType.Metric) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .build());
+        table.addAttribute(attr(InterfaceName.TotalQuantity.name()) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "QUANTITY", "TOTAL QUANTITY" })) //
+                .type(Schema.Type.LONG) //
+                .required() //
+                .interfaceName(InterfaceName.TotalQuantity) //
+                .logicalType(LogicalDataType.Metric) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .build());
+        return table;
+    }
     private LastModifiedKey createLastModifiedKey(String columnName) {
         LastModifiedKey lmk = new LastModifiedKey();
         lmk.setDisplayName(columnName);

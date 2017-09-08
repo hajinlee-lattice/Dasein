@@ -49,8 +49,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     List<String> fieldNames = Arrays.asList("TransactionId", "AccountId", "ContactId", "TransactionType", "ProductId",
             "Amount", "Quantity", "OrderId", "TransactionTime", "ExtensionAttr1");
-    List<Class<?>> clz = Arrays.asList((Class<?>) Long.class, Long.class, Long.class, String.class, Long.class,
-            Float.class, Integer.class, String.class, Long.class, String.class);
+    List<Class<?>> clz = Arrays.asList((Class<?>) String.class, String.class, String.class, String.class, String.class,
+            Double.class, Long.class, String.class, Long.class, String.class);
 
     private static final CustomerSpace customerSpace = CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE);
 
@@ -192,8 +192,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setCountField("Quantity");
         config.setSumField("Amount");
         config.setTrxDateField("TransactionDate");
-        config.setGoupByFields(Arrays.asList("AccountId", "ContactId", "ProductId", "TransactionType",
-                "TransactionDate"));
+        config.setGoupByFields(
+                Arrays.asList("AccountId", "ContactId", "ProductId", "TransactionType", "TransactionDate"));
 
         return JsonUtils.serialize(config);
     }
@@ -204,8 +204,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setMasterIdField(TableRoleInCollection.ConsolidatedTransaction.getPrimaryKey().name());
         config.setCreateTimestampColumn(true);
         config.setColumnsFromRight(new HashSet<String>(Arrays.asList("CREATION_DATE")));
-        config.setCompositeKeys(Arrays.asList("AccountId", "ContactId", "ProductId", "TransactionType",
-                "TransactionTime"));
+        config.setCompositeKeys(
+                Arrays.asList("AccountId", "ContactId", "ProductId", "TransactionType", "TransactionTime"));
         return JsonUtils.serialize(config);
     }
 
@@ -327,7 +327,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Assert.assertEquals(keyboardRecord.get("TotalQuantity").toString(), "1");
     }
 
-//    @Test(groups = "deployment", enabled = true)
+    // @Test(groups = "deployment", enabled = true)
     public void createData() {
         uploadTable1();
         uploadTable2();
@@ -336,31 +336,31 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     private void uploadTable1() {
         Object[][] data = {
-                { 1L, 1L, null, "PurchaseHistory", 1L /* " Disk" */, 10F, 1, "Order1", 1502755200L, "Ext1" }, //
-                { 3L, 2L, null, "PurchaseHistory", 1L, 10F, 1, "Order1", 1502755200L, "Ext1" }, //
-                { 4L, 2L, null, "PurchaseHistory", 2L /* Monitor */, 10F, 1, "Order1", 1502755200L, "Ext1" }, //
+                { "1", "1", null, "PurchaseHistory", "1" /* " Disk" */, 10D, 1L, "Order1", 1502755200L, "Ext1" }, //
+                { "3", "2", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1502755200L, "Ext1" }, //
+                { "4", "2", null, "PurchaseHistory", "2" /* Monitor */, 10D, 1L, "Order1", 1502755200L, "Ext1" }, //
         };
 
-        uploadDataToHdfs(data, fieldNames, clz, "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName1
-                + ".avro", tableName1);
+        uploadDataToHdfs(data, fieldNames, clz,
+                "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName1 + ".avro", tableName1);
     }
 
     private void uploadTable2() {
-        Object[][] data = { { 4L, 2L, null, "PurchaseHistory", 2L, 10F, 1, "Order1", 1502755200L, "Ext2" }, //
-                { 5L, 3L, null, "PurchaseHistory", 1L, 10F, 1, "Order1", 1503001576L, "Ext2" }, //
+        Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1502755200L, "Ext2" }, //
+                { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001576L, "Ext2" }, //
         };
-        uploadDataToHdfs(data, fieldNames, clz, "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName2
-                + ".avro", tableName2);
+        uploadDataToHdfs(data, fieldNames, clz,
+                "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName2 + ".avro", tableName2);
     }
 
     private void uploadTable3() {
-        Object[][] data = { { 4L, 2L, null, "PurchaseHistory", 2L, 10F, 1, "Order1", 1503001576L, "Ext3" }, //
-                { 5L, 3L, null, "PurchaseHistory", 1L, 10F, 1, "Order1", 1503001577L, "Ext3" }, //
-                { 6L, 3L, null, "PurchaseHistory", 1L, 10F, 1, "Order1", 1503001578L, "Ext3" }, //
-                { 7L, 3L, null, "PurchaseHistory", 3L /* Keyboard */, 10F, 1, "Order1", 1503001578L, "Ext3" }, //
+        Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1503001576L, "Ext3" }, //
+                { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001577L, "Ext3" }, //
+                { "6", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001578L, "Ext3" }, //
+                { "7", "3", null, "PurchaseHistory", "3" /* Keyboard */, 10D, 1L, "Order1", 1503001578L, "Ext3" }, //
         };
-        uploadDataToHdfs(data, fieldNames, clz, "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName3
-                + ".avro", tableName3);
+        uploadDataToHdfs(data, fieldNames, clz,
+                "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName3 + ".avro", tableName3);
     }
 
 }
