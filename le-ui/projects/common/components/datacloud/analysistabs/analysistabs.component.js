@@ -2,8 +2,8 @@ angular.module('common.datacloud.analysistabs', [
     'mainApp.appCommon.utilities.ResourceUtility'
     ])
 .controller('AnalysisTabsController', function (
-    $state, $stateParams, $timeout, $scope, FeatureFlagService, BrowserStorageUtility,
-    ResourceUtility, DataCloudStore, QueryService, QueryStore
+    $state, $stateParams, $timeout, $scope, $rootScope,
+    FeatureFlagService, BrowserStorageUtility, ResourceUtility, DataCloudStore, QueryService, QueryStore
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -20,6 +20,12 @@ angular.module('common.datacloud.analysistabs', [
         counts: QueryStore.getCounts(),
         accountsCount: 0,
         contactsCount: 0
+    });
+
+    $rootScope.$broadcast('header-back', { 
+        path: '^home.segment.accounts',
+        displayName: vm.segment,
+        sref: 'home.segments'
     });
 
     vm.init = function() {
