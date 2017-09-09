@@ -371,7 +371,7 @@ public class ProcessorContext {
             if (useRemoteDnB) {
                 groupSize = 128;
             } else if (originalInput.getFetchOnly()) {
-                groupSize = 100;
+                groupSize = 200;
                 numThreads = fetchonlyThreadPool;
                 if (columnSelection != null && columnSelection.getColumns().size() > 10000) {
                     numThreads = Math.max(fetchonlyThreadPool / 2, 4);
