@@ -39,17 +39,24 @@ public class Diff extends TransformationFlowBase<BasicTransformationConfiguratio
         finalAttrs.addAll(src.getFieldNames());
         Set<String> excludeFields = parameters.getExcludeFields() == null ? null
                 : new HashSet(Arrays.asList(parameters.getExcludeFields()));
-        src = src.apply(new AddMD5Hash(new Fields(CHECK_SUM), excludeFields, 1000, true),
+        src = src.apply(new AddMD5Hash(new Fields(CHECK_SUM), excludeFields, 100, true),
                 new FieldList(src.getFieldNames()),
                 new FieldMetadata(CHECK_SUM, String.class));
-        srcCompared = srcCompared.apply(new AddMD5Hash(new Fields(CHECK_SUM), excludeFields, 1000, true),
+        srcCompared = srcCompared.apply(new AddMD5Hash(new Fields(CHECK_SUM), excludeFields, 100, true),
                 new FieldList(srcCompared.getFieldNames()), new FieldMetadata(CHECK_SUM, String.class));
         List<String> compareRetFlds = new ArrayList<>(Arrays.asList(parameters.getKeys()));
         compareRetFlds.add(CHECK_SUM);
         srcCompared = srcCompared.retain(new FieldList(compareRetFlds));
         srcCompared = renameCompared(srcCompared);
+        /*
         Node joined = src.join(new FieldList(parameters.getKeys()), srcCompared,
                 new FieldList(renameCompKeys(parameters.getKeys())), JoinType.LEFT);
+                */
+        List<Node> nodeList = new ArrayList<>();
+        nodeList.add(srcCompared);
+        List<FieldList> fldList = new ArrayList<>();
+        fldList.add(new FieldList(renameCompKeys(parameters.getKeys())));
+        Node joined = src.coGroup(new FieldList(parameters.getKeys()), nodeList, fldList, JoinType.LEFT);
         joined = joined.filter(String.format("!%s.equals(%s)", CHECK_SUM, renameCompAttr(CHECK_SUM)),
                 new FieldList(CHECK_SUM, renameCompAttr(CHECK_SUM))).retain(new FieldList(finalAttrs));
         return joined;
