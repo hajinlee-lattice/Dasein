@@ -1,7 +1,6 @@
 package com.latticeengines.dante.controller;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -23,13 +18,10 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dante.entitymgr.DanteTalkingPointEntityMgr;
 import com.latticeengines.dante.testFramework.DanteTestNGBase;
-import com.latticeengines.dante.testFramework.testDao.TestPlayDao;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.DanteTalkingPoint;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.dante.multitenant.TalkingPointDTO;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 
 public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
@@ -39,20 +31,12 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
     @Autowired
     private DanteTalkingPointEntityMgr danteTalkingPointEntityMgr;
 
-    @Autowired
-    private TestPlayDao testPlayDao;
-
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    private Play testPlay;
-    private static final String PLAY_DISPLAY_NAME = "DeplTestTPPlay";
-    private static final String SEGMENT_NAME = "segment";
-    private static final String CREATED_BY = "lattice@lattice-engines.com";
-
     @BeforeClass(groups = "deployment")
     public void setup() {
-        testPlay = createTestPlay();
+        super.createDependences();
     }
 
     @Test(groups = "deployment")
@@ -110,7 +94,6 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
 
     }
 
-    @SuppressWarnings({ "unchecked" })
     @Test(groups = { "deployment" }, dependsOnMethods = { "testCreateUpdate" })
     public void testPreviewAndPublish() {
         List<TalkingPointDTO> raw = talkingPointProxy.findAllByPlayName(testPlay.getName());
@@ -191,43 +174,7 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
 
     @AfterClass(groups = "deployment")
     public void cleanup() {
-        deletePlay(testPlay);
+        super.deleteTestMetadataSegment();
     }
 
-    private void deletePlay(Play play) {
-        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
-                PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(ptm);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(TransactionStatus status) {
-                testPlayDao.delete(play);
-            }
-        });
-    }
-
-    private Play createTestPlay() {
-        Play play = new Play();
-        MetadataSegment segment = new MetadataSegment();
-        segment.setDisplayName(SEGMENT_NAME);
-        play.setDisplayName(PLAY_DISPLAY_NAME);
-        // comment out just to make it compile
-        // play.setSegment(segment);
-        // play.setSegmentName(SEGMENT_NAME);
-        play.setCreatedBy(CREATED_BY);
-        play.setTenant(mainTestTenant);
-        play.setTenantId(mainTestTenant.getPid());
-        play.setUpdated(new Date());
-        play.setCreated(new Date());
-        play.setName(play.generateNameStr());
-        PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
-                PlatformTransactionManager.class);
-        TransactionTemplate tx = new TransactionTemplate(ptm);
-        tx.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(TransactionStatus status) {
-                testPlayDao.create(play);
-            }
-        });
-
-        return play;
-    }
 }
