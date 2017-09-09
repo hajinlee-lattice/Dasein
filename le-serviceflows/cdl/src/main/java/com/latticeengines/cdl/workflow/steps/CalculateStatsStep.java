@@ -240,6 +240,7 @@ public class CalculateStatsStep extends BaseTransformWrapperStep<CalculateStatsS
         SorterConfig conf = new SorterConfig();
         conf.setPartitions(500);
         conf.setSplittingThreads(maxSplitThreads);
+        conf.setSplittingChunkSize(5000L);
         conf.setCompressResult(true);
         conf.setSortingField(MASTER_TABLE_SORT_KEY);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
