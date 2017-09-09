@@ -371,14 +371,8 @@ public class ProcessorContext {
             if (useRemoteDnB) {
                 groupSize = 128;
             } else if (originalInput.getFetchOnly()) {
-                groupSize = 200;
+                groupSize = 100;
                 numThreads = fetchonlyThreadPool;
-                if (columnSelection != null && columnSelection.getColumns().size() > 10000) {
-                    numThreads = Math.max(fetchonlyThreadPool / 2, 4);
-                    log.warn(String.format(
-                            "Since there are too many columns to be fetched (%d), reduce num threads to %d",
-                            columnSelection.getColumns().size(), numThreads));
-                }
             }
         } else {
             if (groupSize == null || groupSize < 1) {
