@@ -101,35 +101,38 @@ public class PlayServiceImpl implements PlayService {
 
         RatingEngine ratingEngine = play.getRatingEngine();
         if (ratingEngine == null || ratingEngine.getId() == null) {
-            throw new NullPointerException(
-                    String.format("Rating Engine for Play %s is not defined.", ratingEngine.getId()));
-        }
-        try {
-            RatingsCountRequest request = new RatingsCountRequest();
-            request.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
-            RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
-            Map<String, CoverageInfo> ratingEngineIdCoverageMap = response.getRatingEngineIdCoverageMap();
-            Long accountCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount() == null ? 0L
-                    : ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount();
-            Long contactCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount() == null ? 0L
-                    : ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount();
-            List<RatingBucketCoverage> ratingBucketCoverage = ratingEngineIdCoverageMap.get(ratingEngine.getId())
-                    .getBucketCoverageCounts();
-            play.setRatings(ratingBucketCoverage);
-            log.info(String.format("For play %s, new account number and contact number are %d and %d, respectively",
-                    play.getName(), accountCount, contactCount));
-            Long mostRecentSucessfulLaunchAccountNum = playLaunch == null ? 0l : playLaunch.getAccountsLaunched();
-            Long mostRecentSucessfulLaunchContactNum = playLaunch == null ? 0l : playLaunch.getContactsLaunched();
-            Long newAccountsNum = mostRecentSucessfulLaunchAccountNum == null ? accountCount
-                    : accountCount - mostRecentSucessfulLaunchAccountNum;
-            Long newContactsNum = mostRecentSucessfulLaunchContactNum == null ? contactCount
-                    : contactCount - mostRecentSucessfulLaunchContactNum;
-            launchHistory.setNewAccountsNum(newAccountsNum);
-            launchHistory.setNewContactsNum(newContactsNum);
-        } catch (Exception ex) {
-            // any exception in getting count info should not block
-            // rendering of play listing
-            log.info("Ignoring exception in get cont info", ex);
+            // throw new NullPointerException(
+            // String.format("Rating Engine for Play %s is not defined.",
+            // ratingEngine.getId()));
+            log.info(String.format("Rating Engine for Play %s is not defined.", play.getName()));
+        } else {
+            try {
+                RatingsCountRequest request = new RatingsCountRequest();
+                request.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
+                RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+                Map<String, CoverageInfo> ratingEngineIdCoverageMap = response.getRatingEngineIdCoverageMap();
+                Long accountCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount() == null ? 0L
+                        : ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount();
+                Long contactCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount() == null ? 0L
+                        : ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount();
+                List<RatingBucketCoverage> ratingBucketCoverage = ratingEngineIdCoverageMap.get(ratingEngine.getId())
+                        .getBucketCoverageCounts();
+                play.setRatings(ratingBucketCoverage);
+                log.info(String.format("For play %s, new account number and contact number are %d and %d, respectively",
+                        play.getName(), accountCount, contactCount));
+                Long mostRecentSucessfulLaunchAccountNum = playLaunch == null ? 0l : playLaunch.getAccountsLaunched();
+                Long mostRecentSucessfulLaunchContactNum = playLaunch == null ? 0l : playLaunch.getContactsLaunched();
+                Long newAccountsNum = mostRecentSucessfulLaunchAccountNum == null ? accountCount
+                        : accountCount - mostRecentSucessfulLaunchAccountNum;
+                Long newContactsNum = mostRecentSucessfulLaunchContactNum == null ? contactCount
+                        : contactCount - mostRecentSucessfulLaunchContactNum;
+                launchHistory.setNewAccountsNum(newAccountsNum);
+                launchHistory.setNewContactsNum(newContactsNum);
+            } catch (Exception ex) {
+                // any exception in getting count info should not block
+                // rendering of play listing
+                log.info("Ignoring exception in get cont info", ex);
+            }
         }
 
         return play;
