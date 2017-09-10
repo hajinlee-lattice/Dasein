@@ -6,10 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -33,15 +30,12 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -56,9 +50,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     // no mocking needed
     EntityProxy entityProxy;
-
-    @Mock
-    DataCollectionProxy dataCollectionProxy;
 
     @Mock
     InternalResourceRestApiProxy internalResourceRestApiProxy;
@@ -79,6 +70,9 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
             throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         // this test tenant has account data loaded in CDL
         String tenantIdentifier = "Segment_M14.Segment_M14.Production";
+        // String tenantIdentifier =
+        // "hliu_09_07_fisher.hliu_09_07_fisher.Production";
+
         String playId = "play__" + randId;
         String playLaunchId = "launch__" + randId;
         long pageSize = 2L;
@@ -100,7 +94,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         playLaunchInitStep = new PlayLaunchInitStep();
 
         playLaunchInitStep.setEntityProxy(entityProxy);
-        playLaunchInitStep.setDataCollectionProxy(dataCollectionProxy);
         playLaunchInitStep.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
         playLaunchInitStep.setPageSize(pageSize);
         playLaunchInitStep.setRecommendationService(recommendationService);
@@ -108,6 +101,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         playLaunchInitStep.setTenantEntityMgr(tenantEntityMgr);
 
         playLaunchInitStep.setConfiguration(createConf(CustomerSpace.parse(tenantIdentifier), playId, playLaunchId));
+        playLaunchInitStep.initLookupFieldsConfiguration();
     }
 
     @SuppressWarnings("unchecked")
@@ -200,20 +194,8 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                         any(LaunchState.class));
     }
 
-    private void mockAccountProxy(long pageSize) {
-        when(entityProxy.getCount( //
-                anyString(), //
-                any(FrontEndQuery.class))) //
-                        .thenReturn(2L);
-
-        when(entityProxy.getData( //
-                anyString(), //
-                any(FrontEndQuery.class))) //
-                        .thenReturn(generateDataPage(pageSize));
-    }
-
     private Restriction createSegmentRestrictionQuery() {
-        return null;// new RestrictionBuilder().build();
+        return null;
     }
 
     private Play createPlay(String playId) {
@@ -243,15 +225,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         launch.setPlay(createPlay(playId));
         launch.setLaunchId(playLaunchId);
         return launch;
-    }
-
-    private DataPage generateDataPage(long pageSize) {
-        List<Map<String, Object>> dataList = new ArrayList<>();
-        for (long i = 0; i < pageSize; i++) {
-            Map<String, Object> data = new HashMap<>();
-            dataList.add(data);
-        }
-        return new DataPage(dataList);
     }
 
     String accountRestrictionJson = //

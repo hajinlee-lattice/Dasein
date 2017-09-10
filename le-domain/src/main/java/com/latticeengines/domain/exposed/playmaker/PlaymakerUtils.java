@@ -8,11 +8,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class PlaymakerUtils {
 
@@ -106,6 +108,35 @@ public class PlaymakerUtils {
         }
 
         return length;
+    }
+
+    public static List<Map<String, String>> generateContactForRecommendation(List<Map<String, String>> rawContacts) {
+        List<Map<String, String>> contactsForRecommendation = new ArrayList<>();
+
+        if (CollectionUtils.isNotEmpty(rawContacts)) {
+            rawContacts.stream().forEach(rawContact -> processRawContact(rawContact, contactsForRecommendation));
+        }
+        return contactsForRecommendation;
+    }
+
+    private static void processRawContact(Map<String, String> rawContact,
+            List<Map<String, String>> contactsForRecommendation) {
+
+        Map<String, String> contact = new HashMap<>();
+
+        contact.put(PlaymakerConstants.Email, rawContact.get(InterfaceName.Email.name()));
+        contact.put(PlaymakerConstants.Address, rawContact.get(InterfaceName.Address_Street_1.name()));
+        contact.put(PlaymakerConstants.Phone, rawContact.get(InterfaceName.PhoneNumber.name()));
+        contact.put(PlaymakerConstants.State, rawContact.get(InterfaceName.State.name()));
+        contact.put(PlaymakerConstants.ZipCode, rawContact.get(InterfaceName.PostalCode.name()));
+        contact.put(PlaymakerConstants.Country, rawContact.get(InterfaceName.Country.name()));
+        contact.put(PlaymakerConstants.SfdcContactID, "");
+        contact.put(PlaymakerConstants.City, rawContact.get(InterfaceName.City.name()));
+        contact.put(PlaymakerConstants.ContactID, rawContact.get(InterfaceName.ContactId.name()));
+        contact.put(PlaymakerConstants.Name, rawContact.get(InterfaceName.ContactName.name()));
+        
+        contactsForRecommendation.add(contact);
+
     }
 
     // TODO - remove it once we start getting contact data from redshift API

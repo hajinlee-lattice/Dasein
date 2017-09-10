@@ -34,6 +34,7 @@ public enum InterfaceName {
     PostalCode, //
     Country, //
     PhoneNumber, //
+    Address_Street_1, //
 
     Website, //
 
@@ -66,6 +67,7 @@ public enum InterfaceName {
     SalesforceAccountID, // salesforce account ID
 
     // Data Cloud
-    LatticeAccountId // Id in AccountMaster
+    LatticeAccountId, // Id in AccountMaster
+    LDC_Name
 
 }
