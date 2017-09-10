@@ -39,6 +39,8 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             "LE_EMPLOYEE_RANGE" //
     );
 
+    private static final String DATA_CLOUD_VERSION = "2.0.5";
+
     @Override
     @Test(groups = "pipeline1", enabled = true)
     public void testTransformation() throws Exception {
@@ -117,6 +119,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
     protected ProfileConfig constructProfileConfig() {
         ProfileConfig conf = new ProfileConfig();
         conf.setStage(DataCloudConstants.PROFILE_STAGE_ENRICH);
+        conf.setDataCloudVersion(DATA_CLOUD_VERSION);
         conf.setCatAttrsNotEnc(dimensions.toArray(new String[dimensions.size()]));
         return conf;
     }
