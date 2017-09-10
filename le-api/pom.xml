@@ -10,10 +10,10 @@
 
     <properties>
         <component-name>le-api</component-name>
-        <le.dataplatform.version>3.9.0-SNAPSHOT</le.dataplatform.version>
-        <le.domain.version>3.9.0-SNAPSHOT</le.domain.version>
-        <le.monitor.version>3.9.0-SNAPSHOT</le.monitor.version>
-        <le.security.version>3.9.0-SNAPSHOT</le.security.version>
+        <le.dataplatform.version>4.0.0-SNAPSHOT</le.dataplatform.version>
+        <le.domain.version>4.0.0-SNAPSHOT</le.domain.version>
+        <le.monitor.version>4.0.0-SNAPSHOT</le.monitor.version>
+        <le.security.version>4.0.0-SNAPSHOT</le.security.version>
         <jetty.port>8074</jetty.port>
         <jett.stop.port>10974</jett.stop.port>
     </properties>
@@ -21,7 +21,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-web-parent</artifactId>
-        <version>3.9.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../le-parent/web-pom.xml</relativePath>
     </parent>
 

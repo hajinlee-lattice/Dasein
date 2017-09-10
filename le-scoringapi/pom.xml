@@ -11,24 +11,24 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-web-parent</artifactId>
-        <version>3.9.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../le-parent/web-pom.xml</relativePath>
     </parent>
 
     <properties>
         <component-name>scoringapi</component-name>
-        <le.camille.version>3.9.0-SNAPSHOT</le.camille.version>
-        <le.common.version>3.9.0-SNAPSHOT</le.common.version>
-        <le.domain.version>3.9.0-SNAPSHOT</le.domain.version>
-        <le.datafabric.version>3.9.0-SNAPSHOT</le.datafabric.version>
-        <le.monitor.version>3.9.0-SNAPSHOT</le.monitor.version>
-        <le.oauth2.db.version>3.9.0-SNAPSHOT</le.oauth2.db.version>
-        <le.proxy.version>3.9.0-SNAPSHOT</le.proxy.version>
-        <le.network.version>3.9.0-SNAPSHOT</le.network.version>
-        <le.transform.version>3.9.0-SNAPSHOT</le.transform.version>
-        <le.testframework.version>3.9.0-SNAPSHOT</le.testframework.version>
-        <le.transform.version>3.9.0-SNAPSHOT</le.transform.version>
-        <le.hadoop.version>3.9.0-SNAPSHOT</le.hadoop.version>
+        <le.camille.version>4.0.0-SNAPSHOT</le.camille.version>
+        <le.common.version>4.0.0-SNAPSHOT</le.common.version>
+        <le.domain.version>4.0.0-SNAPSHOT</le.domain.version>
+        <le.datafabric.version>4.0.0-SNAPSHOT</le.datafabric.version>
+        <le.monitor.version>4.0.0-SNAPSHOT</le.monitor.version>
+        <le.oauth2.db.version>4.0.0-SNAPSHOT</le.oauth2.db.version>
+        <le.proxy.version>4.0.0-SNAPSHOT</le.proxy.version>
+        <le.network.version>4.0.0-SNAPSHOT</le.network.version>
+        <le.transform.version>4.0.0-SNAPSHOT</le.transform.version>
+        <le.testframework.version>4.0.0-SNAPSHOT</le.testframework.version>
+        <le.transform.version>4.0.0-SNAPSHOT</le.transform.version>
+        <le.hadoop.version>4.0.0-SNAPSHOT</le.hadoop.version>
         <jetty.port>8073</jetty.port>
         <jett.stop.port>10973</jett.stop.port>
     </properties>
