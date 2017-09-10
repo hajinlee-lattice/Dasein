@@ -5,9 +5,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateIndustryFromNaicsFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CountryStandardizationFunction;
@@ -37,6 +40,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.tuple.Fields;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 @Component(SourceStandardizationFlow.DATAFLOW_BEAN_NAME)
 public class SourceStandardizationFlow
@@ -126,12 +130,25 @@ public class SourceStandardizationFlow
             case COPY:
                 source = copy(source, parameters.getCopyFields());
                 break;
+            case CHECKSUM:
+                source = checksum(source, parameters.getChecksumExcludeFields(), parameters.getChecksumLength(),
+                        parameters.getChecksumField());
+                break;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Standardization strategy %s is not supported", strategy.name()));
             }
         }
 
+        return source;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private Node checksum(Node source, String[] excludeFields, int length, String checksumField) {
+        Set<String> toExclude = excludeFields == null ? new HashSet<>() : new HashSet<>(Arrays.asList(excludeFields));
+        source = source
+                .apply(new AddMD5Hash(new Fields(checksumField), toExclude, length,
+                        true), new FieldList(source.getFieldNames()), new FieldMetadata(checksumField, String.class));
         return source;
     }
 

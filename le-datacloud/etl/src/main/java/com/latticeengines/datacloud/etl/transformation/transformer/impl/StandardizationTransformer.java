@@ -350,6 +350,8 @@ public class StandardizationTransformer
                     }
                 }
                 break;
+            case CHECKSUM:
+                break;
             default:
                 log.error(String.format("Standardization strategy %s is not supported", strategy.name()));
                 return false;
@@ -408,6 +410,9 @@ public class StandardizationTransformer
         parameters.setIdFields(config.getIdFields());
         parameters.setIdStrategies(config.getIdStrategies());
         parameters.setCopyFields(config.getCopyFields());
+        parameters.setChecksumExcludeFields(config.getChecksumExcludeFields());
+        parameters.setChecksumField(config.getChecksumField());
+        parameters.setChecksumLength(config.getChecksumLength());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 
