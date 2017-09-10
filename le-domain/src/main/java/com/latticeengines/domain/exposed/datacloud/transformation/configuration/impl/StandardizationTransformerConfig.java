@@ -124,8 +124,19 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     private String[][] copyFields; // for strategy COPY: String[][0] is
                                    // fromField, String[][1] is toField
 
+    @JsonProperty("ChecksumExcludeFields")
+    private String[] checksumExcludeFields; // for strategy CHECKSUM
+
+    @JsonProperty("ChecksumLength")
+    private int checksumLength; // for strategy CHECKSUM: length constraint of
+                                // checksum value
+
+    @JsonProperty("ChecksumField")
+    private String checksumField; // for strategy CHECKSUM: field name of
+                                  // checksum
+
     public enum StandardizationStrategy {
-        ADD_ID, DOMAIN, DUNS, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE, COPY
+        ADD_ID, DOMAIN, DUNS, COUNTRY, STATE, STRING, CONVERT_TYPE, DEDUP, FILTER, UPLOAD_TIMESTAMP, MARKER, RENAME, RETAIN, DISCARD, ADD_FIELD, VALID_DOMAIN, CONSOLIDATE_INDUSTRY, CONSOLIDATE_RANGE, COPY, CHECKSUM
     }
 
     public enum FieldType {
@@ -431,5 +442,30 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     public void setCopyFields(String[][] copyFields) {
         this.copyFields = copyFields;
     }
+
+    public String[] getChecksumExcludeFields() {
+        return checksumExcludeFields;
+    }
+
+    public void setChecksumExcludeFields(String[] checksumExcludeFields) {
+        this.checksumExcludeFields = checksumExcludeFields;
+    }
+
+    public int getChecksumLength() {
+        return checksumLength;
+    }
+
+    public void setChecksumLength(int checksumLength) {
+        this.checksumLength = checksumLength;
+    }
+
+    public String getChecksumField() {
+        return checksumField;
+    }
+
+    public void setChecksumField(String checksumField) {
+        this.checksumField = checksumField;
+    }
+
 
 }

@@ -118,6 +118,15 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("CopyFields")
     private String[][] copyFields;
 
+    @JsonProperty("ChecksumExcludeFields")
+    private String[] checksumExcludeFields;
+
+    @JsonProperty("ChecksumLength")
+    private int checksumLength;
+
+    @JsonProperty("ChecksumField")
+    private String checksumField;
+
     @JsonProperty("StandardCountries")
     private Map<String, String> standardCountries;
 
@@ -416,5 +425,30 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     public void setCopyFields(String[][] copyFields) {
         this.copyFields = copyFields;
     }
+
+    public String[] getChecksumExcludeFields() {
+        return checksumExcludeFields;
+    }
+
+    public void setChecksumExcludeFields(String[] checksumExcludeFields) {
+        this.checksumExcludeFields = checksumExcludeFields;
+    }
+
+    public int getChecksumLength() {
+        return checksumLength;
+    }
+
+    public void setChecksumLength(int checksumLength) {
+        this.checksumLength = checksumLength;
+    }
+
+    public String getChecksumField() {
+        return checksumField;
+    }
+
+    public void setChecksumField(String checksumField) {
+        this.checksumField = checksumField;
+    }
+
 
 }
