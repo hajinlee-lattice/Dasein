@@ -68,8 +68,8 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             }
         }
         logger.info(count + " records in total, " + zeroCountAttrs + " has zero not null count");
-        //TODO: change to compare with rows in profile result
-        Assert.assertEquals(count, 28580);
+        // TODO: change to compare with rows in profile result
+        Assert.assertEquals(count, 25973);
         Assert.assertTrue(zeroCountAttrs > 0, "Should have some attributes with zero count.");
     }
 
@@ -97,8 +97,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
                     bucket, //
                     hqduns, //
                     calcStats, //
-                    report,
-                    extractTopCube);
+                    report, extractTopCube);
             // -----------
             steps.get(steps.size() - 1).setTargetSource(getTargetSourceName());
             configuration.setSteps(steps);
@@ -154,7 +153,6 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         step.setTargetSource("AccountMasterStats");
         return step;
     }
-
 
     private TransformationStepConfig report() {
         TransformationStepConfig step = new TransformationStepConfig();
