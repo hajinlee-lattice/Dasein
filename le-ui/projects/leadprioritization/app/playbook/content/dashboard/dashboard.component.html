@@ -115,7 +115,7 @@
                             <ul class="playbook-ratings graph" ng-if="vm.ratingsGraph">
                                 <li class="_rating" ng-repeat="rating in vm.ratingsGraph.buckets">
                                     <div class="rating-count" ng-show="rating.count">{{rating.count}}</div>
-                                    <div class="rating-bar" ng-style="{'height': (rating.bucketCount/vm.ratingsGraph.total)*100 + '%'}"></div>
+                                    <div class="rating-bar" ng-style="{'height': (rating.count/vm.ratingsGraph.total)*100 + '%'}"></div>
                                     <div class="rating-label">{{rating.bucket}}</div>
                                 </li>
                             </ul>
