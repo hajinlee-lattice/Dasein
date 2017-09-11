@@ -102,8 +102,6 @@ angular.module('common.datacloud.query.service',[
 
 
     this.setAccountRestriction = function(accountRestriction) {
-        console.log(accountRestriction);
-
         this.accountRestriction = accountRestriction;
     };
     this.getAccountRestriction = function() {
@@ -114,9 +112,6 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.setContactRestriction = function(contactRestriction) {
-
-        console.log(contactRestriction);
-
         this.contactRestriction = contactRestriction;
     };
     this.getContactRestriction = function() {
@@ -138,13 +133,9 @@ angular.module('common.datacloud.query.service',[
         var self = this,
             deferred = $q.defer();
 
-        console.log("!!!!!!!!!!!!!!!      "+segment);
-
         this.setSegment(segment);
 
         if (segment != null) {
-
-            console.log("??????????????????           "+segment);
 
             accountRestriction = segment.account_restriction ? [segment.account_restriction.restriction] : [];
             contactRestriction = segment.contact_restriction ? [segment.contact_restriction.restriction] : [];
@@ -155,8 +146,6 @@ angular.module('common.datacloud.query.service',[
             deferred.resolve();
 
         } else {
-
-            console.log("??????????????????           "+segment);
 
             accountRestriction = [];
             contactRestriction = [];
@@ -423,8 +412,7 @@ angular.module('common.datacloud.query.service',[
                 queryWithRestriction = { 
                     'free_form_text_search': query.free_form_text_search,
                     'account_restriction': query.account_restriction,
-                    // 'contact_restriction': query.contact_restriction,
-                    'contact_restriction': null,
+                    'contact_restriction': query.contact_restriction,
                     'preexisting_segment_name': query.preexisting_segment_name,
                     'page_filter': {
                         'num_rows': query.page_filter.num_rows,
