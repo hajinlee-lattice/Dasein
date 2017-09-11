@@ -109,7 +109,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(playList.size(), 1);
         Play play1 = playList.get(0);
         String playName = play1.getName();
-        System.out.println(String.format("play1 has name %s", playName));
+        log.info(String.format("play1 has name %s", playName));
         Play retrievedPlay = playEntityMgr.findByName(playName);
         Assert.assertNotNull(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getName(), play1.getName());
@@ -128,8 +128,8 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         retrievedPlay.setRatingEngine(newRatingEngine);
         retrievedPlay.setExcludeItemsWithoutSalesforceId(true);
 
-        System.out.println("ratingEngine 1 is " + ratingEngine1.getId());
-        System.out.println("ratingEngine 2 is " + ratingEngine2.getId());
+        log.info("ratingEngine 1 is " + ratingEngine1.getId());
+        log.info("ratingEngine 2 is " + ratingEngine2.getId());
 
         playEntityMgr.createOrUpdatePlay(retrievedPlay);
         retrievedPlay = playEntityMgr.findByName(playName);
