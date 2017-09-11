@@ -497,7 +497,8 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList, String modelId) {
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
-        String accountId = checkAndGet(account, InterfaceName.AccountId.name()).toString();
+        Object accountIdObj = checkAndGet(account, InterfaceName.AccountId.name());
+        String accountId = accountIdObj == null ? null : accountIdObj.toString();
 
         Recommendation recommendation = new Recommendation();
         recommendation.setDescription(playLaunch.getPlay().getDescription());

@@ -17,10 +17,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -28,7 +30,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -42,9 +43,6 @@ public class PlayLaunchInitStepUnitTestNG {
 
     @Mock
     EntityProxy entityProxy;
-
-    @Mock
-    DataCollectionProxy dataCollectionProxy;
 
     @Mock
     InternalResourceRestApiProxy internalResourceRestApiProxy;
@@ -81,9 +79,9 @@ public class PlayLaunchInitStepUnitTestNG {
         mockDanteLeadProxy();
 
         playLaunchInitStep = new PlayLaunchInitStep();
+        playLaunchInitStep.initLookupFieldsConfiguration();
 
         playLaunchInitStep.setEntityProxy(entityProxy);
-        playLaunchInitStep.setDataCollectionProxy(dataCollectionProxy);
         playLaunchInitStep.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
         playLaunchInitStep.setPageSize(pageSize);
         playLaunchInitStep.setRecommendationService(recommendationService);
@@ -177,7 +175,15 @@ public class PlayLaunchInitStepUnitTestNG {
     private Play createPlay(String playId) {
         Play play = new Play();
         play.setName(playId);
+        play.setRatingEngine(createRatingEngine());
         return play;
+    }
+
+    RatingEngine createRatingEngine() {
+        RatingEngine engine = new RatingEngine();
+        MetadataSegment segment = new MetadataSegment();
+        engine.setSegment(segment);
+        return engine;
     }
 
     private PlayLaunch createPlayLaunch(String playId, String playLaunchId) {
