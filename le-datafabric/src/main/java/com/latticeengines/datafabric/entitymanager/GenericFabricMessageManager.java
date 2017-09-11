@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatus;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
-public interface GenericFabricEntityManager<T extends HasId<String>> {
+public interface GenericFabricMessageManager<T extends HasId<String>> {
 
     GenericFabricStatus getBatchStatus(String batchId);
 

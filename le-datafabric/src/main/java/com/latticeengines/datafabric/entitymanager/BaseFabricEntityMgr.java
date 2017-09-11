@@ -2,13 +2,6 @@ package com.latticeengines.datafabric.entitymanager;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
-
-import org.apache.avro.generic.GenericRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-
-import com.latticeengines.domain.exposed.datafabric.RecordKey;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
 public interface BaseFabricEntityMgr<T> {
 
@@ -30,16 +23,6 @@ public interface BaseFabricEntityMgr<T> {
 
     List<T> findByProperties(Map<String, String> properties);
 
-    void publish(T entity);
-
-    void publish(RecordKey recordKey, T entity);
-
-    Future<RecordMetadata> publish(GenericRecordRequest recordRequest, GenericRecord record);
-
-    void addConsumer(String processorName, FabricEntityProcessor proc, int threadNumber);
-
-    void removeConsumer(String processorName, int waitTime);
-
     boolean isDisabled();
 
     void init();
@@ -48,5 +31,4 @@ public interface BaseFabricEntityMgr<T> {
 
     String getRecordType();
 
-    void close();
 }
