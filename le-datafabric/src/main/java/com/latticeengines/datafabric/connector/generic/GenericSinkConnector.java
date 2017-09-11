@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 public class GenericSinkConnector extends Connector {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(GenericSinkConnector.class);
     private Map<String, String> configProperties;
 

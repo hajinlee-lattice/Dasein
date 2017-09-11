@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.kafka.common.TopicPartition;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
+import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
@@ -24,7 +24,7 @@ public class GenericRecordProcessor {
     private static final Logger log = LoggerFactory.getLogger(GenericRecordProcessor.class);
 
     private GenericSinkConnectorConfig connectorConfig;
-    private GenericFabricEntityManager<GenericFabricRecord> entityManager;
+    private GenericFabricMessageManager<GenericFabricRecord> entityManager;
 
     private List<GenericRecord> allKeyRecords = new ArrayList<>();
     private List<GenericRecord> allValueRecords = new ArrayList<>();
@@ -34,7 +34,7 @@ public class GenericRecordProcessor {
     private Map<String, Long> batchCountMap = new HashMap<>();
 
     public GenericRecordProcessor(GenericSinkConnectorConfig connectorConfig,
-            GenericFabricEntityManager<GenericFabricRecord> entityManager) {
+            GenericFabricMessageManager<GenericFabricRecord> entityManager) {
         this.connectorConfig = connectorConfig;
         this.entityManager = entityManager;
 

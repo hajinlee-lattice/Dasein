@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
+import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.scoringapi.Record;
@@ -32,8 +32,8 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
 
     private static final String FABRIC_SCORE_HISTORY = "FabricScoreHistory";
 
-    @Resource(name = "genericFabricEntityManager")
-    private GenericFabricEntityManager<ScoreRecordHistory> fabricEntityManager;
+    @Resource(name = "genericFabricMessageManager")
+    private GenericFabricMessageManager<ScoreRecordHistory> fabricEntityManager;
 
     @Value("${scoringapi.score.history.publish.enabled:false}")
     private boolean shouldPublish;

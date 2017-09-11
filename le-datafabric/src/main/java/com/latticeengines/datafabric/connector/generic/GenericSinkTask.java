@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.datafabric.entitymanager.impl.GenericFabricEntityManagerImpl;
+import com.latticeengines.datafabric.entitymanager.impl.GenericFabricMessageyManagerImpl;
 import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 
@@ -29,7 +29,7 @@ public class GenericSinkTask extends SinkTask {
     private AvroData avroData;
 
     private GenericSinkConnectorConfig connectorConfig;
-    private GenericFabricEntityManagerImpl<GenericFabricRecord> entityManager;
+    private GenericFabricMessageyManagerImpl<GenericFabricRecord> messageManager;
 
     public GenericSinkTask() {
 
@@ -49,8 +49,8 @@ public class GenericSinkTask extends SinkTask {
             String stack = connectorConfig.getProperty(GenericSinkConnectorConfig.STACK, String.class);
             String zkConnect = connectorConfig.getProperty(GenericSinkConnectorConfig.KAFKA_ZKCONNECT, String.class);
             FabricMessageServiceImpl messageService = new FabricMessageServiceImpl(stack, zkConnect);
-            entityManager = new GenericFabricEntityManagerImpl<>();
-            entityManager.setMessageService(messageService);
+            messageManager = new GenericFabricMessageyManagerImpl<>();
+            messageManager.setMessageService(messageService);
 
         } catch (Exception e) {
             throw new ConnectException("Couldn't start GenericConnector!", e);
@@ -102,7 +102,7 @@ public class GenericSinkTask extends SinkTask {
 
             }
             log.info("Generic Connector batch size=" + keyRecords.size());
-            GenericRecordProcessor processor = new GenericRecordProcessor(connectorConfig, entityManager);
+            GenericRecordProcessor processor = new GenericRecordProcessor(connectorConfig, messageManager);
             processor.addAll(keyRecords, valueRecords, topicPartitions);
             processor.process();
 

@@ -26,7 +26,7 @@ import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
-import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
+import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
@@ -60,8 +60,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @Value("${datacloud.match.publish.match.history:false}")
     private boolean isMatchHistoryEnabled;
 
-    @Resource(name = "genericFabricEntityManager")
-    private GenericFabricEntityManager<MatchHistory> fabricEntityManager;
+    @Resource(name = "genericFabricMessageManager")
+    private GenericFabricMessageManager<MatchHistory> fabricEntityManager;
 
     @PostConstruct
     public void init() {

@@ -32,10 +32,9 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
+import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
 import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricNode;
@@ -43,15 +42,15 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatus;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatusEnum;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
-public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFunctionalTestNGBase {
+public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(GenericFabricEntityManagerImplFunctionalTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(GenericFabricMessageManagerImplFunctionalTestNG.class);
 
     private static final String BASE_DIR = "/Pods/Default/Services/PropData/Sources";
     private static final String FILE_PATTERN = "Snapshot/*/*.avro";
 
-    @Resource(name = "genericFabricEntityManager")
-    private GenericFabricEntityManager<SampleEntity> entityManager;
+    @Resource(name = "genericFabricMessageManager")
+    private GenericFabricMessageManager<SampleEntity> entityManager;
 
     @Autowired
     private FabricMessageService messageService;
@@ -65,7 +64,6 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
 
     @BeforeClass(groups = "functional")
     public void setUp() throws Exception {
-        FabricMessageServiceImpl messageServiceImpl = (FabricMessageServiceImpl) messageService;
         camille = CamilleEnvironment.getCamille();
         cleanHDFS();
     }
@@ -340,11 +338,11 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
             Assert.assertEquals(count1, count2);
             Assert.assertEquals(count1, LARGE_RECORD_COUNT);
 
-            List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf, BASE_DIR
-                    + "/testGenericFile1/Snapshot/*/*.avro");
+            List<GenericRecord> records1 = AvroUtils.getDataFromGlob(conf,
+                    BASE_DIR + "/testGenericFile1/Snapshot/*/*.avro");
             Assert.assertTrue(records1.get(0).get("age") == null);
-            List<GenericRecord> records2 = AvroUtils.getDataFromGlob(conf, BASE_DIR
-                    + "/testGenericFile2/Snapshot/*/*.avro");
+            List<GenericRecord> records2 = AvroUtils.getDataFromGlob(conf,
+                    BASE_DIR + "/testGenericFile2/Snapshot/*/*.avro");
             Assert.assertTrue(records2.get(0).get("age") != null);
 
         } catch (Exception ex) {
@@ -427,9 +425,9 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
 
     private Schema buildSchem1() {
         String schemaString = "{\"namespace\": \"FabricGenericRecord\", \"type\": \"record\", "
-                + "\"name\": \"FabricGenericRecord1\"," + "\"fields\": ["
-                + "{\"name\": \"RowId\", \"type\": \"long\"}," + "{\"name\": \"Id\", \"type\": \"string\"},"
-                + "{\"name\": \"FirstLastName\", \"type\": \"string\"}" + "]}";
+                + "\"name\": \"FabricGenericRecord1\"," + "\"fields\": [" + "{\"name\": \"RowId\", \"type\": \"long\"},"
+                + "{\"name\": \"Id\", \"type\": \"string\"}," + "{\"name\": \"FirstLastName\", \"type\": \"string\"}"
+                + "]}";
 
         log.info(schemaString);
         Schema.Parser parser = new Schema.Parser();
@@ -438,10 +436,9 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
 
     private Schema buildSchem2() {
         String schemaString = "{\"namespace\": \"FabricGenericRecord\", \"type\": \"record\", "
-                + "\"name\": \"FabricGenericRecord2\"," + "\"fields\": ["
-                + "{\"name\": \"RowId\", \"type\": \"long\"}," + "{\"name\": \"Id\", \"type\": \"string\"},"
-                + "{\"name\": \"FirstLastName\", \"type\": \"string\"}," + "{\"name\": \"age\", \"type\": \"int\"}"
-                + "]}";
+                + "\"name\": \"FabricGenericRecord2\"," + "\"fields\": [" + "{\"name\": \"RowId\", \"type\": \"long\"},"
+                + "{\"name\": \"Id\", \"type\": \"string\"}," + "{\"name\": \"FirstLastName\", \"type\": \"string\"},"
+                + "{\"name\": \"age\", \"type\": \"int\"}" + "]}";
 
         log.info(schemaString);
         Schema.Parser parser = new Schema.Parser();
@@ -453,7 +450,8 @@ public class GenericFabricEntityManagerImplFunctionalTestNG extends DataFabricFu
         private List<GenericRecord> records;
         private String batchId;
 
-        public ConnectorCallable(String batchId, List<GenericRecordRequest> recordRequests, List<GenericRecord> records) {
+        public ConnectorCallable(String batchId, List<GenericRecordRequest> recordRequests,
+                List<GenericRecord> records) {
             this.batchId = batchId;
             this.recordRequests = recordRequests;
             this.records = records;

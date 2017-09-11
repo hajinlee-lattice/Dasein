@@ -11,6 +11,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.datafabric.entitymanager.BaseFabricMessageMgr;
 import com.latticeengines.datafabric.entitymanager.FabricEntityProcessor;
 import com.latticeengines.datafabric.functionalframework.DataFabricFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
@@ -22,6 +23,8 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
     private final String latticeId = "12345654321";
 
     private SampleFabricEntityMgr entityManager;
+    BaseFabricMessageMgr<SampleEntity> msgManager;
+
     private SampleEntityProcessor processor;
 
     private String store;
@@ -50,12 +53,15 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
 
         SampleFabricEntityMgr.Builder builder = new SampleFabricEntityMgr.Builder().messageService(messageService)
                 .dataService(dataService).store(store).repository(repository).recordType(recordType);
-
         entityManager = new SampleFabricEntityMgr(builder);
         entityManager.init();
 
+        BaseFabricMessageMgrImpl.Builder msgBuilder = new BaseFabricMessageMgrImpl.Builder()
+                .messageService(messageService).topic(topic).recordType(recordType);
+        msgManager = new SampleFabricMessageMgr(msgBuilder);
         processor = new SampleEntityProcessor();
-        entityManager.addConsumer(group, processor, 1);
+        msgManager.init();
+        msgManager.addConsumer(group, processor, 1);
 
         List<SampleEntity> entities = createEntities(16);
         deleteEntities(entities);
@@ -64,7 +70,7 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
     @AfterMethod(groups = "functional")
     public void tearDown() throws Exception {
 
-        entityManager.removeConsumer(group, 12000);
+        msgManager.removeConsumer(group, 12000);
         // if (messageService.topicExists(topic)) {
         // messageService.deleteTopic(topic, false);
         // }
@@ -106,9 +112,8 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
         processor.invalidEntities = 0;
 
         // if (true) return;
-
         for (SampleEntity entity : entities) {
-            entityManager.publish(entity);
+            msgManager.publish(entity);
         }
 
         try {
@@ -131,9 +136,9 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
 
         List<SampleEntity> entities = createEntities(16);
 
-        for (SampleEntity entity : entities) {
-            entityManager.publish(entity);
-        }
+        // for (SampleEntity entity : entities) {
+        // entityManager.publish(entity);
+        // }
 
         try {
             Thread.sleep(4000);

@@ -6,9 +6,9 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.kafka.common.TopicPartition;
 
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 
