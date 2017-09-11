@@ -35,29 +35,30 @@ public class AddMD5Hash extends BaseOperation implements Function {
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
-        String data = "";
+        StringBuilder data = new StringBuilder();
         TupleEntry entry = functionCall.getArguments();
         for (int i = 0; i < entry.getFields().size(); i++) {
             if (excludeFields.contains(entry.getFields().get(i).toString())) {
                 continue;
             }
             if (i > 0) {
-                data += "|";
+                data.append("|");
             }
             Object tupleValue = entry.getTuple().getObject(i);
 
             if (tupleValue == null) {
                 tupleValue = "<null>";
             }
-            data += tupleValue.toString();
+            data.append(tupleValue.toString());
         }
+        String res = data.toString();
         if (truncateLen != null) {
-            data = data.substring(0, Math.min(data.length(), truncateLen));
+            res = res.substring(0, Math.min(res.length(), truncateLen));
         }
         if (compressed) {
-            functionCall.getOutputCollector().add(new Tuple(Base64Utils.encodeBase64(DigestUtils.md5(data))));
+            functionCall.getOutputCollector().add(new Tuple(Base64Utils.encodeBase64(DigestUtils.md5(res))));
         } else {
-            functionCall.getOutputCollector().add(new Tuple(DigestUtils.md5Hex(data)));
+            functionCall.getOutputCollector().add(new Tuple(DigestUtils.md5Hex(res)));
         }
 
     }
