@@ -75,6 +75,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
+        for (Job job : jobs) {
+            updateStepDisplayNameAndNumSteps(job);
+            updateJobDisplayNameAndDescription(job);
+        }
         return jobs;
     }
 
@@ -83,6 +87,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding job for application Id " + applicationId + " with pid " + tenantWithPid.getPid());
         Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
+        updateStepDisplayNameAndNumSteps(job);
+        updateJobDisplayNameAndDescription(job);
         return job;
     }
 
