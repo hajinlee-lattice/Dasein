@@ -433,27 +433,16 @@ angular.module('lp.playbook')
     }
 
     this.getRatingsCounts = function(ratings) {
-        ///pls/ratingengines/coverage
         var deferred = $q.defer();
-
         $http({
-            method: 'GET',
-            url: this.host + '/ratingengines/coverage'
+            method: 'POST',
+            url: this.host + '/ratingengines/coverage',
+            data: {
+                ratingEngineIds: ratings
+            }
         }).then(function(response) {
-            console.log('/ratingengines/coverage:', response.data);
+            deferred.resolve(response.data);
         });
-
-        var ret = {};
-        for(var i in ratings) {
-            var rating = ratings[i];
-            ret[rating] = {
-                accounts: Math.floor((Math.random()*1000000)+1),
-                contacts: Math.floor((Math.random()*1000000)+1)
-            } 
-        }
-        $timeout(function() {
-            deferred.resolve(ret);
-        }, 5 * 1000);
         return deferred.promise;
     }
 

@@ -7,6 +7,7 @@ angular.module('lp.playbook.wizard.rating', [])
     angular.extend(vm, {
         stored: PlaybookWizardStore.rating_form,
         ratings: Ratings,
+        ratingsCounts: null,
         currentPage: 1,
         pageSize: 20
     });
@@ -31,8 +32,15 @@ angular.module('lp.playbook.wizard.rating', [])
 
             });
         }
-        PlaybookWizardStore.getRatingsCounts(Ratings).then(function(result){
-            vm.ratingsCounts = result;
+        PlaybookWizardStore.getRatingsCounts(Ratings).then(function(coverage){
+            vm.ratingsCounts = {};
+            if(coverage && coverage.ratingEngineIdCoverageMap) {
+                for(var i in coverage.ratingEngineIdCoverageMap) {
+                    var key = i,
+                    item = coverage.ratingEngineIdCoverageMap[key];
+                    vm.ratingsCounts[key] = item;
+                }
+            }
         });
     }
 
@@ -76,9 +84,9 @@ angular.module('lp.playbook.wizard.rating', [])
         PlaybookWizardStore.setValidation('rating', form.$valid);
         if(vm.stored.rating_selection) {
             PlaybookWizardStore.setSettings({
-                ratingEngine: Ratings.filter(function(_obj) { 
-                    return (_obj.id === vm.stored.rating_selection);
-                })[0]
+                ratingEngine: {
+                    id :vm.stored.rating_selection
+                }
             });
         }
     }

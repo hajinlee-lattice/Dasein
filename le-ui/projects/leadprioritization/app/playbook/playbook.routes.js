@@ -60,7 +60,7 @@ angular
                         var play = PlaybookWizardStore.getCurrentPlay();
                         $scope.play_name = $stateParams.play_name || '';
                         $scope.segment = play.segment;
-                        $scope.targetsDisabled = (play.segment ? false : true);
+                        $scope.targetsDisabled = (play.ratingEngine ? false : true);
                         $scope.stateName = function() {
                             return $state.current.name;
                         }

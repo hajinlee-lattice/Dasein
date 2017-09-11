@@ -53,12 +53,12 @@
                             <label for="rating{{$index}}">{{rating.displayName}}</label>
                         </li>
                         <li class="accounts">
-                            <i ng-if="!vm.ratingsCounts[rating.id].accounts" class="fa fa-spinner fa-spin"></i>
-                            <label ng-if="vm.ratingsCounts[rating.id].accounts" for="rating{{$index}}">{{vm.ratingsCounts[rating.id].accounts|number}}</label>
+                            <i ng-if="!vm.ratingsCounts" class="fa fa-spinner fa-spin"></i>
+                            <label for="rating{{$index}}">{{vm.ratingsCounts[rating.id].accountCount|number}}</label>
                         </li>
                         <li class="contacts">
-                            <i ng-if="!vm.ratingsCounts[rating.id].contacts" class="fa fa-spinner fa-spin"></i>
-                            <label ng-if="vm.ratingsCounts[rating.id].contacts" for="rating{{$index}}">{{vm.ratingsCounts[rating.id].contacts|number}}</label>
+                            <i ng-if="!vm.ratingsCounts" class="fa fa-spinner fa-spin"></i>
+                            <label for="rating{{$index}}">{{vm.ratingsCounts[rating.id].contactCount|number}}</label>
                         </li>
                     </ul>
                 </li>
