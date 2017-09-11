@@ -162,6 +162,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
                 matchInputKeys.put(MatchKey.Domain, Collections.singletonList(InterfaceName.Email.name()));
             }
             if (preMatchEventTable.getAttribute(InterfaceName.PhoneNumber.name()) != null) {
+                matchInputKeys.put(MatchKey.PhoneNumber, new ArrayList<>());
                 MATCH_KEYS_TO_DISPLAY_NAMES.remove(MatchKey.PhoneNumber);
             }
         }

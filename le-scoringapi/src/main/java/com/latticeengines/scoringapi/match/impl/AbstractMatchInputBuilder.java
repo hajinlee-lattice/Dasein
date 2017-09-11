@@ -201,10 +201,12 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
                 && SchemaInterpretation.SalesforceAccount.name().equals(modelSummary.getSourceSchemaInterpretation())
                 && interpreted.getWebsite() != null) {
             keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getWebsite()));
+            addToKeyMapIfValueExists(keyMap, MatchKey.PhoneNumber, interpreted.getPhoneNumber(), record);
         } else if (modelSummary != null
                 && SchemaInterpretation.SalesforceLead.name().equals(modelSummary.getSourceSchemaInterpretation())
                 && interpreted.getEmailAddress() != null) {
             keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getEmailAddress()));
+            keyMap.put(MatchKey.PhoneNumber, new ArrayList<>());
         }
         addToKeyMapIfValueExists(keyMap, MatchKey.Name, interpreted.getCompanyName(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.City, interpreted.getCompanyCity(), record);
@@ -212,7 +214,6 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.DUNS, interpreted.getDuns(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Zipcode, interpreted.getPostalCode(), record);
-        addToKeyMapIfValueExists(keyMap, MatchKey.PhoneNumber, interpreted.getPhoneNumber(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.LatticeAccountID, interpreted.getLatticeAccountId(), record);
 
         log.info(String.format("MatchKey for record: %s is : %s", JsonUtils.serialize(record),
