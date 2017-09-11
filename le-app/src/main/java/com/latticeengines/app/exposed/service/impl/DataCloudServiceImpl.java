@@ -74,6 +74,7 @@ public class DataCloudServiceImpl implements DataCloudService {
         detail.setMatchedKeys(reportRequest.getMatchedKeys());
         detail.setAttribute(reportRequest.getAttribute());
         detail.setMatchedValue(reportRequest.getMatchedValue());
+        customerReport.setIncorrectAttribute(reportRequest.getAttribute());
         customerReport.setReproduceDetail(detail);
 
         matchCustomerReportProxy.matchCreateCustomerReport(customerReport);

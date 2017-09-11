@@ -65,6 +65,9 @@ public class CustomerReport implements HasId<String>, HasPid{
     @JsonProperty("MatchLog")
     private List<String> matchLog;
 
+    @JsonProperty("IncorrectAttribute")
+    private String incorrectAttribute;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -190,6 +193,15 @@ public class CustomerReport implements HasId<String>, HasPid{
     @Transient
     public void setMatchLog(List<String> matchLog) {
         this.matchLog = matchLog;
+    }
+
+    @Column(name = "INCORRECT_ATTRIBUTE")
+    public String getIncorrectAttribute() {
+        return incorrectAttribute;
+    }
+
+    public void setIncorrectAttribute(String incorrectAttribute) {
+        this.incorrectAttribute = incorrectAttribute;
     }
 
 }

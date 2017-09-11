@@ -14,6 +14,7 @@ import com.latticeengines.app.testframework.AppTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
 import com.latticeengines.domain.exposed.datacloud.customer.CustomerReportType;
 import com.latticeengines.domain.exposed.datacloud.customer.IncorrectMatchedAttributeReproduceDetail;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.pls.IncorrectLookupReportRequest;
 import com.latticeengines.domain.exposed.pls.IncorrectMatchedAttrReportRequest;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -61,7 +62,8 @@ public class DataCloudServiceImplDeploymentTestNG extends AppTestNGBase {
         Assert.assertNotNull(matchedCustomerReport.getReproduceDetail());
         Assert.assertTrue(matchedCustomerReport.getReproduceDetail() instanceof IncorrectMatchedAttributeReproduceDetail);
         IncorrectMatchedAttributeReproduceDetail detail = (IncorrectMatchedAttributeReproduceDetail) matchedCustomerReport.getReproduceDetail();
-        Assert.assertEquals(matchedKeys, detail.getMatchedKeys());
+        Assert.assertNotEquals(matchedKeys, detail.getMatchedKeys());
+        Assert.assertEquals(matchedKeys.get("LDC_Name"), detail.getMatchedKeys().get(MatchKey.Name.toString()));
         Assert.assertEquals(attribute,  detail.getAttribute());
     }
 
