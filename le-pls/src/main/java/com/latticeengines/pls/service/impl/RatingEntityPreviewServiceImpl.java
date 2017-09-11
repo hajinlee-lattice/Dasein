@@ -32,19 +32,30 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
     private static final Logger log = LoggerFactory.getLogger(RatingEntityPreviewServiceImpl.class);
 
-    private static final String NAME_AS_PER_LATTICE_MATCH = "LDC_Name";
-
     @Autowired
     private EntityProxy entityProxy;
 
-    List<String> fields = Arrays.asList(InterfaceName.AccountId.name(), //
+    List<String> accountFields = Arrays.asList(InterfaceName.AccountId.name(), //
             InterfaceName.SalesforceAccountID.name(), //
             InterfaceName.CompanyName.name(), //
             InterfaceName.Domain.name(), //
             InterfaceName.Website.name(), //
             InterfaceName.SalesforceAccountID.name(), //
             InterfaceName.LastModifiedDate.name(), //
-            NAME_AS_PER_LATTICE_MATCH);
+            InterfaceName.LDC_Name.name());
+
+    List<String> contactFields = Arrays.asList(InterfaceName.AccountId.name(), //
+            InterfaceName.ContactId.name(), //
+            InterfaceName.CompanyName.name(), //
+            InterfaceName.Email.name(), //
+            InterfaceName.ContactName.name(), //
+            InterfaceName.City.name(), //
+            InterfaceName.State.name(), //
+            InterfaceName.Country.name(), //
+            InterfaceName.PostalCode.name(), //
+            InterfaceName.PhoneNumber.name(), //
+            InterfaceName.Title.name(), //
+            InterfaceName.Address_Street_1.name());
 
     @Override
     public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
@@ -101,11 +112,18 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
     private void setLookups(BusinessEntity entityType, FrontEndQuery entityFrontEndQuery, RatingModel model,
             List<String> lookupFieldNames) {
-        String[] fieldArray = new String[fields.size()];
+        String[] fieldArray = null;
         if (CollectionUtils.isNotEmpty(lookupFieldNames)) {
+            fieldArray = new String[lookupFieldNames.size()];
             lookupFieldNames.toArray(fieldArray);
         } else {
-            fields.toArray(fieldArray);
+            if (entityType == BusinessEntity.Account) {
+                fieldArray = new String[accountFields.size()];
+                accountFields.toArray(fieldArray);
+            } else {
+                fieldArray = new String[contactFields.size()];
+                contactFields.toArray(fieldArray);
+            }
         }
         entityFrontEndQuery.addLookups(entityType, fieldArray);
 

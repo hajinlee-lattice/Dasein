@@ -126,24 +126,18 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             boolean isRestrictNotNullSalesforceId) {
         try {
             MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentId);
-            FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
-            accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
 
-            FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
-            FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
-
-            accountFrontEndQuery.setAccountRestriction(accountRestriction);
-            accountFrontEndQuery.setContactRestriction(contactRestriction);
-            accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+            FrontEndQuery accountFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Account,
+                    isRestrictNotNullSalesforceId, segment);
+            FrontEndQuery contactFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Contact,
+                    isRestrictNotNullSalesforceId, segment);
 
             Long accountCount = entityProxy.getCount( //
                     tenent.getId(), //
                     accountFrontEndQuery);
+            Long contactCount = getContactCount(tenent, contactFrontEndQuery);
 
             CoverageInfo coverageInfo = new CoverageInfo();
-            // TODO - fix it to read contact count from redshift
-            Long contactCount = 7000L;
-            contactCount += rand.nextInt(500);
 
             coverageInfo.setAccountCount(accountCount);
             coverageInfo.setContactCount(contactCount);
@@ -154,21 +148,43 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
     }
 
+    Long getContactCount(Tenant tenent, FrontEndQuery contactFrontEndQuery) {
+        Long contactCount = 0L;
+        try {
+            contactCount = entityProxy.getCount( //
+                    tenent.getId(), //
+                    contactFrontEndQuery);
+        } catch (Exception ex) {
+            log.info("Ignoring exception in getting contact count" + ex);
+        }
+        return contactCount;
+    }
+
+    FrontEndQuery createEntityFronEndQuery(BusinessEntity entityType, boolean isRestrictNotNullSalesforceId,
+            MetadataSegment segment) {
+        FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
+
+        entityFrontEndQuery.setMainEntity(entityType);
+
+        FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+        FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
+
+        entityFrontEndQuery.setAccountRestriction(accountRestriction);
+        entityFrontEndQuery.setContactRestriction(contactRestriction);
+        entityFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+        return entityFrontEndQuery;
+    }
+
     private void processSingleRatingId(Tenant tenent, Map<String, CoverageInfo> ratingEngineIdCoverageMap,
             String ratingEngineId, boolean isRestrictNotNullSalesforceId) {
         try {
             RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
-            FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
-            accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
+            MetadataSegment segment = ratingEngine.getSegment();
 
-            FrontEndRestriction accountRestriction = new FrontEndRestriction(
-                    ratingEngine.getSegment().getAccountRestriction());
-            FrontEndRestriction contactRestriction = new FrontEndRestriction(
-                    ratingEngine.getSegment().getContactRestriction());
-
-            accountFrontEndQuery.setAccountRestriction(accountRestriction);
-            accountFrontEndQuery.setContactRestriction(contactRestriction);
-            accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+            FrontEndQuery accountFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Account,
+                    isRestrictNotNullSalesforceId, segment);
+            FrontEndQuery contactFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Contact,
+                    isRestrictNotNullSalesforceId, segment);
 
             List<RatingModel> ratingModels = new ArrayList<>();
             for (RatingModel model : ratingEngine.getRatingModels()) {
@@ -183,11 +199,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
                     .reduce((x, y) -> x + y);
             Long accountCount = accountCountOption.orElse(0L);
+            Long contactCount = getContactCount(tenent, contactFrontEndQuery);
 
             CoverageInfo coverageInfo = new CoverageInfo();
-            // TODO - fix it to read contact count from redshift
-            Long contactCount = 7000L;
-            contactCount += rand.nextInt(500);
 
             coverageInfo.setAccountCount(accountCount);
             coverageInfo.setContactCount(contactCount);
@@ -220,15 +234,10 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             SegmentIdAndModelRulesPair segmentIdModelRulesPair, boolean isRestrictNotNullSalesforceId) {
         try {
             MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentIdModelRulesPair.getSegmentId());
-            FrontEndQuery accountFrontEndQuery = new FrontEndQuery();
-            accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
-
-            FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
-            FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
-
-            accountFrontEndQuery.setAccountRestriction(accountRestriction);
-            accountFrontEndQuery.setContactRestriction(contactRestriction);
-            accountFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+            FrontEndQuery accountFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Account,
+                    isRestrictNotNullSalesforceId, segment);
+            FrontEndQuery contactFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Contact,
+                    isRestrictNotNullSalesforceId, segment);
 
             List<RatingModel> ratingModels = new ArrayList<>();
             RuleBasedModel ratingModelWrapper = new RuleBasedModel();
@@ -242,11 +251,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
                     .reduce((x, y) -> x + y);
             Long accountCount = accountCountOption.orElse(0L);
+            Long contactCount = getContactCount(tenent, contactFrontEndQuery);
 
             CoverageInfo coverageInfo = new CoverageInfo();
-            // TODO - fix it to read contact count from redshift
-            Long contactCount = 7000L;
-            contactCount += rand.nextInt(500);
 
             coverageInfo.setAccountCount(accountCount);
             coverageInfo.setContactCount(contactCount);
