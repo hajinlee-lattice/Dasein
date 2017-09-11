@@ -110,9 +110,6 @@ angular.module('common.datacloud.explorer', [
         }
 
         if (vm.section === 'segment.analysis') {
-
-            console.log(QueryRestriction);
-
             vm.setCurrentRestrictionForSaveButton();
             vm.metadataSegments = QueryRestriction;
         }
@@ -1227,21 +1224,26 @@ angular.module('common.datacloud.explorer', [
         vm.clearExplorerSegments();
 
         if (vm.metadataSegment != undefined){
-            var restrictions = vm.metadataSegments.restriction;
+            var accountRestrictions = vm.metadataSegments.accountRestrictions,
+                contactRestrictions = vm.metadataSegments.contactRestrictions;
         } else {
-            var restrictions = QueryRestriction;
+            var queryRestriction = QueryRestriction,
+                accountRestrictions = queryRestriction.accountRestrictions,
+                contactRestrictions = queryRestriction.contactRestrictions;
         };
 
         if (vm.addBucketTreeRoot) {
             return;
         }
 
-        // FIXME: this should be recursive... -Lazarus
-        for (var i=0; i < restrictions.length; i++) {
-            var restriction = restrictions[i];
+        console.log(accountRestrictions, contactRestrictions);
 
-            if (restriction.bucketRestriction) {
-                var restriction = restriction.bucketRestriction,
+        // FIXME: this should be recursive... -Lazarus
+        for (var i=0; i < accountRestrictions.length; i++) {
+            var restriction = accountRestrictions[i].restriction.logicalRestriction.restrictions;
+
+            if (restriction.restriction) {
+                var restriction = restriction.restriction,
                     range = restriction.bkt.Rng,
                     label = restriction.bkt.Lbl,
                     key = restriction.attr.split(".")[1],
@@ -1256,6 +1258,27 @@ angular.module('common.datacloud.explorer', [
                 }
             }
         }
+
+        for (var i=0; i < contactRestrictions.length; i++) {
+            var restriction = contactRestrictions[i].restriction.logicalRestriction.restrictions;
+
+            if (restriction.restriction) {
+                var restriction = restriction.restriction,
+                    range = restriction.bkt.Rng,
+                    label = restriction.bkt.Lbl,
+                    key = restriction.attr.split(".")[1],
+                    enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
+                    index = vm.enrichmentsMap[key];
+
+                if (index || index === 0) {
+                    // vm.enrichments[index].SegmentChecked = true; PLS-4589
+                    vm.enrichments[index].SegmentRangesChecked = {};
+                    vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
+                    vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
+                }
+            }
+        }
+        
     }
 
     vm.clearExplorerSegments = function() {
@@ -1411,10 +1434,18 @@ angular.module('common.datacloud.explorer', [
         QueryStore.counts.accounts.loading = true;
         QueryStore.counts.contacts.loading = true;
 
-        if (vm.segmentAttributeInput[attributeKey] === true) {
-            QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+        if(entity === 'Account') {
+            if (vm.segmentAttributeInput[attributeKey] === true) {
+                QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+            } else {
+                QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+            }
         } else {
-            QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+            if (vm.segmentAttributeInput[attributeKey] === true) {
+                QueryStore.addContactRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+            } else {
+                QueryStore.removeContactRestriction({columnName: attributeKey, resourceType: entity, bkt: topBkt});
+            }
         }
 
         if (segmentName === 'Create') {
@@ -1456,14 +1487,22 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         
-        if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
-            QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+
+        if(entity === 'Account') {
+            if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
+                QueryStore.addAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+            } else {
+                QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+            }
         } else {
-            QueryStore.removeAccountRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+            if (vm.segmentAttributeInputRange[attributeRangeKey] === true) {
+                QueryStore.addContactRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+            } else {
+                QueryStore.removeContactRestriction({columnName: attributeKey, resourceType: entity, bkt: stat});
+            }
         }
-        /*
-         * Rebuild the tile table items
-         */
+
+
         vm.TileTableItems = {};
         if(vm.metadataSegments || QueryRestriction) {
             getExplorerSegments(vm.enrichments);

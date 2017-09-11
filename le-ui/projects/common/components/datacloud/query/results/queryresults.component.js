@@ -39,8 +39,6 @@ angular.module('common.datacloud.query.results', [
 
     function updatePage() {
 
-        console.log(vm.saved);
-
         vm.loading = true;
 
         var offset = (vm.current - 1) * vm.pagesize;

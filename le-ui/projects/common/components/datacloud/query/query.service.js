@@ -102,6 +102,8 @@ angular.module('common.datacloud.query.service',[
 
 
     this.setAccountRestriction = function(accountRestriction) {
+        console.log(accountRestriction);
+
         this.accountRestriction = accountRestriction;
     };
     this.getAccountRestriction = function() {
@@ -112,6 +114,9 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.setContactRestriction = function(contactRestriction) {
+
+        console.log(contactRestriction);
+
         this.contactRestriction = contactRestriction;
     };
     this.getContactRestriction = function() {
@@ -259,11 +264,11 @@ angular.module('common.datacloud.query.service',[
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
             self.setResourceTypeCount('accounts', false, data);
-            this.counts.accounts.loading = false;
+            self.counts.accounts.loading = false;
         });
         this.GetCountByQuery('contacts').then(function(data){
             self.setResourceTypeCount('contacts', false, data);
-            this.counts.contacts.loading = false;
+            self.counts.contacts.loading = false;
         });
     };
 
@@ -289,11 +294,11 @@ angular.module('common.datacloud.query.service',[
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
             self.setResourceTypeCount('accounts', false, data);
-            this.counts.accounts.loading = false;
+            self.counts.accounts.loading = false;
         });
         this.GetCountByQuery('contacts').then(function(data){
             self.setResourceTypeCount('contacts', false, data);
-            this.counts.contacts.loading = false;
+            self.counts.contacts.loading = false;
         });
 
     };
@@ -326,11 +331,11 @@ angular.module('common.datacloud.query.service',[
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
             self.setResourceTypeCount('accounts', false, data);
-            this.counts.accounts.loading = false;
+            self.counts.accounts.loading = false;
         });
         this.GetCountByQuery('contacts').then(function(data){
             self.setResourceTypeCount('contacts', false, data);
-            this.counts.contacts.loading = false;
+            self.counts.contacts.loading = false;
         });
     };
 
