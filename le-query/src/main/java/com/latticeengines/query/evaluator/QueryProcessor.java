@@ -153,7 +153,13 @@ public class QueryProcessor {
     }
 
     private SQLQuery<?> addPaging(SQLQuery<?> sqlQuery, PageFilter pageFilter) {
-        return sqlQuery.limit(pageFilter.getNumRows()).offset(pageFilter.getRowOffset());
+        if (pageFilter.getNumRows() > 0) {
+            sqlQuery = sqlQuery.limit(pageFilter.getNumRows());
+        }
+        if (pageFilter.getRowOffset() > 0) {
+            sqlQuery = sqlQuery.offset(pageFilter.getRowOffset());
+        }
+        return sqlQuery;
     }
 
     @SuppressWarnings("unchecked")

@@ -75,7 +75,7 @@
         <javax.servlet.version>3.1.0</javax.servlet.version> <!-- just keep up with tomcat version -->
         <javax.jsp.version>2.2</javax.jsp.version> <!-- just keep up with tomcat version -->
         <flink.akka-version>2.3-custom</flink.akka-version> <!-- to be compatible with flink 1.2.0 -->
-        <redshift.jdbc.version>1.2.1.1001</redshift.jdbc.version> <!-- we upload to nexus -->
+        <redshift.jdbc.version>1.2.7.1003</redshift.jdbc.version> <!-- we upload to nexus -->
         <joda.version>2.8.1</joda.version>
         <cronutils.version>4.0.1</cronutils.version> <!-- need to upgrade joda -->
         <marketo.soap.sdk.version>2.7</marketo.soap.sdk.version> <!-- uploaded to nexues ? -->

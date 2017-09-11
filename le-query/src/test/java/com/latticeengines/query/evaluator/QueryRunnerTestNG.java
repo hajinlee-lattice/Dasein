@@ -9,6 +9,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
@@ -93,8 +94,12 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .exists(BusinessEntity.Contact) //
                 .that(inner) //
                 .build();
-        Query query = Query.builder().select(BusinessEntity.Account, ATTR_ACCOUNT_NAME).from(BusinessEntity.Account)
-                .where(restriction).build();
+        Query query = Query.builder() //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
+                .from(BusinessEntity.Account) //
+                .where(restriction) //
+                // .page(new PageFilter(0, 15)) //
+                .build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
         Assert.assertEquals(results.size(), 5);
     }
