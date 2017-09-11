@@ -21,7 +21,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datafabric.entitymanager.GenericFabricEntityManager;
+import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
+import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricNode;
@@ -30,14 +31,14 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricStatusE
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
-@Component("genericFabricEntityManager")
+@Component("genericFabricMessageManager")
 @Lazy
-public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends BaseFabricEntityMgrImpl<T>
-        implements GenericFabricEntityManager<T> {
+public class GenericFabricMessageyManagerImpl<T extends HasId<String>> extends BaseFabricMessageMgrImpl<T>
+        implements GenericFabricMessageManager<T> {
 
     private static final int TEN_MINUTES = 600_000;
 
-    private static final Logger log = LoggerFactory.getLogger(GenericFabricEntityManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(GenericFabricMessageyManagerImpl.class);
 
     public static final String FABRIC_GENERIC_CONNECTOR = "FabricGenericConnector";
     public static final String FABRIC_GENERIC_RECORD = "FabricGenericRecord";
@@ -49,12 +50,12 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
     @Value("${datafabric.generic.entity.kafka.replication}")
     private int kafkaRep;
 
-    public GenericFabricEntityManagerImpl() {
-        super(new BaseFabricEntityMgrImpl.Builder().recordType(FABRIC_GENERIC_RECORD).topic(FABRIC_GENERIC_CONNECTOR)
-                .scope(ENVIRONMENT_PRIVATE).store(FABRIC_GENERIC_CONNECTOR).repository(FABRIC_GENERIC_CONNECTOR));
+    public GenericFabricMessageyManagerImpl() {
+        super(new BaseFabricMessageMgrImpl.Builder().recordType(FABRIC_GENERIC_RECORD).topic(FABRIC_GENERIC_CONNECTOR)
+                .scope(ENVIRONMENT_PRIVATE));
     }
 
-    public GenericFabricEntityManagerImpl(Builder builder) {
+    public GenericFabricMessageyManagerImpl(Builder builder) {
         super(builder);
     }
 
@@ -152,7 +153,8 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
         if (!isValid) {
             return;
         }
-        Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
+        Pair<GenericRecord, Map<String, Object>> pair = FabricEntityFactory.entityToPair(entity, clazz,
+                getRecordType());
         GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
         publishInternal(request, genericRecord);
     }
@@ -179,7 +181,8 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
             request.setBatchId(batchId);
             request.setRecordType(recordType);
             request.setRepositories(Arrays.asList(repository));
-            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity, clazz);
+            Pair<GenericRecord, Map<String, Object>> pair = FabricEntityFactory.entityToPair(entity, clazz,
+                    getRecordType());
             GenericRecord genericRecord = (pair == null) ? null : pair.getLeft();
             publishInternal(request, genericRecord);
         }
@@ -371,7 +374,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
                 if (!disabled) {
                     disabled = true;
                     lastCheckTime = System.currentTimeMillis();
-                    log.error("Set GenericFabricEntityManagerImpl to be Disabled!");
+                    log.error("Set GenericFabricMessageManager to be Disabled!");
                     close();
                 }
             }
@@ -387,7 +390,7 @@ public class GenericFabricEntityManagerImpl<T extends HasId<String>> extends Bas
                     disabled = false;
                     lastCheckTime = System.currentTimeMillis();
                     init();
-                    log.warn("Set GenericFabricEntityManagerImpl to be Enabled!");
+                    log.warn("Set GenericFabricMessageManager to be Enabled!");
                 }
             }
         }

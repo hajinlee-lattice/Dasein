@@ -2,15 +2,12 @@ package com.latticeengines.datafabric.entitymanager.impl;
 
 import static com.latticeengines.datafabric.util.RedisUtil.INDEX;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
@@ -18,31 +15,19 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.latticeengines.common.exposed.util.AvroReflectionUtils;
 import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
-import com.latticeengines.datafabric.entitymanager.FabricEntityProcessor;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
-import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
-import com.latticeengines.datafabric.service.message.FabricMessageProducer;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
-import com.latticeengines.datafabric.service.message.FabricStreamProc;
-import com.latticeengines.datafabric.service.message.impl.FabricMessageProducerImpl;
-import com.latticeengines.datafabric.service.message.impl.SimpleFabricMessageConsumerImpl;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.datafabric.util.RedisUtil;
 import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
-import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
-import com.latticeengines.domain.exposed.datafabric.RecordKey;
-import com.latticeengines.domain.exposed.datafabric.TopicScope;
-import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFabricEntityMgr<T> {
@@ -61,14 +46,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     private boolean disabled;
 
     private String store;
-
-    private String topic;
-
-    private TopicScope scope;
-
-    private FabricMessageProducer producer;
-
-    private Map<String, Object> consumers;
 
     private Schema schema;
 
@@ -89,8 +66,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         this.repository = builder.repository;
         this.recordType = builder.recordType;
 
-        this.topic = builder.topic;
-        this.scope = builder.scope;
         this.disabled = false;
 
         this.enforceRemoteDynamo = builder.enforceRemoteDynamo;
@@ -106,26 +81,18 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     @Override
     @PostConstruct
     public void init() {
-        log.info("Initializing Datafabric " + topic);
         if (disabled) {
             log.info("Datafabric disabled");
             return;
         }
 
-        entityClass = getTypeParameterClass();
+        entityClass = FabricEntityFactory.getTypeParameterClass(getClass().getGenericSuperclass());
         // get the reflected schema for Entity
         if (entityClass != null) {
             schema = FabricEntityFactory.getFabricSchema(entityClass, recordType);
         }
         if (schema != null) {
             setupStore();
-        }
-
-        if (!disabled && (topic != null)) {
-            producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder()
-                    .messageService(this.messageService).topic(this.topic).scope(scope));
-
-            consumers = new HashMap<>();
         }
     }
 
@@ -169,7 +136,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled) {
             return;
         }
-        Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+        Pair<GenericRecord, Map<String, Object>> pair = FabricEntityFactory.entityToPair(entity, recordType, schema);
         dataStore.createRecord(entity.getId(), pair);
     }
 
@@ -181,7 +148,8 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
 
         Map<String, Pair<GenericRecord, Map<String, Object>>> records = new HashMap<>();
         for (T entity : entities) {
-            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+            Pair<GenericRecord, Map<String, Object>> pair = FabricEntityFactory.entityToPair(entity, recordType,
+                    schema);
             records.put(entity.getId(), pair);
         }
         dataStore.createRecords(records);
@@ -192,7 +160,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled) {
             return;
         }
-        Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+        Pair<GenericRecord, Map<String, Object>> pair = FabricEntityFactory.entityToPair(entity, recordType, schema);
         dataStore.updateRecord(entity.getId(), pair);
     }
 
@@ -201,7 +169,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled) {
             return;
         }
-        Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
+        Pair<GenericRecord, Map<String, Object>> pair = FabricEntityFactory.entityToPair(entity, recordType, schema);
         GenericRecord record = (pair == null) ? null : pair.getLeft();
         dataStore.deleteRecord(entity.getId(), record);
     }
@@ -216,7 +184,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         if (disabled) {
             return null;
         }
-        return pairToEntity(dataStore.findRecord(id));
+        return FabricEntityFactory.pairToEntity(dataStore.findRecord(id), entityClass, schema);
     }
 
     @Override
@@ -230,7 +198,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         List<T> entities = new ArrayList<>();
         for (String id : ids) {
             Pair<GenericRecord, Map<String, Object>> pair = StringUtils.isEmpty(id) ? null : pairs.get(id);
-            entities.add(pairToEntity(pair));
+            entities.add(FabricEntityFactory.pairToEntity(pair, entityClass, schema));
         }
         return entities;
     }
@@ -242,128 +210,14 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         List<Pair<GenericRecord, Map<String, Object>>> pairs = dataStore.findRecords(properties);
         List<T> entities = new ArrayList<T>();
         for (Pair<GenericRecord, Map<String, Object>> pair : pairs) {
-            entities.add(pairToEntity(pair));
+            entities.add(FabricEntityFactory.pairToEntity(pair, entityClass, schema));
         }
         return entities;
     }
 
     @Override
-    public void publish(T entity) {
-        if (disabled || (entity == null))
-            return;
-        try {
-            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
-            GenericRecord record = (pair == null) ? null : pair.getLeft();
-            producer.send(recordType, entity.getId(), record);
-        } catch (Exception e) {
-            log.info("Publish entity failed " + recordType + " " + entity.getId(), e);
-        }
-    }
-
-    @Override
-    public void publish(RecordKey recordKey, T entity) {
-        if (disabled || (entity == null))
-            return;
-        try {
-            Pair<GenericRecord, Map<String, Object>> pair = entityToPair(entity);
-            GenericRecord record = (pair == null) ? null : pair.getLeft();
-            producer.send(recordKey, record);
-        } catch (Exception e) {
-            log.error("Publish entity failed " + recordType + " " + entity.getId(), e);
-        }
-    }
-
-    @Override
-    public Future<RecordMetadata> publish(GenericRecordRequest recordRequest, GenericRecord record) {
-        if (disabled || record == null)
-            return null;
-        return producer.send(recordRequest, record);
-    }
-
-    @Override
-    public void addConsumer(String consumerGroup, FabricEntityProcessor processor, int numThreads) {
-        if (disabled)
-            return;
-
-        FabricStreamProc streamProc = new BaseFabricEntityStreamProc(recordType, processor);
-
-        FabricMessageConsumer consumer = new SimpleFabricMessageConsumerImpl(
-                new SimpleFabricMessageConsumerImpl.Builder().messageService(messageService).group(consumerGroup)
-                        .topic(topic).scope(scope).processor(streamProc).numThreads(numThreads));
-        consumers.put(consumerGroup, consumer);
-        log.info("Add consumer " + consumerGroup + " " + consumer.toString());
-    }
-
-    @Override
-    public void removeConsumer(String consumerGroup, int timeWaits) {
-        if (disabled)
-            return;
-        FabricMessageConsumer consumer = (FabricMessageConsumer) consumers.get(consumerGroup);
-        if (consumer != null) {
-            log.info("Remove consumer " + consumerGroup + " " + consumer + "\n");
-        } else {
-            log.info("Did not find consumer " + consumerGroup + " to delete\n");
-        }
-        consumer.stop(timeWaits);
-        consumers.remove(consumerGroup);
-    }
-
-    @Override
     public boolean isDisabled() {
         return disabled;
-    }
-
-    protected Pair<GenericRecord, Map<String, Object>> entityToPair(T entity) {
-        try {
-            if (entity instanceof FabricEntity) {
-                GenericRecord record = ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
-                Map<String, Object> tags = ((FabricEntity<?>) entity).getTags();
-                return Pair.of(record, tags);
-            }
-            log.info("Create Entity " + entity + "Schema " + schema.toString());
-            return Pair.of(AvroReflectionUtils.toGenericRecord(entity, schema), null);
-        } catch (Exception e) {
-            log.error("Failed to convert entity to generic record", e);
-            return null;
-        }
-    }
-
-    protected Pair<GenericRecord, Map<String, Object>> entityToPair(T entity, Class<T> clazz) {
-        try {
-            if (entity instanceof FabricEntity) {
-                GenericRecord record = ((FabricEntity<?>) entity).toFabricAvroRecord(recordType);
-                Map<String, Object> tags = ((FabricEntity<?>) entity).getTags();
-                return Pair.of(record, tags);
-            }
-            Schema schema = FabricEntityFactory.getFabricSchema(clazz, recordType);
-            log.debug("Create Entity " + entity + "Schema " + schema.toString());
-            return Pair.of(AvroReflectionUtils.toGenericRecord(entity, schema), null);
-        } catch (Exception e) {
-            log.error("Failed to convert entity to generic record", e);
-            return null;
-        }
-    }
-
-    private T pairToEntity(Pair<GenericRecord, Map<String, Object>> pair) {
-        if (pair == null || pair.getLeft() == null) {
-            return null;
-        }
-        GenericRecord record = pair.getLeft();
-        Map<String, Object> tags = pair.getRight();
-        T entity = FabricEntityFactory.fromFabricAvroRecord(record, entityClass, schema);
-        FabricEntityFactory.setTags(entity, tags);
-        return entity;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Class<T> getTypeParameterClass() {
-        Type type = getClass().getGenericSuperclass();
-        ParameterizedType paramType = (ParameterizedType) type;
-        Type actualType = paramType.getActualTypeArguments()[0];
-        if (actualType.getTypeName().equals("T")) {
-            return null;
-        }
-        return (Class<T>) actualType;
     }
 
     private List<String> dedupIds(List<String> ids) {
@@ -374,85 +228,6 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
             }
         }
         return new ArrayList<>(uniqueIds);
-    }
-
-    public class BaseFabricEntityStreamProc implements FabricStreamProc {
-
-        FabricEntityProcessor processor;
-        String recordType;
-
-        public BaseFabricEntityStreamProc(String recordType, FabricEntityProcessor processor) {
-            this.processor = processor;
-            this.recordType = recordType;
-            ;
-        }
-
-        @Override
-        public void processRecord(String type, String id, GenericRecord record) {
-            if (!type.equals(recordType)) {
-                return;
-            }
-            T entity = pairToEntity(Pair.of(record, null));
-            processor.process(entity);
-        }
-    }
-
-    public static class Builder {
-
-        private FabricMessageService messageService = null;
-        private FabricDataService dataService = null;
-
-        private String store;
-
-        private String repository;
-
-        private String recordType;
-
-        private String topic;
-
-        private TopicScope scope = TopicScope.PRIVATE;
-
-        private boolean enforceRemoteDynamo = false;
-
-        public Builder store(String store) {
-            this.store = store;
-            return this;
-        }
-
-        public Builder repository(String repository) {
-            this.repository = repository;
-            return this;
-        }
-
-        public Builder recordType(String recordType) {
-            this.recordType = recordType;
-            return this;
-        }
-
-        public Builder topic(String topic) {
-            this.topic = topic;
-            return this;
-        }
-
-        public Builder scope(TopicScope scope) {
-            this.scope = scope;
-            return this;
-        }
-
-        public Builder messageService(FabricMessageService messageService) {
-            this.messageService = messageService;
-            return this;
-        }
-
-        public Builder dataService(FabricDataService dataService) {
-            this.dataService = dataService;
-            return this;
-        }
-
-        public Builder enforceRemoteDynamo(boolean enforce) {
-            this.enforceRemoteDynamo = enforce;
-            return this;
-        }
     }
 
     @Override
@@ -470,9 +245,43 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
         return dataStore.findAttributes(id);
     }
 
-    @Override
-    public void close() {
-        producer.close();
+    public static class Builder {
+        private FabricMessageService messageService = null;
+        private FabricDataService dataService = null;
+        private String store;
+        private String repository;
+        private String recordType;
+        private boolean enforceRemoteDynamo = false;
+
+        public Builder store(String store) {
+            this.store = store;
+            return this;
+        }
+
+        public Builder repository(String repository) {
+            this.repository = repository;
+            return this;
+        }
+
+        public Builder recordType(String recordType) {
+            this.recordType = recordType;
+            return this;
+        }
+
+        public Builder messageService(FabricMessageService messageService) {
+            this.messageService = messageService;
+            return this;
+        }
+
+        public Builder dataService(FabricDataService dataService) {
+            this.dataService = dataService;
+            return this;
+        }
+
+        public Builder enforceRemoteDynamo(boolean enforce) {
+            this.enforceRemoteDynamo = enforce;
+            return this;
+        }
     }
 
 }
