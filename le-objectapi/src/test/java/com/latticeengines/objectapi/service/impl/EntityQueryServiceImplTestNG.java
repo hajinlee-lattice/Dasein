@@ -90,7 +90,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertEquals(count, new Long(42L));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testContactDataWithAccountIds() {
         // mimic a segment get from metadata api
         MetadataSegment segment = new MetadataSegment();
