@@ -45,6 +45,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
             Play retrievedPlay = findByName(play.getName());
             if (retrievedPlay == null) {
                 log.warn(String.format("Play with name %s does not exist, creating it now", play.getName()));
+                createNewPlay(play);
                 playDao.create(play);
                 return play;
             } else {
@@ -83,7 +84,7 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
             existingPlay.setExcludeItemsWithoutSalesforceId(play.getExcludeItemsWithoutSalesforceId());
         }
         if (play.getRatingEngine() != null) {
-            play.setRatingEngine(findRatingEngine(play));
+            existingPlay.setRatingEngine(findRatingEngine(play));
         }
     }
 

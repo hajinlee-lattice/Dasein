@@ -40,7 +40,7 @@ import com.latticeengines.domain.exposed.db.HasAuditingFields;
 public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingFields {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Column(name = "PID", nullable = false)
     private Long pid;

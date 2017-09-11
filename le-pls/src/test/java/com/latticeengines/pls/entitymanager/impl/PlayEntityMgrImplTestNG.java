@@ -80,7 +80,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         ratingEngine2.setSegment(retrievedSegment);
         ratingEngine2.setCreatedBy(CREATED_BY);
         ratingEngine2.setType(RatingEngineType.RULE_BASED);
-        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine1, tenant.getId());
+        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine2, tenant.getId());
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine2.setId(createdRatingEngine.getId());
 
@@ -127,6 +127,9 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         newRatingEngine.setId(ratingEngine2.getId());
         retrievedPlay.setRatingEngine(newRatingEngine);
         retrievedPlay.setExcludeItemsWithoutSalesforceId(true);
+
+        System.out.println("ratingEngine 1 is " + ratingEngine1.getId());
+        System.out.println("ratingEngine 2 is " + ratingEngine2.getId());
 
         playEntityMgr.createOrUpdatePlay(retrievedPlay);
         retrievedPlay = playEntityMgr.findByName(playName);

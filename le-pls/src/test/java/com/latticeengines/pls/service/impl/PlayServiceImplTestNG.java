@@ -3,6 +3,8 @@ package com.latticeengines.pls.service.impl;
 import java.util.List;
 
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,6 +27,8 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+
+    private static final Logger log = LoggerFactory.getLogger(PlayServiceImplTestNG.class);
 
     @Autowired
     private SegmentService segmentService;
@@ -92,7 +96,8 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
     private void assertPlay(Play play) {
         Assert.assertNotNull(play);
         Assert.assertEquals(play.getCreatedBy(), CREATED_BY);
-
+        Assert.assertNotNull(play.getRatingEngine());
+        log.info(String.format("play is %s", play.toString()));
     }
 
     private Play createDefaultPlay() {

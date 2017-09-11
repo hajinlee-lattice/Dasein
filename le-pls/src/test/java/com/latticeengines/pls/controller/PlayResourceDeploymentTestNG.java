@@ -261,5 +261,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private void assertPlay(Play play) {
         Assert.assertNotNull(play);
         Assert.assertEquals(play.getName(), name);
+        Assert.assertNotNull(play.getRatingEngine());
+        Assert.assertEquals(play.getRatingEngine().getId(), ratingEngine1.getId());
     }
 }
