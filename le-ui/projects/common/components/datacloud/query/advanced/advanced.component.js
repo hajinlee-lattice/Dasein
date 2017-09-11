@@ -13,8 +13,10 @@ angular.module('common.datacloud.query.advanced', [
         mode: $stateParams.mode,
         cube: Cube,
         history: QueryStore.history,
-        restriction: QueryStore.restriction,
+        restriction: QueryStore.accountRestriction,
         enrichmentsMap: DataCloudStore.getEnrichmentsMap(),
+        droppedItem: null,
+        draggedItem: null,
         items: [],
         enrichments: [],
         labelIncrementor: 0,
@@ -161,7 +163,7 @@ angular.module('common.datacloud.query.advanced', [
     vm.setState = function(newState) {
         if (!vm.compareTree(newState, angular.copy(vm.tree))) {
             vm.labelIncrementor = 0;
-            
+
             vm.restriction = {
                 restriction: newState[0]
             };
@@ -211,7 +213,7 @@ angular.module('common.datacloud.query.advanced', [
 
     vm.saveSegment = function() {
         var segment = QueryStore.getSegment(),
-            restriction = QueryStore.getRestriction();
+            restriction = QueryStore.getAccountRestriction();
 
         vm.labelIncrementor = 0;
         vm.saving = true;
@@ -249,6 +251,59 @@ angular.module('common.datacloud.query.advanced', [
                 : 'home.segment.explorer.attributes';
 
         $state.go(state);
+    }
+
+    function swap(context, i, j) {
+        var temp = context[i];
+        context[i] = context[j]
+        context[j] = temp;
+    }
+
+    vm.dropMoveItem = function(dragged, dropped, endMove) {
+        console.log('dropMoveItem', dragged.parent !== dropped.parent, dragged, dropped);
+        var items = dropped.parent 
+                ? dropped.parent.logicalRestriction.restrictions
+                : dropped.tree.logicalRestriction.restrictions;
+
+        var theitem = null;
+        var index = null;
+
+        // items.forEach(function(item, i) {
+        //     var conditional = item.$$hashKey == dropped.tree.$$hashKey;
+
+        //     if (conditional) {
+        //         theitem = item;
+        //         index = i;
+        //         return;
+        //     }
+            
+        // });
+
+        if (dropped.tree.logicalRestriction || dropped.parent.logicalRestriction) {
+            var draggedParent = dragged.parent.logicalRestriction.restrictions;
+            var droppedParent = dropped.parent ? dropped.parent.logicalRestriction.restrictions : [];
+            var draggedIndex = draggedParent.indexOf(dragged.tree);
+            var droppedIndex = droppedParent.indexOf(dropped.tree);
+
+            console.log(draggedIndex, droppedIndex);
+
+            if (dropped.tree.logicalRestriction) {
+                dropped.tree.logicalRestriction.restrictions.splice(droppedIndex+1, 0, angular.copy(dragged.tree));
+            } else {
+                droppedParent.splice(droppedIndex+1, 0, angular.copy(dragged.tree));
+            }
+
+            draggedParent.splice(draggedParent.indexOf(dragged.tree), 1);
+        }
+
+        // if (typeof index === 'number') {
+        //     //console.log(index, dragged);
+        //     //console.log('dropMoveItem', items, items.length, index, index + 1)
+        // }
+    }
+
+    vm.dropItem = function(branch) {
+        console.log('dropped on', branch)
     }
 
     vm.init();

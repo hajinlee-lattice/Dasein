@@ -1213,72 +1213,63 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.makeSegmentsRangeKey = function(enrichment, range, label){
-
         var fieldName = enrichment.Attribute || enrichment.ColumnId,
             values = ObjectValues(range),
             key = fieldName + (range ? values.join('') : label);
+
         return key;
     }
 
     var getExplorerSegments = function(enrichments) {
         vm.clearExplorerSegments();
 
-        if (vm.metadataSegment != undefined){
+        if (vm.metadataSegment != undefined) {
             var accountRestrictions = vm.metadataSegments.accountRestrictions,
                 contactRestrictions = vm.metadataSegments.contactRestrictions;
         } else {
             var queryRestriction = QueryRestriction,
                 accountRestrictions = queryRestriction.accountRestrictions,
                 contactRestrictions = queryRestriction.contactRestrictions;
-        };
+        }
 
         if (vm.addBucketTreeRoot) {
             return;
         }
 
-        console.log(accountRestrictions, contactRestrictions);
+        accountRestrictions = accountRestrictions 
+            ? angular.copy(accountRestrictions.restriction.logicalRestriction.restrictions) 
+            : [];
+
+        contactRestrictions = contactRestrictions 
+            ? angular.copy(contactRestrictions.restriction.logicalRestriction.restrictions) 
+            : [];
+
+        restrictions = [].concat(accountRestrictions, contactRestrictions);
+
+        console.log('restrictions', accountRestrictions, contactRestrictions, restrictions);
 
         // FIXME: this should be recursive... -Lazarus
-        for (var i=0; i < accountRestrictions.length; i++) {
-            var restriction = accountRestrictions[i].restriction.logicalRestriction.restrictions;
+        for (var i=0; i < restrictions.length; i++) {
+            var restriction = accountRestrictions[i];
 
-            if (restriction.restriction) {
-                var restriction = restriction.restriction,
-                    range = restriction.bkt.Rng,
-                    label = restriction.bkt.Lbl,
-                    key = restriction.attr.split(".")[1],
-                    enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
-                    index = vm.enrichmentsMap[key];
+            if (!restriction.bucketRestriction) {
+                continue;
+            }
 
-                if (index || index === 0) {
-                    // vm.enrichments[index].SegmentChecked = true; PLS-4589
-                    vm.enrichments[index].SegmentRangesChecked = {};
-                    vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
-                    vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
-                }
+            var restriction = restriction.bucketRestriction,
+                range = restriction.bkt.Rng,
+                label = restriction.bkt.Lbl,
+                key = restriction.attr.split(".")[1],
+                enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
+                index = vm.enrichmentsMap[key];
+            
+            if (index || index === 0) {
+                // vm.enrichments[index].SegmentChecked = true; PLS-4589
+                vm.enrichments[index].SegmentRangesChecked = {};
+                vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
+                vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
             }
         }
-
-        for (var i=0; i < contactRestrictions.length; i++) {
-            var restriction = contactRestrictions[i].restriction.logicalRestriction.restrictions;
-
-            if (restriction.restriction) {
-                var restriction = restriction.restriction,
-                    range = restriction.bkt.Rng,
-                    label = restriction.bkt.Lbl,
-                    key = restriction.attr.split(".")[1],
-                    enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
-                    index = vm.enrichmentsMap[key];
-
-                if (index || index === 0) {
-                    // vm.enrichments[index].SegmentChecked = true; PLS-4589
-                    vm.enrichments[index].SegmentRangesChecked = {};
-                    vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
-                    vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
-                }
-            }
-        }
-        
     }
 
     vm.clearExplorerSegments = function() {

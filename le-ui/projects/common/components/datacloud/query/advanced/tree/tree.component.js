@@ -24,7 +24,9 @@ angular
                 label: '',
                 range: [],
                 operation: '',
-                unused: false
+                unused: false,
+                uniqueId: $scope.tree.$$hashKey,
+                editMode: 'Custom'
             });
 
             vm.init = function (type, value) {
@@ -72,6 +74,9 @@ angular
                 }
             }
 
+            vm.changePreset = function() {
+            }
+            
             vm.changeOperation = function() {
                 if (!vm.item.topbkt.Rng) {
                     vm.item.topbkt.Rng = [null, null];
@@ -163,6 +168,37 @@ angular
                 this.root.goAttributes();
             }
 
+            vm.mouseDown = function() {
+                vm.root.draggedItem = vm;
+                //console.log('mouseDown', vm);
+            }
+
+            vm.mouseUp = function() {
+                var dragged = vm.root.draggedItem,
+                    dropped = vm.root.droppedItem;
+
+                if (dragged && (!dropped || (dropped && dropped.uniqueId !== dragged.uniqueId))) {
+                    //console.log('mouseUp', dragged.uniqueId, dropped.uniqueId, dragged, dropped);
+                    vm.root.droppedItem = vm;
+                    
+                    if (dropped) {
+                        vm.root.dropMoveItem(dragged, dropped);
+                    }
+                }
+
+                vm.root.draggedItem = null;
+                vm.root.droppedItem = null;
+            }
+
+            vm.mouseOver = function() {
+                var dragged = vm.root.draggedItem,
+                    dropped = vm.root.droppedItem;
+
+                if (dragged && (!dropped || (dropped && dropped.tree.$$hashKey !== vm.tree.$$hashKey))) {
+                    vm.root.droppedItem = vm;
+                }
+            }
+
             vm.addOperator = function(tree) {
                 var operator = tree.logicalRestriction.operator == 'AND' ? 'OR' : 'AND';
                 this.root.saveState();
@@ -177,8 +213,8 @@ angular
                 }
             }
 
-            this.clickOperator = function($element) {
-                this.root.saveState();
+            this.clickEditMode = function(value) {
+                vm.editMode = value;                
             }
 
             this.clickCollapsed = function() {

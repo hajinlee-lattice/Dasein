@@ -333,6 +333,7 @@ angular.module('common.datacloud')
         'lattice': '/latticeinsights',
         'customer': '/datacollection'
     };
+    
     this.path = this.paths['lattice'];
 
     this.setHost = function(value) {

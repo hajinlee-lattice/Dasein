@@ -3,7 +3,10 @@
         ng-class="{
             'query-section-all': vm.tree.logicalRestriction.operator == 'AND',
             'query-section-any': vm.tree.logicalRestriction.operator == 'OR'
-        }">
+        }"
+        ng-mousedown="vm.mouseDown()"
+        ng-mouseup="vm.mouseUp()"
+        ng-mouseover="vm.mouseOver()">
 
     <div class="query-section-operator label-operator item-operator-and">and</div>
     <div class="query-section-operator label-operator item-operator-or">or</div>
@@ -50,7 +53,10 @@
 
 <div    class="query-section-item noselect-children category-{{ vm.item.Category.replace(' ','_') | lowercase }}" 
         ng-if="vm.tree.bucketRestriction" 
-        ng-init="data = vm.enrichments['LatticeAccount.'+vm.tree.bucketRestriction.attr]">
+        ng-init="data = vm.enrichments['LatticeAccount.'+vm.tree.bucketRestriction.attr]"
+        ng-mousedown="vm.mouseDown()"
+        ng-mouseup="vm.mouseUp()"
+        ng-mouseover="vm.mouseOver()">
     <div class="query-section-operator item-operator item-operator-and">and</div>
     <div class="query-section-operator item-operator item-operator-or">or</div>
 
@@ -67,6 +73,7 @@
             <span class="query-section-item-name"><strong>{{vm.item.DisplayName}}</strong></span>
             
             <span ng-if="vm.editing && !vm.unused">
+
                 <span ng-if="vm.type == 'Boolean'" class="query-section-item-operation">
                     <select ng-model="vm.item.topbkt.Lbl" ng-change="vm.updateBucketCount()">
                         <option value="Yes">is</option>
@@ -80,25 +87,48 @@
                 </span>
 
                 <span ng-if="vm.type == 'Numerical'" class="query-section-item-operation">
-                    <select ng-model="vm.operation" ng-change="vm.changeOperation()">
-                        <option value="is">is</option>
-                        <option value="between">is between</option>
-                        <option value="less">is less than</option>
-                        <option value="greater_equal">is greater than</option>
-                        <option value="empty">is empty</option>
-                    </select>
+                    <div class="button-group" role="group" ng-click="vm.clickEditMode(vm.editMode == 'Custom' ? 'Preset' : 'Custom')">
+                        <button type="button" 
+                                class="button icon-button {{vm.editMode == 'Custom' ? 'white' : 'light-gray'}}-button" 
+                                value="{{vm.editMode == 'Custom' ? 'Preset' : 'Custom'}}">
+                            <span ng-if="vm.editMode == 'Custom'">Custom</span>
+                            <i class="fa fa-bars fa-rotate-90" ng-if="vm.editMode == 'Preset'"></i>
+                        </button>
+                        <button type="button" 
+                                class="button icon-button {{vm.editMode == 'Preset' ? 'white' : 'light-gray'}}-button" 
+                                value="{{vm.editMode == 'Custom' ? 'Preset' : 'Custom'}}">
+                            <i class="fa fa-bars fa-rotate-90" ng-if="vm.editMode == 'Custom'"></i>
+                            <span ng-if="vm.editMode == 'Preset'">Preset</span>
+                        </button>
+                    </div>
 
-                    <input  ng-if="vm.operation != 'less' && vm.operation != 'empty'" 
-                            ng-model="vm.range[0]" 
-                            ng-keyup="vm.changeOperation()"
-                            ng-value="vm.range[0]"></input>
+                    <span ng-if="vm.editMode == 'Custom'">
+                        <select ng-model="vm.operation" ng-change="vm.changeOperation()">
+                            <option value="is">is</option>
+                            <option value="between">is between</option>
+                            <option value="less">is less than</option>
+                            <option value="greater_equal">is greater than</option>
+                            <option value="empty">is empty</option>
+                        </select>
 
-                    <span ng-if="vm.operation == 'between'" class="operation-and">-</span>
+                        <input  ng-if="vm.operation != 'less' && vm.operation != 'empty'" 
+                                ng-model="vm.range[0]" 
+                                ng-keyup="vm.changeOperation()"
+                                ng-value="vm.range[0]"></input>
+
+                        <span ng-if="vm.operation == 'between'" class="operation-and">-</span>
+                        
+                        <input  ng-if="vm.operation != 'is' && vm.operation != 'empty' && vm.operation != '' && vm.operation != 'greater_equal'" 
+                                ng-model="vm.range[1]" 
+                                ng-keyup="vm.changeOperation()"
+                                ng-value="vm.range[1]"></input>
+                    </span>
                     
-                    <input  ng-if="vm.operation != 'is' && vm.operation != 'empty' && vm.operation != '' && vm.operation != 'greater_equal'" 
-                            ng-model="vm.range[1]" 
-                            ng-keyup="vm.changeOperation()"
-                            ng-value="vm.range[1]"></input>
+                    <span ng-if="vm.editMode == 'Preset'">
+                        <select ng-model="vm.presetOperation" ng-change="vm.changePreset()">
+                            <option ng-repeat="bucket in vm.item.cube.Bkts.List" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
+                        </select>
+                    </span>
                 </span>
 
                 <button class="button blue-button" ng-click="vm.setBucket($event)">SET</button>
@@ -165,3 +195,5 @@
         </div>
     </li>
 </ul>
+
+<hr size="2">
