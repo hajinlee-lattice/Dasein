@@ -82,5 +82,9 @@
     "objectapi": {
         "mem": 1024,
         "port": 9013
+    },
+    "dante": {
+        "mem": 1024,
+        "port": 9014
     }
 }

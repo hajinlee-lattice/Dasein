@@ -49,6 +49,7 @@ if [ ! -z "${HOSTS}" ]; then
     DELLEBI_HOSTPORTS=""
     CDL_HOSTPORTS=""
     LP_HOSTPORTS=""
+    DANTE_HOSTPORTS=""
 
     for h in $(echo $HOSTS | sed "s/,/ /g")
         do
@@ -75,6 +76,7 @@ if [ ! -z "${HOSTS}" ]; then
             DELLEBI_HOSTPORTS="${DELLEBI_HOSTPORTS}${h}:9010,"
             CDL_HOSTPORTS="${CDL_HOSTPORTS}${h}:9011,"
             LP_HOSTPORTS="${LP_HOSTPORTS}${h}:9012,"
+            DANTE_HOSTPORTS="${DANTE_HOSTPORTS}${h}:9014,"
         done
 
 fi
@@ -101,6 +103,7 @@ replace_token datacloudapi ${DATACLOUDAPI_HOSTPORTS} true
 replace_token dellebi ${DELLEBI_HOSTPORTS} true
 replace_token cdl ${CDL_HOSTPORTS} true
 replace_token lp ${LP_HOSTPORTS} true
+replace_token dante ${DANTE_HOSTPORTS} true
 
 cat /usr/local/etc/haproxy/haproxy.cfg
 
