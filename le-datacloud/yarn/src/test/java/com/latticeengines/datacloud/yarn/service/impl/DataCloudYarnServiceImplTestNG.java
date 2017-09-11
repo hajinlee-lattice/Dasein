@@ -139,9 +139,9 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
 
     @Test(groups = "functional")
     public void testSegment() throws Exception {
-        String fileName = "BulkMatchInput.avro";
+        String fileName = "BulkMatchInput_WithIds.avro";
         cleanupAvroDir(avroDir);
-        uploadDataCsv(avroDir, fileName);
+        updateAvroFile(avroDir, fileName);
         String avroPath = avroDir + "/" + fileName;
 
         DataCloudJobConfiguration jobConfiguration = jobConfiguration(avroPath);
@@ -155,6 +155,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         unionSelection.setCustomSelection(cs);
         jobConfiguration.getMatchInput().setPredefinedSelection(null);
         jobConfiguration.getMatchInput().setUnionSelection(unionSelection);
+        jobConfiguration.getMatchInput().setFetchOnly(true);
 
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);

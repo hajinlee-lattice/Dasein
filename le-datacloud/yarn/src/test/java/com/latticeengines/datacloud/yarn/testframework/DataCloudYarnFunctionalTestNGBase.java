@@ -126,6 +126,24 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
         FileUtils.deleteQuietly(new File(fileName));
     }
 
+    protected void updateAvroFile(String avroDir, String fileName) {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("matchinput/" + fileName);
+        if (url == null) {
+            throw new RuntimeException("Cannot find resource " + fileName);
+        }
+
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, avroDir + "/" + fileName)) {
+                HdfsUtils.rmdir(yarnConfiguration, avroDir + "/" + fileName);
+            }
+            HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(), avroDir + "/" + fileName);
+        } catch (Exception e) {
+            Assert.fail("Failed to upload " + fileName, e);
+        }
+
+        FileUtils.deleteQuietly(new File(fileName));
+    }
+
     protected void cleanupAvroDir(String avroDir) {
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, avroDir)) {

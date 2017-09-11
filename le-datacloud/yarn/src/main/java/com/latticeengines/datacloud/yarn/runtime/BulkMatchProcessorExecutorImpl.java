@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
 
     private static final Logger log = LoggerFactory.getLogger(BulkMatchProcessorExecutorImpl.class);
+    private Random random = new Random(System.currentTimeMillis());
 
     @Override
     public void execute(ProcessorContext processorContext) {
@@ -102,7 +104,10 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
 
         log.info(String.format("%d out of %d futures are finished.", toDelete.size(), futures.size()));
         futures.removeAll(toDelete);
-        System.gc();
+        if (random.nextInt(100) > 90) {
+            log.info("Call System.gc().");
+            System.gc();
+        }
     }
 
 }
