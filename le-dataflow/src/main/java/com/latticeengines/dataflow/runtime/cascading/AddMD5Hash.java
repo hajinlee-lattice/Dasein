@@ -6,8 +6,6 @@ import java.util.Set;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import com.latticeengines.common.exposed.util.Base64Utils;
-
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -51,16 +49,7 @@ public class AddMD5Hash extends BaseOperation implements Function {
             }
             data.append(tupleValue.toString());
         }
-        String res = data.toString();
-        if (truncateLen != null) {
-            res = res.substring(0, Math.min(res.length(), truncateLen));
-        }
-        if (compressed) {
-            functionCall.getOutputCollector().add(new Tuple(Base64Utils.encodeBase64(DigestUtils.md5(res))));
-        } else {
-            functionCall.getOutputCollector().add(new Tuple(DigestUtils.md5Hex(res)));
-        }
-
+        functionCall.getOutputCollector().add(new Tuple(DigestUtils.md5Hex(data.toString())));
     }
 
 }
