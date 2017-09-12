@@ -1,14 +1,16 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -68,7 +70,6 @@ public class MatchInputValidator {
                     "Unknown type of input buffer " + input.getInputBuffer().getBufferType());
         }
         input.setFields(inputFields);
-        input.setNumRows(input.getInputBuffer().getNumRows().intValue());
 
         Map<MatchKey, List<String>> keyMap = commonValidation(input);
         input.setKeyMap(keyMap);
@@ -168,19 +169,10 @@ public class MatchInputValidator {
                 throw new IllegalStateException("Cannot find avro dir " + avroDir);
             }
 
-            Long count;
-            try {
-                count = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
-                log.info("Find " + count + " records in the avro buffer dir " + avroDir);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to count input data", e);
-            }
-
-            if (count == 0L) {
+            Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
+            if (!iterator.hasNext()) {
                 throw new IllegalArgumentException("0 rows in input avro(s)");
             }
-
-            buffer.setNumRows(count);
 
             Schema schema = extractSchema(avroDir, yarnConfiguration);
             List<String> fieldNames = new ArrayList<>();

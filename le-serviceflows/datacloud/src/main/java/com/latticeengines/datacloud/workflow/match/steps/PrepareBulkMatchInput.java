@@ -75,6 +75,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         putStringValueInContext(BulkMatchContextKey.ROOT_OPERATION_UID, getConfiguration().getRootOperationUid());
         matchCommandService.update(getConfiguration().getRootOperationUid()) //
                 .status(MatchStatus.MATCHING) //
+                .rowsRequested(count.intValue()) //
                 .progress(0.05f) //
                 .commit();
     }

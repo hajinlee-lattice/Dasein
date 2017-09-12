@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -13,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public class InputBuffer {
 
     private IOBufferType bufferType;
-    private Long numRows;
 
     @JsonProperty("BufferType")
     public IOBufferType getBufferType() {
@@ -23,16 +21,6 @@ public class InputBuffer {
     @JsonProperty("BufferType")
     protected void setBufferType(IOBufferType bufferType) {
         this.bufferType = bufferType;
-    }
-
-    @JsonIgnore
-    public Long getNumRows() {
-        return numRows;
-    }
-
-    @JsonIgnore
-    public void setNumRows(Long numRows) {
-        this.numRows = numRows;
     }
 
 }

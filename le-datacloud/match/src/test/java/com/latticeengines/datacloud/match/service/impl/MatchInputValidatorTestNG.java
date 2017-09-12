@@ -70,8 +70,6 @@ public class MatchInputValidatorTestNG extends DataCloudMatchFunctionalTestNGBas
             Assert.fail("Validation failed", e);
         }
 
-        Assert.assertEquals(matchInput.getInputBuffer().getNumRows(), (Long) 100L);
-
         cleanupAvroDir(avroDir);
     }
 

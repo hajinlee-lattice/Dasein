@@ -8,6 +8,7 @@ public interface MatchCommandUpdater {
     MatchCommandUpdater status(MatchStatus status);
     MatchCommandUpdater progress(Float progress);
     MatchCommandUpdater errorMessage(String errorMessage);
+    MatchCommandUpdater rowsRequested(Integer rowsSubmitted);
     MatchCommandUpdater rowsMatched(Integer rowsMatched);
     MatchCommandUpdater dnbCommands();
     MatchCommandUpdater resultLocation(String location);
