@@ -94,13 +94,13 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
                 .that(inner) //
                 .build();
         Query query = Query.builder() //
-                .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME, ATTR_ACCOUNT_ID) //
                 .from(BusinessEntity.Account) //
                 .where(restriction) //
-                // .page(new PageFilter(0, 15)) //
+                .page(new PageFilter(1, 2)) //
                 .build();
         List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
-        Assert.assertEquals(results.size(), 5);
+        Assert.assertEquals(results.size(), 2);
     }
 
     @Test(groups = "functional")

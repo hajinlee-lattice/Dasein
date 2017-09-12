@@ -51,9 +51,20 @@ public class QueryEvaluator {
         });
         attrNames.put(SCORE.toLowerCase(), SCORE);
 
+        long offset = 0L, limit = 0L;
+        if (query.getPageFilter() != null && query.getEntitiesForExists() != null) {
+            offset = query.getPageFilter().getRowOffset();
+            limit = query.getPageFilter().getNumRows();
+        }
         try (ResultSet results = sqlquery.getResults()) {
             ResultSetMetaData metadata = results.getMetaData();
             while (results.next()) {
+                if (limit > 0 && data.size() >= limit) {
+                    break;
+                }
+                if (offset-- > 0) {
+                    continue;
+                }
                 Map<String, Object> row = new HashMap<>();
                 for (int i = 1; i <= metadata.getColumnCount(); ++i) {
                     String columnName = metadata.getColumnName(i);

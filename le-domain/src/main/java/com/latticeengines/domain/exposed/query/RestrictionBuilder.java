@@ -72,14 +72,12 @@ public class RestrictionBuilder {
             throw new IllegalArgumentException("Cannot specify let and exists together.");
         }
         existsEntity = entity;
-        complete = false;
+        restriction = new ExistsRestriction(existsEntity, false, null);
+        complete = true;
         return this;
     }
 
     public RestrictionBuilder that(Restriction innerRestriction) {
-        if (complete) {
-            throw new IllegalArgumentException("The builder is already complete. Check your operation chaining.");
-        }
         restriction = new ExistsRestriction(existsEntity, false, innerRestriction);
         complete = true;
         return this;

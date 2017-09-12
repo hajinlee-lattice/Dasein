@@ -13,6 +13,7 @@ import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.sql.SQLQuery;
 
@@ -47,10 +48,17 @@ public class ExistsResolver extends BaseRestrictionResolver<ExistsRestriction>
         StringPath mainTable = AttrRepoUtils.getTablePath(attrRepo, tgtEntity);
         SQLQuery<?> query = queryFactory.getQuery(attrRepo).from(mainTable.as(tgtEntity.name()));
         Restriction innerRestriction = restriction.getRestriction();
-        RestrictionResolver innerResolver = factory.getRestrictionResolver(innerRestriction.getClass());
-        BooleanExpression innerPredicate = innerResolver.resolve(innerRestriction);
+        BooleanExpression innerPredicate = null;
+        if (innerRestriction != null) {
+            RestrictionResolver innerResolver = factory.getRestrictionResolver(innerRestriction.getClass());
+            innerPredicate = innerResolver.resolve(innerRestriction);
+        }
         for (Predicate p: joinPredicates) {
-            innerPredicate = innerPredicate.and(p);
+            if (innerPredicate == null) {
+                innerPredicate = Expressions.asBoolean(p);
+            } else {
+                innerPredicate = innerPredicate.and(p);
+            }
         }
         query = query.where(innerPredicate);
         if (restriction.getNegate()) {
