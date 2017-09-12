@@ -170,48 +170,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         profileAppId = appId.toString();
     }
 
-    protected long mockCsvImport(BusinessEntity entity, int fileId) throws IOException {
-        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
-                entity.name());
-        Table importTemplate;
-        if (dataFeedTask == null) {
-            Schema schema = getCsvImportSchema(entity);
-            importTemplate = MetadataConverter.getTable(schema, new ArrayList<>(), null, null, false);
-            importTemplate.setTableType(TableType.IMPORTTABLE);
-            if (BusinessEntity.Account.equals(entity)) {
-                importTemplate.setName(SchemaInterpretation.Account.name());
-            } else {
-                importTemplate.setName(SchemaInterpretation.Contact.name());
-            }
-            dataFeedTask = new DataFeedTask();
-            dataFeedTask.setImportTemplate(importTemplate);
-            dataFeedTask.setStatus(DataFeedTask.Status.Active);
-            dataFeedTask.setEntity(entity.name());
-            dataFeedTask.setFeedType("Query");
-            dataFeedTask.setSource("VisiDB");
-            dataFeedTask.setActiveJob("Not specified");
-            dataFeedTask.setSourceConfig("Not specified");
-            dataFeedTask.setStartTime(new Date());
-            dataFeedTask.setLastImported(new Date(0L));
-            dataFeedTask.setUniqueId(NamingUtils.uuid("DataFeedTask"));
-            dataFeedProxy.createDataFeedTask(customerSpace.toString(), dataFeedTask);
-        } else {
-            importTemplate = dataFeedTask.getImportTemplate();
-        }
-
-        String targetPath = uploadMockedCsvImportData(entity, fileId);
-        String defaultFS = yarnConfiguration.get(FileSystem.FS_DEFAULT_NAME_KEY);
-        String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
-        long count = AvroUtils.count(yarnConfiguration, targetPath + "/*.avro");
-        Extract e = createExtract(hdfsUri, count);
-        dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", entity.name());
-        dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(),
-                e);
-        return count;
-    }
-
     protected Schema getCsvImportSchema(BusinessEntity entity) throws IOException {
         InputStream avscIs = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(String.format("end2end/csv/%s.avsc", entity.name()));
