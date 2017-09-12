@@ -352,12 +352,11 @@ angular
                 },
                 WizardProgressItems: function(PlaybookWizardStore) {
                     return [
-                        { label: 'Settings', state: 'settings', nextFn: PlaybookWizardStore.nextSaveGeneric },
-                        { label: 'Rating', state: 'settings.rating', nextFn: PlaybookWizardStore.nextSaveGeneric },
-                        { label: 'Targets', state: 'settings.rating.targets' },
-                        { label: 'Insights', state: 'settings.rating.targets.insights', nextFn: PlaybookWizardStore.nextSaveInsight },
-                        { label: 'Preview', state: 'settings.rating.targets.insights.preview' },
-                        { label: 'Launch', state: 'settings.rating.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
+                        { label: 'Rating', state: 'rating', nextFn: PlaybookWizardStore.nextSaveGeneric },
+                        { label: 'Targets', state: 'rating.targets' },
+                        { label: 'Insights', state: 'rating.targets.insights', nextFn: PlaybookWizardStore.nextSaveInsight },
+                        { label: 'Preview', state: 'rating.targets.insights.preview' },
+                        { label: 'Launch', state: 'rating.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
                     ];
                 }
             },
@@ -398,22 +397,9 @@ angular
                     templateUrl: '/components/wizard/controls/controls.component.html'
                 }
             },
-            redirectTo: 'home.playbook.wizard.settings'
+            redirectTo: 'home.playbook.wizard.rating'
         })
-        .state('home.playbook.wizard.settings', {
-            url: '/settings',
-            params: {
-                pageIcon: 'ico-playbook',
-                pageTitle: 'Play Book',
-                section: 'wizard.targets'
-            },
-            views: {
-                'wizard_content@home.playbook.wizard': {
-                    templateUrl: 'app/playbook/content/settings/settings.component.html'
-                }
-            },
-        })
-        .state('home.playbook.wizard.settings.rating', {
+        .state('home.playbook.wizard.rating', {
             url: '/rating',
             resolve: {
                 Ratings: function(PlaybookWizardStore) {
@@ -428,7 +414,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.settings.rating.targets', {
+        .state('home.playbook.wizard.rating.targets', {
             url: '/targets',
             resolve: {
                 SegmentServiceProxy: ['SegmentService', 'QueryStore', function(SegmentService, QueryStore) {
@@ -519,7 +505,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.settings.rating.targets.insights', {
+        .state('home.playbook.wizard.rating.targets.insights', {
             url: '/insights',
             params: {
                 section: 'wizard.insights'
@@ -550,7 +536,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.settings.rating.targets.insights.preview', {
+        .state('home.playbook.wizard.rating.targets.insights.preview', {
             url: '/preview',
             resolve: {
                 Play: function(PlaybookWizardStore) {
@@ -568,7 +554,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.wizard.settings.rating.targets.insights.preview.launch', {
+        .state('home.playbook.wizard.rating.targets.insights.preview.launch', {
             url: '/launch',
             views: {
                 'wizard_content@home.playbook.wizard': {

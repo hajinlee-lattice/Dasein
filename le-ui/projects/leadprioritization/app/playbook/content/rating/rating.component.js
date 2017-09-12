@@ -9,7 +9,8 @@ angular.module('lp.playbook.wizard.rating', [])
         ratings: Ratings,
         ratingsCounts: null,
         currentPage: 1,
-        pageSize: 20
+        pageSize: 20,
+        block_user: true
     });
 
     $scope.$watch('vm.search', function(newValue, oldValue) {
@@ -25,13 +26,17 @@ angular.module('lp.playbook.wizard.rating', [])
         }
         if($stateParams.play_name) {
             PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+                vm.block_user = false;
                 if(play.ratingEngine) {
                     vm.stored.rating_selection = play.ratingEngine.id;
                     PlaybookWizardStore.setValidation('rating', true);
                 }
 
             });
+        } else {
+            vm.block_user = false;
         }
+
         PlaybookWizardStore.getRatingsCounts(Ratings).then(function(coverage){
             vm.ratingsCounts = {};
             if(coverage && coverage.ratingEngineIdCoverageMap) {

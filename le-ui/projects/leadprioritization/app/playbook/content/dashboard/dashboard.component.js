@@ -178,8 +178,7 @@ angular.module('lp.playbook.dashboard', [
     vm.launchValidate = function(play) {
         var properties = [
                 'displayName',
-                'segment',
-                'rating',
+                'ratingEngine',
             ];
 
         properties.forEach(function(property){

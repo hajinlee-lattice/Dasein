@@ -1,12 +1,12 @@
 angular.module('lp.playbook')
-.service('PlaybookWizardStore', function($q, $state, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility){
+.service('PlaybookWizardStore', function($q, $state, $stateParams, PlaybookWizardService, CgTalkingPointStore, BrowserStorageUtility){
     var PlaybookWizardStore = this;
 
     this.init = function() {
         this.settings = {};
         this.savedRating = null;
         this.savedSegment = null;
-        this.currentPlay = null;
+        this.currentPlay = this.currentPlay || null;
         this.playLaunches = null;
         this.savedTalkingPoints = null;
 
@@ -27,7 +27,7 @@ angular.module('lp.playbook')
             settings: false,
             rating: false,
             targets: true,
-            insights: false,
+            insights: true,
             preview: true,
             launch: true
         }
@@ -169,7 +169,6 @@ angular.module('lp.playbook')
     }
 
     this.getSavedSegment = function() {
-        console.log('get savedSegment');
         return this.savedSegment;
     }
 
@@ -183,7 +182,7 @@ angular.module('lp.playbook')
 
     this.setPlay = function(play) {
         this.currentPlay = play;
-        this.savedSegment = play.segment;
+        //this.savedSegment = play.segment;
     }
 
     this.getCurrentPlay = function() {
@@ -207,7 +206,6 @@ angular.module('lp.playbook')
         var deferred = $q.defer();
         var ClientSession = BrowserStorageUtility.getClientSession();
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
-        console.log(opts);
         PlaybookWizardService.savePlay(opts).then(function(data){
             deferred.resolve(data);
             PlaybookWizardStore.setPlay(data);
@@ -277,7 +275,7 @@ angular.module('lp.playbook')
     }
 
     this.getLaunchedStatus = function(play) {
-        var launchedState = (play.launchHistory.playLaunch ? play.launchHistory.playLaunch.launchState : null),
+        var launchedState = (play.launchHistory && play.launchHistory.playLaunch && play.launchHistory.playLaunch.launchState ? play.launchHistory.playLaunch.launchState : null),
             hasLaunched = (launchedState === 'Launched' ? true : false);
         return {
             launchedState: launchedState,

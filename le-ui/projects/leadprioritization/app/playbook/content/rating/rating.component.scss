@@ -20,6 +20,10 @@ section.playbook.container {
                             }
                         }
                     }
+                    &[disabled] {
+                        pointer-events: none;
+                        opacity: .5;
+                    }
                 }
             }
         }

@@ -102,19 +102,17 @@
 
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">
-
                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                             ng-if="play.launchHistory.playLaunch == null && play.segment == null"
+                             ng-if="!play.launchHistory.playLaunch && !play.ratingEngine && !vm.tileStates[play.name].launching"
                             ng-click="vm.continuePlaySetup($event)">
                             Continue
                         </button>
-
                         <button 
                             type="button"
                             class="button blue-button pull-right"
-                            ng-if="play.launchHistory.playLaunch == null && play.segment != null && vm.tileStates[play.name].launching == false"
+                            ng-if="!play.launchHistory.playLaunch && play.ratingEngine && !vm.tileStates[play.name].launching"
                             ng-disabled="vm.lockLaunching"
                             ng-click="vm.launchPlay($event, play)">
                             Launch
@@ -122,13 +120,13 @@
                         <button
                             type="button"
                             class="button gray-button pull-right"
-                            ng-if="vm.tileStates[play.name].launching == true">
+                            ng-if="vm.tileStates[play.name].launching">
                             <i class="fa fa-spinner fa-pulse fw"></i> 
                             Launching...</button>
                         <span 
                             class="launch-success pull-right" 
-                            ng-if="play.launchHistory.playLaunch != null && play.segment != null">
-                            Launched {{play.updated | date}}
+                            ng-if="play.launchHistory.playLaunch && !vm.tileStates[play.name].launching">
+                            Launched {{play.launchHistory.playLaunch.updated | date}}
                             <i class="fa fa-check" aria-hidden="true"></i>
                         </span>
 

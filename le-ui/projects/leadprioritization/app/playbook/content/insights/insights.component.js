@@ -17,9 +17,16 @@ angular.module('lp.playbook.wizard.insights', [])
         currentPlay: PlaybookWizardStore.getCurrentPlay()
     });
 
+    vm.init = function() {
+        if($stateParams.play_name) {
+            PlaybookWizardStore.getPlay($stateParams.play_name);
+        }
+    }
+
+    vm.init();
+
     $rootScope.$on('talkingPoints:sync', function(e){
         CgTalkingPointStore.getTalkingPoints($stateParams.play_name, true).then(function(talkingPoints) {
-
             var _tp = [];
             talkingPoints.forEach(function(talkingPoint, index) {
                 delete talkingPoint.title;
@@ -162,7 +169,7 @@ angular.module('lp.playbook.wizard.insights', [])
                 }
             }
             if (errors) {
-                PlaybookWizardStore.setValidation('insights', false);
+                //PlaybookWizardStore.setValidation('insights', false);
                 valid = false;
             } else {
                 valid = true;
@@ -174,8 +181,8 @@ angular.module('lp.playbook.wizard.insights', [])
         if(valid) {
             PlaybookWizardStore.setTalkingPoints(vm.talkingPoints);
         }
-        PlaybookWizardStore.setValidation('insights', valid);
-        return valid;
+        PlaybookWizardStore.setValidation('insights', true);
+        return true;
     };
 
     vm.revertClick = function($event, val) {

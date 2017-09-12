@@ -36,6 +36,7 @@
                 <li 
                     ng-repeat="rating in (filteredList = (vm.ratings| filter: vm.searchFields)) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
                     ng-class="{selected: vm.stored.rating_selection == rating.id}"
+                    ng-disabled="vm.block_user"
                     class="item rating_">
                     <ul>
                         <li class="segment">
