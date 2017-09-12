@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
@@ -77,8 +78,8 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         MetadataSegment segment = ratingEngine.getSegment();
 
-        entityFrontEndQuery.setAccountRestriction(segment.getAccountFrontEndRestriction());
-        entityFrontEndQuery.setContactRestriction(segment.getContactFrontEndRestriction());
+        entityFrontEndQuery.setAccountRestriction(new FrontEndRestriction(segment.getAccountRestriction()));
+        entityFrontEndQuery.setContactRestriction(new FrontEndRestriction(segment.getContactRestriction()));
 
         log.info(String.format("Entity query => %s", JsonUtils.serialize(entityFrontEndQuery)));
 
