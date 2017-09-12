@@ -76,7 +76,7 @@ angular
 
             vm.checkSelected = function(bucket) {
                 if (bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]) {
-                    console.log('selected', (bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]), bucket.Rng[0], vm.range[0], bucket.Rng[1], vm.range[1], bucket, vm.range);
+                    //console.log('selected', (bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]), bucket.Rng[0], vm.range[0], bucket.Rng[1], vm.range[1], bucket, vm.range);
                     vm.presetOperation = bucket.Lbl;
                 }
             }
@@ -95,7 +95,7 @@ angular
                 restriction.Rng[1] = bkt.Rng[1];
 
                 vm.setOperation(null, 'Numerical', null, bkt.Rng) 
-                console.log(label, bucket, buckets, restriction);
+                //console.log(label, bucket, buckets, restriction);
             }
 
             vm.changeOperation = function() {
