@@ -61,8 +61,12 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
         if (play.getRatingEngine() != null) {
             play.setRatingEngine(findRatingEngine(play));
         }
-        play.setName(play.generateNameStr());
-        play.setDisplayName(String.format(Play.DEFAULT_NAME_PATTERN, Play.DATE_FORMAT.format(new Date())));
+        if (play.getDisplayName() == null) {
+            play.setDisplayName(String.format(Play.DEFAULT_NAME_PATTERN, Play.DATE_FORMAT.format(new Date())));
+        }
+        if (play.getName() == null) {
+            play.setName(play.generateNameStr());
+        }
     }
 
     private RatingEngine findRatingEngine(Play play) {
