@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.CoverageInfo;
 import com.latticeengines.domain.exposed.pls.RatingBucketCoverage;
@@ -133,6 +134,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     isRestrictNotNullSalesforceId, segment);
             FrontEndQuery contactFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Contact,
                     isRestrictNotNullSalesforceId, segment);
+            log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
 
             Long accountCount = entityProxy.getCount( //
                     tenent.getId(), //
@@ -153,6 +155,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     Long getContactCount(Tenant tenent, FrontEndQuery contactFrontEndQuery) {
         Long contactCount = 0L;
         try {
+            log.info("Front end query for Contact: " + JsonUtils.serialize(contactFrontEndQuery));
             contactCount = entityProxy.getCount( //
                     tenent.getId(), //
                     contactFrontEndQuery);
@@ -197,6 +200,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             }
             accountFrontEndQuery.setRatingModels(ratingModels);
 
+            log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
             Map<String, Long> countInfo = entityProxy.getRatingCount( //
                     tenent.getId(), //
                     accountFrontEndQuery);
@@ -251,6 +255,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             ratingModels.add(ratingModelWrapper);
             accountFrontEndQuery.setRatingModels(ratingModels);
 
+            log.info("Front end queryfor Account: " + JsonUtils.serialize(accountFrontEndQuery));
             Map<String, Long> countInfo = entityProxy.getRatingCount( //
                     tenent.getId(), //
                     accountFrontEndQuery);
