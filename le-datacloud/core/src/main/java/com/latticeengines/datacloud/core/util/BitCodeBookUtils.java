@@ -22,7 +22,7 @@ public class BitCodeBookUtils {
      * @param codeBookLookup
      *            (empty map)
      * @param decodeStrs
-     *            (decodedAttr -> decodeStrategyStr)
+     *            (decodeAttr -> decodeStrategyStr)
      */
     public static void constructCodeBookMap(Map<String, BitCodeBook> codeBookMap, Map<String, String> codeBookLookup,
             Map<String, String> decodeStrs) {
