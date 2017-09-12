@@ -7,14 +7,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ForkJoinPool;
+
+import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.CoverageInfo;
 import com.latticeengines.domain.exposed.pls.RatingBucketCoverage;
@@ -41,6 +46,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private static Logger log = LoggerFactory.getLogger(RatingCoverageServiceImpl.class);
 
+    @Value("${pls.rating.coverageservice.threadpool.size:10}")
+    private Integer fetcherNum;
+
     @Autowired
     private RatingEngineService ratingEngineService;
 
@@ -50,7 +58,14 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     @Autowired
     private EntityProxy entityProxy;
 
+    private ForkJoinPool tpForParallelStream;
+
     Random rand = new Random(System.currentTimeMillis());
+
+    @PostConstruct
+    public void init() {
+        tpForParallelStream = ThreadPoolUtils.getForkJoinThreadPool("rating-coverage", fetcherNum);
+    }
 
     @Override
     public RatingsCountResponse getCoverageInfo(RatingsCountRequest request) {
@@ -79,12 +94,15 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         Map<String, CoverageInfo> ratingEngineIdCoverageMap = new ConcurrentHashMap<>();
         result.setRatingEngineIdCoverageMap(ratingEngineIdCoverageMap);
 
-        request.getRatingEngineIds() //
-                .stream().parallel() //
-                .forEach( //
-                        ratingEngineId -> //
-                        processSingleRatingId(tenent, ratingEngineIdCoverageMap, //
-                                ratingEngineId, request.isRestrictNotNullSalesforceId()));
+        tpForParallelStream.submit(//
+                () -> //
+                request.getRatingEngineIds() //
+                        .stream().parallel() //
+                        .forEach( //
+                                ratingEngineId -> //
+                                processSingleRatingId(tenent, ratingEngineIdCoverageMap, //
+                                        ratingEngineId, request.isRestrictNotNullSalesforceId()))) //
+                .join();
 
         return result;
     }
@@ -96,12 +114,15 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         Map<String, CoverageInfo> segmentIdCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdCoverageMap(segmentIdCoverageMap);
 
-        request.getSegmentIds() //
-                .stream().parallel() //
-                .forEach( //
-                        segmentId -> //
-                        processSingleSegmentId(tenent, segmentIdCoverageMap, //
-                                segmentId, request.isRestrictNotNullSalesforceId()));
+        tpForParallelStream.submit(//
+                () -> //
+                request.getSegmentIds() //
+                        .stream().parallel() //
+                        .forEach( //
+                                segmentId -> //
+                                processSingleSegmentId(tenent, segmentIdCoverageMap, //
+                                        segmentId, request.isRestrictNotNullSalesforceId()))) //
+                .join();
 
         return result;
     }
@@ -113,12 +134,15 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         Map<String, CoverageInfo> segmentIdModelRulesCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdModelRulesCoverageMap(segmentIdModelRulesCoverageMap);
 
-        request.getSegmentIdModelRules() //
-                .stream().parallel() //
-                .forEach( //
-                        segmentIdModelRulesPair -> //
-                        processSingleSegmentIdModelRulesPair(tenent, segmentIdModelRulesCoverageMap, //
-                                segmentIdModelRulesPair, request.isRestrictNotNullSalesforceId()));
+        tpForParallelStream.submit(//
+                () -> //
+                request.getSegmentIdModelRules() //
+                        .stream().parallel() //
+                        .forEach( //
+                                segmentIdModelRulesPair -> //
+                                processSingleSegmentIdModelRulesPair(tenent, segmentIdModelRulesCoverageMap, //
+                                        segmentIdModelRulesPair, request.isRestrictNotNullSalesforceId()))) //
+                .join();
 
         return result;
     }
@@ -128,12 +152,15 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         try {
             MultiTenantContext.setTenant(tenent);
 
-            MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentId);
+            MetadataSegment segment = //
+                    metadataSegmentService.getSegmentByName(segmentId, false);
 
-            FrontEndQuery accountFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Account,
-                    isRestrictNotNullSalesforceId, segment);
-            FrontEndQuery contactFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Contact,
-                    isRestrictNotNullSalesforceId, segment);
+            FrontEndQuery accountFrontEndQuery = //
+                    createEntityFronEndQuery(BusinessEntity.Account, //
+                            isRestrictNotNullSalesforceId, segment);
+            FrontEndQuery contactFrontEndQuery = //
+                    createEntityFronEndQuery(BusinessEntity.Contact, //
+                            isRestrictNotNullSalesforceId, segment);
             log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
 
             Long accountCount = entityProxy.getCount( //
@@ -188,10 +215,12 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
             MetadataSegment segment = ratingEngine.getSegment();
 
-            FrontEndQuery accountFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Account,
-                    isRestrictNotNullSalesforceId, segment);
-            FrontEndQuery contactFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Contact,
-                    isRestrictNotNullSalesforceId, segment);
+            FrontEndQuery accountFrontEndQuery = //
+                    createEntityFronEndQuery(BusinessEntity.Account, //
+                            isRestrictNotNullSalesforceId, segment);
+            FrontEndQuery contactFrontEndQuery = //
+                    createEntityFronEndQuery(BusinessEntity.Contact, //
+                            isRestrictNotNullSalesforceId, segment);
 
             List<RatingModel> ratingModels = new ArrayList<>();
             for (RatingModel model : ratingEngine.getRatingModels()) {
@@ -243,11 +272,15 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         try {
             MultiTenantContext.setTenant(tenent);
 
-            MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentIdModelRulesPair.getSegmentId());
-            FrontEndQuery accountFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Account,
-                    isRestrictNotNullSalesforceId, segment);
-            FrontEndQuery contactFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Contact,
-                    isRestrictNotNullSalesforceId, segment);
+            MetadataSegment segment = //
+                    metadataSegmentService.getSegmentByName( //
+                            segmentIdModelRulesPair.getSegmentId(), false);
+            FrontEndQuery accountFrontEndQuery = //
+                    createEntityFronEndQuery(BusinessEntity.Account, //
+                            isRestrictNotNullSalesforceId, segment);
+            FrontEndQuery contactFrontEndQuery = //
+                    createEntityFronEndQuery(BusinessEntity.Contact, //
+                            isRestrictNotNullSalesforceId, segment);
 
             List<RatingModel> ratingModels = new ArrayList<>();
             RuleBasedModel ratingModelWrapper = new RuleBasedModel();
