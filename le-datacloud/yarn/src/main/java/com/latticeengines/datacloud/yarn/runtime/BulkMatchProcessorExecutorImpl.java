@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +24,10 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorExecutorImpl {
 
     private static final Logger log = LoggerFactory.getLogger(BulkMatchProcessorExecutorImpl.class);
-    private Random random = new Random(System.currentTimeMillis());
+    private static final long MAX_DATA_SIZE_BETWEEN_GC = 200_000_000;
+
+    private long dataSizeSinceGC = 0L;
+    private int numCols = 0;
 
     @Override
     public void execute(ProcessorContext processorContext) {
@@ -87,12 +89,21 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
             // always skip this future if it has not timed out.
             toDelete.add(future);
             if (context != null) {
+                if (numCols == 0) {
+                    try {
+                        numCols = context.getOutput().getResult().get(0).getOutput().size();
+                        log.info("Determined number of output columns is " + numCols);
+                    } catch (Exception e) {
+                        //ignore
+                    }
+                }
                 if (combinedContext == null) {
                     combinedContext = context;
                 } else {
                     combinedContext.getOutput().getResult().addAll(context.getOutput().getResult());
                 }
                 processorContext.getRowsProcessed().addAndGet(context.getInput().getNumRows());
+                dataSizeSinceGC += context.getInput().getNumRows() * numCols;
             }
         }
         if (combinedContext != null) {
@@ -104,9 +115,10 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
 
         log.info(String.format("%d out of %d futures are finished.", toDelete.size(), futures.size()));
         futures.removeAll(toDelete);
-        if (random.nextInt(100) > 90) {
-            log.info("Call System.gc().");
+        if (dataSizeSinceGC >= MAX_DATA_SIZE_BETWEEN_GC) {
+            log.info("Processed " + dataSizeSinceGC + " data elements (rows x columns) since last GC, calling System.gc().");
             System.gc();
+            dataSizeSinceGC = 0L;
         }
     }
 
