@@ -60,11 +60,11 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     @Override
     public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
             String sortBy, boolean descending, String bucketFieldName, List<String> lookupFieldNames,
-            boolean restrictNotNullSalesforceId) {
+            boolean restrictNotNullSalesforceId, String freeFormTextSearch) {
         Tenant tenent = MultiTenantContext.getTenant();
 
         FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
-        setBasicInfo(ratingEngine, entityType, entityFrontEndQuery, restrictNotNullSalesforceId);
+        setBasicInfo(ratingEngine, entityType, entityFrontEndQuery, restrictNotNullSalesforceId, freeFormTextSearch);
 
         entityFrontEndQuery.setPageFilter(new PageFilter(offset, maximum));
 
@@ -90,13 +90,14 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     }
 
     private void setBasicInfo(RatingEngine ratingEngine, BusinessEntity entityType, FrontEndQuery entityFrontEndQuery,
-            boolean restrictNotNullSalesforceId) {
+            boolean restrictNotNullSalesforceId, String freeFormTextSearch) {
         entityFrontEndQuery.setMainEntity(entityType);
 
         entityFrontEndQuery.setAccountRestriction(ratingEngine.getSegment().getAccountFrontEndRestriction());
         entityFrontEndQuery.setContactRestriction(ratingEngine.getSegment().getContactFrontEndRestriction());
 
         entityFrontEndQuery.setRestrictNotNullSalesforceId(restrictNotNullSalesforceId);
+        entityFrontEndQuery.setFreeFormTextSearch(freeFormTextSearch);
     }
 
     private void setSortField(BusinessEntity entityType, String sortBy, boolean descending,

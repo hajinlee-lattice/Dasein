@@ -98,9 +98,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         request.getSegmentIds() //
                 .stream().parallel() //
                 .forEach( //
-                        ratingEngineId -> //
+                        segmentId -> //
                         processSingleSegmentId(tenent, segmentIdCoverageMap, //
-                                ratingEngineId, request.isRestrictNotNullSalesforceId()));
+                                segmentId, request.isRestrictNotNullSalesforceId()));
 
         return result;
     }

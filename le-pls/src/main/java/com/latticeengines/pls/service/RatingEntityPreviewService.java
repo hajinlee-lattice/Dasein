@@ -10,6 +10,6 @@ public interface RatingEntityPreviewService {
 
     DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
             String sortBy, boolean descending, String bucketFieldName, List<String> lookupFieldNames,
-            boolean restrictNotNullSalesforceId);
+            boolean restrictNotNullSalesforceId, String freeFormTextSearch);
 
 }
