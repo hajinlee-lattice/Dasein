@@ -281,16 +281,21 @@ angular.module('common.datacloud.query.advanced', [
 
         if (dropped.tree.logicalRestriction || dropped.parent.logicalRestriction) {
             var draggedParent = dragged.parent.logicalRestriction.restrictions;
-            var droppedParent = dropped.parent ? dropped.parent.logicalRestriction.restrictions : [];
+            var droppedParent = dropped.parent 
+                ? dropped.parent.logicalRestriction.restrictions 
+                : [];
+
             var draggedIndex = draggedParent.indexOf(dragged.tree);
             var droppedIndex = droppedParent.indexOf(dropped.tree);
+            
+            var draggedItem = angular.copy(dragged.tree);
 
             console.log(draggedIndex, droppedIndex);
 
             if (dropped.tree.logicalRestriction) {
-                dropped.tree.logicalRestriction.restrictions.splice(droppedIndex+1, 0, angular.copy(dragged.tree));
+                dropped.tree.logicalRestriction.restrictions.splice(droppedIndex+1, 0, draggedItem);
             } else {
-                droppedParent.splice(droppedIndex+1, 0, angular.copy(dragged.tree));
+                droppedParent.splice(droppedIndex+1, 0, draggedItem);
             }
 
             draggedParent.splice(draggedParent.indexOf(dragged.tree), 1);

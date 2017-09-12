@@ -74,9 +74,30 @@ angular
                 }
             }
 
-            vm.changePreset = function() {
+            vm.checkSelected = function(bucket) {
+                if (bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]) {
+                    console.log('selected', (bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]), bucket.Rng[0], vm.range[0], bucket.Rng[1], vm.range[1], bucket, vm.range);
+                    vm.presetOperation = bucket.Lbl;
+                }
             }
-            
+
+            vm.changePreset = function() {
+                var label = vm.presetOperation;
+                var buckets = vm.item.cube.Bkts.List;
+                var bucket = buckets.filter(function(item) { return item.Lbl == label; })[0];
+                var restriction = vm.tree.bucketRestriction.bkt;
+                var bkt = angular.copy(bucket);
+
+                restriction.Cnt = bkt.Cnt;
+                restriction.Id = bkt.Id;
+                restriction.Lbl = bkt.Lbl;
+                restriction.Rng[0] = bkt.Rng[0];
+                restriction.Rng[1] = bkt.Rng[1];
+
+                vm.setOperation(null, 'Numerical', null, bkt.Rng) 
+                console.log(label, bucket, buckets, restriction);
+            }
+
             vm.changeOperation = function() {
                 if (!vm.item.topbkt.Rng) {
                     vm.item.topbkt.Rng = [null, null];
@@ -196,6 +217,11 @@ angular
 
                 if (dragged && (!dropped || (dropped && dropped.tree.$$hashKey !== vm.tree.$$hashKey))) {
                     vm.root.droppedItem = vm;
+                    
+                    if (dropped) {
+                        //vm.root.dropMoveItem(dragged, dropped);
+                        //vm.root.draggedItem = vm;
+                    }
                 }
             }
 

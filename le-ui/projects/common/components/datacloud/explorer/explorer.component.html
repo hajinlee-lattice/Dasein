@@ -3,7 +3,8 @@
     <div ng-if="!vm.category" ng-init="vm.relanding()"></div>
     <div class="status-alert-box {{vm.status_alert.type}}" ng-if="vm.status_alert.show">
         <div class="icon"></div>
-        <div class="message" ng-bind-html="vm.status_alert.message"></div>
+        <div class="message" ng-if="vm.status_alert.special != 'nohtml'" ng-bind-html="vm.status_alert.message"></div>
+        <div class="message" ng-if="vm.status_alert.special == 'nohtml'">{{vm.status_alert.message}}</div>
         <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
     </div>
     <div ng-if="!vm.hidePage()">

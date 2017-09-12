@@ -36,6 +36,7 @@ angular.module('common.datacloud.explorer', [
             categories_select_all: 'All Categories',
             premiumTotalSelectError: 'Premium attribute limit reached',
             generalTotalSelectError: 'Attribute limit reached',
+            insufficientUserRights: 'Lattice Insights are disabled',
             no_results: 'No attributes were found',
             saved_alert: 'Your changes have been saved.',
             saved_error: 'Your changes could not be saved.',
@@ -93,6 +94,11 @@ angular.module('common.datacloud.explorer', [
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
     vm.init = function() {
+        if (vm.section == 'insights' && !vm.show_lattice_insights) {
+            vm.statusMessage(vm.label.insufficientUserRights, { wait: 0, special: 'nohtml' });
+            return false;
+        }
+
         if (vm.lookupMode && vm.LookupResponse.errorCode) {
             $state.go('home.datacloud.explorer');
         }
@@ -1069,6 +1075,7 @@ angular.module('common.datacloud.explorer', [
 
         vm.status_alert.type = type;
         vm.status_alert.message = message;
+        vm.status_alert.special = opts.special;
         $timeout.cancel(status_timer);
         vm.status_alert.show = true;
 
@@ -1252,7 +1259,7 @@ angular.module('common.datacloud.explorer', [
         for (var i=0; i < restrictions.length; i++) {
             var restriction = accountRestrictions[i];
 
-            if (!restriction.bucketRestriction) {
+            if (!restriction || !restriction.bucketRestriction || !restriction.bucketRestriction.bkt) {
                 continue;
             }
 
@@ -1262,7 +1269,7 @@ angular.module('common.datacloud.explorer', [
                 key = restriction.attr.split(".")[1],
                 enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
                 index = vm.enrichmentsMap[key];
-            
+
             if (index || index === 0) {
                 // vm.enrichments[index].SegmentChecked = true; PLS-4589
                 vm.enrichments[index].SegmentRangesChecked = {};

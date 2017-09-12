@@ -126,7 +126,7 @@
                     
                     <span ng-if="vm.editMode == 'Preset'">
                         <select ng-model="vm.presetOperation" ng-change="vm.changePreset()">
-                            <option ng-repeat="bucket in vm.item.cube.Bkts.List" ng-value="bucket.Lbl">{{ bucket.Lbl }}</option>
+                            <option ng-repeat="bucket in vm.item.cube.Bkts.List" ng-value="bucket.Lbl" ng-init="vm.checkSelected(bucket)">{{ bucket.Lbl }}</option>
                         </select>
                     </span>
                 </span>
