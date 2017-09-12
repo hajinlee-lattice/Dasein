@@ -87,7 +87,8 @@ class AssignConversionRateToAllCategoricalValues(PipelineStep):
         return 1.0
 
     def __convertFloatToString(self, x):
-        return '{0:.2f}'.format(x) if (isinstance(x, numbers.Real) and not np.isnan(x)) else x
+        return '{0:.2f}'.format(x) if (isinstance(x, numbers.Real) and not np.isnan(x)) else str(x) if (isinstance(x, numbers.Real) and np.isnan(x)) else x
+
 
     def __writeRTSArtifacts(self):
         with open("conversionratemapping.json", "wb") as fp:
