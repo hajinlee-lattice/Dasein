@@ -125,6 +125,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     private void processSingleSegmentId(Tenant tenent, Map<String, CoverageInfo> segmentIdCoverageMap, String segmentId,
             boolean isRestrictNotNullSalesforceId) {
         try {
+            MultiTenantContext.setTenant(tenent);
+
             MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentId);
 
             FrontEndQuery accountFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Account,
@@ -178,6 +180,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     private void processSingleRatingId(Tenant tenent, Map<String, CoverageInfo> ratingEngineIdCoverageMap,
             String ratingEngineId, boolean isRestrictNotNullSalesforceId) {
         try {
+            MultiTenantContext.setTenant(tenent);
+
             RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
             MetadataSegment segment = ratingEngine.getSegment();
 
@@ -233,6 +237,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             Map<String, CoverageInfo> segmentIdModelRulesCoverageMap,
             SegmentIdAndModelRulesPair segmentIdModelRulesPair, boolean isRestrictNotNullSalesforceId) {
         try {
+            MultiTenantContext.setTenant(tenent);
+
             MetadataSegment segment = metadataSegmentService.getSegmentByName(segmentIdModelRulesPair.getSegmentId());
             FrontEndQuery accountFrontEndQuery = createEntityFronEndQuery(BusinessEntity.Account,
                     isRestrictNotNullSalesforceId, segment);
