@@ -94,7 +94,6 @@ public class BasicStandardizationServiceTestNG
         String[][] copyFields = { { "Name", "CopiedName" } };
         conf.setCopyFields(copyFields);
         conf.setChecksumField("Checksum");
-        conf.setChecksumLength(100);
         StandardizationTransformerConfig.StandardizationStrategy[] sequence = { StandardizationStrategy.COUNTRY,
                 StandardizationStrategy.STATE, StandardizationStrategy.STRING, StandardizationStrategy.DUNS,
                 StandardizationStrategy.ADD_ID, StandardizationStrategy.COPY, StandardizationStrategy.CHECKSUM };

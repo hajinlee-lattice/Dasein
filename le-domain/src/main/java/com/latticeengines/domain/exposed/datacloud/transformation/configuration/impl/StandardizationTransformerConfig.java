@@ -127,10 +127,6 @@ public class StandardizationTransformerConfig extends TransformerConfig {
     @JsonProperty("ChecksumExcludeFields")
     private String[] checksumExcludeFields; // for strategy CHECKSUM
 
-    @JsonProperty("ChecksumLength")
-    private int checksumLength; // for strategy CHECKSUM: length constraint of
-                                // checksum value
-
     @JsonProperty("ChecksumField")
     private String checksumField; // for strategy CHECKSUM: field name of
                                   // checksum
@@ -449,14 +445,6 @@ public class StandardizationTransformerConfig extends TransformerConfig {
 
     public void setChecksumExcludeFields(String[] checksumExcludeFields) {
         this.checksumExcludeFields = checksumExcludeFields;
-    }
-
-    public int getChecksumLength() {
-        return checksumLength;
-    }
-
-    public void setChecksumLength(int checksumLength) {
-        this.checksumLength = checksumLength;
     }
 
     public String getChecksumField() {

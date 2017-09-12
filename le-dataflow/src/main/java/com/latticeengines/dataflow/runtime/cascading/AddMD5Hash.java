@@ -24,11 +24,9 @@ public class AddMD5Hash extends BaseOperation implements Function {
     private boolean compressed;
 
     @ConstructorProperties({ "fieldDeclaration" })
-    public AddMD5Hash(Fields fieldDeclaration, Set<String> excludeFields, Integer truncateLen, boolean compressed) {
+    public AddMD5Hash(Fields fieldDeclaration, Set<String> excludeFields) {
         super(0, fieldDeclaration);
         this.excludeFields = excludeFields == null ? new HashSet<>() : excludeFields;
-        this.truncateLen = truncateLen;
-        this.compressed = compressed;
     }
 
     @Override

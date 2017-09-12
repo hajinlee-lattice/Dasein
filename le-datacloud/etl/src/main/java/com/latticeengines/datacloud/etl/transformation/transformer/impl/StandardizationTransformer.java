@@ -412,7 +412,6 @@ public class StandardizationTransformer
         parameters.setCopyFields(config.getCopyFields());
         parameters.setChecksumExcludeFields(config.getChecksumExcludeFields());
         parameters.setChecksumField(config.getChecksumField());
-        parameters.setChecksumLength(config.getChecksumLength());
         parameters.setStandardCountries(countryCodeService.getStandardCountries());
     }
 

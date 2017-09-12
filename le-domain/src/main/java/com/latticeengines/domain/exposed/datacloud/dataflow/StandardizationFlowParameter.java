@@ -121,9 +121,6 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
     @JsonProperty("ChecksumExcludeFields")
     private String[] checksumExcludeFields;
 
-    @JsonProperty("ChecksumLength")
-    private int checksumLength;
-
     @JsonProperty("ChecksumField")
     private String checksumField;
 
@@ -432,14 +429,6 @@ public class StandardizationFlowParameter extends TransformationFlowParameters {
 
     public void setChecksumExcludeFields(String[] checksumExcludeFields) {
         this.checksumExcludeFields = checksumExcludeFields;
-    }
-
-    public int getChecksumLength() {
-        return checksumLength;
-    }
-
-    public void setChecksumLength(int checksumLength) {
-        this.checksumLength = checksumLength;
     }
 
     public String getChecksumField() {

@@ -131,8 +131,7 @@ public class SourceStandardizationFlow
                 source = copy(source, parameters.getCopyFields());
                 break;
             case CHECKSUM:
-                source = checksum(source, parameters.getChecksumExcludeFields(), parameters.getChecksumLength(),
-                        parameters.getChecksumField());
+                source = checksum(source, parameters.getChecksumExcludeFields(), parameters.getChecksumField());
                 break;
             default:
                 throw new UnsupportedOperationException(
@@ -143,12 +142,12 @@ public class SourceStandardizationFlow
         return source;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Node checksum(Node source, String[] excludeFields, int length, String checksumField) {
+    @SuppressWarnings({ "unchecked" })
+    private Node checksum(Node source, String[] excludeFields, String checksumField) {
         Set<String> toExclude = excludeFields == null ? new HashSet<>() : new HashSet<>(Arrays.asList(excludeFields));
         source = source
-                .apply(new AddMD5Hash(new Fields(checksumField), toExclude, length,
-                        true), new FieldList(source.getFieldNames()), new FieldMetadata(checksumField, String.class));
+                .apply(new AddMD5Hash(new Fields(checksumField), toExclude), new FieldList(source.getFieldNames()),
+                        new FieldMetadata(checksumField, String.class));
         return source;
     }
 

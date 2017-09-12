@@ -857,7 +857,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         Pipe each = new Each(pm.getKey(), DataFlowUtils.convertToFields(fieldsToApply.getFields()),
-                new AddMD5Hash(new Fields(targetFieldName), null, null, false), Fields.ALL);
+                new AddMD5Hash(new Fields(targetFieldName), null), Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         FieldMetadata pdHashFm = new FieldMetadata(Type.STRING, String.class, targetFieldName, null);
         pdHashFm.setPropertyValue("length", "32");
