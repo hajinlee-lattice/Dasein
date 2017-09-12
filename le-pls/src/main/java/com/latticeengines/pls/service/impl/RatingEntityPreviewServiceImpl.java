@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -73,6 +74,11 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         RatingModel model = setModelInfo(ratingEngine, entityFrontEndQuery);
 
         setLookups(entityType, entityFrontEndQuery, model, lookupFieldNames);
+
+        MetadataSegment segment = ratingEngine.getSegment();
+
+        entityFrontEndQuery.setAccountRestriction(segment.getAccountFrontEndRestriction());
+        entityFrontEndQuery.setContactRestriction(segment.getContactFrontEndRestriction());
 
         log.info(String.format("Entity query => %s", JsonUtils.serialize(entityFrontEndQuery)));
 
