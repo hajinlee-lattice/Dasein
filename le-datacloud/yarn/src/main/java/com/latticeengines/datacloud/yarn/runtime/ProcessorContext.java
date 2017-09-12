@@ -88,7 +88,7 @@ public class ProcessorContext {
     @Value("${datacloud.yarn.actors.num.threads}")
     private int actorsThreadPool;
 
-    @Value("${datacloud.yarn.fetchonly.num.threads:8}")
+    @Value("${datacloud.yarn.fetchonly.num.threads:4}")
     private int fetchonlyThreadPool;
 
     @Value("${datacloud.yarn.actors.group.size}")

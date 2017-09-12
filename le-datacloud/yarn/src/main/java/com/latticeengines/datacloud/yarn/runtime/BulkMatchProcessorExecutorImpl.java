@@ -116,8 +116,8 @@ public class BulkMatchProcessorExecutorImpl extends AbstractBulkMatchProcessorEx
         log.info(String.format("%d out of %d futures are finished.", toDelete.size(), futures.size()));
         futures.removeAll(toDelete);
         if (dataSizeSinceGC >= MAX_DATA_SIZE_BETWEEN_GC) {
-            log.info("Processed " + dataSizeSinceGC + " data elements (rows x columns) since last GC, calling System.gc().");
-            System.gc();
+            log.info("Processed " + dataSizeSinceGC + " data elements (rows x columns) since last GC, calling System.gc()?");
+            // System.gc();
             dataSizeSinceGC = 0L;
         }
     }
