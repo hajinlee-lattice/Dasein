@@ -48,9 +48,9 @@ public enum BusinessEntity implements GraphNode {
 
         // Relationships
         Account.addRelationship(Contact, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
-        Account.addRelationship(LatticeAccount, Cardinality.ONE_TO_ONE, InterfaceName.LatticeAccountId);
         Account.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Contact.addRelationship(Account, Cardinality.MANY_TO_MANY, InterfaceName.AccountId);
+        Transaction.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
     }
 
