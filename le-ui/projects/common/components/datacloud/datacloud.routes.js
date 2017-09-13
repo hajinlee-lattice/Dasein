@@ -14,13 +14,18 @@ angular
             'home.segment.explorer': 'customer', 
             'home.segment.explorer.attributes': 'customer',
             'home.segment.explorer.query.advanced': 'customer',
+            'home.segment.accounts': 'customer',
+            'home.segment.contacts': 'customer',
             'home.model.analysis.explorer': 'customer',
             'home.model.analysis.explorer.attributes': 'customer',
             'home.model.analysis.explorer.query.advanced': 'customer',
+            'home.model.analysis.accounts': 'customer',
+            'home.model.analysis.contacts': 'customer',
+            'home.ratingsengine.wizard.segment.attributes': 'customer',
+            'home.ratingsengine.wizard.segment.attributes.rules': 'customer',
             'home.datacloud.explorer': 'lattice',
             'home.datacloud.insights': 'lattice',
-            'home.datacloud.lookup.form': 'lattice',
-            'home.ratingsengine.wizard.segment.attributes': 'customer'
+            'home.datacloud.lookup.form': 'lattice'
         };
 
         if (states[toState.name]) {

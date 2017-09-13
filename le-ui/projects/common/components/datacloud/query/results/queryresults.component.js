@@ -43,15 +43,15 @@ angular.module('common.datacloud.query.results', [
 
         var offset = (vm.current - 1) * vm.pagesize;
         var dataQuery = {
-            free_form_text_search: vm.search,
-            account_restriction: vm.accountRestriction,
-            contact_restriction: vm.contactRestriction,
-            preexisting_segment_name: $stateParams.segment,
-            page_filter: {
-                num_rows: vm.pagesize,
-                row_offset: offset
+            "free_form_text_search": vm.search,
+            "account_restriction": vm.accountRestriction,
+            "contact_restriction": vm.contactRestriction,
+            "preexisting_segment_name": $stateParams.segment,
+            "page_filter": {
+                "num_rows": vm.pagesize,
+                "row_offset": offset
             },
-            restrict_with_sfdcid: vm.excludeNonSalesForce
+            "restrict_with_sfdcid": vm.excludeNonSalesForce
         };
 
         if(vm.page === 'Accounts'){
@@ -97,7 +97,7 @@ angular.module('common.datacloud.query.results', [
     };
 
     vm.refineQuery = function() {
-        return vm.inModel
+        return vm.inModel()
             ? 'home.model.analysis.explorer.query.advanced'
             : 'home.segment.explorer.query.advanced'
     };

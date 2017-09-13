@@ -113,7 +113,6 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.setCurrentSavedTree = function() {
-        console.log('SAVE CURRENT TREE', angular.copy(vm.tree))
         QueryStore.currentSavedTree = angular.copy(vm.tree);
     }
 
@@ -135,7 +134,7 @@ angular.module('common.datacloud.query.advanced', [
         var current = angular.copy(vm.tree),
             old = angular.copy(vm.history[vm.history.length -1]) || [];
 
-        console.log('saveState', vm.compareTree(old, current), current, old);
+        //console.log('saveState', vm.compareTree(old, current), current, old);
 
         if (!vm.compareTree(old, current)) {
             vm.history.push(current);
@@ -150,7 +149,7 @@ angular.module('common.datacloud.query.advanced', [
         var lastState;
 
         while (lastState = vm.history.pop()) {
-            console.log('clickUndo', vm.tree, lastState);
+            //console.log('clickUndo', vm.tree, lastState);
             
             if (vm.setState(lastState)) {
                 vm.updateCount();
@@ -180,16 +179,18 @@ angular.module('common.datacloud.query.advanced', [
         QueryStore.counts.accounts.loading = true;
         vm.prevBucketCountAttr = null;
 
-        QueryService.GetCountByQuery('accounts', SegmentStore.sanitizeSegment({ 
-            'free_form_text_search': "",
-            'account_restriction': angular.copy(vm.restriction),
-            'page_filter': {
-                'num_rows': 20,
-                'row_offset': 0
-            }
-        })).then(function(result) {
-            QueryStore.setResourceTypeCount('accounts', false, result);
-        });
+        $timeout(function() {
+            QueryService.GetCountByQuery('accounts', SegmentStore.sanitizeSegment({ 
+                'free_form_text_search': "",
+                'account_restriction': angular.copy(vm.restriction),
+                'page_filter': {
+                    'num_rows': 20,
+                    'row_offset': 0
+                }
+            })).then(function(result) {
+                QueryStore.setResourceTypeCount('accounts', false, result);
+            });
+        }, 100);
     }
 
     vm.updateBucketCount = function(bucketRestriction) {
@@ -235,6 +236,9 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.checkDisableSave = function() {
+        return false;
+
+        // FIXME: this stuff is disabled for now
         if (!QueryStore.currentSavedTree || !vm.tree) {
             return true;
         }
@@ -253,44 +257,20 @@ angular.module('common.datacloud.query.advanced', [
         $state.go(state);
     }
 
-    function swap(context, i, j) {
-        var temp = context[i];
-        context[i] = context[j]
-        context[j] = temp;
-    }
-
     vm.dropMoveItem = function(dragged, dropped, endMove) {
         console.log('dropMoveItem', dragged.parent !== dropped.parent, dragged, dropped);
         var items = dropped.parent 
                 ? dropped.parent.logicalRestriction.restrictions
                 : dropped.tree.logicalRestriction.restrictions;
 
-        var theitem = null;
-        var index = null;
-
-        // items.forEach(function(item, i) {
-        //     var conditional = item.$$hashKey == dropped.tree.$$hashKey;
-
-        //     if (conditional) {
-        //         theitem = item;
-        //         index = i;
-        //         return;
-        //     }
-            
-        // });
-
         if (dropped.tree.logicalRestriction || dropped.parent.logicalRestriction) {
-            var draggedParent = dragged.parent.logicalRestriction.restrictions;
-            var droppedParent = dropped.parent 
-                ? dropped.parent.logicalRestriction.restrictions 
-                : [];
-
-            var draggedIndex = draggedParent.indexOf(dragged.tree);
-            var droppedIndex = droppedParent.indexOf(dropped.tree);
-            
-            var draggedItem = angular.copy(dragged.tree);
-
-            console.log(draggedIndex, droppedIndex);
+            var draggedParent = dragged.parent.logicalRestriction.restrictions,
+                droppedParent = dropped.parent 
+                    ? dropped.parent.logicalRestriction.restrictions 
+                    : [],
+                draggedIndex = draggedParent.indexOf(dragged.tree),
+                droppedIndex = droppedParent.indexOf(dropped.tree),
+                draggedItem = angular.copy(dragged.tree);
 
             if (dropped.tree.logicalRestriction) {
                 dropped.tree.logicalRestriction.restrictions.splice(droppedIndex+1, 0, draggedItem);
@@ -300,15 +280,6 @@ angular.module('common.datacloud.query.advanced', [
 
             draggedParent.splice(draggedParent.indexOf(dragged.tree), 1);
         }
-
-        // if (typeof index === 'number') {
-        //     //console.log(index, dragged);
-        //     //console.log('dropMoveItem', items, items.length, index, index + 1)
-        // }
-    }
-
-    vm.dropItem = function(branch) {
-        console.log('dropped on', branch)
     }
 
     vm.init();
