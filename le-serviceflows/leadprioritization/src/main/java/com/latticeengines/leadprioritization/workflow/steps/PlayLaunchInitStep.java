@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -517,16 +516,15 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         Double value = 0D;
         recommendation.setMonetaryValue(value);
 
-        // give preference to company name from customer data itself. If not
-        // found then try to get company name from lattice data cloud field
-        // LDC_Name
-        recommendation.setCompanyName(checkAndGet(account, InterfaceName.CompanyName.name()));
+        // give preference to lattice data cloud field LDC_Name. If not found
+        // then try to get company name from customer data itself.
+        recommendation.setCompanyName(checkAndGet(account, InterfaceName.LDC_Name.name()));
         if (recommendation.getCompanyName() == null) {
-            recommendation.setCompanyName(checkAndGet(account, InterfaceName.LDC_Name.name()));
+            recommendation.setCompanyName(checkAndGet(account, InterfaceName.CompanyName.name()));
         }
 
         recommendation.setTenantId(tenant.getPid());
-        recommendation.setLikelihood(0.5D);
+        recommendation.setLikelihood(50.0D);
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
 
         String bucketName = checkAndGet(account, modelId, "A");
@@ -544,12 +542,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             List<Map<String, String>> contactsForRecommendation = PlaymakerUtils
                     .generateContactForRecommendation(mapForAccountAndContactList.get(accountId));
             recommendation.setExpandedContacts(contactsForRecommendation);
-        } else {
-            // TODO - read contact data from redshift api
-            List<Map<String, String>> contactList = PlaymakerUtils
-                    .createDummyContacts(StringUtils.isBlank(recommendation.getCompanyName()) ? "Dummy Company"
-                            : recommendation.getCompanyName());
-            recommendation.setExpandedContacts(contactList);
         }
 
         return recommendation;
