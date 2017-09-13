@@ -37,72 +37,72 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     private SourceFileEntityMgr sourceFileEntityMgr;
 
     @Override
-    public void downloadFile(HttpServletRequest request, HttpServletResponse response,
-            String modelId, String mimeType, String filter) throws IOException {
+    public void downloadFile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType,
+            String filter) throws IOException {
 
         HdfsFileHttpDownloader downloader = getDownloader(modelId, mimeType, filter);
         downloader.downloadFile(request, response);
     }
 
     @Override
-    public void downloadPivotFile(HttpServletRequest request, HttpServletResponse response,
-            String modelId, String mimeType) throws IOException {
+    public void downloadPivotFile(HttpServletRequest request, HttpServletResponse response, String modelId,
+            String mimeType) throws IOException {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        validateModelSummary(summary, modelId);
         String filePath = summary.getPivotArtifactPath();
         downloadFileByPath(request, response, mimeType, filePath);
     }
 
     @Override
-    public void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response,
-            String modelId, String mimeType) throws IOException {
+    public void downloadTrainingSet(HttpServletRequest request, HttpServletResponse response, String modelId,
+            String mimeType) throws IOException {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        validateModelSummary(summary, modelId);
         String trainingFilePath = summary.getModelSummaryConfiguration()
                 .getString(ProvenancePropertyName.TrainingFilePath, "");
         downloadFileByPath(request, response, mimeType, trainingFilePath);
     }
 
     @Override
-    public void downloadModelProfile(HttpServletRequest request, HttpServletResponse response, String modelId, String mimeType) throws IOException {
+    public void downloadModelProfile(HttpServletRequest request, HttpServletResponse response, String modelId,
+            String mimeType) throws IOException {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        String modelProfilePath = String.format("%s%s/data/%s-Event-Metadata/%s", modelingServiceHdfsBaseDir, summary
-                .getTenant().getId(), summary.getEventTableName(), MODEL_PROFILE_AVRO);
+        validateModelSummary(summary, modelId);
+        String modelProfilePath = String.format("%s%s/data/%s-Event-Metadata/%s", modelingServiceHdfsBaseDir,
+                summary.getTenant().getId(), summary.getEventTableName(), MODEL_PROFILE_AVRO);
         downloadFileByPath(request, response, mimeType, modelProfilePath);
     }
 
     @Override
-    public void downloadFileByApplicationId(HttpServletRequest request,
-            HttpServletResponse response, String mimeType, String applicationId, String fileName)
-            throws IOException, LedpException {
+    public void downloadFileByApplicationId(HttpServletRequest request, HttpServletResponse response, String mimeType,
+            String applicationId, String fileName) throws IOException, LedpException {
         SourceFile sourceFile = sourceFileEntityMgr.findByApplicationId(applicationId);
         boolean fileDownloaded = false;
         if (sourceFile != null) {
             String filePath = sourceFile.getPath();
             if (filePath != null && !filePath.isEmpty()) {
-                CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(mimeType,
-                        filePath, fileName);
+                CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(mimeType, filePath, fileName);
                 downloader.downloadFile(request, response);
                 fileDownloaded = true;
             }
         }
 
         if (!fileDownloaded) {
-            throw new IOException(
-                    String.format("Error downloading source file with name: %s", fileName));
+            throw new IOException(String.format("Error downloading source file with name: %s", fileName));
         }
     }
 
     @Override
-    public void downloadFileByPath(HttpServletRequest request, HttpServletResponse response,
-            String mimeType, String filePath) throws IOException {
+    public void downloadFileByPath(HttpServletRequest request, HttpServletResponse response, String mimeType,
+            String filePath) throws IOException {
         if (filePath != null && !filePath.isEmpty()) {
-            CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(mimeType,
-                    filePath, null);
+            CustomerSpaceHdfsFileDownloader downloader = getCustomerSpaceDownloader(mimeType, filePath, null);
             downloader.downloadFile(request, response);
         }
     }
 
-    private CustomerSpaceHdfsFileDownloader getCustomerSpaceDownloader(String mimeType,
-            String filePath, String fileName) {
+    private CustomerSpaceHdfsFileDownloader getCustomerSpaceDownloader(String mimeType, String filePath,
+            String fileName) {
         CustomerSpaceHdfsFileDownloader.FileDownloadBuilder builder = new CustomerSpaceHdfsFileDownloader.FileDownloadBuilder();
         builder.setMimeType(mimeType).setFilePath(filePath).setYarnConfiguration(yarnConfiguration)
                 .setFileName(fileName);
@@ -125,4 +125,9 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         return new HdfsFileHttpDownloader(requestBuilder);
     }
 
+    private void validateModelSummary(ModelSummary summary, String modelId) {
+        if (summary == null) {
+            throw new NullPointerException(String.format("Modelsummary with id %s is null", modelId));
+        }
+    }
 }
