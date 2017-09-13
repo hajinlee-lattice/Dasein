@@ -102,7 +102,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             rootOperationUid = getStringValueFromContext(BulkMatchContextKey.ROOT_OPERATION_UID);
 
             remainingJobs = new ArrayList<DataCloudJobConfiguration>(jobConfigurations);
-            while (remainingJobs.size() != 0) {
+            while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
                 submitMatchBlocks();
                 waitForMatchBlocks();
                 try {
