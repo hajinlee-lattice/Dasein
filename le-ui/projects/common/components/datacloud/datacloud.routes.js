@@ -4,6 +4,7 @@ angular
     'common.datacloud.lookup',
     'common.datacloud.explorertabs',
     'common.datacloud.analysistabs',
+    'common.datacloud.targettabs',
     'common.datacloud.query',
     'common.datacloud.query.advanced',
     'mainApp.core.utilities.BrowserStorageUtility'
@@ -405,9 +406,6 @@ angular
                     } else {
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
                             var segment = result;
-
-                            // console.log("[resolve] AccountsCount", segment);
-
                             query = { 
                                 'free_form_text_search': '',
                                 'account_restriction': segment.account_restriction,

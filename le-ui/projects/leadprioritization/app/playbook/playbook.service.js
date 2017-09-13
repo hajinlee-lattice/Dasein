@@ -282,6 +282,16 @@ angular.module('lp.playbook')
             hasLaunched: hasLaunched
         };
     }
+
+    this.getTargetData = function(engineId, query){ 
+        var deferred = $q.defer();
+
+        PlaybookWizardService.getTargetData(engineId, query).then(function(response) {
+            deferred.resolve(response);
+        });
+        return deferred.promise;
+    };
+
 })
 .service('PlaybookWizardService', function($q, $http, $state, $timeout) {
     this.host = '/pls'; //default
@@ -356,6 +366,10 @@ angular.module('lp.playbook')
             method: 'GET',
             url: this.host + '/play' + play_name_url
         }).then(function(response){
+
+            console.log(response);
+
+
             deferred.resolve(response.data);
         });
         return deferred.promise;
@@ -438,6 +452,18 @@ angular.module('lp.playbook')
             data: {
                 ratingEngineIds: ratings
             }
+        }).then(function(response) {
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.getTargetData = function(engineId, query) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/ratingengines/' + engineId + '/entitypreview',
+            params: query
         }).then(function(response) {
             deferred.resolve(response.data);
         });

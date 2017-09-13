@@ -307,3 +307,7 @@
 .query-filter.query-all .fa.arrow:before {
     content: "\f063"; /* down */
 }
+
+.main-content section.target-tabs:last-child {
+    margin-bottom: 0;
+}

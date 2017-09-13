@@ -41,32 +41,41 @@ angular.module('common.datacloud.query.results', [
 
         vm.loading = true;
 
-        var offset = (vm.current - 1) * vm.pagesize;
-        var dataQuery = {
-            "free_form_text_search": vm.search,
-            "account_restriction": vm.accountRestriction,
-            "contact_restriction": vm.contactRestriction,
-            "preexisting_segment_name": $stateParams.segment,
-            "page_filter": {
-                "num_rows": vm.pagesize,
-                "row_offset": offset
-            },
-            "restrict_with_sfdcid": vm.excludeNonSalesForce
-        };
+        if(vm.section === 'segment.analysis'){
 
-        if(vm.page === 'Accounts'){
-            QueryStore.setAccounts(dataQuery).then(function(response){
-                vm.accounts = response.data;
-                vm.loading = false;
-            });
+            var offset = (vm.current - 1) * vm.pagesize;
+            var dataQuery = {
+                "free_form_text_search": vm.search,
+                "account_restriction": vm.accountRestriction,
+                "contact_restriction": vm.contactRestriction,
+                "preexisting_segment_name": $stateParams.segment,
+                "page_filter": {
+                    "num_rows": vm.pagesize,
+                    "row_offset": offset
+                },
+                "restrict_with_sfdcid": vm.excludeNonSalesForce
+            };
+
+            if(vm.page === 'Accounts'){
+                QueryStore.setAccounts(dataQuery).then(function(response){
+                    vm.accounts = response.data;
+                    vm.loading = false;
+                });
+            } else {
+                QueryStore.setContacts(dataQuery).then(function(response){
+                    vm.contact = response.data;
+                    vm.loading = false;
+                });
+            }
+
+            vm.setCurrentRestrictionForSaveButton();
+
         } else {
-            QueryStore.setContacts(dataQuery).then(function(response){
-                vm.contact = response.data;
-                vm.loading = false;
-            });
-        }
 
-        vm.setCurrentRestrictionForSaveButton();
+            console.log(vm.accounts);
+            vm.loading = false;
+
+        }
 
     };
 

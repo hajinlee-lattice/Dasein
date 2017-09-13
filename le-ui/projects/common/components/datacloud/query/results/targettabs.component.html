@@ -1,0 +1,27 @@
+<section id="TargetTabsView" class="container target-tabs">
+
+    <div class="row">
+        <div class="twelve columns">
+    
+            <div ng-if="vm.config.header" class="sub-header {{vm.config.header.class}}">
+                <h2>{{vm.config.header.label}}</h2>
+            </div>
+            <ul class="tabs_">
+                <li
+                    ui-sref="home.playbook.dashboard.targets.accounts"
+                    ui-sref-active="active">
+                    <span>Accounts</span>
+                </li>
+                <!-- <li 
+                    ui-sref="home.playbook.dashboard.targets.contacts" 
+                    ui-sref-active="active"> -->
+                <li 
+                    class="disabled">
+                    <span>Contacts</span>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+
+</section>

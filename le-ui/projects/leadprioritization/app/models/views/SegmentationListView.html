@@ -1,4 +1,4 @@
-<section id="main-content" class="container tile-list">
+<section id="main-content" class="container tile-list segments-list">
 
 
     <div class="row">
@@ -72,11 +72,11 @@
                         </p>
                         <p 
                             ng-if="!segment.description">
-                            <button 
-                                class="button link-button" 
+                            <span class="gray-text">This segment does not have a description.</span> <span
+                                class="blue-text" 
                                 data-ng-click="vm.editSegmentClick($event, segment)">
                                 Add description
-                            </button>
+                            </span>
                         </p>
                     </div>
 
@@ -93,8 +93,11 @@
                                 id="display_name"
                                 name="display_name"
                                 data-ng-model="segment.display_name"
+                                maxlength="50"
+                                ng-trim="false"
                                 class="form-control" />
                                 </label>
+                            <span>{{50 - segment.display_name.length}} characters remaining</span>
                         </div>
                         <div class="form-group">
                             <label for="segmentDescription">Description</label>
