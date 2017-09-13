@@ -143,7 +143,8 @@ public class CheckpointService {
                     TableRoleInCollection.ConsolidatedContact, //
                     TableRoleInCollection.BucketedAccount, //
                     TableRoleInCollection.SortedContact, //
-                    TableRoleInCollection.Profile);
+                    TableRoleInCollection.Profile, //
+                    TableRoleInCollection.ContactProfile);
             for (TableRoleInCollection role : tables) {
                 Table table = parseCheckpointTable(checkpoint, role.name(), version);
                 if (table != null) {
@@ -390,7 +391,8 @@ public class CheckpointService {
                     TableRoleInCollection.ConsolidatedContact, //
                     TableRoleInCollection.BucketedAccount, //
                     TableRoleInCollection.SortedContact, //
-                    TableRoleInCollection.Profile);
+                    TableRoleInCollection.Profile, //
+                    TableRoleInCollection.ContactProfile);
             for (TableRoleInCollection role : tables) {
                 saveTableIfExists(role, version, checkpoint);
             }
