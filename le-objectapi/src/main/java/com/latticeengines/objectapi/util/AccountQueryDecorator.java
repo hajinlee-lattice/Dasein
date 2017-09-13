@@ -1,23 +1,29 @@
 package com.latticeengines.objectapi.util;
 
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class AccountQueryDecorator extends QueryDecorator {
 
     private final boolean addSelects;
 
+    private final static AttributeLookup[] attributeLookups = {
+            new AttributeLookup(BusinessEntity.Account, "LDC_Domain"),
+            new AttributeLookup(BusinessEntity.Account, "LDC_Name"),
+            new AttributeLookup(BusinessEntity.Account, "LDC_Country"),
+            new AttributeLookup(BusinessEntity.Account, "LDC_City"),
+            new AttributeLookup(BusinessEntity.Account, "LDC_State"),
+            new AttributeLookup(BusinessEntity.Account, "SalesforceAccountID")
+    };
+
+
     private AccountQueryDecorator(boolean addSelect) {
         this.addSelects = addSelect;
     }
 
     @Override
-    public BusinessEntity getLookupEntity() {
-        return BusinessEntity.Account;
-    }
-
-    @Override
-    public String[] getEntityLookups() {
-        return new String[] { "LDC_Domain", "LDC_Name", "LDC_Country", "LDC_City", "LDC_State", "SalesforceAccountID" };
+    public AttributeLookup[] getAttributeLookups() {
+        return attributeLookups;
     }
 
     @Override

@@ -67,7 +67,7 @@ public class QueryTranslator {
             });
         } else if (decorator != null) {
             if (decorator.addSelects()) {
-                queryBuilder.select(decorator.getLookupEntity(), decorator.getEntityLookups());
+                queryBuilder.select(decorator.getAttributeLookups());
                 if (frontEndQuery.getRatingModels() != null) {
                     frontEndQuery.getRatingModels().forEach(model -> {
                         if (model instanceof RuleBasedModel) {

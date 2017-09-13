@@ -136,6 +136,14 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
             Object accountId = contact.get(InterfaceName.AccountId.name());
             Assert.assertTrue(accountIds.contains(accountId));
         }
+        FrontEndQuery emptyContactQuery = new FrontEndQuery();
+        emptyContactQuery.setMainEntity(BusinessEntity.Contact);
+        emptyContactQuery.setContactRestriction(frontEndRestriction);
+        dataPage = entityQueryService.getData(emptyContactQuery);
+        Assert.assertEquals(dataPage.getData().size(), 19);
+        for (Map<String, Object> contact : dataPage.getData()) {
+            Assert.assertTrue(contact.containsKey(InterfaceName.CompanyName.toString()));
+        }
     }
 
     @Test(groups = "functional")

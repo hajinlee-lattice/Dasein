@@ -4,19 +4,23 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.GroupBy;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.objectapi.service.EntityQueryService;
@@ -53,7 +57,55 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
-        return queryEvaluatorService.getData(customerSpace.toString(), query);
+        query = preProcess(frontEndQuery.getMainEntity(), query);
+        DataPage data = queryEvaluatorService.getData(customerSpace.toString(), query);
+        return postProcess(frontEndQuery.getMainEntity(), data);
+    }
+
+    private Query preProcess(BusinessEntity entity, Query query) {
+        if (BusinessEntity.Contact == entity) {
+            List<Lookup> lookups = query.getLookups();
+            if (lookups != null && lookups.stream().anyMatch(this::isContactCompanyNameLookup)) {
+                List<Lookup> filtered =
+                    lookups.stream().filter(this::isContactCompanyNameLookup).collect(Collectors.toList());
+                filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.toString()));
+                filtered.add(new AttributeLookup(BusinessEntity.Account, InterfaceName.LDC_Name.toString()));
+                query.setLookups(filtered);
+            }
+        }
+        return query;
+    }
+
+    private boolean isContactCompanyNameLookup(Lookup lookup) {
+        if (lookup instanceof AttributeLookup) {
+            AttributeLookup attrLookup = (AttributeLookup) lookup;
+            String attributeName = attrLookup.getAttribute();
+            if (attributeName.equals(InterfaceName.CompanyName.toString()) &&
+                BusinessEntity.Contact == attrLookup.getEntity()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private DataPage postProcess(BusinessEntity entity, DataPage data) {
+        if (BusinessEntity.Contact == entity) {
+            List<Map<String, Object>> results = data.getData();
+            List<Map<String, Object>> processed = results.stream().map(objectMap -> {
+                if (objectMap.containsKey(InterfaceName.CompanyName.toString()) &&
+                    objectMap.containsKey(InterfaceName.LDC_Name.toString())) {
+                    String companyName = (String) objectMap.get(InterfaceName.CompanyName.toString());
+                    String ldcName = (String) objectMap.get(InterfaceName.LDC_Name.toString());
+                    String consolidatedName = (ldcName != null) ? ldcName : companyName;
+                    if (consolidatedName != null) {
+                        objectMap.put(InterfaceName.CompanyName.toString(), consolidatedName);
+                    }
+                }
+                return objectMap;
+            }).collect(Collectors.toList());
+            data.setData(processed);
+        }
+        return data;
     }
 
     @Override
