@@ -56,7 +56,12 @@
     </ul>
 
     
+    <!--
 
+    The way of rendering columns and rows needs to be refactored in M15.
+    - Hadden
+
+    -->
 
 
     <table class="list-table" ng-if="vm.page === 'Accounts'">
@@ -112,11 +117,6 @@
     </table>
 
 
-
-
-
-
-
     <table class="list-table" ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
@@ -127,10 +127,10 @@
                 </th>
                 <th>Web Address</th>
                 <th>SalesForce ID</th>
-                <th class="sortable" ng-click="sortType = 'rule_based_model___jkgdob_rhk9h9ogiirrhw'; sortReverse = !sortReverse">
+                <th class="sortable" ng-click="sortType = 'ScoreBucket'; sortReverse = !sortReverse">
                     Rating
-                    <span ng-show="sortType == 'rule_based_model___jkgdob_rhk9h9ogiirrhw' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'rule_based_model___jkgdob_rhk9h9ogiirrhw' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="sortType == 'ScoreBucket' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'ScoreBucket' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
             </tr>
         </thead>
@@ -152,16 +152,10 @@
                         {{account.SalesforceAccountID}}
                     </span>
                 </td>
-                <td>{{account.rule_based_model___jkgdob_rhk9h9ogiirrhw}}</td>
+                <td>{{account.ScoreBucket}}</td>
             </tr>
         </tbody>
     </table>
-
-
-
-
-
-
 
 
     <table class="list-table" ng-if="vm.page === 'Contacts'">
@@ -205,7 +199,7 @@
     </div>
 
 
-    <ul class="filters pull-right" ng-if="vm.page === 'Accounts' || vm.section === 'dashboard.targets.accounts' || vm.section === 'wizard.targets' && vm.accounts.length > 0">
+    <ul class="filters pull-right" ng-if="vm.page === 'Accounts' || vm.section === 'dashboard.targets' && vm.currentTargetTab === 'Accounts' || vm.section === 'wizard.targets' && vm.accounts.length > 15">
         <li>
             <pd-pagination-controls
                 current="vm.current"
@@ -213,7 +207,7 @@
             </pd-pagination-controls>
         </li>
     </ul>
-    <ul class="filters pull-right" ng-if="vm.page === 'Contacts' || vm.section === 'dashboard.targets' || vm.section === 'wizard.targets' && vm.contacts.length > 0">
+    <ul class="filters pull-right" ng-if="vm.page === 'Contacts' || vm.section === 'dashboard.targets' && vm.currentTargetTab === 'Contacts' || vm.section === 'wizard.targets' && vm.contacts.length > 15">
         <li>
             <pd-pagination-controls
                 current="vm.current"

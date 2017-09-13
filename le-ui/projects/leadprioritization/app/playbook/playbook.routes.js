@@ -166,6 +166,28 @@ angular
                 pageTitle: 'Avaliable Targets',
                 section: 'dashboard.targets'
             },
+            resolve: {
+                Config: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
+
+                    var deferred = $q.defer();
+
+                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
+                        var play = play;
+                        var config = {
+                            play: play,
+                            excludeAccountsWithoutSalesforceId: play.excludeAccountsWithoutSalesforceId,
+                            excludeContactsWithoutSalesforceId: play.excludeContactsWithoutSalesforceId,
+                            header: {
+                                class: 'playbook-targets',
+                                label: 'Targets'
+                            }
+                        };
+                        deferred.resolve(config);
+                    });
+
+                    return deferred.promise;
+                }],
+            },
             redirectTo: 'home.playbook.dashboard.targets.accounts',
             views: {
                 "summary@": {
@@ -184,29 +206,6 @@ angular
                 currentTargetTab: 'accounts'
             },
             resolve: {
-                Config: ['$q', '$stateParams', function($q, $stateParams) {
-
-                    var deferred = $q.defer();
-
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
-
-                        console.log(play);
-
-                        var play = play;
-                        var config = {
-                            play: play,
-                            excludeAccountsWithoutSalesforceId: play.excludeAccountsWithoutSalesforceId,
-                            excludeContactsWithoutSalesforceId: play.excludeContactsWithoutSalesforceId,
-                            header: {
-                                class: 'playbook-targets',
-                                label: 'Targets'
-                            }
-                        };
-                        deferred.resolve(config);
-                    });
-
-                    return deferred.promise;
-                }],
                 Accounts: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 
                     var deferred = $q.defer();
@@ -218,6 +217,7 @@ angular
                                 free_form_text_search: '',
                                 restrictNotNullSalesforceId: false,
                                 entityType: 'Account',
+                                bucketFieldName: 'ScoreBucket',
                                 maximum: 15,
                                 offset: 0
                             };
@@ -229,11 +229,35 @@ angular
                     return deferred.promise;
 
                 }],
-                AccountsCount: [function(){
-                    return null;
+                AccountsCount: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
+
+                    var deferred = $q.defer();
+
+                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                        var engineId = data.ratingEngine.id,
+                            engineIdObject = [{id: engineId}];
+                        PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
+                            deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
+                        });
+                    });
+
+                    return deferred.promise;
+
                 }],
-                CountWithoutSalesForce: [function(){
-                    return null;
+                CountWithoutSalesForce: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
+
+                    var deferred = $q.defer();
+
+                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                        var engineId = data.ratingEngine.id,
+                            engineIdObject = [{id: engineId}];
+                        PlaybookWizardStore.getRatingsCounts(engineIdObject, true).then(function(data){
+                            deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
+                        });
+                    });
+
+                    return deferred.promise;
+                    
                 }],
                 Contacts: [function(){
                     return null;
@@ -270,11 +294,12 @@ angular
 
                         var engineId = data.ratingEngine.id,
                             query = { 
-                                'free_form_text_search': '',
-                                'restrictNotNullSalesforceId': false,
-                                'entityType': 'Account',
-                                'maximum': 15,
-                                'offset': 0
+                                free_form_text_search: '',
+                                restrictNotNullSalesforceId: false,
+                                entityType: 'Account',
+                                bucketFieldName: 'ScoreBucket',
+                                maximum: 15,
+                                offset: 0
                             };
 
                         deferred.resolve(PlaybookWizardStore.getTargetData(engineId, query).then(function(data){ return data.data; }));

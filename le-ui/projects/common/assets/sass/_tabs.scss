@@ -74,6 +74,12 @@ ul.tabs_ {
             cursor: default;
             border-bottom: 1px solid #fafafa;
         }
+        &.disabled {
+          color: #b5b5b5;
+          &:hover {
+            cursor: default;
+          }
+        }
     }
 }
 

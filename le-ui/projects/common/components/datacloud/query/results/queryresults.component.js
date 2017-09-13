@@ -34,16 +34,16 @@ angular.module('common.datacloud.query.results', [
         saving: false,
         section: $stateParams.section,
         page: $stateParams.pageTitle,
-        config: Config
+        config: Config,
+        currentTargetTab: 'Accounts'
     });
 
     function updatePage() {
 
         vm.loading = true;
+        var offset = (vm.current - 1) * vm.pagesize;
 
         if(vm.section === 'segment.analysis'){
-
-            var offset = (vm.current - 1) * vm.pagesize;
             var dataQuery = {
                 "free_form_text_search": vm.search,
                 "account_restriction": vm.accountRestriction,
@@ -72,7 +72,6 @@ angular.module('common.datacloud.query.results', [
 
         } else {
 
-            console.log(vm.accounts);
             vm.loading = false;
 
         }

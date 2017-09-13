@@ -114,14 +114,15 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    this.getRatingsCounts = function(Ratings) {
+    this.getRatingsCounts = function(Ratings, noSalesForceId) {
         var deferred = $q.defer(),
-            ratings_ids = [];
+            ratings_ids = [],
+            noSalesForceId = noSalesForceId || false;
         if(Ratings && typeof Ratings === 'object') {
             Ratings.forEach(function(value, key) {
                 ratings_ids.push(value.id);
             });
-            PlaybookWizardService.getRatingsCounts(ratings_ids).then(function(data) {
+            PlaybookWizardService.getRatingsCounts(ratings_ids, noSalesForceId).then(function(data) {
                 deferred.resolve(data);
             });
         }
@@ -366,10 +367,6 @@ angular.module('lp.playbook')
             method: 'GET',
             url: this.host + '/play' + play_name_url
         }).then(function(response){
-
-            console.log(response);
-
-
             deferred.resolve(response.data);
         });
         return deferred.promise;
@@ -444,13 +441,16 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    this.getRatingsCounts = function(ratings) {
+    this.getRatingsCounts = function(ratings, noSalesForceId) {
+
+        console.log(noSalesForceId);
         var deferred = $q.defer();
         $http({
             method: 'POST',
             url: this.host + '/ratingengines/coverage',
             data: {
-                ratingEngineIds: ratings
+                ratingEngineIds: ratings,
+                restrictNotNullSalesforceId: noSalesForceId
             }
         }).then(function(response) {
             deferred.resolve(response.data);
