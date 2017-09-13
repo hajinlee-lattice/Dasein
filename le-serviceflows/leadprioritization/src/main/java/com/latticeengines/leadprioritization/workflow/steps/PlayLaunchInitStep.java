@@ -187,7 +187,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         contactFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
 
         setSortField(BusinessEntity.Account, InterfaceName.LEAccountIDLong.name(), false, accountFrontEndQuery);
-        setSortField(BusinessEntity.Contact, InterfaceName.ContactId.name(), false, accountFrontEndQuery);
+        setSortField(BusinessEntity.Contact, InterfaceName.ContactId.name(), false, contactFrontEndQuery);
 
         return modelId;
     }
