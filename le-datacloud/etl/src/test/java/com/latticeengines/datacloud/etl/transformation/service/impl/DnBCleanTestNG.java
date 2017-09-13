@@ -30,7 +30,7 @@ public class DnBCleanTestNG extends TransformationServiceImplTestNGBase<Pipeline
     GeneralSource source = new GeneralSource("DnBCacheSeedClean");
     GeneralSource baseSource = new GeneralSource("DnBCacheSeed");
 
-    @Test(groups = "functional")
+    @Test(groups = "pipeline1")
     public void testTransformation() {
         prepareDnBCacheSeed();
         TransformationProgress progress = createNewProgress();
