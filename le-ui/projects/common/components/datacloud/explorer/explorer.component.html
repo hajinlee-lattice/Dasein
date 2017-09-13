@@ -96,7 +96,7 @@
                 </div>
             </div>
             <div class="subcategory-back" ng-if="filteredList.length && vm.category && (!vm.subcategory || (vm.subcategory == 'Other' && !vm.isYesNoCategory(vm.category, true))) && !vm.stateParams.gotoNonemptyCategory">
-                <span ng-click="vm.setCategory(''); vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
+                <span ng-if="vm.subcategories[vm.category].length <= 1" ng-click="vm.setCategory(''); vm.setSubcategory(''); vm.metadata.current = 1; vm.updateStateParams();">Back</span>
             </div>
             <div class="row enrichment-wizard-pagination noselect-children" ng-init="vm.metadata.current = 1" ng-if="filteredList.length > vm.pagesize">
                 <div class="twelve columns">

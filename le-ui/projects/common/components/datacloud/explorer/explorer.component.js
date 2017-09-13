@@ -486,7 +486,7 @@ angular.module('common.datacloud.explorer', [
 
         if (category) {
             metadata = vm.highlightMetadata.categories[category];
-            if(subcategory) {
+            if(subcategory && vm.highlightMetadata.categories[category].subcategories) {
                 metadata = vm.highlightMetadata.categories[category].subcategories[subcategory];
             }
         }
@@ -839,7 +839,6 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.getTileTableItems = function(category, subcategory, segment, limit, debug) {
-
         var items = [],
             limit = (limit === 0 ? 0 : null) || limit || null;
 
@@ -858,12 +857,10 @@ angular.module('common.datacloud.explorer', [
         if (vm.topAttributes[category]) {
             var timestamp_a = new Date().getTime();
 
-            if (!subcategory && vm.isYesNoCategory(category, true)) {
+            if (!subcategory) { //PLS-4922
                 Object.keys(vm.topAttributes[category].Subcategories).forEach(function(key, index) {
                     items = items.concat(vm.topAttributes[category].Subcategories[key]);
                 });
-            } else if(!subcategory) {
-                items = vm.topAttributes[category].Subcategories['Other'];
             } else {
                 items = vm.topAttributes[category].Subcategories[subcategory];
             }
@@ -872,9 +869,7 @@ angular.module('common.datacloud.explorer', [
 
             if (items) {
                 items.forEach(function(item, itemKey) {
-
                     // console.log(item);
-
                     var index = vm.enrichmentsMap[item.Attribute],
                         enrichment = vm.enrichments[index],
                         map = [
@@ -892,19 +887,10 @@ angular.module('common.datacloud.explorer', [
                             'SegmentChecked'
                         ];
 
-
-                    // console.log(enrichment);
-
                     if (enrichment) {
                         if(!vm.lookupMode) {
                             map.forEach(function(key){
-                                
-
-
                                 item[key] = enrichment[key];
-
-
-
                             });
 
                             enrichment.Count = item.Count;
@@ -915,7 +901,6 @@ angular.module('common.datacloud.explorer', [
                         }
                         enrichment.Hide = item.Hide;
                     }
-
                 });
             }
             var timestamp_c = new Date().getTime();

@@ -19,7 +19,7 @@
                 </li>
 
                 <li ng-repeat="attribute in (highlightAttributes = ((TileTableItems = vm.getTileTableItems(category, false, 'HighlightHighlighted', 5)).HighlightHighlighted 
-                        | filter: vm.enrichmentsFilter                        
+                        | filter: vm.enrichmentsFilter
                         | filter: vm.filterHideTrue
                         | orderBy: vm.categoryOrderBy()
                         | limitTo: (vm.showHighlighting() ? 5 : 0)))"

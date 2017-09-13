@@ -22,6 +22,7 @@
 
             <!-- | filter: vm.enrichmentsFilter() -->
             <li ng-repeat="attribute in (subcategoryAttributes = (vm.getTileTableItems(vm.category, subcategory).other
+                    | filter: vm.enrichmentsFilter()
                     | filter: vm.filterHideTrue
                     | orderBy: vm.categoryOrderBy()
                     | limitTo: 5))"
@@ -29,7 +30,13 @@
                     ng-click="vm.selectSegmentAttribute(attribute)">
 
                 <div class="column label" title="{{attribute.DisplayName}}">
-                    <input ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]" ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" name="{{attribute.Attribute || attribute.ColumnId}}" id="{{attribute.Attribute || attribute.ColumnId}}" type="checkbox" ng-if="vm.section == 'segment.analysis'" />
+                    <input 
+                            ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]" 
+                            ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
+                            name="{{attribute.Attribute || attribute.ColumnId}}" 
+                            id="{{attribute.Attribute || attribute.ColumnId}}" 
+                            type="checkbox" 
+                            ng-if="vm.section == 'segment.analysis'" />
 
                     <strong ng-if="attribute.DisplayName">{{ attribute.DisplayName }}</strong>
                     <strong ng-if="!attribute.DisplayName">{{ attribute.Attribute }}</strong>
