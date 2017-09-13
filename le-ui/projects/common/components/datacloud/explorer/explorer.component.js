@@ -1238,11 +1238,11 @@ angular.module('common.datacloud.explorer', [
 
         restrictions = [].concat(accountRestrictions, contactRestrictions);
 
-        console.log('restrictions', accountRestrictions, contactRestrictions, restrictions);
+        //console.log('getExplorerSegments', accountRestrictions, contactRestrictions, restrictions);
 
         // FIXME: this should be recursive... -Lazarus
         for (var i=0; i < restrictions.length; i++) {
-            var restriction = accountRestrictions[i];
+            var restriction = restrictions[i];
 
             if (!restriction || !restriction.bucketRestriction || !restriction.bucketRestriction.bkt) {
                 continue;
@@ -1254,7 +1254,7 @@ angular.module('common.datacloud.explorer', [
                 key = restriction.attr.split(".")[1],
                 enrichment = breakOnFirstEncounter(vm.enrichments, 'ColumnId', key, true),
                 index = vm.enrichmentsMap[key];
-
+            
             if (index || index === 0) {
                 // vm.enrichments[index].SegmentChecked = true; PLS-4589
                 vm.enrichments[index].SegmentRangesChecked = {};

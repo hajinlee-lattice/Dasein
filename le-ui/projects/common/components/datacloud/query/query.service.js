@@ -102,23 +102,27 @@ angular.module('common.datacloud.query.service',[
 
 
     this.setAccountRestriction = function(accountRestriction) {
-        this.accountRestriction = accountRestriction;
+        if (accountRestriction) {
+            this.accountRestriction = accountRestriction;
+        }
     };
     this.getAccountRestriction = function() {
         return this.accountRestriction;
     };
     this.updateAccountRestriction = function(accountRestriction) {
-        accountRestriction = accountRestriction.all;
+        //accountRestriction = accountRestriction.all;
     };
 
     this.setContactRestriction = function(contactRestriction) {
-        this.contactRestriction = contactRestriction;
+        if (contactRestriction) {
+            this.contactRestriction = contactRestriction;
+        }
     };
     this.getContactRestriction = function() {
         return this.contactRestriction;
     };
     this.updateContactRestriction = function(contactRestriction) {
-        contactRestriction = contactRestriction.all;
+        //contactRestriction = contactRestriction.all;
     };
 
     this.setSegment = function(segment) {
@@ -198,20 +202,16 @@ angular.module('common.datacloud.query.service',[
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
-        var treeRoot = this.getAddBucketTreeRoot();
-
-        ((treeRoot ? treeRoot.logicalRestriction.restrictions : null) || accountRestriction).push({
+        var treeRoot = this.getAddBucketTreeRoot(),
+            restrictions = treeRoot 
+                ? treeRoot.logicalRestriction.restrictions 
+                : this.accountRestriction.restriction.logicalRestriction.restrictions;
+        
+        restrictions.push({
             bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
 
-        this.setAccountRestriction({
-            "restriction": {
-                "logicalRestriction": {
-                    "operator": "AND",
-                    "restrictions": accountRestriction
-                }
-            }
-        });
+        this.setAccountRestriction(this.accountRestriction);
 
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
@@ -226,29 +226,25 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.removeAccountRestriction = function(attribute) {
-
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
         var searchTerm = attribute.attr,
-            index = -1;
+            index = -1,
+            retrictions = this.accountRestriction.restriction.logicalRestriction.restrictions;
 
-        for(var i = 0, len = accountRestriction.length; i < len; i++) {
-            if (accountRestriction[i].bucketRestriction.attr === searchTerm) {
+        for (var i = 0, len = retrictions.length; i < len; i++) {
+            if (retrictions[i].bucketRestriction && retrictions[i].bucketRestriction.attr === searchTerm) {
                 var index = i;
                 break;
             }
         }
 
-        accountRestriction.splice(index, 1);
-        this.setRestriction({
-            "restriction": {
-                "logicalRestriction": {
-                    "operator": "AND",
-                    "restrictions": accountRestriction 
-                }
-            }
-        });
+        if (index >= 0) {
+            retrictions.splice(index, 1);
+        }
+
+        this.setAccountRestriction(this.accountRestriction);
 
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
@@ -265,20 +261,16 @@ angular.module('common.datacloud.query.service',[
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
-        var treeRoot = this.getAddBucketTreeRoot();
-
-        ((treeRoot ? treeRoot.logicalRestriction.restrictions : null) || contactRestriction).push({
+        var treeRoot = this.getAddBucketTreeRoot(),
+            restrictions = treeRoot 
+                ? treeRoot.logicalRestriction.restrictions 
+                : this.contactRestriction.restriction.logicalRestriction.restrictions;
+        
+        restrictions.push({
             bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
         });
 
-        this.setContactRestriction({
-            "restriction": {
-                "logicalRestriction": {
-                    "operator": "AND",
-                    "restrictions": contactRestriction
-                }
-            }
-        });
+        this.setContactRestriction(this.contactRestriction);
 
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
@@ -289,33 +281,28 @@ angular.module('common.datacloud.query.service',[
             self.setResourceTypeCount('contacts', false, data);
             self.counts.contacts.loading = false;
         });
-
     };
 
     this.removeContactRestriction = function(attribute) {
-
         attribute.resourceType = attribute.resourceType || 'LatticeAccount';
         attribute.attr = attribute.resourceType + '.' + attribute.columnName;
 
         var searchTerm = attribute.attr,
-            index = -1;
+            index = -1,
+            retrictions = this.contactRestriction.restriction.logicalRestriction.restrictions;
 
-        for(var i = 0, len = contactRestriction.length; i < len; i++) {
-            if (contactRestriction[i].bucketRestriction.attr === searchTerm) {
+        for (var i = 0, len = retrictions.length; i < len; i++) {
+            if (retrictions[i].bucketRestriction && retrictions[i].bucketRestriction.attr === searchTerm) {
                 var index = i;
                 break;
             }
         }
 
-        contactRestriction.splice(index, 1);
-        this.setContactRestriction({
-            "restriction": {
-                "logicalRestriction": {
-                    "operator": "AND",
-                    "restrictions": contactRestriction
-                }
-            }
-        });
+        if (index >= 0) {
+            retrictions.splice(index, 1);
+        }
+
+        this.setContactRestriction(this.contactRestriction);
 
         var self = this;
         this.GetCountByQuery('accounts').then(function(data){
@@ -329,7 +316,6 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.findAttributes = function(columnName) {
-
         var groupKey = null;
         var attributes = [];
 
