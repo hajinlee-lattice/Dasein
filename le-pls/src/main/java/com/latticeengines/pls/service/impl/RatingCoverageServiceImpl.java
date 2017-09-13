@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
@@ -48,6 +49,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     @Value("${pls.rating.coverageservice.threadpool.size:10}")
     private Integer fetcherNum;
+
+    @Value("${pls.rating.coverageservice.threshold.parallel:3}")
+    private Integer thresholdForParallelProcessing;
 
     @Autowired
     private RatingEngineService ratingEngineService;
@@ -94,15 +98,25 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         Map<String, CoverageInfo> ratingEngineIdCoverageMap = new ConcurrentHashMap<>();
         result.setRatingEngineIdCoverageMap(ratingEngineIdCoverageMap);
 
-        tpForParallelStream.submit(//
-                () -> //
-                request.getRatingEngineIds() //
-                        .stream().parallel() //
-                        .forEach( //
-                                ratingEngineId -> //
-                                processSingleRatingId(tenent, ratingEngineIdCoverageMap, //
-                                        ratingEngineId, request.isRestrictNotNullSalesforceId()))) //
-                .join();
+        if (request.getRatingEngineIds().size() < thresholdForParallelProcessing) {
+            // it is more efficient to use sequential stream (will use current
+            // thread) if collection size is small. It also ensures that small
+            // requests are not blocked if threadpool is used by bigger requests
+            Stream<String> stream = //
+                    request.getRatingEngineIds().stream();
+            ratingEngineStreamProcessing(request, tenent, ratingEngineIdCoverageMap, stream);
+        } else {
+            tpForParallelStream.submit(//
+                    () -> //
+                    {
+                        Stream<String> parallelStream = //
+                                request.getRatingEngineIds().stream() //
+                                        .parallel();
+
+                        ratingEngineStreamProcessing(request, tenent, ratingEngineIdCoverageMap, parallelStream);
+                    }) //
+                    .join();
+        }
 
         return result;
     }
@@ -114,16 +128,25 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         Map<String, CoverageInfo> segmentIdCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdCoverageMap(segmentIdCoverageMap);
 
-        tpForParallelStream.submit(//
-                () -> //
-                request.getSegmentIds() //
-                        .stream().parallel() //
-                        .forEach( //
-                                segmentId -> //
-                                processSingleSegmentId(tenent, segmentIdCoverageMap, //
-                                        segmentId, request.isRestrictNotNullSalesforceId()))) //
-                .join();
+        if (request.getSegmentIds().size() < thresholdForParallelProcessing) {
+            // it is more efficient to use sequential stream (will use current
+            // thread) if collection size is small. It also ensures that small
+            // requests are not blocked if threadpool is used by bigger requests
+            Stream<String> stream = //
+                    request.getSegmentIds().stream();
+            segmentStreamProcessing(request, tenent, segmentIdCoverageMap, stream);
+        } else {
+            tpForParallelStream.submit(//
+                    () -> //
+                    {
+                        Stream<String> parallelStream = //
+                                request.getSegmentIds().stream() //
+                                        .parallel();
 
+                        segmentStreamProcessing(request, tenent, segmentIdCoverageMap, parallelStream);
+                    }) //
+                    .join();
+        }
         return result;
     }
 
@@ -134,17 +157,58 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         Map<String, CoverageInfo> segmentIdModelRulesCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdModelRulesCoverageMap(segmentIdModelRulesCoverageMap);
 
-        tpForParallelStream.submit(//
-                () -> //
-                request.getSegmentIdModelRules() //
-                        .stream().parallel() //
-                        .forEach( //
-                                segmentIdModelRulesPair -> //
-                                processSingleSegmentIdModelRulesPair(tenent, segmentIdModelRulesCoverageMap, //
-                                        segmentIdModelRulesPair, request.isRestrictNotNullSalesforceId()))) //
-                .join();
+        if (request.getSegmentIdModelRules().size() < thresholdForParallelProcessing) {
+            // it is more efficient to use sequential stream (will use current
+            // thread) if collection size is small. It also ensures that small
+            // requests are not blocked if threadpool is used by bigger requests
+            Stream<SegmentIdAndModelRulesPair> stream = //
+                    request.getSegmentIdModelRules().stream();
+            segmentIdModelRulesStreamProcessing(request, tenent, segmentIdModelRulesCoverageMap, stream);
+        } else {
+            tpForParallelStream.submit(//
+                    () -> //
+                    {
+                        Stream<SegmentIdAndModelRulesPair> parallelStream = //
+                                request.getSegmentIdModelRules().stream() //
+                                        .parallel();
+
+                        segmentIdModelRulesStreamProcessing(request, tenent, segmentIdModelRulesCoverageMap,
+                                parallelStream);
+                    }) //
+                    .join();
+        }
 
         return result;
+    }
+
+    // this method can accept parallel or sequential stream
+    private void ratingEngineStreamProcessing(RatingsCountRequest request, Tenant tenent,
+            Map<String, CoverageInfo> ratingEngineIdCoverageMap, Stream<String> stream) {
+        stream //
+                .forEach( //
+                        ratingEngineId -> //
+                        processSingleRatingId(tenent, ratingEngineIdCoverageMap, //
+                                ratingEngineId, request.isRestrictNotNullSalesforceId()));
+    }
+
+    // this method can accept parallel or sequential stream
+    private void segmentStreamProcessing(RatingsCountRequest request, Tenant tenent,
+            Map<String, CoverageInfo> segmentIdCoverageMap, Stream<String> stream) {
+        stream //
+                .forEach( //
+                        segmentId -> //
+                        processSingleSegmentId(tenent, segmentIdCoverageMap, //
+                                segmentId, request.isRestrictNotNullSalesforceId()));
+    }
+
+    // this method can accept parallel or sequential stream
+    private void segmentIdModelRulesStreamProcessing(RatingsCountRequest request, Tenant tenent,
+            Map<String, CoverageInfo> segmentIdModelRulesCoverageMap, Stream<SegmentIdAndModelRulesPair> stream) {
+        stream //
+                .forEach( //
+                        segmentIdModelRulesPair -> //
+                        processSingleSegmentIdModelRulesPair(tenent, segmentIdModelRulesCoverageMap, //
+                                segmentIdModelRulesPair, request.isRestrictNotNullSalesforceId()));
     }
 
     private void processSingleSegmentId(Tenant tenent, Map<String, CoverageInfo> segmentIdCoverageMap, String segmentId,
