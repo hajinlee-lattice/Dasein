@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
@@ -183,6 +185,10 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         accountFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
         contactFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
+
+        setSortField(BusinessEntity.Account, InterfaceName.LEAccountIDLong.name(), false, accountFrontEndQuery);
+        setSortField(BusinessEntity.Contact, InterfaceName.ContactId.name(), false, accountFrontEndQuery);
+
         return modelId;
     }
 
@@ -222,6 +228,17 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction(segmentRestriction);
         accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
+    }
+
+    private void setSortField(BusinessEntity entityType, String sortBy, boolean descending,
+            FrontEndQuery entityFrontEndQuery) {
+        List<AttributeLookup> lookups = new ArrayList<>();
+        AttributeLookup attrLookup = new AttributeLookup(entityType,
+                StringUtils.isNotBlank(sortBy) ? sortBy : InterfaceName.LastModifiedDate.name());
+        lookups.add(attrLookup);
+
+        FrontEndSort sort = new FrontEndSort(lookups, descending);
+        entityFrontEndQuery.setSort(sort);
     }
 
     private String prepareQueryUsingRatingsDefn(FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
