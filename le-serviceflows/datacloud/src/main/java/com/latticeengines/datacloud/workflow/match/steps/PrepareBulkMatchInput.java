@@ -93,14 +93,22 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private Integer determineNumBlocksForAM(Long count) {
-        Integer numBlocks = 1;
-        Integer averageBlockSize = 1_000_000;
-        while (count >= averageBlockSize * numBlocks && numBlocks < maxNumBlocks) {
-            numBlocks++;
+        Integer minBlockSize = 75_000;
+        Integer maxBlockSize = 150_000;
+
+        Integer numBlocks;
+
+        if (count < (minBlockSize * maxNumBlocks)) {
+            numBlocks = Math.max((int)(count / minBlockSize), 1);
+        } else if (count > (maxBlockSize * maxNumBlocks)) {
+            numBlocks = (int) (count / maxBlockSize);
+        } else {
+            numBlocks = maxNumBlocks;
         }
+
         return numBlocks;
     }
-    
+
     private Integer determineNumBlocks(Long count) {
         Integer numBlocks = 1;
         Integer averageBlockSize = getConfiguration().getAverageBlockSize();
