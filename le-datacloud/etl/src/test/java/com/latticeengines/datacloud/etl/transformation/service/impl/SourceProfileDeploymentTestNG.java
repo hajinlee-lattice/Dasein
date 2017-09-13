@@ -78,6 +78,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         progress = transformData(progress);
         finish(progress);
         confirmIntermediateSource(segProfile, null);
+        confirmIntermediateSource(source, null);
         confirmResultFile(progress);
         cleanupProgressTables();
     }
@@ -430,6 +431,105 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
                 }
                 Assert.assertEquals(0, expected.size());
                 break;
+            case ENRICH_PROFILE:
+                flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
+                srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
+                        DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER,
+                        DATA_CLOUD_VERSION);
+                String[] encAttrs2 = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent",
+                        "BmbrSurge_CompositeScore" };
+                encAttrSet = new HashSet<>(Arrays.asList(encAttrs2));
+                expected = new HashMap<>(); // encAttr -> decAttr count
+                for (SourceAttribute srcAttr : srcAttrs) {
+                    JsonNode arg = om.readTree(srcAttr.getArguments());
+                    if (arg.get(SourceProfiler.IS_PROFILE).asBoolean()
+                            && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
+                        String decStr = arg.get(SourceProfiler.DECODE_STRATEGY).toString();
+                        BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr,
+                                BitDecodeStrategy.class);
+                        Assert.assertNotNull(bitDecodeStrategy.getEncodedColumn());
+                        if (!encAttrSet.contains(bitDecodeStrategy.getEncodedColumn())) {
+                            continue;
+                        }
+                        if (!expected.containsKey(bitDecodeStrategy.getEncodedColumn())) {
+                            expected.put(bitDecodeStrategy.getEncodedColumn(), 1);
+                        } else {
+                            expected.put(bitDecodeStrategy.getEncodedColumn(),
+                                    expected.get(bitDecodeStrategy.getEncodedColumn()) + 1);
+                        }
+                    }
+                }
+                while (records.hasNext()) {
+                    GenericRecord record = records.next();
+                    // log.info(record.toString());
+                    Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
+                    Object attr = record.get("AttrName");
+                    Assert.assertNotNull(attr);
+                    if (attr instanceof Utf8) {
+                        attr = attr.toString();
+                    }
+                    Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
+                    if (bktAlgo != null && bktAlgo instanceof Utf8) {
+                        bktAlgo = bktAlgo.toString();
+                    }
+                    if (decStr != null) { // Attributes need to decode
+                        if (decStr instanceof Utf8) {
+                            decStr = decStr.toString();
+                        }
+                        BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr,
+                                BitDecodeStrategy.class);
+                        Assert.assertTrue(expected.containsKey(bitDecodeStrategy.getEncodedColumn()));
+                        expected.put(bitDecodeStrategy.getEncodedColumn(),
+                                expected.get(bitDecodeStrategy.getEncodedColumn()) - 1);
+                        if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
+                            expected.remove(bitDecodeStrategy.getEncodedColumn());
+                        }
+                        switch (bitDecodeStrategy.getEncodedColumn()) {
+                        case "HGData_SupplierTechIndicators":
+                        case "BuiltWith_TechIndicators":
+                            Assert.assertNotNull(bktAlgo);
+                            BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
+                            Assert.assertNotNull(boolAlgo);
+                            break;
+                        case "BmbrSurge_Intent":
+                            Assert.assertNotNull(bktAlgo);
+                            CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo,
+                                    CategoricalBucket.class);
+                            Assert.assertNotNull(catAlgo);
+                            Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
+                            Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
+                                    "null,Very Low,Low,Medium,High,Very High");
+                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
+                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
+                            break;
+                        case "BmbrSurge_CompositeScore":
+                            if (bktAlgo == null) {
+                                continue;
+                            }
+                            IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
+                            Assert.assertNotNull(intAlgo);
+                            // log.info((String) attr + ": " +
+                            // JsonUtils.serialize(intAlgo));
+                            break;
+                        default:
+                            throw new RuntimeException(String.format("Unrecognized encoded attribute %s",
+                                    bitDecodeStrategy.getEncodedColumn()));
+                        }
+                    } else { // FLat attributes
+                        log.info(record.toString());
+                        Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
+                        if (flatAttrsBuckAlgo.get((String) attr) == null) { // Retained
+                                                                            // attributes
+                            Assert.assertNull(bktAlgo);
+                        } else {
+                            JsonUtils.serialize(JsonUtils.deserialize((String) bktAlgo,
+                                    flatAttrsBuckAlgo.get((String) attr).getClass()));
+                        }
+                    }
+                }
+                Assert.assertEquals(0, expected.size());
+                break;
             default:
                 throw new UnsupportedOperationException(String.format("Unknown intermediate source %s", source));
             }
@@ -440,104 +540,7 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        try {
-            log.info("Start to verify records one by one.");
-            Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
-            List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
-                    DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER,
-                    DATA_CLOUD_VERSION);
-            String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent",
-                    "BmbrSurge_CompositeScore" };
-            Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));
-            Map<String, Integer> expected = new HashMap<>(); // encAttr -> decAttr count
-            for (SourceAttribute srcAttr : srcAttrs) {
-                JsonNode arg = om.readTree(srcAttr.getArguments());
-                if (arg.get(SourceProfiler.IS_PROFILE).asBoolean() && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
-                    String decStr = arg.get(SourceProfiler.DECODE_STRATEGY).toString();
-                    BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr,
-                            BitDecodeStrategy.class);
-                    Assert.assertNotNull(bitDecodeStrategy.getEncodedColumn());
-                    if (!encAttrSet.contains(bitDecodeStrategy.getEncodedColumn())) {
-                        continue;
-                    }
-                    if (!expected.containsKey(bitDecodeStrategy.getEncodedColumn())) {
-                        expected.put(bitDecodeStrategy.getEncodedColumn(), 1);
-                    } else {
-                        expected.put(bitDecodeStrategy.getEncodedColumn(),
-                                expected.get(bitDecodeStrategy.getEncodedColumn()) + 1);
-                    }
-                }
-            }
-            while (records.hasNext()) {
-                GenericRecord record = records.next();
-                // log.info(record.toString());
-                Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
-                Object attr = record.get("AttrName");
-                Assert.assertNotNull(attr);
-                if (attr instanceof Utf8) {
-                    attr = attr.toString();
-                }
-                Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
-                if (bktAlgo != null && bktAlgo instanceof Utf8) {
-                    bktAlgo = bktAlgo.toString();
-                }
-                if (decStr != null) { // Attributes need to decode
-                    if (decStr instanceof Utf8) {
-                        decStr = decStr.toString();
-                    }
-                    BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr,
-                            BitDecodeStrategy.class);
-                    Assert.assertTrue(expected.containsKey(bitDecodeStrategy.getEncodedColumn()));
-                    expected.put(bitDecodeStrategy.getEncodedColumn(),
-                            expected.get(bitDecodeStrategy.getEncodedColumn()) - 1);
-                    if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
-                        expected.remove(bitDecodeStrategy.getEncodedColumn());
-                    }
-                    switch (bitDecodeStrategy.getEncodedColumn()) {
-                    case "HGData_SupplierTechIndicators":
-                    case "BuiltWith_TechIndicators":
-                        Assert.assertNotNull(bktAlgo);
-                        BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
-                        Assert.assertNotNull(boolAlgo);
-                        break;
-                    case "BmbrSurge_Intent":
-                        Assert.assertNotNull(bktAlgo);
-                        CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo, CategoricalBucket.class);
-                        Assert.assertNotNull(catAlgo);
-                        Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
-                        Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
-                                "null,Very Low,Low,Medium,High,Very High");
-                        Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
-                        Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
-                        Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
-                        break;
-                    case "BmbrSurge_CompositeScore":
-                        if (bktAlgo == null) {
-                            continue;
-                        }
-                        IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
-                        Assert.assertNotNull(intAlgo);
-                        //log.info((String) attr + ": " + JsonUtils.serialize(intAlgo));
-                        break;
-                    default:
-                        throw new RuntimeException(String.format("Unrecognized encoded attribute %s",
-                                bitDecodeStrategy.getEncodedColumn()));
-                    }
-                } else { // FLat attributes
-                    log.info(record.toString());
-                    Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
-                    if (flatAttrsBuckAlgo.get((String) attr) == null) {  // Retained attributes
-                        Assert.assertNull(bktAlgo);
-                    } else {
-                        JsonUtils.serialize(JsonUtils.deserialize((String) bktAlgo,
-                                flatAttrsBuckAlgo.get((String) attr).getClass()));
-                    }
-                }
-            }
-            Assert.assertEquals(0, expected.size());
-        } catch (Exception ex) {
-            throw new RuntimeException("Exception in verifyResultAvroRecords", ex);
-        }
+
     }
 
 }

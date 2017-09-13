@@ -266,15 +266,15 @@ public class AMSeedManualFixTestNG
                 duns = String.valueOf(record.get("DUNS"));
             }
             Object[] expected = expectedData.get(domain + duns);
-            Assert.assertTrue(equals(record.get("EMPLOYEES_TOTAL"), expected[1]));
-            Assert.assertTrue(equals(record.get("SALES_VOLUME_US_DOLLARS"), expected[4]));
-            Assert.assertTrue(equals(record.get("LE_IS_PRIMARY_DOMAIN"), expected[5]));
-            Assert.assertTrue(equals(record.get("LE_PRIMARY_DUNS"), expected[6]));
-            Assert.assertTrue(equals(record.get("City"), expected[7]));
-            Assert.assertTrue(equals(record.get("IsPrimaryAccount"), expected[8]));
-            Assert.assertTrue(equals(record.get("LE_EMPLOYEE_RANGE"), expected[9]));
-            Assert.assertTrue(equals(record.get("LE_REVENUE_RANGE"), expected[10]));
-            Assert.assertTrue(equals(record.get("DomainSource"), expected[11]));
+            Assert.assertTrue(isObjEquals(record.get("EMPLOYEES_TOTAL"), expected[1]));
+            Assert.assertTrue(isObjEquals(record.get("SALES_VOLUME_US_DOLLARS"), expected[4]));
+            Assert.assertTrue(isObjEquals(record.get("LE_IS_PRIMARY_DOMAIN"), expected[5]));
+            Assert.assertTrue(isObjEquals(record.get("LE_PRIMARY_DUNS"), expected[6]));
+            Assert.assertTrue(isObjEquals(record.get("City"), expected[7]));
+            Assert.assertTrue(isObjEquals(record.get("IsPrimaryAccount"), expected[8]));
+            Assert.assertTrue(isObjEquals(record.get("LE_EMPLOYEE_RANGE"), expected[9]));
+            Assert.assertTrue(isObjEquals(record.get("LE_REVENUE_RANGE"), expected[10]));
+            Assert.assertTrue(isObjEquals(record.get("DomainSource"), expected[11]));
             rowCount++;
         }
         Assert.assertEquals(rowCount, 25);

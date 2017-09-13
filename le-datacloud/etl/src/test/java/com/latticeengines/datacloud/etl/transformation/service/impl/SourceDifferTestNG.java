@@ -235,11 +235,11 @@ public class SourceDifferTestNG extends TransformationServiceImplTestNGBase<Pipe
             GenericRecord record = records.next();
             log.info(record.toString());
             Long id = (Long) record.get("ID");
-            Assert.assertTrue(equals(record.get("Attr1"), expected.get(id)[1]));
-            Assert.assertTrue(equals(record.get("Attr2"), expected.get(id)[2]));
-            Assert.assertTrue(equals(record.get("Attr3"), expected.get(id)[3]));
-            Assert.assertTrue(equals(record.get("Attr4"), expected.get(id)[4]));
-            Assert.assertTrue(equals(record.get("Attr5"), expected.get(id)[5]));
+            Assert.assertTrue(isObjEquals(record.get("Attr1"), expected.get(id)[1]));
+            Assert.assertTrue(isObjEquals(record.get("Attr2"), expected.get(id)[2]));
+            Assert.assertTrue(isObjEquals(record.get("Attr3"), expected.get(id)[3]));
+            Assert.assertTrue(isObjEquals(record.get("Attr4"), expected.get(id)[4]));
+            Assert.assertTrue(isObjEquals(record.get("Attr5"), expected.get(id)[5]));
             count++;
         }
         Assert.assertEquals(6, count);

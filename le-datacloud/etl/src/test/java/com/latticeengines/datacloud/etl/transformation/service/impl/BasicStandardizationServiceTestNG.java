@@ -162,12 +162,12 @@ public class BasicStandardizationServiceTestNG
             GenericRecord record = records.next();
             log.info(record.toString());
             Object[] expectedResult = expectedMap.get((Integer) record.get("ID"));
-            Assert.assertTrue(equals(record.get("Name"), expectedResult[1]));
-            Assert.assertTrue(equals(record.get("Country"), expectedResult[2]));
-            Assert.assertTrue(equals(record.get("State"), expectedResult[3]));
-            Assert.assertTrue(equals(record.get("ZipCode"), expectedResult[4]));
-            Assert.assertTrue(equals(record.get("DUNS"), expectedResult[5]));
-            Assert.assertTrue(equals(record.get("CopiedName"), expectedResult[6]));
+            Assert.assertTrue(isObjEquals(record.get("Name"), expectedResult[1]));
+            Assert.assertTrue(isObjEquals(record.get("Country"), expectedResult[2]));
+            Assert.assertTrue(isObjEquals(record.get("State"), expectedResult[3]));
+            Assert.assertTrue(isObjEquals(record.get("ZipCode"), expectedResult[4]));
+            Assert.assertTrue(isObjEquals(record.get("DUNS"), expectedResult[5]));
+            Assert.assertTrue(isObjEquals(record.get("CopiedName"), expectedResult[6]));
             Assert.assertFalse(rowIdSet.contains((Long) record.get("RowId")));
             rowIdSet.add((Long) record.get("RowId"));
             Assert.assertFalse(uuidSet.contains(record.get("UUID").toString()));

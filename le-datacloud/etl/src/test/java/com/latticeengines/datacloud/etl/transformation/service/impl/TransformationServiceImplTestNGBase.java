@@ -328,7 +328,7 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
         }
     }
 
-    protected boolean equals(Object actual, Object expected) {
+    protected boolean isObjEquals(Object actual, Object expected) {
         if (actual == null && expected == null) {
             return true;
         }

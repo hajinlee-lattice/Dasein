@@ -164,12 +164,12 @@ public class ManualSeedCleanTestNG extends TransformationServiceImplTestNGBase<P
             GenericRecord record = records.next();
             String id = String.valueOf(record.get("Manual_Id"));
             Object[] expected = expectedData.get(id);
-            Assert.assertTrue(equals(record.get("Manual_SALES_VOLUME_US_DOLLARS"), expected[1]));
-            Assert.assertTrue(equals(record.get("Manual_EMPLOYEES_TOTAL"), expected[2]));
-            Assert.assertTrue(equals(record.get("Manual_LE_EMPLOYEE_RANGE"), expected[3]));
-            Assert.assertTrue(equals(record.get("Manual_LE_REVENUE_RANGE"), expected[4]));
-            Assert.assertTrue(equals(record.get("Manual_Domain"), expected[5]));
-            Assert.assertTrue(equals(record.get("Manual_Duns"), expected[6]));
+            Assert.assertTrue(isObjEquals(record.get("Manual_SALES_VOLUME_US_DOLLARS"), expected[1]));
+            Assert.assertTrue(isObjEquals(record.get("Manual_EMPLOYEES_TOTAL"), expected[2]));
+            Assert.assertTrue(isObjEquals(record.get("Manual_LE_EMPLOYEE_RANGE"), expected[3]));
+            Assert.assertTrue(isObjEquals(record.get("Manual_LE_REVENUE_RANGE"), expected[4]));
+            Assert.assertTrue(isObjEquals(record.get("Manual_Domain"), expected[5]));
+            Assert.assertTrue(isObjEquals(record.get("Manual_Duns"), expected[6]));
             rowCount++;
         }
         Assert.assertEquals(rowCount, 9);

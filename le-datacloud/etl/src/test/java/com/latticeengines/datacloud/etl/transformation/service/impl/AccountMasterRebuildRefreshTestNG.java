@@ -399,21 +399,21 @@ public class AccountMasterRebuildRefreshTestNG
             log.info(record.toString());
             Long id = (Long) record.get("LatticeID");
             Object[] expected = expectedData.get(id);
-            Assert.assertTrue(equals(record.get("LDC_Domain"), expected[1]));
-            Assert.assertTrue(equals(record.get("LDC_DUNS"), expected[2]));
-            Assert.assertTrue(equals(record.get("LDC_Name"), expected[3]));
-            Assert.assertTrue(equals(record.get("AlexaRank"), expected[4]));
-            Assert.assertTrue(equals(record.get("Bmbr30_Healthcare_Total"), expected[5]));
-            Assert.assertTrue(equals(record.get("BmbrSurge_BucketCode"), expected[6]));
-            Assert.assertTrue(equals(record.get("BusinessTechnologiesAds"), expected[7]));
-            Assert.assertTrue(equals(record.get("BuiltWith_TechIndicators"), expected[8]));
-            Assert.assertTrue(equals(record.get("FeatureTermAddItem"), expected[9]));
-            Assert.assertTrue(equals(record.get("CloudTechnologies_SRM"), expected[10]));
-            Assert.assertTrue(equals(record.get("HGData_SegmentTechIndicators"), expected[11]));
-            Assert.assertTrue(equals(record.get("HPAEmailSuffix"), expected[12]));
-            Assert.assertTrue(equals(record.get("Total_Amount_Raised"), expected[13]));
-            Assert.assertTrue(equals(record.get("SemrushRank"), expected[14]));
-            Assert.assertTrue(equals(record.get("SALES_VOLUME_LOCAL_CURRENCY"), expected[15]));
+            Assert.assertTrue(isObjEquals(record.get("LDC_Domain"), expected[1]));
+            Assert.assertTrue(isObjEquals(record.get("LDC_DUNS"), expected[2]));
+            Assert.assertTrue(isObjEquals(record.get("LDC_Name"), expected[3]));
+            Assert.assertTrue(isObjEquals(record.get("AlexaRank"), expected[4]));
+            Assert.assertTrue(isObjEquals(record.get("Bmbr30_Healthcare_Total"), expected[5]));
+            Assert.assertTrue(isObjEquals(record.get("BmbrSurge_BucketCode"), expected[6]));
+            Assert.assertTrue(isObjEquals(record.get("BusinessTechnologiesAds"), expected[7]));
+            Assert.assertTrue(isObjEquals(record.get("BuiltWith_TechIndicators"), expected[8]));
+            Assert.assertTrue(isObjEquals(record.get("FeatureTermAddItem"), expected[9]));
+            Assert.assertTrue(isObjEquals(record.get("CloudTechnologies_SRM"), expected[10]));
+            Assert.assertTrue(isObjEquals(record.get("HGData_SegmentTechIndicators"), expected[11]));
+            Assert.assertTrue(isObjEquals(record.get("HPAEmailSuffix"), expected[12]));
+            Assert.assertTrue(isObjEquals(record.get("Total_Amount_Raised"), expected[13]));
+            Assert.assertTrue(isObjEquals(record.get("SemrushRank"), expected[14]));
+            Assert.assertTrue(isObjEquals(record.get("SALES_VOLUME_LOCAL_CURRENCY"), expected[15]));
         }
     }
 

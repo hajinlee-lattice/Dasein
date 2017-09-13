@@ -164,8 +164,8 @@ public class ManualSeedDunsEnrichTestNG
             GenericRecord record = records.next();
             String id = String.valueOf(record.get("MAN_Id"));
             Object[] expected = expectedData.get(id);
-            Assert.assertTrue(equals(record.get("MAN_Domain"), expected[1]));
-            Assert.assertTrue(equals(record.get("MAN_DUNS"), expected[2]));
+            Assert.assertTrue(isObjEquals(record.get("MAN_Domain"), expected[1]));
+            Assert.assertTrue(isObjEquals(record.get("MAN_DUNS"), expected[2]));
             rowCount++;
         }
         Assert.assertEquals(rowCount, 10);

@@ -148,12 +148,12 @@ public class DnBCleanTestNG extends TransformationServiceImplTestNGBase<Pipeline
             GenericRecord record = records.next();
             log.info(record.toString());
             Object[] expectedResult = expectedMap.get((Integer) record.get("ID"));
-            Assert.assertTrue(equals(record.get("SALES_VOLUME_US_DOLLARS"), expectedResult[1]));
-            Assert.assertTrue(equals(record.get("SALES_VOLUME_RELIABILITY_CODE"), expectedResult[2]));
-            Assert.assertTrue(equals(record.get("EMPLOYEES_TOTAL"), expectedResult[3]));
-            Assert.assertTrue(equals(record.get("EMPLOYEES_TOTAL_RELIABILITY_CODE"), expectedResult[4]));
-            Assert.assertTrue(equals(record.get("EMPLOYEES_HERE"), expectedResult[5]));
-            Assert.assertTrue(equals(record.get("EMPLOYEES_HERE_RELIABILITY_CODE"), expectedResult[6]));
+            Assert.assertTrue(isObjEquals(record.get("SALES_VOLUME_US_DOLLARS"), expectedResult[1]));
+            Assert.assertTrue(isObjEquals(record.get("SALES_VOLUME_RELIABILITY_CODE"), expectedResult[2]));
+            Assert.assertTrue(isObjEquals(record.get("EMPLOYEES_TOTAL"), expectedResult[3]));
+            Assert.assertTrue(isObjEquals(record.get("EMPLOYEES_TOTAL_RELIABILITY_CODE"), expectedResult[4]));
+            Assert.assertTrue(isObjEquals(record.get("EMPLOYEES_HERE"), expectedResult[5]));
+            Assert.assertTrue(isObjEquals(record.get("EMPLOYEES_HERE_RELIABILITY_CODE"), expectedResult[6]));
             rowNum++;
         }
         Assert.assertEquals(rowNum, expectedMap.size());

@@ -158,15 +158,15 @@ public class SourceJoinTestNG extends TransformationServiceImplTestNGBase<Pipeli
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info(record.toString());
-            Assert.assertTrue(equals(record.get("ID1"), expectedData[0][0]));
-            Assert.assertTrue(equals(record.get("ID2"), expectedData[0][1]));
-            Assert.assertTrue(equals(record.get("Value"), expectedData[0][2]));
-            Assert.assertTrue(equals(record.get("Src2__ID1"), expectedData[0][3]));
-            Assert.assertTrue(equals(record.get("Src2__ID2"), expectedData[0][4]));
-            Assert.assertTrue(equals(record.get("Src2__Value"), expectedData[0][5]));
-            Assert.assertTrue(equals(record.get("Src3__ID1"), expectedData[0][6]));
-            Assert.assertTrue(equals(record.get("Src3__ID2"), expectedData[0][7]));
-            Assert.assertTrue(equals(record.get("Src3__Value"), expectedData[0][8]));
+            Assert.assertTrue(isObjEquals(record.get("ID1"), expectedData[0][0]));
+            Assert.assertTrue(isObjEquals(record.get("ID2"), expectedData[0][1]));
+            Assert.assertTrue(isObjEquals(record.get("Value"), expectedData[0][2]));
+            Assert.assertTrue(isObjEquals(record.get("Src2__ID1"), expectedData[0][3]));
+            Assert.assertTrue(isObjEquals(record.get("Src2__ID2"), expectedData[0][4]));
+            Assert.assertTrue(isObjEquals(record.get("Src2__Value"), expectedData[0][5]));
+            Assert.assertTrue(isObjEquals(record.get("Src3__ID1"), expectedData[0][6]));
+            Assert.assertTrue(isObjEquals(record.get("Src3__ID2"), expectedData[0][7]));
+            Assert.assertTrue(isObjEquals(record.get("Src3__Value"), expectedData[0][8]));
             rowNum++;
         }
         Assert.assertEquals(rowNum, expectedData.length);

@@ -223,7 +223,7 @@ public class BomboraSurgePivotedServiceImplTestNG
                         compoScoreDecodeFields);
                 for (Map.Entry<String, Object> entry : compoScores.entrySet()) {
                     log.info(String.format("%s: %s", entry.getKey(), entry.getValue()));
-                    Assert.assertTrue(equals(entry.getValue(), expectedMap.get(domain).get(entry.getKey())));
+                    Assert.assertTrue(isObjEquals(entry.getValue(), expectedMap.get(domain).get(entry.getKey())));
                 }
             }
             Object encodedBucketCode = record.get("BmbrSurge_BucketCode");
@@ -235,7 +235,7 @@ public class BomboraSurgePivotedServiceImplTestNG
                         bucketScoreDecodeFields);
                 for (Map.Entry<String, Object> entry : bucketScores.entrySet()) {
                     log.info(String.format("%s: %s", entry.getKey(), entry.getValue()));
-                    Assert.assertTrue(equals(entry.getValue(), expectedMap.get(domain).get(entry.getKey())));
+                    Assert.assertTrue(isObjEquals(entry.getValue(), expectedMap.get(domain).get(entry.getKey())));
                 }
             }
             Object encodedIntent = record.get("BmbrSurge_Intent");
@@ -246,7 +246,7 @@ public class BomboraSurgePivotedServiceImplTestNG
                 Map<String, Object> intents = intentCodeBook.decode((String) encodedIntent, intentDecodeFields);
                 for (Map.Entry<String, Object> entry : intents.entrySet()) {
                     log.info(String.format("%s: %s", entry.getKey(), entry.getValue()));
-                    Assert.assertTrue(equals(entry.getValue(), expectedMap.get(domain).get(entry.getKey())));
+                    Assert.assertTrue(isObjEquals(entry.getValue(), expectedMap.get(domain).get(entry.getKey())));
                 }
             }
             rowNum++;
