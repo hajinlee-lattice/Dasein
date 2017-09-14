@@ -35,7 +35,7 @@ angular.module('common.datacloud.analysistabs', [
         $timeout(function(){
             QueryStore.setResourceTypeCount('accounts', false, vm.accountsCount);
             QueryStore.setResourceTypeCount('contacts', false, vm.contactsCount);
-        }, 2000);
+        }, 250);
 
         QueryStore.history = [];
 
