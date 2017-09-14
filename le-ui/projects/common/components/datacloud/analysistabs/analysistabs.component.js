@@ -17,9 +17,9 @@ angular.module('common.datacloud.analysistabs', [
         show_lattice_insights: FeatureFlagService.FlagIsEnabled(flags.LATTICE_INSIGHTS),
         accountRestriction: QueryStore.getAccountRestriction() || null,
         contactRestriction: QueryStore.getContactRestriction() || null,
-        counts: QueryStore.getCounts(),
-        accountsCount: 0,
-        contactsCount: 0
+        counts: QueryStore.getCounts()//,
+        // accountsCount: 0,
+        // contactsCount: 0
     });
 
     if ($state.current.name === 'home.segment.accounts') {
@@ -32,20 +32,22 @@ angular.module('common.datacloud.analysistabs', [
 
     vm.init = function() {
 
-        $timeout(function(){
-            QueryStore.setResourceTypeCount('accounts', false, vm.accountsCount);
-            QueryStore.setResourceTypeCount('contacts', false, vm.contactsCount);
-        }, 250);
+        // $timeout(function(){
+        //     QueryStore.setResourceTypeCount('accounts', false, vm.accountsCount);
+        //     QueryStore.setResourceTypeCount('contacts', false, vm.contactsCount);
+        // }, 250);
 
         QueryStore.history = [];
 
         QueryStore.GetCountByQuery('accounts').then(function(data){ 
-            vm.accountsCount = data;
+            // vm.accountsCount = data;
+            vm.counts.accounts.value = data;
             vm.counts.accounts.loading = false;
         });
         QueryStore.GetCountByQuery('contacts').then(function(data){ 
-            vm.contactsCount = data;
-            vm.counts.accounts.loading = false;
+            // vm.contactsCount = data;
+            vm.counts.contacts.value = data;
+            vm.counts.contacts.loading = false;
         });
 
         if(vm.segment === 'Create'){
