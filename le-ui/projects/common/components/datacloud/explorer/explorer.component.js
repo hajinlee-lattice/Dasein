@@ -1643,6 +1643,11 @@ angular.module('common.datacloud.explorer', [
                 });
             } else {
                 SegmentStore.getSegmentByName(segmentName).then(function(result) {
+
+
+                    console.log("!!!!!!!!!!!!  ", result);
+
+
                     var segmentData = result,
                         accountRestriction = QueryStore.getAccountRestriction(),
                         contactRestriction = QueryStore.getContactRestriction(),
@@ -1660,8 +1665,10 @@ angular.module('common.datacloud.explorer', [
 
                     SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
 
+                        console.log("???????????????????  ", result);
+
                         vm.saveSegmentEnabled = false;
-                        $state.go('.', { segment: 'segment' + ts }, { notify: false }, { reload: true });
+                        // $state.go('.', { segment: segment.name }, { notify: false }, { reload: true });
                         vm.saved = true;
 
                     });
