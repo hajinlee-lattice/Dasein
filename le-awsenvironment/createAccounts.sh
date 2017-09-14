@@ -76,19 +76,19 @@ do
 	    mkdir /home/${user}/.ssh
 	    chown ${user} /home/${user}/.ssh
 	    chgrp  ${user} /home/${user}/.ssh
-	    chmod 600  ${user} /home/${user}/.ssh
+	    chmod 700   /home/${user}/.ssh
     fi
 
     if [ ! -e /home/${user}/.ssh/authorized_keys ] ; then
 	    touch  ${user} /home/${user}/.ssh/authorized_keys
 	    chown ${user} /home/${user}/.ssh/authorized_keys
 	    chgrp  ${user} /home/${user}/.ssh/authorized_keys
-	    chmod 400  ${user} /home/${user}/.ssh/authorized_keys
+	    chmod 700   /home/${user}/.ssh/authorized_keys
 	    touch  ${user} /home/${user}/.ssh/authorized_keys
     fi  
 
     # for each key id, get ssh key 
-    for keyid in $userKeyList
+    for keyid in ${userKeyList[@]}
     do
         getPubSSH $user $keyid
         if [ -n "$keystr" ] ; then
