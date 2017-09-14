@@ -530,7 +530,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         recommendation.setLaunchDate(launchTime);
 
         recommendation.setAccountId(accountIdLong);
-        recommendation.setLeAccountExternalID(accountId);
+        recommendation.setLeAccountExternalID(accountIdLong);
         recommendation.setSfdcAccountID(checkAndGet(account, InterfaceName.SalesforceAccountID.name()));
         Double value = 0D;
         recommendation.setMonetaryValue(value);
