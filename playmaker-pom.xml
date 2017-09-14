@@ -10,9 +10,9 @@
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-playmaker-parent</artifactId>
+        <artifactId>le-parent</artifactId>
         <version>4.0.0-SNAPSHOT</version>
-        <relativePath>le-parent/playmaker-pom.xml</relativePath>
+        <relativePath>le-parent</relativePath>
     </parent>
 
     <modules>

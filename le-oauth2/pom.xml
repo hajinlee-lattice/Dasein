@@ -10,21 +10,64 @@
 
     <properties>
         <component-name>oauth2</component-name>
-        <le.common.version>4.0.0-SNAPSHOT</le.common.version>
-        <le.domain.version>4.0.0-SNAPSHOT</le.domain.version>
-        <le.oauth2.db.version>4.0.0-SNAPSHOT</le.oauth2.db.version>
-        <le.baton.version>4.0.0-SNAPSHOT</le.baton.version>
-        <le.monitor.version>4.0.0-SNAPSHOT</le.monitor.version>
+        <spring.oauth2.version>2.2.0.RELEASE</spring.oauth2.version>
+        <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
+        <maven.surefire.version>2.20</maven.surefire.version>
+        <jetty.version>9.2.22.v20170606</jetty.version>
+        <javax.servlet.version>3.1.0</javax.servlet.version>
+        <javax.jsp.version>2.2</javax.jsp.version>
+        <springfox.swagger.version>2.4.0</springfox.swagger.version>
+        <apache.http.version>4.4.1</apache.http.version>
+        <sqljdbc4.version>4.0</sqljdbc4.version>
+        <mysql.connector.version>5.1.30</mysql.connector.version>
+        <log4j.extras.version>1.2.17</log4j.extras.version>
+        <commons.lang3.version>3.6</commons.lang3.version>
+        <reflections.version>0.9.9</reflections.version>
+        <c3p0.version>0.9.5.2</c3p0.version>
+        <slf4j.version>1.7.25</slf4j.version>
+
         <start-class>com.latticeengines.oauth2.authserver.OAuthServer</start-class>
-        <java.version>1.7</java.version>
-        <jetty.port>8079</jetty.port>
+        <java.version>1.8</java.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>LE Maven REPOSITORY</name>
+            <layout>default</layout>
+            <url>http://10.41.1.75:8081/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+    <!-- set up to use LE local Nexus Repository for maven plugins -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <name>LE Maven Plugin Repository</name>
+            <url>http://10.41.1.75:8081/repository/maven-public/</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+
     <parent>
-        <groupId>com.latticeengines</groupId>
-        <artifactId>le-playmaker-parent</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
-        <relativePath>../le-parent/playmaker-pom.xml</relativePath>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.2.4.RELEASE</version>
     </parent>
 
     <dependencies>
@@ -36,7 +79,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
-            <version>${le.common.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -116,7 +159,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -132,7 +175,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-baton</artifactId>
-            <version>${le.baton.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -144,7 +187,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-oauth2db</artifactId>
-            <version>${le.oauth2.db.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.security</groupId>
@@ -155,7 +198,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-monitor</artifactId>
-            <version>${le.monitor.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
@@ -189,16 +232,86 @@
             <artifactId>sqljdbc4</artifactId>
             <version>${sqljdbc4.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <version>${spring.boot.version}</version>
+        </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>
             <version>${log4j.extras.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox.swagger.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox.swagger.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${apache.http.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mchange</groupId>
+            <artifactId>c3p0</artifactId>
+            <version>${c3p0.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <dependency>
@@ -206,6 +319,20 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>${javax.servlet.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

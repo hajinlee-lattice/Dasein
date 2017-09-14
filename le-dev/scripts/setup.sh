@@ -31,10 +31,6 @@ echo "Top-level compile"
 mvn -T8 -DskipTests clean install 2> /tmp/errors.txt
 processErrors
 
-echo "Top-level playmaker compile"
-mvn -T6 -f playmaker-pom.xml -DskipTests clean install 2> /tmp/errors.txt
-processErrors
-
 echo "Top-level shaded yarn compile"
 mvn -T6 -f shaded-pom.xml -Pshaded-yarn -DskipTests clean package 2> /tmp/errors.txt
 processErrors

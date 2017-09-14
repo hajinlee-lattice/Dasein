@@ -77,5 +77,6 @@
         <module>le-dantedb</module>
         <module>le-dante</module>
         <module>le-serviceapps</module>
+        <module>le-oauth2</module>
     </modules>
 </project>
