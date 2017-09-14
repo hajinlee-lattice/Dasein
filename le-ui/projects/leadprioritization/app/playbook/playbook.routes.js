@@ -125,7 +125,7 @@ angular
             },
             resolve: {
                 Play: function(PlaybookWizardStore, $stateParams) {
-                    return PlaybookWizardStore.getPlay($stateParams.play_name);
+                    return PlaybookWizardStore.getPlay($stateParams.play_name, true);
                 },
                 TalkingPointPreviewResources: function(CgTalkingPointStore) {
                     return CgTalkingPointStore.getTalkingPointsPreviewResources();

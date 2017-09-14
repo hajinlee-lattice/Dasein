@@ -69,7 +69,7 @@
                         </div>
                     </div>
                     <div class="dashboard-section-footer">
-                        <span ng-if="vm.play.lastTalkingPointPublishTime">Published {{vm.TimestampIntervalUtility.timeAgo(vm.play.lastTalkingPointPublishTime)}} <i class="fa fa-check"></i></span>
+                        <span ng-if="vm.play.lastTalkingPointPublishTime && vm.play.talkingPoints.length">Published {{vm.TimestampIntervalUtility.timeAgo(vm.play.lastTalkingPointPublishTime)}} <i class="fa fa-check"></i></span>
                         <span ng-if="!vm.play.lastTalkingPointPublishTime && vm.play.talkingPoints.length" class="error-text">Not Published</span>
                         <button class="preview button blue-button" ng-if="!vm.play.talkingPoints.length" ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Create Talking Points</button>
                         <button class="preview button blue-button" ng-if="vm.play.talkingPoints.length" ui-sref="home.playbook.dashboard.insights({play_name: vm.play.name})">Edit Talking Points</button>
