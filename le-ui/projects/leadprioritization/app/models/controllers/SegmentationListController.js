@@ -30,8 +30,6 @@ angular.module('lp.models.segments', [
 
 
     vm.init = function($q) {
-        
-        console.log(vm.segments);
 
         SegmentsList.forEach(function(segment) {
             vm.tileStates[segment.name] = {
