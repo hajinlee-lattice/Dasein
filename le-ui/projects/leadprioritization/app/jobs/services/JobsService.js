@@ -1,6 +1,104 @@
 angular
 .module('lp.jobs')
 .service('JobsService', function($http, $q, _, $stateParams) {
+    var stepsNameDictionary = {
+        "markReportOutOfDate":                  "load_data",
+        "importData":                           "load_data",
+        "createPreMatchEventTable":             "match_data",
+        "loadHdfsTableToPDServer":              "match_data",
+        "match":                                "match_data",
+        "createEventTableFromMatchResult":      "generate_insights",
+        "runImportSummaryDataFlow":             "generate_insights",
+        "registerImportSummaryReport":          "generate_insights",
+        "sample":                               "generate_insights",
+        "profileAndModel":                      "create_global_model",
+        "chooseModel":                          "create_global_model",
+        "activateModel":                        "create_global_model",
+        "runScoreTableDataFlow":                "create_global_target_market",
+        "runAttributeLevelSummaryDataFlows":    "create_global_target_market",
+        "scoreEventTable":                      "score_training_set",
+        "combineInputTableWithScore":           "score_training_set",
+        "pivotScoreAndEvent":                   "score_training_set"
+    };
+
+    var dictionary = {
+        'fitModelWorkflow': stepsNameDictionary,/*
+        'importMatchAndScoreWorkflow': {
+        },*/
+        'importMatchAndModelWorkflow': {
+
+            "importData":                           "load_data",
+            "createEventTableReport":               "load_data",
+
+            "createPrematchEventTableReport":       "generate_insights",
+            "validatePrematchEventTable":           "generate_insights",
+            "preMatchStep":                         "generate_insights",
+            "prepareBulkMatchInput":                "generate_insights",
+            "parallelBlockExecution":               "generate_insights",
+            "processMatchResult":                   "generate_insights",
+            "dedupEventTableDataFlow":              "generate_insights",
+
+            "addStandardAttributesDataFlow":        "create_global_target_market",
+            "sample":                               "create_global_target_market",
+            "exportData":                           "create_global_target_market",
+            "setMatchSelection":                    "create_global_target_market",
+            "writeMetadataFiles":                   "create_global_target_market",
+            "profile":                              "create_global_target_market",
+            "reviewModel":                          "create_global_target_market",
+            "remediateDataRules":                   "create_global_target_market",
+            "writeMetadataFiles":                   "create_global_target_market",
+            "createModel":                          "create_global_target_market",
+            "downloadAndProcessModelSummaries":     "create_global_target_market",
+            "createNote":                           "create_global_target_market",
+            "persistDataRules":                     "create_global_target_market",
+            "setConfigurationForScoring":           "create_global_target_market",
+            "preMatchStep":                         "create_global_target_market",
+            "prepareBulkMatchInput":                "create_global_target_market",
+
+            "parallelBlockExecution":               "score_training_set",
+            "processMatchResult":                   "score_training_set",
+            "rtsScoreEventTable":                   "score_training_set",
+            "combineMatchDebugWithScoreDataFlow":   "score_training_set",
+            "combineInputTableWithScoreDataFlow":   "score_training_set",
+            "exportData":                           "score_training_set",
+            "pivotScoreAndEventDataFlow":           "score_training_set",
+            "exportData":                           "score_training_set"
+
+        },
+        'modelAndEmailWorkflow': {
+            'dedupEventTable':                          'load_data',
+            'matchDataCloud':                           'load_data',
+            'processMatchResult':                       'generate_insights',
+            'addStandardAttributes':                    'generate_insights',
+
+            'resolveMetadataFromUserRefinedAttributes': 'create_global_target_market',
+            'sample':                                   'create_global_target_market',
+            'exportData':                               'create_global_target_market',
+            'setMatchSelection':                        'create_global_target_market',
+            'writeMetadataFiles':                       'create_global_target_market',
+            'profile':                                  'create_global_target_market',
+            'reviewModel':                              'create_global_target_market',
+            'remediateDataRules':                       'create_global_target_market',
+            'createModel':                              'create_global_target_market',
+            'downloadAndProcessModelSummaries':         'create_global_target_market',
+            'persistDataRules':                         'create_global_target_market',
+
+            'setConfigurationForScoring':               'score_training_set',
+            // 'matchDataCloud':                        'score_training_set',
+            // 'processMatchResult':                    'score_training_set',
+            // 'addStandardAttributes':                 'score_training_set',
+            'score':                                    'score_training_set',
+            'scoreEventTable':                          'score_training_set',
+            'combineInputTableWithScore':               'score_training_set',
+            // 'exportData':                            'score_training_set',
+            'pivotScoreAndEvent':                       'score_training_set'
+            // 'exportData':                            'score_training_set',
+        },
+        'pmmlModelWorkflow': {
+            'createPMMLModel': 'create_global_target_market'
+        }
+    };
+
     var numStepsInGroup = {
         "load_data": 0,
         "match_data": 0,
@@ -9,6 +107,12 @@ angular
         "create_global_target_market": 0,
         "score_training_set": 0
     };
+
+    var nonDisplayedJobTypes = new Set([
+        'bulkmatchworkflow',
+        'playlaunchworkflow',
+        'consolidateandpublishworkflow',
+        'profileandpublishworkflow']);
 
     this.getErrorLog = function(JobReport) {
         var deferred = $q.defer();
@@ -88,12 +192,15 @@ angular
             }
         }).then(
             function onSuccess(response) {
+                var jobs = _.reject(response.data, function(job) {
+                    return nonDisplayedJobTypes.has(job.jobType.toLowerCase());
+                });
                 result = {
                     success: true,
                     resultObj: null
                 };
 
-                var jobs = _.sortBy(response.data, 'startTimestamp');
+                jobs = _.sortBy(jobs, 'startTimestamp');
                 result.resultObj = _.map(jobs, function(job) {
                     clearNumSteps();
                     var stepRunning = getStepRunning(job);
@@ -137,6 +244,10 @@ angular
 
         var deferred = $q.defer();
         var result;
+
+        if (jobId === null) {
+            return;
+        }
 
         $http({
             method: 'GET',
@@ -321,8 +432,9 @@ angular
     function getStepFailed(job) {
         if (job.steps) {
             for (var i = 0; i < job.steps.length; i++) {
-                if (job.steps[i].stepStatus === "Failed" || job.steps[i].stepStatus === "Cancelled") {
-                    return job.steps[i].name;
+                var stepRunning = getDictionaryValue(job, i);
+                if (stepRunning && (job.steps[i].stepStatus === "Failed" || job.steps[i].stepStatus === "Cancelled")) {
+                    return stepRunning;
                 }
             }
         }
@@ -338,11 +450,25 @@ angular
             return;
         }
         for (var i = 0; i < job.steps.length; i++) {
-            if (job.steps[i].stepStatus === "Running") {
-                return job.steps[i].name;
+            var stepRunning = getDictionaryValue(job, i);
+
+            if (stepRunning && job.steps[i].stepStatus === "Running") {
+                return stepRunning;
             }
         }
         return null;
+    }
+
+    function getDictionaryValue(job, i) {
+        var JobType = dictionary[job.jobType];
+
+        console.log( job );
+
+        var stepDisplayName = JobType
+            ? JobType[job.steps[i].jobStepType.trim()]
+            : '';
+
+        return stepDisplayName;
     }
 
     function getStepsCompleted(job) {
@@ -353,7 +479,7 @@ angular
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus === "Completed") {
-                var stepCompleted = job.steps[i].name;
+                var stepCompleted = getDictionaryValue(job, i);
 
                 if ((stepCompleted === "generate_insights" || stepCompleted === "create_global_target_market") && stepsCompleted.indexOf("score_training_set") > -1) {
                     numStepsInGroup.score_training_set += 1;
