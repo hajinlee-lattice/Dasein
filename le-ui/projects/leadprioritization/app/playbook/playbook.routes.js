@@ -229,21 +229,21 @@ angular
                     return deferred.promise;
 
                 }],
-                AccountsCount: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
+                // AccountsCount: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 
-                    var deferred = $q.defer();
+                //     var deferred = $q.defer();
 
-                    PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
-                        var engineId = data.ratingEngine.id,
-                            engineIdObject = [{id: engineId}];
-                        PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                            deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
-                        });
-                    });
+                //     PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                //         var engineId = data.ratingEngine.id,
+                //             engineIdObject = [{id: engineId}];
+                //         PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
+                //             deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
+                //         });
+                //     });
 
-                    return deferred.promise;
+                //     return deferred.promise;
 
-                }],
+                // }],
                 CountWithoutSalesForce: ['$q', '$stateParams', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardStore) {
 
                     var deferred = $q.defer();
@@ -262,9 +262,9 @@ angular
                 Contacts: [function(){
                     return null;
                 }],
-                ContactsCount: [function(){
-                    return null;
-                }],
+                // ContactsCount: [function(){
+                //     return null;
+                // }],
                 Config: [function(){
                     return null;
                 }],

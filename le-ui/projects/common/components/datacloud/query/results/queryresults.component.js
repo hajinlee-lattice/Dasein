@@ -55,6 +55,7 @@ angular.module('common.datacloud.query.results', [
         var offset = (vm.current - 1) * vm.pagesize;
 
         if(vm.section === 'segment.analysis'){
+            
             var dataQuery = {
                 "free_form_text_search": vm.search,
                 "account_restriction": vm.accountRestriction,
@@ -82,6 +83,33 @@ angular.module('common.datacloud.query.results', [
             vm.setCurrentRestrictionForSaveButton();
 
         } else {
+
+            PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+
+                var engineId = data.ratingEngine.id,
+                    query = { 
+                        free_form_text_search: '',
+                        restrictNotNullSalesforceId: false,
+                        entityType: 'Account',
+                        bucketFieldName: 'ScoreBucket',
+                        maximum: 15,
+                        offset: offset
+                    };
+
+                PlaybookWizardStore.getTargetData(engineId, query).then(function(data){ 
+                    vm.accounts = data.data; 
+                    vm.loading = false;
+                });
+
+            });
+
+            PlaybookWizardStore.getPlay($stateParams.play_name).then(function(data){
+                var engineId = data.ratingEngine.id,
+                    engineIdObject = [{id: engineId}];
+                PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
+                    vm.counts.accounts.value = data.ratingEngineIdCoverageMap[engineId].accountCount;
+                });
+            });
 
             PlaybookWizardStore.setValidation('targets', true);
             vm.loading = false;

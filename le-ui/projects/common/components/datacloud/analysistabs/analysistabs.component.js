@@ -41,9 +41,11 @@ angular.module('common.datacloud.analysistabs', [
 
         QueryStore.GetCountByQuery('accounts').then(function(data){ 
             vm.accountsCount = data;
+            vm.counts.accounts.loading = false;
         });
         QueryStore.GetCountByQuery('contacts').then(function(data){ 
             vm.contactsCount = data;
+            vm.counts.accounts.loading = false;
         });
 
         if(vm.segment === 'Create'){

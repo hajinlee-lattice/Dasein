@@ -869,7 +869,6 @@ angular.module('common.datacloud.explorer', [
 
             if (items) {
                 items.forEach(function(item, itemKey) {
-                    // console.log(item);
                     var index = vm.enrichmentsMap[item.Attribute],
                         enrichment = vm.enrichments[index],
                         map = [
@@ -1274,7 +1273,7 @@ angular.module('common.datacloud.explorer', [
                 index = vm.enrichmentsMap[key];
             
             if (index || index === 0) {
-                // vm.enrichments[index].SegmentChecked = true; PLS-4589
+                // vm.enrichments[index].SegmentChecked = true;
                 vm.enrichments[index].SegmentRangesChecked = {};
                 vm.segmentAttributeInput[vm.enrichments[index].ColumnId] = true;
                 vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
@@ -1289,9 +1288,6 @@ angular.module('common.datacloud.explorer', [
         _enrichments.forEach(function(enrichment){
             delete enrichment.SegmentChecked;
         });
-
-        // console.log(_enrichments);
-
     }
 
     var textSearch = function(haystack, needle, case_insensitive) {
@@ -1409,8 +1405,6 @@ angular.module('common.datacloud.explorer', [
             return false;
         }
 
-        console.log(attribute);
-
         var attributeKey = attribute.Attribute || attribute.FieldName,
             stat = vm.getAttributeStat(attribute) || {};
 
@@ -1467,16 +1461,11 @@ angular.module('common.datacloud.explorer', [
             entity = enrichment.Entity,
             segmentName = $stateParams.segment;
 
-
-        console.log(attributeRangeKey);
-
-        //     if(stat.Rng === undefined){
-        //         var attributeRangeKey = stat.Lbl;
-        //     } else {
-        //         var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
-        //     }
-
-        console.log(enrichment);
+            // if(stat.Rng === undefined){
+            //     var attributeRangeKey = stat.columnName + stat.Lbl;
+            // } else {
+            //     var attributeRangeKey = vm.makeSegmentsRangeKey(enrichment, stat.Rng);
+            // }
 
         if(disable) {
             return false;

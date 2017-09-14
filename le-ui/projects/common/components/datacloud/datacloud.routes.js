@@ -575,11 +575,11 @@ angular
                                 'row_offset': 0
                             }
                         };
+
                         deferred.resolve( QueryStore.GetDataByQuery('accounts', query).then(function(data){ return data; }));
                     } else {
                         SegmentStore.getSegmentByName(segmentName).then(function(result) {
                             var segment = result;
-
                             query = { 
                                 'free_form_text_search': '',
                                 'account_restriction': segment.account_restriction,
