@@ -57,12 +57,9 @@
 
     
     <!--
-
-    The way of rendering columns and rows needs to be refactored in M15.
+    The way of rendering these tables needs to be consolidated and refactored in M15.
     - Hadden
-
     -->
-
 
     <table class="list-table" ng-if="vm.page === 'Accounts'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
@@ -115,8 +112,6 @@
             </tr>
         </tbody>
     </table>
-
-
     <table class="list-table" ng-if="vm.section === 'dashboard.targets' || vm.section === 'wizard.targets'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
@@ -156,8 +151,6 @@
             </tr>
         </tbody>
     </table>
-
-
     <table class="list-table" ng-if="vm.page === 'Contacts'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
@@ -185,6 +178,10 @@
             </tr>
         </tbody>
     </table>
+
+
+
+
 
     <div class="loading" ng-if="vm.loading">
          Loading {{vm.page}}...

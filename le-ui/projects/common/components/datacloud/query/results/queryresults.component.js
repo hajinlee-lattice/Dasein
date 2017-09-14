@@ -87,10 +87,10 @@ angular.module('common.datacloud.query.results', [
             vm.loading = false;
         }
 
-        if(vm.currentTargetTab === 'Accounts' && vm.accountsCount > 15){
+        if(vm.currentTargetTab === 'Accounts' || vm.section === 'segment.analysis' && vm.accountsCount > 15){
             vm.showAccountPagination = true;
             vm.showContactPagination = false;
-        } else if (vm.currentTargetTab === 'Contacts' && vm.accountsCount > 15){
+        } else if (vm.currentTargetTab === 'Contacts' || vm.section === 'segment.analysis' && vm.accountsCount > 15){
             vm.showAccountPagination = false;
             vm.showContactPagination = true;
         }
