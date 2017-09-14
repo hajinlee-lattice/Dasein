@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -190,7 +191,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "CompanyName").gte("h").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "CompanyName").gte("A").build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setRatingModels(Collections.singletonList(model));
@@ -201,9 +202,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
             if (RuleBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 420L);
+                Assert.assertEquals((long) count, 8576L);
             } else if (RuleBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 1526L);
+                Assert.assertEquals((long) count, 55643L);
             }
         });
     }
@@ -221,14 +222,14 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
         Map<String, Restriction> ruleA = new HashMap<>();
         ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("b", "g").build());
+                Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("B", "G").build());
         ruleA.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
-                Restriction.builder().let(BusinessEntity.Contact, "Title").in("a", "n").build());
+                Restriction.builder().let(BusinessEntity.Contact, "Title").in("A", "N").build());
         rule.getBucketToRuleMap().put(RuleBucketName.A.getName(), ruleA);
 
         Map<String, Restriction> ruleC = new HashMap<>();
         ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("h", "n").build());
+                Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("H", "N").build());
         rule.getBucketToRuleMap().put(RuleBucketName.C.getName(), ruleC);
 
         model.setRatingRule(rule);

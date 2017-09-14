@@ -1,9 +1,12 @@
 package com.latticeengines.objectapi.service.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,16 +15,18 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.GroupBy;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
+import com.latticeengines.domain.exposed.query.SubQuery;
+import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.util.AccountQueryDecorator;
@@ -113,8 +118,16 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Query query = ratingCountQuery(frontEndQuery);
         List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), query).getData();
-        Map<String, Long> counts = new HashMap<>();
-        data.forEach(map -> counts.put((String) map.get(QueryEvaluator.SCORE), (Long) map.get("count")));
+        RatingModel model = frontEndQuery.getRatingModels().get(0);
+        Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
+        TreeMap<String, Long> counts = new TreeMap<>();
+        data.forEach(map -> {
+            String key = lblMap.get((String) map.get(QueryEvaluator.SCORE));
+            if (!counts.containsKey(key)) {
+                counts.put(key, 0L);
+            }
+            counts.put(key, counts.get(key) + (Long) map.get("count"));
+        });
         return counts;
     }
 
@@ -126,15 +139,22 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             RatingModel model = frontEndQuery.getRatingModels().get(0);
             if (model instanceof RuleBasedModel) {
                 RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
-                CaseLookup caseLookup = QueryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
+                Lookup ruleLookup = QueryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
                         ruleBasedModel.getRatingRule(),
-                        QueryEvaluator.SCORE);
+                        QueryEvaluator.SCORE, true);
+                AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
+                query.setLookups(Arrays.asList(idLookup, ruleLookup));
                 GroupBy groupBy = new GroupBy();
-                groupBy.setLookups(Collections.singletonList(caseLookup));
+                groupBy.setLookups(Collections.singletonList(idLookup));
                 query.setGroupBy(groupBy);
-                query.addLookup(caseLookup);
-                query.addLookup(AggregateLookup.count().as("Count"));
-                return query;
+
+                SubQuery subQuery = new SubQuery(query, "q");
+                SubQueryAttrLookup subQueryAttrLookup = new SubQueryAttrLookup(subQuery, QueryEvaluator.SCORE);
+                return Query.builder() //
+                        .select(subQueryAttrLookup, AggregateLookup.count().as("Count")) //
+                        .from(subQuery) //
+                        .groupBy(subQueryAttrLookup) //
+                        .build();
             } else {
                 throw new UnsupportedOperationException(
                         "Can not count rating model of type " + model.getClass().getSimpleName());
@@ -153,6 +173,14 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         default:
             throw new UnsupportedOperationException("Cannot find a decorator for entity " + entity);
         }
+    }
+
+    private static Map<String, String> ruleLabelReverseMapping(RatingRule ratingRule) {
+        Map<String, String> lblMap = new HashMap<>();
+        AtomicInteger idx = new AtomicInteger(0);
+        ratingRule.getBucketToRuleMap().forEach((key, val) -> lblMap.put(String.valueOf(idx.getAndIncrement()), key));
+        lblMap.put(String.valueOf(idx.get()), ratingRule.getDefaultBucketName());
+        return lblMap;
     }
 
 }

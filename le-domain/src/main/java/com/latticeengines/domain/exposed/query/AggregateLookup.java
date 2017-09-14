@@ -2,12 +2,19 @@ package com.latticeengines.domain.exposed.query;
 
 
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.COUNT;
+import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.MAX;
+import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.MIN;
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.SUM;
+
+import java.util.Collection;
+import java.util.Collections;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,6 +37,8 @@ public class AggregateLookup extends Lookup {
                 return AggregateLookup.count();
             case SUM:
                 return AggregateLookup.sum(mixin);
+            case MAX:
+                return AggregateLookup.max(mixin);
             default:
                 throw new UnsupportedOperationException("Unsupported aggregator " + aggregator);
         }
@@ -45,6 +54,20 @@ public class AggregateLookup extends Lookup {
         AggregateLookup lookup1 = new AggregateLookup();
         lookup1.setLookup(mixin);
         lookup1.setAggregator(SUM);
+        return lookup1;
+    }
+
+    public static AggregateLookup max(Lookup mixin) {
+        AggregateLookup lookup1 = new AggregateLookup();
+        lookup1.setLookup(mixin);
+        lookup1.setAggregator(MAX);
+        return lookup1;
+    }
+
+    public static AggregateLookup min(Lookup mixin) {
+        AggregateLookup lookup1 = new AggregateLookup();
+        lookup1.setLookup(mixin);
+        lookup1.setAggregator(MIN);
         return lookup1;
     }
 
@@ -79,6 +102,24 @@ public class AggregateLookup extends Lookup {
 
     public enum Aggregator {
         COUNT, //
-        SUM
+        SUM, //
+        MAX, //
+        MIN
     }
+
+    @Override
+    public Collection<? extends GraphNode> getChildren() {
+        if (lookup != null) {
+            return Collections.singleton(lookup);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
+
 }
+

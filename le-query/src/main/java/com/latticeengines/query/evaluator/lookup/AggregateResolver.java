@@ -1,9 +1,16 @@
 package com.latticeengines.query.evaluator.lookup;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.util.QueryUtils;
 import com.querydsl.core.types.Expression;
@@ -11,15 +18,8 @@ import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.core.types.dsl.StringPath;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
-import java.util.List;
-
-public class AggregateResolver extends BaseLookupResolver<AggregateLookup>
-        implements LookupResolver<AggregateLookup> {
+public class AggregateResolver extends BaseLookupResolver<AggregateLookup> implements LookupResolver<AggregateLookup> {
 
     private LookupResolverFactory factory;
 
@@ -38,12 +38,13 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup>
     @Override
     public List<ComparableExpression<Comparable>> resolveForAggregateCompare(AggregateLookup lookup) {
         switch (lookup.getAggregator()) {
-            case SUM:
-                return sumExpressionForCompare(lookup);
-            default:
-                throw new UnsupportedOperationException(
-                        "Does not support aggregator " + lookup.getAggregator() + "in where clause yet."
-                );
+        case SUM:
+        case MAX:
+        case MIN:
+            return numExpressionForCompare(lookup);
+        default:
+            throw new UnsupportedOperationException(
+                    "Does not support aggregator " + lookup.getAggregator() + "in where clause yet.");
         }
     }
 
@@ -51,27 +52,31 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup>
     @Override
     public Expression<?> resolveForSelect(AggregateLookup lookup, boolean asAlias) {
         switch (lookup.getAggregator()) {
-            case COUNT:
-                return countExpression(lookup, asAlias);
-            case SUM:
-                return sumExpressionForSelect(lookup, asAlias);
-            default:
-                throw new RuntimeException("Unsupported aggregator " + lookup.getAggregator());
+        case COUNT:
+            return countExpression(lookup, asAlias);
+        case SUM:
+        case MAX:
+        case MIN:
+            return numExpressionForSelect(lookup, asAlias);
+        default:
+            throw new RuntimeException("Unsupported aggregator " + lookup.getAggregator());
         }
     }
 
     @SuppressWarnings("unchecked")
-    private List<ComparableExpression<Comparable>> sumExpressionForCompare(AggregateLookup lookup) {
-        NumberExpression sumExpression = (NumberExpression) sumExpressionForSelect(lookup, false);
+    private List<ComparableExpression<Comparable>> numExpressionForCompare(AggregateLookup lookup) {
+        NumberExpression sumExpression = (NumberExpression) numExpressionForSelect(lookup, false);
         return Collections.singletonList(Expressions.asComparable(sumExpression));
     }
 
-    private Expression<?> sumExpressionForSelect(AggregateLookup lookup, boolean asAlias) {
+    @SuppressWarnings("unchecked")
+    private Expression<?> numExpressionForSelect(AggregateLookup lookup, boolean asAlias) {
         if (lookup.getLookup() == null) {
             throw new RuntimeException("Sum aggregation cannot be applied for empty lookup.");
         }
 
         NumberPath numberPath = null;
+        NumberExpression numberExpression = null;
         if (lookup.getLookup() instanceof AttributeLookup) {
             AttributeLookup innerLookup = (AttributeLookup) lookup.getLookup();
             ColumnMetadata cm = getColumnMetadata(innerLookup);
@@ -82,17 +87,40 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup>
         } else if (lookup.getLookup() instanceof SubQueryAttrLookup) {
             SubQueryAttrLookup innerLookup = (SubQueryAttrLookup) lookup.getLookup();
             numberPath = QueryUtils.getAttributeNumberPath(innerLookup.getSubQuery(), innerLookup.getAttribute());
+        } else if (lookup.getLookup() instanceof CaseLookup) {
+            CaseLookup caseLookup = (CaseLookup) lookup.getLookup();
+            LookupResolver resolver = factory.getLookupResolver(caseLookup.getClass());
+            Expression<BigDecimal> expression = resolver.resolveForSelect(caseLookup, false);
+            numberExpression = Expressions.asNumber(expression);
         }
 
-        if (numberPath == null) {
-            throw new RuntimeException("Sum aggregation is not supported for " +
-                    lookup.getLookup().getClass().getName());
+        if (numberPath == null && numberExpression == null) {
+            throw new RuntimeException(
+                    "Sum aggregation is not supported for " + lookup.getLookup().getClass().getName());
         }
 
         if (asAlias && StringUtils.isNotBlank(lookup.getAlias())) {
-            return numberPath.sum().as(lookup.getAlias());
+            switch (lookup.getAggregator()) {
+            case SUM:
+                return numberPath.sum().as(lookup.getAlias());
+            case MAX:
+                return numberExpression.max().as(lookup.getAlias());
+            case MIN:
+                return numberExpression.min().as(lookup.getAlias());
+            default:
+                throw new UnsupportedOperationException("Aggregator " + lookup.getAggregator() + " is not supported");
+            }
         } else {
-            return numberPath.sum();
+            switch (lookup.getAggregator()) {
+            case SUM:
+                return numberPath.sum();
+            case MAX:
+                return numberExpression.max();
+            case MIN:
+                return numberExpression.min();
+            default:
+                throw new UnsupportedOperationException("Aggregator " + lookup.getAggregator() + " is not supported");
+            }
         }
     }
 

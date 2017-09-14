@@ -49,9 +49,11 @@ public class CaseResolver extends BaseLookupResolver<CaseLookup> implements Look
             }
         }
         if (cases == null) {
-            return Expressions.asString(lookup.getDefaultCase()).as(lookup.getAlias());
+            return asAlias ? Expressions.asString(lookup.getDefaultCase()).as(lookup.getAlias())
+                    : Expressions.asString(lookup.getDefaultCase());
         } else {
-            return cases.otherwise(lookup.getDefaultCase()).as(lookup.getAlias());
+            return asAlias ? cases.otherwise(lookup.getDefaultCase()).as(lookup.getAlias())
+                    : cases.otherwise(lookup.getDefaultCase());
         }
     }
 

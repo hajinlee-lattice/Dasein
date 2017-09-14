@@ -26,6 +26,9 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
     @SuppressWarnings("unchecked")
     @Override
     public List<ComparableExpression<String>> resolveForCompare(AttributeLookup lookup) {
+        if (lookup.getEntity() == null) {
+            return Collections.singletonList(QueryUtils.getAttributePath(lookup.getAttribute()));
+        }
         ColumnMetadata cm = getColumnMetadata(lookup);
         if (cm == null) {
             throw new IllegalArgumentException("Cannot find the attribute " + lookup + " in attribute repository.");
@@ -36,6 +39,9 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
 
     @Override
     public Expression<?> resolveForSelect(AttributeLookup lookup, boolean asAlias) {
+        if (lookup.getEntity() == null) {
+            return QueryUtils.getAttributePath(lookup.getAttribute());
+        }
         ColumnMetadata cm = getColumnMetadata(lookup);
         if (cm == null) {
             throw new QueryEvaluationException("Cannot find the attribute " + lookup + " in attribute repository.");

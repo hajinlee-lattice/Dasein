@@ -2,6 +2,7 @@ package com.latticeengines.objectapi.util;
 
 import java.util.List;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +11,13 @@ import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
@@ -75,9 +78,9 @@ public class QueryTranslator {
                             if (frontEndQuery.getRatingModels().size() == 1) {
                                 alias = "Score";
                             }
-                            CaseLookup caseLookup = translateRatingRule(frontEndQuery.getMainEntity(),
-                                    ((RuleBasedModel) model).getRatingRule(), alias);
-                            queryBuilder.select(caseLookup);
+                            Lookup ruleLookup = translateRatingRule(frontEndQuery.getMainEntity(),
+                                    ((RuleBasedModel) model).getRatingRule(), alias, false);
+                            queryBuilder.select(ruleLookup);
                         } else {
                             log.warn("Cannot not handle rating model of type " + model.getClass().getSimpleName());
                         }
@@ -188,9 +191,10 @@ public class QueryTranslator {
         return joinRestrictions(outerRestriction, existsRestriction);
     }
 
-    public static CaseLookup translateRatingRule(BusinessEntity entity, RatingRule ratingRule, String alias) {
-        // TODO: only support ACCOUNT_RULE for now
+    public static Lookup translateRatingRule(BusinessEntity entity, RatingRule ratingRule, String alias,
+            boolean forScoreCount) {
         TreeMap<String, Restriction> cases = new TreeMap<>();
+        AtomicInteger idx = new AtomicInteger(0);
         ratingRule.getBucketToRuleMap().forEach((key, val) -> {
             FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
             frontEndRestriction.setRestriction(val.get(FrontEndQueryConstants.ACCOUNT_RESTRICTION));
@@ -205,22 +209,33 @@ public class QueryTranslator {
             if (BusinessEntity.Account.equals(entity)) {
                 innerEntity = BusinessEntity.Contact;
                 outerRestriction = accountRestriction;
-                innerRestriction = null;
+                innerRestriction = contactRestriction;
             } else if (BusinessEntity.Contact.equals(entity)) {
                 innerEntity = BusinessEntity.Account;
                 outerRestriction = contactRestriction;
-                innerRestriction = null;
+                innerRestriction = accountRestriction;
             } else {
                 throw new RuntimeException("Cannot determine inner entity based on main entity " + entity);
             }
 
-            cases.put(key, addExistsRestriction(outerRestriction, innerEntity, innerRestriction));
+            if (forScoreCount) {
+                cases.put(String.valueOf(idx.getAndIncrement()), joinRestrictions(outerRestriction, innerRestriction));
+            } else {
+                cases.put(key,
+                        addExistsRestriction(outerRestriction, innerEntity, innerRestriction));
+            }
         });
-        return new CaseLookup(cases, ratingRule.getDefaultBucketName(), alias);
+        if (forScoreCount) {
+            CaseLookup caseLookup = new CaseLookup(cases, String.valueOf(idx.get()), null);
+            AggregateLookup lookup = AggregateLookup.min(caseLookup);
+            lookup.setAlias(alias);
+            return lookup;
+        } else {
+            return new CaseLookup(cases, ratingRule.getDefaultBucketName(), alias);
+        }
     }
 
-    private static CaseLookup parseRatingLookup(BusinessEntity entity, AttributeLookup lookup,
-            List<RatingModel> models) {
+    private static Lookup parseRatingLookup(BusinessEntity entity, AttributeLookup lookup, List<RatingModel> models) {
         if (models == null) {
             throw new RuntimeException(
                     "You specified a rating lookup " + lookup + " but no rating models, cannot parse the lookup.");
@@ -230,7 +245,7 @@ public class QueryTranslator {
         if (model != null) {
             if (models.get(0) instanceof RuleBasedModel) {
                 RatingRule ratingRule = ((RuleBasedModel) models.get(0)).getRatingRule();
-                return translateRatingRule(entity, ratingRule, lookup.getAttribute());
+                return translateRatingRule(entity, ratingRule, lookup.getAttribute(), false);
             } else {
                 throw new UnsupportedOperationException("Only support rule based model now.");
             }
