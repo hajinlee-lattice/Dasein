@@ -203,6 +203,7 @@ angular
                     vm.root.droppedItem = vm;
                     
                     if (dropped) {
+                        this.root.saveState();
                         vm.root.dropMoveItem(dragged, dropped);
                     }
                 }
@@ -237,6 +238,10 @@ angular
                         }
                     })
                 }
+            }
+
+            this.clickOperator = function() {
+                this.root.saveState();
             }
 
             this.clickEditMode = function(value) {

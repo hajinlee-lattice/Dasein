@@ -1212,6 +1212,18 @@ angular.module('common.datacloud.explorer', [
         return key;
     }
 
+    var getBucketRestrictions = function(tree, arr) {
+        tree.forEach(function(branch) {
+            if (branch && branch.bucketRestriction) {
+                arr.push(branch);
+            }
+
+            if (branch && branch.logicalRestriction) {
+                getBucketRestrictions(branch.logicalRestriction.restrictions, arr);
+            }
+        });
+    }
+
     var getExplorerSegments = function(enrichments) {
         vm.clearExplorerSegments();
 
@@ -1235,6 +1247,12 @@ angular.module('common.datacloud.explorer', [
         contactRestrictions = contactRestrictions 
             ? angular.copy(contactRestrictions.restriction.logicalRestriction.restrictions) 
             : [];
+
+        var restrictions = [];
+
+        // FIXME:  Recursively grab all bucketRestrictions - but we might not want this
+        // getBucketRestrictions(accountRestrictions, restrictions);
+        // getBucketRestrictions(contactRestrictions, restrictions);
 
         restrictions = [].concat(accountRestrictions, contactRestrictions);
 

@@ -342,6 +342,7 @@ angular
 
                     return deferred.promise;                    
                 }],
+                /*
                 AccountsCount: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
                     
                     var deferred = $q.defer(),
@@ -421,7 +422,7 @@ angular
                     };
                         
                     return deferred.promise;
-                }],
+                }],*/
                 CountWithoutSalesForce: [function(){
                     return null;
                 }],

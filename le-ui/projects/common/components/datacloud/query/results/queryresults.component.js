@@ -1,8 +1,11 @@
 angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
-.controller('QueryResultsCtrl', function($q, $scope, $state, $stateParams, $filter, 
-    BrowserStorageUtility, QueryStore, QueryService, SegmentService, SegmentStore, LookupStore, Config, Accounts, AccountsCount, CountWithoutSalesForce, Contacts, ContactsCount, PlaybookWizardStore) {
+.controller('QueryResultsCtrl', function(
+    $q, $scope, $state, $stateParams, $filter, BrowserStorageUtility, QueryStore, QueryService, 
+    SegmentService, SegmentStore, LookupStore, Config, Accounts, /*AccountsCount, ContactsCount,*/ 
+    CountWithoutSalesForce, Contacts, PlaybookWizardStore
+) {
 
     var vm = this;
     angular.extend(vm, {
@@ -10,10 +13,11 @@ angular.module('common.datacloud.query.results', [
         modelId: $stateParams.modelId,
         inModel: $state.current.name.split('.')[1] === 'model',
         accounts: Accounts,
-        accountsCount: AccountsCount,
+        counts: QueryStore.getCounts(),
+        accountsCount: null, //AccountsCount,
         accountsWithoutSfId: CountWithoutSalesForce,
         contacts: Contacts,
-        contactsCount: ContactsCount,
+        contactsCount: null, //ContactsCount,
         loading: true,
         saving: false,
         saved: false,
@@ -39,6 +43,11 @@ angular.module('common.datacloud.query.results', [
         config: Config,
         currentTargetTab: 'Accounts'
     });
+
+    vm.init = function() {
+        vm.accountsCount = vm.counts.accounts.value;
+        vm.contactsCount = vm.counts.contacts.value;
+    }
 
     function updatePage() {
 
@@ -274,7 +283,7 @@ angular.module('common.datacloud.query.results', [
         updatePage();
     });
 
-
+    vm.init();
 });
 
 
