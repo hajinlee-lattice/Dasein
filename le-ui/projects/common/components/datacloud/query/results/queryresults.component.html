@@ -186,20 +186,14 @@
         </tbody>
     </table>
 
-
-
-
-
     <div class="loading" ng-if="vm.loading">
          Loading {{vm.page}}...
     </div>
-
     <div ng-if="vm.accounts.length === 0 || vm.contacts.length === 0">
         <p>No {{vm.page}} Found<p>
     </div>
 
-
-    <ul class="filters pull-right" ng-if="vm.page === 'Accounts' || vm.section === 'dashboard.targets' && vm.currentTargetTab === 'Accounts' || vm.section === 'wizard.targets' && vm.accounts.length > 15">
+    <ul class="filters pull-right" ng-if="vm.showAccountPagination">
         <li>
             <pd-pagination-controls
                 current="vm.current"
@@ -207,7 +201,7 @@
             </pd-pagination-controls>
         </li>
     </ul>
-    <ul class="filters pull-right" ng-if="vm.page === 'Contacts' || vm.section === 'dashboard.targets' && vm.currentTargetTab === 'Contacts' || vm.section === 'wizard.targets' && vm.contacts.length > 15">
+    <ul class="filters pull-right" ng-if="vm.showContactPagination">
         <li>
             <pd-pagination-controls
                 current="vm.current"

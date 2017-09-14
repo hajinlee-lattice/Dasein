@@ -2,7 +2,7 @@ angular.module('common.datacloud.query.results', [
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .controller('QueryResultsCtrl', function($q, $scope, $state, $stateParams, $filter, 
-    BrowserStorageUtility, QueryStore, QueryService, SegmentService, SegmentStore, LookupStore, Config, Accounts, AccountsCount, CountWithoutSalesForce, Contacts, ContactsCount) {
+    BrowserStorageUtility, QueryStore, QueryService, SegmentService, SegmentStore, LookupStore, Config, Accounts, AccountsCount, CountWithoutSalesForce, Contacts, ContactsCount, PlaybookWizardStore) {
 
     var vm = this;
     angular.extend(vm, {
@@ -22,6 +22,8 @@ angular.module('common.datacloud.query.results', [
         contactRestriction: QueryStore.getContactRestriction(),
         current: 1,
         pagesize: 15,
+        showAccountPagination: false,
+        showContactPagination: false,
         search: '',
         searchOptions: {
             updateOn: 'default blur',
@@ -72,8 +74,16 @@ angular.module('common.datacloud.query.results', [
 
         } else {
 
+            PlaybookWizardStore.setValidation('targets', true);
             vm.loading = false;
+        }
 
+        if(vm.currentTargetTab === 'Accounts' && vm.accountsCount > 15){
+            vm.showAccountPagination = true;
+            vm.showContactPagination = false;
+        } else if (vm.currentTargetTab === 'Contacts' && vm.accountsCount > 15){
+            vm.showAccountPagination = false;
+            vm.showContactPagination = true;
         }
 
     };

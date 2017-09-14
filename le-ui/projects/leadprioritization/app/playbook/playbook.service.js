@@ -26,7 +26,10 @@ angular.module('lp.playbook')
         this.validation = {
             settings: false,
             rating: false,
-            targets: true,
+            targets: {
+                accounts: true,
+                contacts: true
+            },
             insights: true,
             preview: true,
             launch: true
@@ -442,8 +445,6 @@ angular.module('lp.playbook')
     }
 
     this.getRatingsCounts = function(ratings, noSalesForceId) {
-
-        console.log(noSalesForceId);
         var deferred = $q.defer();
         $http({
             method: 'POST',
