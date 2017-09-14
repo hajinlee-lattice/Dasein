@@ -88,7 +88,6 @@ angular.module('lp.playbook.dashboard', [
     }
 
     var makeSimpleGraph = function(buckets, path) {
-        console.log(buckets);
         var total =  0;
         function index(obj,i) {
             return obj[i]
@@ -111,7 +110,7 @@ angular.module('lp.playbook.dashboard', [
         var total_contacts = launchHistory.playLaunch.contactsLaunched + launchHistory.newContactsNum,
             total_accounts = launchHistory.playLaunch.accountsLaunched + launchHistory.newAccountsNum,
             total = total_contacts + total_accounts;
-
+            
         return {
             buckets: {
                 contacts: {
@@ -197,7 +196,6 @@ angular.module('lp.playbook.dashboard', [
             vm.launchButton = PlaybookWizardStore.launchButton(play);
             vm.launchedState = vm.launchButton.state; //(vm.play.launchHistory && vm.play.launchHistory.mostRecentLaunch && vm.play.launchHistory.mostRecentLaunch.launchState ? vm.play.launchHistory.mostRecentLaunch.launchState : null);
             vm.ratingsGraph = makeSimpleGraph(play.ratings && play.ratings, 'count');
-            console.log(vm.ratingsGraph);
             vm.launchGraph = makeLaunchGraph(play.launchHistory);
 
             if(vm.launchedState === 'Launching') { // if it's in a launching state check every 10 seconds so we can update the button, then stop checking

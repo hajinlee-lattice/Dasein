@@ -65,7 +65,7 @@ angular
                             return $state.current.name;
                         }
                         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
-                        if(!launchedStatus.hasLaunched) {
+                        if($state.current.name === 'home.playbook.dashboard.launch_job') {
                             $scope.menuDisabled = true;
                         }
                         $rootScope.$broadcast('header-back', { 
