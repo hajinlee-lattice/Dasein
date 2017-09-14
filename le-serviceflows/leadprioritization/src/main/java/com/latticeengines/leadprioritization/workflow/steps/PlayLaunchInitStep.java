@@ -514,7 +514,9 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         String playName = config.getPlayName();
         String playLaunchId = config.getPlayLaunchId();
         Object accountIdObj = checkAndGet(account, InterfaceName.AccountId.name());
+        Object accountIdLongObj = checkAndGet(account, InterfaceName.LEAccountIDLong.name());
         String accountId = accountIdObj == null ? null : accountIdObj.toString();
+        String accountIdLong = accountIdLongObj == null ? accountId : accountIdLongObj.toString();
 
         Recommendation recommendation = new Recommendation();
         recommendation.setDescription(playLaunch.getPlay().getDescription());
@@ -527,7 +529,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
         }
         recommendation.setLaunchDate(launchTime);
 
-        recommendation.setAccountId(accountId);
+        recommendation.setAccountId(accountIdLong);
         recommendation.setLeAccountExternalID(accountId);
         recommendation.setSfdcAccountID(checkAndGet(account, InterfaceName.SalesforceAccountID.name()));
         Double value = 0D;
