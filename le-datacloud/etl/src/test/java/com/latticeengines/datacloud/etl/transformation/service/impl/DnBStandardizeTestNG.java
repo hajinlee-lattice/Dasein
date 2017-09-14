@@ -29,9 +29,9 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig.StandardizationStrategy;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
-public class DnBCacheSeedCleanServiceImplTestNG
+public class DnBStandardizeTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(DnBCacheSeedCleanServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DnBStandardizeTestNG.class);
 
     @Autowired
     DnBCacheSeed source;
