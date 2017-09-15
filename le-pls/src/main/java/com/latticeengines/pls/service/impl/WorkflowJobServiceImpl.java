@@ -134,7 +134,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 String stepDisplayName =
                         JobStepDisplayInfoMapping.getMappedName(job.getJobType(), i);
                 String stepDescription =
-                        JobStepDisplayInfoMapping.getMappedDescription(job.getJobType(), step.getJobStepType());
+                        JobStepDisplayInfoMapping.getMappedDescription(job.getJobType(), i);
                 step.setName(stepDisplayName);
                 step.setDescription(stepDescription);
                 if (!stepDisplayName.equalsIgnoreCase(previousStepDisplayName)) {
