@@ -43,6 +43,7 @@ public class AccountMasterRebuildRefreshTestNG
     private GeneralSource alexa = new GeneralSource("AlexaMostRecent");
     private GeneralSource bombora30 = new GeneralSource("Bombora30DayAgg");
     private GeneralSource bomboraSurge = new GeneralSource("BomboraSurgePivoted");
+    private GeneralSource bomboraSurgeRLS = new GeneralSource("BomboraSurgePivotedRLS");
     private GeneralSource bwPivoted = new GeneralSource("BuiltWithPivoted");
     private GeneralSource bwTech = new GeneralSource("BuiltWithTechIndicators");
     private GeneralSource feature = new GeneralSource("FeaturePivoted");
@@ -100,7 +101,7 @@ public class AccountMasterRebuildRefreshTestNG
         TransformationStepConfig step2 = new TransformationStepConfig();
         step2.setTargetSource(source.getSourceName());
         step2.setTargetVersion(VERSION2);
-        String[] baseSourceArr2 = { source.getSourceName(), bomboraSurge.getSourceName() };
+        String[] baseSourceArr2 = { source.getSourceName(), bomboraSurgeRLS.getSourceName() };
         String[] baseVersions2 = { VERSION1, VERSION2 };
         step2.setBaseVersions(Arrays.asList(baseVersions2));
         List<String> baseSources2 = new ArrayList<>(Arrays.asList(baseSourceArr2));
@@ -179,7 +180,7 @@ public class AccountMasterRebuildRefreshTestNG
 
         keyMapRefresh = new HashMap<>();
         Map<String, String[]> domKeyMapRefresh = new HashMap<>();
-        domKeyMapRefresh.put(bomboraSurge.getSourceName(), new String[] { "Domain" });
+        domKeyMapRefresh.put(bomboraSurgeRLS.getSourceName(), new String[] { "Domain" });
         keyMapRefresh.put(new String[] { "LDC_Domain" }, domKeyMapRefresh);
     }
 
@@ -249,7 +250,7 @@ public class AccountMasterRebuildRefreshTestNG
                 { "dom3.com", "GHI" }, //
         };
         uploadBaseSourceData(bomboraSurge.getSourceName(), VERSION1, columns, data);
-        uploadBaseSourceData(bomboraSurge.getSourceName(), VERSION2, columns, dataRefreshed);
+        uploadBaseSourceData(bomboraSurgeRLS.getSourceName(), VERSION2, columns, dataRefreshed);
     }
 
     private void prepareBWPivoted() {
