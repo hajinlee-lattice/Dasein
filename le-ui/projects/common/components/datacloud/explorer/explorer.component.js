@@ -1351,7 +1351,6 @@ angular.module('common.datacloud.explorer', [
 
     vm.categoryCount = function(category) {
         var filtered = vm.enrichmentsObj[category];
-
         if (!filtered) {
             return 0;
         }
@@ -1382,8 +1381,20 @@ angular.module('common.datacloud.explorer', [
         }
 
         vm.hasCategoryCount = result.length;
+        if (vm.lookupMode) {
+            lookupSyncNewTotal();
+        }
         return result.length;
     }
+
+    var lookupSyncNewTotal = function() {
+        var total = 0;
+        for(var i in vm.categoryCounts) {
+            total += vm.categoryCounts[i];
+        }
+        LookupStore.add('count', total);
+    }
+
 
     var getSegmentBucketInputs = function() {
         var buckets = {},
