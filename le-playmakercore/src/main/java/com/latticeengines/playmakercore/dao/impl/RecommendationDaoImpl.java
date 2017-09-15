@@ -1,5 +1,6 @@
 package com.latticeengines.playmakercore.dao.impl;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         Session session = getSessionFactory().getCurrentSession();
 
         Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = "FROM %s WHERE synchronizationDestination = :syncDestination ";
+        String queryStr = "FROM %s WHERE synchronizationDestination = :syncDestination " //
+                + "AND lastUpdatedTimestamp >= :lastUpdatedTimestamp ";
 
         if (!CollectionUtils.isEmpty(playIds)) {
             queryStr += "AND playId IN (:playIds) ";
@@ -52,6 +54,12 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setMaxResults(max);
         query.setFirstResult(offset);
         query.setString("syncDestination", syncDestination);
+
+        if (lastModificationDate == null) {
+            lastModificationDate = new Date(0L);
+        }
+        query.setTimestamp("lastUpdatedTimestamp", lastModificationDate);
+
         if (!CollectionUtils.isEmpty(playIds)) {
             query.setParameterList("playIds", playIds);
         }
@@ -114,7 +122,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + ") " //
                 + "FROM %s " //
                 + "WHERE synchronizationDestination = :syncDestination " //
-                + "AND lastUpdatedTimestamp >= :lastUpdatedTimestamp ";
+                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp ";
 
         if (!CollectionUtils.isEmpty(playIds)) {
             queryStr += "AND playId IN (:playIds) ";
@@ -129,7 +137,9 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         if (lastModificationDate == null) {
             lastModificationDate = new Date(0L);
         }
-        query.setTimestamp("lastUpdatedTimestamp", lastModificationDate);
+
+        query.setBigInteger("lastUpdatedTimestamp",
+                new BigInteger((new Long(lastModificationDate.getTime()).toString())));
 
         if (!CollectionUtils.isEmpty(playIds)) {
             query.setParameterList("playIds", playIds);

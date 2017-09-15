@@ -15,6 +15,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -157,9 +158,28 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Assert.assertTrue(recommendations.size() > 0);
         Assert.assertEquals(recommendations.size(), recommendationCount);
 
+        Long lastModificationDate = 0L;
+
         for (Map<String, Object> recommendation : recommendations) {
             Assert.assertTrue(recommendation.size() > 0);
+            Object timestamp = recommendation.get(PlaymakerConstants.LastModificationDate);
+            if (!(timestamp instanceof Long)) {
+                timestamp = Long.parseLong(timestamp.toString());
+            }
+            if ((Long) timestamp > lastModificationDate) {
+                lastModificationDate = (Long) timestamp;
+            }
         }
+
+        Date lastModificationDate2 = new Date((lastModificationDate + 1) * 1000);
+        recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate2, //
+                SynchronizationDestinationEnum.SFDC.toString(), playIds);
+        Assert.assertEquals(0, recommendationCount);
+
+        recommendations = recommendationEntityMgr.findRecommendationsAsMap(lastModificationDate2, //
+                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds);
+        Assert.assertNotNull(recommendations);
+        Assert.assertTrue(recommendations.size() == 0);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationAsMapByPlayId" })
@@ -180,13 +200,32 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         Assert.assertEquals(recommendations.size(), minPageSize);
+        Long lastModificationDate = 0L;
 
         for (Recommendation recommendation : recommendations) {
             Assert.assertNotNull(recommendation.getRecommendationId());
             Assert.assertNotNull(recommendation.getPid());
             Assert.assertNotNull(recommendation.getTenantId());
             Assert.assertEquals(recommendation.getTenantId().longValue(), TENANT_PID);
+            Object timestamp = new Long(recommendation.getLastUpdatedTimestamp().getTime());
+            if (!(timestamp instanceof Long)) {
+                timestamp = Long.parseLong(timestamp.toString());
+            }
+            if ((Long) timestamp > lastModificationDate) {
+                lastModificationDate = (Long) timestamp;
+            }
         }
+
+        Date lastModificationDate2 = new Date((lastModificationDate + 1));
+        recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate2, //
+                SynchronizationDestinationEnum.SFDC.toString(), null);
+
+        Assert.assertEquals(0, recommendationCount);
+
+        recommendations = recommendationEntityMgr.findRecommendations(lastModificationDate2, //
+                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null);
+        Assert.assertNotNull(recommendations);
+        Assert.assertTrue(recommendations.size() == 0);
     }
 
     @AfterClass(groups = "functional")
