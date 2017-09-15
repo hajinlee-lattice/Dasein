@@ -19,7 +19,7 @@
     },
     "scoringapi": {
         "cpu": 1024,
-        "mem": 3096,
+        "mem": 3072,
         "port": 8073
     },
     "oauth2": {
@@ -80,7 +80,7 @@
         "port": 9012
     },
     "objectapi": {
-        "mem": 1024,
+        "mem": 4096,
         "port": 9013
     },
     "dante": {
