@@ -52,7 +52,7 @@
     -->
     <div class="stats" ng-if="vm.cube.data.Stats[enrichment.ColumnId].Bkts.List && 
                               vm.cube.data.Stats[enrichment.ColumnId].Bkts.List.length && 
-                              !vm.lookupMode && ['wizard.segment','edit'].indexOf(vm.section) == -1">
+                              !vm.lookupMode && ['wizard.segment','edit','team'].indexOf(vm.section) == -1">
 <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
         <h5><label>Attribute range</label><label>Records</label></h5>
         
