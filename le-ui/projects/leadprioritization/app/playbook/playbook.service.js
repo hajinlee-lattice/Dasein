@@ -37,6 +37,7 @@ angular.module('lp.playbook')
     
     this.clear = function() {
         this.init();
+        this.currentPlay = null;
         CgTalkingPointStore.clear();
     }
 

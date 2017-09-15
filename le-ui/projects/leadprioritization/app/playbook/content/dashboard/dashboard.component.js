@@ -224,7 +224,7 @@ angular.module('lp.playbook.dashboard', [
         checkLaunchState = null;
     });
 
-    //PlaybookWizardStore.clear();
+    PlaybookWizardStore.clear();
     if(play_name) {
         getPlay();
     }
