@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
@@ -30,7 +34,6 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
-import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.SourceProfiler;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -39,53 +42,68 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
 import com.latticeengines.domain.exposed.datacloud.dataflow.CategoricalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.AMAttrEnrichConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.security.Tenant;
 
-public class SourceProfileDeploymentTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
+public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(SourceProfileDeploymentTestNG.class);
 
     private static final long RAND_SEED = 0L;
     private static final String ENRICH_PROFILE = "EnrichProfile";
     private static final String SEGMENT_PROFILE = "SegmentProfile";
+    private static final String MATCH_SEGMENT_PROFILE = "MatchSegmentProfile";
 
-    private GeneralSource source = new GeneralSource(ENRICH_PROFILE);
+    private GeneralSource source = new GeneralSource(MATCH_SEGMENT_PROFILE);
     private GeneralSource segProfile = new GeneralSource(SEGMENT_PROFILE);
+    private GeneralSource enrichProfile = new GeneralSource(ENRICH_PROFILE);
 
     @Autowired
     private AccountMaster am;
 
-    private static final String customerTableName = "CustomerTable";
-    GeneralSource customerTable = new GeneralSource(customerTableName);
+    private static final String CUSTOMER_TABLE_NAME = "CustomerTable";
+    GeneralSource customerTable = new GeneralSource(CUSTOMER_TABLE_NAME);
 
-    private ObjectMapper om = new ObjectMapper();
+    private static final String MATCH_TABLE_NAME = "Fortune1000";
+    GeneralSource matchTable = new GeneralSource(MATCH_TABLE_NAME);
 
     @Autowired
     private SourceAttributeEntityMgr srcAttrEntityMgr;
 
     private static final String DATA_CLOUD_VERSION = "2.0.5";
+    private static final String DATA_CLOUD_VERSION_MATCH = "2.0.6";
+
+    private ObjectMapper om = new ObjectMapper();
 
     @Test(groups = "deployment")
     public void testTransformation() {
         prepareAM();
         prepareCustomer();
+        prepareMatch();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
         confirmIntermediateSource(segProfile, null);
-        confirmIntermediateSource(source, null);
+        confirmIntermediateSource(enrichProfile, null);
         confirmResultFile(progress);
         cleanupProgressTables();
     }
 
     @Override
-    protected TransformationService<PipelineTransformationConfiguration> getTransformationService() {
-        return pipelineTransformationService;
+    protected String getTargetSourceName() {
+        return source.getSourceName();
     }
 
     @Override
@@ -99,75 +117,86 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
     }
 
     @Override
-    protected String getPathForResult() {
-        Source targetSource = sourceService.findBySourceName(source.getSourceName());
-        String targetVersion = hdfsSourceEntityMgr.getCurrentVersion(targetSource);
-        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
-    }
-
-    @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
-        try {
-            PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
-            configuration.setName("SourceProfiling");
-            configuration.setVersion(targetVersion);
+        PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
+        configuration.setName("SourceProfiling");
+        configuration.setVersion(targetVersion);
 
-            TransformationStepConfig step0 = new TransformationStepConfig();
-            SourceTable sourceTable = new SourceTable(customerTable.getSourceName(),
-                    CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
-            List<String> baseSources = new ArrayList<>();
-            baseSources.add(customerTable.getSourceName());
-            baseSources.add(am.getSourceName());
-            step0.setBaseSources(baseSources);
-            Map<String, SourceTable> baseTables = new HashMap<>();
-            baseTables.put(customerTable.getSourceName(), sourceTable);
-            step0.setBaseTables(baseTables);
-            step0.setTransformer(DataCloudConstants.TRANSFORMER_AM_ENRICHER);
-            step0.setConfiguration(getCustomerUniverseConfig());
-            step0.setTargetSource("Enriched");
+        TransformationStepConfig step0 = new TransformationStepConfig();
+        SourceTable sourceTable = new SourceTable(customerTable.getSourceName(),
+                CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
+        List<String> baseSources = new ArrayList<>();
+        baseSources.add(customerTable.getSourceName());
+        baseSources.add(am.getSourceName());
+        step0.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(customerTable.getSourceName(), sourceTable);
+        step0.setBaseTables(baseTables);
+        step0.setTransformer(DataCloudConstants.TRANSFORMER_AM_ENRICHER);
+        step0.setConfiguration(getCustomerUniverseConfig());
+        step0.setTargetSource("Enriched");
 
-            TransformationStepConfig step1 = new TransformationStepConfig();
-            List<Integer> inputSteps = new ArrayList<>();
-            inputSteps.addAll(Collections.singletonList(0));
-            step1.setInputSteps(inputSteps);
-            step1.setTransformer(SourceProfiler.TRANSFORMER_NAME);
-            step1.setTargetSource(segProfile.getSourceName());
-            String confParamStr1 = getSegmentProfileConfig();
-            step1.setConfiguration(confParamStr1);
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.addAll(Collections.singletonList(0));
+        step1.setInputSteps(inputSteps);
+        step1.setTransformer(SourceProfiler.TRANSFORMER_NAME);
+        step1.setTargetSource(segProfile.getSourceName());
+        String confParamStr1 = getSegmentProfileConfig();
+        step1.setConfiguration(confParamStr1);
 
-            TransformationStepConfig step2 = new TransformationStepConfig();
-            baseSources = new ArrayList<>();
-            baseSources.add(am.getSourceName());
-            step2.setBaseSources(baseSources);
-            step2.setTransformer(SourceProfiler.TRANSFORMER_NAME);
-            step2.setTargetSource(source.getSourceName());
-            String confParamStr2 = getEnrichProfileConfig();
-            step2.setConfiguration(confParamStr2);
+        TransformationStepConfig step2 = new TransformationStepConfig();
+        baseSources = new ArrayList<>();
+        baseSources.add(am.getSourceName());
+        step2.setBaseSources(baseSources);
+        step2.setTransformer(SourceProfiler.TRANSFORMER_NAME);
+        step2.setTargetSource(enrichProfile.getSourceName());
+        String confParamStr2 = getEnrichProfileConfig();
+        step2.setConfiguration(confParamStr2);
 
-            // -----------
-            List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
-            steps.add(step0);
-            steps.add(step1);
-            steps.add(step2);
+        TransformationStepConfig step3 = new TransformationStepConfig();
+        SourceTable sourceTable3 = new SourceTable(matchTable.getSourceName(),
+                CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE));
+        List<String> baseSources3 = Collections.singletonList(matchTable.getSourceName());
+        step3.setBaseSources(baseSources3);
+        Map<String, SourceTable> baseTables3 = new HashMap<>();
+        baseTables3.put(matchTable.getSourceName(), sourceTable3);
+        step3.setBaseTables(baseTables3);
+        step3.setTransformer(TRANSFORMER_MATCH);
+        step3.setConfiguration(getMatchConfig());
 
-            // -----------
-            configuration.setSteps(steps);
-            configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
-            configuration.setKeepTemp(true);
-            return configuration;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        TransformationStepConfig step4 = new TransformationStepConfig();
+        inputSteps = new ArrayList<>();
+        inputSteps.addAll(Collections.singletonList(3));
+        step4.setInputSteps(inputSteps);
+        step4.setTransformer(SourceProfiler.TRANSFORMER_NAME);
+        step4.setTargetSource(source.getSourceName());
+        String confParamStr4 = getMatchSegmentProfileConfig();
+        step4.setConfiguration(setDataFlowEngine(confParamStr4, "TEZ"));
+
+        // -----------
+        List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        steps.add(step0);
+        steps.add(step1);
+        steps.add(step2);
+        steps.add(step3);
+        steps.add(step4);
+
+        // -----------
+        configuration.setSteps(steps);
+        configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
+        configuration.setKeepTemp(true);
+        return configuration;
     }
 
-    private String getCustomerUniverseConfig() throws JsonProcessingException {
+    private String getCustomerUniverseConfig() {
         AMAttrEnrichConfig conf = new AMAttrEnrichConfig();
         conf.setAmLatticeId("LatticeID");
         conf.setInputLatticeId("LatticeAccountId");
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
-    private String getSegmentProfileConfig() throws JsonProcessingException {
+    private String getSegmentProfileConfig() {
         ProfileConfig conf = new ProfileConfig();
         conf.setNumBucketEqualSized(false);
         conf.setBucketNum(4);
@@ -175,10 +204,10 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         conf.setRandSeed(RAND_SEED);
         conf.setMaxCat(10);
         conf.setDataCloudVersion(DATA_CLOUD_VERSION);
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
     }
 
-    private String getEnrichProfileConfig() throws JsonProcessingException {
+    private String getEnrichProfileConfig() {
         ProfileConfig conf = new ProfileConfig();
         conf.setNumBucketEqualSized(false);
         conf.setBucketNum(4);
@@ -187,7 +216,46 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         conf.setStage(DataCloudConstants.PROFILE_STAGE_ENRICH);
         conf.setMaxCat(10);
         conf.setDataCloudVersion(DATA_CLOUD_VERSION);
-        return om.writeValueAsString(conf);
+        return JsonUtils.serialize(conf);
+    }
+
+    private String getMatchConfig() {
+        MatchTransformerConfig config = new MatchTransformerConfig();
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(new Tenant(DataCloudConstants.SERVICE_CUSTOMERSPACE));
+        UnionSelection us = new UnionSelection();
+        Map<Predefined, String> ps = new HashMap<>();
+        ps.put(Predefined.Segment, "2.0");
+        ColumnSelection cs = new ColumnSelection();
+        List<Column> cols = Arrays.asList(new Column(DataCloudConstants.ATTR_LDC_DOMAIN),
+                new Column(DataCloudConstants.ATTR_LDC_NAME));
+        cs.setColumns(cols);
+        us.setPredefinedSelections(ps);
+        us.setCustomSelection(cs);
+        matchInput.setUnionSelection(us);
+        matchInput.setKeyMap(getKeyMap());
+        matchInput.setDataCloudVersion(DATA_CLOUD_VERSION_MATCH);
+        matchInput.setSkipKeyResolution(true);
+        matchInput.setSplitsPerBlock(40);
+        config.setMatchInput(matchInput);
+        return JsonUtils.serialize(config);
+    }
+
+    private String getMatchSegmentProfileConfig() {
+        ProfileConfig conf = new ProfileConfig();
+        conf.setNumBucketEqualSized(false);
+        conf.setBucketNum(4);
+        conf.setMinBucketSize(2);
+        conf.setRandSeed(RAND_SEED);
+        conf.setMaxCat(10);
+        conf.setDataCloudVersion(DATA_CLOUD_VERSION_MATCH);
+        return JsonUtils.serialize(conf);
+    }
+
+    private Map<MatchKey, List<String>> getKeyMap() {
+        Map<MatchKey, List<String>> keyMap = new TreeMap<>();
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
+        return keyMap;
     }
 
     private Object[][] customerData = new Object[][] { //
@@ -294,6 +362,31 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         }
     }
 
+    private Object[][] matchData = new Object[][] { //
+            { "1", "google.com" }, //
+            { "2", "amazon.com" }, //
+            { "3", "baidu.com" }, //
+            { "4", "facebook.com" }, //
+            { "5", "lattice-engines.com" }, //
+            { "6", "uber.com" }, //
+            { "7", "linkedin.com" }, //
+            { "8", "twitter.com" }, //
+            { "9", "sina.com" }, //
+            { "10", "airbnb.com" }, //
+            { "11", "youtube.com" }, //
+            { "12", "wikipedia.org" }, //
+            { "13", "reddit.com" }, //
+            { "14", "qq.com" }, //
+            { "15", "taobao.com" }, //
+    };
+
+    private void prepareMatch() {
+        List<Pair<String, Class<?>>> schema = new ArrayList<>();
+        schema.add(Pair.of("ID", String.class));
+        schema.add(Pair.of("Domain", String.class));
+        uploadAndRegisterTableSource(schema, matchData, matchTable.getSourceName());
+    }
+
     private Map<String, BucketAlgorithm> getExpectedBuckAlgoForFlatAttrs() {
         Map<String, BucketAlgorithm> map = new HashMap<>();
         map.put("LatticeAccountId", null);
@@ -336,199 +429,10 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
             switch (source) {
             case SEGMENT_PROFILE:
                 log.info(String.format("Start to verify intermediate source %s", source));
-                Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
-                List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
-                        DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER,
-                        DATA_CLOUD_VERSION);
-                String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent" };
-                Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));
-                Map<String, Integer> expected = new HashMap<>();    // encAttr -> decAttr count
-                for (SourceAttribute srcAttr : srcAttrs) {
-                    JsonNode arg = om.readTree(srcAttr.getArguments());
-                    if (arg.get(SourceProfiler.IS_PROFILE).asBoolean()
-                            && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
-                        String decStr = arg.get(SourceProfiler.DECODE_STRATEGY).toString();
-                        BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr,
-                                BitDecodeStrategy.class);
-                        Assert.assertNotNull(bitDecodeStrategy.getEncodedColumn());
-                        if (!encAttrSet.contains(bitDecodeStrategy.getEncodedColumn())) {
-                            continue;
-                        }
-                        if (!expected.containsKey(bitDecodeStrategy.getEncodedColumn())) {
-                            expected.put(bitDecodeStrategy.getEncodedColumn(), 1);
-                        } else {
-                            expected.put(bitDecodeStrategy.getEncodedColumn(),
-                                    expected.get(bitDecodeStrategy.getEncodedColumn()) + 1);
-                        }
-                    }
-                }
-                while (records.hasNext()) {
-                    GenericRecord record = records.next();
-                    // log.info(record.toString());
-                    Object attr = record.get("AttrName");
-                    Assert.assertNotNull(attr);
-                    if (attr instanceof Utf8) {
-                        attr = attr.toString();
-                    }
-                    Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
-                    if (bktAlgo != null && bktAlgo instanceof Utf8) {
-                        bktAlgo = bktAlgo.toString();
-                    }
-                    Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
-                    if (decStr != null) { // Attributes need to decode
-                        if (decStr instanceof Utf8) {
-                            decStr = decStr.toString();
-                        }
-                        BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr,
-                                BitDecodeStrategy.class);
-                        Assert.assertTrue(expected.containsKey(bitDecodeStrategy.getEncodedColumn()));
-                        expected.put(bitDecodeStrategy.getEncodedColumn(),
-                                expected.get(bitDecodeStrategy.getEncodedColumn()) - 1);
-                        if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
-                            expected.remove(bitDecodeStrategy.getEncodedColumn());
-                        }
-                        switch (bitDecodeStrategy.getEncodedColumn()) {
-                        case "HGData_SupplierTechIndicators":
-                        case "BuiltWith_TechIndicators":
-                            Assert.assertNotNull(bktAlgo);
-                            BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
-                            Assert.assertNotNull(boolAlgo);
-                            break;
-                        case "BmbrSurge_Intent":
-                            Assert.assertNotNull(bktAlgo);
-                            CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo,
-                                    CategoricalBucket.class);
-                            Assert.assertNotNull(catAlgo);
-                            Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
-                            Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
-                                    "null,Very Low,Low,Medium,High,Very High");
-                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
-                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
-                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
-                            break;
-                        case "BmbrSurge_CompositeScore":
-                            if (bktAlgo == null) {
-                                continue;
-                            }
-                            IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
-                            Assert.assertNotNull(intAlgo);
-                            // log.info((String) attr + ": " + JsonUtils.serialize(intAlgo));
-                            break;
-                        default:
-                            throw new RuntimeException(String.format("Unrecognized encoded attribute %s",
-                                    bitDecodeStrategy.getEncodedColumn()));
-                        }
-                    } else { // Flat attributes
-                        log.info(record.toString());
-                        Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
-                        if (flatAttrsBuckAlgo.get((String) attr) == null) {  // Retained attributes
-                            Assert.assertNull(bktAlgo);
-                        } else {
-                            JsonUtils.serialize(JsonUtils.deserialize((String) bktAlgo,
-                                    flatAttrsBuckAlgo.get((String) attr).getClass()));
-                        }
-                    }
-                }
-                Assert.assertEquals(0, expected.size());
+                verifySegmentProfileResult(records);
                 break;
             case ENRICH_PROFILE:
-                flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
-                srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
-                        DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER,
-                        DATA_CLOUD_VERSION);
-                String[] encAttrs2 = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent",
-                        "BmbrSurge_CompositeScore" };
-                encAttrSet = new HashSet<>(Arrays.asList(encAttrs2));
-                expected = new HashMap<>(); // encAttr -> decAttr count
-                for (SourceAttribute srcAttr : srcAttrs) {
-                    JsonNode arg = om.readTree(srcAttr.getArguments());
-                    if (arg.get(SourceProfiler.IS_PROFILE).asBoolean()
-                            && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
-                        String decStr = arg.get(SourceProfiler.DECODE_STRATEGY).toString();
-                        BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr,
-                                BitDecodeStrategy.class);
-                        Assert.assertNotNull(bitDecodeStrategy.getEncodedColumn());
-                        if (!encAttrSet.contains(bitDecodeStrategy.getEncodedColumn())) {
-                            continue;
-                        }
-                        if (!expected.containsKey(bitDecodeStrategy.getEncodedColumn())) {
-                            expected.put(bitDecodeStrategy.getEncodedColumn(), 1);
-                        } else {
-                            expected.put(bitDecodeStrategy.getEncodedColumn(),
-                                    expected.get(bitDecodeStrategy.getEncodedColumn()) + 1);
-                        }
-                    }
-                }
-                while (records.hasNext()) {
-                    GenericRecord record = records.next();
-                    // log.info(record.toString());
-                    Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
-                    Object attr = record.get("AttrName");
-                    Assert.assertNotNull(attr);
-                    if (attr instanceof Utf8) {
-                        attr = attr.toString();
-                    }
-                    Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
-                    if (bktAlgo != null && bktAlgo instanceof Utf8) {
-                        bktAlgo = bktAlgo.toString();
-                    }
-                    if (decStr != null) { // Attributes need to decode
-                        if (decStr instanceof Utf8) {
-                            decStr = decStr.toString();
-                        }
-                        BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr,
-                                BitDecodeStrategy.class);
-                        Assert.assertTrue(expected.containsKey(bitDecodeStrategy.getEncodedColumn()));
-                        expected.put(bitDecodeStrategy.getEncodedColumn(),
-                                expected.get(bitDecodeStrategy.getEncodedColumn()) - 1);
-                        if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
-                            expected.remove(bitDecodeStrategy.getEncodedColumn());
-                        }
-                        switch (bitDecodeStrategy.getEncodedColumn()) {
-                        case "HGData_SupplierTechIndicators":
-                        case "BuiltWith_TechIndicators":
-                            Assert.assertNotNull(bktAlgo);
-                            BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
-                            Assert.assertNotNull(boolAlgo);
-                            break;
-                        case "BmbrSurge_Intent":
-                            Assert.assertNotNull(bktAlgo);
-                            CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo,
-                                    CategoricalBucket.class);
-                            Assert.assertNotNull(catAlgo);
-                            Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
-                            Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
-                                    "null,Very Low,Low,Medium,High,Very High");
-                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
-                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
-                            Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
-                            break;
-                        case "BmbrSurge_CompositeScore":
-                            if (bktAlgo == null) {
-                                continue;
-                            }
-                            IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
-                            Assert.assertNotNull(intAlgo);
-                            // log.info((String) attr + ": " +
-                            // JsonUtils.serialize(intAlgo));
-                            break;
-                        default:
-                            throw new RuntimeException(String.format("Unrecognized encoded attribute %s",
-                                    bitDecodeStrategy.getEncodedColumn()));
-                        }
-                    } else { // FLat attributes
-                        log.info(record.toString());
-                        Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
-                        if (flatAttrsBuckAlgo.get((String) attr) == null) { // Retained
-                                                                            // attributes
-                            Assert.assertNull(bktAlgo);
-                        } else {
-                            JsonUtils.serialize(JsonUtils.deserialize((String) bktAlgo,
-                                    flatAttrsBuckAlgo.get((String) attr).getClass()));
-                        }
-                    }
-                }
-                Assert.assertEquals(0, expected.size());
+                verifyEnrichProfileResult(records);
                 break;
             default:
                 throw new UnsupportedOperationException(String.format("Unknown intermediate source %s", source));
@@ -538,9 +442,197 @@ public class SourceProfileDeploymentTestNG extends TransformationServiceImplTest
         }
     }
 
+    private void verifySegmentProfileResult(Iterator<GenericRecord> records)
+            throws JsonProcessingException, IOException {
+        Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
+        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
+                DataCloudConstants.PROFILE_STAGE_SEGMENT, DataCloudConstants.TRANSFORMER_PROFILER, DATA_CLOUD_VERSION);
+        String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent" };
+        Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));
+        Map<String, Integer> expected = new HashMap<>(); // encAttr -> decAttr
+                                                         // count
+        for (SourceAttribute srcAttr : srcAttrs) {
+            JsonNode arg = om.readTree(srcAttr.getArguments());
+            if (arg.get(SourceProfiler.IS_PROFILE).asBoolean() && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
+                String decStr = arg.get(SourceProfiler.DECODE_STRATEGY).toString();
+                BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr, BitDecodeStrategy.class);
+                Assert.assertNotNull(bitDecodeStrategy.getEncodedColumn());
+                if (!encAttrSet.contains(bitDecodeStrategy.getEncodedColumn())) {
+                    continue;
+                }
+                if (!expected.containsKey(bitDecodeStrategy.getEncodedColumn())) {
+                    expected.put(bitDecodeStrategy.getEncodedColumn(), 1);
+                } else {
+                    expected.put(bitDecodeStrategy.getEncodedColumn(),
+                            expected.get(bitDecodeStrategy.getEncodedColumn()) + 1);
+                }
+            }
+        }
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            // log.info(record.toString());
+            Object attr = record.get("AttrName");
+            Assert.assertNotNull(attr);
+            if (attr instanceof Utf8) {
+                attr = attr.toString();
+            }
+            Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
+            if (bktAlgo != null && bktAlgo instanceof Utf8) {
+                bktAlgo = bktAlgo.toString();
+            }
+            Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
+            if (decStr != null) { // Attributes need to decode
+                if (decStr instanceof Utf8) {
+                    decStr = decStr.toString();
+                }
+                BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr, BitDecodeStrategy.class);
+                Assert.assertTrue(expected.containsKey(bitDecodeStrategy.getEncodedColumn()));
+                expected.put(bitDecodeStrategy.getEncodedColumn(),
+                        expected.get(bitDecodeStrategy.getEncodedColumn()) - 1);
+                if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
+                    expected.remove(bitDecodeStrategy.getEncodedColumn());
+                }
+                switch (bitDecodeStrategy.getEncodedColumn()) {
+                case "HGData_SupplierTechIndicators":
+                case "BuiltWith_TechIndicators":
+                    Assert.assertNotNull(bktAlgo);
+                    BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
+                    Assert.assertNotNull(boolAlgo);
+                    break;
+                case "BmbrSurge_Intent":
+                    Assert.assertNotNull(bktAlgo);
+                    CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo, CategoricalBucket.class);
+                    Assert.assertNotNull(catAlgo);
+                    Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
+                    Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
+                            "null,Very Low,Low,Medium,High,Very High");
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
+                    break;
+                case "BmbrSurge_CompositeScore":
+                    if (bktAlgo == null) {
+                        continue;
+                    }
+                    IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
+                    Assert.assertNotNull(intAlgo);
+                    // log.info((String) attr + ": " + JsonUtils.serialize(intAlgo));
+                    break;
+                default:
+                    throw new RuntimeException(
+                            String.format("Unrecognized encoded attribute %s", bitDecodeStrategy.getEncodedColumn()));
+                }
+            } else { // Flat attributes
+                log.info(record.toString());
+                Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
+                if (flatAttrsBuckAlgo.get((String) attr) == null) { // Retained attributes
+                    Assert.assertNull(bktAlgo);
+                } else {
+                    JsonUtils.serialize(
+                            JsonUtils.deserialize((String) bktAlgo, flatAttrsBuckAlgo.get((String) attr).getClass()));
+                }
+            }
+        }
+        Assert.assertEquals(0, expected.size());
+    }
+
+    private void verifyEnrichProfileResult(Iterator<GenericRecord> records)
+            throws JsonProcessingException, IOException {
+        Map<String, BucketAlgorithm> flatAttrsBuckAlgo = getExpectedBuckAlgoForFlatAttrs();
+        List<SourceAttribute> srcAttrs = srcAttrEntityMgr.getAttributes(SourceProfiler.AM_PROFILE,
+                DataCloudConstants.PROFILE_STAGE_ENRICH, DataCloudConstants.TRANSFORMER_PROFILER, DATA_CLOUD_VERSION);
+        String[] encAttrs = { "HGData_SupplierTechIndicators", "BuiltWith_TechIndicators", "BmbrSurge_Intent",
+                "BmbrSurge_CompositeScore" };
+        Set<String> encAttrSet = new HashSet<>(Arrays.asList(encAttrs));
+        Map<String, Integer> expected = new HashMap<>(); // encAttr -> decAttr count
+        for (SourceAttribute srcAttr : srcAttrs) {
+            JsonNode arg = om.readTree(srcAttr.getArguments());
+            if (arg.get(SourceProfiler.IS_PROFILE).asBoolean() && arg.hasNonNull(SourceProfiler.DECODE_STRATEGY)) {
+                String decStr = arg.get(SourceProfiler.DECODE_STRATEGY).toString();
+                BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr, BitDecodeStrategy.class);
+                Assert.assertNotNull(bitDecodeStrategy.getEncodedColumn());
+                if (!encAttrSet.contains(bitDecodeStrategy.getEncodedColumn())) {
+                    continue;
+                }
+                if (!expected.containsKey(bitDecodeStrategy.getEncodedColumn())) {
+                    expected.put(bitDecodeStrategy.getEncodedColumn(), 1);
+                } else {
+                    expected.put(bitDecodeStrategy.getEncodedColumn(),
+                            expected.get(bitDecodeStrategy.getEncodedColumn()) + 1);
+                }
+            }
+        }
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            // log.info(record.toString());
+            Object decStr = record.get(SourceProfiler.DECODE_STRATEGY);
+            Object attr = record.get("AttrName");
+            Assert.assertNotNull(attr);
+            if (attr instanceof Utf8) {
+                attr = attr.toString();
+            }
+            Object bktAlgo = record.get(SourceProfiler.BKT_ALGO);
+            if (bktAlgo != null && bktAlgo instanceof Utf8) {
+                bktAlgo = bktAlgo.toString();
+            }
+            if (decStr != null) { // Attributes need to decode
+                if (decStr instanceof Utf8) {
+                    decStr = decStr.toString();
+                }
+                BitDecodeStrategy bitDecodeStrategy = JsonUtils.deserialize((String) decStr, BitDecodeStrategy.class);
+                Assert.assertTrue(expected.containsKey(bitDecodeStrategy.getEncodedColumn()));
+                expected.put(bitDecodeStrategy.getEncodedColumn(),
+                        expected.get(bitDecodeStrategy.getEncodedColumn()) - 1);
+                if (expected.get(bitDecodeStrategy.getEncodedColumn()) == 0) {
+                    expected.remove(bitDecodeStrategy.getEncodedColumn());
+                }
+                switch (bitDecodeStrategy.getEncodedColumn()) {
+                case "HGData_SupplierTechIndicators":
+                case "BuiltWith_TechIndicators":
+                    Assert.assertNotNull(bktAlgo);
+                    BooleanBucket boolAlgo = JsonUtils.deserialize((String) bktAlgo, BooleanBucket.class);
+                    Assert.assertNotNull(boolAlgo);
+                    break;
+                case "BmbrSurge_Intent":
+                    Assert.assertNotNull(bktAlgo);
+                    CategoricalBucket catAlgo = JsonUtils.deserialize((String) bktAlgo, CategoricalBucket.class);
+                    Assert.assertNotNull(catAlgo);
+                    Assert.assertTrue(CollectionUtils.isNotEmpty(catAlgo.getCategories()));
+                    Assert.assertEquals(String.join(",", catAlgo.generateLabels()),
+                            "null,Very Low,Low,Medium,High,Very High");
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_ENCATTR));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_LOWESTBIT));
+                    Assert.assertNotNull(record.get(DataCloudConstants.PROFILE_ATTR_NUMBITS));
+                    break;
+                case "BmbrSurge_CompositeScore":
+                    if (bktAlgo == null) {
+                        continue;
+                    }
+                    IntervalBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, IntervalBucket.class);
+                    Assert.assertNotNull(intAlgo);
+                    // log.info((String) attr + ": " + JsonUtils.serialize(intAlgo));
+                    break;
+                default:
+                    throw new RuntimeException(
+                            String.format("Unrecognized encoded attribute %s", bitDecodeStrategy.getEncodedColumn()));
+                }
+            } else { // FLat attributes
+                log.info(record.toString());
+                Assert.assertTrue(flatAttrsBuckAlgo.containsKey((String) attr));
+                if (flatAttrsBuckAlgo.get((String) attr) == null) { // Retained
+                                                                    // attributes
+                    Assert.assertNull(bktAlgo);
+                } else {
+                    JsonUtils.serialize(
+                            JsonUtils.deserialize((String) bktAlgo, flatAttrsBuckAlgo.get((String) attr).getClass()));
+                }
+            }
+        }
+        Assert.assertEquals(0, expected.size());
+    }
+
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-
     }
 
 }

@@ -185,8 +185,9 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         Set<Schema.Type> catTypes = new HashSet<>(Arrays.asList(new Schema.Type[] { Schema.Type.STRING }));
         try {
             // Attributes encoded in the profiled source which need to decode
-            Map<String, List<ProfileParameters.Attribute>> encAttrMap = new HashMap<>(); // Encoded attr-> [decoded attrs] (Enabled in profiling)
-            Set<String> encAttrs = new HashSet<>(); // All encoded attrs (enabled/disabled in profiling)
+            Map<String, List<ProfileParameters.Attribute>> encAttrMap = new HashMap<>(); // encoded attr -> [decoded attrs] (Enabled in profiling)
+            Set<String> encAttrs = new HashSet<>(); // all encoded attrs (enabled/disabled in profiling)
+            Map<String, ProfileParameters.Attribute> decAttrMap = new HashMap<>();  // decoded attr name -> decoded attr object
             Map<String, String> decodeStrs = new HashMap<>();   // decoded attr -> decode strategy str
             for (SourceAttribute amAttr : amAttrConfig.values()) {
                 JsonNode arg = om.readTree(amAttr.getArguments());
@@ -222,8 +223,10 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                                 1);
                     }
                 }
-                encAttrMap.get(encAttr).add(
-                        new ProfileParameters.Attribute(amAttr.getAttribute(), numBits, decodeStrategyStr, bktAlgo));
+                ProfileParameters.Attribute attr = new ProfileParameters.Attribute(amAttr.getAttribute(), numBits,
+                        decodeStrategyStr, bktAlgo);
+                encAttrMap.get(encAttr).add(attr);
+                decAttrMap.put(attr.getAttr(), attr);
                 decodeStrs.put(amAttr.getAttribute(), decodeStrategyStr);
             }
             // Build BitCodeBook
@@ -254,49 +257,23 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                     attrsToRetain.add(new ProfileParameters.Attribute(field.name(), null, null, null));
                     continue;
                 }
+                // Preknown attributes which are encoded (usually for Enrichment
+                // use case, since profiled source is AM)
                 if (encAttrMap.containsKey(field.name())) {
                     for (ProfileParameters.Attribute attr : encAttrMap.get(field.name())) {
-                        switch (config.getStage()) {
-                        case DataCloudConstants.PROFILE_STAGE_SEGMENT:
-                            if (attr.getAlgo() instanceof BooleanBucket
-                                    || attr.getAlgo() instanceof CategoricalBucket) {
-                                log.info(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
-                                        attr.getAttr()));
-                                amAttrsToEnc.add(attr); // No external attrs needs to decode
-                            } else if (attr.getAlgo() instanceof IntervalBucket) {
-                                log.info(String.format("%s attr %s (unencode)",
-                                        attr.getAlgo().getClass().getSimpleName(),
-                                        attr.getAttr()));
-                                numericAttrs.add(attr);
-                            } else {
-                                log.info(String.format("%s attr %s (unencode)",
-                                        attr.getAlgo().getClass().getSimpleName(),
-                                        attr.getAttr()));
-                                attrsToRetain.add(attr);
-                            }
-                            break;
-                        case DataCloudConstants.PROFILE_STAGE_ENRICH:
-                            if (attr.getAlgo() instanceof BooleanBucket
-                                    || attr.getAlgo() instanceof CategoricalBucket) {
-                                log.info(String.format("%s attr %s (encode)",
-                                        attr.getAlgo().getClass().getSimpleName(), attr.getAttr()));
-                                amAttrsToEnc.add(attr);
-                            } else if (attr.getAlgo() instanceof IntervalBucket) {
-                                log.info(String.format("%s attr %s (encode)",
-                                        attr.getAlgo().getClass().getSimpleName(), attr.getAttr()));
-                                numericAttrs.add(attr);
-                            } else {
-                                log.info(String.format("%s attr %s (unencode)",
-                                        attr.getAlgo().getClass().getSimpleName(), attr.getAttr()));
-                                attrsToRetain.add(attr);
-                            }
-                            break;
-                        default:
-                            throw new RuntimeException("Unrecognized stage " + config.getStage());
-                        }
+                        classifyPreknownAttr(attr, config.getStage(), numericAttrs, catAttrs, amAttrsToEnc,
+                                attrsToRetain);
                     }
                     continue;
                 }
+                // Preknown attributes which are in plain format (usually for
+                // Segment use case, since profiled source is match result)
+                if (decAttrMap.containsKey(field.name())) {
+                    classifyPreknownAttr(decAttrMap.get(field.name()), config.getStage(), numericAttrs, catAttrs,
+                            amAttrsToEnc, attrsToRetain);
+                    continue;
+                }
+
                 Schema.Type type = field.schema().getTypes().get(0).getType();
                 if (numTypes.contains(type)) {
                     switch (config.getStage()) {
@@ -350,6 +327,44 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             }
         } catch (Exception ex) {
             throw new RuntimeException("Fail to classify attributes", ex);
+        }
+    }
+
+    private void classifyPreknownAttr(ProfileParameters.Attribute attr, String stage, List<Attribute> numericAttrs,
+            List<Attribute> catAttrs, List<Attribute> amAttrsToEnc, List<Attribute> attrsToRetain) {
+        switch (stage) {
+        case DataCloudConstants.PROFILE_STAGE_SEGMENT:
+            if (attr.getAlgo() instanceof BooleanBucket || attr.getAlgo() instanceof CategoricalBucket) {
+                log.info(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
+                        attr.getAttr()));
+                amAttrsToEnc.add(attr);
+            } else if (attr.getAlgo() instanceof IntervalBucket) {
+                log.info(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
+                        attr.getAttr()));
+                numericAttrs.add(attr);
+            } else {
+                log.info(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
+                        attr.getAttr()));
+                attrsToRetain.add(attr);
+            }
+            break;
+        case DataCloudConstants.PROFILE_STAGE_ENRICH:
+            if (attr.getAlgo() instanceof BooleanBucket || attr.getAlgo() instanceof CategoricalBucket) {
+                log.info(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
+                        attr.getAttr()));
+                amAttrsToEnc.add(attr);
+            } else if (attr.getAlgo() instanceof IntervalBucket) {
+                log.info(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
+                        attr.getAttr()));
+                numericAttrs.add(attr);
+            } else {
+                log.info(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
+                        attr.getAttr()));
+                attrsToRetain.add(attr);
+            }
+            break;
+        default:
+            throw new RuntimeException("Unrecognized stage " + stage);
         }
     }
 
