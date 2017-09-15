@@ -139,4 +139,62 @@ div.advanced-query-builder {
             padding: 6px 10px;
         }
     }
+    
+    .button-group {
+        margin: 0 0.75em 0 0.25em;
+
+        button {
+            border-radius: 3px;
+            border-color: rgb(169, 169, 169);
+        }
+
+        &>.button:last-child:not(:first-child), 
+        &>.dropdown-toggle:not(:first-child) {
+            border-bottom-left-radius: 0;
+            border-top-left-radius: 0;
+        }
+
+        &>.button:first-child:not(:last-child):not(.dropdown-toggle) {
+            border-bottom-right-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+        .button.icon-button, 
+        button.button.icon-button, 
+        a.button.icon-button, 
+        .button a:link.icon-button, 
+        .button a:focus.icon-button, 
+        .button a:visited.icon-button {
+            padding: 0;
+            font-size: 10pt;
+            vertical-align: baseline;
+            
+            &.white-button:hover,
+            &.white-button:focus {
+                background-color: white;
+            }
+            
+            &.light-gray-button {
+                background: #aaa;
+            }
+
+            span {
+                display: inline-block;
+                padding: 0.1em .4em 0;
+                color: #000;
+            }
+
+            i {
+                display: inline-block;
+                margin: 0.25em .2em 0.3em;
+                color: #eee;
+                
+            }
+
+            &:last-child i {
+                margin-left: 0.1em;
+                margin-right: 0.25em;
+            }
+        }
+    }
 }

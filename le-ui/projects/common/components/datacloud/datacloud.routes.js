@@ -295,6 +295,15 @@ angular
             },
             resolve: angular.extend({}, DataCloudResolve, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
+                    var resolveQueryRestriction = function() {
+                        var accountRestriction = QueryStore.getAccountRestriction(),
+                            contactRestriction = QueryStore.getContactRestriction();
+
+                        deferred.resolve({
+                            accountRestrictions: accountRestriction,
+                            contactRestrictions: contactRestriction
+                        });
+                    };
 
                     var deferred = $q.defer(),
                         segmentName = $stateParams.segment,
@@ -302,19 +311,9 @@ angular
                         tenantName = $stateParams.tenantName;
 
                     QueryStore.setupStore(null).then(function(){
-
-                        if(segmentName === 'Create'){
-
-                            var accountRestriction = QueryStore.getAccountRestriction(),
-                                contactRestriction = QueryStore.getContactRestriction();
-
-                            deferred.resolve({
-                                accountRestrictions: accountRestriction,
-                                contactRestrictions: contactRestriction
-                            });
-
+                        if (segmentName === 'Create') {
+                            resolveQueryRestriction();
                         } else {
-                            
                             SegmentStore.getSegmentByName(segmentName).then(function(result) {
                                 if (segmentName && !result) {
                                     if (modelId) {
@@ -326,21 +325,12 @@ angular
                                     return QueryStore.setupStore(result);
                                 }
                             }).then(function() {
-                                
-                                var accountRestriction = QueryStore.getAccountRestriction(),
-                                    contactRestriction = QueryStore.getContactRestriction();
-
-                                deferred.resolve({
-                                    accountRestrictions: accountRestriction,
-                                    contactRestrictions: contactRestriction
-                                });
-
+                                resolveQueryRestriction();
                             });
                         }
-
                     });
 
-                    return deferred.promise;                    
+                    return deferred.promise;                   
                 }],
                 /*
                 AccountsCount: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
@@ -511,50 +501,57 @@ angular
             },
             resolve: {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
+                    var getRestrictions = function(restriction) {
+                        var restrictions = restriction && restriction.restriction
+                            ? restriction.restriction.logicalRestriction.restrictions
+                            : [];
+
+                        return restrictions;
+                    }
+
+                    var resolveQueryRestriction = function() {
+                        var accountRestriction = QueryStore.getAccountRestriction(),
+                            contactRestriction = QueryStore.getContactRestriction();
+
+                        deferred.resolve({
+                            accountRestrictions: accountRestriction,
+                            contactRestrictions: contactRestriction
+                        });
+                    };
 
                     var deferred = $q.defer(),
                         segmentName = $stateParams.segment,
                         modelId = $stateParams.modelId,
-                        tenantName = $stateParams.tenantName;
+                        tenantName = $stateParams.tenantName,
+                        accountRestriction = QueryStore.getAccountRestriction(),
+                        contactRestriction = QueryStore.getContactRestriction(),
+                        accountRestrictions = getRestrictions(accountRestriction),
+                        contactRestrictions = getRestrictions(contactRestriction),
+                        isCreate = segmentName === 'Create';
 
-                    QueryStore.setupStore(null).then(function(){
-
-                        if(segmentName === 'Create'){
-
-                            var accountRestriction = QueryStore.getAccountRestriction(),
-                                contactRestriction = QueryStore.getContactRestriction();
-
-                            deferred.resolve({
-                                accountRestrictions: accountRestriction,
-                                contactRestrictions: contactRestriction
-                            });
-
-                        } else {
-                            
-                            SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                                if (segmentName && !result) {
-                                    if (modelId) {
-                                        $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
+                    if (isCreate && (accountRestrictions.length > 0 || accountRestrictions.length > 0)) {
+                        resolveQueryRestriction();
+                    } else {
+                        QueryStore.setupStore(null).then(function(){
+                            if (isCreate) {
+                                resolveQueryRestriction();
+                            } else {
+                                SegmentStore.getSegmentByName(segmentName).then(function(result) {
+                                    if (segmentName && !result) {
+                                        if (modelId) {
+                                            $state.go('home.model.segmentation', {modelId: modelId}, {notify: true, reload: true});
+                                        } else {
+                                            $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
+                                        }
                                     } else {
-                                        $state.go('home.segments', {tenantName: tenantName}, {notify: true, reload: true});
+                                        QueryStore.setupStore(result);
                                     }
-                                } else {
-                                    return QueryStore.setupStore(result);
-                                }
-                            }).then(function() {
-                                
-                                var accountRestriction = QueryStore.getAccountRestriction(),
-                                    contactRestriction = QueryStore.getContactRestriction();
 
-                                deferred.resolve({
-                                    accountRestrictions: accountRestriction,
-                                    contactRestrictions: contactRestriction
+                                    resolveQueryRestriction();
                                 });
-
-                            });
-                        }
-
-                    });
+                            }
+                        });
+                    }
 
                     return deferred.promise;                    
                 }],

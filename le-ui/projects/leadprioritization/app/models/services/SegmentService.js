@@ -69,9 +69,16 @@ angular
     }
 
     this.sanitizeSegment = function(segment) {
-        var restriction = segment.account_restriction.restriction;
+        var aRestriction = segment.account_restriction
+            ? segment.account_restriction.restriction
+            : {};
+        
+        var cRestriction = segment.contact_restriction
+            ? segment.contact_restriction.restriction
+            : {};
 
-        this.sanitizeSegmentRestriction([ restriction ]);
+        this.sanitizeSegmentRestriction([ aRestriction ]);
+        this.sanitizeSegmentRestriction([ cRestriction ]);
 
         return segment;
     }

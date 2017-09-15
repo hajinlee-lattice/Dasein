@@ -140,7 +140,6 @@ angular.module('common.datacloud.query.service',[
         this.setSegment(segment);
 
         if (segment != null) {
-
             accountRestriction = segment.account_restriction ? [segment.account_restriction.restriction] : [];
             contactRestriction = segment.contact_restriction ? [segment.contact_restriction.restriction] : [];
 
@@ -150,7 +149,6 @@ angular.module('common.datacloud.query.service',[
             deferred.resolve();
 
         } else {
-
             accountRestriction = [];
             contactRestriction = [];
 
@@ -420,7 +418,7 @@ angular.module('common.datacloud.query.service',[
 
 
 })
-.service('QueryService', function($http, $q) {
+.service('QueryService', function($http, $q, SegmentStore) {
     this.canceler = null;
 
     this.GetCountByQuery = function(resourceType, query, cancelPrevious) {
@@ -430,6 +428,8 @@ angular.module('common.datacloud.query.service',[
         
         this.canceler = $q.defer(); 
         var deferred = $q.defer(); 
+
+        SegmentStore.sanitizeSegment(query);
 
         $http({
             method: 'POST',
@@ -450,6 +450,8 @@ angular.module('common.datacloud.query.service',[
 
     this.GetDataByQuery = function(resourceType, query) {
         var deferred = $q.defer();
+
+        SegmentStore.sanitizeSegment(query);
 
         $http({
             method: 'POST',

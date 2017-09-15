@@ -73,7 +73,22 @@
         
         <div class="row query-helper-text-one" ng-if="vm.mode == 'segment'">
             <span>
-                Build a segment with <strong>accounts</strong> that have:
+                Build a segment with 
+                <div class="button-group" role="group" ng-click="vm.clickTreeMode(vm.treeMode == 'account' ? 'contact' : 'account')">
+                    <button type="button" 
+                            class="button icon-button {{vm.treeMode == 'account' ? 'white' : 'light-gray'}}-button" 
+                            value="{{vm.treeMode == 'account' ? 'contact' : 'account'}}">
+                        <span ng-if="vm.treeMode == 'account'">Accounts</span>
+                        <i class="fa fa-bars fa-rotate-90" ng-if="vm.treeMode == 'contact'"></i>
+                    </button>
+                    <button type="button" 
+                            class="button icon-button {{vm.treeMode == 'contact' ? 'white' : 'light-gray'}}-button" 
+                            value="{{vm.treeMode == 'account' ? 'contact' : 'account'}}">
+                        <i class="fa fa-bars fa-rotate-90" ng-if="vm.treeMode == 'account'"></i>
+                        <span ng-if="vm.treeMode == 'contact'">Contacts</span>
+                    </button>
+                </div>
+                that have:
             </span>
         </div>
 

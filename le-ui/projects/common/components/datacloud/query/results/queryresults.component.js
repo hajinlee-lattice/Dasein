@@ -6,7 +6,6 @@ angular.module('common.datacloud.query.results', [
     SegmentService, SegmentStore, LookupStore, Config, Accounts, /*AccountsCount, ContactsCount,*/ 
     CountWithoutSalesForce, Contacts, PlaybookWizardStore
 ) {
-
     var vm = this;
     angular.extend(vm, {
         resourceType: $state.current.name.substring($state.current.name.lastIndexOf('.') + 1),
@@ -50,12 +49,10 @@ angular.module('common.datacloud.query.results', [
     }
 
     function updatePage() {
-
         vm.loading = true;
         var offset = (vm.current - 1) * vm.pagesize;
 
-        if(vm.section === 'segment.analysis'){
-            
+        if (vm.section === 'segment.analysis') {
             var dataQuery = {
                 "free_form_text_search": vm.search,
                 "account_restriction": vm.accountRestriction,
@@ -68,13 +65,13 @@ angular.module('common.datacloud.query.results', [
                 "restrict_with_sfdcid": vm.excludeNonSalesForce
             };
 
-            if(vm.page === 'Accounts'){
-                QueryStore.setAccounts(dataQuery).then(function(response){
+            if (vm.page === 'Accounts'){
+                QueryStore.setAccounts(dataQuery).then(function(response) {
                     vm.accounts = response.data;
                     vm.loading = false;
                 });
             } else {
-                QueryStore.setContacts(dataQuery).then(function(response){
+                QueryStore.setContacts(dataQuery).then(function(response) {
                     vm.contact = response.data;
                     vm.loading = false;
                 });
@@ -178,7 +175,6 @@ angular.module('common.datacloud.query.results', [
         var segmentName = $stateParams.segment;
 
         if (segmentName === 'Create') {
-
             var accountRestriction = JSON.stringify({
                 "restriction": {
                     "logicalRestriction": {
@@ -187,6 +183,7 @@ angular.module('common.datacloud.query.results', [
                     }
                 }
             });
+
             var contactRestriction = JSON.stringify({
                 "restriction": {
                     "logicalRestriction": {
@@ -199,11 +196,8 @@ angular.module('common.datacloud.query.results', [
             $stateParams.defaultSegmentRestriction = accountRestriction + contactRestriction;
             
             vm.checkSaveButtonState();
-
         } else {
-
             SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
                 var accountRestriction = JSON.stringify(result.account_restriction),
                     contactRestriction = JSON.stringify(result.contact_restriction);
                 
@@ -212,12 +206,10 @@ angular.module('common.datacloud.query.results', [
                 vm.checkSaveButtonState();
             });
         };
-        
     };
 
 
     vm.checkSaveButtonState = function(){
-
         var oldVal = $stateParams.defaultSegmentRestriction,
             newAccountVal = JSON.stringify(QueryStore.getAccountRestriction()),
             newContactVal = JSON.stringify(QueryStore.getContactRestriction()),
@@ -229,7 +221,6 @@ angular.module('common.datacloud.query.results', [
         } else {
             vm.saveSegmentEnabled = true;
         };
-
     };
 
     vm.inModel = function() {
@@ -242,12 +233,10 @@ angular.module('common.datacloud.query.results', [
     }
 
     vm.saveSegment = function() {
-
         var segmentName = $stateParams.segment,
             ts = new Date().getTime();
 
         if (segmentName === 'Create') {
-            
             var accountRestriction = QueryStore.getAccountRestriction(),
                 contactRestriction = QueryStore.getContactRestriction(),
                 segment = {
@@ -262,19 +251,14 @@ angular.module('common.datacloud.query.results', [
                 };
 
             SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
-
                 QueryStore.setupStore(result.data);
 
                 vm.saveSegmentEnabled = false;
                 $state.go('.', { segment: 'segment' + ts }, { notify: false });
                 vm.saved = true;
-
             });
-
         } else {
-            
             SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
                 var segmentData = result,
                     accountRestriction = QueryStore.getAccountRestriction(),
                     contactRestriction = QueryStore.getContactRestriction(),
@@ -290,20 +274,14 @@ angular.module('common.datacloud.query.results', [
                     };
 
                 SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
-                    
                     QueryStore.setupStore(result.data);
                     
                     vm.saveSegmentEnabled = false;
                     $state.go('.', { segment: 'segment' + ts }, { notify: false });
                     vm.saved = true;
-
                 });
-
             });
-
         };
-
-
     };
 
     $scope.$watch('vm.current', function(newValue, oldValue) {

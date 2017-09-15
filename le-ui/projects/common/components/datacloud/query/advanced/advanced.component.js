@@ -27,7 +27,8 @@ angular.module('common.datacloud.query.advanced', [
             { label: 'C', resource: 'accounts', count: 0, percentage: 0, active: false },
             { label: 'D', resource: 'accounts', count: 0, percentage: 0, active: false },
             { label: 'F', resource: 'accounts', count: 0, percentage: 0, active: false }
-        ]
+        ],
+        treeMode: 'account'
     });
 
     vm.init = function() {
@@ -58,7 +59,6 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.getTree = function() {
-        //vm.generateRulesTree();
         switch (vm.mode) {
             case 'segment':
                 return [ vm.restriction.restriction ];
@@ -68,16 +68,9 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.generateRulesTree = function() {
-        var items = [
-            'TechIndicator_AbsorbLMS',
-            'LE_EMPLOYEE_RANGE',
-            'TechIndicator_Adify',
-            'LE_NUMBER_OF_LOCATIONS',
-            'AlexaReachPerMillion',
-        ];
-
         var items = DataCloudStore.getRatingEngineAttributes();
         var bucketRestrictions = [];
+
         items.forEach(function(value, index) {
             var item = vm.enrichments[vm.enrichmentsMap[value]]
 
@@ -176,19 +169,22 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.updateCount = function() {
-        QueryStore.counts.accounts.loading = true;
+        QueryStore.counts[vm.treeMode + 's'].loading = true;
         vm.prevBucketCountAttr = null;
 
         $timeout(function() {
-            QueryService.GetCountByQuery('accounts', SegmentStore.sanitizeSegment({ 
+            var segment = { 
                 'free_form_text_search': "",
-                'account_restriction': angular.copy(vm.restriction),
                 'page_filter': {
                     'num_rows': 20,
                     'row_offset': 0
                 }
-            })).then(function(result) {
-                QueryStore.setResourceTypeCount('accounts', false, result);
+            };
+
+            segment[vm.treeMode + '_restriction'] = angular.copy(vm.restriction),
+
+            QueryService.GetCountByQuery(vm.treeMode + 's', SegmentStore.sanitizeSegment(segment)).then(function(result) {
+                QueryStore.setResourceTypeCount(vm.treeMode + 's', false, result);
             });
         }, 100);
     }
@@ -196,14 +192,21 @@ angular.module('common.datacloud.query.advanced', [
     vm.updateBucketCount = function(bucketRestriction) {
         var deferred = $q.defer();
 
-        QueryService.GetCountByQuery('accounts', {
-            "free_form_text_search": "",
-            "account_restriction": {
-                "restriction": {
-                    "bucketRestriction": bucketRestriction
-                }
+        var segment = {
+            "free_form_text_search": ""
+        };
+
+        segment[vm.treeMode + '_restriction'] = {
+            "restriction": {
+                "bucketRestriction": bucketRestriction
             }
-        }, bucketRestriction.attr == vm.prevBucketCountAttr).then(function(result) {
+        };
+
+        QueryService.GetCountByQuery(
+            vm.treeMode + 's', 
+            segment, 
+            bucketRestriction.attr == vm.prevBucketCountAttr
+        ).then(function(result) {
             deferred.resolve(result);
         });
         
@@ -280,6 +283,13 @@ angular.module('common.datacloud.query.advanced', [
 
             draggedParent.splice(draggedParent.indexOf(dragged.tree), 1);
         }
+    }
+
+    this.clickTreeMode = function(value) {
+        vm.treeMode = value;
+        vm.restriction = QueryStore[value + 'Restriction'];
+        vm.tree = vm.getTree();
+        vm.setCurrentSavedTree();
     }
 
     vm.init();
