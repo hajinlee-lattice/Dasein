@@ -16,6 +16,7 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
@@ -78,6 +79,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     dataFeedProxy.registerExtracts(customerSpace, importJobIdentifier, templateName, extracts);
                 }
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.SUCCESS);
+                updateDataFeedStatus(customerSpace);
             } catch (Exception e) {
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
             }
@@ -86,6 +88,13 @@ public class DataFeedTaskImportListener extends LEJobListener {
             log.error(String.format("DataFeedTask import job ends in unknown status: %s",
                     jobExecution.getStatus().name()));
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
+        }
+    }
+
+    private void updateDataFeedStatus(String customerSpace) {
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+        if (dataFeed.getStatus() == DataFeed.Status.Initialized) {
+            dataFeedProxy.updateDataFeedStatus(customerSpace, DataFeed.Status.InitialLoaded.getName());
         }
     }
 
