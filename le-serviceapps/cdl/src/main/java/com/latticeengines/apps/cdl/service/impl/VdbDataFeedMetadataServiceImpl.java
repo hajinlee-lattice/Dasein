@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,11 +216,14 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         for (Attribute attr : targetTable.getAttributes()) {
             if (srcAttrs.containsKey(attr.getName())) {
-                if (!VdbMetadataUtils.isAcceptableDataType(srcAttrs.get(attr.getName()).getSourceLogicalDataType
-                        (), attr.getSourceLogicalDataType())) {
+                if (!VdbMetadataUtils.isAcceptableDataType(srcAttrs.get(attr.getName()).getSourceLogicalDataType(),
+                        attr.getSourceLogicalDataType())) {
                     log.error(String.format("Field %s should have the type %s, not %s", attr.getName(),
                             srcAttrs.get(attr.getName()).getSourceLogicalDataType(), attr.getSourceLogicalDataType()));
                     return false;
+                } else {
+                    attr.setSourceLogicalDataType(srcAttrs.get(attr.getName()).getSourceLogicalDataType());
+                    attr.setPhysicalDataType(srcAttrs.get(attr.getName()).getPhysicalDataType());
                 }
             }
         }
@@ -271,4 +275,42 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         return true;
     }
 
+    @Override
+    public Type getAvroType(Attribute attribute) {
+        Type type = null;
+        String typeStrLowerCase = attribute.getSourceLogicalDataType().toLowerCase();
+        switch (typeStrLowerCase) {
+            case "bit":
+                type = Type.BOOLEAN;
+                break;
+            case "byte":
+            case "short":
+            case "int":
+                type = Type.INT;
+                break;
+            case "long":
+            case "date":
+            case "datetime":
+            case "datetimeoffset":
+                type = Type.LONG;
+                break;
+            case "float":
+                type = Type.FLOAT;
+                break;
+            case "double":
+                type = Type.DOUBLE;
+                break;
+            case "string":
+                type = Type.STRING;
+                break;
+            default:
+                break;
+        }
+        if (type == null) {
+            if (typeStrLowerCase.startsWith("nvarchar") || typeStrLowerCase.startsWith("varchar")) {
+                type = Type.STRING;
+            }
+        }
+        return type;
+    }
 }

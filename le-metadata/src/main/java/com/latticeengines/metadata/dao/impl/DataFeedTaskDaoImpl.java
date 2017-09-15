@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.dao.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -70,5 +71,27 @@ public class DataFeedTaskDaoImpl extends BaseDaoImpl<DataFeedTask> implements Da
         query.setDate("lastImported", lastImported);
         query.setString("status", status.name());
         query.executeUpdate();
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, Long dataFeed) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<DataFeedTask> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where entity = :entity and dataFeed = :dataFeed",
+                entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("entity", entity);
+        query.setLong("dataFeed", dataFeed);
+        List list = query.list();
+        List<DataFeedTask> result = new ArrayList<>();
+        if (list.size() == 0) {
+            return null;
+        } else {
+            for (Object dataFeedTask : list) {
+                result.add((DataFeedTask) dataFeedTask);
+            }
+            return result;
+        }
     }
 }

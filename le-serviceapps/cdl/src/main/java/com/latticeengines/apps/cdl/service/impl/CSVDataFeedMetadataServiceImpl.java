@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.HashMap;
 
+import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -97,5 +98,14 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         }
         importConfig.setJobIdentifier(jobIdentifier);
         return JsonUtils.serialize(importConfig);
+    }
+
+    @Override
+    public Type getAvroType(Attribute attribute) {
+        if (attribute == null) {
+            return null;
+        } else {
+            return Type.valueOf(attribute.getDataType().toUpperCase());
+        }
     }
 }

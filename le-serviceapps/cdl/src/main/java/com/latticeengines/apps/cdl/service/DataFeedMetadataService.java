@@ -3,9 +3,11 @@ package com.latticeengines.apps.cdl.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.avro.Schema.Type;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public abstract class DataFeedMetadataService {
 
@@ -32,5 +34,7 @@ public abstract class DataFeedMetadataService {
     public boolean needUpdateDataFeedStatus() {
         return false;
     }
+
+    public abstract Type getAvroType(Attribute attribute);
 
 }

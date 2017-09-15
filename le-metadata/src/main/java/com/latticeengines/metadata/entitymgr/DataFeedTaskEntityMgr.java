@@ -34,6 +34,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
     DataFeedTask getDataFeedTask(String uniqueId);
 
+    List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, Long dataFeedId);
+
     void deleteByTaskId(Long taskId);
 
     void updateDataFeedTask(DataFeedTask dataFeedTask);

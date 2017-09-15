@@ -18,6 +18,8 @@ public interface DataFeedTaskService {
 
     DataFeedTask getDataFeedTask(String customerSpace, String uniqueId);
 
+    List<DataFeedTask> getDataFeedTaskWithSameEntity(String customerSpace, String entity);
+
     void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
 
     void registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract);

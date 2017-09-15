@@ -86,6 +86,15 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
+    public List<DataFeedTask> getDataFeedTaskWithSameEntity(String customerSpace, String entity) {
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        if (dataFeed == null) {
+            return null;
+        }
+        return dataFeedTaskEntityMgr.getDataFeedTaskWithSameEntity(entity, dataFeed.getPid());
+    }
+
+    @Override
     public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
         dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask);
     }

@@ -1,9 +1,15 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +79,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         setCategoryForTable(newMeta, entity);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), source, feedType, entity);
         if (dataFeedTask != null) {
+            crosscheckDataType(customerSpace, entity, source, newMeta, dataFeedTask.getUniqueId());
             Table originMeta = dataFeedTask.getImportTemplate();
             DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
             if (!dataFeedMetadataService.compareMetadata(originMeta, newMeta,
@@ -83,6 +90,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             }
             return dataFeedTask.getUniqueId();
         } else {
+            crosscheckDataType(customerSpace, entity, source, newMeta, "");
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setUniqueId(NamingUtils.uuid("DataFeedTask"));
             dataFeedTask.setImportTemplate(newMeta);
@@ -114,6 +122,9 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         switch (businessEntity) {
             case Account:
                 category = Category.ACCOUNT_ATTRIBUTES.name();
+                break;
+            case Contact:
+                category = Category.CONTACT_ATTRIBUTES.name();
                 break;
             //todo other entity
             default:
@@ -151,5 +162,44 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("original tenant %s, new tenant %s", customerSpace.getTenantId(),
                 newCustomerSpace.getTenantId()));
         return newCustomerSpace;
+    }
+
+    private void crosscheckDataType(CustomerSpace customerSpace, String entity, String source, Table metaTable,
+                                    String dataFeedTaskUniqueId) {
+        List<DataFeedTask> dataFeedTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace.toString(), entity);
+        if (dataFeedTasks == null || dataFeedTasks.size() == 0) {
+            return;
+        } else {
+            for (DataFeedTask dataFeedTask : dataFeedTasks) {
+                if (StringUtils.equals(dataFeedTask.getUniqueId(), dataFeedTaskUniqueId)) {
+                    continue;
+                }
+                List<String> inconsistentAttrs = compareAttribute(dataFeedTask.getSource(),
+                        dataFeedTask.getImportTemplate(), source, metaTable);
+                if (inconsistentAttrs != null && inconsistentAttrs.size() > 0) {
+                    throw new RuntimeException(String.format("The following field data type is not consistent with " +
+                            "the one that already exists:", String.join(",", inconsistentAttrs)));
+                }
+            }
+        }
+    }
+
+    private List<String> compareAttribute(String baseSource, Table baseTable,
+                                     String targetSource, Table targetTable) {
+        List<String> inconsistentAttrs = new ArrayList<>();
+        DataFeedMetadataService baseService = DataFeedMetadataService.getService(baseSource);
+        DataFeedMetadataService targetService = DataFeedMetadataService.getService(targetSource);
+        Map<String, Attribute> baseAttrs = new HashMap<>();
+        baseTable.getAttributes().forEach(attribute -> baseAttrs.put(attribute.getName().toLowerCase(), attribute));
+        for (Attribute attr : targetTable.getAttributes()) {
+            if (baseAttrs.containsKey(attr.getName().toLowerCase())) {
+                Schema.Type baseType = baseService.getAvroType(baseAttrs.get(attr.getName().toLowerCase()));
+                Schema.Type targetType = targetService.getAvroType(attr);
+                if (baseType != targetType) {
+                    inconsistentAttrs.add(attr.getName());
+                }
+            }
+        }
+        return inconsistentAttrs;
     }
 }

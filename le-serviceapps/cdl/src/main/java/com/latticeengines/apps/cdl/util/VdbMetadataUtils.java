@@ -30,7 +30,7 @@ public class VdbMetadataUtils {
         try {
             Attribute attr = new Attribute();
             attr.setNullable(Boolean.TRUE);
-            attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()));
+            attr.setName(AvroUtils.getAvroFriendlyString(metadata.getColumnName()).toLowerCase());
             attr.setSourceAttrName(metadata.getColumnName());
             attr.setDisplayName(metadata.getDisplayName());
             attr.setSourceLogicalDataType(metadata.getDataType());

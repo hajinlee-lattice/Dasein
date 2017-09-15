@@ -70,6 +70,14 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTask(customerSpace, taskId);
     }
 
+    @RequestMapping(value = "/{entity}/list", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get data feed task")
+    public List<DataFeedTask> getDataFeedTaskWithSameEntity(@PathVariable String customerSpace, @PathVariable String entity) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace, entity);
+    }
+
     @RequestMapping(value = "/{taskId}/registerextract/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")

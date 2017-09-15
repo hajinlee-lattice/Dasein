@@ -53,7 +53,7 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
         testTable = vdbDataFeedMetadataService.getMetadata(testVdbMetadata);
         Assert.assertNotNull(testTable);
         Assert.assertEquals(testTable.getName(), "FS_Data_For_Dante_Accounts_1000");
-        Attribute requiredField = testTable.getAttribute("Account");
+        Attribute requiredField = testTable.getAttribute("account");
         Assert.assertNotNull(requiredField);
         Table error = vdbDataFeedMetadataService.getMetadata(errorVdbMetadata);
     }
@@ -93,11 +93,19 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
     public void testCompareMetadata() {
         Table updateTable1 = TableUtils.clone(resolvedTable, resolvedTable.getName());
         Table updateTable2 = TableUtils.clone(resolvedTable, resolvedTable.getName());
+        Table updateTable3 = TableUtils.clone(resolvedTable, resolvedTable.getName());
         Assert.assertTrue(vdbDataFeedMetadataService.compareMetadata(resolvedTable, updateTable1, true));
         updateTable1.getAttribute(InterfaceName.AccountId).setDisplayName("New_Account_ID_Test");
         Assert.assertFalse(vdbDataFeedMetadataService.compareMetadata(resolvedTable, updateTable1, true));
         updateTable2.getAttribute(InterfaceName.CompanyName).setSourceLogicalDataType("long");
         Assert.assertFalse(vdbDataFeedMetadataService.compareMetadata(resolvedTable, updateTable2, false));
+        Attribute testAttr = updateTable3.getAttribute("territory");
+        String testAttrType = testAttr.getSourceLogicalDataType();
+        updateTable3.getAttribute("territory").setSourceLogicalDataType("String");
+        updateTable3.getAttribute("territory").setPhysicalDataType("String");
+        Assert.assertNotEquals(testAttrType, testAttr.getSourceLogicalDataType());
+        Assert.assertTrue(vdbDataFeedMetadataService.compareMetadata(resolvedTable, updateTable3, true));
+        Assert.assertEquals(testAttrType, testAttr.getSourceLogicalDataType());
         vdbDataFeedMetadataService.compareMetadata(resolvedTable, updateTable2, true);
     }
 
