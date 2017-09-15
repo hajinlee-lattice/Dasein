@@ -61,8 +61,9 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             putObjectInContext(TABLE_GOING_TO_REDSHIFT, entityTableMap);
         }
         boolean createNew = configuration.getHdfsToRedshiftConfiguration().isCreateNew();
-        if (!entityTableMap.isEmpty()) {
-            ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("redshift-export", entityTableMap.size());
+        if (entityTableMap != null && !entityTableMap.isEmpty()) {
+            ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("redshift-export",
+                    entityTableMap.size());
             for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
                 Exporter exporter = new Exporter(createNew, entry.getKey(), entry.getValue());
                 executors.submit(exporter);
@@ -149,7 +150,7 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
         }
 
         private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,
-                                                      TableRoleInCollection tableRole) {
+                TableRoleInCollection tableRole) {
             // all distributed on account id
             String distKey = tableRole.getPrimaryKey().name();
             List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
@@ -157,7 +158,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                 sortKeys.add(tableRole.getPrimaryKey().name());
             }
             RedshiftTableConfiguration.SortKeyType sortKeyType = sortKeys.size() == 1
-                    ? RedshiftTableConfiguration.SortKeyType.Compound : RedshiftTableConfiguration.SortKeyType.Interleaved;
+                    ? RedshiftTableConfiguration.SortKeyType.Compound
+                    : RedshiftTableConfiguration.SortKeyType.Interleaved;
 
             HdfsToRedshiftConfiguration exportConfig = configuration.getHdfsToRedshiftConfiguration();
             exportConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
@@ -178,8 +180,8 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             redshiftTableConfig.setSortKeyType(sortKeyType);
             redshiftTableConfig.setSortKeys(sortKeys);
             redshiftTableConfig.setTableName(targetTableName);
-            redshiftTableConfig
-                    .setJsonPathPrefix(String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
+            redshiftTableConfig.setJsonPathPrefix(
+                    String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
             return exportConfig;
         }
     }
