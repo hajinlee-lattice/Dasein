@@ -16,6 +16,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
+import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -171,7 +172,8 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
             }
         }
 
-        Date lastModificationDate2 = new Date((lastModificationDate + 1) * 1000);
+        Date lastModificationDate2 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate + 1);
+        Date lastModificationDate3 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate - 1);
         recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate2, //
                 SynchronizationDestinationEnum.SFDC.toString(), playIds);
         Assert.assertEquals(0, recommendationCount);
@@ -180,6 +182,15 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                 0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds);
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() == 0);
+
+        recommendations = recommendationEntityMgr.findRecommendationsAsMap(lastModificationDate3, //
+                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds);
+        Assert.assertNotNull(recommendations);
+        Assert.assertTrue(recommendations.size() > 0);
+
+        recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate3, //
+                SynchronizationDestinationEnum.SFDC.toString(), playIds);
+        Assert.assertTrue(recommendationCount > 0);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationAsMapByPlayId" })
@@ -215,8 +226,10 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                 lastModificationDate = (Long) timestamp;
             }
         }
+        lastModificationDate = lastModificationDate / 1000;
 
-        Date lastModificationDate2 = new Date((lastModificationDate + 1));
+        Date lastModificationDate2 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate + 1);
+        Date lastModificationDate3 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate - 1);
         recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate2, //
                 SynchronizationDestinationEnum.SFDC.toString(), null);
 
@@ -226,6 +239,15 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                 (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null);
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() == 0);
+
+        recommendations = recommendationEntityMgr.findRecommendations(lastModificationDate3, //
+                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null);
+        Assert.assertNotNull(recommendations);
+        Assert.assertTrue(recommendations.size() > 0);
+
+        recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate3, //
+                SynchronizationDestinationEnum.SFDC.toString(), null);
+        Assert.assertTrue(recommendationCount > 0);
     }
 
     @AfterClass(groups = "functional")

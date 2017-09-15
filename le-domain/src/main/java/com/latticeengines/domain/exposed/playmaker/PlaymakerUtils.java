@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -56,8 +57,8 @@ public class PlaymakerUtils {
         return contactList != null ? contactList : new ArrayList<>();
     }
 
-    public static Date dateFromEpochSeconds(long start) {
-        return new Date(start * 1000);
+    public static Date dateFromEpochSeconds(long unixTimestamp) {
+        return new Date(TimeUnit.MILLISECONDS.convert(unixTimestamp, TimeUnit.SECONDS));
     }
 
     public static String convertToSFDCFieldType(String sourceLogicalDataType) {
@@ -134,7 +135,7 @@ public class PlaymakerUtils {
         contact.put(PlaymakerConstants.City, rawContact.get(InterfaceName.City.name()));
         contact.put(PlaymakerConstants.ContactID, rawContact.get(InterfaceName.ContactId.name()));
         contact.put(PlaymakerConstants.Name, rawContact.get(InterfaceName.ContactName.name()));
-        
+
         contactsForRecommendation.add(contact);
 
     }

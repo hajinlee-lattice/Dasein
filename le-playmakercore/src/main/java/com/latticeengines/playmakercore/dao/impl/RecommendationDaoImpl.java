@@ -43,7 +43,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "FROM %s WHERE synchronizationDestination = :syncDestination " //
-                + "AND lastUpdatedTimestamp >= :lastUpdatedTimestamp ";
+                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp ";
 
         if (!CollectionUtils.isEmpty(playIds)) {
             queryStr += "AND playId IN (:playIds) ";
@@ -55,15 +55,24 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setFirstResult(offset);
         query.setString("syncDestination", syncDestination);
 
-        if (lastModificationDate == null) {
-            lastModificationDate = new Date(0L);
-        }
-        query.setTimestamp("lastUpdatedTimestamp", lastModificationDate);
+        updateQueryWithLastUpdatedTimestamp(lastModificationDate, query);
 
         if (!CollectionUtils.isEmpty(playIds)) {
             query.setParameterList("playIds", playIds);
         }
         return query.list();
+    }
+
+    void updateQueryWithLastUpdatedTimestamp(Date lastModificationDate, Query query) {
+        if (lastModificationDate == null) {
+            lastModificationDate = new Date(0L);
+        }
+        query.setBigInteger("lastUpdatedTimestamp",
+                new BigInteger((dateToUnixTimestamp(lastModificationDate).toString())));
+    }
+
+    Long dateToUnixTimestamp(Date lastModificationDate) {
+        return new Long(lastModificationDate.getTime() / 1000);
     }
 
     @Override
@@ -72,20 +81,18 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
 
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT count(*) FROM %s WHERE synchronizationDestination = :syncDestination " //
-                + "AND lastUpdatedTimestamp >= :lastUpdatedTimestamp ";
+                + "AND UNIX_TIMESTAMP(lastUpdatedTimestamp) >= :lastUpdatedTimestamp ";
 
         if (!CollectionUtils.isEmpty(playIds)) {
             queryStr += "AND playId IN (:playIds) ";
         }
 
+        queryStr += " ORDER BY lastUpdatedTimestamp ";
         queryStr = String.format(queryStr, entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("syncDestination", syncDestination);
 
-        if (lastModificationDate == null) {
-            lastModificationDate = new Date(0L);
-        }
-        query.setTimestamp("lastUpdatedTimestamp", lastModificationDate);
+        updateQueryWithLastUpdatedTimestamp(lastModificationDate, query);
 
         if (!CollectionUtils.isEmpty(playIds)) {
             query.setParameterList("playIds", playIds);
@@ -128,18 +135,15 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             queryStr += "AND playId IN (:playIds) ";
         }
 
+        queryStr += " ORDER BY lastUpdatedTimestamp ";
         queryStr = String.format(queryStr, entityClz.getSimpleName());
+
         Query query = session.createQuery(queryStr);
         query.setMaxResults(max);
         query.setFirstResult(offset);
         query.setString("syncDestination", syncDestination);
 
-        if (lastModificationDate == null) {
-            lastModificationDate = new Date(0L);
-        }
-
-        query.setBigInteger("lastUpdatedTimestamp",
-                new BigInteger((new Long(lastModificationDate.getTime()).toString())));
+        updateQueryWithLastUpdatedTimestamp(lastModificationDate, query);
 
         if (!CollectionUtils.isEmpty(playIds)) {
             query.setParameterList("playIds", playIds);
