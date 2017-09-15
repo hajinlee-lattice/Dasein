@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.hadoop.fs.HdfsResourceLoader;
@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryMetrics;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.modelquality.entitymgr.ModelSummaryMetricsEntityMgr;
 import com.latticeengines.modelquality.metrics.ModelQualityMetrics;
 import com.latticeengines.modelquality.metrics.ModelingMeasurement;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -55,6 +57,12 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
 
     @Autowired
     private WorkflowProxy workflowProxy;
+
+    @Autowired
+    private ModelSummaryMetrics modelSummaryMetrics;
+
+    @Autowired
+    private ModelSummaryMetricsEntityMgr modelSummaryMetricsEntityMgr;
 
     @Override
     protected void runModel(ModelRun modelRun) {
@@ -232,6 +240,18 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         }
     }
 
+    private ModelSummaryMetrics writeMetricsToSql(ModelSummary modelSummary) {
+        modelSummaryMetrics.setTenantId(modelSummary.getTenantId());
+        modelSummaryMetrics.setName(modelSummary.getName());
+        modelSummaryMetrics.setTenant(modelSummary.getTenant());
+        modelSummaryMetrics.setRocScore(modelSummary.getRocScore());
+        modelSummaryMetrics.setTop20PercentLift(modelSummary.getTop20PercentLift());
+        modelSummaryMetrics.setDataCloudVersion(modelSummary.getDataCloudVersion());
+        modelSummaryMetrics.setLastUpdateTime(modelSummary.getLastUpdateTime());
+        modelSummaryMetrics.setConstructionTime(modelSummary.getConstructionTime());
+        return modelSummaryMetrics;
+    }
+
     private void saveMetricsToReportDB(ModelSummary modelSummary, SelectedConfig config,
             ModelRunEntityNames modelRunEntityNames) {
         modelSummary.setDetails(null);
@@ -239,5 +259,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
         ModelQualityMetrics metrics = new ModelQualityMetrics(modelSummary, config, modelRunEntityNames);
         ModelingMeasurement measurement = new ModelingMeasurement(metrics);
         metricService.write(MetricDB.MODEL_QUALITY, measurement);
+        ModelSummaryMetrics modelSummaryMetrics = writeMetricsToSql(modelSummary);
+        modelSummaryMetricsEntityMgr.create(modelSummaryMetrics);
     }
 }

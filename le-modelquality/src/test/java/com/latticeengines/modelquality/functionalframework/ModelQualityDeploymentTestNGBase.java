@@ -5,15 +5,16 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -327,6 +328,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         } else {
             mainTestTenant = deploymentTestBed.addExtraTestTenant(tenantName);
         }
+        deploymentTestBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         switchToSuperAdmin();
     }
 
