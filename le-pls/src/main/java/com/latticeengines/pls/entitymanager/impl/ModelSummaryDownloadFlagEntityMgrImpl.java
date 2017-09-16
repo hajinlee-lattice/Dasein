@@ -3,6 +3,8 @@ package com.latticeengines.pls.entitymanager.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -17,6 +19,8 @@ import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 @Component("modelSummaryDownloadFlagEntityMgr")
 public class ModelSummaryDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<ModelSummaryDownloadFlag> implements
         ModelSummaryDownloadFlagEntityMgr {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryDownloadFlagEntityMgrImpl.class);
 
     @Autowired
     private ModelSummaryDownloadFlagDao modelSummaryDownloadFlagDao;
@@ -38,6 +42,7 @@ public class ModelSummaryDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<Mod
         ModelSummaryDownloadFlag flag = new ModelSummaryDownloadFlag();
         flag.setTenantId(tenantId);
         flag.setMarkTime(new Date(System.currentTimeMillis()));
+        log.info(String.format("Set model summary download flag for tenant %s by entityMgr.", tenantId));
         modelSummaryDownloadFlagDao.create(flag);
     }
 

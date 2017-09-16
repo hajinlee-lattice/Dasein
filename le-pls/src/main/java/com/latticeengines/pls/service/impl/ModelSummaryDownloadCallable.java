@@ -87,7 +87,7 @@ public class ModelSummaryDownloadCallable implements Callable<Boolean> {
             Boolean result = partialDownload();
             if (result) {
                 modelSummaryDownloadFlagEntityMgr.removeDownloadedFlag(System.currentTimeMillis()
-                        - TimeUnit.HOURS.toMillis(2));
+                        - TimeUnit.HOURS.toMillis(24));
             }
             return result;
         }
