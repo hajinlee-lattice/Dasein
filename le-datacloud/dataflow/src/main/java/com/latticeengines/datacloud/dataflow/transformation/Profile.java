@@ -63,6 +63,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         parseCatAttrs(catAttrs);
 
         // Add dummy group
+        src = retainAttrs(src, numAttrs, numAttrsToDecode, catAttrs);
         src = src.apply(new AddRandomIntFunction(DUMMY_GROUP, 1, SAMPLE_SIZE, config.getRandSeed()),
                 new FieldList(src.getFieldNames()), new FieldMetadata(DUMMY_GROUP, Integer.class));
 
@@ -73,6 +74,15 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         Node catProfile = profileCatAttrs(src, catAttrs);
 
         return numProfile.merge(catProfile);
+    }
+    
+    private Node retainAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode, List<String> catAttrs) {
+    	List<String> retainAttrs = new ArrayList<>();
+        retainAttrs.addAll(numAttrs);
+        retainAttrs.addAll(numAttrsToDecode.keySet());
+        retainAttrs.addAll(catAttrs);
+        src = src.retain(new FieldList(retainAttrs));
+        return src;
     }
 
     private void parseNumAttrs(List<String> numAttrs, Map<String, List<String>> numAttrsToDecode,
