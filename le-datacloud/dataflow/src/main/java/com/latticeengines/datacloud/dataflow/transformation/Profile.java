@@ -67,6 +67,8 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         src = src.apply(new AddRandomIntFunction(DUMMY_GROUP, 1, SAMPLE_SIZE, config.getRandSeed()),
                 new FieldList(src.getFieldNames()), new FieldMetadata(DUMMY_GROUP, Integer.class));
 
+        return src;
+        /*
         // Numeric profiling
         Node numProfile = profileNumAttrs(src, numAttrs, numAttrsToDecode, decStrs);
 
@@ -74,6 +76,7 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         Node catProfile = profileCatAttrs(src, catAttrs);
 
         return numProfile.merge(catProfile);
+        */
     }
     
     private Node retainAttrs(Node src, List<String> numAttrs, Map<String, List<String>> numAttrsToDecode, List<String> catAttrs) {
