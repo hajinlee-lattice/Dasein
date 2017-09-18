@@ -1,5 +1,6 @@
 package com.latticeengines.datafabric.functionalframework;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,16 @@ public abstract class DataFabricFunctionalTestNGBase extends AbstractTestNGSprin
 
     protected static final Logger log = LoggerFactory.getLogger(DataFabricFunctionalTestNGBase.class);
 
+    protected static final String BASE_DIR = "/Pods/Default/Services/PropData/Sources";
+
     @Autowired
     protected FabricMessageService messageService;
 
     @Autowired
     protected FabricDataService dataService;
+
+    @Autowired
+    protected Configuration conf;
+
 
 }

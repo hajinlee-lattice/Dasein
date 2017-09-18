@@ -18,7 +18,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +45,6 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
 
     private static final Logger log = LoggerFactory.getLogger(GenericFabricMessageManagerImplFunctionalTestNG.class);
 
-    private static final String BASE_DIR = "/Pods/Default/Services/PropData/Sources";
     private static final String FILE_PATTERN = "Snapshot/*/*.avro";
 
     @Resource(name = "genericFabricMessageManager")
@@ -54,9 +52,6 @@ public class GenericFabricMessageManagerImplFunctionalTestNG extends DataFabricF
 
     @Autowired
     private FabricMessageService messageService;
-
-    @Autowired
-    private Configuration conf;
 
     Set<String> batchIds = new HashSet<>();
 

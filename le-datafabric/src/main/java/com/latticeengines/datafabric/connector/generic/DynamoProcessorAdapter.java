@@ -64,7 +64,7 @@ public class DynamoProcessorAdapter extends AbstractProcessorAdapter {
         }
     }
 
-    private void getDataStore(DynamoDataServiceProvider dynamoProvider, String repository,
+    protected void getDataStore(DynamoDataServiceProvider dynamoProvider, String repository,
             Map<TopicPartition, List<Pair<GenericRecordRequest, GenericRecord>>> pairs) {
         if (dataStore == null) {
             synchronized (this) {
@@ -73,7 +73,7 @@ public class DynamoProcessorAdapter extends AbstractProcessorAdapter {
                     String secretKey = connectorConfig.getProperty(GenericSinkConnectorConfig.SECRET_KEY, String.class);
                     log.info("access key=" + accessKey + " secret key=" + secretKey);
                     BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
-                    //TODO: region should come from sink configuration
+                    // TODO: region should come from sink configuration
                     DynamoServiceImpl dynamoService = new DynamoServiceImpl(awsCredentials, null, "us-east-1");
 
                     dynamoProvider.setDynamoService(dynamoService);
@@ -81,12 +81,19 @@ public class DynamoProcessorAdapter extends AbstractProcessorAdapter {
                     dataService.addServiceProvider(dynamoProvider);
 
                     Pair<GenericRecordRequest, GenericRecord> pair = pairs.values().iterator().next().get(0);
-                    dataStore = dataService.constructDataStore(dynamoProvider.getName(), repository, pair.getKey()
-                            .getRecordType(), pair.getValue().getSchema());
+                    dataStore = dataService.constructDataStore(dynamoProvider.getName(), repository,
+                            pair.getKey().getRecordType(), pair.getValue().getSchema());
                     ((DynamoDataStoreImpl) dataStore).useRemoteDynamo(true);
                 }
             }
         }
     }
 
+    protected FabricDataStore getDataStore() {
+        return this.dataStore;
+    }
+
+    protected void setDataStore(FabricDataStore dataStore) {
+        this.dataStore = dataStore;
+    }
 }

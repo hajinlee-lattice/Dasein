@@ -65,6 +65,7 @@ public class BaseFabricMessageMgrImpl<T extends HasId<String>> implements BaseFa
         if (entityClass != null) {
             schema = FabricEntityFactory.getFabricSchema(entityClass, recordType);
         }
+        consumers = new HashMap<>();
     }
 
     public void setMessageService(FabricMessageService messageService) {
@@ -136,7 +137,6 @@ public class BaseFabricMessageMgrImpl<T extends HasId<String>> implements BaseFa
                     if (topic != null) {
                         producer = new FabricMessageProducerImpl(new FabricMessageProducerImpl.Builder()
                                 .messageService(this.messageService).topic(this.topic).scope(scope));
-                        consumers = new HashMap<>();
                     }
                 }
             }

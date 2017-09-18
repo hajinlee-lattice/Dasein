@@ -1,7 +1,5 @@
 package com.latticeengines.datafabric.connector.generic;
 
-import io.confluent.connect.avro.AvroData;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,12 +21,14 @@ import com.latticeengines.datafabric.entitymanager.impl.GenericFabricMessageyMan
 import com.latticeengines.datafabric.service.message.impl.FabricMessageServiceImpl;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericFabricRecord;
 
+import io.confluent.connect.avro.AvroData;
+
 public class GenericSinkTask extends SinkTask {
 
     private static final Logger log = LoggerFactory.getLogger(GenericSinkTask.class);
     private AvroData avroData;
 
-    private GenericSinkConnectorConfig connectorConfig;
+    protected GenericSinkConnectorConfig connectorConfig;
     private GenericFabricMessageyManagerImpl<GenericFabricRecord> messageManager;
 
     public GenericSinkTask() {

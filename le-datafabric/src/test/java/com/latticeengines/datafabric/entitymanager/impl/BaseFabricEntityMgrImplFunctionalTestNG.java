@@ -70,6 +70,7 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
     @AfterMethod(groups = "functional")
     public void tearDown() throws Exception {
 
+        msgManager.close();
         msgManager.removeConsumer(group, 12000);
         // if (messageService.topicExists(topic)) {
         // messageService.deleteTopic(topic, false);
