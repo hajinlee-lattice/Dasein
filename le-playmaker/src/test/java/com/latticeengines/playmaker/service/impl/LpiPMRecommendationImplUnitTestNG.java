@@ -18,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
@@ -28,6 +29,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+
+import junit.framework.Assert;
 
 public class LpiPMRecommendationImplUnitTestNG {
 
@@ -42,6 +45,8 @@ public class LpiPMRecommendationImplUnitTestNG {
     private String playId;
     private String playLaunchId;
     private List<String> idList;
+    private int TOTAL_REC_COUNT;
+    private List<Map<String, Object>> resultMaps;
 
     @BeforeClass(groups = "unit")
     public void setup() {
@@ -49,13 +54,15 @@ public class LpiPMRecommendationImplUnitTestNG {
         String tenantIdentifier = randId + "." + randId + ".Production";
         playId = "play__" + randId;
         playLaunchId = "launch__" + randId;
-        long pageSize = 2L;
+        TOTAL_REC_COUNT = 2;
         idList = new ArrayList<>();
         idList.add(playId);
 
+        resultMaps = createDummyRecommendationResult(TOTAL_REC_COUNT);
+
         MockitoAnnotations.initMocks(this);
 
-        mockRecommendationEntityMgr(pageSize);
+        mockRecommendationEntityMgr(TOTAL_REC_COUNT);
         mockInternalResourceRestApiProxy();
         MultiTenantContext.setTenant(new Tenant("a.a.Production"));
 
@@ -67,12 +74,35 @@ public class LpiPMRecommendationImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetRecommendationCount() {
-        lpiPMRecommendationImpl.getRecommendationCount(0, SynchronizationDestinationEnum.SFDC, idList);
+        int count = lpiPMRecommendationImpl.getRecommendationCount(0, SynchronizationDestinationEnum.SFDC, idList);
+        Assert.assertEquals(TOTAL_REC_COUNT, count);
     }
 
     @Test(groups = "unit")
     public void testGetRecommendations() {
-        lpiPMRecommendationImpl.getRecommendations(0, 0, 2, SynchronizationDestinationEnum.SFDC, idList);
+        List<Map<String, Object>> recommendations = lpiPMRecommendationImpl.getRecommendations(0, 0,
+                TOTAL_REC_COUNT + 5, SynchronizationDestinationEnum.SFDC, idList);
+        Assert.assertTrue(recommendations != null);
+        Assert.assertFalse(recommendations.isEmpty());
+        Assert.assertEquals(TOTAL_REC_COUNT, recommendations.size());
+
+        int idx = 0;
+
+        for (Map<String, Object> recommendation : recommendations) {
+            Map<String, Object> expectedRecData = resultMaps.get(idx);
+            Assert.assertEquals(expectedRecData.get(PlaymakerConstants.AccountID),
+                    recommendation.get(PlaymakerConstants.AccountID));
+
+            if (recommendation.containsKey(PlaymakerConstants.PlayID)) {
+                Assert.assertEquals(expectedRecData.get(PlaymakerConstants.PlayID),
+                        recommendation.get(PlaymakerConstants.PlayID));
+            }
+
+            Assert.assertEquals(++idx, recommendation.get(PlaymakerConstants.RowNum));
+
+        }
+        System.out.println(JsonUtils.serialize(recommendations));
+
     }
 
     @SuppressWarnings("deprecation")
@@ -82,9 +112,8 @@ public class LpiPMRecommendationImplUnitTestNG {
                         any(Date.class), //
                         anyString(), //
                         anyListOf(String.class))) //
-                                .thenReturn(2);
+                                .thenReturn(TOTAL_REC_COUNT);
 
-        List<Map<String, Object>> resultMaps = createDummyRecommendationResult(2);
         when(recommendationEntityMgr //
                 .findRecommendationsAsMap( //
                         any(Date.class), //
@@ -113,28 +142,28 @@ public class LpiPMRecommendationImplUnitTestNG {
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            Map<String, Object> accExtRec = new HashMap<>();
+            Map<String, Object> rec = new HashMap<>();
 
-            accExtRec.put(PlaymakerConstants.AccountID, "" + i);
+            rec.put(PlaymakerConstants.AccountID, "" + i);
 
-            accExtRec.put(PlaymakerConstants.PlayID, playId);
+            rec.put(PlaymakerConstants.PlayID, playId);
 
-            accExtRec.put(PlaymakerConstants.LaunchID, playLaunchId);
+            rec.put(PlaymakerConstants.LaunchID, playLaunchId);
 
-            accExtRec.put(PlaymakerConstants.LaunchDate, 100L);
+            rec.put(PlaymakerConstants.LaunchDate, 100L);
 
-            accExtRec.put(PlaymakerConstants.PriorityDisplayName, buckets[i % buckets.length].getName());
+            rec.put(PlaymakerConstants.PriorityDisplayName, buckets[i % buckets.length].getName());
 
-            accExtRec.put(PlaymakerConstants.PriorityID, buckets[i % buckets.length].name());
+            rec.put(PlaymakerConstants.PriorityID, buckets[i % buckets.length].name());
 
-            accExtRec.put(PlaymakerConstants.Contacts,
+            rec.put(PlaymakerConstants.Contacts,
                     "[{\"Email\":\"FirstName4679@ort.com\",\"Address\":\"Marine Corps Personnel Support Dr\","
                             + "\"Phone\":\"248.813.2000\",\"State\":\"MI\",\"ZipCode\":\"48098-2815\",\"Country\":\"USA\","
                             + "\"SfdcContactID\":\"\",\"City\":\"Troy\",\"ContactID\":\"4679\",\"Name\":\"FirstName4679 LastName4679\"}]");
 
-            accExtRec.put(InterfaceName.CompanyName.name(), "Company " + i);
+            rec.put(InterfaceName.CompanyName.name(), "Company " + i);
 
-            result.add(accExtRec);
+            result.add(rec);
         }
 
         return result;
