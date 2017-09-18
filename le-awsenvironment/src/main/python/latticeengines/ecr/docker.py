@@ -9,6 +9,7 @@ from ..conf import AwsEnvironment
 NEXUS_DOCKER_REGISTRY="bodcdevnexus75.dev.lattice.local:18666"
 NAMESPACE="latticeengines"
 REVISIONS_TO_KEEP=10
+ECR_CLIENT={}
 
 def main():
     args = parse_args()
@@ -69,7 +70,7 @@ def purge_internal(environment, image):
     config = AwsEnvironment(environment)
     id = config.aws_account_id()
 
-    client = boto3.client('ecr')
+    client = ecr_client(environment)
     response = client.list_images(
         registryId=id,
         repositoryName=NAMESPACE + '/' + image
@@ -127,7 +128,7 @@ def tag_for_local(registry, image, remotetag, localtag, with_foption=False):
 
 def create_ecr_if_not_exists(env, image):
     if not repo_in_ecr(env, image):
-        client = boto3.client('ecr')
+        client = ecr_client(env)
         full_name = NAMESPACE + "/" +  image
         client.create_repository(
             repositoryName=full_name
@@ -137,7 +138,7 @@ def repo_in_ecr(env, image):
     config = AwsEnvironment(env)
     id = config.aws_account_id()
     full_name = NAMESPACE + "/" +  image
-    client = boto3.client('ecr')
+    client = ecr_client(env)
     response = client.describe_repositories(registryId=id)
     for repo in response['repositories']:
         if repo['repositoryName'] == full_name:
@@ -159,11 +160,18 @@ def login_aws(environment):
     config = AwsEnvironment(environment)
     account_id = config.aws_account_id()
     print "logging in docker registry for account %s ..." % account_id
-    client = boto3.client('ecr')
+    client = ecr_client(environment)
     res = client.get_authorization_token(registryIds=[account_id])
     data = res['authorizationData'][0]
     username, password = base64.b64decode(data['authorizationToken']).split(':')
     return 'docker login -u %s -p %s %s' % (username, password, data['proxyEndpoint'])
+
+def ecr_client(environment):
+    global ECR_CLIENT
+    if environment not in ECR_CLIENT:
+        config = AwsEnvironment(environment)
+        ECR_CLIENT[environment] = boto3.client('ecr', region_name=config.aws_region())
+    return ECR_CLIENT[environment]
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Docker image management')
