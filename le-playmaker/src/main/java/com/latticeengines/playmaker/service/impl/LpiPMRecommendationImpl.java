@@ -125,15 +125,6 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
                 accExtRec.put(PlaymakerConstants.SfdcContactID, "");
 
-                List<Map<String, String>> contactList = PlaymakerUtils
-                        .getExpandedContacts((String) accExtRec.get(PlaymakerConstants.Contacts));
-
-                accExtRec.put(PlaymakerConstants.Contacts, //
-                        contactList.isEmpty() //
-                                ? PlaymakerUtils
-                                        .createDummyContacts((String) accExtRec.get(InterfaceName.CompanyName.name())) //
-                                : contactList);
-
                 accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
 
             }
