@@ -73,7 +73,7 @@ angular.module('lp.ratingsengine')
         });
         return deferred.promise;
     }
-
+    
     this.getRatings = function() {
         var deferred = $q.defer();
         RatingsEngineService.getRatings().then(function(data) {

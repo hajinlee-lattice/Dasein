@@ -33,20 +33,23 @@
                     ng-click="vm.tileClick($event, rating.id)"
                     ng-mouseleave="vm.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
                     ng-if="vm.ratings.length > 0"
-                    ng-class="{editing: vm.tileStates[rating.id].editrating}">
+                    ng-class="{editing: vm.tileStates[rating.id].editRating}">
 
-                    <div class="tile-header" ng-if="!vm.tileStates[rating.id].editrating">
+                    <div class="tile-header" ng-if="!vm.tileStates[rating.id].editRating">
                         <h2 title="{{rating.displayName}}">{{rating.displayName | limitTo: 30 }}{{rating.displayName.length > 30 ? '&hellip;' : ''}}</h2>
                         <div class="edit">
                             <button
                                     type="button"
                                     ng-click="vm.customMenuClick($event, rating)"
-                                    ng-class="{ 'open': vm.tileStates[rating.name].showCustomMenu }">
-                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.tileStates[rating.name].showCustomMenu }"></span>
+                                    ng-class="{ 'open': vm.tileStates[rating.id].showCustomMenu }">
+                                <span class="fa fa-ellipsis-v" ng-class="{ 'fa-rotate-180': vm.tileStates[rating.id].showCustomMenu }"></span>
                             </button>
-                            <ul class="model-menu" ng-show="vm.tileStates[rating.name].showCustomMenu">
-                                <li data-ng-click="vm.editRatingClick($event, rating)">
-                                    <a href="javascript:void(0)">Deactivate</a>
+                            <ul class="model-menu" ng-show="vm.tileStates[rating.id].showCustomMenu">
+                                <li data-ng-click="vm.editStatusClick($event, rating)">
+                                    <a href="javascript:void(0)">
+                                        <span ng-if="rating.status === 'INACTIVE'">Activate</span>
+                                        <span ng-if="rating.status === 'ACTIVE'">Deactivate</span>
+                                    </a>
                                     <i class="fa fa-power-off"></i>
                                 </li>
                                 <li data-ng-click="vm.editRatingClick($event, rating)">
@@ -63,25 +66,25 @@
                     </div><!-- End .tile-header -->
                     <div 
                         class="tile-metadata"
-                        ng-if="!vm.tileStates[rating.name].editRating">
+                        ng-if="!vm.tileStates[rating.id].editRating">
                         
                         <ul>
                             <li>Created by <span class="blue-text">{{rating.createdBy}}</span> on <span class="blue-text">{{rating.created | date}}</span></li>
                             <li>
                                 Segment: 
-                                <span ng-if="play.segment != null" class="blue-text">{{play.segment}}</span>
-                                <span ng-if="play.segment == null" class="gray-text">Segment not selected</span>
+                                <span ng-if="rating.segmentDisplayName != null" class="blue-text">{{rating.segmentDisplayName}}</span>
+                                <span ng-if="rating.segmentDisplayName == null" class="gray-text">Segment not selected</span>
                             </li>
                             <li>
                                 Last Data Refresh: 
                                 <span>
-                                    <span class="blue-text">{{rating.lastDataRefresh | date}}</span>
+                                    <span class="blue-text">{{rating.lastRefreshedDate | date}}</span>
                                 </span>
                             </li>
                         </ul>
 
                     </div><!-- End .tile-metadata -->
-                    <div class="tile-body" ng-if="!vm.tileStates[rating.name].editRating">
+                    <div class="tile-body" ng-if="!vm.tileStates[rating.id].editRating">
 
                         <div ng-if="rating.ratingModels != []">
                             <h4>Account Ratings</h4>
@@ -104,6 +107,13 @@
                             Ratings are active
                             <i class="fa fa-check"></i>
                         </span>
+
+                        <span 
+                            ng-if="rating.status === 'INACTIVE'"
+                            class="launch-success pull-right">
+                            Ratings are inactive
+                        </span>
+
                         <button 
                             class="launch button blue-button pull-right" 
                             ng-click="vm.launchPlay()"
@@ -123,7 +133,7 @@
                     <form
                         class="edit-form"
                         name="editRatingForm"
-                        ng-if="vm.tileStates[rating.name].editRating"
+                        ng-if="vm.tileStates[rating.id].editRating"
                         ng-click="$event.stopPropagation()">
                         <div class="form-group">
                             

@@ -9,7 +9,7 @@ angular.module('mainApp.ratingsengine.deleteratingmodal', [
         $http.get('app/ratingsengine/content/ratingslist/deleteratingmodal.component.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
-            scope.ratingName = rating.name;
+            scope.ratingId = rating.id;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -36,17 +36,17 @@ angular.module('mainApp.ratingsengine.deleteratingmodal', [
             $event.preventDefault();
 
         }
-        deleteRating($scope.ratingName);
+        deleteRating($scope.ratingId);
     };
 
-    function deleteRating(ratingName) {
+    function deleteRating(ratingId) {
         $("#deleteRatingError").hide();
 
-        RatingsEngineService.deleteRating(ratingName).then(function(result) {
+        RatingsEngineService.deleteRating(ratingId).then(function(result) {
             
             $timeout( function(){
                 $("#modalContainer").modal('hide');
-                $state.go('home.ratingsengine.ratings', {}, { reload: true } );
+                $state.go('home.ratingsengine.ratingslist', {}, { reload: true } );
             }, 100 );
 
         });

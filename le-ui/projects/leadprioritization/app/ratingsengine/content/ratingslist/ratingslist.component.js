@@ -42,12 +42,14 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
     });
 
     vm.init = function($q) {
-        // console.log(vm.ratings);
+        
         var checkLaunchState;
         RatingsEngineStore.clear();
-        angular.forEach(RatingList, function(rating) {
-            vm.tileStates[rating.name] = {
-                showCustomMenu: false
+
+        angular.forEach(vm.ratings, function(rating) {
+            vm.tileStates[rating.id] = {
+                showCustomMenu: false,
+                editRating: false,
             };
         });
 
@@ -60,7 +62,7 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
             $event.stopPropagation();
         }
 
-        var tileState = vm.tileStates[rating.name];
+        var tileState = vm.tileStates[rating.id];
         tileState.showCustomMenu = !tileState.showCustomMenu
 
         if (tileState.showCustomMenu) {
@@ -86,14 +88,13 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
         $state.go('home.ratingsengine.dashboard', {rating_id: ratingId} );
     };
 
-
     var oldRatingDisplayName = '';
     vm.editRatingClick = function($event, rating){
         $event.stopPropagation();
 
         oldRatingDisplayName = rating.displayName;
 
-        var tileState = vm.tileStates[rating.name];
+        var tileState = vm.tileStates[rating.id];
         tileState.showCustomMenu = !tileState.showCustomMenu;
         tileState.editRating = !tileState.editRating;
     };
@@ -104,8 +105,29 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
         rating.displayName = oldRatingDisplayName;
         oldRatingDisplayName = '';
 
-        var tileState = vm.tileStates[rating.name];
+        var tileState = vm.tileStates[rating.id];
         tileState.editRating = !tileState.editRating;
+    };
+
+    vm.editStatusClick = function($event, rating){
+        
+        $event.stopPropagation();
+        vm.saveInProgress = true;
+
+        if(rating.status === 'ACTIVE'){
+            var updatedRating = {
+                id: rating.id,
+                status: 'INACTIVE'   
+            }
+        } else {
+            var updatedRating = {
+                id: rating.id,
+                status: 'ACTIVE'   
+            }
+        }
+
+        updateRating(updatedRating);
+
     };
 
     vm.saveRatingClicked = function($event, rating) {
@@ -114,8 +136,10 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
         vm.saveInProgress = true;
         oldRatingDisplayName = '';
 
+        console.log(rating);
+
         var updatedRating = {
-            name: rating.name,
+            id: rating.id,
             displayName: rating.displayName
         }
 
@@ -137,7 +161,7 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
         RatingsEngineService.saveRating(updatedRating).then(function(result) {
             vm.saveInProgress = true;
             $timeout( function(){
-                $state.go('home.ratingsengine.ratings', {}, { reload: true} );
+                $state.go('home.ratingsengine.ratingslist', {}, { reload: true} );
             }, 100 );
         });
 
