@@ -43,7 +43,11 @@ public class Query implements GraphNode {
     @JsonProperty("main_entity")
     private BusinessEntity mainEntity;
 
-    // only support single sub query for now.
+    // used to generate "with" common tables
+    @JsonProperty("common_table_query_list")
+    private List<SubQuery> commonTableQueryList = new ArrayList<>();
+
+    // used to generate "from", currently only support 1
     @JsonProperty("subquery")
     private SubQuery subQuery;
 
@@ -80,6 +84,10 @@ public class Query implements GraphNode {
     @JsonIgnore
     private List<JoinSpecification> existsJoins;
 
+    @JsonIgnore
+    private List<JoinSpecification> commonTableJoins;
+
+
     public static QueryBuilder builder() {
         return new QueryBuilder();
     }
@@ -112,6 +120,14 @@ public class Query implements GraphNode {
 
     public void addLookup(Lookup lookup) {
         lookups.add(lookup);
+    }
+
+    public List<SubQuery> getCommonTableQueryList() {
+        return commonTableQueryList;
+    }
+
+    public void setCommonTableQueryList(List<SubQuery> commonTableQueryList) {
+        this.commonTableQueryList = commonTableQueryList;
     }
 
     public Sort getSort() {
@@ -156,8 +172,10 @@ public class Query implements GraphNode {
 
     public void analyze() {
         if (subQuery != null) {
+            // we may want to revisit this logic to use common tables
             log.info("Skip automatic join resolution, as the query is based on a sub-query.");
             lookupJoins = Collections.emptyList();
+            commonTableJoins = Collections.emptyList();
         } else {
             traverseEntities();
             resolveMainEntity();
@@ -215,8 +233,14 @@ public class Query implements GraphNode {
                 .map(e -> new JoinSpecification(entity, e, ObjectUsage.EXISTS)) //
                 .collect(Collectors.toSet());
 
+        List<JoinSpecification> subQueryJoinsList = commonTableQueryList.stream()
+                .map(sq -> new JoinSpecification(entity, sq.getQuery().getMainEntity(),
+                                                 entity.name(), sq.getAlias(), ObjectUsage.LOOKUP))
+                .collect(Collectors.toList());
+
         lookupJoins = new ArrayList<>(lookupJoinsSet);
         existsJoins = new ArrayList<>(existsJoinsSet);
+        commonTableJoins = new ArrayList<>(subQueryJoinsList);
     }
 
     public BusinessEntity getMainEntity() {
@@ -249,6 +273,10 @@ public class Query implements GraphNode {
 
     public List<JoinSpecification> getExistsJoins() {
         return existsJoins;
+    }
+
+    public List<JoinSpecification> getCommonTableJoins() {
+        return commonTableJoins;
     }
 
     @Override

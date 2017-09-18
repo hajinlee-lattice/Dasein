@@ -14,6 +14,7 @@ public class QueryBuilder {
     private List<Lookup> lookups = new ArrayList<>();
     private GroupBy groupBy;
     private BusinessEntity mainEntity;
+    private List<SubQuery> subQueryList = new ArrayList<>();
     private SubQuery subQuery;
     private Restriction restriction;
     private Sort sort;
@@ -98,6 +99,11 @@ public class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder with(SubQuery... subQueryArray) {
+        Collections.addAll(this.subQueryList, subQueryArray);
+        return this;
+    }
+
     public QueryBuilder groupBy(Lookup... groupByLookups) {
         groupBy = new GroupBy();
         groupBy.setLookups(Arrays.asList(groupByLookups));
@@ -119,6 +125,7 @@ public class QueryBuilder {
         query.setFreeFormTextSearchAttributes(freeFormTextSearchAttributes);
         query.setMainEntity(mainEntity);
         query.setSubQuery(subQuery);
+        query.setCommonTableQueryList(subQueryList);
         query.setGroupBy(groupBy);
         return query;
     }

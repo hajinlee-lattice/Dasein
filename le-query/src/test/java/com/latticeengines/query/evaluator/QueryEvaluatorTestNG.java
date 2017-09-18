@@ -76,6 +76,48 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testSubqueryJoin() {
+        String subQueryAlias = "Contact_Alias";
+        String countAttrAlias = "Count";
+        Restriction accountRestriction = Restriction.builder()
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(1802).build();
+        AttributeLookup accountIdLookup = new AttributeLookup(BusinessEntity.Contact, ATTR_ACCOUNT_ID);
+        Query query = Query.builder() //
+                .select(accountIdLookup,
+                        AggregateLookup.count().as(countAttrAlias)) //
+                .from(BusinessEntity.Contact) //
+                .groupBy(accountIdLookup) //
+                .build();
+        SubQuery subQuery = new SubQuery(query, subQueryAlias);
+        SubQueryAttrLookup countLookup = new SubQueryAttrLookup(subQuery, countAttrAlias);
+        Restriction subQueryRestriction = Restriction.builder().let(subQuery, countAttrAlias)
+                .gte(10).build();
+        Restriction joinedRestriction = Restriction.builder().and(accountRestriction, subQueryRestriction).build();
+        Query joinQuery = Query.builder()
+                .with(subQuery)
+                .select(BusinessEntity.Account, ATTR_ACCOUNT_ID, ATTR_ACCOUNT_NAME)
+                .select(countLookup)
+                .where(joinedRestriction)
+                .build();
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, joinQuery);
+        sqlContains(sqlQuery,
+                    String.format("with %s as (select %s.%s, count(?) as %s",
+                                  subQueryAlias, CONTACT, ATTR_ACCOUNT_ID, countAttrAlias)
+        );
+        sqlContains(sqlQuery, String.format("from %s as %s", contactTableName, CONTACT));
+        sqlContains(sqlQuery, String.format("group by %s.%s)", CONTACT, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("select %s.%s, %s.%s, %s.%s",
+                                            ACCOUNT, ATTR_ACCOUNT_ID, ACCOUNT, ATTR_ACCOUNT_NAME, subQueryAlias, countAttrAlias));
+        sqlContains(sqlQuery, String.format("from %s as %s", accountTableName , ACCOUNT));
+        sqlContains(sqlQuery, String.format("join %s", subQueryAlias));
+        sqlContains(sqlQuery, String.format("on %s.%s = %s.%s", ACCOUNT, ATTR_ACCOUNT_ID, subQueryAlias, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format(
+                "where %s.%s = ? and %s.%s >= ?",
+                ACCOUNT, ATTR_ACCOUNT_ID, subQueryAlias, countAttrAlias));
+
+    }
+
+    @Test(groups = "functional")
     public void testRestriction() {
         // simple where clause
         Restriction restriction = Restriction.builder() //

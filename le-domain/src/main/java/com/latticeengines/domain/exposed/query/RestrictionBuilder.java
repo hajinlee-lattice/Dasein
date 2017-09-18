@@ -28,6 +28,10 @@ public class RestrictionBuilder {
         return let(new AttributeLookup(entity, attrName));
     }
 
+    public RestrictionBuilder let(SubQuery subQuery, String attrName) {
+        return let(new SubQueryAttrLookup(subQuery, attrName));
+    }
+
     public RestrictionBuilder let(Lookup lookup) {
         if (lookup instanceof AttributeLookup || lookup instanceof SubQueryAttrLookup) {
             if (restriction != null) {

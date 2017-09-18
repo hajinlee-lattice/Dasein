@@ -2,7 +2,9 @@ package com.latticeengines.query.evaluator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -84,24 +86,40 @@ public class QueryProcessor {
      */
     private SQLQuery<?> from(AttributeRepository repository, Query query) {
         SubQuery subQuery = query.getSubQuery();
-        SQLQuery<?> sqlQuery;
+        SQLQuery<?> sqlQuery = queryFactory.getQuery(repository);
+        for (SubQuery sq: query.getCommonTableQueryList()) {
+            StringPath aliasTable = AttrRepoUtils.getTablePath(sq.getAlias());
+            sqlQuery = sqlQuery.with(aliasTable, processSubueryExpression(repository, sq, false));
+        }
         if (subQuery != null) {
-            Expression<?> subQueryExpression = (subQuery.getAlias() == null) ?
-                    process(repository, subQuery.getQuery()):
-                    process(repository, subQuery.getQuery()).as(subQuery.getAlias());
-            sqlQuery = queryFactory.getQuery(repository).from(subQueryExpression);
+            Expression<?> subQueryExpression = processSubueryExpression(repository, subQuery, true);
+            sqlQuery = sqlQuery.from(subQueryExpression);
         } else {
             BusinessEntity mainEntity = query.getMainEntity();
             StringPath mainTable = AttrRepoUtils.getTablePath(repository, mainEntity);
-            sqlQuery = queryFactory.getQuery(repository).from(mainTable.as(mainEntity.name()));
+            sqlQuery = sqlQuery.from(mainTable.as(mainEntity.name()));
         }
         return addJoins(sqlQuery, repository, query);
+    }
+
+    private Expression<?> processSubueryExpression(AttributeRepository repository,
+                                                   SubQuery subQuery,
+                                                   boolean setAlias) {
+        return (setAlias) ?
+                process(repository, subQuery.getQuery()).as(subQuery.getAlias()):
+                process(repository, subQuery.getQuery());
     }
 
     /**
      * JOIN T1, T2, T3, etc...
      */
     private SQLQuery<?> addJoins(SQLQuery<?> sqlQuery, AttributeRepository repository, Query query) {
+        sqlQuery = addLookupJoins(sqlQuery, repository, query);
+        sqlQuery = addCommonTableJoins(sqlQuery, query);
+        return sqlQuery;
+    }
+
+    private SQLQuery<?> addLookupJoins(SQLQuery<?> sqlQuery, AttributeRepository repository, Query query) {
         List<BusinessEntity> joinedEntities = new ArrayList<>();
         joinedEntities.add(query.getMainEntity());
         List<JoinSpecification> lookupJoins = query.getLookupJoins();
@@ -122,6 +140,34 @@ public class QueryProcessor {
             sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(target.name()));
             joinKeys.addAll(QueryUtils.getJoinPredicates(relationship));
             joinedEntities.add(target);
+        }
+        for (Predicate predicate : joinKeys) {
+            sqlQuery = sqlQuery.on(predicate);
+        }
+        return sqlQuery;
+    }
+
+    private SQLQuery<?> addCommonTableJoins(SQLQuery<?> sqlQuery,
+                                            Query query) {
+        List<Predicate> joinKeys = new ArrayList<>();
+        BusinessEntity srcEntity = query.getMainEntity();
+        for (JoinSpecification join : query.getCommonTableJoins()) {
+            BusinessEntity target = join.getDestinationEntity();
+            BusinessEntity.Relationship relationship = srcEntity.join(target);
+            if (relationship == null) {
+                throw new QueryEvaluationException(
+                        "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity() + " to entity " + target + ".");
+            }
+            Map<BusinessEntity, String> entityAliasMap = new HashMap<>();
+            entityAliasMap.put(join.getSourceEntity(), join.getSource());
+            entityAliasMap.put(join.getDestinationEntity(), join.getDestination());
+            joinKeys.addAll(QueryUtils.getJoinPredicates(relationship, entityAliasMap));
+        }
+
+        for (SubQuery subQuery: query.getCommonTableQueryList()) {
+            // JOIN T1
+            EntityPath<String> targetTableName = AttrRepoUtils.getEntityPath(subQuery.getAlias());
+            sqlQuery = sqlQuery.join(targetTableName);
         }
         for (Predicate predicate : joinKeys) {
             sqlQuery = sqlQuery.on(predicate);

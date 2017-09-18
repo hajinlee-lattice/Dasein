@@ -31,6 +31,12 @@ public class JoinSpecification {
     @JsonProperty("dest_entity")
     private BusinessEntity destinationEntity;
 
+    @JsonProperty("source")
+    private String source;
+
+    @JsonProperty("destination")
+    private String destination;
+
     @JsonProperty("dest_obj_usage")
     private ObjectUsage destinationObjectUsage;
 
@@ -43,8 +49,16 @@ public class JoinSpecification {
 
     public JoinSpecification(BusinessEntity sourceEntity, BusinessEntity destinationEntity,
                              ObjectUsage destinationObjectUsage) {
+        this(sourceEntity, destinationEntity, sourceEntity.name(), destinationEntity.name(),
+             destinationObjectUsage);
+    }
+
+    public JoinSpecification(BusinessEntity sourceEntity, BusinessEntity destinationEntity,
+                             String source, String destination, ObjectUsage destinationObjectUsage) {
         this.sourceEntity = sourceEntity;
         this.destinationEntity = destinationEntity;
+        this.source = source;
+        this.destination = destination;
         this.destinationObjectUsage = destinationObjectUsage;
     }
 
@@ -62,6 +76,22 @@ public class JoinSpecification {
 
     public void setDestinationEntity(BusinessEntity destinationEntity) {
         this.destinationEntity = destinationEntity;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
     }
 
     public SchemaInterpretation getSourceType() {
@@ -104,7 +134,7 @@ public class JoinSpecification {
     }
 
     private String comprableForm() {
-        List<String> names = Arrays.asList(sourceEntity.name(), destinationEntity.name(), destinationObjectUsage.name());
+        List<String> names = Arrays.asList(source, destination, destinationObjectUsage.name());
         Collections.sort(names);
         return StringUtils.join(names, "-");
     }
