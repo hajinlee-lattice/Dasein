@@ -45,6 +45,8 @@ public class SchemaRepository {
             return getAccountSchema();
         case Contact:
             return getContactSchema();
+        case Product:
+            return getProductSchema();
         case Transaction:
             return getTransactionSchema();
         default:
@@ -1157,6 +1159,7 @@ public class SchemaRepository {
                 .build());
         return table;
     }
+
     private LastModifiedKey createLastModifiedKey(String columnName) {
         LastModifiedKey lmk = new LastModifiedKey();
         lmk.setDisplayName(columnName);
