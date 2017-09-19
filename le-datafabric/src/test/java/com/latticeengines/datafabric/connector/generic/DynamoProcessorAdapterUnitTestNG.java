@@ -51,7 +51,7 @@ public class DynamoProcessorAdapterUnitTestNG {
     public void tearDown() throws Exception {
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "unit", enabled = true)
     public void getDataStore() throws Exception {
         Map<String, String> props = new HashMap<>();
         props.put(GenericSinkConnectorConfig.ACCESS_KEY.getKey(), "access");
