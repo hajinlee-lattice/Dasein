@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 
 public class ModelingHdfsUtils {
 
@@ -76,13 +77,14 @@ public class ModelingHdfsUtils {
 
     public static String getStandardDataComposition(Configuration conf, String sourceDataDir,
             final String eventTableName) throws IOException {
-        List<String> paths = HdfsUtils.getFilesForDirRecursive(conf, sourceDataDir, new HdfsFileFilter() {
+        List<String> paths = HdfsUtils.onlyGetFilesForDirRecursive(conf, sourceDataDir, new HdfsFileFilter() {
             @Override
             public boolean accept(FileStatus file) {
                 return file.getPath().getName().equals("datacomposition.json") //
                         && file.getPath().getParent().getName().startsWith(eventTableName);
             }
-        });
+        }, true);
+
         return paths.get(0);
     }
 
@@ -90,14 +92,27 @@ public class ModelingHdfsUtils {
             String eventTableName, String cpEventTableName, Configuration yarnConfiguration) throws IOException {
         String sourceDataRoot = sourceCustomerRoot + "/data/" + eventTableName;
         String targetDataRoot = targetCustomerRoot + "/data/" + cpEventTableName;
-        HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
 
-        String sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
-                sourceCustomerRoot + "/data/", eventTableName);
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory - copy " +
+                "files")) {
+            HdfsUtils.copyFiles(yarnConfiguration, sourceDataRoot, targetDataRoot);
+        }
+
+        String sourceStandardDataCompositionPath = null;
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory - get " +
+                "standard data composition")) {
+            sourceStandardDataCompositionPath = ModelingHdfsUtils.getStandardDataComposition(yarnConfiguration,
+                    sourceCustomerRoot + "/data/", eventTableName);
+        }
+
         String targetStandardDataCompositionPath = sourceStandardDataCompositionPath
                 .replace(sourceCustomerRoot, targetCustomerRoot).replace(eventTableName, cpEventTableName);
-        HdfsUtils.copyFiles(yarnConfiguration, new Path(sourceStandardDataCompositionPath).getParent().toString(),
-                new Path(targetStandardDataCompositionPath).getParent().toString());
+
+        try (PerformanceTimer timer = new PerformanceTimer("Copy hdfs data: Copy modeling data directory - copy " +
+                "files")) {
+            HdfsUtils.copyFiles(yarnConfiguration, new Path(sourceStandardDataCompositionPath).getParent().toString(),
+                    new Path(targetStandardDataCompositionPath).getParent().toString());
+        }
     }
 
     public static String getModelFileNameFromLocalDir(String sourceModelLocalRoot)
