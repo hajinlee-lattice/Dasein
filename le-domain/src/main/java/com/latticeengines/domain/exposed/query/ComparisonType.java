@@ -14,5 +14,9 @@ public enum ComparisonType {
     GTE_AND_LTE, //
     GTE_AND_LT, //
     GT_AND_LTE, //
-    GT_AND_LT
+    GT_AND_LT,  //
+    EVER,
+    IN_CURRENT_PERIOD,
+    BEFORE,
+    AFTER
 }
