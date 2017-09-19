@@ -7,8 +7,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
@@ -34,6 +36,7 @@ import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketName;
@@ -72,6 +75,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         rtsBulkScoringConfig.setModelGuids(Arrays.asList(new String[] { modelGuidString }));
         rtsBulkScoringConfig.setModelType(ModelType.PYTHONMODEL.getModelType());
         rtsBulkScoringConfig.setEnableLeadEnrichment(true);
+        rtsBulkScoringConfig.setScoreTestFile(true);
         bulkScoringProcessor = new ScoringProcessor(rtsBulkScoringConfig);
         bulkScoringProcessor.setConfiguration(yarnConfiguration);
     }
@@ -114,18 +118,32 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(bulkRecordScoreRequest.getRecords().size(), 100);
         Assert.assertEquals(scoreRequestList.get(4).getRecords().size(), 26);
         Assert.assertEquals(record.getModelAttributeValuesMap().size(), 1);
+        Table metadataTable = MetadataConverter.getTable(yarnConfiguration, dir);
+        Assert.assertEquals(record.getModelAttributeValuesMap().get(modelGuidString).size(),
+                metadataTable.getAttributes().size());
         Assert.assertTrue(record.getModelAttributeValuesMap().containsKey(modelGuidString));
         Assert.assertEquals(record.getRule(), ScoringProcessor.RECORD_RULE);
     }
 
     @Test(groups = "functional", dependsOnMethods = "testConvertAvroToBulkScoreRequest")
-    public void testConvertAvroToBulkScoreRequestWithEnrichmentOff() throws IllegalArgumentException, Exception {
+    public void testConvertAvroToBulkScoreRequestWithScoreTestFileOff() throws IllegalArgumentException, Exception {
         List<BulkRecordScoreRequest> scoreRequestList = new ArrayList<>();
         BulkRecordScoreRequest scoreRequest = null;
-        rtsBulkScoringConfig.setEnableLeadEnrichment(false);
+        rtsBulkScoringConfig.setScoreTestFile(false);
         Table metadataTable = MetadataConverter.getTable(yarnConfiguration, dir);
+
+        Set<String> internalPlusMustHaveAttributeNames = new HashSet<>();
+        internalPlusMustHaveAttributeNames.add(InterfaceName.LatticeAccountId.toString());
+        internalPlusMustHaveAttributeNames.add(InterfaceName.InternalId.toString());
+        for (Attribute attribute : metadataTable.getAttributes()) {
+            if (attribute.isInternalPredictor()) {
+                System.out.println(String.format("attribute %s is internal.", metadataTable.getAttributes()));
+                internalPlusMustHaveAttributeNames.add(attribute.getName());
+            }
+        }
+        System.out.println("internalPlusMustHaveAttributeNames is " + internalPlusMustHaveAttributeNames);
+
         FileReader<GenericRecord> reader = bulkScoringProcessor.instantiateReaderForBulkScoreRequest(dir);
-        System.out.println("attributeList is " + metadataTable.getAttributes());
         rtsBulkScoringConfig.setMetadataTable(metadataTable);
 
         scoreRequest = bulkScoringProcessor.getBulkScoreRequest(reader, rtsBulkScoringConfig);
@@ -141,6 +159,10 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
         Assert.assertEquals(bulkRecordScoreRequest.getRecords().size(), 100);
         Assert.assertEquals(record.getModelAttributeValuesMap().size(), 1);
         Assert.assertTrue(record.getModelAttributeValuesMap().containsKey(modelGuidString));
+        Assert.assertNotNull(record.getModelAttributeValuesMap().get(modelGuidString));
+        Map<String, Object> attributeValues = record.getModelAttributeValuesMap().get(modelGuidString);
+        Assert.assertTrue(attributeValues.containsKey(InterfaceName.LatticeAccountId.toString()));
+        Assert.assertTrue(attributeValues.containsKey(InterfaceName.InternalId.toString()));
         Assert.assertEquals(record.getRule(), ScoringProcessor.RECORD_RULE);
         System.out.println("record is " + record);
     }

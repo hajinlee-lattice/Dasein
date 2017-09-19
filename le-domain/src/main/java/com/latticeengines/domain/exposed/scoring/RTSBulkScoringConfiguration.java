@@ -18,6 +18,8 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
 
     private boolean enableDebug;
 
+    private boolean scoreTestFile;
+
     private String internalResourceHostPort;
 
     private List<String> modelGuids = new ArrayList<>();
@@ -104,6 +106,16 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
     @JsonProperty("model_type")
     public String getModelType() {
         return this.modelType;
+    }
+
+    @JsonProperty("score_test_file")
+    public void setScoreTestFile(boolean scoreTestFile) {
+        this.scoreTestFile = scoreTestFile;
+    }
+
+    @JsonProperty("score_test_file")
+    public boolean getScoreTestFile() {
+        return this.scoreTestFile;
     }
 
     @Override

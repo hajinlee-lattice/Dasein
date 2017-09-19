@@ -197,6 +197,11 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
             return this;
         }
 
+        public Builder setScoreTestFile(boolean scoreTestFile) {
+            score.setScoreTestFile(scoreTestFile);
+            return this;
+        }
+
         public Builder modelType(String modelType) {
             score.setModelType(modelType);
             combineInputWithScores.setModelType(modelType);
@@ -212,5 +217,6 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
             combineInputWithScores.setBucketMetadata(bucketMetadataList);
             return this;
         }
+
     }
 }

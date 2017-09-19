@@ -12,6 +12,8 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean enableDebug;
 
+    private boolean scoreTestFile;
+
     private String modelType;
 
     public String getModelId() {
@@ -60,6 +62,14 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     public String getModelType() {
         return this.modelType;
+    }
+
+    public void setScoreTestFile(boolean scoreTestFile) {
+        this.scoreTestFile = scoreTestFile;
+    }
+
+    public boolean getScoreTestFile() {
+        return this.scoreTestFile;
     }
 
 }

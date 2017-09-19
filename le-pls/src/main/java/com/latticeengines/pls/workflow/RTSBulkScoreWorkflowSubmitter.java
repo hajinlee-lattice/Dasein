@@ -111,6 +111,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                         + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
+                .setScoreTestFile(false) //
                 .enableDebug(enableDebug) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //

@@ -324,7 +324,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             }
 
             Map<String, Object> attributeValues = new HashMap<>();
-            if (rtsBulkScoringConfig.isEnableLeadEnrichment()) { // Score a file
+            if (rtsBulkScoringConfig.getScoreTestFile()) { // Score a test file
                 for (Schema.Field field : fields) {
                     String fieldName = field.name();
                     Object fieldValue = avroRecord.get(fieldName) == null //

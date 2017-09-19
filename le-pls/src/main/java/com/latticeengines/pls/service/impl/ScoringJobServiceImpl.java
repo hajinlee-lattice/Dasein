@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,18 +18,13 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelType;
-import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.ScoringJobService;
 import com.latticeengines.pls.workflow.ImportAndRTSBulkScoreWorkflowSubmitter;
-import com.latticeengines.pls.workflow.ImportMatchAndScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
-import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -57,19 +52,13 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     private ImportAndRTSBulkScoreWorkflowSubmitter importAndRTSBulkScoreWorkflowSubmitter;
 
     @Autowired
-    private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
-
-    @Autowired
-    private ImportMatchAndScoreWorkflowSubmitter importMatchAndScoreWorkflowSubmitter;
-
-    @Autowired
     private Configuration yarnConfiguration;
 
     @Override
     public List<Job> getJobs(String modelId) {
         Tenant tenantWithPid = getTenant();
-        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid()
-                + " and model " + modelId);
+        log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid() + " and model "
+                + modelId);
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         List<Job> ret = new ArrayList<>();
         for (Job job : jobs) {
@@ -161,47 +150,27 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     @Override
-    public String scoreTestingData(String modelId, String fileName, Boolean useRts, Boolean performEnrichment,
-            Boolean debug) {
+    public String scoreTestingData(String modelId, String fileName, Boolean performEnrichment, Boolean debug) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        boolean useRtsApi = false;
         boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
         boolean enableDebug = debug == null ? false : debug.booleanValue();
-
-        if (enableLeadEnrichment || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
-            useRtsApi = true;
-        }
-
-        if (useRtsApi) {
-            return scoreTestingDataUsingRtsApi(modelSummary, fileName, enableLeadEnrichment, enableDebug);
-        }
-        return scoreTestingData(modelId, fileName);
+        return scoreTestingDataUsingRtsApi(modelSummary, fileName, enableLeadEnrichment, enableDebug);
     }
 
     @Override
-    public String scoreTrainingData(String modelId, Boolean useRts, Boolean performEnrichment, Boolean debug) {
+    public String scoreTrainingData(String modelId, Boolean performEnrichment, Boolean debug) {
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        boolean useRtsApi = false;
         boolean enableLeadEnrichment = performEnrichment == null ? false : performEnrichment.booleanValue();
         boolean enableDebug = debug == null ? false : debug.booleanValue();
-
-        if (enableLeadEnrichment || modelSummary.getModelType().equals(ModelType.PMML.getModelType())) {
-            useRtsApi = true;
-        }
-
-        if (useRtsApi) {
-            return scoreTrainingDataUsingRtsApi(modelSummary, enableLeadEnrichment, enableDebug);
-
-        }
-        return scoreTrainingData(modelSummary);
+        return scoreTrainingDataUsingRtsApi(modelSummary, enableLeadEnrichment, enableDebug);
     }
 
     private Tenant getTenant() {
@@ -209,37 +178,8 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         return tenantEntityMgr.findByTenantId(tenant.getId());
     }
 
-    private String scoreTrainingData(ModelSummary modelSummary) {
-        if (modelSummary.getTrainingTableName() == null) {
-            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelSummary.getId() });
-        }
-
-        String transformationGroupName = getTransformationGroupNameForModelSummary(modelSummary);
-        return scoreWorkflowSubmitter.submit(modelSummary,
-                "Training Data", TransformationGroup.fromName(transformationGroupName)).toString();
-    }
-
-    private String scoreTestingData(String modelId, String fileName) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        String transformationGroupName = getTransformationGroupNameForModelSummary(modelSummary);
-        return importMatchAndScoreWorkflowSubmitter.submit(modelSummary, fileName,
-                TransformationGroup.fromName(transformationGroupName)).toString();
-    }
-
-    private String getTransformationGroupNameForModelSummary(ModelSummary modelSummary) {
-        String transformationGroupName = modelSummary.getModelSummaryConfiguration().getString(
-                ProvenancePropertyName.TransformationGroupName, null);
-        if (transformationGroupName == null) {
-            transformationGroupName = modelSummary.getTransformationGroupName();
-        }
-        if (transformationGroupName == null) {
-            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummary.getId() });
-        }
-
-        return transformationGroupName;
-    }
-
-    private String scoreTrainingDataUsingRtsApi(ModelSummary modelSummary, boolean enableLeadEnrichment, boolean debug) {
+    private String scoreTrainingDataUsingRtsApi(ModelSummary modelSummary, boolean enableLeadEnrichment,
+            boolean debug) {
         if (modelSummary.getTrainingTableName() == null) {
             throw new LedpException(LedpCode.LEDP_18100, new String[] { modelSummary.getId() });
         }
@@ -248,10 +188,10 @@ public class ScoringJobServiceImpl implements ScoringJobService {
                 enableLeadEnrichment, "Training Data", debug).toString();
     }
 
-    private String scoreTestingDataUsingRtsApi(ModelSummary modelSummary, String fileName,
-            boolean enableLeadEnrichment, boolean debug) {
-        return importAndRTSBulkScoreWorkflowSubmitter.submit(modelSummary.getId(), fileName, enableLeadEnrichment,
-                debug).toString();
+    private String scoreTestingDataUsingRtsApi(ModelSummary modelSummary, String fileName, boolean enableLeadEnrichment,
+            boolean debug) {
+        return importAndRTSBulkScoreWorkflowSubmitter
+                .submit(modelSummary.getId(), fileName, enableLeadEnrichment, debug).toString();
     }
 
     @Override

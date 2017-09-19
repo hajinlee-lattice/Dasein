@@ -26,7 +26,7 @@ public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImpl
     protected static String customer = "Mulesoft_Relaunch_Deployment";
 
     @Override
-    @BeforeClass(groups = "deployment", enabled = true)
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         tenant = CustomerSpace.parse(customer).toString();
         path = customerBaseDir + "/" + tenant;
@@ -37,7 +37,7 @@ public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImpl
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + UUID.randomUUID() + "/scores";
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void modelScoreAndCompare() throws Exception {
         super.modelScoreAndCompare();
     }

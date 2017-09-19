@@ -133,8 +133,10 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                                 ".csv") + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .enableLeadEnrichment(enableLeadEnrichment) //
+                .setScoreTestFile(true) //
                 .enableDebug(enableDebug) //
-                .matchDebugEnabled(!skipIdMatch && !ModelType.PMML.getModelType().equals(modelType) && plsFeatureFlagService.isMatchDebugEnabled()) //
+                .matchDebugEnabled(!skipIdMatch && !ModelType.PMML.getModelType().equals(modelType)
+                        && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.ENRICHMENT) //
                 .internalResourcePort(internalResourceHostPort) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //

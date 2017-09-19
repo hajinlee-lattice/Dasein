@@ -133,6 +133,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         targetDir = TEST_INPUT_DATA_DIR + tableName;
         rtsBulkScoringConfig.setTargetResultDir(targetDir);
         rtsBulkScoringConfig.setEnableLeadEnrichment(true);
+        rtsBulkScoringConfig.setScoreTestFile(true);
         rtsBulkScoringConfig.setEnableDebug(false);
         rtsBulkScoringConfig.setModelType(ModelType.PYTHONMODEL.getModelType());
         rtsBulkScoringConfig.setInternalResourceHostPort(plsApiHostPort);

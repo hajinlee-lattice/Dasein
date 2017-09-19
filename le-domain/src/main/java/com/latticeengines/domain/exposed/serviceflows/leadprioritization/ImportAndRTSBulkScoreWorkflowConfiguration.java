@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
@@ -105,6 +104,11 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
             return this;
         }
 
+        public Builder setScoreTestFile(boolean scoreTestFile) {
+            rtsBulkScoreWorkflowConfigurationBuilder.setScoreTestFile(scoreTestFile);
+            return this;
+        }
+
         public Builder matchType(MatchCommandType matchCommandType) {
             rtsBulkScoreWorkflowConfigurationBuilder.matchType(matchCommandType);
             return this;
@@ -172,12 +176,12 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
             rtsBulkScoreWorkflowConfigurationBuilder.matchDebugEnabled(enableMatchDebug);
             return this;
         }
-        
+
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
             rtsBulkScoreWorkflowConfigurationBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
-        
+
         public Builder modelType(String modelType) {
             rtsBulkScoreWorkflowConfigurationBuilder.modelType(modelType);
             return this;

@@ -41,7 +41,7 @@ public class ScoreResource {
         log.info(String.format("Scoring testing file for model %s (performEnrichment=%s,useRtsApi=%s)", modelId,
                 performEnrichment, useRtsApi));
         return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
-                scoringJobService.scoreTestingData(modelId, fileName, useRtsApi, performEnrichment, debug)));
+                scoringJobService.scoreTestingData(modelId, fileName, performEnrichment, debug)));
 
     }
 
@@ -56,6 +56,6 @@ public class ScoreResource {
         log.info(String.format("Scoring training file for model %s (performEnrichment=%s,useRtsApi=%s)", modelId,
                 performEnrichment, useRtsApi));
         return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
-                scoringJobService.scoreTrainingData(modelId, useRtsApi, performEnrichment, debug)));
+                scoringJobService.scoreTrainingData(modelId, performEnrichment, debug)));
     }
 }

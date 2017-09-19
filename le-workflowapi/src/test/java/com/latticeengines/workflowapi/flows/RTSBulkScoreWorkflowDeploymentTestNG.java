@@ -86,8 +86,8 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         super.setup();
         TEST_INPUT_DATA_DIR = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), mainTestCustomerSpace)
                 .toString();
-        SCORED_FILE_DIR = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), mainTestCustomerSpace)
-                .toString() + "/Exports";
+        SCORED_FILE_DIR = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), mainTestCustomerSpace).toString()
+                + "/Exports";
         System.out.println("SCORED_FILE_DIR is " + SCORED_FILE_DIR);
 
         String applicationId = "application_1457046993615_3823";
