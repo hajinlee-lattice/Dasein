@@ -18,8 +18,8 @@ public class BucketRestrictionUnitTestNG {
         String serialized = JsonUtils.serialize(bucketSelection);
         BucketRestriction deserialized = JsonUtils.deserialize(serialized, BucketRestriction.class);
         Assert.assertNull(deserialized.getBkt().getLabel());
-        Assert.assertEquals(deserialized.getBkt().getRange().getLeft(), 2);
-        Assert.assertEquals(deserialized.getBkt().getRange().getRight(), 3);
+        Assert.assertEquals(deserialized.getBkt().getValues().get(0), 2);
+        Assert.assertEquals(deserialized.getBkt().getValues().get(1), 3);
 
         bucketSelection = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "A"),
                 Bucket.nullBkt());
