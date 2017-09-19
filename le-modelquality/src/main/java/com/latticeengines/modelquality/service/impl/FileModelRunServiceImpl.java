@@ -59,9 +59,6 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
     private WorkflowProxy workflowProxy;
 
     @Autowired
-    private ModelSummaryMetrics modelSummaryMetrics;
-
-    @Autowired
     private ModelSummaryMetricsEntityMgr modelSummaryMetricsEntityMgr;
 
     @Override
@@ -241,6 +238,7 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
     }
 
     private ModelSummaryMetrics writeMetricsToSql(ModelSummary modelSummary) {
+        ModelSummaryMetrics modelSummaryMetrics = new ModelSummaryMetrics();
         modelSummaryMetrics.setTenantId(modelSummary.getTenantId());
         modelSummaryMetrics.setName(modelSummary.getName());
         modelSummaryMetrics.setTenant(modelSummary.getTenant());
