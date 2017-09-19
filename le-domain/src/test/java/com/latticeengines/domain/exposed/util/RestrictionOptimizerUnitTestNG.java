@@ -8,6 +8,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -113,10 +115,9 @@ public class RestrictionOptimizerUnitTestNG {
     }
 
     private static BucketRestriction bucket(BusinessEntity entity, int idx) {
-        return BucketRestrictionUtils.from(Restriction.builder() //
-                .let(entity, entity.name().substring(0, 1)) //
-                .eq(String.valueOf(idx)) //
-                .build());
+        Bucket bucket = Bucket.valueBkt(String.valueOf(idx));
+        AttributeLookup attrLookup = new AttributeLookup(entity, entity.name().substring(0, 1));
+        return new BucketRestriction(attrLookup, bucket);
     }
 
     private static Restriction and(Restriction... restrictions) {

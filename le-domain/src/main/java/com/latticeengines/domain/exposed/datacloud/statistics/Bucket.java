@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.statistics;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,8 +15,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.latticeengines.domain.exposed.query.ComparisonType;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -45,10 +46,10 @@ public class Bucket implements Serializable {
     @JsonProperty("Lift")
     private Double lift;
 
-    @JsonProperty("comparator")
+    @JsonProperty("Cmp")
     private ComparisonType comparisonType;
 
-    @JsonProperty("values")
+    @JsonProperty("Vals")
     private List<Object> values;
 
     public static Bucket nullBkt() {
@@ -56,8 +57,43 @@ public class Bucket implements Serializable {
     }
 
     public static Bucket rangeBkt(Object min, Object max) {
+        return rangeBkt(min, max, true, false);
+    }
+
+    public static Bucket rangeBkt(Object min, Object max, boolean minInclusive, boolean maxInclusive) {
         Bucket bucket =  new Bucket();
-        bucket.setRange(ImmutablePair.of(min, max));
+        List<Object> vals;
+        ComparisonType comparator;
+        if (min != null && max != null) {
+            vals = Arrays.asList(min, max);
+            if (minInclusive && maxInclusive) {
+                comparator = ComparisonType.GTE_AND_LTE;
+            } else if (minInclusive) {
+                comparator = ComparisonType.GTE_AND_LT;
+            } else if (maxInclusive) {
+                comparator = ComparisonType.GT_AND_LTE;
+            } else {
+                comparator = ComparisonType.GT_AND_LT;
+            }
+        } else if (min != null) {
+            vals = Collections.singletonList(min);
+            if (minInclusive) {
+                comparator = ComparisonType.GREATER_OR_EQUAL;
+            } else {
+                comparator = ComparisonType.GREATER_THAN;
+            }
+        } else if (max != null) {
+            vals = Collections.singletonList(max);
+            if (maxInclusive) {
+                comparator = ComparisonType.LESS_OR_EQUAL;
+            } else {
+                comparator = ComparisonType.LESS_THAN;
+            }
+        } else {
+            throw new IllegalArgumentException("A bucket cannot have both min and max being null");
+        }
+        bucket.setComparisonType(comparator);
+        bucket.setValues(vals);
         return bucket;
     }
 

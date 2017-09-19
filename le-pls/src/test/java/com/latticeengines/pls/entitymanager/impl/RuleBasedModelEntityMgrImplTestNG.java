@@ -18,19 +18,20 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.BucketRestrictionUtils;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.entitymanager.RuleBasedModelEntityMgr;
@@ -187,10 +188,9 @@ public class RuleBasedModelEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     private static BucketRestriction bucket(BusinessEntity entity, int idx) {
-        return BucketRestrictionUtils.from(Restriction.builder() //
-                .let(entity, entity.name().substring(0, 1)) //
-                .eq(String.valueOf(idx)) //
-                .build());
+        Bucket bucket = Bucket.valueBkt(String.valueOf(idx));
+        AttributeLookup attrLookup = new AttributeLookup(entity, entity.name().substring(0, 1));
+        return new BucketRestriction(attrLookup, bucket);
     }
 
     private static Restriction and(Restriction... restrictions) {

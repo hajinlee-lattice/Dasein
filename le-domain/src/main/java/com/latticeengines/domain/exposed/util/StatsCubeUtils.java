@@ -6,6 +6,8 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.STATS_ATTR_NAME;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +18,6 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 
 public class StatsCubeUtils {
 
@@ -117,7 +119,6 @@ public class StatsCubeUtils {
             Bucket bucket = new Bucket();
             bucket.setId((long) i);
             bucket.setLabel(label);
-            bucket.setRange(null);
             bucket.setCount(0L);
             bucketList.add(bucket);
         }
@@ -153,7 +154,8 @@ public class StatsCubeUtils {
         default:
         }
         bucket.setLabel(val);
-        bucket.setRange(null);
+        bucket.setValues(Collections.singletonList(val));
+        bucket.setComparisonType(ComparisonType.EQUAL);
     }
 
     private static void updateIntervalBucket(Bucket bucket, IntervalBucket algo, int bktId) {
@@ -163,14 +165,26 @@ public class StatsCubeUtils {
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);
-        bucket.setRange(Pair.of(min, max));
+        if (min != null && max != null) {
+            bucket.setComparisonType(ComparisonType.GTE_AND_LT);
+            bucket.setValues(Arrays.asList(min, max));
+        } else if (min != null) {
+            bucket.setComparisonType(ComparisonType.GREATER_OR_EQUAL);
+            bucket.setValues(Collections.singletonList(min));
+        } else if (max != null) {
+            bucket.setComparisonType(ComparisonType.LESS_THAN);
+            bucket.setValues(Collections.singletonList(max));
+        } else {
+            throw new IllegalArgumentException("A bucket cannot have both min and max being null");
+        }
     }
 
     private static void updateCategoricalBucket(Bucket bucket, CategoricalBucket algo, int bktId) {
         List<String> labels = algo.generateLabels();
         String bucketLabel = labels.get(bktId);
         bucket.setLabel(bucketLabel);
-        bucket.setRange(null);
+        bucket.setValues(Collections.singletonList(bucketLabel));
+        bucket.setComparisonType(ComparisonType.EQUAL);
     }
 
     public static Statistics constructStatistics(Map<BusinessEntity, StatsCube> cubeMap,

@@ -10,5 +10,9 @@ public enum ComparisonType {
     LESS_THAN, //
     LESS_OR_EQUAL, //
     IN_RANGE, //
-    IN_COLLECTION
+    IN_COLLECTION, //
+    GTE_AND_LTE, //
+    GTE_AND_LT, //
+    GT_AND_LTE, //
+    GT_AND_LT
 }

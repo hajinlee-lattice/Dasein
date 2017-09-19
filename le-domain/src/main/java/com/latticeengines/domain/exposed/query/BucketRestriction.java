@@ -140,10 +140,42 @@ public class BucketRestriction extends Restriction {
             restriction = Restriction.builder().let(attr).lte(values.get(0)).build();
             break;
         case IN_RANGE:
+        case GTE_AND_LTE:
+        case GT_AND_LTE:
+        case GTE_AND_LT:
+        case GT_AND_LT:
             validateInRangeValues(values);
             Object min = values.get(0);
             Object max = values.get(1);
-            restriction = Restriction.builder().let(attr).in(min, max).build();
+            switch (comparisonType) {
+                case GTE_AND_LTE:
+                    restriction = Restriction.builder().and( //
+                            Restriction.builder().let(attr).gte(min).build(),
+                            Restriction.builder().let(attr).lte(max).build()
+                    ).build();
+                    break;
+                case GT_AND_LTE:
+                    restriction = Restriction.builder().and( //
+                            Restriction.builder().let(attr).gt(min).build(),
+                            Restriction.builder().let(attr).lte(max).build()
+                    ).build();
+                    break;
+                case GTE_AND_LT:
+                    restriction = Restriction.builder().and( //
+                            Restriction.builder().let(attr).gte(min).build(),
+                            Restriction.builder().let(attr).lt(max).build()
+                    ).build();
+                    break;
+                case GT_AND_LT:
+                    restriction = Restriction.builder().and( //
+                            Restriction.builder().let(attr).gt(min).build(),
+                            Restriction.builder().let(attr).lt(max).build()
+                    ).build();
+                    break;
+                default:
+                    restriction = Restriction.builder().let(attr).in(min, max).build();
+                    break;
+            }
             break;
         case IN_COLLECTION:
             restriction = Restriction.builder().let(attr).inCollection(values).build();
