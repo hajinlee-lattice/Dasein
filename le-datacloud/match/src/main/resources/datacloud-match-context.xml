@@ -11,6 +11,7 @@
 
     <import resource="classpath:datacloud-core-context.xml"/>
     <import resource="classpath:datacloud-match-persistence-context.xml"/>
+    <import resource="classpath:datacloud-match-aspect-context.xml" />
     <import resource="classpath:actors-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml" />
