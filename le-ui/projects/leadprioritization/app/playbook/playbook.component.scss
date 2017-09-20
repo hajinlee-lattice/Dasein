@@ -95,12 +95,11 @@ section.playbook.container {
     justify-content: center;
     height: 100%; // control the height in your components css, this should just fill that height
     & > ._rating {
-        @include flex-item(0 0 auto);
+        @include flex-item(1 0 auto);
         @include flex-container;
         flex-direction: column;
         justify-content: flex-end;
         margin: 0 15px;
-        width: 55px;
         div {
             @include flex-item(0 0 auto);
             text-align: center;

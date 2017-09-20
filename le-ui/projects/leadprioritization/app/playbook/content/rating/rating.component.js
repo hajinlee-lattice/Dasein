@@ -29,6 +29,7 @@ angular.module('lp.playbook.wizard.rating', [])
                 vm.block_user = false;
                 if(play.ratingEngine) {
                     vm.stored.rating_selection = play.ratingEngine.id;
+                    PlaybookWizardStore.setRating(play.ratingEngine);
                     PlaybookWizardStore.setValidation('rating', true);
                 }
 

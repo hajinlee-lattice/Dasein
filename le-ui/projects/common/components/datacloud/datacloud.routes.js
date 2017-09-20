@@ -93,6 +93,9 @@ angular
         },
         CurrentConfiguration: function() {
             return null;
+        },
+        RatingsEngineModels: function() {
+            return null;
         }
     };
 

@@ -85,7 +85,7 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
 
     vm.tileClick = function ($event, ratingId) {
         $event.preventDefault();
-        $state.go('home.ratingsengine.dashboard', {rating_id: ratingId} );
+        $state.go('home.ratingsengine.wizard.segment', {rating_id: ratingId} );
     };
 
     var oldRatingDisplayName = '';

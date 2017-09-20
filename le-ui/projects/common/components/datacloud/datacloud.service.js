@@ -12,7 +12,7 @@ angular.module('common.datacloud')
         this.premiumSelectMaximum = null;
         this.topAttributes = null;
         this.cube = null;
-        this.ratingEngineAttributes = [];
+        this.ratingsEngineAttributes = [];
         this.metadata = {
             current: 1,
             currentCategory: 1,
@@ -255,7 +255,7 @@ angular.module('common.datacloud')
             var vm = this;
 
             DataCloudService.getAllTopAttributes(opts).then(function(response) {
-                vm.topAttributes = response.data; // ben
+                vm.topAttributes = response.data;
                 deferred.resolve(vm.topAttributes);
             });
         }
@@ -304,23 +304,37 @@ angular.module('common.datacloud')
         return deferred.promise;
     }
 
-    this.getRatingEngineAttributes = function() {
-        return this.ratingEngineAttributes;
+    var flattenRatingsEngineAttributes = function(ratingsEngine) {
+        return (ratingsEngine && ratingsEngine[0] && ratingsEngine[0].rule && ratingsEngine[0].rule.selectedAttributes ? ratingsEngine[0].rule.selectedAttributes : []);
     }
 
-    this.setRatingEngineAttributes = function(attribute_id) {
-        var index = this.ratingEngineAttributes.indexOf(attribute_id);
+    this.setRatingsEngineAttributes = function(attributes) {
+        this.ratingsEngineAttributes = attributes;
+    }
+
+    this.getRatingsEngineAttributes = function(ratingsEngineId, ratingModelId) {
+        var deferred = $q.defer();
+        DataCloudService.getRatingsEngineAttributes(ratingsEngineId, ratingModelId).then(function(response) {
+            DataCloudStore.setRatingsEngineAttributes(flattenRatingsEngineAttributes(response.data));
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
+    this.setSelectedRatingsEngineAttributes = function(attribute_id) {
+        var index = this.ratingsEngineAttributes.indexOf(attribute_id);
         if(index >= 0) {
-            this.ratingEngineAttributes.splice(index, 1);
+            this.ratingsEngineAttributes.splice(index, 1);
         } else {
-            this.ratingEngineAttributes.push(attribute_id)
+            this.ratingsEngineAttributes.push(attribute_id)
         }
     }
 
-    this.selectRatingEngineAttribute = function(attribute) {
+    this.selectRatingsEngineAttribute = function(rating_id, rating_model_id, attribute) {
         var deferred = $q.defer();
-        this.setRatingEngineAttributes(attribute.ColumnId);
-        DataCloudService.selectRatingEngineAttribute(this.ratingEngineAttributes).then(function(response){
+        this.setSelectedRatingsEngineAttributes(attribute.ColumnId);
+        DataCloudService.selectRatingsEngineAttribute(rating_id, rating_model_id, this.ratingsEngineAttributes).then(function(response) {
+            DataCloudStore.setRatingsEngineAttributes(response);
             deferred.resolve(response);
         });
         return deferred.promise;
@@ -596,9 +610,38 @@ angular.module('common.datacloud')
         return deferred.promise;
     }
 
-    this.selectRatingEngineAttribute = function(attributes) {
+    this.getRatingsEngineAttributes = function(ratingsEngineId, ratingModelId) {
         var deferred = $q.defer();
-        deferred.resolve(attributes);
+        $http({
+            method: 'get',
+            url: this.host + '/ratingengines/' + ratingsEngineId + '/ratingmodels' + (ratingModelId ? '/' + ratingModelId : ''),
+        }).then(function(response){
+            deferred.resolve(response);
+        });
+        return deferred.promise;
+    }
+
+    var flattenRatingsEngineAttributes = function(ratingsEngine) {
+        return (ratingsEngine && ratingsEngine.rule && ratingsEngine.rule.selectedAttributes ? ratingsEngine.rule.selectedAttributes : []);
+    }
+
+    this.selectRatingsEngineAttribute = function(ratingsEngineId, ratingModelId, attributes) {
+        var deferred = $q.defer(),
+            save = {
+                rule: {
+                    id: ratingsEngineId,
+                    selectedAttributes: attributes
+                }
+            };
+
+        $http({
+            method: 'POST',
+            url: this.host + '/ratingengines/' + ratingsEngineId + '/ratingmodels' + (ratingModelId ? '/' + ratingModelId : ''),
+            data: save
+        }).then(function(response) {
+            var saved_attributes = flattenRatingsEngineAttributes(response.data);
+            deferred.resolve(saved_attributes);
+        });
         return deferred.promise;
     }
 });

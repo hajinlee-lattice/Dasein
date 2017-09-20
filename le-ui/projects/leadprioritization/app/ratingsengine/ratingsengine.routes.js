@@ -239,7 +239,15 @@ angular
                 },
                 LookupResponse: function() {
                     return { attributes: null };
-                }
+                },
+                RatingsEngineModels: ['$q', '$stateParams', 'DataCloudStore', function($q, $stateParams, DataCloudStore) {
+                    var deferred = $q.defer();
+                    DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(data) {
+                        var model = (data && data[0] ? data[0] : {});
+                        deferred.resolve(model);
+                    });
+                    return deferred.promise;
+                }]
             },
             views: {
                 'wizard_content@home.ratingsengine.wizard': {

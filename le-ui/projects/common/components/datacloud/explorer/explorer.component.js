@@ -12,7 +12,8 @@ angular.module('common.datacloud.explorer', [
     $scope, $filter, $timeout, $interval, $window, $document, $q, $state, $stateParams, Enrichments,
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryService, QueryStore,
-    SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse 
+    SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, 
+    RatingsEngineModels
 ){
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -308,7 +309,7 @@ angular.module('common.datacloud.explorer', [
             item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden === true ? true : false);
             item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : false);
 
-            item.IsRatingEngineAttribute = ratingsEngineAttributeState(item);
+            item.IsRatingsEngineAttribute = ratingsEngineAttributeState(item);
 
             obj[category][subcategory].push(index);
         });
@@ -547,9 +548,18 @@ angular.module('common.datacloud.explorer', [
         return ret;
     }
 
+    var getRatingsEngineRule = function(RatingsEngineModels) {
+        var data = RatingsEngineModels,
+            rule = (data && data.rule ? data.rule : {}),
+            rule = rule || {};
+        return rule;
+    }
+
     var ratingsEngineAttributeState = function(item) {
-        var selected = DataCloudStore.getRatingEngineAttributes();
-        if(selected.indexOf(item.ColumnId) >= 0) {
+        var rule = getRatingsEngineRule(RatingsEngineModels),
+            ratingsEngineAttributes = rule.selectedAttributes || [];
+
+        if(ratingsEngineAttributes.indexOf(item.ColumnId) >= 0) {
             return true;
         }
         return false;
@@ -1678,10 +1688,10 @@ angular.module('common.datacloud.explorer', [
 
     };
 
-    vm.selectRatingEngineAttribute = function(enrichment) {
-        DataCloudStore.selectRatingEngineAttribute(enrichment).then(function(response) {
-            enrichment.IsRatingEngineAttribute = !enrichment.IsRatingEngineAttribute;
-            //console.log(response);
+    vm.selectRatingsEngineAttribute = function(enrichment) {
+        var rule = getRatingsEngineRule(RatingsEngineModels);
+        DataCloudStore.selectRatingsEngineAttribute($stateParams.rating_id, rule.id, enrichment).then(function(response) {
+            enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
         });
     }
 

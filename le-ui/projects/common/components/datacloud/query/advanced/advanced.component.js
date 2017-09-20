@@ -68,7 +68,7 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.generateRulesTree = function() {
-        var items = DataCloudStore.getRatingEngineAttributes();
+        var items = DataCloudStore.getRatingsEngineAttributes();
         var bucketRestrictions = [];
 
         items.forEach(function(value, index) {
