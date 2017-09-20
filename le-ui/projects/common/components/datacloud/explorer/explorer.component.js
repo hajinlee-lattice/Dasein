@@ -324,6 +324,11 @@ angular.module('common.datacloud.explorer', [
                 }
             });
 
+            if(vm.section === 'wizard.segment') {
+                var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
+                DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);
+            }
+
             getTopAttributes();
             getHighlightMetadata();
 
@@ -893,7 +898,8 @@ angular.module('common.datacloud.explorer', [
                             'ImportanceOrdering',
                             'HighlightHidden',
                             'HighlightHighlighted',
-                            'SegmentChecked'
+                            'SegmentChecked',
+                            'IsRatingsEngineAttribute'
                         ];
 
                     if (enrichment) {
@@ -1349,7 +1355,8 @@ angular.module('common.datacloud.explorer', [
                 || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
                 || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
                 || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
+                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)
+                || (vm.metadata.toggle.show.selected_ratingsengine_attributes && !item.IsRatingsEngineAttribute)) {
                     continue;
                 }
                 result.push(item);
@@ -1378,7 +1385,8 @@ angular.module('common.datacloud.explorer', [
                 || (vm.metadata.toggle.show.enabled && item.HighlightHidden)
                 || (vm.metadata.toggle.hide.enabled && !item.HighlightHidden)
                 || (vm.metadata.toggle.show.highlighted && !item.HighlightHighlighted)
-                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)) {
+                || (vm.metadata.toggle.hide.highlighted && item.HighlightHighlighted)
+                || (vm.metadata.toggle.show.selected_ratingsengine_attributes && !item.IsRatingsEngineAttribute)) {
                     continue;
                 }
                 result.push(item);
@@ -1692,6 +1700,8 @@ angular.module('common.datacloud.explorer', [
         var rule = getRatingsEngineRule(RatingsEngineModels);
         DataCloudStore.selectRatingsEngineAttribute($stateParams.rating_id, rule.id, enrichment).then(function(response) {
             enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
+            var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
+            DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);
         });
     }
 

@@ -31,6 +31,7 @@ angular
                 saved: false
             });
 
+
             // remove highlighting
             if (!vm.showHighlighting()) {
                 vm.orders.attribute = vm.orders.attribute.filter(function(item){
@@ -69,9 +70,9 @@ angular
                         'vm.metadata.toggle.show.enabled',
                         'vm.metadata.toggle.hide.enabled',
                         'vm.metadata.toggle.show.highlighted',
-                        'vm.metadata.toggle.hide.highlighted'
+                        'vm.metadata.toggle.hide.highlighted',
+                        'vm.metadata.toggle.show.selected_ratingsengine_attributes'
                     ], function(newValues, oldValues, scope) {
-
                     vm.filterEmptySubcategories();
                     vm.TileTableItems = {};
                 });
@@ -264,6 +265,10 @@ angular
 
                 if (vm.lookupMode && vm.isYesNoCategory(vm.category)) {
                     filter.AttributeValue = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
+                }
+
+                if(vm.section == 'wizard.segment') {
+                    filter.IsRatingsEngineAttribute = (vm.metadata.toggle.show.selected_ratingsengine_attributes ? true : '');
                 }
 
                 return filter;

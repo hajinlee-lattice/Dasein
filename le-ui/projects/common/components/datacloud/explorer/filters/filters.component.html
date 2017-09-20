@@ -8,10 +8,10 @@
 
 <ul class="filters" >
     <li class="ratings-selected" ng-if="vm.section == 'wizard.segment'">
-    <ul>
-        <li>Selected Attributes (n)</li>
-        <li>All Attributes (n)</li>
-    </ul>
+        <ul ng-init="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;">
+            <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;" ng-class="{selected: vm.metadata.toggle.show.selected_ratingsengine_attributes}">Selected Attributes ({{vm.metadata.selectedForRatingsEngine|number}})</li>
+            <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = false;" ng-class="{selected: !vm.metadata.toggle.show.selected_ratingsengine_attributes}">All Attributes ({{vm.count|number}})</li>
+        </ul>
     </li>
     <li class="query">
         <div class="ng-search">
