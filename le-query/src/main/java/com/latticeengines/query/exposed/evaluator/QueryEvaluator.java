@@ -52,7 +52,7 @@ public class QueryEvaluator {
         attrNames.put(SCORE.toLowerCase(), SCORE);
 
         long offset = 0L, limit = 0L;
-        if (query.getPageFilter() != null && query.getEntitiesForExists() != null) {
+        if (query.getPageFilter() != null && query.containEntityForExists()) {
             offset = query.getPageFilter().getRowOffset();
             limit = query.getPageFilter().getNumRows();
         }

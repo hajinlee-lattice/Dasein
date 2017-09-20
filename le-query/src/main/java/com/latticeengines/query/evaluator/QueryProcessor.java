@@ -66,7 +66,7 @@ public class QueryProcessor {
             sqlQuery = sqlQuery.where(processFreeTextSearch(query));
         }
         sqlQuery = sqlQuery.select(getSelect(resolverFactory, query.getLookups()));
-        if (query.getPageFilter() != null && query.getEntitiesForExists() == null) {
+        if (query.getPageFilter() != null && !query.containEntityForExists()) {
             sqlQuery = addPaging(sqlQuery, query.getPageFilter());
         }
         if (query.getSort() != null) {

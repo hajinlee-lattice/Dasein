@@ -267,6 +267,10 @@ public class Query implements GraphNode {
         return entitiesForExists;
     }
 
+    public boolean containEntityForExists() {
+        return entitiesForExists != null && entitiesForExists.size() != 0;
+    }
+
     public List<JoinSpecification> getLookupJoins() {
         return lookupJoins;
     }
