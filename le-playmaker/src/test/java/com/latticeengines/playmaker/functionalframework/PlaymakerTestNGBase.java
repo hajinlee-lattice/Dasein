@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
 
@@ -25,6 +26,7 @@ public class PlaymakerTestNGBase extends AbstractTestNGSpringContextTests {
     protected PlaymakerTenantEntityMgr playMakerEntityMgr;
 
     public void beforeClass() {
+        SSLUtils.turnOffSSL();
         tenant = getTenant();
 
         try {
