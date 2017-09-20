@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
@@ -131,9 +132,11 @@ public class WorkflowExecutionCache {
             if (FinalApplicationStatus.FAILED.equals(workflowJob.getStatus())) {
                 job.setJobStatus(JobStatus.FAILED);
             } else {
-                WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
-                if (job.getJobStatus() == null || job.getJobStatus() == JobStatus.PENDING) {
-                    job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
+                JobStatus status = getJobStatusFromBatchStatus(workflowStatus.getStatus());
+                if (status.isTerminated()) {
+                    job.setJobStatus(status);
+                } else {
+                    WorkflowUtils.updateJobFromYarn(job, workflowJob, jobProxy, workflowJobEntityMgr);
                 }
             }
             job.setStartTimestamp(workflowStatus.getStartTime());
@@ -261,4 +264,13 @@ public class WorkflowExecutionCache {
         return jobStatus;
     }
 
+    @VisibleForTesting
+    void setWorkflowService(WorkflowService workflowService) {
+        this.workflowService = workflowService;
+    }
+
+    @VisibleForTesting
+    void setLEJobExecutionRetriever(LEJobExecutionRetriever leJobExecutionRetriever) {
+        this.leJobExecutionRetriever = leJobExecutionRetriever;
+    }
 }
