@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.play.PlayLaunchInitStepTestHelper;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -44,6 +46,8 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private PlayLaunchInitStep playLaunchInitStep;
+
+    private PlayLaunchInitStepTestHelper helper;
 
     @Mock
     PlayLaunchInitStepConfiguration configuration;
@@ -69,9 +73,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
     public void setup()
             throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         // this test tenant has account data loaded in CDL
-        String tenantIdentifier = "Segment_M14.Segment_M14.Production";
-        // String tenantIdentifier =
-        // "hliu_09_07_fisher.hliu_09_07_fisher.Production";
+        String tenantIdentifier = "hliu_09_07_fisher.hliu_09_07_fisher.Production";
 
         String playId = "play__" + randId;
         String playLaunchId = "launch__" + randId;
@@ -91,17 +93,15 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
         mockDanteLeadProxy();
 
-        playLaunchInitStep = new PlayLaunchInitStep();
+        helper = new PlayLaunchInitStepTestHelper(internalResourceRestApiProxy, entityProxy, recommendationService,
+                danteLeadProxy, pageSize);
 
-        playLaunchInitStep.setEntityProxy(entityProxy);
+        playLaunchInitStep = new PlayLaunchInitStep();
+        playLaunchInitStep.setPlayLaunchProcessor(helper.getPlayLaunchProcessor());
         playLaunchInitStep.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
-        playLaunchInitStep.setPageSize(pageSize);
-        playLaunchInitStep.setRecommendationService(recommendationService);
-        playLaunchInitStep.setDanteLeadProxy(danteLeadProxy);
         playLaunchInitStep.setTenantEntityMgr(tenantEntityMgr);
 
         playLaunchInitStep.setConfiguration(createConf(CustomerSpace.parse(tenantIdentifier), playId, playLaunchId));
-        playLaunchInitStep.initLookupFieldsConfiguration();
     }
 
     @SuppressWarnings("unchecked")
@@ -224,6 +224,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         PlayLaunch launch = new PlayLaunch();
         launch.setPlay(createPlay(playId));
         launch.setLaunchId(playLaunchId);
+        launch.setCreated(new Date());
         return launch;
     }
 
