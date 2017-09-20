@@ -6,13 +6,15 @@
 </div>
 
 
-<ul class="filters" >
-    <li class="ratings-selected" ng-if="vm.section == 'wizard.segment'">
+<ul class="filters-tabs">
+    <li class="ratingsengine-selected" ng-if="vm.section == 'wizard.segment'">
         <ul ng-init="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;">
-            <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;" ng-class="{selected: vm.metadata.toggle.show.selected_ratingsengine_attributes}">Selected Attributes ({{vm.metadata.selectedForRatingsEngine|number}})</li>
+            <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;" ng-class="{selected: vm.metadata.toggle.show.selected_ratingsengine_attributes}"><span class="ico ico-model ico-black"></span> Selected Attributes ({{vm.metadata.selectedForRatingsEngine|number}})</li>
             <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = false;" ng-class="{selected: !vm.metadata.toggle.show.selected_ratingsengine_attributes}">All Attributes ({{vm.count|number}})</li>
         </ul>
     </li>
+</ul>
+<ul class="filters" >
     <li class="query">
         <div class="ng-search">
             <a class="button icon-button white-button" ng-click="vm.queryText.length ? vm.queryText = null : ''">
