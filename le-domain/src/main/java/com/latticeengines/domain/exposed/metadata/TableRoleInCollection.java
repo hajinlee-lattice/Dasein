@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 public enum TableRoleInCollection {
     ConsolidatedAccount, //
     ConsolidatedContact, //
+    ConsolidatedProduct, //
     ConsolidatedTransaction, //
 
     Profile, //
@@ -16,8 +17,9 @@ public enum TableRoleInCollection {
 
     BucketedAccount, //
     SortedContact, //
-    BucketedTransaction, //
-    
+    SortedProduct, //
+    AggregatedTransaction, //
+
     AccountMaster;
 
     private InterfaceName primaryKey;
@@ -43,8 +45,15 @@ public enum TableRoleInCollection {
         SortedContact.foreignKeys = ConsolidatedContact.foreignKeys;
 
         ConsolidatedTransaction.primaryKey = InterfaceName.TransactionId;
-        ConsolidatedTransaction.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
-        
+        ConsolidatedTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
+        AggregatedTransaction.primaryKey = ConsolidatedTransaction.primaryKey;
+        AggregatedTransaction.foreignKeys = ConsolidatedTransaction.foreignKeys;
+
+        ConsolidatedProduct.primaryKey = InterfaceName.ProductId;
+        ConsolidatedProduct.foreignKeys = ImmutableList.of(ConsolidatedProduct.primaryKey);
+        SortedProduct.primaryKey = ConsolidatedProduct.primaryKey;
+        SortedProduct.foreignKeys = ConsolidatedProduct.foreignKeys;
+
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
     }
 }

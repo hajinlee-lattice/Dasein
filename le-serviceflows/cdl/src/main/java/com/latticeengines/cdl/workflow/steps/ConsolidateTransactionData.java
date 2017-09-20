@@ -41,7 +41,6 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateTransactionDataStepConfiguration> {
 
     private static final String TRANSACTION_DATE = "TransactionDate";
-    private static final String AGGREGATE_SUFFIX = "_Aggregate";
     private static final String AGGREGATE_TABLE_KEY = "Aggregate";
     private static final String MASTER_TABLE_KEY = "Master";
     private static final String DELTA_TABLE_KEY = "Delta";
@@ -51,8 +50,6 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
     private static String regex = "^" + BusinessEntity.Transaction.name()
             + "_(?:[0-9]{2})?[0-9]{2}-[0-3]?[0-9]-[0-3]?[0-9]$";
     protected static Pattern pattern = Pattern.compile(regex);
-
-    private String srcIdField;
 
     private int inputMergeStep;
     private int partitionAndAggregateStep;
@@ -94,8 +91,8 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(batchStoreTablePrefix + AGGREGATE_SUFFIX);
-        targetTable.setPrimaryKey(batchStorePrimaryKey);
+        targetTable.setNamePrefix(servingStoreTablePrefix);
+        targetTable.setPrimaryKey(servingStorePrimaryKey);
         step2.setTargetTable(targetTable);
         step2.setConfiguration(getPartitionConfig());
         return step2;
@@ -136,7 +133,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
 
     @Override
     protected void onPostTransformationCompleted() {
-        String aggrTableName = TableUtils.getFullTableName(batchStoreTablePrefix + AGGREGATE_SUFFIX, pipelineVersion);
+        String aggrTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
         Table aggregateTable = metadataProxy.getTable(customerSpace.toString(), aggrTableName);
         putObjectInContext(AGGREGATE_TABLE_KEY, aggregateTable);
         Table masterTable = setupMasterTable(aggregateTable);

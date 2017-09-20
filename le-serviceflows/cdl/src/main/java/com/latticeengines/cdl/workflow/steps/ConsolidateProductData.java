@@ -11,12 +11,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateContactDataStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ConsolidateProductDataStepConfiguration;
 
-@Component("consolidateContactData")
-public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateContactDataStepConfiguration> {
+@Component("consolidateProductData")
+public class ConsolidateProductData extends ConsolidateDataBase<ConsolidateProductDataStepConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(ConsolidateContactData.class);
+    private static final Logger log = LoggerFactory.getLogger(ConsolidateProductData.class);
 
     private int mergeStep;
     private int upsertMasterStep;
@@ -45,7 +45,7 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
             steps.add(upsertMaster);
-            if (isBucketing()) {
+            if (!isBucketing()) {
                 steps.add(diff);
                 steps.add(sort);
             }
@@ -58,12 +58,11 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
         }
     }
 
-
     @Override
     protected String getConsolidateDataConfig(boolean isDedupeSource) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
-        config.setMasterIdField(TableRoleInCollection.ConsolidatedContact.getPrimaryKey().name());
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedProduct.getPrimaryKey().name());
         config.setDedupeSource(isDedupeSource);
         return appendEngineConf(config, lightEngineConfig());
     }

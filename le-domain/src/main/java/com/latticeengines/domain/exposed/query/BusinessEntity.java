@@ -2,11 +2,13 @@ package com.latticeengines.domain.exposed.query;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AccountMaster;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedTransaction;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedProduct;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedProduct;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,8 +43,10 @@ public enum BusinessEntity implements GraphNode {
         Account.setServingStore(BucketedAccount);
         Contact.setBatchStore(ConsolidatedContact);
         Contact.setServingStore(SortedContact);
+        Product.setBatchStore(ConsolidatedProduct);
+        Product.setServingStore(SortedProduct);
         Transaction.setBatchStore(ConsolidatedTransaction);
-        Transaction.setServingStore(BucketedTransaction);
+        Transaction.setServingStore(AggregatedTransaction);
 
         LatticeAccount.setServingStore(AccountMaster);
 

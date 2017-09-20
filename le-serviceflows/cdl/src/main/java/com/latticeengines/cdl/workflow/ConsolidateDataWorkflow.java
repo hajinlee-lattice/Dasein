@@ -20,6 +20,9 @@ public class ConsolidateDataWorkflow extends AbstractWorkflow<ConsolidateDataWor
     private ConsolidateContactWrapper consolidateContactWrapper;
 
     @Autowired
+    private ConsolidateProductWrapper consolidateProductWrapper;
+
+    @Autowired
     private ConsolidateTransactionWrapper consolidateTransactionWrapper;
 
     
@@ -33,6 +36,7 @@ public class ConsolidateDataWorkflow extends AbstractWorkflow<ConsolidateDataWor
         return new WorkflowBuilder() //
                 .next(consolidateAccountWrapper) //
                 .next(consolidateContactWrapper) //
+                .next(consolidateProductWrapper) //
                 .next(consolidateTransactionWrapper) //
                 .build();
     }

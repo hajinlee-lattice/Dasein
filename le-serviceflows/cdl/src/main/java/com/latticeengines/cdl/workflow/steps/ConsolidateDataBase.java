@@ -1,6 +1,10 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +21,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -63,27 +71,14 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
     protected TableRoleInCollection batchStore;
     protected TableRoleInCollection servingStore;
 
+    protected String srcIdField;
+
     protected String newRecordsTablePrefix = "newRecordsTablePrefix";
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         initializeConfiguration();
         return generateWorkflowConf();
-    }
-
-    protected TransformationStepConfig mergeInputs() {
-        TransformationStepConfig step1 = new TransformationStepConfig();
-        List<String> baseSources = inputTableNames;
-        step1.setBaseSources(baseSources);
-
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        for (String inputTableName : inputTableNames) {
-            baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
-        }
-        step1.setBaseTables(baseTables);
-        step1.setTransformer("consolidateDataTransformer");
-        step1.setConfiguration(getConsolidateDataConfig(true));
-        return step1;
     }
 
     @Override
@@ -177,6 +172,90 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
     protected TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getConsolidateRequest();
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
+    }
+
+    protected TransformationStepConfig mergeInputs() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<String> baseSources = inputTableNames;
+        step.setBaseSources(baseSources);
+
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        for (String inputTableName : inputTableNames) {
+            baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
+        }
+        step.setBaseTables(baseTables);
+        step.setTransformer("consolidateDataTransformer");
+        step.setConfiguration(getConsolidateDataConfig(true));
+        return step;
+    }
+
+    protected TransformationStepConfig mergeMaster(int mergeStep) {
+        TargetTable targetTable;
+        TransformationStepConfig step = new TransformationStepConfig();
+        setupMasterTable(step);
+        step.setInputSteps(Collections.singletonList(mergeStep));
+        step.setTransformer("consolidateDataTransformer");
+        step.setConfiguration(getConsolidateDataConfig(false));
+
+        targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(batchStoreTablePrefix);
+        targetTable.setPrimaryKey(batchStorePrimaryKey);
+        step.setTargetTable(targetTable);
+        return step;
+    }
+
+    protected TransformationStepConfig diff(int mergeStep, int upsertMasterStep) {
+        if (!isBucketing()) {
+            return null;
+        }
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Arrays.asList(mergeStep, upsertMasterStep));
+        step.setTransformer("consolidateDeltaTransformer");
+        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
+        config.setSrcIdField(srcIdField);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    protected TransformationStepConfig sortDiff(int diffStep) {
+        if (!isBucketing()) {
+            return null;
+        }
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(diffStep));
+        step.setTransformer(TRANSFORMER_SORTER);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(servingStoreTablePrefix);
+        targetTable.setPrimaryKey(servingStorePrimaryKey);
+        targetTable.setExpandBucketedAttrs(true);
+        step.setTargetTable(targetTable);
+
+        SorterConfig config = new SorterConfig();
+        config.setPartitions(100);
+        config.setSortingField(servingStoreSortKeys.get(0));
+        config.setCompressResult(true);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+
+        return step;
+    }
+
+    protected void setupMasterTable(TransformationStepConfig step) {
+        List<String> baseSources;
+        Map<String, SourceTable> baseTables;
+        if (StringUtils.isNotBlank(inputMasterTableName)) {
+            Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
+            if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
+                baseSources = Collections.singletonList(inputMasterTableName);
+                baseTables = new HashMap<>();
+                SourceTable sourceMasterTable = new SourceTable(inputMasterTableName, customerSpace);
+                baseTables.put(inputMasterTableName, sourceMasterTable);
+                step.setBaseSources(baseSources);
+                step.setBaseTables(baseTables);
+            }
+        }
     }
 
     public boolean isBucketing() {

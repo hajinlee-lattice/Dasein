@@ -64,6 +64,8 @@ public class SchemaRepository {
             return getAccountSchema();
         case Contact:
             return getContactSchema();
+        case Product:
+            return getProductSchema();
         case TimeSeries:
             return getTimeSeriesSchema();
         case Category:

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -72,7 +73,11 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
             return;
         }
         for (int i = 0; i < sources.size(); i++) {
-            Node newSource = sources.get(i).groupByAndLimit(new FieldList(groupByKey), 1);
+            Node source = sources.get(i);
+            if (StringUtils.isEmpty(groupByKey) || !source.getFieldNames().contains(groupByKey)) {
+                continue;
+            }
+            Node newSource = source.groupByAndLimit(new FieldList(groupByKey), 1);
             sources.set(i, newSource);
         }
     }

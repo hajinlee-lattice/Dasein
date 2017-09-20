@@ -63,6 +63,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
             return this;
         }
 
+        public Builder productIdField(String idField) {
+            consolidateDataConfigurationBuilder.productIdField(idField);
+            return this;
+        }
+
         public Builder transactionIdField(String idField) {
             consolidateDataConfigurationBuilder.transactionIdField(idField);
             return this;
@@ -80,6 +85,11 @@ public class ConsolidateAndPublishWorkflowConfiguration extends BaseCDLWorkflowC
 
         public Builder bucketTransaction(boolean bucketTransaction) {
             consolidateDataConfigurationBuilder.bucketTransaction(bucketTransaction);
+            return this;
+        }
+
+        public Builder bucketProduct(boolean bucketProduct) {
+            consolidateDataConfigurationBuilder.bucketProduct(bucketProduct);
             return this;
         }
 
