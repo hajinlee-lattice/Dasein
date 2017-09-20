@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 public class WorkflowStatus {
 
     public static final EnumSet<BatchStatus> TERMINAL_BATCH_STATUS = EnumSet.of(BatchStatus.ABANDONED,
-    BatchStatus.COMPLETED, BatchStatus.FAILED, BatchStatus.STOPPED);
+            BatchStatus.COMPLETED, BatchStatus.FAILED, BatchStatus.STOPPED);
 
     private BatchStatus status;
     private Date startTime;
@@ -20,6 +20,13 @@ public class WorkflowStatus {
     private Date lastUpdated;
     private String workflowName;
     private CustomerSpace customerSpace;
+
+    public WorkflowStatus() {
+    }
+
+    public WorkflowStatus(BatchStatus status) {
+        this.status = status;
+    }
 
     @Override
     public String toString() {
