@@ -23,8 +23,9 @@ public class TenantDaoImpl extends BaseDaoImpl<Tenant> implements TenantDao {
     public Tenant findByTenantId(String tenantId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Tenant> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where id = '%s'", entityClz.getSimpleName(), tenantId);
+        String queryStr = String.format("from %s where id = :tenantId", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
+        query.setString("tenantId", tenantId);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -37,8 +38,9 @@ public class TenantDaoImpl extends BaseDaoImpl<Tenant> implements TenantDao {
     public Tenant findByTenantName(String tenantName) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Tenant> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where name = '%s'", entityClz.getSimpleName(), tenantName);
+        String queryStr = String.format("from %s where name = :tenantName", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
+        query.setString("tenantName",tenantName);
         List list = query.list();
         if (list.size() == 0) {
             return null;

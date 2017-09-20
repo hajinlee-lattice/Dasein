@@ -39,4 +39,10 @@ public class TenantEntityMgrImplTestNG extends SecurityFunctionalTestNGBase {
         assertEquals(t.getName(), "TENANT1");
     }
 
+    @Test(groups = "functional")
+    public void findByTenantName() {
+        Tenant t = tenantEntityMgr.findByTenantName("TENANT1");
+        assertEquals(t.getId(), "TENANT1");
+    }
+
 }
