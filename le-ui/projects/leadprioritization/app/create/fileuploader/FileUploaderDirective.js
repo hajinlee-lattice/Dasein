@@ -347,7 +347,7 @@ angular
                     vm.params = {};
                 }
 
-                var fileType = vm.accountLeadCheck ? vm.accountLeadCheck : 'account',
+                var fileType = vm.accountLeadCheck ? vm.accountLeadCheck : 'SalesforceLead',
                     modelName = vm.modelDisplayName = vm.modelDisplayName || vm.selectedFileName, options;
                 if($state.includes('home.import.entry')) {
                     var fileName = "file_" + (new Date).getTime() + ".csv";
@@ -355,7 +355,7 @@ angular
                             file: file,
                             url: vm.params.url || '/pls/models/uploadfile/cdl',
                             params: {
-                                entity: vm.params.schema || fileType,
+                                entity: 'account',
                                 fileName: fileName,
                                 modelId: vm.params.modelId || false,
                                 metadataFile: vm.params.metadataFile || null,
