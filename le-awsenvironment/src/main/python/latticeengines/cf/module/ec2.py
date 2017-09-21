@@ -183,6 +183,12 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "rm -f s-iss.pub"
                         ] ] }
                     },
+                    "06_ssh_user" : {
+                        "command" : { "Fn::Join": [ "\n", [
+                            "#!/bin/bash",
+                            "bash /createSSHAccounts.sh Developers || true"
+                        ] ] }
+                    },
                     "10_add_instance_to_cluster" : {
                         "command" : { "Fn::Join": [ "", [
                             "#!/bin/bash\n",
