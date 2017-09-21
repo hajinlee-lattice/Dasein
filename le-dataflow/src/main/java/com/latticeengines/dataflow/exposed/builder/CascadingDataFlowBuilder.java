@@ -54,6 +54,8 @@ import com.latticeengines.domain.exposed.dataflow.ExtractFilter;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -235,6 +237,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 path = matches.get(0);
                 allSchemas[i] = AvroUtils.getSchema(config, new Path(path));
                 for (Field field : allSchemas[i].getFields()) {
+                    Attribute attr = sourceTable.getAttribute(field.name());
+                    if (attr != null && attr.getApprovedUsage() != null && attr.getApprovedUsage().contains(ApprovedUsage.IGNORED.getName())) {
+                        continue;
+                    }
                     allColumns.put(field.name(), field);
                 }
                 i++;
