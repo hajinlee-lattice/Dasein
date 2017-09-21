@@ -25,15 +25,19 @@ public class FirstConsolidateAndProfileDeploymentTestNG extends DataIngestionEnd
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
+        runPreCheckInTest();
+        verifyFirstProfileCheckpoint();
+        saveCheckpoint("profile1");
+    }
+
+    @Test(groups = "precheckin")
+    public void runPreCheckInTest() throws Exception {
         importData();
         verifyCannotProfile();
         consolidate();
         verifyConsolidate();
         profile();
         verifyProfile();
-
-        verifyFirstProfileCheckpoint();
-        saveCheckpoint("profile1");
     }
 
     private void importData() throws Exception {
