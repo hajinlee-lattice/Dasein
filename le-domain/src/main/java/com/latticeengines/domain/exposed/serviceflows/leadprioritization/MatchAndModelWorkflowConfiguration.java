@@ -316,6 +316,11 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             return this;
         }
 
+        public Builder setScoreTestFile(boolean scoreTestFile) {
+            score.setScoreTestFile(scoreTestFile);
+            return this;
+        }
+
         public Builder enableDebug(boolean enableDebug) {
             score.setEnableDebug(enableDebug);
             return this;
