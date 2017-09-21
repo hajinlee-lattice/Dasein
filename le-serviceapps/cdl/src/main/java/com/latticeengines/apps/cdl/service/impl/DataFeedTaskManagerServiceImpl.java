@@ -178,7 +178,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                         dataFeedTask.getImportTemplate(), source, metaTable);
                 if (inconsistentAttrs != null && inconsistentAttrs.size() > 0) {
                     throw new RuntimeException(String.format("The following field data type is not consistent with " +
-                            "the one that already exists:", String.join(",", inconsistentAttrs)));
+                            "the one that already exists: %s", String.join(",", inconsistentAttrs)));
                 }
             }
         }
