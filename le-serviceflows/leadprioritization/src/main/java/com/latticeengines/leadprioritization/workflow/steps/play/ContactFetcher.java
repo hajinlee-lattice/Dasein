@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component
@@ -31,14 +30,17 @@ public class ContactFetcher {
     @Value("${playmaker.workflow.segment.pagesize:100}")
     private long pageSize;
 
-    public void fetch(PlayLaunchInitStepConfiguration config, FrontEndQuery contactFrontEndQuery,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList) {
+    public Map<Object, List<Map<String, String>>> fetch(PlayLaunchContext playLaunchContext) {
+        Map<Object, List<Map<String, String>>> mapForAccountAndContactList = new HashMap<>();
+
         try {
+            FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
+
             contactFrontEndQuery.setPageFilter(null);
             log.info(String.format("Contact query => %s", JsonUtils.serialize(contactFrontEndQuery)));
 
             Long contactsCount = entityProxy.getCount( //
-                    config.getCustomerSpace().toString(), //
+                    playLaunchContext.getCustomerSpace().toString(), //
                     contactFrontEndQuery);
             int pages = (int) Math.ceil((contactsCount * 1.0D) / pageSize);
 
@@ -46,18 +48,22 @@ public class ContactFetcher {
             long processedContactsCount = 0L;
 
             for (int pageNo = 0; pageNo < pages; pageNo++) {
-                processedContactsCount = fetchContactsPage(config, contactFrontEndQuery, mapForAccountAndContactList,
+                processedContactsCount = fetchContactsPage(playLaunchContext, mapForAccountAndContactList,
                         contactsCount, processedContactsCount, pageNo);
             }
 
         } catch (Exception ex) {
             log.error("Ignoring till contact data is available in cdl", ex);
         }
+
+        return mapForAccountAndContactList;
     }
 
-    private long fetchContactsPage(PlayLaunchInitStepConfiguration config, FrontEndQuery contactFrontEndQuery,
+    private long fetchContactsPage(PlayLaunchContext playLaunchContext,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Long contactsCount,
             long processedContactsCount, int pageNo) {
+        FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
+
         log.info(String.format("Contacts Loop #%d", pageNo));
         long expectedPageSize = Math.min(pageSize, (contactsCount - processedContactsCount));
 
@@ -66,7 +72,7 @@ public class ContactFetcher {
         log.info(String.format("Contact query => %s", JsonUtils.serialize(contactFrontEndQuery)));
 
         DataPage contactPage = entityProxy.getData( //
-                config.getCustomerSpace().toString(), //
+                playLaunchContext.getCustomerSpace().toString(), //
                 contactFrontEndQuery);
 
         log.info(String.format("Got # %d contact elements in this loop", contactPage.getData().size()));

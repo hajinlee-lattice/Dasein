@@ -207,6 +207,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Restriction contactRestriction = JsonUtils.deserialize(contactRestrictionJson, Restriction.class);
         segment.setAccountRestriction(accountRestriction);
         segment.setContactRestriction(contactRestriction);
+        segment.setName("Segment_" + randId);
 
         ratingEngine.setSegment(segment);
         Set<RatingModel> ratingModels = new HashSet<>();

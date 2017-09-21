@@ -11,7 +11,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component
@@ -24,22 +23,22 @@ public class AccountFetcher {
     @Value("${playmaker.workflow.segment.pagesize:100}")
     private long pageSize;
 
-    public long getCount(PlayLaunchInitStepConfiguration config, FrontEndQuery accountFrontEndQuery) {
+    public long getCount(PlayLaunchContext playLaunchContext) {
         return entityProxy.getCount( //
-                config.getCustomerSpace().toString(), //
-                accountFrontEndQuery);
+                playLaunchContext.getCustomerSpace().toString(), //
+                playLaunchContext.getAccountFrontEndQuery());
     }
 
-    public DataPage fetch(PlayLaunchInitStepConfiguration config, FrontEndQuery accountFrontEndQuery, //
+    public DataPage fetch(PlayLaunchContext playLaunchContext, //
             long segmentAccountsCount, long processedSegmentAccountsCount) {
         long expectedPageSize = Math.min(pageSize, (segmentAccountsCount - processedSegmentAccountsCount));
-
+        FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         accountFrontEndQuery.setPageFilter(new PageFilter(processedSegmentAccountsCount, expectedPageSize));
 
         log.info(String.format("Account query => %s", JsonUtils.serialize(accountFrontEndQuery)));
 
         DataPage accountPage = entityProxy.getData( //
-                config.getCustomerSpace().toString(), //
+                playLaunchContext.getCustomerSpace().toString(), //
                 accountFrontEndQuery);
 
         log.info(String.format("Got # %d elements in this loop", accountPage.getData().size()));

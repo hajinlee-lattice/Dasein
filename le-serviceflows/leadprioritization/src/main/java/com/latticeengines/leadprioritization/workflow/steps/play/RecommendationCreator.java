@@ -3,7 +3,6 @@ package com.latticeengines.leadprioritization.workflow.steps.play;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,6 @@ import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.playmakercore.service.RecommendationService;
 import com.latticeengines.proxy.exposed.dante.DanteLeadProxy;
 
@@ -35,50 +33,67 @@ public class RecommendationCreator {
     @Autowired
     private DanteLeadProxy danteLeadProxy;
 
-    public void generateRecommendations(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
-            String modelId, AtomicLong accountLaunched, AtomicLong contactLaunched, AtomicLong accountErrored,
-            AtomicLong accountSuppressed, List<Map<String, Object>> accountList,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, long launchTimestampMillis) {
+    public void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList) {
         accountList//
                 .stream().parallel() //
                 .forEach( //
                         account -> {
                             try {
-                                processSingleAccount(tenant, playLaunch, config, //
-                                        modelId, accountLaunched, contactLaunched, accountErrored, accountSuppressed, //
-                                        mapForAccountAndContactList, account, launchTimestampMillis);
+                                processSingleAccount(playLaunchContext, //
+                                        mapForAccountAndContactList, account);
                             } catch (Throwable th) {
                                 log.error(th.getMessage(), th);
-                                accountErrored.addAndGet(1);
+                                playLaunchContext.getCounter().getAccountErrored().addAndGet(1);
                                 throw th;
                             }
                         });
     }
 
-    private void processSingleAccount(Tenant tenant, PlayLaunch playLaunch, PlayLaunchInitStepConfiguration config,
-            String modelId, AtomicLong accountLaunched, AtomicLong contactLaunched, AtomicLong accountErrored,
-            AtomicLong accountSuppressed, Map<Object, List<Map<String, String>>> mapForAccountAndContactList,
-            Map<String, Object> account, long launchTimestampMillis) {
-        Recommendation recommendation = //
-                prepareRecommendation(tenant, playLaunch, config, account, mapForAccountAndContactList, modelId,
-                        launchTimestampMillis);
-        if (playLaunch.getBucketsToLaunch().contains(recommendation.getPriorityID())) {
+    private void processSingleAccount(PlayLaunchContext playLaunchContext,
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, Map<String, Object> account) {
+        RuleBucketName bucket = getBucketInfo(playLaunchContext, account);
+
+        // Generate recommendation only when bucket is selected for launch
+        if (playLaunchContext.getPlayLaunch().getBucketsToLaunch().contains(bucket)) {
+
+            // prepare recommendation
+            Recommendation recommendation = //
+                    prepareRecommendation(playLaunchContext, account, mapForAccountAndContactList, bucket);
+
+            // insert recommendation in table
             recommendationService.create(recommendation);
-            danteLeadProxy.create(recommendation, config.getCustomerSpace().toString());
-            contactLaunched.addAndGet(
+
+            // insert recommendation in dante
+            danteLeadProxy.create(recommendation, playLaunchContext.getCustomerSpace().toString());
+
+            // update corresponding counters
+            playLaunchContext.getCounter().getContactLaunched().addAndGet(
                     recommendation.getExpandedContacts() != null ? recommendation.getExpandedContacts().size() : 0);
-            accountLaunched.addAndGet(1);
+            playLaunchContext.getCounter().getAccountLaunched().addAndGet(1);
         } else {
-            accountSuppressed.addAndGet(1);
+            playLaunchContext.getCounter().getAccountSuppressed().addAndGet(1);
         }
     }
 
-    private Recommendation prepareRecommendation(Tenant tenant, PlayLaunch playLaunch,
-            PlayLaunchInitStepConfiguration config, Map<String, Object> account,
-            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, String modelId,
-            long launchTimestampMillis) {
-        String playName = config.getPlayName();
-        String playLaunchId = config.getPlayLaunchId();
+    private RuleBucketName getBucketInfo(PlayLaunchContext playLaunchContext, Map<String, Object> account) {
+        String bucketName = checkAndGet(account, playLaunchContext.getModelId());
+        RuleBucketName bucket = RuleBucketName.getRuleBucketName(bucketName);
+
+        if (bucket == null) {
+            bucket = RuleBucketName.valueOf(bucketName);
+        }
+        return bucket;
+    }
+
+    private Recommendation prepareRecommendation(PlayLaunchContext playLaunchContext, Map<String, Object> account,
+            Map<Object, List<Map<String, String>>> mapForAccountAndContactList, RuleBucketName bucket) {
+        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+        long launchTimestampMillis = playLaunchContext.getLaunchTimestampMillis();
+        String playName = playLaunchContext.getPlayName();
+        String playLaunchId = playLaunchContext.getPlayLaunchId();
+        Tenant tenant = playLaunchContext.getTenant();
+
         Object accountIdObj = checkAndGet(account, InterfaceName.AccountId.name());
         Object accountIdLongObj = checkAndGet(account, InterfaceName.LEAccountIDLong.name());
         String accountId = accountIdObj == null ? null : accountIdObj.toString();
@@ -111,14 +126,6 @@ public class RecommendationCreator {
         recommendation.setTenantId(tenant.getPid());
         recommendation.setLikelihood(DEFAULT_LIKELIHOOD);
         recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
-
-        String bucketName = checkAndGet(account, modelId);
-        RuleBucketName bucket = null;
-        bucket = RuleBucketName.getRuleBucketName(bucketName);
-
-        if (bucket == null) {
-            bucket = RuleBucketName.valueOf(bucketName);
-        }
 
         recommendation.setPriorityID(bucket);
         recommendation.setPriorityDisplayName(bucket.getName());

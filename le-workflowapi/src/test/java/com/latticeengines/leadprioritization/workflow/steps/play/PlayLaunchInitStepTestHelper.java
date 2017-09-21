@@ -18,7 +18,6 @@ public class PlayLaunchInitStepTestHelper {
             long pageSize) {
         frontEndQueryCreator = new FrontEndQueryCreator();
         frontEndQueryCreator.initLookupFieldsConfiguration();
-        frontEndQueryCreator.setInternalResourceRestApiProxy(internalResourceRestApiProxy);
 
         recommendationCreator = new RecommendationCreator();
         recommendationCreator.setRecommendationService(recommendationService);

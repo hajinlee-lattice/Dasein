@@ -17,8 +17,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -31,7 +29,6 @@ import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 @Component
 public class FrontEndQueryCreator {
@@ -41,40 +38,32 @@ public class FrontEndQueryCreator {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
     private Map<BusinessEntity, List<String>> accountLookupFields;
 
     private Map<BusinessEntity, List<String>> contactLookupFields;
 
     @PostConstruct
     public void init() {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
 
         initLookupFieldsConfiguration();
     }
 
-    public String prepareFrontEndQueries(CustomerSpace customerSpace, Play play, String segmentName,
-            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
-            List<Object> modifiableAccountIdCollectionForContacts) throws JsonProcessingException {
+    public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext) throws JsonProcessingException {
+        Play play = playLaunchContext.getPlay();
+        FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
+        FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
+
         accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
         contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
 
         prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery);
 
         RatingEngine ratingEngine = play.getRatingEngine();
-        String modelId = null;
 
         if (ratingEngine != null) {
-            modelId = prepareQueryUsingRatingsDefn(accountFrontEndQuery, contactFrontEndQuery,
-                    modifiableAccountIdCollectionForContacts, ratingEngine);
+            prepareQueryUsingRatingsDefn(playLaunchContext);
         } else {
-            log.error(String.format("Rating Engine is not set for the play %s", play.getName()));
-        }
-
-        if (accountFrontEndQuery.getAccountRestriction() == null) {
-            prepareQueryUsingSegmentDefn(customerSpace, segmentName, accountFrontEndQuery, contactFrontEndQuery,
-                    modifiableAccountIdCollectionForContacts);
+            throw new NullPointerException(String.format("Rating Engine is not set for the play %s", play.getName()));
         }
 
         accountFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
@@ -82,8 +71,6 @@ public class FrontEndQueryCreator {
 
         setSortField(BusinessEntity.Account, InterfaceName.LEAccountIDLong.name(), false, accountFrontEndQuery);
         setSortField(BusinessEntity.Contact, InterfaceName.ContactId.name(), false, contactFrontEndQuery);
-
-        return modelId;
     }
 
     private void prepareLookupsForFrontEndQueries(FrontEndQuery accountFrontEndQuery,
@@ -112,18 +99,6 @@ public class FrontEndQueryCreator {
                         field -> lookups.add(new AttributeLookup(businessEntity, field)));
     }
 
-    private void prepareQueryUsingSegmentDefn(CustomerSpace customerSpace, String segmentName,
-            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
-            List<Object> modifiableAccountIdCollectionForContacts) throws JsonProcessingException {
-        Restriction segmentRestriction = internalResourceRestApiProxy.getSegmentRestrictionQuery(customerSpace,
-                segmentName);
-
-        log.info(String.format("Processing restriction: %s", JsonUtils.serialize(segmentRestriction)));
-
-        FrontEndRestriction frontEndRestriction = new FrontEndRestriction(segmentRestriction);
-        accountFrontEndQuery.setAccountRestriction(frontEndRestriction);
-    }
-
     private void setSortField(BusinessEntity entityType, String sortBy, boolean descending,
             FrontEndQuery entityFrontEndQuery) {
         List<AttributeLookup> lookups = new ArrayList<>();
@@ -135,9 +110,16 @@ public class FrontEndQueryCreator {
         entityFrontEndQuery.setSort(sort);
     }
 
-    private String prepareQueryUsingRatingsDefn(FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
-            List<Object> modifiableAccountIdCollectionForContacts, RatingEngine ratingEngine) {
-        List<Lookup> lookups;
+    private void prepareQueryUsingRatingsDefn(PlayLaunchContext playLaunchContext) {
+
+        Play play = playLaunchContext.getPlay();
+        FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
+        FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
+        List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
+                .getModifiableAccountIdCollectionForContacts();
+        String modelId = playLaunchContext.getModelId();
+        RatingEngine ratingEngine = play.getRatingEngine();
+
         if (ratingEngine.getSegment() != null) {
             FrontEndRestriction accountRestriction = new FrontEndRestriction(
                     ratingEngine.getSegment().getAccountRestriction());
@@ -153,19 +135,16 @@ public class FrontEndQueryCreator {
                     prepareContactRestriction(extractedContactRestriction, modifiableAccountIdCollectionForContacts));
         }
 
-        String modelId = null;
         List<RatingModel> ratingModels = new ArrayList<>();
         for (RatingModel model : ratingEngine.getRatingModels()) {
             ratingModels.add(model);
-            modelId = model.getId();
             break;
         }
         accountFrontEndQuery.setRatingModels(ratingModels);
 
-        lookups = accountFrontEndQuery.getLookups();
+        List<Lookup> lookups = accountFrontEndQuery.getLookups();
         Lookup lookup = new AttributeLookup(BusinessEntity.Rating, modelId);
         lookups.add(lookup);
-        return modelId;
     }
 
     private FrontEndRestriction prepareContactRestriction(Restriction extractedContactRestriction,
@@ -204,11 +183,6 @@ public class FrontEndQueryCreator {
                         InterfaceName.PhoneNumber.name(), //
                         InterfaceName.Title.name(), //
                         InterfaceName.Address_Street_1.name()));
-    }
-
-    @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
     }
 
 }

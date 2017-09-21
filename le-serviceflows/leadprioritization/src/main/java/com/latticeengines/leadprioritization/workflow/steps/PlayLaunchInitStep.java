@@ -41,7 +41,6 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     @Override
     public void execute() {
-        Tenant tenant;
         PlayLaunchInitStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
         String playName = config.getPlayName();
@@ -49,7 +48,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
         try {
             log.info("Inside PlayLaunchInitStep execute()");
-            tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
+            Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
 
             log.info(String.format("For tenant: %s", customerSpace.toString()));
             log.info(String.format("For playId: %s", playName));
