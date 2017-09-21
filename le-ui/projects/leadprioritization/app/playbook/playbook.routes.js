@@ -22,7 +22,7 @@ angular
             url: '/plays',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Play Book'
+                pageTitle: 'Playbook'
             },
             resolve: {
                 PlayList: function($q, PlaybookWizardService) {
@@ -371,7 +371,7 @@ angular
                         text: {
                             main_title: 'Your play is launching',
                             main_title_completed: 'Your play is launched',
-                            button_goto: 'Go to Play Book'
+                            button_goto: 'Go to Playbook'
                         },
                         button_goto_sref: 'home.playbook',
                         disable_create_button: true,
