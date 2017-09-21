@@ -22,7 +22,11 @@ public interface GlobalAuthTestBed {
 
     Tenant bootstrapForProduct(LatticeProduct product);
 
+    Tenant bootstrapForProduct(String tenantIdentifier, LatticeProduct product);
+
     Tenant bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap);
+
+    Tenant bootstrapForProduct(String tenantIdentifier, LatticeProduct product, Map<String, Boolean> featureFlagMap);
 
     List<Tenant> getTestTenants();
 
@@ -73,4 +77,6 @@ public interface GlobalAuthTestBed {
     void overwriteFeatureFlag(Tenant tenant, String featureFlagName, boolean value);
 
     void excludeTestTenantsForCleanup(List<Tenant> tenants);
+
+    void loginAD();
 }

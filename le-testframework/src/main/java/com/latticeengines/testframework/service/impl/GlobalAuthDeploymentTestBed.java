@@ -127,7 +127,26 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
+    public Tenant bootstrapForProduct(String tenantIdentifier, LatticeProduct product) {
+        loginAD();
+        Tenant tenant = bootstrapViaTenantConsole(tenantIdentifier, product, enviroment, null);
+        involvedDL = (LatticeProduct.LPA.equals(product));
+        involvedZK = false;
+        return tenant;
+    }
+
+    @Override
     public Tenant bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
+        loginAD();
+        Tenant tenant = bootstrapViaTenantConsole(product, enviroment, featureFlagMap);
+        involvedDL = (LatticeProduct.LPA.equals(product));
+        involvedZK = false;
+        return tenant;
+    }
+
+    @Override
+    public Tenant bootstrapForProduct(String tenantIdentifier, LatticeProduct product,
+            Map<String, Boolean> featureFlagMap) {
         loginAD();
         Tenant tenant = bootstrapViaTenantConsole(product, enviroment, featureFlagMap);
         involvedDL = (LatticeProduct.LPA.equals(product));
@@ -248,10 +267,21 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
      * bootstrap with one full tenant through tenant console
      */
     private Tenant bootstrapViaTenantConsole(LatticeProduct latticeProduct, String environment,
-                                             Map<String, Boolean> featureFlagMap) {
+            Map<String, Boolean> featureFlagMap) {
         Tenant tenant = addBuiltInTestTenant();
-        String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase()).replace(
-                "{env}", environment);
+        return bootstrapViaTenantConsole(tenant, latticeProduct, environment, featureFlagMap);
+    }
+
+    private Tenant bootstrapViaTenantConsole(String tenantIdentifier, LatticeProduct latticeProduct, String environment,
+            Map<String, Boolean> featureFlagMap) {
+        Tenant tenant = addTestTenant(tenantIdentifier);
+        return bootstrapViaTenantConsole(tenant, latticeProduct, environment, featureFlagMap);
+    }
+
+    private Tenant bootstrapViaTenantConsole(Tenant tenant, LatticeProduct latticeProduct, String environment,
+            Map<String, Boolean> featureFlagMap) {
+        String jsonFileName = testTenantRegJson.replace("{product}", latticeProduct.name().toLowerCase())
+                .replace("{env}", environment);
         CustomerSpace customerSpace = CustomerSpace.parse(tenant.getId());
         try {
             provisionThroughTenantConsole(customerSpace.toString(), sfdcTopology, jsonFileName, featureFlagMap);
@@ -405,10 +435,10 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         return false;
     }
 
-    private void loginAD() {
+    @Override
+    public void loginAD() {
         adminTenantProxy.login(TestFrameworkUtils.AD_USERNAME, TestFrameworkUtils.AD_PASSWORD);
     }
-
 
     public AuthorizationHeaderHttpRequestInterceptor getPlsAuthInterceptor() {
         return authHeaderInterceptor;

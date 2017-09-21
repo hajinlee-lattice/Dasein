@@ -47,7 +47,18 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
+    public Tenant bootstrapForProduct(String tenantIdentifier, LatticeProduct product) {
+        throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
+    }
+
+    @Override
     public Tenant bootstrapForProduct(LatticeProduct product, Map<String, Boolean> featureFlagMap) {
+        throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
+    }
+
+    @Override
+    public Tenant bootstrapForProduct(String tenantIdentifier, LatticeProduct product,
+            Map<String, Boolean> featureFlagMap) {
         throw new UnsupportedOperationException("bootstrap for product is not applicable to functional tests.");
     }
 
@@ -118,5 +129,10 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     @Override
     public void deleteTenant(Tenant tenant) {
         tenantService.discardTenant(tenant);
+    }
+
+    @Override
+    public void loginAD() {
+        throw new UnsupportedOperationException("loginAD is not applicable to functional tests.");
     }
 }

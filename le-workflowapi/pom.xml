@@ -379,6 +379,13 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-pls</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-oauth2db</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

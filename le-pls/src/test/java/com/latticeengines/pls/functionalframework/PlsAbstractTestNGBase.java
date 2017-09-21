@@ -243,4 +243,8 @@ public abstract class PlsAbstractTestNGBase extends AbstractTestNGSpringContextT
         return summary;
     }
 
+    public void setMainTestTenant(Tenant mainTestTenant) {
+        this.mainTestTenant = mainTestTenant;
+    }
+
 }
