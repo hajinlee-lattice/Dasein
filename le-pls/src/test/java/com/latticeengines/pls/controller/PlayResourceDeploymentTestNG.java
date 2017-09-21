@@ -19,9 +19,9 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
@@ -76,6 +76,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         ratingEngine1.setSegment(retrievedSegment);
         ratingEngine1.setCreatedBy(CREATED_BY);
         ratingEngine1.setType(RatingEngineType.RULE_BASED);
+        ratingEngine1.setStatus(RatingEngineStatus.ACTIVE);
+
         RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine1,
                 tenant.getId());
         Assert.assertNotNull(createdRatingEngine);

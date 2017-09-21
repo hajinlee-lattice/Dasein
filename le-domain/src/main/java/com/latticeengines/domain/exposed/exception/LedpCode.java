@@ -265,6 +265,7 @@ public enum LedpCode {
     LEDP_18152("Failed to submit a customer report on matching issue."), //
     LEDP_18153("Segment not defined for Rating Engine {0}."), //
     LEDP_18154("Type not defined for Rating Engine {0}."), //
+    LEDP_18155("Play {0} cannot be launched since corresponding ratings engine is not active."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

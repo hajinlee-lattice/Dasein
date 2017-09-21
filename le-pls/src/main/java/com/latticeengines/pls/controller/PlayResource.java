@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
@@ -119,7 +120,10 @@ public class PlayResource {
     private void validatePlayBeforeLaunch(Play play) {
         if (play.getRatingEngine() == null) {
             throw new LedpException(LedpCode.LEDP_18149, new String[] { play.getName() });
+        } else if (play.getRatingEngine().getStatus() != RatingEngineStatus.ACTIVE) {
+            throw new LedpException(LedpCode.LEDP_18155, new String[] { play.getName() });
         }
+
     }
 
     @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)
