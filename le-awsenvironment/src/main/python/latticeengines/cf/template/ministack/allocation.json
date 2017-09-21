@@ -35,7 +35,7 @@
         "port": 9001
     },
     "metadata": {
-        "mem": 1024,
+        "mem": 2048,
         "port": 9002
     },
     "scoring": {
