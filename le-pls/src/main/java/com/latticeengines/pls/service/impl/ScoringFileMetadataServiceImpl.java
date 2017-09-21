@@ -344,7 +344,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                     }, null);
                     if (attribute != null) {
                         log.info(String.format("Current ignored fileds include %s.", attribute.getDisplayName()));
-                        attribute.setApprovedUsage(ApprovedUsage.NONE, ApprovedUsage.IGNORED);
+                        modelAttributes.remove(attribute);
                     }
                 }
             }
