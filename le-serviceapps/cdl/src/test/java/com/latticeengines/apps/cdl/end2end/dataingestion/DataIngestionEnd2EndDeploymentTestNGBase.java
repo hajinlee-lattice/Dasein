@@ -125,7 +125,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     protected String profileAppId;
     protected DataCollection.Version initialVersion;
 
-    @BeforeClass(groups = { "end2end" })
+    @BeforeClass(groups = { "end2end", "precheckin" })
     public void setup() throws Exception {
         logger.info("Bootstrapping test tenants using tenant console ...");
 
@@ -141,7 +141,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         attachProtectedProxy(plsCDLImportProxy);
     }
 
-    @AfterClass(groups = { "end2end" })
+    @AfterClass(groups = { "end2end", "precheckin" })
     protected void cleanup() throws Exception {
         checkpointService.cleanup();
     }
