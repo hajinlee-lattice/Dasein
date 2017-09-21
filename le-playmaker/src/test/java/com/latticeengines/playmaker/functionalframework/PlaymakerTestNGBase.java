@@ -57,7 +57,11 @@ public class PlaymakerTestNGBase extends AbstractTestNGSpringContextTests {
         } catch (Exception ex) {
             hostName = "localhost";
         }
-        return "test." + System.getProperty("user.name") + "." + hostName;
+        String userName = System.getProperty("user.name");
+        // make sure to replace all specialChars with '_'
+        userName = userName.replaceAll("[^A-Za-z0-9]", "_");
+
+        return "test." + userName + "." + hostName;
     }
 
 }
