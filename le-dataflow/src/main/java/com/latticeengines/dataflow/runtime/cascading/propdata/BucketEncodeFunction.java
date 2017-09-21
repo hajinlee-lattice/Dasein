@@ -196,7 +196,10 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
         if (mapping != null && !mapping.isEmpty()) {
             mapping.forEach((k, v) -> v.forEach(s -> reversedMapping.put(s, k)));
         }
-        String thisCategory = value.toString();
+        String thisCategory = value.toString().trim();
+        if (StringUtils.isEmpty(thisCategory)) {
+            return 0;
+        }
         if (!reversedMapping.isEmpty()) {
             thisCategory = reversedMapping.get(thisCategory);
         }

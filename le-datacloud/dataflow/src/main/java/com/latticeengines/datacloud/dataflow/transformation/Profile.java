@@ -67,8 +67,6 @@ public class Profile extends TransformationFlowBase<BasicTransformationConfigura
         src = src.apply(new AddRandomIntFunction(DUMMY_GROUP, 1, SAMPLE_SIZE, config.getRandSeed()),
                 new FieldList(src.getFieldNames()), new FieldMetadata(DUMMY_GROUP, Integer.class));
 
-        // return src;
-
         // Numeric profiling
         Node numProfile = profileNumAttrs(src, numAttrs, numAttrsToDecode, decStrs);
 
