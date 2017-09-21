@@ -13,7 +13,7 @@ angular
             angular.extend(vm, {
                 orders: {
                     attributeLookupMode: [ '-Value', 'DisplayName'],
-                    attribute: ['-HighlightHighlighted', 'DisplayName'],
+                    attribute: ['-HighlightHighlighted', '-IsRatingsEngineAttribute', 'DisplayName'],
                     subcategory: 'toString()',
                     category: 'toString()'
                 },
@@ -267,7 +267,7 @@ angular
                     filter.AttributeValue = (!vm.metadata.toggle.show.nulls ? '!' + 'No' : '');
                 }
 
-                if(vm.section == 'wizard.segment') {
+                if(vm.section == 'wizard.ratingsengine_segment') {
                     filter.IsRatingsEngineAttribute = (vm.metadata.toggle.show.selected_ratingsengine_attributes ? true : '');
                 }
 

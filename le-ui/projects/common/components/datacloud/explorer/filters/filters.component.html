@@ -7,8 +7,8 @@
 
 
 <ul class="filters-tabs">
-    <li class="ratingsengine-selected" ng-if="vm.section == 'wizard.segment'">
-        <ul ng-init="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;">
+    <li class="ratingsengine-selected" ng-if="vm.section == 'wizard.ratingsengine_segment'">
+        <ul ng-init="vm.metadata.toggle.show.selected_ratingsengine_attributes = (vm.metadata.selectedForRatingsEngine > 0);">
             <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = true;" ng-class="{selected: vm.metadata.toggle.show.selected_ratingsengine_attributes}"><span class="ico ico-model ico-black"></span> Selected Attributes ({{vm.metadata.selectedForRatingsEngine|number}})</li>
             <li ng-click="vm.metadata.toggle.show.selected_ratingsengine_attributes = false;" ng-class="{selected: !vm.metadata.toggle.show.selected_ratingsengine_attributes}">All Attributes ({{vm.count|number}})</li>
         </ul>
@@ -25,7 +25,7 @@
             <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
         </div>
     </li>
-    <li class="filter dropdown-container" ng-if="['segment.analysis','wizard.segment'].indexOf(vm.section) == -1">
+    <li class="filter dropdown-container" ng-if="['segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal || (vm.section != 'insights' && vm.metadata.toggle.show.enabled) || vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted  || vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls}">
             <i class="fa fa-filter"></i>
         </h2>
@@ -51,10 +51,10 @@
             <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
         </a>
     </li>
-    <li class="save" ng-if="vm.enabledManualSave && ['wizard.segment'].indexOf(vm.section) == -1">
+    <li class="save" ng-if="vm.enabledManualSave && ['wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <button class="save button orange-button" ng-disabled="vm.saveDisabled" ng-click="vm.saveSelected()">{{vm.label.button_save}}</button>
     </li>
-    <li class="download dropdown-container" ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.segment'].indexOf(vm.section) == -1">
+    <li class="download dropdown-container" ng-if="!vm.lookupMode && ['insights','browse','team','segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <h2 class="button icon-button white-button">
             <i class="fa fa-download"></i>
         </h2>

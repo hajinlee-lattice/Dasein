@@ -13,7 +13,7 @@ angular.module('common.datacloud.explorer', [
     ApiHost, BrowserStorageUtility, ResourceUtility, FeatureFlagService, DataCloudStore, DataCloudService,
     EnrichmentTopAttributes, EnrichmentPremiumSelectMaximum, LookupStore, QueryService, QueryStore,
     SegmentService, SegmentStore, QueryRestriction, CurrentConfiguration, EnrichmentCount, LookupResponse, 
-    RatingsEngineModels
+    RatingsEngineModels, RatingsEngineStore
 ){
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -324,9 +324,10 @@ angular.module('common.datacloud.explorer', [
                 }
             });
 
-            if(vm.section === 'wizard.segment') {
+            if(vm.section === 'wizard.ratingsengine_segment') {
                 var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
                 DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);
+                RatingsEngineStore.setValidation('attributes', (SelectedForRatingsEngine.length > 0));
             }
 
             getTopAttributes();
@@ -1702,6 +1703,10 @@ angular.module('common.datacloud.explorer', [
             enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
             var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
             DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);
+            RatingsEngineStore.setValidation('attributes', (SelectedForRatingsEngine.length > 0));
+            if(!SelectedForRatingsEngine.length) {
+                vm.metadata.toggle.show.selected_ratingsengine_attributes = false;
+            }
         });
     }
 

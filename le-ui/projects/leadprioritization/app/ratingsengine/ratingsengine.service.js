@@ -1,5 +1,5 @@
 angular.module('lp.ratingsengine')
-.service('RatingsEngineStore', function($q, $state, RatingsEngineService, BrowserStorageUtility){
+.service('RatingsEngineStore', function($q, $state, $stateParams, RatingsEngineService, BrowserStorageUtility){
     var RatingsEngineStore = this;
 
     this.init = function() {
@@ -20,6 +20,14 @@ angular.module('lp.ratingsengine')
         this.init();
     }
 
+    this.getValidation = function(type) {
+        return this.validation[type];
+    }
+
+    this.setValidation = function(type, value) {
+        this.validation[type] = value;
+    }
+
     this.setSettings = function(obj) {
         var obj = obj || {};
         for(var i in obj) {
@@ -32,10 +40,12 @@ angular.module('lp.ratingsengine')
     this.nextSaveGeneric = function(nextState) {
         var changed = false,
             opts = RatingsEngineStore.settings;
+        
+        $state.go(nextState, {rating_id: $stateParams.rating_id});
 
-        RatingsEngineStore.saveRating().then(function(rating) {
-            $state.go(nextState, {rating_id: rating.id});
-        });
+        // RatingsEngineStore.saveRating().then(function(rating) {
+        //     $state.go(nextState, {rating_id: rating.id});
+        // });
     }
 
     this.setRating = function(rating) {

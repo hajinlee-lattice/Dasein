@@ -162,7 +162,7 @@ angular
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Create Ratings Engine',
-                section: 'wizard.segment'
+                section: 'wizard.ratingsengine_segment'
             },
             views: {
                 'wizard_content@home.ratingsengine.wizard': {
@@ -177,7 +177,7 @@ angular
             params: {
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Create Ratings Engine',
-                section: 'wizard.attributes',
+                section: 'wizard.ratingsengine_attributes',
                 gotoNonemptyCategory: true
             },
             resolve: {
