@@ -347,10 +347,26 @@ angular
                     vm.params = {};
                 }
 
-                var fileType = vm.accountLeadCheck ? vm.accountLeadCheck : 'SalesforceLead',
-                    modelName = vm.modelDisplayName = vm.modelDisplayName || vm.selectedFileName,
+                var fileType = vm.accountLeadCheck ? vm.accountLeadCheck : 'account',
+                    modelName = vm.modelDisplayName = vm.modelDisplayName || vm.selectedFileName, options;
+                if($state.includes('home.import.entry')) {
+                    var fileName = "file_" + (new Date).getTime() + ".csv";
                     options = {
-                        file: file, 
+                            file: file,
+                            url: vm.params.url || '/pls/models/uploadfile/cdl',
+                            params: {
+                                entity: vm.params.schema || fileType,
+                                fileName: fileName,
+                                modelId: vm.params.modelId || false,
+                                metadataFile: vm.params.metadataFile || null,
+                                compressed: vm.isCompressed(),
+                                displayName: vm.selectedFileDisplayName
+                            },
+                            progress: vm.uploadProgress
+                        };
+                } else {
+                    options = {
+                        file: file,
                         url: vm.params.url || '/pls/models/uploadfile/unnamed',
                         params: {
                             schema: vm.params.schema || fileType,
@@ -361,7 +377,7 @@ angular
                         },
                         progress: vm.uploadProgress
                     };
-
+                }
                 vm.cancelDeferred = cancelDeferred = $q.defer();
 
                 ImportService.Upload(options).then(vm.uploadResponse);
