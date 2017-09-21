@@ -235,7 +235,11 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
 
         SorterConfig config = new SorterConfig();
         config.setPartitions(100);
-        config.setSortingField(servingStoreSortKeys.get(0));
+        String sortingKey = servingStorePrimaryKey;
+        if (!servingStoreSortKeys.isEmpty()) {
+            sortingKey = servingStoreSortKeys.get(0);
+        }
+        config.setSortingField(sortingKey);
         config.setCompressResult(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
