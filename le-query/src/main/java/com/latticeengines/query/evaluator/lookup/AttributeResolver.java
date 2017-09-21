@@ -25,7 +25,7 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<ComparableExpression<String>> resolveForCompare(AttributeLookup lookup) {
+    public List<ComparableExpression<? extends Comparable>> resolveForCompare(AttributeLookup lookup) {
         if (lookup.getEntity() == null) {
             return Collections.singletonList(QueryUtils.getAttributePath(lookup.getAttribute()));
         }

@@ -19,7 +19,7 @@ public class CollectionResolver extends BaseLookupResolver<CollectionLookup>
     }
 
     @Override
-    public List<ComparableExpression<String>> resolveForCompare(CollectionLookup lookup) {
+    public List<ComparableExpression<? extends Comparable>> resolveForCompare(CollectionLookup lookup) {
         Collection<Object> collection = lookup.getValues();
         if (collection == null || collection.isEmpty()) {
             throw new QueryEvaluationException("Collection lookup must have at least one element.");

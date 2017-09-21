@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
 
+import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.AVG;
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.COUNT;
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.MAX;
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.MIN;
@@ -31,19 +32,6 @@ public class AggregateLookup extends Lookup {
     @JsonProperty("alias")
     private String alias;
 
-    public static AggregateLookup create(Lookup mixin, Aggregator aggregator) {
-        switch(aggregator) {
-            case COUNT:
-                return AggregateLookup.count();
-            case SUM:
-                return AggregateLookup.sum(mixin);
-            case MAX:
-                return AggregateLookup.max(mixin);
-            default:
-                throw new UnsupportedOperationException("Unsupported aggregator " + aggregator);
-        }
-    }
-
     public static AggregateLookup count() {
         AggregateLookup lookup1 = new AggregateLookup();
         lookup1.setAggregator(COUNT);
@@ -54,6 +42,13 @@ public class AggregateLookup extends Lookup {
         AggregateLookup lookup1 = new AggregateLookup();
         lookup1.setLookup(mixin);
         lookup1.setAggregator(SUM);
+        return lookup1;
+    }
+
+    public static AggregateLookup avg(Lookup mixin) {
+        AggregateLookup lookup1 = new AggregateLookup();
+        lookup1.setLookup(mixin);
+        lookup1.setAggregator(AVG);
         return lookup1;
     }
 
@@ -103,6 +98,7 @@ public class AggregateLookup extends Lookup {
     public enum Aggregator {
         COUNT, //
         SUM, //
+        AVG, //
         MAX, //
         MIN
     }

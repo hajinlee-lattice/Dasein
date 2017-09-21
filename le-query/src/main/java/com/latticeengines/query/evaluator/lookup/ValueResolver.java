@@ -17,7 +17,7 @@ public class ValueResolver extends BaseLookupResolver<ValueLookup>
     }
 
     @Override
-    public List<ComparableExpression<String>> resolveForCompare(ValueLookup lookup) {
+    public List<ComparableExpression<? extends Comparable>> resolveForCompare(ValueLookup lookup) {
         return Collections.singletonList(Expressions.asComparable(lookup.getValue().toString()));
     }
 

@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -47,8 +48,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         }
 
         LookupResolver lhsResolver = lookupFactory.getLookupResolver(lhs.getClass());
-        List<ComparableExpression<String>> lhsPaths = lhsResolver.resolveForCompare(lhs);
-        ComparableExpression<String> lhsPath = lhsPaths.get(0);
+        List<ComparableExpression<Comparable>> lhsPaths = lhsResolver.resolveForCompare(lhs);
+        ComparableExpression<Comparable> lhsPath = lhsPaths.get(0);
 
         if (restriction.getRelation().equals(ComparisonType.EQUAL) && isNullValueLookup(rhs)) {
             if (restriction.getNegate()) {
@@ -64,7 +65,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             return lhsPath.isNotNull();
         } else {
             LookupResolver rhsResolver = lookupFactory.getLookupResolver(rhs.getClass());
-            List<ComparableExpression<String>> rhsPaths = rhsResolver.resolveForCompare(rhs);
+            List<ComparableExpression<Comparable>> rhsPaths = rhsResolver.resolveForCompare(rhs);
 
             BooleanExpression booleanExpression;
 

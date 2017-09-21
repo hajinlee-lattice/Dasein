@@ -26,7 +26,7 @@ public class CaseResolver extends BaseLookupResolver<CaseLookup> implements Look
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<ComparableExpression<String>> resolveForCompare(CaseLookup lookup) {
+    public List<ComparableExpression<? extends Comparable>> resolveForCompare(CaseLookup lookup) {
         throw new UnsupportedOperationException("Using case lookup in where clause is not supported.");
     }
 

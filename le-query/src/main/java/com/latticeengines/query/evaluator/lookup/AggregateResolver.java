@@ -30,15 +30,10 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<ComparableExpression<String>> resolveForCompare(AggregateLookup lookup) {
-        throw new UnsupportedOperationException("Does not support aggregator in where clause.");
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<ComparableExpression<Comparable>> resolveForAggregateCompare(AggregateLookup lookup) {
+    public List<ComparableExpression<? extends Comparable>> resolveForCompare(AggregateLookup lookup) {
         switch (lookup.getAggregator()) {
         case SUM:
+        case AVG:
         case MAX:
         case MIN:
             return numExpressionForCompare(lookup);
@@ -55,6 +50,7 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         case COUNT:
             return countExpression(lookup, asAlias);
         case SUM:
+        case AVG:
         case MAX:
         case MIN:
             return numExpressionForSelect(lookup, asAlias);
@@ -64,7 +60,7 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
     }
 
     @SuppressWarnings("unchecked")
-    private List<ComparableExpression<Comparable>> numExpressionForCompare(AggregateLookup lookup) {
+    private List<ComparableExpression<? extends Comparable>> numExpressionForCompare(AggregateLookup lookup) {
         NumberExpression sumExpression = (NumberExpression) numExpressionForSelect(lookup, false);
         return Collections.singletonList(Expressions.asComparable(sumExpression));
     }
@@ -80,9 +76,6 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         if (lookup.getLookup() instanceof AttributeLookup) {
             AttributeLookup innerLookup = (AttributeLookup) lookup.getLookup();
             ColumnMetadata cm = getColumnMetadata(innerLookup);
-            if (cm.getStats() != null) {
-                throw new RuntimeException("Sum aggregation is only supported for non-bucketed attribute");
-            }
             numberPath = QueryUtils.getAttributeNumberPath(innerLookup.getEntity(), cm.getName());
         } else if (lookup.getLookup() instanceof SubQueryAttrLookup) {
             SubQueryAttrLookup innerLookup = (SubQueryAttrLookup) lookup.getLookup();
@@ -103,6 +96,8 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
             switch (lookup.getAggregator()) {
             case SUM:
                 return numberPath.sum().as(lookup.getAlias());
+            case AVG:
+                return numberPath.avg().as(lookup.getAlias());
             case MAX:
                 return numberExpression.max().as(lookup.getAlias());
             case MIN:
@@ -114,6 +109,8 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
             switch (lookup.getAggregator()) {
             case SUM:
                 return numberPath.sum();
+            case AVG:
+                return numberPath.avg();
             case MAX:
                 return numberExpression.max();
             case MIN:

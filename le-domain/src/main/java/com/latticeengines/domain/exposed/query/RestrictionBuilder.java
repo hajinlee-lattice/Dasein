@@ -33,7 +33,8 @@ public class RestrictionBuilder {
     }
 
     public RestrictionBuilder let(Lookup lookup) {
-        if (lookup instanceof AttributeLookup || lookup instanceof SubQueryAttrLookup) {
+        if (lookup instanceof AttributeLookup || lookup instanceof SubQueryAttrLookup
+                || lookup instanceof AggregateLookup) {
             if (restriction != null) {
                 throw new IllegalArgumentException("Cannot chain a lookup here.");
             }
@@ -45,26 +46,6 @@ public class RestrictionBuilder {
             return this;
         } else {
             throw new UnsupportedOperationException("Only support attribute lookup and sub query attr lookup.");
-        }
-    }
-
-    public RestrictionBuilder let(BusinessEntity entity, String attrName, AggregateLookup.Aggregator aggregator) {
-        return let(new AttributeLookup(entity, attrName), aggregator);
-    }
-
-    public RestrictionBuilder let(Lookup lookup, AggregateLookup.Aggregator aggregator) {
-        if (lookup instanceof AttributeLookup || lookup instanceof SubQueryAttrLookup) {
-            if (restriction != null) {
-                throw new IllegalArgumentException("Cannot chain a lookup here.");
-            }
-            if (existsEntity != null) {
-                throw new IllegalArgumentException("Cannot specify let and exists together.");
-            }
-            this.attrLookup = AggregateLookup.create(lookup, aggregator);
-            complete = false;
-            return this;
-        } else {
-            throw new UnsupportedOperationException("Only support aggregation of attr and sub query attr lookup.");
         }
     }
 

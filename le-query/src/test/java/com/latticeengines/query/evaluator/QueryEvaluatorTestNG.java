@@ -8,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -297,19 +298,30 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("order by %s.%s asc", ACCOUNT, ATTR_ACCOUNT_NAME));
     }
 
-    // require a non-bucketed numeric attribute to test this later
-    @Test(groups = "functional", enabled = false)
-    public void testSumAggregation() {
+    @Test(groups = "functional")
+    public void testAggregation() {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME);
-        AttributeLookup aggrAttrLookup = new AttributeLookup(BusinessEntity.Account, "AlexaRank");
+        AttributeLookup aggrAttrLookup = new AttributeLookup(BusinessEntity.Account, "AlexaViewsPerUser");
+        AggregateLookup sumLookup = AggregateLookup.sum(aggrAttrLookup);
+        AggregateLookup avgLookup = AggregateLookup.avg(aggrAttrLookup);
+        Restriction sumRestriction = Restriction.builder().let(sumLookup).gt(0).build();
+        Restriction avgRestriction = Restriction.builder().let(avgLookup).gt(0).build();
+        Restriction orRestriction = Restriction.builder().or(sumRestriction, avgRestriction).build();
+        Restriction acctRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(44602)
+                .build();
         Query query = Query.builder() //
-                .select(attrLookup, AggregateLookup.sum(aggrAttrLookup)) //
+                .select(attrLookup, sumLookup, avgLookup) //
                 .from(BusinessEntity.Account) //
+                .where(acctRestriction)
                 .groupBy(attrLookup) //
+                .having(orRestriction)
                 .build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("select %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
-        sqlContains(sqlQuery, "sum(Account.AlexaRank)");
+        sqlContains(sqlQuery, String.format("select %s.%s, %s, %s", ACCOUNT, ATTR_ACCOUNT_NAME,
+                "sum(Account.AlexaViewsPerUser)", "avg(Account.AlexaViewsPerUser)"));
+        sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
+        sqlContains(sqlQuery, String.format("where %s.%s = ?", ACCOUNT, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, "having sum(Account.AlexaViewsPerUser) > ? or avg(Account.AlexaViewsPerUser) > ?");
         sqlContains(sqlQuery, String.format("group by %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
     }
 

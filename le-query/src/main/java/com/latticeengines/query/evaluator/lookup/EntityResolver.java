@@ -16,7 +16,7 @@ public class EntityResolver extends BaseLookupResolver<EntityLookup>
     }
 
     @Override
-    public List<ComparableExpression<String>> resolveForCompare(EntityLookup lookup) {
+    public List<ComparableExpression<? extends Comparable>> resolveForCompare(EntityLookup lookup) {
         throw new UnsupportedOperationException("Should not use entity look in where clause");
     }
 

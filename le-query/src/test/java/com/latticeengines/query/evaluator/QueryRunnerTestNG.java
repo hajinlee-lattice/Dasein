@@ -10,6 +10,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.query.AggregateLookup;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.PageFilter;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
+import com.querydsl.sql.SQLQuery;
 
 /**
  * This test will go out to a test table in Redshift
@@ -191,6 +193,26 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         } while (results.size() > 0);
         Assert.assertEquals(totalResults, countInRedshift);
         Assert.assertEquals(totalRuns, (int) (Math.ceil(new Long(countInRedshift).doubleValue() / pageSize) + 1));
+    }
+
+    @Test(groups = "functional")
+    public void testAggregation() {
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME);
+        AttributeLookup aggrAttrLookup = new AttributeLookup(BusinessEntity.Account, "AlexaViewsPerUser");
+        AggregateLookup sumLookup = AggregateLookup.sum(aggrAttrLookup);
+        AggregateLookup avgLookup = AggregateLookup.avg(aggrAttrLookup);
+        Restriction sumRestriction = Restriction.builder().let(sumLookup).gt(0).build();
+        Restriction avgRestriction = Restriction.builder().let(avgLookup).gt(0).build();
+        Restriction orRestriction = Restriction.builder().or(sumRestriction, avgRestriction).build();
+        Restriction acctRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(44602)
+                .build();
+        Query query = Query.builder() //
+                .select(attrLookup, sumLookup, avgLookup) //
+                .from(BusinessEntity.Account) //
+                .where(acctRestriction).groupBy(attrLookup) //
+                .having(orRestriction).build();
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
+        Assert.assertEquals(results.size(), 1);
     }
 
     @Test(groups = "functional")

@@ -40,7 +40,7 @@ public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<ComparableExpression<String>> resolveForCompare(SubQueryAttrLookup lookup) {
+    public List<ComparableExpression<? extends Comparable>> resolveForCompare(SubQueryAttrLookup lookup) {
         return Collections
                 .singletonList(Expressions.asComparable((Expression<String>) resolveForSelect(lookup, false)));
     }
