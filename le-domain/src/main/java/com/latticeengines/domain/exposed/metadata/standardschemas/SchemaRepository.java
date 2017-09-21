@@ -1012,7 +1012,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(
                         new String[] { "ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
                 .interfaceName(InterfaceName.AccountId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1022,7 +1021,6 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet(
                         new String[] { "CONTACT_ID", "CONTACTID", "CONTACT_EXTERNAL_ID", "CONTACT ID", "CONTACT" })) //
                 .type(Schema.Type.STRING) //
-                .required() //
                 .interfaceName(InterfaceName.ContactId) //
                 .logicalType(LogicalDataType.Id) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
