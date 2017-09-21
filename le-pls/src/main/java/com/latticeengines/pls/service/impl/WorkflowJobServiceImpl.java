@@ -1,19 +1,17 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.latticeengines.domain.exposed.pls.frontend.JobStepDisplayInfoMapping;
-import com.latticeengines.domain.exposed.workflow.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +19,13 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.JobStepDisplayInfoMapping;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.JobStep;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
@@ -33,13 +37,12 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobService.class);
-    private static final String[] NONDISPLAYED_JOB_TYPE_VALUES = new String[] {
-            "bulkmatchworkflow",
-            "playlaunchworkflow",
-            "consolidateandpublishworkflow",
-            "profileandpublishworkflow"
-    };
-    private static final Set<String> NONDISPLAYED_JOB_TYPES = new HashSet<>(Arrays.asList(NONDISPLAYED_JOB_TYPE_VALUES));
+    private static final String[] NON_DISPLAYED_JOB_TYPE_VALUES = new String[] { //
+            "bulkmatchworkflow", //
+            "consolidateandpublishworkflow", //
+            "profileandpublishworkflow" };
+    private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
+            Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -110,13 +113,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return Collections.emptyList();
         }
 
-        jobs.removeIf(job -> NONDISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()));
-        for (Job job : jobs) {
-            updateStepDisplayNameAndNumSteps(job);
-            updateJobDisplayNameAndDescription(job);
-        }
-
-        updateAllJobsWithModelModelSummaries(jobs);
+        jobs.removeIf(job -> NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()));
+        updateAllJobsAndStepsWithModelModelSummaries(jobs);
         return jobs;
     }
 
@@ -131,10 +129,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             String previousStepDisplayName = "";
             for (int i = 0; i < steps.size(); i++) {
                 JobStep step = steps.get(i);
-                String stepDisplayName =
-                        JobStepDisplayInfoMapping.getMappedName(job.getJobType(), i);
-                String stepDescription =
-                        JobStepDisplayInfoMapping.getMappedDescription(job.getJobType(), i);
+                String stepDisplayName = JobStepDisplayInfoMapping.getMappedName(job.getJobType(), i);
+                String stepDescription = JobStepDisplayInfoMapping.getMappedDescription(job.getJobType(), i);
                 step.setName(stepDisplayName);
                 step.setDescription(stepDescription);
                 if (!stepDisplayName.equalsIgnoreCase(previousStepDisplayName)) {
@@ -155,13 +151,15 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         job.setDescription(job.getJobType());
     }
 
-    private void updateAllJobsWithModelModelSummaries(List<Job> jobs) {
+    private void updateAllJobsAndStepsWithModelModelSummaries(List<Job> jobs) {
         Map<String, ModelSummary> modelIdToModelSummaries = new HashMap<>();
         for (ModelSummary modelSummary : modelSummaryService.getModelSummaries("all")) {
             modelIdToModelSummaries.put(modelSummary.getId(), modelSummary);
         }
 
         for (Job job : jobs) {
+            updateStepDisplayNameAndNumSteps(job);
+            updateJobDisplayNameAndDescription(job);
             String modelId = null;
             if (job.getInputs() != null && job.getInputs().containsKey(WorkflowContextConstants.Inputs.MODEL_ID)) {
                 modelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
