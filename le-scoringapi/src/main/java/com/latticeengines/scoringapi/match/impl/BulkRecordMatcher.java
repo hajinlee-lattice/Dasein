@@ -282,6 +282,10 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
                 putInBulkMatchInput(RTS_MATCH_ONLY, matchInputMap, //
                         recordModelTuple, matchOnlyInput);
+                log.info(String.format(
+                        "Bulk-realtime match request info: tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
+                        space.getTenantId(), RTS_MATCH_ONLY, modelSummary == null ? null : modelSummary.getId(),
+                        matchOnlyInput.getDataCloudVersion(), matchOnlyInput.getData().size()));
             }
 
             // call enrichment (without predefined column selection) against
@@ -304,6 +308,10 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
             putInBulkMatchInput(AM_ENRICH_ONLY, matchInputMap, //
                     recordModelTuple, matchAMEnrichmentInput);
+            log.info(String.format(
+                    "Bulk-realtime match request info: tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
+                    space.getTenantId(), AM_ENRICH_ONLY, modelSummary == null ? null : modelSummary.getId(),
+                    matchAMEnrichmentInput.getDataCloudVersion(), matchAMEnrichmentInput.getData().size()));
         } else {
             // call regular match
             MatchInput matchInput = buildMatchInput(space, //
@@ -319,6 +327,10 @@ public class BulkRecordMatcher extends AbstractMatcher {
             }
 
             putInBulkMatchInput(key, matchInputMap, recordModelTuple, matchInput);
+            log.info(String.format(
+                    "Bulk-realtime match request info: tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
+                    space.getTenantId(), key, modelSummary == null ? null : modelSummary.getId(),
+                    matchInput.getDataCloudVersion(), matchInput.getData().size()));
         }
     }
 
