@@ -128,6 +128,30 @@ public class RestrictionBuilder {
         return this;
     }
 
+    public RestrictionBuilder contains(Object value) {
+        operator = ComparisonType.CONTAINS;
+        negate = false;
+        rhsLookup = new ValueLookup(value);
+        completeConcrete();
+        return this;
+    }
+
+    public RestrictionBuilder notcontains(Object value) {
+        operator = ComparisonType.CONTAINS;
+        negate = true;
+        rhsLookup = new ValueLookup(value);
+        completeConcrete();
+        return this;
+    }
+
+    public RestrictionBuilder startsWith(Object value) {
+        operator = ComparisonType.STARTS_WITH;
+        negate = false;
+        rhsLookup = new ValueLookup(value);
+        completeConcrete();
+        return this;
+    }
+
     public RestrictionBuilder inCollection(Collection<Object> collection) {
         if (collection == null) {
             throw new IllegalArgumentException("collection cannot be null");
@@ -191,7 +215,7 @@ public class RestrictionBuilder {
 
     public RestrictionBuilder and(RestrictionBuilder... childBuilders) {
         List<Restriction> children = new ArrayList<>();
-        for (RestrictionBuilder builder: childBuilders) {
+        for (RestrictionBuilder builder : childBuilders) {
             children.add(builder.build());
         }
         return and(children);
@@ -210,7 +234,7 @@ public class RestrictionBuilder {
 
     public RestrictionBuilder or(RestrictionBuilder... childBuilders) {
         List<Restriction> children = new ArrayList<>();
-        for (RestrictionBuilder builder: childBuilders) {
+        for (RestrictionBuilder builder : childBuilders) {
             children.add(builder.build());
         }
         return or(children);
@@ -247,7 +271,8 @@ public class RestrictionBuilder {
 
     private void completeLogical() {
         if (attrLookup != null || existsEntity != null) {
-            throw new IllegalArgumentException("Cannot put logical operation in concrete restriction, it should be outside.");
+            throw new IllegalArgumentException(
+                    "Cannot put logical operation in concrete restriction, it should be outside.");
         }
         if (complete) {
             throw new IllegalArgumentException("The builder is already complete. Check your operation chaining.");
@@ -255,5 +280,4 @@ public class RestrictionBuilder {
         restriction = new LogicalRestriction(logicalOperator, children);
         complete = true;
     }
-
 }

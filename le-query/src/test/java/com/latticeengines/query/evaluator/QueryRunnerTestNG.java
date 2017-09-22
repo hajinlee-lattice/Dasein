@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
-import com.querydsl.sql.SQLQuery;
 
 /**
  * This test will go out to a test table in Redshift
@@ -41,7 +40,38 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count, 1);
 
         restriction = Restriction.builder() //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID).startsWith(accountId.substring(0, accountId.length() - 1)) //
+                .build();
+        query = Query.builder() //
+                .find(BusinessEntity.Account) //
+                .where(restriction) //
+                .build();
+        count = queryEvaluatorService.getCount(attrRepo, query);
+        Assert.assertEquals(count, 1);
+
+        restriction = Restriction.builder() //
+                .let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
+                .notcontains(accountId.substring(0, accountId.length() - 1)) //
+                .build();
+        query = Query.builder() //
+                .find(BusinessEntity.Account) //
+                .where(restriction) //
+                .build();
+        count = queryEvaluatorService.getCount(attrRepo, query);
+        Assert.assertEquals(count, TOTAL_RECORDS - 1);
+
+        restriction = Restriction.builder() //
                 .let(BusinessEntity.Contact, ATTR_ACCOUNT_ID).eq(accountId) //
+                .build();
+        query = Query.builder() //
+                .find(BusinessEntity.Contact) //
+                .where(restriction) //
+                .build();
+        count = queryEvaluatorService.getCount(attrRepo, query);
+        Assert.assertEquals(count, 1916);
+
+        restriction = Restriction.builder() //
+                .let(BusinessEntity.Contact, ATTR_ACCOUNT_ID).contains(accountId.substring(1, accountId.length() - 1)) //
                 .build();
         query = Query.builder() //
                 .find(BusinessEntity.Contact) //
@@ -133,7 +163,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dataProvider = "bitEncodedData")
-    public void testBitEncoded(String label, long expectedCount) {
+    public void testBitEncoded(String label, String start, String contain, long expectedCount) {
         // bucket
         Restriction restriction = Restriction.builder() //
                 .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq(label) //
@@ -141,12 +171,35 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Query query = Query.builder().where(restriction).build();
         long count = queryEvaluatorService.getCount(attrRepo, query);
         Assert.assertEquals(count, expectedCount);
+
+        if (label != null) {
+            restriction = Restriction.builder() //
+                    .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).startsWith(start) //
+                    .build();
+            query = Query.builder().where(restriction).build();
+            count = queryEvaluatorService.getCount(attrRepo, query);
+            Assert.assertEquals(count, expectedCount);
+
+            restriction = Restriction.builder() //
+                    .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).contains(contain) //
+                    .build();
+            query = Query.builder().where(restriction).build();
+            count = queryEvaluatorService.getCount(attrRepo, query);
+            Assert.assertEquals(count, expectedCount);
+
+            restriction = Restriction.builder() //
+                    .let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).notcontains(contain) //
+                    .build();
+            query = Query.builder().where(restriction).build();
+            count = queryEvaluatorService.getCount(attrRepo, query);
+            Assert.assertEquals(count, TOTAL_RECORDS - expectedCount);
+        }
     }
 
     @DataProvider(name = "bitEncodedData", parallel = true)
     private Object[][] provideBitEncodedData() {
-        return new Object[][] { { "Yes", BUCKETED_YES_IN_CUSTOEMR }, { "No", BUCKETED_NO_IN_CUSTOEMR },
-                { null, BUCKETED_NULL_IN_CUSTOEMR } };
+        return new Object[][] { { "Yes", "y", "e", BUCKETED_YES_IN_CUSTOEMR },
+                { "No", "N", "o", BUCKETED_NO_IN_CUSTOEMR }, { null, null, null, BUCKETED_NULL_IN_CUSTOEMR } };
     }
 
     @Test(groups = "functional")

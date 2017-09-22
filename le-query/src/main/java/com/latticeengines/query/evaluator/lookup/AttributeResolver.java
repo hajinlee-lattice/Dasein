@@ -16,8 +16,7 @@ import com.querydsl.core.types.dsl.Expressions;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
-public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
-        implements LookupResolver<AttributeLookup> {
+public class AttributeResolver extends BaseLookupResolver<AttributeLookup> implements LookupResolver<AttributeLookup> {
 
     public AttributeResolver(AttributeRepository repository) {
         super(repository);
@@ -33,8 +32,7 @@ public class AttributeResolver extends BaseLookupResolver<AttributeLookup>
         if (cm == null) {
             throw new IllegalArgumentException("Cannot find the attribute " + lookup + " in attribute repository.");
         }
-        return Collections
-                .singletonList(Expressions.asComparable(resolveBucketRange(lookup.getEntity(), cm, false)));
+        return Collections.singletonList(Expressions.asString(resolveBucketRange(lookup.getEntity(), cm, false)));
     }
 
     @Override

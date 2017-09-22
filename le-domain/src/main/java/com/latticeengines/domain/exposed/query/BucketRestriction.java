@@ -180,6 +180,15 @@ public class BucketRestriction extends Restriction {
         case IN_COLLECTION:
             restriction = Restriction.builder().let(attr).inCollection(values).build();
             break;
+        case CONTAINS:
+            restriction = Restriction.builder().let(attr).contains(values.get(0)).build();
+            break;
+        case NOT_CONTAINS:
+            restriction = Restriction.builder().let(attr).notcontains(values.get(0)).build();
+            break;
+        case STARTS_WITH:
+            restriction = Restriction.builder().let(attr).not().startsWith(values.get(0)).build();
+            break;
         default:
             throw new UnsupportedOperationException("comparator " + comparisonType + " is not supported yet");
         }
@@ -204,8 +213,7 @@ public class BucketRestriction extends Restriction {
         } else if (bkt.getRange() != null) {
             if (bkt.getRange().getLeft() != null && bkt.getRange().getRight() != null) {
                 if (bkt.getRange().getLeft().equals(bkt.getRange().getRight())) {
-                    return Restriction.builder().let(attr).eq(bkt.getRange().getLeft())
-                            .build();
+                    return Restriction.builder().let(attr).eq(bkt.getRange().getLeft()).build();
                 } else {
                     Restriction lowerBound = Restriction.builder().let(attr).gte(bkt.getRange().getLeft()).build();
                     Restriction upperBound = Restriction.builder().let(attr).lt(bkt.getRange().getRight()).build();

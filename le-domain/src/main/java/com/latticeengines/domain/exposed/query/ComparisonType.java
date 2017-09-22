@@ -11,12 +11,32 @@ public enum ComparisonType {
     LESS_OR_EQUAL, //
     IN_RANGE, //
     IN_COLLECTION, //
+    CONTAINS, //
+    NOT_CONTAINS, //
+    STARTS_WITH, //
     GTE_AND_LTE, //
     GTE_AND_LT, //
     GT_AND_LTE, //
-    GT_AND_LT,  //
-    EVER,
-    IN_CURRENT_PERIOD,
-    BEFORE,
-    AFTER
+    GT_AND_LT, //
+    EVER, //
+    IN_CURRENT_PERIOD, //
+    BEFORE, //
+    AFTER;
+
+    public boolean isLikeTypeOfComparison() {
+        return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH;
+    }
+
+    public boolean filter(String source, String target) {
+        switch (this) {
+        case CONTAINS:
+            // currently rely on negate to find complement of contains
+        case NOT_CONTAINS:
+            return source.toLowerCase().contains(target.toLowerCase());
+        case STARTS_WITH:
+            return source.toLowerCase().startsWith(target.toLowerCase());
+        default:
+            throw new UnsupportedOperationException();
+        }
+    }
 }

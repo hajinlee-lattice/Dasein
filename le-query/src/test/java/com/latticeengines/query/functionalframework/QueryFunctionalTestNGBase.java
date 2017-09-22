@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
-import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
@@ -31,12 +30,13 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected static AttributeRepository attrRepo;
     protected static String accountTableName;
     protected static String contactTableName;
-
     protected static final String BUCKETED_NOMINAL_ATTR = "TechIndicator_AdobeCreativeSuite";
     protected static final String BUCKETED_PHYSICAL_ATTR = "EAttr220";
-    protected static final long  BUCKETED_YES_IN_CUSTOEMR = 39;
-    protected static final long  BUCKETED_NO_IN_CUSTOEMR = 29;
-    protected static final long  BUCKETED_NULL_IN_CUSTOEMR = 506574 - BUCKETED_YES_IN_CUSTOEMR - BUCKETED_NO_IN_CUSTOEMR;
+    protected static final long BUCKETED_YES_IN_CUSTOEMR = 39;
+    protected static final long BUCKETED_NO_IN_CUSTOEMR = 29;
+    protected static final long TOTAL_RECORDS = 506574;
+    protected static final long BUCKETED_NULL_IN_CUSTOEMR = TOTAL_RECORDS - BUCKETED_YES_IN_CUSTOEMR
+            - BUCKETED_NO_IN_CUSTOEMR;
 
     protected static final String ATTR_ACCOUNT_NAME = InterfaceName.CompanyName.name();
     protected static final String ATTR_ACCOUNT_WEBSITE = InterfaceName.Website.name();
@@ -59,19 +59,18 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         AttributeLookup accountIdAttrLookup = new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_ID);
         Restriction contactRestriction = Restriction.builder().let(BusinessEntity.Contact, ATTR_CONTACT_EMAIL)
                 .eq("avelayudham@worldbank.org.kb").build();
-        Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
-                .eq(1802).build();
+        Restriction accountIdRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(1802)
+                .build();
 
-        Query innerQuery = Query.builder().from(BusinessEntity.Contact)
-                .where(contactRestriction).select(BusinessEntity.Contact, ATTR_ACCOUNT_ID).build();
+        Query innerQuery = Query.builder().from(BusinessEntity.Contact).where(contactRestriction)
+                .select(BusinessEntity.Contact, ATTR_ACCOUNT_ID).build();
         SubQuery subQuery = new SubQuery(innerQuery, subSelectAlias);
         Restriction subQueryRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID)
                 .inCollection(subQuery, ATTR_ACCOUNT_ID).build();
 
-        Restriction accountWithSelectedContact =
-                Restriction.builder().and(accountIdRestriction, subQueryRestriction).build();
-        Query query = Query.builder().where(accountWithSelectedContact)
-                .select(accountIdAttrLookup)
+        Restriction accountWithSelectedContact = Restriction.builder().and(accountIdRestriction, subQueryRestriction)
+                .build();
+        Query query = Query.builder().where(accountWithSelectedContact).select(accountIdAttrLookup)
                 .from(BusinessEntity.Account) //
                 .build();
         return query;

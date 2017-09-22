@@ -47,7 +47,7 @@ public final class QueryUtils {
     }
 
     public static List<Predicate> getJoinPredicates(BusinessEntity.Relationship relationship,
-                                                    Map<BusinessEntity, String> entityAliasMap) {
+            Map<BusinessEntity, String> entityAliasMap) {
         List<Predicate> joinPredicates = new ArrayList<>();
         for (Pair<InterfaceName, InterfaceName> pair : relationship.getJoinKeys()) {
             String srcAttrName = pair.getLeft().name();
@@ -55,12 +55,12 @@ public final class QueryUtils {
             // ON T1.c1 = T2.c2
             String parentAlias = entityAliasMap.get(relationship.getParent());
             String childAlias = entityAliasMap.get(relationship.getChild());
-            StringPath sourceAttr = (parentAlias == null) ?
-                    QueryUtils.getAttributePath(relationship.getParent(), srcAttrName):
-                    QueryUtils.getAttributePath(parentAlias, srcAttrName);
-            StringPath targetAttr = (childAlias == null) ?
-                    QueryUtils.getAttributePath(relationship.getChild(), tgtAttrName):
-                    QueryUtils.getAttributePath(childAlias, tgtAttrName);
+            StringPath sourceAttr = (parentAlias == null)
+                    ? QueryUtils.getAttributePath(relationship.getParent(), srcAttrName)
+                    : QueryUtils.getAttributePath(parentAlias, srcAttrName);
+            StringPath targetAttr = (childAlias == null)
+                    ? QueryUtils.getAttributePath(relationship.getChild(), tgtAttrName)
+                    : QueryUtils.getAttributePath(childAlias, tgtAttrName);
             joinPredicates.add(sourceAttr.eq(targetAttr));
         }
         return joinPredicates;

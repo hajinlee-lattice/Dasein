@@ -1,6 +1,8 @@
 package com.latticeengines.query.evaluator.restriction;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -8,8 +10,8 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.CollectionLookup;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
@@ -19,6 +21,7 @@ import com.latticeengines.query.evaluator.lookup.LookupResolver;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 
 public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestriction>
         implements RestrictionResolver<ConcreteRestriction> {
@@ -27,7 +30,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         super(factory);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public BooleanExpression resolve(ConcreteRestriction restriction) {
         Lookup lhs = restriction.getLhs();
@@ -43,13 +46,17 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 ValueLookup valueLookup = (ValueLookup) rhs;
                 AttributeStats stats = findAttributeStats(attrLookup);
                 Buckets bkts = stats.getBuckets();
-                rhs = convert(bkts, (String) valueLookup.getValue());
+                if (restriction.getRelation().isLikeTypeOfComparison()) {
+                    rhs = convert(restriction, bkts, (String) valueLookup.getValue());
+                } else {
+                    rhs = convert(bkts, (String) valueLookup.getValue());
+                }
             }
         }
 
         LookupResolver lhsResolver = lookupFactory.getLookupResolver(lhs.getClass());
-        List<ComparableExpression<Comparable>> lhsPaths = lhsResolver.resolveForCompare(lhs);
-        ComparableExpression<Comparable> lhsPath = lhsPaths.get(0);
+        List<ComparableExpression> lhsPaths = lhsResolver.resolveForCompare(lhs);
+        ComparableExpression lhsPath = lhsPaths.get(0);
 
         if (restriction.getRelation().equals(ComparisonType.EQUAL) && isNullValueLookup(rhs)) {
             if (restriction.getNegate()) {
@@ -58,14 +65,14 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 restriction.setRelation(ComparisonType.IS_NULL);
             }
         }
-        
+
         if (restriction.getRelation().equals(ComparisonType.IS_NULL)) {
             return lhsPath.isNull();
         } else if (restriction.getRelation().equals(ComparisonType.IS_NOT_NULL)) {
             return lhsPath.isNotNull();
         } else {
             LookupResolver rhsResolver = lookupFactory.getLookupResolver(rhs.getClass());
-            List<ComparableExpression<Comparable>> rhsPaths = rhsResolver.resolveForCompare(rhs);
+            List<ComparableExpression> rhsPaths = rhsResolver.resolveForCompare(rhs);
 
             BooleanExpression booleanExpression;
 
@@ -97,8 +104,10 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
                     booleanExpression = lhsPaths.get(0).in(subselect);
                 } else {
-                    // when there's only 1 element in the collection, querydsl generates something
-                    // like "attr in ?", which is not a valid syntax so we treat it differently
+                    // when there's only 1 element in the collection, querydsl
+                    // generates something
+                    // like "attr in ?", which is not a valid syntax so we treat
+                    // it differently
                     if (rhsPaths.size() > 1) {
                         booleanExpression = lhsPath.in(rhsPaths.toArray(new ComparableExpression[0]));
                     } else {
@@ -106,6 +115,17 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     }
                 }
                 break;
+            case CONTAINS:
+            case NOT_CONTAINS:
+                if (lhsPath instanceof StringExpression) {
+                    booleanExpression = ((StringExpression) lhsPath).containsIgnoreCase(rhsPaths.get(0));
+                    break;
+                }
+            case STARTS_WITH:
+                if (lhsPath instanceof StringExpression) {
+                    booleanExpression = ((StringExpression) lhsPath).startsWithIgnoreCase(rhsPaths.get(0));
+                    break;
+                }
             default:
                 throw new LedpException(LedpCode.LEDP_37006, new String[] { restriction.getRelation().toString() });
             }
@@ -128,7 +148,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             AttributeLookup attrLookup = (AttributeLookup) lhs;
             ColumnMetadata cm = findAttributeMetadata(attrLookup);
             if (cm == null) {
-                throw new IllegalArgumentException("Cannot find metadata for attribute " + attrLookup + " in attr repo.");
+                throw new IllegalArgumentException(
+                        "Cannot find metadata for attribute " + attrLookup + " in attr repo.");
             }
             if (cm.getBitOffset() != null) {
                 // lhs is bit encoded
@@ -140,13 +161,6 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     ValueLookup valueLookup = (ValueLookup) rhs;
                     Object val = valueLookup.getValue();
                     if (val == null || (val instanceof String)) {
-                        if (restriction.getNegate()) {
-                            throw new UnsupportedOperationException("Not support negate on bucketed attribute.");
-                        }
-                        if (!ComparisonType.EQUAL.equals(restriction.getRelation())) {
-                            throw new UnsupportedOperationException(
-                                    "Only support ComparisonType.EQUAL on bucketed attribute.");
-                        }
                         return true;
                     } else {
                         throw new UnsupportedOperationException("Bucket attribute can only do string value lookup.");
@@ -164,13 +178,41 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
         if (bktLbl != null) {
             Bucket bkt = buckets.getBucketList().stream() //
                     .filter(b -> b.getLabel().equals(bktLbl)) //
-                    .findFirst().orElse(null);
-            if (bkt == null) {
-                throw new QueryEvaluationException("Cannot find label [" + bktLbl + "] in statistics.");
-            }
+                    .findFirst() //
+                    .orElseThrow(() -> {
+                        return new QueryEvaluationException("Cannot find label [" + bktLbl + "] in statistics.");
+                    });
             value = bkt.getIdAsInt();
         }
         return new ValueLookup(value);
+    }
+
+    private Lookup convert(ConcreteRestriction restriction, Buckets buckets, String bktLbl) {
+        List<Object> ids = new ArrayList<>();
+        if (bktLbl != null) {
+            ids = buckets.getBucketList().stream() //
+                    .filter(b -> {
+                        String lbl = null;
+                        if (ComparisonType.EQUAL.equals(b.getComparisonType()) && b.getValues() != null
+                                && b.getValues().size() == 1) {
+                            lbl = (String) b.getValues().get(0);
+                        } else {
+                            lbl = b.getLabel();
+                        }
+                        return restriction.getRelation().filter(lbl, bktLbl);
+                    }) //
+                    .map(Bucket::getIdAsInt) //
+                    .collect(Collectors.toList());
+        }
+        if (ids.isEmpty()) {
+            throw new QueryEvaluationException("Cannot find corresponding label for " + bktLbl + " in statistics.");
+        }
+        if (ids.size() > 1) {
+            restriction.setRelation(ComparisonType.IN_COLLECTION);
+            return new CollectionLookup(ids);
+        }
+        restriction.setRelation(ComparisonType.EQUAL);
+        return new ValueLookup(ids.get(0));
     }
 
 }

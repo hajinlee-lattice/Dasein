@@ -50,8 +50,7 @@ public class QueryProcessor {
         query.analyze();
 
         LookupResolverFactory resolverFactory = new LookupResolverFactory(repository, this);
-        RestrictionResolverFactory rrFactory = new RestrictionResolverFactory(
-                resolverFactory, query.getExistsJoins(),
+        RestrictionResolverFactory rrFactory = new RestrictionResolverFactory(resolverFactory, query.getExistsJoins(),
                 queryFactory, this);
         resolverFactory.setRestrictionResolverFactory(rrFactory);
 
@@ -73,7 +72,6 @@ public class QueryProcessor {
             sqlQuery = addSort(sqlQuery, query.getSort(), resolverFactory);
         }
 
-
         if (query.getGroupBy() != null) {
             sqlQuery = addGroupBy(sqlQuery, query.getGroupBy(), resolverFactory);
         }
@@ -87,7 +85,7 @@ public class QueryProcessor {
     private SQLQuery<?> from(AttributeRepository repository, Query query) {
         SubQuery subQuery = query.getSubQuery();
         SQLQuery<?> sqlQuery = queryFactory.getQuery(repository);
-        for (SubQuery sq: query.getCommonTableQueryList()) {
+        for (SubQuery sq : query.getCommonTableQueryList()) {
             StringPath aliasTable = AttrRepoUtils.getTablePath(sq.getAlias());
             sqlQuery = sqlQuery.with(aliasTable, processSubueryExpression(repository, sq, false));
         }
@@ -102,12 +100,10 @@ public class QueryProcessor {
         return addJoins(sqlQuery, repository, query);
     }
 
-    private Expression<?> processSubueryExpression(AttributeRepository repository,
-                                                   SubQuery subQuery,
-                                                   boolean setAlias) {
-        return (setAlias) ?
-                process(repository, subQuery.getQuery()).as(subQuery.getAlias()):
-                process(repository, subQuery.getQuery());
+    private Expression<?> processSubueryExpression(AttributeRepository repository, SubQuery subQuery,
+            boolean setAlias) {
+        return (setAlias) ? process(repository, subQuery.getQuery()).as(subQuery.getAlias())
+                : process(repository, subQuery.getQuery());
     }
 
     /**
@@ -130,11 +126,12 @@ public class QueryProcessor {
             BusinessEntity.Relationship relationship = joinedEntities.stream() //
                     .map(e -> e.join(target)) //
                     .filter(Objects::nonNull) //
-                    .findAny().orElse(null);
-            if (relationship == null) {
-                throw new QueryEvaluationException(
-                        "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity() + " to entity " + target + ".");
-            }
+                    .findAny() //
+                    .orElseThrow(() -> {
+                        return new QueryEvaluationException(
+                                "Broken Connectivity: Cannot find a connected path from entity "
+                                        + join.getSourceEntity() + " to entity " + target + ".");
+                    });
             // JOIN T1
             EntityPath<String> targetTableName = AttrRepoUtils.getTablePathBuilder(repository, target);
             sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(target.name()));
@@ -147,16 +144,15 @@ public class QueryProcessor {
         return sqlQuery;
     }
 
-    private SQLQuery<?> addCommonTableJoins(SQLQuery<?> sqlQuery,
-                                            Query query) {
+    private SQLQuery<?> addCommonTableJoins(SQLQuery<?> sqlQuery, Query query) {
         List<Predicate> joinKeys = new ArrayList<>();
         BusinessEntity srcEntity = query.getMainEntity();
         for (JoinSpecification join : query.getCommonTableJoins()) {
             BusinessEntity target = join.getDestinationEntity();
             BusinessEntity.Relationship relationship = srcEntity.join(target);
             if (relationship == null) {
-                throw new QueryEvaluationException(
-                        "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity() + " to entity " + target + ".");
+                throw new QueryEvaluationException("Broken Connectivity: Cannot find a connected path from entity "
+                        + join.getSourceEntity() + " to entity " + target + ".");
             }
             Map<BusinessEntity, String> entityAliasMap = new HashMap<>();
             entityAliasMap.put(join.getSourceEntity(), join.getSource());
@@ -164,7 +160,7 @@ public class QueryProcessor {
             joinKeys.addAll(QueryUtils.getJoinPredicates(relationship, entityAliasMap));
         }
 
-        for (SubQuery subQuery: query.getCommonTableQueryList()) {
+        for (SubQuery subQuery : query.getCommonTableQueryList()) {
             // JOIN T1
             EntityPath<String> targetTableName = AttrRepoUtils.getEntityPath(subQuery.getAlias());
             sqlQuery = sqlQuery.join(targetTableName);
@@ -192,8 +188,8 @@ public class QueryProcessor {
     @SuppressWarnings("unchecked")
     private BooleanExpression processRestriction(Restriction restriction, LookupResolverFactory resolverFactory,
             List<JoinSpecification> existsJoins) {
-        RestrictionResolverFactory factory = new RestrictionResolverFactory(resolverFactory, existsJoins,
-                queryFactory, this);
+        RestrictionResolverFactory factory = new RestrictionResolverFactory(resolverFactory, existsJoins, queryFactory,
+                this);
         RestrictionResolver resolver = factory.getRestrictionResolver(restriction.getClass());
         return resolver.resolve(restriction);
     }
@@ -214,7 +210,8 @@ public class QueryProcessor {
             LookupResolver resolver = resolverFactory.getLookupResolver(AttributeLookup.class);
             for (Lookup lookup : sort.getLookups()) {
                 if (lookup instanceof AttributeLookup) {
-                    ComparableExpression<String> resolved = Expressions.asComparable(resolver.resolveForSelect(lookup, false));
+                    ComparableExpression<String> resolved = Expressions
+                            .asComparable(resolver.resolveForSelect(lookup, false));
                     if (sort.getDescending()) {
                         sqlQuery = sqlQuery.orderBy(resolved.desc());
                     } else {
@@ -229,14 +226,16 @@ public class QueryProcessor {
     @SuppressWarnings("unchecked")
     private SQLQuery<?> addGroupBy(SQLQuery<?> sqlQuery, GroupBy groupBy, LookupResolverFactory resolverFactory) {
         if (groupBy != null) {
-            for (Lookup lookup: groupBy.getLookups()) {
+            for (Lookup lookup : groupBy.getLookups()) {
                 LookupResolver resolver = resolverFactory.getLookupResolver(lookup.getClass());
-                ComparableExpression<String> resolved = Expressions.asComparable(resolver.resolveForSelect(lookup, false));
+                ComparableExpression<String> resolved = Expressions
+                        .asComparable(resolver.resolveForSelect(lookup, false));
                 sqlQuery = sqlQuery.groupBy(resolved);
             }
             if (groupBy.getHaving() != null) {
                 Restriction restriction = groupBy.getHaving();
-                BooleanExpression booleanExpression = processRestriction(restriction, resolverFactory, Collections.emptyList());
+                BooleanExpression booleanExpression = processRestriction(restriction, resolverFactory,
+                        Collections.emptyList());
                 sqlQuery = sqlQuery.having(booleanExpression);
             }
         }

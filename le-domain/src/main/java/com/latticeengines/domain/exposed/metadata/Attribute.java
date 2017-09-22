@@ -854,6 +854,22 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
+    public Boolean getExcludeFromAll() {
+        Boolean excludeFromAll = (Boolean) properties.get("ExcludeFromAll");
+        if (excludeFromAll == null) {
+            return false;
+        }
+        return excludeFromAll;
+    }
+
+    @JsonIgnore
+    @Transient
+    public void setExcludeFromAll(String excludeFromAll) {
+        properties.put("ExcludeFromAll", Boolean.valueOf(excludeFromAll));
+    }
+
+    @Transient
+    @JsonIgnore
     public void setBitOffset(Integer bitOffset) {
         properties.put("BitOffset", bitOffset);
     }
