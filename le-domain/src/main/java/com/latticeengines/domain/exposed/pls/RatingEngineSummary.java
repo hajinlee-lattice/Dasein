@@ -126,4 +126,5 @@ public class RatingEngineSummary {
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
 }

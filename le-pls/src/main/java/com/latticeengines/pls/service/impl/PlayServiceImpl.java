@@ -9,6 +9,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.CoverageInfo;
 import com.latticeengines.domain.exposed.pls.LaunchHistory;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -34,6 +36,7 @@ import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -60,6 +63,9 @@ public class PlayServiceImpl implements PlayService {
     @Autowired
     RatingCoverageService ratingCoverageService;
 
+    @Autowired
+    private DataFeedProxy dataFeedProxy;
+
     private ForkJoinPool tpForParallelStream;
 
     @PostConstruct
@@ -78,7 +84,9 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public List<Play> getAllPlays() {
-        return playEntityMgr.findAll();
+        List<Play> plays = playEntityMgr.findAll();
+        updateLastRefreshedDate(plays);
+        return plays;
     }
 
     @Override
@@ -86,12 +94,17 @@ public class PlayServiceImpl implements PlayService {
         if (StringUtils.isBlank(name)) {
             throw new LedpException(LedpCode.LEDP_18144);
         }
-        return playEntityMgr.findByName(name);
+        Play play = playEntityMgr.findByName(name);
+        if (play != null) {
+            updateLastRefreshedDate(play.getRatingEngine());
+        }
+        return play;
     }
 
     @Override
     public List<Play> getAllFullPlays(boolean shouldLoadCoverage) {
         List<Play> plays = getAllPlays();
+        Date lastRefreshedDate = findLastRefreshedDate();
         Tenant tenant = MultiTenantContext.getTenant();
 
         // to make loading of play list efficient and faster we need to run full
@@ -102,7 +115,7 @@ public class PlayServiceImpl implements PlayService {
                         .stream().parallel() //
                         .forEach( //
                                 play -> //
-                                getFullPlay(play, shouldLoadCoverage, tenant))) //
+                                getFullPlay(play, shouldLoadCoverage, tenant, lastRefreshedDate))) //
                 .join();
 
         return plays;
@@ -115,6 +128,11 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private Play getFullPlay(Play play, boolean shouldLoadCoverage, Tenant tenant) {
+        Date lastRefreshedDate = findLastRefreshedDate();
+        return getFullPlay(play, shouldLoadCoverage, tenant, lastRefreshedDate);
+    }
+
+    private Play getFullPlay(Play play, boolean shouldLoadCoverage, Tenant tenant, Date lastRefreshedDate) {
         if (play == null) {
             return null;
         }
@@ -140,6 +158,7 @@ public class PlayServiceImpl implements PlayService {
             }
         }
 
+        updateLastRefreshedDate(play.getRatingEngine(), lastRefreshedDate);
         return play;
     }
 
@@ -201,4 +220,32 @@ public class PlayServiceImpl implements PlayService {
         playEntityMgr.update(play);
     }
 
+    private void updateLastRefreshedDate(RatingEngine ratingEngine) {
+        Date lastRefreshedDate = findLastRefreshedDate();
+        updateLastRefreshedDate(ratingEngine, lastRefreshedDate);
+    }
+
+    private void updateLastRefreshedDate(RatingEngine ratingEngine, Date lastRefreshedDate) {
+        if (ratingEngine != null) {
+            ratingEngine.setLastRefreshedDate(lastRefreshedDate);
+        }
+    }
+
+    private void updateLastRefreshedDate(List<Play> plays) {
+        if (CollectionUtils.isNotEmpty(plays)) {
+            Date lastRefreshedDate = findLastRefreshedDate();
+            plays //
+                    .stream().forEach(play -> {
+                        if (play.getRatingEngine() != null) {
+                            play.getRatingEngine().setLastRefreshedDate(lastRefreshedDate);
+                        }
+                    });
+        }
+    }
+
+    private Date findLastRefreshedDate() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(tenant.getId());
+        return dataFeed.getLastPublished();
+    }
 }

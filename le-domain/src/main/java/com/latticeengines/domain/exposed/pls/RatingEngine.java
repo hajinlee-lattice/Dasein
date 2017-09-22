@@ -22,6 +22,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
@@ -115,6 +116,10 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
             CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.EAGER, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<RatingModel> ratingModels = new HashSet<>();
+
+    @JsonProperty("lastRefreshedDate")
+    @Transient
+    private Date lastRefreshedDate;
 
     @Override
     public Long getPid() {
@@ -228,6 +233,14 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         }
         ratingModel.setRatingEngine(this);
         this.ratingModels.add(ratingModel);
+    }
+
+    public Date getLastRefreshedDate() {
+        return lastRefreshedDate;
+    }
+
+    public void setLastRefreshedDate(Date lastRefreshedDate) {
+        this.lastRefreshedDate = lastRefreshedDate;
     }
 
     @Override

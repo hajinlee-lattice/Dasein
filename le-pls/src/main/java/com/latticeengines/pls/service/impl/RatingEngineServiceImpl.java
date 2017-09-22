@@ -1,9 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +45,10 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
-        return ratingEngineEntityMgr.findAll();
+        Tenant tenant = MultiTenantContext.getTenant();
+        List<RatingEngine> result = ratingEngineEntityMgr.findAll();
+        updateLastRefreshedDate(tenant.getId(), result);
+        return result;
     }
 
     @Override
@@ -73,14 +78,17 @@ public class RatingEngineServiceImpl implements RatingEngineService {
         ratingEngineSummary.setCreated(ratingEngine.getCreated());
         ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
 
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(tenantId);
-        ratingEngineSummary.setLastRefreshedDate(dataFeed.getLastPublished());
+        Date lastRefreshedDate = findLastRefreshedDate(tenantId);
+        ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);
         return ratingEngineSummary;
     }
 
     @Override
     public RatingEngine getRatingEngineById(String id) {
-        return ratingEngineEntityMgr.findById(id);
+        Tenant tenant = MultiTenantContext.getTenant();
+        RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
+        updateLastRefreshedDate(tenant.getId(), ratingEngine);
+        return ratingEngine;
     }
 
     @Override
@@ -88,6 +96,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
         if (ratingEngine == null) {
             throw new NullPointerException("Entity is null when creating a rating engine.");
         }
+        Tenant tenant = MultiTenantContext.getTenant();
         if (ratingEngine.getSegment() != null) {
             MetadataSegmentDTO segmentDTO = metadataSegmentService
                     .getSegmentDTOByName(ratingEngine.getSegment().getName(), false);
@@ -95,7 +104,10 @@ public class RatingEngineServiceImpl implements RatingEngineService {
             segment.setPid(segmentDTO.getPrimaryKey());
             ratingEngine.setSegment(segment);
         }
-        return ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenantId);
+
+        ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenantId);
+        updateLastRefreshedDate(tenant.getId(), ratingEngine);
+        return ratingEngine;
     }
 
     @Override
@@ -127,6 +139,26 @@ public class RatingEngineServiceImpl implements RatingEngineService {
                 .getRatingModelService(ratingEngine.getType());
         ratingModel.setId(ratingModelId);
         return ratingModelService.createOrUpdate(ratingModel, ratingEngineId);
+    }
+
+    private void updateLastRefreshedDate(String tenantId, List<RatingEngine> ratingEngines) {
+        if (CollectionUtils.isNotEmpty(ratingEngines)) {
+            Date lastRefreshedDate = findLastRefreshedDate(tenantId);
+            ratingEngines.stream().forEach(re -> re.setLastRefreshedDate(lastRefreshedDate));
+        }
+    }
+
+    private void updateLastRefreshedDate(String tenantId, RatingEngine ratingEngine) {
+        if (ratingEngine != null) {
+            Date lastRefreshedDate = findLastRefreshedDate(tenantId);
+            ratingEngine.setLastRefreshedDate(lastRefreshedDate);
+        }
+    }
+
+    private Date findLastRefreshedDate(String tenantId) {
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(tenantId);
+        Date lastRefreshedDate = dataFeed.getLastPublished();
+        return lastRefreshedDate;
     }
 
     private RatingEngine validateRatingEngine(String ratingEngineId) {
