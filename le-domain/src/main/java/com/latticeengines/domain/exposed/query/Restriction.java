@@ -1,5 +1,9 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -11,6 +15,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
         @Type(value = BucketRestriction.class, name = "bucketRestriction"),
+        @Type(value = TransactionRestriction.class, name = "transactionRestriction"),
+        @Type(value = TimeRestriction.class, name = "timeRestriction"),
+        @Type(value = PurchaseRestriction.class, name = "purchaseRestriction"),
         @Type(value = ConcreteRestriction.class, name = "concreteRestriction"),
         @Type(value = ExistsRestriction.class, name = "existsRestriction"),
         @Type(value = LogicalRestriction.class, name = "logicalRestriction") })
