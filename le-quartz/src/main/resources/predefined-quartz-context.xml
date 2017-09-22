@@ -127,9 +127,42 @@
         <property name="jobTimeout" value="${quartz.matchapi.matchcommandclean.refresh.job.timeout:3600}" />
     </bean>
 
+    <bean name="cdlImportJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="cdlImportJob" />
+        <property name="cronTrigger" value="${quartz.cdl.import.job.cron:0 0/20 * * * ?}" />
+        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlImportJob&quot;}" />
+        <property name="jobTimeout" value="${quartz.cdl.import.job.timeout:3600}" />
+    </bean>
+
+    <bean name="cdlConsolidateJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="cdlConsolidateJob" />
+        <property name="cronTrigger" value="${quartz.cdl.consolidate.job.cron:0 0/20 * * * ?}" />
+        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlConsolidateJob&quot;}" />
+        <property name="jobTimeout" value="${quartz.cdl.consolidate.job.timeout:3600}" />
+    </bean>
+
+    <bean name="cdlProfileJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="cdlProfileJob" />
+        <property name="cronTrigger" value="${quartz.cdl.profile.job.cron:0 0/20 * * * ?}" />
+        <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}" />
+        <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}" />
+        <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}" />
+        <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}" />
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlProfileJob&quot;}" />
+        <property name="jobTimeout" value="${quartz.cdl.profile.job.timeout:3600}" />
+    </bean>
+
     <util:list id="predefinedJobs" list-class="java.util.ArrayList">
-        <ref bean="plsModelSummaryDownload"/>
         <ref bean="plsModelSummaryFullDownload"/>
+        <ref bean="plsModelSummaryDownload"/>
         <ref bean="dataplatformDLOrchestration"/>
         <ref bean="dataplatformJobWatchdog"/>
         <ref bean="dellebiDailyJob1"/>
@@ -138,6 +171,9 @@
         <ref bean="dataCloudRefresh"/>
         <ref bean="scoringManagerJob"/>
         <ref bean="matchCommandClean"/>
+        <ref bean="cdlImportJob"/>
+        <ref bean="cdlConsolidateJob"/>
+        <ref bean="cdlProfileJob"/>
     </util:list>
 
 </beans>
