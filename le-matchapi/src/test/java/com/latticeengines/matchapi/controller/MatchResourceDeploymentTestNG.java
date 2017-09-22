@@ -392,7 +392,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
 
     @Test(groups = "deployment", enabled = true)
     public void testGetBulkConfig() {
-        MatchInput input = createAvroBulkMatchInput(true, null, "2.0.4");
+        String currentVersion = dataCloudVersionEntityMgr.currentApprovedVersionAsString();
+        MatchInput input = createAvroBulkMatchInput(true, null, currentVersion);
         BulkMatchWorkflowConfiguration bulkConf = matchProxy.getBulkConfig(input, podId);
         Assert.assertNotNull(bulkConf);
         Assert.assertEquals(bulkConf.getSwpkgName(), "datacloud");
