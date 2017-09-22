@@ -35,11 +35,19 @@
 				text-align: center;
 				font-size: 16px;
 			}
+			& > div {
+				display: flex;
+				justify-content: center;
+				align-items: stretch;
+				flex-direction: column;
+			}
 			.barChart.ratings {
 				display: flex;
 				justify-content: center;
 				align-items: flex-end;
+				vertical-align: bottom;
 				& > li {
+					flex: 0 0 1;
 					width: 15%;
 					margin: 0 2px;
 					text-align: center;
@@ -94,6 +102,20 @@
 					}
 				}
 			}
+			.inactive {
+				h4 {
+					color: #bbb;
+				}
+				.barChart.ratings > li {
+					.value {
+						color: #bbb;
+					}
+					.rating-bar {
+		                border-bottom-color: #ddd;
+		                background-color: #ddd;
+					}
+				}
+			}
 		}
 		form {
 			padding: 0 13px 13px;
@@ -129,6 +151,16 @@
 					box-shadow: none;
 				}
 			}
+		}
+	}
+	.bucket-loading {
+		text-align: center;
+		display: block;
+		margin-top: 28px;
+		i {
+			font-size: 24px;
+			color: #ddd;
+			display: block;
 		}
 	}
 }

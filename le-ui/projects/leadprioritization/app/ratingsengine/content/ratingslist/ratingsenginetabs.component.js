@@ -2,8 +2,8 @@ angular.module('lp.ratingsengine.ratingsenginetabs', [
     'mainApp.appCommon.utilities.ResourceUtility'
     ])
 .controller('RatingsEngineTabsController', function (
-    $state, $stateParams, $timeout, $scope, BrowserStorageUtility,
-    ResourceUtility, RatingList
+    $state, $stateParams, $timeout, $scope, $filter,
+    BrowserStorageUtility, ResourceUtility, RatingList
 ) {
     var vm = this;
 
@@ -13,13 +13,12 @@ angular.module('lp.ratingsengine.ratingsenginetabs', [
     });
 
     vm.init = function() {
-        vm.activeCount = function() {
-            var count = 0;
-            angular.forEach(vm.ratings, function(rating){
-                count += rating.status.ACTIVE ? 1 : 0;
-            });
-            return count; 
-        };
+
+        // console.log(vm.ratings);
+
+        vm.inactiveCount = $filter('filter')(vm.ratings, { status: 'INACTIVE' }).length;
+        vm.activeCount = vm.ratings.length - vm.inactiveCount; 
+
     }
     vm.init();
 

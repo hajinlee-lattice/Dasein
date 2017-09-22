@@ -1,13 +1,14 @@
 <section id="RatingsEngineTabsView" class="containerx">
     <ul>
+        
         <li
             ui-sref="home.ratingsengine.ratingslist"
             ui-sref-active="active">
             <div class="tab-container">
                 <h2>Rating Engines</h2>
                 <div class="enrichmentCounts">
-                    <span class="count">1</span> active
-                    <span class="count">0</span> inactive
+                    <span class="count">{{vm.activeCount}}</span> active
+                    <span class="count">{{vm.inactiveCount}}</span> inactive
                 </div>
             </div>
         </li>

@@ -38,17 +38,6 @@ angular
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Ratings Engine'
             },
-            resolve: {
-                RatingsList: function($q, RatingsEngineStore) {
-                    var deferred = $q.defer();
-
-                    RatingsEngineStore.getRatings().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }
-            },
             views: {
                 "main@": {
                     controller: 'RatingsEngineListController',

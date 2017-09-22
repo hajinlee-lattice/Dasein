@@ -2,7 +2,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     'mainApp.ratingsengine.deleteratingmodal'
 ])
 .controller('RatingsEngineListController', function ($scope, $timeout, $element, $state, 
-$stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRatingModal) {
+$stateParams, $filter, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRatingModal) {
 
     var vm = this;
     angular.extend(vm, {
@@ -10,6 +10,8 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
         filteredItems: [],
         tileStates: {},
         query: '',
+        loadingRatingChart: true,
+        buckets: {},
         header: {
             sort: {
                 label: 'Sort By',
@@ -17,7 +19,7 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
                 order: '-',
                 property: 'created',
                 items: [
-                    { label: 'Modified Date',   icon: 'numeric',    property: 'updated' },
+                    { label: 'Last Data Refresh',   icon: 'numeric',    property: 'updated' },
                     { label: 'Creation Date',   icon: 'numeric',    property: 'created' },
                     { label: 'Rating Name',      icon: 'alpha',      property: 'displayName' }
                 ]
@@ -27,31 +29,46 @@ $stateParams, RatingList, RatingsEngineStore, RatingsEngineService, DeleteRating
                 unfiltered: RatingList,
                 filtered: RatingList,
                 items: [
-                    { label: "All", action: { }, total: vm.totalLength }
-                    // { 
-                    //     label: "Draft", 
-                    //     action: { 
-                    //         launchHistory: {playLaunch: null},
-                    //         segment: null
-                    //     }, 
-                    //     total: ''
-                    // }
+                    { label: "All", action: { }, total: vm.totalLength },
+                    { label: "Active", action: { status: 'ACTIVE' }, total: vm.activeCount },
+                    { label: "Inactive", action: { status: 'INACTIVE' }, total: vm.inactiveCount },
                 ]
             }
         }
     });
 
-    vm.init = function($q) {
+    vm.init = function($q, $filter) {
+
+        // console.log(vm.ratings);
         
-        var checkLaunchState;
+        var checkLaunchState,
+            arrayofIds = [];
+
         RatingsEngineStore.clear();
 
         angular.forEach(vm.ratings, function(rating) {
-            vm.tileStates[rating.id] = {
+            
+            var ratingId = rating.id;
+
+            vm.tileStates[ratingId] = {
                 showCustomMenu: false,
                 editRating: false,
             };
+
+            arrayofIds.push(ratingId);
+
         });
+
+        RatingsEngineStore.getRatingsChartData(arrayofIds).then(function(response){
+
+            vm.loadingRatingChart = false;
+            vm.buckets = response;
+
+            angular.forEach(vm.ratings, function(rating) {
+                rating.bucketInformation = vm.buckets.ratingEngineIdCoverageMap[rating.id];
+            });
+
+        });  
 
     }
     vm.init();

@@ -93,6 +93,32 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
+
+    this.getRatingsChartData = function(arrayofIds){
+        var deferred = $q.defer();
+        
+        RatingsEngineService.getRatingsChartData(arrayofIds).then(function(response){
+            deferred.resolve(response);
+        });
+
+        return deferred.promise;
+    };
+
+    // this.getRatingsCounts = function(Ratings, noSalesForceId) {
+    //     var deferred = $q.defer(),
+    //         ratings_ids = [],
+    //         noSalesForceId = noSalesForceId || false;
+    //     if(Ratings && typeof Ratings === 'object') {
+    //         Ratings.forEach(function(value, key) {
+    //             ratings_ids.push(value.id);
+    //         });
+    //         RatingsEngineService.getRatingsCounts(ratings_ids, noSalesForceId).then(function(data) {
+    //             deferred.resolve(data);
+    //         });
+    //     }
+    //     return deferred.promise;
+    // }
+
 })
 .service('RatingsEngineService', function($q, $http, $state) {
     this.host = '/pls'; //default
@@ -122,6 +148,35 @@ angular.module('lp.ratingsengine')
                 deferred.reject(errorMsg);
             }
         );
+        return deferred.promise;
+    }
+
+    // this.getRatingsCounts = function(ratings, noSalesForceId) {
+    //     var deferred = $q.defer();
+    //     $http({
+    //         method: 'POST',
+    //         url: this.host + '/ratingengines/coverage',
+    //         data: {
+    //             ratingEngineIds: ratings,
+    //             restrictNotNullSalesforceId: noSalesForceId
+    //         }
+    //     }).then(function(response) {
+    //         deferred.resolve(response.data);
+    //     });
+    //     return deferred.promise;
+    // }
+
+    this.getRatingsChartData = function(arrayofIds) {
+        var deferred = $q.defer();
+        $http({
+            method: 'POST',
+            url: this.host + '/ratingengines/coverage',
+            data: {
+                ratingEngineIds: arrayofIds
+            }
+        }).then(function(response) {
+            deferred.resolve(response.data);
+        });
         return deferred.promise;
     }
 
@@ -174,44 +229,6 @@ angular.module('lp.ratingsengine')
         }).then(function(response){
             deferred.resolve(response.data);
         });
-        return deferred.promise;
-    }
-
-    this.getRatingsStub = function() {
-        var deferred = $q.defer(),
-            stub = [{
-            "created": "2017-08-28T17:11:47.490Z",
-            "createdBy": "Jon Hadden",
-            "displayName": "Jon Test Rating Engine",
-            "id": "1234",
-            "note": "string",
-            "pid": 0,
-            "lastDataRefresh": "2017-08-28T17:11:47.490Z",
-            "bucketInformation": [
-                {
-                    bucket: "A",
-                    count: 500
-                },
-                {
-                    bucket: "B",
-                    count: 500
-                },
-                {
-                    bucket: "C",
-                    count: 500
-                }
-            ],
-            "status": "ACTIVE",
-            "tenant": {
-                "DisplayName": "string",
-                "Identifier": "string",
-                "RegisteredTime": 0,
-                "UIVersion": "string"
-            },
-            "type": "RULE_BASED",
-            "updated": "2017-08-28T17:11:47.499Z"
-        }];
-        deferred.resolve(stub);
         return deferred.promise;
     }
 
