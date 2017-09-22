@@ -7,6 +7,7 @@ import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.MIN;
 import static com.latticeengines.domain.exposed.query.AggregateLookup.Aggregator.SUM;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -32,6 +33,9 @@ public class AggregateLookup extends Lookup {
     @JsonProperty("alias")
     private String alias;
 
+    @JsonProperty("nvl")
+    private BigDecimal nvl;
+
     public static AggregateLookup count() {
         AggregateLookup lookup1 = new AggregateLookup();
         lookup1.setAggregator(COUNT);
@@ -42,6 +46,7 @@ public class AggregateLookup extends Lookup {
         AggregateLookup lookup1 = new AggregateLookup();
         lookup1.setLookup(mixin);
         lookup1.setAggregator(SUM);
+        lookup1.setNvl(BigDecimal.ZERO);
         return lookup1;
     }
 
@@ -49,6 +54,7 @@ public class AggregateLookup extends Lookup {
         AggregateLookup lookup1 = new AggregateLookup();
         lookup1.setLookup(mixin);
         lookup1.setAggregator(AVG);
+        lookup1.setNvl(BigDecimal.ZERO);
         return lookup1;
     }
 
@@ -93,6 +99,14 @@ public class AggregateLookup extends Lookup {
     public AggregateLookup as(String alias) {
         setAlias(alias);
         return this;
+    }
+
+    public BigDecimal getNvl() {
+        return nvl;
+    }
+
+    public void setNvl(BigDecimal nvl) {
+        this.nvl = nvl;
     }
 
     public enum Aggregator {

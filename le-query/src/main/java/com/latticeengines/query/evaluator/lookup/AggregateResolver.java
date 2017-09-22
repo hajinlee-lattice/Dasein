@@ -61,8 +61,8 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
 
     @SuppressWarnings("unchecked")
     private List<ComparableExpression<? extends Comparable>> numExpressionForCompare(AggregateLookup lookup) {
-        NumberExpression sumExpression = (NumberExpression) numExpressionForSelect(lookup, false);
-        return Collections.singletonList(Expressions.asComparable(sumExpression));
+        NumberExpression numExpression = (NumberExpression) numExpressionForSelect(lookup, false);
+        return Collections.singletonList(Expressions.asComparable(numExpression));
     }
 
     @SuppressWarnings("unchecked")
@@ -95,9 +95,9 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         if (asAlias && StringUtils.isNotBlank(lookup.getAlias())) {
             switch (lookup.getAggregator()) {
             case SUM:
-                return numberPath.sum().as(lookup.getAlias());
+                return numberPath.sum().coalesce(lookup.getNvl()).asNumber().as(lookup.getAlias());
             case AVG:
-                return numberPath.avg().as(lookup.getAlias());
+                return numberPath.avg().coalesce(lookup.getNvl()).asNumber().as(lookup.getAlias());
             case MAX:
                 return numberExpression.max().as(lookup.getAlias());
             case MIN:
@@ -108,9 +108,9 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         } else {
             switch (lookup.getAggregator()) {
             case SUM:
-                return numberPath.sum();
+                return numberPath.sum().coalesce(lookup.getNvl()).asNumber();
             case AVG:
-                return numberPath.avg();
+                return numberPath.avg().coalesce(lookup.getNvl()).asNumber();
             case MAX:
                 return numberExpression.max();
             case MIN:

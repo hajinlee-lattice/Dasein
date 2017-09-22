@@ -257,14 +257,26 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Restriction sumRestriction = Restriction.builder().let(sumLookup).gt(0).build();
         Restriction avgRestriction = Restriction.builder().let(avgLookup).gt(0).build();
         Restriction orRestriction = Restriction.builder().or(sumRestriction, avgRestriction).build();
-        Restriction acctRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(44602)
+        Restriction acctPosRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(44602)
                 .build();
-        Query query = Query.builder() //
+        Query queryPositive = Query.builder() //
                 .select(attrLookup, sumLookup, avgLookup) //
                 .from(BusinessEntity.Account) //
-                .where(acctRestriction).groupBy(attrLookup) //
+                .where(acctPosRestriction).groupBy(attrLookup) //
                 .having(orRestriction).build();
-        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, queryPositive).getData();
+        Assert.assertEquals(results.size(), 1);
+        Restriction sumNullRestriction = Restriction.builder().let(sumLookup).eq(0).build();
+        Restriction avgNullRestriction = Restriction.builder().let(avgLookup).eq(0).build();
+        Restriction andNullRestriction = Restriction.builder().or(sumNullRestriction, avgNullRestriction).build();
+        Restriction acctNullRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_ID).eq(1802)
+                .build();
+        Query queryNullAggregation = Query.builder() //
+                .select(attrLookup, sumLookup, avgLookup) //
+                .from(BusinessEntity.Account) //
+                .where(acctNullRestriction).groupBy(attrLookup) //
+                .having(andNullRestriction).build();
+        results = queryEvaluatorService.getData(attrRepo, queryNullAggregation).getData();
         Assert.assertEquals(results.size(), 1);
     }
 

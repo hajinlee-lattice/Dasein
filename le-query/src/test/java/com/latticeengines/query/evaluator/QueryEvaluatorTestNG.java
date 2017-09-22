@@ -353,10 +353,11 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .having(orRestriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("select %s.%s, %s, %s", ACCOUNT, ATTR_ACCOUNT_NAME,
-                "sum(Account.AlexaViewsPerUser)", "avg(Account.AlexaViewsPerUser)"));
+                "coalesce(sum(Account.AlexaViewsPerUser), ?)", "coalesce(avg(Account.AlexaViewsPerUser), ?)"));
         sqlContains(sqlQuery, String.format("from %s as %s", accountTableName, ACCOUNT));
         sqlContains(sqlQuery, String.format("where %s.%s = ?", ACCOUNT, ATTR_ACCOUNT_ID));
-        sqlContains(sqlQuery, "having sum(Account.AlexaViewsPerUser) > ? or avg(Account.AlexaViewsPerUser) > ?");
+        sqlContains(sqlQuery,
+                "having coalesce(sum(Account.AlexaViewsPerUser), ?) > ? or coalesce(avg(Account.AlexaViewsPerUser), ?) > ?");
         sqlContains(sqlQuery, String.format("group by %s.%s", ACCOUNT, ATTR_ACCOUNT_NAME));
     }
 
