@@ -60,12 +60,8 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
 
 
     @Override
-    protected String getConsolidateDataConfig(boolean isDedupeSource) {
-        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(srcIdField);
+    protected void setupConfig(ConsolidateDataTransformerConfig config) {
         config.setMasterIdField(TableRoleInCollection.ConsolidatedContact.getPrimaryKey().name());
-        config.setDedupeSource(isDedupeSource);
-        return appendEngineConf(config, lightEngineConfig());
     }
 
 }

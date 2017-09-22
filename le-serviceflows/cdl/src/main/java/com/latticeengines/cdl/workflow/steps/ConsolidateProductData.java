@@ -45,7 +45,7 @@ public class ConsolidateProductData extends ConsolidateDataBase<ConsolidateProdu
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
             steps.add(upsertMaster);
-            if (!isBucketing()) {
+            if (isBucketing()) {
                 steps.add(diff);
                 steps.add(sort);
             }
@@ -59,12 +59,7 @@ public class ConsolidateProductData extends ConsolidateDataBase<ConsolidateProdu
     }
 
     @Override
-    protected String getConsolidateDataConfig(boolean isDedupeSource) {
-        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(srcIdField);
+    protected void setupConfig(ConsolidateDataTransformerConfig config) {
         config.setMasterIdField(TableRoleInCollection.ConsolidatedProduct.getPrimaryKey().name());
-        config.setDedupeSource(isDedupeSource);
-        return appendEngineConf(config, lightEngineConfig());
     }
-
 }

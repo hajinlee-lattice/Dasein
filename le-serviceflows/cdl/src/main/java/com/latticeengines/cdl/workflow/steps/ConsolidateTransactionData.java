@@ -237,4 +237,9 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
         extract.setExtractionTimestamp(DateTime.now().getMillis());
         masterTable.addExtract(extract);
     }
+
+    @Override
+    protected void setupConfig(ConsolidateDataTransformerConfig config) {
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedTransaction.getPrimaryKey().name());
+    }
 }

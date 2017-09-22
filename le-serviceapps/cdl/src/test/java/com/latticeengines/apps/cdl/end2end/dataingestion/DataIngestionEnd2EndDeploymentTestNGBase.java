@@ -212,8 +212,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             importTemplate.setTableType(TableType.IMPORTTABLE);
             if (BusinessEntity.Account.equals(entity)) {
                 importTemplate.setName(SchemaInterpretation.Account.name());
-            } else {
+            } else if (BusinessEntity.Contact.equals(entity)) {
                 importTemplate.setName(SchemaInterpretation.Contact.name());
+            } else {
+                importTemplate.setName(SchemaInterpretation.Product.name());
             }
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setImportTemplate(importTemplate);
@@ -327,6 +329,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                         .anyMatch(n -> InterfaceName.AccountId.name().equals(n));
                 Assert.assertTrue(hasId);
                 Assert.assertTrue(hasAccountId);
+                break;
+            case Product:
+                hasId = schema.getFields().stream().map(Schema.Field::name)
+                        .anyMatch(n -> InterfaceName.Id.name().equals(n));
+                Assert.assertTrue(hasId);
                 break;
             case Account:
                 hasId = schema.getFields().stream().map(Schema.Field::name)
@@ -507,7 +514,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     protected void verifyConsolidateReport(String appId, int publishReportSize, long exportedAccounts,
-            long exportedContacts) {
+            long exportedContacts, long exportedProducts) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 2);
         Report publishReport = reports.get(1);
@@ -516,8 +523,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 });
         assertEquals(map.entrySet().size(), publishReportSize);
         if (publishReportSize != 0) {
-            assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).longValue(), exportedAccounts);
-            assertEquals(map.get(TableRoleInCollection.SortedContact.name()).longValue(), exportedContacts);
+            if (publishReportSize == 1) {
+                assertEquals(map.get(TableRoleInCollection.SortedProduct.name()).longValue(), exportedProducts);
+            }
+            if (publishReportSize > 1) {
+                assertEquals(map.get(TableRoleInCollection.BucketedAccount.name()).longValue(), exportedAccounts);
+                assertEquals(map.get(TableRoleInCollection.SortedContact.name()).longValue(), exportedContacts);
+            }
         }
     }
 

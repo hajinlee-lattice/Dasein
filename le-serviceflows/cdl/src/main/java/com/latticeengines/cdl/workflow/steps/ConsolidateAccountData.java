@@ -105,18 +105,16 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
         }
     }
 
+
     @Override
-    protected String getConsolidateDataConfig(boolean isDedupeSource) {
-        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(srcIdField);
-        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+    protected void setupConfig(ConsolidateDataTransformerConfig config) {
         if (inputMasterTableName != null) {
             List<String> fields = AvroUtils.getSchemaFields(yarnConfiguration,
                     masterTable.getExtracts().get(0).getPath());
             config.setOrigMasterFields(fields);
         }
-        config.setDedupeSource(isDedupeSource);
-        return appendEngineConf(config, lightEngineConfig());
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+
     }
 
     private TransformationStepConfig mergeNew() {

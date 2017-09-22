@@ -164,8 +164,12 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         isActive = getObjectFromContext(IS_ACTIVE, Boolean.class);
         if (isBucketing()) {
             Table profileTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.Profile);
-            profileTableName = profileTable.getName();
-            log.info("Set profileTableName=" + profileTableName);
+            if (profileTable != null) {
+                profileTableName = profileTable.getName();
+                log.info("Set profileTableName=" + profileTableName);
+            } else {
+                log.info("There's no profileTableName");
+            }
         }
     }
 
@@ -214,6 +218,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         step.setTransformer("consolidateDeltaTransformer");
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(srcIdField);
+        setupConfig(config);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
@@ -266,9 +271,17 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         return configuration.isBucketing();
     }
 
-    public abstract PipelineTransformationRequest getConsolidateRequest();
+    protected String getConsolidateDataConfig(boolean isDedupeSource) {
+        ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
+        config.setSrcIdField(srcIdField);
+        setupConfig(config);
+        config.setDedupeSource(isDedupeSource);
+        return appendEngineConf(config, lightEngineConfig());
+    }
 
-    abstract String getConsolidateDataConfig(boolean isDedupeSource);
+    protected abstract void setupConfig(ConsolidateDataTransformerConfig config);
+
+    public abstract PipelineTransformationRequest getConsolidateRequest();
 
     public BusinessEntity getBusinessEntity() {
         return configuration.getBusinessEntity();

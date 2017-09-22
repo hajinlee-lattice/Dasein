@@ -46,7 +46,7 @@ public class SecondConsolidateDeploymentTestNG extends DataIngestionEnd2EndDeplo
     }
 
     private void verifyConsolidate() {
-        verifyConsolidateReport(consolidateAppId, 2, ACCOUNT_IMPORT_SIZE_2, ACCOUNT_IMPORT_SIZE_2);
+        verifyConsolidateReport(consolidateAppId, 2, ACCOUNT_IMPORT_SIZE_2, ACCOUNT_IMPORT_SIZE_2, 0);
         verifyDataFeedStatsu(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion);
 

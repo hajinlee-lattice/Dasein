@@ -70,6 +70,8 @@ public class CheckpointService {
     static final int CONTACT_IMPORT_SIZE_2 = 200;
     static final int CONTACT_IMPORT_SIZE_3 = 300;
 
+    static final int PRODUCT_IMPORT_SIZE_1 = 100;
+
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 

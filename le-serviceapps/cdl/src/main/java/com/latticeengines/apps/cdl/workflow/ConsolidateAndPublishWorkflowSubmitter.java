@@ -137,7 +137,7 @@ public class ConsolidateAndPublishWorkflowSubmitter extends WorkflowSubmitter {
                 .bucketContact(dataCollectionProxy.getTable(customerSpace.toString(),
                         TableRoleInCollection.ContactProfile) != null) //
                 .transactionIdField(InterfaceName.Id.name()) //
-                .bucketTransaction(false) //
+                .bucketTransaction(true) //
                 .bucketProduct(true) //
                 .workflowContainerMem(workflowMemMb) //
                 .build();
