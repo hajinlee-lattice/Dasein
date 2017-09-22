@@ -17,7 +17,8 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
         wget https://s3.amazonaws.com/latticeengines-dev/hadoop-${HDP_VERSION}.tar.gz -O ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz
     fi
     rm -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION} || true
-    tar xzf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz -C ${ARTIFACT_DIR}
+    mkdir -p ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}
+    tar xzf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}.tar.gz -C ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}
     cp -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}/* ${HADOOP_HOME}
     rm -rf ${ARTIFACT_DIR}/hadoop-${HDP_VERSION}
 
