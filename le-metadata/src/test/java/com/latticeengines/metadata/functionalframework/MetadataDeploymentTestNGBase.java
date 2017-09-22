@@ -23,7 +23,8 @@ import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFiel
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })

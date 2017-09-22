@@ -101,6 +101,7 @@ public class DataFeedTaskResource {
     @ApiOperation(value = "Get unconsolidated extracts in queue")
     public List<Extract> getExtractsPendingInQueue(@PathVariable String customerSpace, @PathVariable String source,
             @PathVariable String dataFeedType, @PathVariable String entity) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getExtractsPendingInQueue(customerSpace, source, dataFeedType, entity);
     }
 
