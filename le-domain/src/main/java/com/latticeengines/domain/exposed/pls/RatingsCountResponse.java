@@ -15,6 +15,8 @@ public class RatingsCountResponse {
 
     private Map<String, CoverageInfo> segmentIdModelRulesCoverageMap;
 
+    private Map<String, String> errorMap;
+
     public Map<String, CoverageInfo> getSegmentIdCoverageMap() {
         return segmentIdCoverageMap;
     }
@@ -47,4 +49,11 @@ public class RatingsCountResponse {
         this.segmentIdModelRulesCoverageMap = segmentIdModelRulesCoverageMap;
     }
 
+    public Map<String, String> getErrorMap() {
+        return errorMap;
+    }
+
+    public void setErrorMap(Map<String, String> errorMap) {
+        this.errorMap = errorMap;
+    }
 }

@@ -97,6 +97,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         RatingsCountResponse result = new RatingsCountResponse();
         Map<String, CoverageInfo> ratingEngineIdCoverageMap = new ConcurrentHashMap<>();
         result.setRatingEngineIdCoverageMap(ratingEngineIdCoverageMap);
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        result.setErrorMap(errorMap);
 
         if (request.getRatingEngineIds().size() < thresholdForParallelProcessing) {
             // it is more efficient to use sequential stream (will use current
@@ -104,7 +106,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             // requests are not blocked if threadpool is used by bigger requests
             Stream<String> stream = //
                     request.getRatingEngineIds().stream();
-            ratingEngineStreamProcessing(request, tenent, ratingEngineIdCoverageMap, stream);
+            ratingEngineStreamProcessing(request, tenent, ratingEngineIdCoverageMap, errorMap, stream);
         } else {
             tpForParallelStream.submit(//
                     () -> //
@@ -113,7 +115,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                 request.getRatingEngineIds().stream() //
                                         .parallel();
 
-                        ratingEngineStreamProcessing(request, tenent, ratingEngineIdCoverageMap, parallelStream);
+                        ratingEngineStreamProcessing(request, tenent, ratingEngineIdCoverageMap, errorMap,
+                                parallelStream);
                     }) //
                     .join();
         }
@@ -127,6 +130,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         RatingsCountResponse result = new RatingsCountResponse();
         Map<String, CoverageInfo> segmentIdCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdCoverageMap(segmentIdCoverageMap);
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        result.setErrorMap(errorMap);
 
         if (request.getSegmentIds().size() < thresholdForParallelProcessing) {
             // it is more efficient to use sequential stream (will use current
@@ -134,7 +139,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             // requests are not blocked if threadpool is used by bigger requests
             Stream<String> stream = //
                     request.getSegmentIds().stream();
-            segmentStreamProcessing(request, tenent, segmentIdCoverageMap, stream);
+            segmentStreamProcessing(request, tenent, segmentIdCoverageMap, errorMap, stream);
         } else {
             tpForParallelStream.submit(//
                     () -> //
@@ -143,7 +148,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                 request.getSegmentIds().stream() //
                                         .parallel();
 
-                        segmentStreamProcessing(request, tenent, segmentIdCoverageMap, parallelStream);
+                        segmentStreamProcessing(request, tenent, segmentIdCoverageMap, errorMap, parallelStream);
                     }) //
                     .join();
         }
@@ -156,6 +161,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         RatingsCountResponse result = new RatingsCountResponse();
         Map<String, CoverageInfo> segmentIdModelRulesCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdModelRulesCoverageMap(segmentIdModelRulesCoverageMap);
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        result.setErrorMap(errorMap);
 
         if (request.getSegmentIdModelRules().size() < thresholdForParallelProcessing) {
             // it is more efficient to use sequential stream (will use current
@@ -163,7 +170,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             // requests are not blocked if threadpool is used by bigger requests
             Stream<SegmentIdAndModelRulesPair> stream = //
                     request.getSegmentIdModelRules().stream();
-            segmentIdModelRulesStreamProcessing(request, tenent, segmentIdModelRulesCoverageMap, stream);
+            segmentIdModelRulesStreamProcessing(request, tenent, segmentIdModelRulesCoverageMap, errorMap, stream);
         } else {
             tpForParallelStream.submit(//
                     () -> //
@@ -172,7 +179,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                 request.getSegmentIdModelRules().stream() //
                                         .parallel();
 
-                        segmentIdModelRulesStreamProcessing(request, tenent, segmentIdModelRulesCoverageMap,
+                        segmentIdModelRulesStreamProcessing(request, tenent, segmentIdModelRulesCoverageMap, errorMap,
                                 parallelStream);
                     }) //
                     .join();
@@ -183,36 +190,37 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     // this method can accept parallel or sequential stream
     private void ratingEngineStreamProcessing(RatingsCountRequest request, Tenant tenent,
-            Map<String, CoverageInfo> ratingEngineIdCoverageMap, Stream<String> stream) {
+            Map<String, CoverageInfo> ratingEngineIdCoverageMap, Map<String, String> errorMap, Stream<String> stream) {
         stream //
                 .forEach( //
                         ratingEngineId -> //
-                        processSingleRatingId(tenent, ratingEngineIdCoverageMap, //
+                        processSingleRatingId(tenent, ratingEngineIdCoverageMap, errorMap, //
                                 ratingEngineId, request.isRestrictNotNullSalesforceId()));
     }
 
     // this method can accept parallel or sequential stream
     private void segmentStreamProcessing(RatingsCountRequest request, Tenant tenent,
-            Map<String, CoverageInfo> segmentIdCoverageMap, Stream<String> stream) {
+            Map<String, CoverageInfo> segmentIdCoverageMap, Map<String, String> errorMap, Stream<String> stream) {
         stream //
                 .forEach( //
                         segmentId -> //
-                        processSingleSegmentId(tenent, segmentIdCoverageMap, //
+                        processSingleSegmentId(tenent, segmentIdCoverageMap, errorMap, //
                                 segmentId, request.isRestrictNotNullSalesforceId()));
     }
 
     // this method can accept parallel or sequential stream
     private void segmentIdModelRulesStreamProcessing(RatingsCountRequest request, Tenant tenent,
-            Map<String, CoverageInfo> segmentIdModelRulesCoverageMap, Stream<SegmentIdAndModelRulesPair> stream) {
+            Map<String, CoverageInfo> segmentIdModelRulesCoverageMap, Map<String, String> errorMap,
+            Stream<SegmentIdAndModelRulesPair> stream) {
         stream //
                 .forEach( //
                         segmentIdModelRulesPair -> //
-                        processSingleSegmentIdModelRulesPair(tenent, segmentIdModelRulesCoverageMap, //
+                        processSingleSegmentIdModelRulesPair(tenent, segmentIdModelRulesCoverageMap, errorMap, //
                                 segmentIdModelRulesPair, request.isRestrictNotNullSalesforceId()));
     }
 
-    private void processSingleSegmentId(Tenant tenent, Map<String, CoverageInfo> segmentIdCoverageMap, String segmentId,
-            boolean isRestrictNotNullSalesforceId) {
+    private void processSingleSegmentId(Tenant tenent, Map<String, CoverageInfo> segmentIdCoverageMap,
+            Map<String, String> errorMap, String segmentId, boolean isRestrictNotNullSalesforceId) {
         try {
             MultiTenantContext.setTenant(tenent);
 
@@ -240,39 +248,12 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             segmentIdCoverageMap.put(segmentId, coverageInfo);
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for segment id: " + segmentId, ex);
+            errorMap.put(segmentId, ex.getMessage());
         }
-    }
-
-    Long getContactCount(Tenant tenent, FrontEndQuery contactFrontEndQuery) {
-        Long contactCount = 0L;
-        try {
-            log.info("Front end query for Contact: " + JsonUtils.serialize(contactFrontEndQuery));
-            contactCount = entityProxy.getCount( //
-                    tenent.getId(), //
-                    contactFrontEndQuery);
-        } catch (Exception ex) {
-            log.info("Ignoring exception in getting contact count" + ex);
-        }
-        return contactCount;
-    }
-
-    FrontEndQuery createEntityFronEndQuery(BusinessEntity entityType, boolean isRestrictNotNullSalesforceId,
-            MetadataSegment segment) {
-        FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
-
-        entityFrontEndQuery.setMainEntity(entityType);
-
-        FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
-        FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
-
-        entityFrontEndQuery.setAccountRestriction(accountRestriction);
-        entityFrontEndQuery.setContactRestriction(contactRestriction);
-        entityFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
-        return entityFrontEndQuery;
     }
 
     private void processSingleRatingId(Tenant tenent, Map<String, CoverageInfo> ratingEngineIdCoverageMap,
-            String ratingEngineId, boolean isRestrictNotNullSalesforceId) {
+            Map<String, String> errorMap, String ratingEngineId, boolean isRestrictNotNullSalesforceId) {
         try {
             MultiTenantContext.setTenant(tenent);
 
@@ -326,12 +307,13 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             ratingEngineIdCoverageMap.put(ratingEngineId, coverageInfo);
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for rating id: " + ratingEngineId, ex);
+            errorMap.put(ratingEngineId, ex.getMessage());
         }
 
     }
 
     private void processSingleSegmentIdModelRulesPair(Tenant tenent,
-            Map<String, CoverageInfo> segmentIdModelRulesCoverageMap,
+            Map<String, CoverageInfo> segmentIdModelRulesCoverageMap, Map<String, String> errorMap,
             SegmentIdAndModelRulesPair segmentIdModelRulesPair, boolean isRestrictNotNullSalesforceId) {
         try {
             MultiTenantContext.setTenant(tenent);
@@ -386,7 +368,36 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for segmentIdModelRulesPair: "
                     + segmentIdModelRulesPair, ex);
+            errorMap.put(segmentIdModelRulesPair.getSegmentId(), ex.getMessage());
         }
+    }
+
+    private Long getContactCount(Tenant tenent, FrontEndQuery contactFrontEndQuery) {
+        Long contactCount = 0L;
+        try {
+            log.info("Front end query for Contact: " + JsonUtils.serialize(contactFrontEndQuery));
+            contactCount = entityProxy.getCount( //
+                    tenent.getId(), //
+                    contactFrontEndQuery);
+        } catch (Exception ex) {
+            log.info("Ignoring exception in getting contact count" + ex);
+        }
+        return contactCount;
+    }
+
+    private FrontEndQuery createEntityFronEndQuery(BusinessEntity entityType, boolean isRestrictNotNullSalesforceId,
+            MetadataSegment segment) {
+        FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
+
+        entityFrontEndQuery.setMainEntity(entityType);
+
+        FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+        FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
+
+        entityFrontEndQuery.setAccountRestriction(accountRestriction);
+        entityFrontEndQuery.setContactRestriction(contactRestriction);
+        entityFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+        return entityFrontEndQuery;
     }
 
     private RatingsCountResponse processRatingIdsDummy(RatingsCountRequest request) {
