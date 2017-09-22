@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -100,6 +101,34 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(id, summaries.get(0).getId());
         Assert.assertEquals(summaries.get(0).getSegmentDisplayName(), SEGMENT_NAME);
 
+        // test get list of ratingEngine summaries filtered by type and status
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(null, null);
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.AI_BASED.name(),
+                null);
+        Assert.assertEquals(summaries.size(), 0);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+                null);
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(null,
+                RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(null,
+                RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(summaries.size(), 0);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(summaries.size(), 0);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.AI_BASED.name(),
+                RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(summaries.size(), 0);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.AI_BASED.name(),
+                RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(summaries.size(), 0);
+
         // test basic find
         createdRatingEngine = ratingEngineService.getRatingEngineById(id);
         Assert.assertNotNull(createdRatingEngine);
@@ -124,6 +153,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         // test update rating engine
         ratingEngine.setDisplayName(RATING_ENGINE_NAME);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
+        ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
         createdRatingEngine = ratingEngineService.createOrUpdate(ratingEngine, mainTestTenant.getId());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
         Assert.assertEquals(RATING_ENGINE_NOTE, createdRatingEngine.getNote());
@@ -134,6 +164,19 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(id, ratingEngineList.get(0).getId());
+
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(null,
+                RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(summaries.size(), 0);
+        summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(null,
+                RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(summaries.size(), 0);
 
         // test basic find rating models
         ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(id);

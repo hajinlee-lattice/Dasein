@@ -1,5 +1,7 @@
 package com.latticeengines.pls.dao.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -17,6 +19,19 @@ public class RatingEngineDaoImpl extends BaseDaoImpl<RatingEngine> implements Ra
     @Override
     public RatingEngine findById(String id) {
         return super.findByField("ID", id);
+    }
+
+    @Override
+    public List<RatingEngine> findAllByTypeAndStatus(String type, String status) {
+        if (type == null && status == null) {
+            return super.findAll();
+        } else if (type == null && status != null) {
+            return super.findAllByFields("status", status);
+        } else if (type != null && status == null) {
+            return super.findAllByFields("type", type);
+        } else {
+            return super.findAllByFields("type", type, "status", status);
+        }
     }
 
 }

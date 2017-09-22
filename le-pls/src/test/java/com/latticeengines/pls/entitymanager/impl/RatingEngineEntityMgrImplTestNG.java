@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -93,6 +94,7 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNull(createdRatingEngine.getNote());
         Assert.assertEquals(createdRatingEngine.getType(), RatingEngineType.RULE_BASED);
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
+        Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.INACTIVE);
 
         String createdRatingEngineStr = createdRatingEngine.toString();
         log.info("createdRatingEngineStr is " + createdRatingEngineStr);
@@ -120,13 +122,39 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(ratingEngineList.size(), 1);
         Assert.assertEquals(ratingEngineId, ratingEngineList.get(0).getId());
 
+        // test find all by type and status
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, null);
+        Assert.assertEquals(ratingEngineList.size(), 1);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.AI_BASED.name(), null);
+        Assert.assertEquals(ratingEngineList.size(), 0);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(), null);
+        Assert.assertEquals(ratingEngineList.size(), 1);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 1);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 0);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 0);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 1);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.AI_BASED.name(),
+                RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 0);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.AI_BASED.name(),
+                RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 0);
+
         // test update
         RatingEngine re = new RatingEngine();
         re.setDisplayName(RATING_ENGINE_NAME);
         re.setNote(RATING_ENGINE_NOTE);
+        re.setStatus(RatingEngineStatus.ACTIVE);
         re.setId(ratingEngine.getId());
         createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
         log.info("Rating Engine after update is " + createdRatingEngine.toString());
+        Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
         Assert.assertNotNull(createdRatingEngine.getRatingModels());
         Assert.assertEquals(createdRatingEngine.getRatingModels().size(), 1);
         Assert.assertNotNull(createdRatingEngine.getSegment());
@@ -143,6 +171,17 @@ public class RatingEngineEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(ratingEngineId, ratingEngineList.get(0).getId());
         RatingEngine retrievedRatingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
         log.info("Rating Engine after update is " + retrievedRatingEngine.toString());
+
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 1);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.ACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 1);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 0);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.INACTIVE.name());
+        Assert.assertEquals(ratingEngineList.size(), 0);
 
         // test deletion
         ratingEngineEntityMgr.deleteById(ratingEngineId);

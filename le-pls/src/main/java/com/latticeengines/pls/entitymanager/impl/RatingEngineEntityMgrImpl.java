@@ -43,7 +43,13 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<RatingEngine> findAll() {
-        return super.findAll();
+        return findAllByTypeAndStatus(null, null);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<RatingEngine> findAllByTypeAndStatus(String type, String status) {
+        return ratingEngineDao.findAllByTypeAndStatus(type, status);
     }
 
     @Override

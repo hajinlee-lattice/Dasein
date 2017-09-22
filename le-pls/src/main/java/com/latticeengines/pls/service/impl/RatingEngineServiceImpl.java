@@ -53,10 +53,17 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     @Override
     public List<RatingEngineSummary> getAllRatingEngineSummaries() {
+        return getAllRatingEngineSummariesWithTypeAndStatus(null, null);
+    }
+
+    @Override
+    public List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatus(String type, String status) {
         Tenant tenant = MultiTenantContext.getTenant();
-        log.info(String.format("Get all the rating engine summaries for tenant %s", tenant.getId()));
+        log.info(String.format(
+                "Get all the rating engine summaries for tenant %s with status set to %s and type set to %s",
+                tenant.getId(), status, type));
         List<RatingEngineSummary> result = new ArrayList<>();
-        ratingEngineEntityMgr.findAll().stream()
+        ratingEngineEntityMgr.findAllByTypeAndStatus(type, status).stream()
                 .forEach(re -> result.add(constructRatingEngineSummary(re, tenant.getId())));
         return result;
     }

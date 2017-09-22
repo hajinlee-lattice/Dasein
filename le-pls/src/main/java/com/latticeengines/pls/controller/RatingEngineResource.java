@@ -58,8 +58,10 @@ public class RatingEngineResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all Rating Engine summaries for a tenant")
-    public List<RatingEngineSummary> getRatingEngineSummaries() {
-        return ratingEngineService.getAllRatingEngineSummaries();
+    public List<RatingEngineSummary> getRatingEngineSummaries( //
+            @RequestParam(value = "status", required = false) String status, //
+            @RequestParam(value = "type", required = false) String type) {
+        return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(type, status);
     }
 
     @RequestMapping(value = "/types", method = RequestMethod.GET, headers = "Accept=application/json")

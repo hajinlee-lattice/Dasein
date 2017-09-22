@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -118,6 +119,23 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 possibleRatingEngineSummary2.getSegmentDisplayName());
         Assert.assertEquals(possibleRatingEngineSummary1.getSegmentDisplayName(), SEGMENT_NAME);
 
+        // test get all rating engine summary list filtered by type and status
+        ratingEngineSummarieObjects = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=INACTIVE", List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 2);
+        ratingEngineSummarieObjects = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE", List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
+        ratingEngineSummarieObjects = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=INACTIVE&type=RULE_BASED", List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 2);
+        ratingEngineSummarieObjects = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&type=RULE_BASED", List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
+        ratingEngineSummarieObjects = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=AI_BASED", List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
+
         // test get specific rating engine
         RatingEngine ratingEngine = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId(), RatingEngine.class);
@@ -139,19 +157,21 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 RatingRule.DEFAULT_BUCKET_NAME);
     }
 
+    @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "testGet" })
     public void testUpdate() {
         // test update rating engine
         re1.setDisplayName(RATING_ENGINE_NAME_1);
         re1.setNote(RATING_ENGINE_NOTE_1);
+        re1.setStatus(RatingEngineStatus.ACTIVE);
         RatingEngine ratingEngine = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines", re1,
                 RatingEngine.class);
         Assert.assertNotNull(ratingEngine);
         Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());
         Assert.assertEquals(RATING_ENGINE_NOTE_1, ratingEngine.getNote());
         Assert.assertEquals(re1.getId(), ratingEngine.getId());
+        Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
 
-        @SuppressWarnings("unchecked")
         List<RatingEngineSummary> ratingEngineSummaries = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
         Assert.assertNotNull(ratingEngineSummaries);
@@ -161,7 +181,25 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 RatingEngine.class);
         Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());
         Assert.assertEquals(RATING_ENGINE_NOTE_1, ratingEngine.getNote());
-        Assert.assertEquals(re1.getId(), ratingEngine.getId());
+        Assert.assertEquals(ratingEngine.getId(), re1.getId());
+        Assert.assertEquals(ratingEngine.getStatus(), RatingEngineStatus.ACTIVE);
+
+        ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE",
+                List.class);
+        Assert.assertNotNull(ratingEngineSummaries);
+        Assert.assertEquals(ratingEngineSummaries.size(), 1);
+        ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=INACTIVE",
+                List.class);
+        Assert.assertNotNull(ratingEngineSummaries);
+        Assert.assertEquals(ratingEngineSummaries.size(), 1);
+        ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=AI_BASED",
+                List.class);
+        Assert.assertNotNull(ratingEngineSummaries);
+        Assert.assertEquals(ratingEngineSummaries.size(), 0);
+        ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=RULE_BASED",
+                List.class);
+        Assert.assertNotNull(ratingEngineSummaries);
+        Assert.assertEquals(ratingEngineSummaries.size(), 2);
 
         // test update rule based model
         Set<?> ratingModelObjects = restTemplate

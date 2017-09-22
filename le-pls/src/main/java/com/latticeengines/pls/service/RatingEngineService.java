@@ -13,6 +13,8 @@ public interface RatingEngineService {
 
     List<RatingEngineSummary> getAllRatingEngineSummaries();
 
+    List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatus(String type, String status);
+
     RatingEngine getRatingEngineById(String id);
 
     RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId);
