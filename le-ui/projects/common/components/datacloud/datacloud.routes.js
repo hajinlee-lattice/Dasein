@@ -6,7 +6,6 @@ angular
     'common.datacloud.analysistabs',
     'common.datacloud.targettabs',
     'common.datacloud.query',
-    'common.datacloud.query.advanced',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .run(function($rootScope, $state, DataCloudStore, DataCloudService) {
@@ -14,12 +13,12 @@ angular
         var states = {
             'home.segment.explorer': 'customer', 
             'home.segment.explorer.attributes': 'customer',
-            'home.segment.explorer.query.advanced': 'customer',
+            'home.segment.explorer.builder': 'customer',
             'home.segment.accounts': 'customer',
             'home.segment.contacts': 'customer',
             'home.model.analysis.explorer': 'customer',
             'home.model.analysis.explorer.attributes': 'customer',
-            'home.model.analysis.explorer.query.advanced': 'customer',
+            'home.model.analysis.explorer.builder': 'customer',
             'home.model.analysis.accounts': 'customer',
             'home.model.analysis.contacts': 'customer',
             'home.ratingsengine.wizard.segment.attributes': 'customer',
@@ -39,70 +38,80 @@ angular
         }
     });
 })
-.config(function($stateProvider) {
-    var DataCloudResolve = {
-        EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
-            var deferred = $q.defer();
+.provider('DataCloudResolves', function DataCloudResolvesProvider() {
+    this.$get = function DataCloudResolvesFactory() {
+        return {
+            "main": {
+                EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
 
-            DataCloudStore.setHost(ApiHost);
+                    DataCloudStore.setHost(ApiHost);
 
-            DataCloudStore.getCount().then(function(result) {
-                DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                deferred.resolve(result.data);
-            });
+                    DataCloudStore.getCount().then(function(result) {
+                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                        deferred.resolve(result.data);
+                    });
 
-            return deferred.promise;
-        }],
-        Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function($q, DataCloudStore, ApiHost, EnrichmentCount) {
-            var deferred = $q.defer();
+                    return deferred.promise;
+                }],
+                Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function($q, DataCloudStore, ApiHost, EnrichmentCount) {
+                    var deferred = $q.defer();
 
-            DataCloudStore.setHost(ApiHost);
+                    DataCloudStore.setHost(ApiHost);
 
-            DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function(result) {
-                deferred.resolve(result);
-            });
+                    DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function(result) {
+                        deferred.resolve(result);
+                    });
 
-            return deferred.promise;
-        }],
-        EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
-            var deferred = $q.defer();
+                    return deferred.promise;
+                }],
+                EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
 
-            DataCloudStore.setHost(ApiHost);
+                    DataCloudStore.setHost(ApiHost);
 
-            DataCloudStore.getAllTopAttributes().then(function(result) {
-                deferred.resolve(result['Categories'] || result || {});
-            });
+                    DataCloudStore.getAllTopAttributes().then(function(result) {
+                        deferred.resolve(result['Categories'] || result || {});
+                    });
 
-            return deferred.promise;
-        }], 
-        EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
-            var deferred = $q.defer();
+                    return deferred.promise;
+                }], 
+                EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
+                    var deferred = $q.defer();
 
-            DataCloudStore.setHost(ApiHost);
+                    DataCloudStore.setHost(ApiHost);
 
-            DataCloudStore.getPremiumSelectMaximum().then(function(result) {
-                deferred.resolve(result);
-            });
+                    DataCloudStore.getPremiumSelectMaximum().then(function(result) {
+                        deferred.resolve(result);
+                    });
 
-            return deferred.promise;
-        }],
-        // below resolves are needed. Do not removed
-        // override at child state when needed
-        QueryRestriction: function() {
-            return null;
-        },
-        CurrentConfiguration: function() {
-            return null;
-        },
-        RatingsEngineModels: function() {
-            return null;
-        }
-    };
+                    return deferred.promise;
+                }],
+                // below resolves are needed. Do not removed
+                // override at child state when needed
+                LookupResponse: [function() {
+                    return { attributes: null };
+                }],
+                QueryRestriction: [function() {
+                    return null;
+                }],
+                CurrentConfiguration: [function() {
+                    return null;
+                }],
+                RatingsEngineModels: [function() {
+                    return null;
+                }]
+            }
+        };
+    }
+})
+.config(function($stateProvider, DataCloudResolvesProvider) {
+    var DataCloudResolves = DataCloudResolvesProvider.$get().main;
 
     $stateProvider
         .state('home.datacloud', {
             url: '/datacloud',
-            resolve: DataCloudResolve,
+            resolve: DataCloudResolves,
             redirectTo: 'home.datacloud.explorer'
         })
         .state('home.datacloud.lookup', {
@@ -284,9 +293,7 @@ angular
         });
 
     var getState = function(type, overwrite) {
-        var result = angular.extend({}, analysis[type], overwrite)
-
-        return result;
+        return angular.extend({}, analysis[type], overwrite);
     };
 
     var analysis = {
@@ -296,7 +303,7 @@ angular
                 segment: 'Create',
                 reload: true
             },
-            resolve: angular.extend({}, DataCloudResolve, {
+            resolve: angular.extend({}, DataCloudResolves, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var resolveQueryRestriction = function() {
                         var accountRestriction = QueryStore.getAccountRestriction(),
@@ -335,87 +342,6 @@ angular
 
                     return deferred.promise;                   
                 }],
-                /*
-                AccountsCount: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
-                    
-                    var deferred = $q.defer(),
-                        segmentName = $stateParams.segment,
-                        accountRestriction = QueryStore.getAccountRestriction(),
-                        contactRestriction = QueryStore.getContactRestriction();
-
-                    // console.log("[resolve] AccountsCount", segmentName);
-
-                    if(segmentName === "Create"){
-                        query = { 
-                            'free_form_text_search': '',
-                            'account_restriction': accountRestriction,
-                            'contact_restriction': contactRestriction,
-                            'page_filter': {
-                                'num_rows': 15,
-                                'row_offset': 0
-                            }
-                        };
-
-                        deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
-
-                    } else {
-                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                            var segment = result;
-
-                            query = { 
-                                'free_form_text_search': '',
-                                'account_restriction': segment.account_restriction,
-                                'contact_restriction': segment.contact_restriction,
-                                'preexisting_segment_name': segmentName,
-                                'page_filter': {
-                                    'num_rows': 15,
-                                    'row_offset': 0
-                                }
-                            };
-                            deferred.resolve( QueryStore.GetCountByQuery('accounts', query).then(function(data){ return data; }));
-                        });
-                    };
-                        
-                    return deferred.promise;
-                }],
-                ContactsCount: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
-                    
-                    var deferred = $q.defer(),
-                        segmentName = $stateParams.segment,
-                        accountRestriction = QueryStore.getAccountRestriction(),
-                        contactRestriction = QueryStore.getContactRestriction();
-
-                    if(segmentName === "Create"){
-                        query = { 
-                            'free_form_text_search': '',
-                            'account_restriction': accountRestriction,
-                            'contact_restriction': contactRestriction,
-                            'preexisting_segment_name': segmentName,
-                            'page_filter': {
-                                'num_rows': 15,
-                                'row_offset': 0
-                            }
-                        };
-                        deferred.resolve( QueryStore.GetCountByQuery('contacts', query).then(function(data){ return data; }));
-                    } else {
-                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                            var segment = result;
-                            query = { 
-                                'free_form_text_search': '',
-                                'account_restriction': segment.account_restriction,
-                                'contact_restriction': segment.contact_restriction,
-                                'preexisting_segment_name': segmentName,
-                                'page_filter': {
-                                    'num_rows': 15,
-                                    'row_offset': 0
-                                }
-                            };
-                            deferred.resolve( QueryStore.GetCountByQuery('contacts', query).then(function(data){ return data; }));
-                        });
-                    };
-                        
-                    return deferred.promise;
-                }],*/
                 CountWithoutSalesForce: [function(){
                     return null;
                 }],
@@ -453,27 +379,11 @@ angular
                 }
             }
         },
-        query: {
-            url: '/query',
+        builder: {
+            url: '/builder',
             params: {
                 pageIcon: 'ico-analysis',
-                pageTitle: 'Analysis',
-                section: 'query'
-            },
-            views: {
-                "main@": {
-                    controller: 'QueryBuilderCtrl',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/query/builder/querybuilder.component.html'
-                }
-            }
-        },
-        advquery: {
-            url: '/advanced/:mode',
-            params: {
-                pageIcon: 'ico-analysis',
-                pageTitle: 'Analysis',
-                mode: 'segment'
+                pageTitle: 'Analysis'
             },
             resolve: {
                 Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
@@ -486,6 +396,9 @@ angular
                     });
                     
                     return deferred.promise;
+                }],
+                CurrentRatingsEngine: [function() {
+                    return null;
                 }]
             },
             views: {
@@ -704,8 +617,7 @@ angular
             }
         }))
         .state('home.model.analysis.explorer.attributes', getState('attributes'))
-        .state('home.model.analysis.explorer.query', getState('query'))
-        .state('home.model.analysis.explorer.query.advanced', getState('advquery'))
+        .state('home.model.analysis.explorer.builder', getState('builder'))
         .state('home.model.analysis.accounts', getState('accounts'))
         .state('home.model.analysis.contacts', getState('contacts'))
         .state('home.segment', getState('main', {
@@ -736,8 +648,7 @@ angular
                 }]
             }
         }))
-        .state('home.segment.explorer.query', getState('query'))
-        .state('home.segment.explorer.query.advanced', getState('advquery'))
+        .state('home.segment.explorer.builder', getState('builder'))
         .state('home.segment.accounts', getState('accounts'))
         .state('home.segment.contacts', getState('contacts'));
 });

@@ -44,6 +44,7 @@ angular.module('common.datacloud.analysistabs', [
             vm.counts.accounts.value = data;
             vm.counts.accounts.loading = false;
         });
+        
         QueryStore.GetCountByQuery('contacts').then(function(data){ 
             // vm.contactsCount = data;
             vm.counts.contacts.value = data;

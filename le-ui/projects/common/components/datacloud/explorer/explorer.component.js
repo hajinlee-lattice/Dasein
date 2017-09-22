@@ -1571,9 +1571,9 @@ angular.module('common.datacloud.explorer', [
 
     vm.refineQuery = function() {
         if (vm.inModel()) {
-            $state.go('home.model.analysis.explorer.query.advanced');
+            $state.go('home.model.analysis.explorer.builder');
         } else{
-            $state.go('home.segment.explorer.query.advanced');
+            $state.go('home.segment.explorer.builder');
         }
     }
 

@@ -1,5 +1,5 @@
 angular
-.module('common.datacloud.query.advanced.tree', [])
+.module('common.datacloud.query.builder.tree', [])
 .directive('queryTreeDirective',function() {
     return {
         restrict: 'AE',

@@ -149,9 +149,9 @@ angular.module('common.datacloud.query.results', [
     };
 
     vm.refineQuery = function() {
-        return vm.inModel()
-            ? 'home.model.analysis.explorer.query.advanced'
-            : 'home.segment.explorer.query.advanced'
+        return vm.inModel() 
+            ? 'home.model.analysis.explorer.builder'
+            : 'home.segment.explorer.builder'
     };
 
     vm.clearSearch = function() {

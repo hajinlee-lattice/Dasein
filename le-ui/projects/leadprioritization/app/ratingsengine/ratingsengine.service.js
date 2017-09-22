@@ -6,7 +6,7 @@ angular.module('lp.ratingsengine')
         this.settings = {};
         this.validation = {
             segment: true,
-            attributes: true,
+            attributes: false,
             rules: true
         }
         this.currentRating = {};
@@ -31,7 +31,8 @@ angular.module('lp.ratingsengine')
 
     this.setSettings = function(obj) {
         var obj = obj || {};
-        for(var i in obj) {
+
+        for (var i in obj) {
             var key = i,
                 value = obj[i];
             this.settings[key] = value;
@@ -55,6 +56,7 @@ angular.module('lp.ratingsengine')
 
     this.getRating = function(id) {
         var deferred = $q.defer();
+
         if(this.rating) {
             deferred.resolve(this.rating)
         } else {
@@ -63,6 +65,7 @@ angular.module('lp.ratingsengine')
                 deferred.resolve(data);
             });
         }
+
         return deferred.promise;
     }
 
@@ -74,6 +77,7 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer(),
             opts = opts || {},
             ClientSession = BrowserStorageUtility.getClientSession();
+
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
         opts.type = opts.type || 'RULE_BASED',
         opts.displayName = 'testing making new engine';
@@ -82,15 +86,18 @@ angular.module('lp.ratingsengine')
             deferred.resolve(data);
             RatingsEngineStore.setRating(data);
         });
+
         return deferred.promise;
     }
     
     this.getRatings = function() {
         var deferred = $q.defer();
+
         RatingsEngineService.getRatings().then(function(data) {
             RatingsEngineStore.ratings = data;
             deferred.resolve(data);
         });
+
         return deferred.promise;
     }
 
@@ -129,12 +136,10 @@ angular.module('lp.ratingsengine')
     }
 })
 .service('RatingsEngineService', function($q, $http, $state) {
-    this.host = '/pls'; //default
-
     this.getRatings = function() {
         var deferred = $q.defer(),
             result,
-            url = this.host + '/ratingengines';
+            url = '/pls/ratingengines';
 
         $http({
             method: 'GET',
@@ -147,23 +152,27 @@ angular.module('lp.ratingsengine')
                 result = response.data;
                 deferred.resolve(result);
 
-            }, function onError(response) {
+            }, 
+            function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
 
                 var errorMsg = response.data.errorMsg || 'unspecified error';
+
                 deferred.reject(errorMsg);
             }
         );
+
         return deferred.promise;
     }
 
     // this.getRatingsCounts = function(ratings, noSalesForceId) {
     //     var deferred = $q.defer();
+
     //     $http({
     //         method: 'POST',
-    //         url: this.host + '/ratingengines/coverage',
+    //         url: '/pls/ratingengines/coverage',
     //         data: {
     //             ratingEngineIds: ratings,
     //             restrictNotNullSalesforceId: noSalesForceId
@@ -171,25 +180,27 @@ angular.module('lp.ratingsengine')
     //     }).then(function(response) {
     //         deferred.resolve(response.data);
     //     });
+
     //     return deferred.promise;
     // }
 
     this.getRatingsChartData = function(arrayofIds) {
         var deferred = $q.defer();
+
         $http({
             method: 'POST',
-            url: this.host + '/ratingengines/coverage',
+            url: '/pls/ratingengines/coverage',
             data: {
                 ratingEngineIds: arrayofIds
             }
         }).then(function(response) {
             deferred.resolve(response.data);
         });
+
         return deferred.promise;
     }
 
     this.deleteRating = function(ratingName) {
-
         var deferred = $q.defer(),
             result,
             url = '/pls/ratingengines/' + ratingName;
@@ -205,7 +216,8 @@ angular.module('lp.ratingsengine')
                 result = response.data;
                 deferred.resolve(result);
 
-            }, function onError(response) {
+            }, 
+            function onError(response) {
                 if (!response.data) {
                     response.data = {};
                 }
@@ -214,30 +226,34 @@ angular.module('lp.ratingsengine')
                 deferred.reject(errorMsg);
             }
         );
+
         return deferred.promise;
     }
 
     this.saveRating = function(opts) {
         var deferred = $q.defer();
+
         $http({
             method: 'POST',
-            url: this.host + '/ratingengines',
+            url: '/pls/ratingengines',
             data: opts
         }).then(function(response){
             deferred.resolve(response.data);
         });
+
         return deferred.promise;
     }
 
     this.getRating = function(id) {
         var deferred = $q.defer();
+
         $http({
             method: 'GET',
-            url: this.host + '/ratingsengines/' + id
+            url: '/pls/ratingsengines/' + id
         }).then(function(response){
             deferred.resolve(response.data);
         });
+
         return deferred.promise;
     }
-
 });

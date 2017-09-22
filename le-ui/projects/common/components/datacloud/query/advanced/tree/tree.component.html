@@ -12,7 +12,11 @@
     <div class="query-section-operator label-operator item-operator-or">or</div>
     <div class="query-section-type-dotline"></div>
     
-    <div class="query-section-label">
+    <div    class="query-section-label"
+            ng-class="{ 
+                'dragging': vm.root.draggedItem == vm,
+                'dropped': vm.root.droppedItem == vm 
+            }">
         <i class="query-section-label-expand fa fa-{{ vm.tree.collapsed ? 'plus' : 'minus' }}-square-o" ng-click="vm.clickCollapsed()"></i>
         
         <!--div class="button-group" role="group" ng-click="vm.clickOperator(vm.tree.logicalRestriction.operator == 'AND' ? 'OR' : 'AND')">
@@ -52,6 +56,10 @@
 </div>
 
 <div    class="query-section-item noselect-children category-{{ vm.item.Category.replace(' ','_') | lowercase }}" 
+        ng-class="{ 
+            'dragging': vm.root.draggedItem == vm,
+            'dropped': vm.root.droppedItem == vm 
+        }"
         ng-if="vm.tree.bucketRestriction" 
         ng-init="data = vm.enrichments['LatticeAccount.'+vm.tree.bucketRestriction.attr]"
         ng-mousedown="vm.mouseDown()"
@@ -189,11 +197,11 @@
         <div class="query-section-item query-section-item-end noselect-children">
             <span>
                 <i class="fa fa-plus"></i> Add 
-                <a href="javascript:void(0)" ng-click="vm.addAttribute(vm.tree)">attribute</a> / 
-                <a href="javascript:void(0)" ng-click="vm.addOperator(vm.tree)">operator</a>
+                <a href="javascript:void(0)" ng-click="vm.addAttribute(vm.tree)">attribute</a> 
+                <span class="add-operator"> / 
+                    <a href="javascript:void(0)" ng-click="vm.addOperator(vm.tree)">operator</a>
+                </span>
             </span>
         </div>
     </li>
 </ul>
-
-<hr size="2">

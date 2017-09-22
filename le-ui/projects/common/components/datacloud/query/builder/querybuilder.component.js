@@ -1,5 +1,6 @@
-angular.module('common.datacloud.query.builder', [])
-.controller('QueryBuilderCtrl', function($scope, $state, BrowserStorageUtility,
+/*
+angular.module('common.datacloud.query.builderx', [])
+.controller('xQueryBuilderCtrl', function($scope, $state, BrowserStorageUtility,
     QueryRestriction, QueryStore, DataCloudStore, SegmentServiceProxy, BucketRestriction, CurrentConfiguration) {
 
     var LATTICE_RATINGS_FIELD_NAME = 'Lattice_Ratings';
@@ -229,3 +230,4 @@ angular.module('common.datacloud.query.builder', [])
 
     vm.init();
 });
+*/

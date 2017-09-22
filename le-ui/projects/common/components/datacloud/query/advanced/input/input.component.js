@@ -1,5 +1,5 @@
 angular
-.module('common.datacloud.query.advanced.input', [])
+.module('common.datacloud.query.builder.input', [])
 .directive('queryInputDirective',function() {
     return {
         restrict: 'AE',

@@ -1,6 +1,7 @@
 angular
 .module('lp.ratingsengine', [
     'common.wizard',
+    'common.datacloud',
     'lp.ratingsengine.ratingsenginetabs',
     'lp.ratingsengine.ratingslist',
     'lp.ratingsengine.creationhistory',
@@ -9,7 +10,7 @@ angular
     'lp.ratingsengine.wizard.segment',
     'lp.ratingsengine.wizard.attributes'
 ])
-.config(function($stateProvider) {
+.config(function($stateProvider, DataCloudResolvesProvider) {
     $stateProvider
         .state('home.ratingsengine', {
             url: '/ratings_engine',
@@ -187,75 +188,16 @@ angular
                 section: 'wizard.ratingsengine_attributes',
                 gotoNonemptyCategory: true
             },
-            resolve: {
-                EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getCount().then(function(result) {
-                        DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                        deferred.resolve(result.data);
-                    });
-
-                    return deferred.promise;
-                }],
-                Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function($q, DataCloudStore, ApiHost, EnrichmentCount) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }],
-                EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getAllTopAttributes().then(function(result) {
-                        deferred.resolve(result['Categories'] || result || {});
-                    });
-
-                    return deferred.promise;
-                }], 
-                EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    DataCloudStore.setHost(ApiHost);
-
-                    DataCloudStore.getPremiumSelectMaximum().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }],
-                // below resolves are needed. Do not remove
-                // override at child state when needed
-                SegmentServiceProxy: function() {
-                    return null;
-                },
-                QueryRestriction: function() {
-                    return null;
-                },
-                CurrentConfiguration: function() {
-                    return null;
-                },
-                LookupResponse: function() {
-                    return { attributes: null };
-                },
-                RatingsEngineModels: ['$q', '$stateParams', 'DataCloudStore', function($q, $stateParams, DataCloudStore) {
+            resolve: angular.extend({}, DataCloudResolvesProvider.$get().main, {
+                RatingsEngineModels: function($q, $stateParams, DataCloudStore) {
                     var deferred = $q.defer();
                     DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(data) {
                         var model = (data && data[0] ? data[0] : {});
                         deferred.resolve(model);
                     });
                     return deferred.promise;
-                }]
-            },
+                }
+            }),
             views: {
                 'wizard_content@home.ratingsengine.wizard': {
                     controller: 'DataCloudController',
@@ -270,24 +212,31 @@ angular
             },
         })
         .state('home.ratingsengine.wizard.segment.attributes.rules', {
-            url: '/rules/:mode',
+            url: '/rules',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Create Ratings Engine',
-                mode: 'rules'
+                pageTitle: 'Create Ratings Engine'
             },
             resolve: {
-                Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
+                Cube: function($q, DataCloudStore){
                     var deferred = $q.defer();
 
                     DataCloudStore.getCube().then(function(result) {
-                        if (result.data) {
-                            deferred.resolve(result.data.Stats);
-                        }
+                        deferred.resolve(result.data.Stats);
                     });
                     
                     return deferred.promise;
-                }]
+                },
+                CurrentRatingsEngine: function($q, $stateParams, DataCloudStore) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(data) {
+                        var model = (data && data[0] ? data[0] : {});
+                        deferred.resolve(model);
+                    }); 
+
+                    return deferred.promise;
+                }
             },
             views: {
                 'wizard_content@home.ratingsengine.wizard': {

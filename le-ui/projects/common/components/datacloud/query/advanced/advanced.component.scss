@@ -7,6 +7,10 @@ div.advanced-query-builder {
     strong {
         font-weight: bold;
     }
+
+    ul.query-tree-root > li > query-tree-directive > ul > li > query-tree-directive > ul > li > query-tree-directive > ul > li div.query-section-item-end span.add-operator {
+        display: none;
+    }
     
     div.query-rules-header {
 
@@ -139,7 +143,7 @@ div.advanced-query-builder {
             padding: 6px 10px;
         }
     }
-    
+
     .button-group {
         margin: 0 0.75em 0 0.25em;
 

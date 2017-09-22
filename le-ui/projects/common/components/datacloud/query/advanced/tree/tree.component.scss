@@ -122,7 +122,7 @@ div.advanced-query-builder {
                     }
                 }
                 
-                span {
+                > span {
                     display: inline-block;
                     margin: 1.2em 0em 0 0.2em;
                     vertical-align: baseline;
@@ -140,7 +140,7 @@ div.advanced-query-builder {
             }
 
             .query-section-item-label {
-                background-color: #f6f6f6;
+                background-color: rgba(150,150,150,.1);
                 border-right: 1px solid #ccc;
                 width: 2em;
                 padding-top: .9em;
@@ -394,6 +394,24 @@ div.advanced-query-builder {
     hr {
         margin-top: -0.9em;
         display: none;
+    }
+
+    .dragging,
+    .dropped {
+        -webkit-transition: none;
+        -moz-transition: none;
+        -ms-transition: none;
+        -o-transition: none;
+        transition: none;
+    }
+
+    .dragging {
+        opacity: .5 !important;
+    }
+
+    .dropped {
+        border-bottom-color: black !important;
+        border-bottom-width: 2px !important;
     }
 }
 

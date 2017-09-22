@@ -1,16 +1,16 @@
-angular.module('common.datacloud.query.advanced', [
-    'common.datacloud.query.advanced.input',
-    'common.datacloud.query.advanced.tree'
+angular.module('common.datacloud.query.builder', [
+    'common.datacloud.query.builder.input',
+    'common.datacloud.query.builder.tree'
 ])
 .controller('AdvancedQueryCtrl', function(
     $state, $stateParams, $timeout, $q, QueryStore, $scope,
-    QueryService, SegmentStore, DataCloudStore, Cube
+    QueryService, SegmentStore, DataCloudStore, Cube, CurrentRatingsEngine
 ) {
     var vm = this;
 
     angular.extend(this, {
         inModel: $state.current.name.split('.')[1] === 'model',
-        mode: $stateParams.mode,
+        mode: CurrentRatingsEngine !== null ? 'rules' : 'segment',
         cube: Cube,
         history: QueryStore.history,
         restriction: QueryStore.accountRestriction,
@@ -32,7 +32,8 @@ angular.module('common.datacloud.query.advanced', [
     });
 
     vm.init = function() {
-        
+        console.log('[AQB] CurrentRatingsEngine:', CurrentRatingsEngine);
+
         DataCloudStore.getEnrichments().then(function(enrichments) {
             for (var i=0, enrichment; i<enrichments.length; i++) {
                 enrichment = enrichments[i];
@@ -68,9 +69,9 @@ angular.module('common.datacloud.query.advanced', [
     }
 
     vm.generateRulesTree = function() {
-        var items = DataCloudStore.getRatingsEngineAttributes();
+        var items = CurrentRatingsEngine.rule.selectedAttributes;
         var bucketRestrictions = [];
-
+        
         items.forEach(function(value, index) {
             var item = vm.enrichments[vm.enrichmentsMap[value]]
 
