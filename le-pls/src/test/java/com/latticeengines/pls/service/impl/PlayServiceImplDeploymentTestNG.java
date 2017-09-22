@@ -18,17 +18,17 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class PlayServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
-    private static final Logger log = LoggerFactory.getLogger(PlayServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayServiceImplDeploymentTestNG.class);
 
     @Autowired
     private SegmentService segmentService;
@@ -49,10 +49,9 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant tenant;
 
-    @Override
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithGATenants(1);
+        setupTestEnvironmentWithOneTenant();
         tenant = testBed.getTestTenants().get(0);
         MultiTenantContext.setTenant(tenant);
 
@@ -76,7 +75,7 @@ public class PlayServiceImplTestNG extends PlsFunctionalTestNGBase {
         play = createDefaultPlay();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testCrud() {
         Play newPlay = playService.createOrUpdate(play, tenant.getId());
         assertPlay(newPlay);
