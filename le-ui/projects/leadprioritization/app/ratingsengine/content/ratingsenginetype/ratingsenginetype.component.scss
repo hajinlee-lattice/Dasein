@@ -1,23 +1,21 @@
-.ratingsengine-ratingsenginetype.container {
-    & > .inner-container {
-        margin: 50px;
-        border-radius: 4px;
-        border: 1px solid #d0d0d0;
-        & > .header {
-            padding: 10px 20px;
-            border-bottom: 1px solid #d0d0d0;
-        }
-        & > .content-body {
-            padding: 10px 20px;
+section.ratingsengine.ratingsenginetype.container {
+    max-width: 800px;
+    .wizard-content {
+        width: 100%;
+        font-size: 16px;
+        p {
+            margin: 10px 0;
         }
     }
     ul.types {
         @include flex-container;
+        margin: 40px 0;
         & > li.type {
             @include flex-item(0 1 auto);
+            position: relative;
             width: 50%;
             padding: 50px;
-            margin: 50px;
+            margin: 0 50px;
             text-align: center;
             border-radius: 4px;
             border: 1px solid #d0d0d0;
@@ -28,6 +26,24 @@
             &[disabled] {
                 opacity: .5;
                 pointer-events: none;
+            }
+            &:after {
+                content: '';
+                display: block;
+                position: absolute;
+                top: 0;
+                left: -50px;
+                bottom: 0;
+                border-left: 1px solid #d0d0d0;
+            }
+            &:first-child {
+                margin-left: 0;
+                &:after {
+                    display: none;
+                }
+            }
+            &:last-child {
+                margin-right: 0;
             }
         }
     }

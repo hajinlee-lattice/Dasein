@@ -1,9 +1,12 @@
-<div class="ratingsengine-ratingsenginetype ratingsengine-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
-    <div class="inner-container">
-        <div class="header">
-            <h2>Ratings Engine Type</h2>
-        </div>
-        <div class="content-body">
+<section class="container ratingsengine ratingsenginetype">
+  <div class="row">
+    <div class="columns twelve box-outline">
+      <div class="section-header">
+        <h4>Ratings Engine Type</h4>
+      </div>
+      <hr />
+      <div class="section-body with-padding row">
+        <div class="columns ten wizard-content" ui-view="wizard_content">
             <p>
                 How would you like to create Ratings for sales Plays and marketing campaigns?
             </p>
@@ -28,5 +31,7 @@
                 </p>
             </div>
         </div>
+      </div>
     </div>
-</div>
+  </div>
+</section>
