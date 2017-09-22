@@ -12,6 +12,7 @@ angular.module('lp.ratingsengine')
         this.currentRating = {};
         this.rating = null;
         this.ratings = null;
+        this.type = null;
     }
 
     this.init();
@@ -119,6 +120,13 @@ angular.module('lp.ratingsengine')
     //     return deferred.promise;
     // }
 
+    this.setType = function(type) {
+        this.type = type;
+    }
+
+    this.getType = function() {
+        return this.type;
+    }
 })
 .service('RatingsEngineService', function($q, $http, $state) {
     this.host = '/pls'; //default

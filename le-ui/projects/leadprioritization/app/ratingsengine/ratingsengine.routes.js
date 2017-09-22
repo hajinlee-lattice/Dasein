@@ -4,6 +4,7 @@ angular
     'lp.ratingsengine.ratingsenginetabs',
     'lp.ratingsengine.ratingslist',
     'lp.ratingsengine.creationhistory',
+    'lp.ratingsengine.ratingsenginetype',
     'lp.ratingsengine.dashboard',
     'lp.ratingsengine.wizard.segment',
     'lp.ratingsengine.wizard.attributes'
@@ -57,6 +58,23 @@ angular
                     controller: 'RatingsEngineCreationHistory',
                     controllerAs: 'vm',
                     templateUrl: 'app/ratingsengine/content/ratingslist/creationhistory.component.html'
+                }
+            }
+        })
+        .state('home.ratingsengine.ratingsenginetype', {
+            url: '/ratingsenginetype',
+            params: {
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Rating Engine Type'
+            },
+            views: {
+                'summary@': {
+                    template: ''
+                },
+                "main@": {
+                    controller: 'RatingsEngineType',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/ratingsengine/content/ratingsenginetype/ratingsenginetype.component.html'
                 }
             }
         })

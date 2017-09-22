@@ -1,0 +1,32 @@
+<div class="ratingsengine-ratingsenginetype ratingsengine-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
+    <div class="inner-container">
+        <div class="header">
+            <h2>Ratings Engine Type</h2>
+        </div>
+        <div class="content-body">
+            <p>
+                How would you like to create Ratings for sales Plays and marketing campaigns?
+            </p>
+            <ul class="types" ng-init="type = 'RULE_BASED'">
+                <li disabled class="type" ng-mouseover="type = 'AI'" ng-click="vm.setType(type)" ng-class="{selected: type == 'AI'}">Aritifical Intelligence</li>
+                <li class="type" ng-mouseover="type = 'RULE_BASED'" ng-click="vm.setType(type)" ng-class="{selected: type == 'RULE_BASED'}">Rule Based</li>
+            </ul>
+            <div ng-if="type == 'AI'">
+                <p>
+                    Select this option to rate your Accounts and Contacts using predictive analytics scoring.
+                </p>
+                <p>
+                    The upcoming wizard will ask you about your business goals and the artifical intellgence will do the rest.
+                </p>
+            </div>
+            <div ng-if="type == 'RULE_BASED'">
+                <p>
+                    Select this option to rate your Accounts using your business knowledge.
+                </p>
+                <p>
+                    The upcoming wizard will help you define your ratings based on your own business goals and rules.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
