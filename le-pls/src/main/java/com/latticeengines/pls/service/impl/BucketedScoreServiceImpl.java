@@ -137,7 +137,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
         if (modelSummary == null) {
             throw new LedpException(LedpCode.LEDP_18126, new String[] { modelId });
         }

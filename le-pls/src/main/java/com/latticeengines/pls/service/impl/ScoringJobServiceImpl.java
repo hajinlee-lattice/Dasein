@@ -66,7 +66,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
                     || job.getJobType().equals("rtsBulkScoreWorkflow")
                     || job.getJobType().equals("importAndRTSBulkScoreWorkflow")) {
                 String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
-                ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+                ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
                 String jobModelName = modelSummary != null ? modelSummary.getDisplayName() : null;
                 if (jobModelId != null && jobModelId.equals(modelId)) {
                     job.getInputs().put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, jobModelName);

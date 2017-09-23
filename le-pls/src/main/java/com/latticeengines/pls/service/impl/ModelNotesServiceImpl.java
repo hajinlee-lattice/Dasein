@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.ModelNotes;
-import com.latticeengines.domain.exposed.pls.ModelNotesOrigin;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.pls.entitymanager.ModelNotesEntityMgr;
@@ -43,7 +42,7 @@ public class ModelNotesServiceImpl implements ModelNotesService {
 
     @Override
     public List<ModelNotes> getAllByModelSummaryId(String modelSummaryId) {
-        ModelSummary summary1 = modelSummaryEntityMgr.getByModelId(modelSummaryId);
+        ModelSummary summary1 = modelSummaryEntityMgr.findByModelId(modelSummaryId, false, false, true);
         return modelNotesEntityMgr.getAllByModelSummaryId(String.valueOf(summary1.getPid()));
     }
 

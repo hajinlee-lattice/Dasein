@@ -22,6 +22,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelNotesService;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 public class ModelNotesServiceImplTestNG extends PlsFunctionalTestNGBase {
@@ -40,13 +41,15 @@ public class ModelNotesServiceImplTestNG extends PlsFunctionalTestNGBase {
     private ModelSummary modelSummary1;
     private ModelSummary modelSummary2;
 
+    private Tenant tenant1;
+    private Tenant tenant2;
     @Autowired
     private GlobalAuthFunctionalTestBed globalAuthFunctionalTestBed;
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("tenant1");
-        Tenant tenant2 = tenantService.findByTenantId("tenant2");
+        tenant1 = tenantService.findByTenantId("tenant1");
+        tenant2 = tenantService.findByTenantId("tenant2");
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
@@ -145,6 +148,7 @@ public class ModelNotesServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void createModelNotesForSummary1() {
+        MultiTenantContext.setTenant(tenant1);
         NoteParams noteParams = new NoteParams();
         noteParams.setUserName("penglong.liu@lattice-engines.com");
         noteParams.setContent("this is a test case");
@@ -168,6 +172,7 @@ public class ModelNotesServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "testUpdateByNoteId")
     public void testCopyNotes() {
+        MultiTenantContext.setTenant(tenant2);
         modelNotesService.copyNotes(modelSummary1.getId(), modelSummary2.getId());
 
         List<ModelNotes> list = modelNotesService.getAllByModelSummaryId(modelSummary2.getId());
