@@ -50,6 +50,30 @@ angular.module('lp.ratingsengine')
         // });
     }
 
+    this.setSegment = function(segment) {
+
+        console.log(segment);
+        this.savedSegment = segment;
+    }
+
+    this.saveSegment = function(segment, ratingEngineId) {
+        if (segment) {
+            this.getRatingEnging(ratingEngineId).then(function(ratingEngine){
+                PlaybookWizardStore.savePlay({
+                    displayName: play.displayName,
+                    name: play.name,
+                    segment: segment.name
+                }).then(function(response){
+                    PlaybookWizardStore.setSegment(segment);
+                });
+            });
+        }
+    }
+
+    this.getSavedSegment = function() {
+        return this.savedSegment;
+    }
+
     this.setRating = function(rating) {
         this.currentRating = rating;
     }
@@ -134,6 +158,7 @@ angular.module('lp.ratingsengine')
     this.getType = function() {
         return this.type;
     }
+
 })
 .service('RatingsEngineService', function($q, $http, $state) {
     this.getRatings = function() {
@@ -256,4 +281,6 @@ angular.module('lp.ratingsengine')
 
         return deferred.promise;
     }
+
+
 });

@@ -172,6 +172,11 @@ angular
                 pageTitle: 'Create Ratings Engine',
                 section: 'wizard.ratingsengine_segment'
             },
+            resolve: {
+                Segments: function(SegmentService) {
+                    return SegmentService.GetSegments();
+                }
+            },
             views: {
                 'wizard_content@home.ratingsengine.wizard': {
                     controller: 'RatingsEngineSegment',
