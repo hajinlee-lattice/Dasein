@@ -248,7 +248,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             segmentIdCoverageMap.put(segmentId, coverageInfo);
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for segment id: " + segmentId, ex);
-            errorMap.put(segmentId, ex.getMessage());
+            logInErrorMap(errorMap, segmentId, ex.getMessage());
         }
     }
 
@@ -258,6 +258,12 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             MultiTenantContext.setTenant(tenent);
 
             RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
+
+            if (ratingEngine == null || ratingEngine.getSegment() == null) {
+                logInErrorMap(errorMap, ratingEngineId, "Invalid rating engine");
+                return;
+            }
+
             MetadataSegment segment = ratingEngine.getSegment();
 
             FrontEndQuery accountFrontEndQuery = //
@@ -307,7 +313,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             ratingEngineIdCoverageMap.put(ratingEngineId, coverageInfo);
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for rating id: " + ratingEngineId, ex);
-            errorMap.put(ratingEngineId, ex.getMessage());
+            logInErrorMap(errorMap, ratingEngineId, ex.getMessage());
         }
 
     }
@@ -368,7 +374,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for segmentIdModelRulesPair: "
                     + segmentIdModelRulesPair, ex);
-            errorMap.put(segmentIdModelRulesPair.getSegmentId(), ex.getMessage());
+            logInErrorMap(errorMap, segmentIdModelRulesPair.getSegmentId(), ex.getMessage());
         }
     }
 
@@ -500,6 +506,14 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             ratingEngineModelIdCoverageMap.put(ratingModelSegmentId.getRatingModelId(), coverageInfo);
         }
         return result;
+    }
+
+    private void logInErrorMap(final Map<String, String> errorMap, final String key, final String msg) {
+        try {
+            logInErrorMap(errorMap, key, msg);
+        } catch (Exception ex) {
+            log.info("Ignoring unexpected error while putting msg in error map for key: " + key, ex);
+        }
     }
 
     private RatingsCountResponse processSegmentIdModelRulesDummy(RatingsCountRequest request) {
