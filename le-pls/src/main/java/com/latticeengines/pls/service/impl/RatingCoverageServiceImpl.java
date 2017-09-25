@@ -302,6 +302,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     countInBucket = countInfo.get(bucket.getName());
                 } else if (countInfo.containsKey(bucket.name())) {
                     countInBucket = countInfo.get(bucket.name());
+                } else {
+                    // do not put bucket info for bucket which is not defined
+                    continue;
                 }
 
                 RatingBucketCoverage coveragePair = new RatingBucketCoverage();
@@ -362,6 +365,9 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     countInBucket = countInfo.get(bucket.getName());
                 } else if (countInfo.containsKey(bucket.name())) {
                     countInBucket = countInfo.get(bucket.name());
+                } else {
+                    // do not put bucket info for bucket which is not defined
+                    continue;
                 }
 
                 RatingBucketCoverage coveragePair = new RatingBucketCoverage();
