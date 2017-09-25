@@ -19,6 +19,13 @@ section.ratingsengine.ratingsenginetype.container {
             text-align: center;
             border-radius: 4px;
             border: 1px solid #d0d0d0;
+            strong {
+                background-repeat: no-repeat;
+                background-position: top center;
+                display: inline-block;
+                padding-top: 45px;
+                transition: none;
+            }
             &.selected {
                 background-color: rgba(67, 125, 187, 1);
                 color: white;
@@ -44,6 +51,26 @@ section.ratingsengine.ratingsenginetype.container {
             }
             &:last-child {
                 margin-right: 0;
+            }
+            &.ai {
+                strong {
+                    background-image: url(/assets/images/ratingsengine-type-ai-black.png);
+                }
+                &.selected {
+                    strong {
+                        background-image: url(/assets/images/ratingsengine-type-ai-white.png);
+                    }
+                }
+            }
+            &.rulebased {
+                strong {
+                    background-image: url(/assets/images/ratingsengine-type-rulebased-black.png);
+                }
+                &.selected {
+                    strong {
+                        background-image: url(/assets/images/ratingsengine-type-rulebased-white.png);
+                    }
+                }
             }
         }
     }

@@ -2,7 +2,7 @@
   <div class="row">
     <div class="columns twelve box-outline">
       <div class="section-header">
-        <h4>Ratings Engine Type</h4>
+        <h4>Rating Engine Type</h4>
       </div>
       <hr />
       <div class="section-body with-padding row">
@@ -11,8 +11,12 @@
                 How would you like to create Ratings for sales Plays and marketing campaigns?
             </p>
             <ul class="types" ng-init="type = 'RULE_BASED'">
-                <li disabled class="type" ng-mouseover="type = 'AI'" ng-click="vm.setType(type)" ng-class="{selected: type == 'AI'}">Aritifical Intelligence</li>
-                <li class="type" ng-mouseover="type = 'RULE_BASED'" ng-click="vm.setType(type)" ng-class="{selected: type == 'RULE_BASED'}">Rule Based</li>
+                <li disabled class="type ai" ng-mouseover="type = 'AI'" ng-click="vm.setType(type)" ng-class="{selected: type == 'AI'}">
+                    <strong>Aritifical Intelligence</strong>
+                </li>
+                <li class="type rulebased" ng-mouseover="type = 'RULE_BASED'" ng-click="vm.setType(type)" ng-class="{selected: type == 'RULE_BASED'}">
+                    <strong>Rule Based</strong>
+                </li>
             </ul>
             <div ng-if="type == 'AI'">
                 <p>

@@ -38,7 +38,7 @@ angular
             url: '/ratings',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Ratings Engine'
+                pageTitle: 'Rating Engine'
             },
             views: {
                 "main@": {
@@ -83,7 +83,7 @@ angular
             url: '/dashboard/:rating_id',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Ratings Engine'
+                pageTitle: 'Rating Engine'
             },
             views: {
                 "summary@": {
@@ -169,7 +169,7 @@ angular
             url: '/segment',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Create Ratings Engine',
+                pageTitle: 'Create Rating Engine',
                 section: 'wizard.ratingsengine_segment'
             },
             resolve: {
@@ -220,7 +220,7 @@ angular
             url: '/rules',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Create Ratings Engine'
+                pageTitle: 'Create Rating Engine'
             },
             resolve: {
                 Cube: function($q, DataCloudStore){
