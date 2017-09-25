@@ -72,6 +72,7 @@ public class PlayServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 tenant.getId());
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine1.setId(createdRatingEngine.getId());
+        ratingEngine1.setPid(createdRatingEngine.getPid());
         play = createDefaultPlay();
     }
 
@@ -84,10 +85,20 @@ public class PlayServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertPlay(newPlay);
         newPlay = playService.getFullPlayByName(playName);
         assertPlay(newPlay);
+        List<Play> plays = playService.getAllFullPlays(false, ratingEngine1.getId());
+        Assert.assertNotNull(plays);
+        Assert.assertEquals(plays.size(), 1);
+        try {
+            plays = playService.getAllFullPlays(false, "someRandomString");
+            Assert.fail("Should have thrown exception");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof NullPointerException);
+        }
+
         playService.deleteByName(playName);
         newPlay = playService.getPlayByName(playName);
         Assert.assertNull(newPlay);
-        List<Play> plays = playService.getAllPlays();
+        plays = playService.getAllPlays();
         Assert.assertNotNull(plays);
         Assert.assertEquals(plays.size(), 0);
     }

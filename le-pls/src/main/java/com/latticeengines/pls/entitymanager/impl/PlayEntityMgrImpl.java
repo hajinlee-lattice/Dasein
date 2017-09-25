@@ -106,6 +106,12 @@ public class PlayEntityMgrImpl extends BaseEntityMgrImpl<Play> implements PlayEn
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Play> findAllByRatingEnginePid(long pid) {
+        return playDao.findAllByRatingEnginePid(pid);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Play findByName(String name) {
         return playDao.findByName(name);
     }

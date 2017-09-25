@@ -11,6 +11,8 @@ public interface PlayEntityMgr extends BaseEntityMgr<Play> {
 
     List<Play> findAll();
 
+    List<Play> findAllByRatingEnginePid(long pid);
+
     Play findByName(String name);
 
     void deleteByName(String name);

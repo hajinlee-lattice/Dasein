@@ -75,6 +75,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 tenant.getId());
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine1.setId(createdRatingEngine.getId());
+        ratingEngine1.setPid(createdRatingEngine.getPid());
 
         ratingEngine2 = new RatingEngine();
         ratingEngine2.setSegment(retrievedSegment);
@@ -83,6 +84,7 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine2, tenant.getId());
         Assert.assertNotNull(createdRatingEngine);
         ratingEngine2.setId(createdRatingEngine.getId());
+        ratingEngine2.setPid(createdRatingEngine.getPid());
 
         play = new Play();
         play.setDescription(DESCRIPTION);
@@ -111,15 +113,13 @@ public class PlayEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         String playName = play1.getName();
         log.info(String.format("play1 has name %s", playName));
         Play retrievedPlay = playEntityMgr.findByName(playName);
-        Assert.assertNotNull(retrievedPlay);
-        Assert.assertEquals(retrievedPlay.getName(), play1.getName());
-        Assert.assertEquals(retrievedPlay.getDescription(), DESCRIPTION);
-        Assert.assertNotNull(retrievedPlay.getDisplayName());
-        Assert.assertNotNull(retrievedPlay.getRatingEngine());
-        Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine1.getId());
-        Assert.assertNotNull(retrievedPlay.getCreated());
-        Assert.assertNotNull(retrievedPlay.getUpdated());
-        Assert.assertFalse(retrievedPlay.getExcludeItemsWithoutSalesforceId());
+
+        List<Play> plays = playEntityMgr.findAllByRatingEnginePid(ratingEngine1.getPid());
+        Assert.assertNotNull(plays);
+        Assert.assertEquals(plays.size(), 1);
+        plays = playEntityMgr.findAllByRatingEnginePid(ratingEngine2.getPid());
+        Assert.assertNotNull(plays);
+        Assert.assertEquals(plays.size(), 0);
 
         retrievedPlay.setDescription(null);
         retrievedPlay.setDisplayName(NEW_DISPLAY_NAME);

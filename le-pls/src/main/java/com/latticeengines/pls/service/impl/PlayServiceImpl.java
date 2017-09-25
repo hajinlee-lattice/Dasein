@@ -35,6 +35,7 @@ import com.latticeengines.pls.entitymanager.PlayEntityMgr;
 import com.latticeengines.pls.service.PlayLaunchService;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.pls.service.RatingCoverageService;
+import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -55,13 +56,16 @@ public class PlayServiceImpl implements PlayService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    TalkingPointProxy talkingPointProxy;
+    private TalkingPointProxy talkingPointProxy;
 
     @Autowired
-    PlayLaunchService playLaunchService;
+    private PlayLaunchService playLaunchService;
 
     @Autowired
-    RatingCoverageService ratingCoverageService;
+    private RatingCoverageService ratingCoverageService;
+
+    @Autowired
+    private RatingEngineService ratingEngineService;
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
@@ -102,23 +106,42 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public List<Play> getAllFullPlays(boolean shouldLoadCoverage) {
-        List<Play> plays = getAllPlays();
+    public List<Play> getAllFullPlays(boolean shouldLoadCoverage, String ratingEngineId) {
+        List<Play> plays = null;
+        if (ratingEngineId == null) {
+            plays = getAllPlays();
+        } else {
+            RatingEngine ratingEngine = validateRatingEngineId(ratingEngineId);
+            plays = playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid());
+        }
+
+        final List<Play> innerPlays = new ArrayList<>();
+        innerPlays.addAll(plays);
+
         Date lastRefreshedDate = findLastRefreshedDate();
         Tenant tenant = MultiTenantContext.getTenant();
-
         // to make loading of play list efficient and faster we need to run full
         // play loading in parallel
         tpForParallelStream.submit(//
                 () -> //
-                plays //
-                        .stream().parallel() //
+                innerPlays //
+                        .stream() //
+                        .parallel() //
                         .forEach( //
                                 play -> //
                                 getFullPlay(play, shouldLoadCoverage, tenant, lastRefreshedDate))) //
                 .join();
 
-        return plays;
+        return innerPlays;
+    }
+
+    private RatingEngine validateRatingEngineId(String ratingEngineId) {
+        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
+        if (ratingEngine == null || ratingEngine.getPid() == null) {
+            throw new NullPointerException(
+                    String.format("Rating Engine %s has not been fully specified", ratingEngine));
+        }
+        return ratingEngine;
     }
 
     @Override
@@ -140,21 +163,14 @@ public class PlayServiceImpl implements PlayService {
             MultiTenantContext.setTenant(tenant);
         }
 
-        List<LaunchState> launchStates = new ArrayList<>();
-        launchStates.add(LaunchState.Launched);
-        PlayLaunch playLaunch = playLaunchService.findLatestByPlayId(play.getPid(), launchStates);
-        PlayLaunch mostRecentPlayLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
-        LaunchHistory launchHistory = new LaunchHistory();
-        launchHistory.setPlayLaunch(playLaunch);
-        launchHistory.setMostRecentLaunch(mostRecentPlayLaunch);
-        play.setLaunchHistory(launchHistory);
+        LaunchHistory launchHistory = updatePlayLaunchHistory(play);
 
         RatingEngine ratingEngine = play.getRatingEngine();
         if (ratingEngine == null || ratingEngine.getId() == null) {
             log.info(String.format("Rating Engine for Play %s is not defined.", play.getName()));
         } else {
             if (shouldLoadCoverage) {
-                populateCoverageInfo(play, playLaunch, launchHistory, ratingEngine);
+                populateCoverageInfo(play, launchHistory, ratingEngine);
             }
         }
 
@@ -162,9 +178,26 @@ public class PlayServiceImpl implements PlayService {
         return play;
     }
 
-    private void populateCoverageInfo(Play play, PlayLaunch playLaunch, LaunchHistory launchHistory,
-            RatingEngine ratingEngine) {
+    private LaunchHistory updatePlayLaunchHistory(Play play) {
+        LaunchHistory launchHistory = getLaunchHistoryForPlay(play);
+        play.setLaunchHistory(launchHistory);
+        return launchHistory;
+    }
+
+    private LaunchHistory getLaunchHistoryForPlay(Play play) {
+        List<LaunchState> launchStates = new ArrayList<>();
+        launchStates.add(LaunchState.Launched);
+        PlayLaunch playLaunch = playLaunchService.findLatestByPlayId(play.getPid(), launchStates);
+        PlayLaunch mostRecentPlayLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
+        LaunchHistory launchHistory = new LaunchHistory();
+        launchHistory.setPlayLaunch(playLaunch);
+        launchHistory.setMostRecentLaunch(mostRecentPlayLaunch);
+        return launchHistory;
+    }
+
+    private void populateCoverageInfo(Play play, LaunchHistory launchHistory, RatingEngine ratingEngine) {
         try {
+            PlayLaunch mostRecentSuccessfulPlayLaunch = launchHistory.getPlayLaunch();
             RatingsCountRequest request = new RatingsCountRequest();
             request.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
             RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
@@ -180,8 +213,10 @@ public class PlayServiceImpl implements PlayService {
             log.info(String.format("For play %s, new account number and contact number are %d and %d, respectively",
                     play.getName(), accountCount, contactCount));
 
-            Long mostRecentSucessfulLaunchAccountNum = playLaunch == null ? 0l : playLaunch.getAccountsLaunched();
-            Long mostRecentSucessfulLaunchContactNum = playLaunch == null ? 0l : playLaunch.getContactsLaunched();
+            Long mostRecentSucessfulLaunchAccountNum = mostRecentSuccessfulPlayLaunch == null ? 0l
+                    : mostRecentSuccessfulPlayLaunch.getAccountsLaunched();
+            Long mostRecentSucessfulLaunchContactNum = mostRecentSuccessfulPlayLaunch == null ? 0l
+                    : mostRecentSuccessfulPlayLaunch.getContactsLaunched();
 
             Long newAccountsNum = mostRecentSucessfulLaunchAccountNum == null ? accountCount
                     : accountCount - mostRecentSucessfulLaunchAccountNum;

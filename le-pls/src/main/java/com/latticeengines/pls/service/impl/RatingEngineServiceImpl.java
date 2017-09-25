@@ -91,10 +91,12 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     }
 
     @Override
-    public RatingEngine getRatingEngineById(String id) {
+    public RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate) {
         Tenant tenant = MultiTenantContext.getTenant();
         RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
-        updateLastRefreshedDate(tenant.getId(), ratingEngine);
+        if (populateRefreshedDate) {
+            updateLastRefreshedDate(tenant.getId(), ratingEngine);
+        }
         return ratingEngine;
     }
 
@@ -124,7 +126,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     @Override
     public Set<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId) {
-        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId);
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
         return ratingEngine.getRatingModels();
     }
 
@@ -170,7 +172,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     private RatingEngine validateRatingEngine(String ratingEngineId) {
 
-        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId);
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
         if (ratingEngine == null) {
             throw new NullPointerException(String.format("Rating Engine with id %s is null", ratingEngineId));
         }

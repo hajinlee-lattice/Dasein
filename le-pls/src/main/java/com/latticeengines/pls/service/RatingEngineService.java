@@ -15,7 +15,7 @@ public interface RatingEngineService {
 
     List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatus(String type, String status);
 
-    RatingEngine getRatingEngineById(String id);
+    RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate);
 
     RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId);
 

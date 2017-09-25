@@ -128,6 +128,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(playList);
         Assert.assertEquals(playList.size(), existingPlays + 2);
 
+        playList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play?ratingEngineId=" + ratingEngine1.getId(),
+                List.class);
+        Assert.assertNotNull(playList);
+        Assert.assertEquals(playList.size(), existingPlays + 2);
+
         Play retrievedPlay = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/" + name, Play.class);
         assertPlay(retrievedPlay);
         Assert.assertEquals(retrievedPlay.getTalkingPoints().size(), 2);

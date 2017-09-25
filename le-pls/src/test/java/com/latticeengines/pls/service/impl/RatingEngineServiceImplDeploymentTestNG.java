@@ -130,13 +130,15 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(summaries.size(), 0);
 
         // test basic find
-        createdRatingEngine = ratingEngineService.getRatingEngineById(id);
+        createdRatingEngine = ratingEngineService.getRatingEngineById(id, false);
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertEquals(id, createdRatingEngine.getId());
         MetadataSegment segment = createdRatingEngine.getSegment();
         Assert.assertNotNull(segment);
         Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
         String createdRatingEngineStr = createdRatingEngine.toString();
+        createdRatingEngine = ratingEngineService.getRatingEngineById(id, true);
+        Assert.assertNotNull(createdRatingEngine);
         log.info("String is " + createdRatingEngineStr);
 
         Set<RatingModel> ratingModels = createdRatingEngine.getRatingModels();
@@ -205,7 +207,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(((RuleBasedModel) retrievedRoleBasedModel).getRatingRule().getDefaultBucketName(),
                 RuleBucketName.D.getName());
 
-        createdRatingEngine = ratingEngineService.getRatingEngineById(id);
+        createdRatingEngine = ratingEngineService.getRatingEngineById(id, false);
         createdRatingEngineStr = createdRatingEngine.toString();
         log.info("After updating the model, the getting full of Rating Engine is " + createdRatingEngineStr);
 
@@ -215,7 +217,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 0);
 
-        createdRatingEngine = ratingEngineService.getRatingEngineById(id);
+        createdRatingEngine = ratingEngineService.getRatingEngineById(id, false);
         Assert.assertNull(createdRatingEngine);
     }
 

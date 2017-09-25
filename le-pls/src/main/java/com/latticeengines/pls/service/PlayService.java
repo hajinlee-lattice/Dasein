@@ -14,7 +14,7 @@ public interface PlayService {
 
     void deleteByName(String name);
 
-    List<Play> getAllFullPlays(boolean shouldLoadCoverage);
+    List<Play> getAllFullPlays(boolean shouldLoadCoverage, String ratingEngineId);
 
     Play getFullPlayByName(String name);
 

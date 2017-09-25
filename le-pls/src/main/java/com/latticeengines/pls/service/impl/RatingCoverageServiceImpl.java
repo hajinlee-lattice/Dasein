@@ -260,7 +260,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         try {
             MultiTenantContext.setTenant(tenent);
 
-            RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
+            RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
 
             if (ratingEngine == null || ratingEngine.getSegment() == null) {
                 logInErrorMap(errorMap, ratingEngineId, "Invalid rating engine");

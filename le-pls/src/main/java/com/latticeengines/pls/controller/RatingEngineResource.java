@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -78,7 +76,7 @@ public class RatingEngineResource {
             @PathVariable String ratingEngineId, //
             HttpServletRequest request, //
             HttpServletResponse response) {
-        return ratingEngineService.getRatingEngineById(ratingEngineId);
+        return ratingEngineService.getRatingEngineById(ratingEngineId, true);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/entitypreview", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -95,7 +93,7 @@ public class RatingEngineResource {
             @RequestParam(value = "lookupFieldNames", required = false) List<String> lookupFieldNames, //
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch) {
-        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId);
+        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
         descending = descending == null ? false : descending;
         restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
         return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
@@ -172,21 +170,6 @@ public class RatingEngineResource {
             @PathVariable String ratingModelId, //
             HttpServletRequest request, HttpServletResponse response) {
         return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
-    }
-
-    @RequestMapping(value = "/{ratingEngineId}/plays", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get Plays associated with a Rating Engine given its id")
-    public Set<Play> getPlays(@PathVariable String ratingEngineId, //
-            HttpServletRequest request, //
-            HttpServletResponse response) {
-        return createPlays();
-    }
-
-    private Set<Play> createPlays() {
-        Set<Play> set = new HashSet<>();
-        set.add(new Play());
-        return set;
     }
 
 }

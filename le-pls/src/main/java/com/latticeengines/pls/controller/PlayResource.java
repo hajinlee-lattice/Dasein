@@ -53,12 +53,14 @@ public class PlayResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all full plays for a tenant")
-    public List<Play> getPlays(HttpServletRequest request, HttpServletResponse response,
-            @RequestParam(value = "shouldLoadCoverage", required = false) Boolean shouldLoadCoverage) {
+    public List<Play> getPlays(HttpServletRequest request, //
+            HttpServletResponse response,
+            @RequestParam(value = "shouldLoadCoverage", required = false) Boolean shouldLoadCoverage, //
+            @RequestParam(value = "ratingEngineId", required = false) String ratingEngineId) {
         // by default shouldLoadCoverage flag should be false otherwise play
         // listing API takes lot of time to load
         shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
-        return playService.getAllFullPlays(shouldLoadCoverage);
+        return playService.getAllFullPlays(shouldLoadCoverage, ratingEngineId);
     }
 
     @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
