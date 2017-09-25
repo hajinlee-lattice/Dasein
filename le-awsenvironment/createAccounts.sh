@@ -42,7 +42,7 @@ function getPubSSH {
 
 
 # query froup for information
-
+echo "Getting info for IAM group ${Groupname}"
 groupinfo=`aws iam get-group --group-name $Groupname`
 if [ $? -ne 0 ] ; then
     echo "FAILED: probably invalid group name."

@@ -36,7 +36,9 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                 "packages" : {
                     "yum" : {
                         "xfsprogs" : [],
-                        "nfs-utils": []
+                        "nfs-utils": [],
+                        "aws-cli": [],
+                        "jq": []
                     }
                 },
                 "files" : {
@@ -201,7 +203,6 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                     },
                     "20_start_telegraf" : {
                         "command" : { "Fn::Join": [ "", [
-                            "yum install -y aws-cli jq\n",
                             "start ecs\n"
                             "for i in {1..100}; do\n",
                             "    instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
