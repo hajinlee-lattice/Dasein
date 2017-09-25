@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.util;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,7 +16,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.VdbMetadataExtension;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 
 public class VdbMetadataUtils {
@@ -47,32 +45,10 @@ public class VdbMetadataUtils {
             if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
                 attr.setDataQuality(metadata.getDataQuality().get(0));
             }
-            setAttributeExtensions(attr, metadata.getExtensions());
             return attr;
         } catch (Exception e) {
             // see the log to add unit test
             throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.serialize(metadata)), e);
-        }
-    }
-
-    private static void setAttributeExtensions(Attribute attribute, List<VdbMetadataExtension> vdbMetadataExtensions) {
-        if (vdbMetadataExtensions == null) {
-            return;
-        }
-        for (VdbMetadataExtension extension : vdbMetadataExtensions) {
-            if (extension.getKey().equalsIgnoreCase("ExcludeFromFiltering")) {
-                attribute.setExcludeFromFiltering(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromPlaymakerExport")) {
-                attribute.setExcludeFromPlaymakerExport(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromTalkingPoints")) {
-                attribute.setExcludeFromTalkingPoints(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromListView")) {
-                attribute.setExcludeFromListView(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromDetailView")) {
-                attribute.setExcludeFromDetailView(extension.getValue());
-            } else if (extension.getKey().equalsIgnoreCase("ExcludeFromAll")) {
-                attribute.setExcludeFromAll(extension.getValue());
-            }
         }
     }
 
