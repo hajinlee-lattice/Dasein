@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.validation.Schema;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,6 +187,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         schemaToLatticeSchemaFields.put(SchemaInterpretation.SalesforceLead, latticeLeadSchemaFields);
 
         return schemaToLatticeSchemaFields;
+    }
+
+    @Override
+    public List<LatticeSchemaField> getSchemaToLatticeSchemaFields(SchemaInterpretation schemaInterpretation) {
+        List<LatticeSchemaField> latticeSchemaFields = new ArrayList<>();
+        List<Attribute> attributes = SchemaRepository.instance().getSchema(schemaInterpretation).getAttributes();
+        for (Attribute accountAttribute : attributes) {
+            latticeSchemaFields.add(getLatticeFieldFromTableAttribute(accountAttribute));
+        }
+        return latticeSchemaFields;
     }
 
     private LatticeSchemaField getLatticeFieldFromTableAttribute(Attribute attribute) {

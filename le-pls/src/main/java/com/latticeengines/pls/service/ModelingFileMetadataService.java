@@ -25,4 +25,6 @@ public interface ModelingFileMetadataService {
 
     Map<SchemaInterpretation, List<LatticeSchemaField>> getSchemaToLatticeSchemaFields(
             boolean excludeLatticeDataAttributes);
+
+    List<LatticeSchemaField> getSchemaToLatticeSchemaFields(SchemaInterpretation schemaInterpretation);
 }

@@ -175,4 +175,14 @@ public class ModelingFileUploadResource {
         return ResponseDocument.successResponse(modelingFileMetadataService
                 .getSchemaToLatticeSchemaFields(excludeLatticeDataAttributes));
     }
+
+    @RequestMapping(value = "latticeschema/cdl", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "return a list of the lattice attribute fields for certain entity type")
+    public ResponseDocument<List<LatticeSchemaField>> getLatticeSchemaFieldMap(
+            @RequestParam(value = "entity") String entity) {
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation.getByName(entity);
+        return ResponseDocument.successResponse(modelingFileMetadataService
+                .getSchemaToLatticeSchemaFields(schemaInterpretation));
+    }
 }
