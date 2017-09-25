@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.VdbMetadataExtension;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 
 public class VdbMetadataUtilsUnitTestNG {
@@ -145,6 +146,15 @@ public class VdbMetadataUtilsUnitTestNG {
         };
     }
 
+    @Test(groups = "unit")
+    public void testMetadataExtension() {
+        VdbSpecMetadata metadata = createVdbMetadata();
+        Attribute attribute = VdbMetadataUtils.convertToAttribute(metadata);
+        Assert.assertNotNull(attribute);
+        Assert.assertTrue(attribute.getExcludeFromAll());
+        Assert.assertFalse(attribute.getExcludeFromListView());
+    }
+
     private VdbSpecMetadata createVdbMetadata() {
         VdbSpecMetadata metadata = new VdbSpecMetadata();
         metadata.setColumnName("HG_CLOUD_INFRASTRUCTURE_COMPUTI_EB4A8EFFF7");
@@ -155,6 +165,10 @@ public class VdbMetadataUtilsUnitTestNG {
         metadata.setMostRecentUpdateDate("3/24/2017 1:36:00 AM +00:00");
         metadata.setLastTimeSourceUpdated(Collections.singletonList("3/24/2017 1:36:00 AM +00:00"));
         metadata.setTags(Collections.singletonList("External"));
+        VdbMetadataExtension vdbMetadataExtension = new VdbMetadataExtension();
+        vdbMetadataExtension.setKey("ExcludeFromAll");
+        vdbMetadataExtension.setValue("true");
+        metadata.setExtensions(Collections.singletonList(vdbMetadataExtension));
         return metadata;
     }
 
