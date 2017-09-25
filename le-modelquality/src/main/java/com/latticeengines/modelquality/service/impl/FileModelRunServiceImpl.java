@@ -44,6 +44,7 @@ import com.latticeengines.modelquality.entitymgr.ModelSummaryMetricsEntityMgr;
 import com.latticeengines.modelquality.metrics.ModelQualityMetrics;
 import com.latticeengines.modelquality.metrics.ModelingMeasurement;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 @Component("fileModelRunService")
 public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
@@ -60,6 +61,9 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
 
     @Autowired
     private ModelSummaryMetricsEntityMgr modelSummaryMetricsEntityMgr;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
 
     @Override
     protected void runModel(ModelRun modelRun) {
@@ -238,10 +242,10 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
     }
 
     private ModelSummaryMetrics writeMetricsToSql(ModelSummary modelSummary) {
+        String lookupId = modelSummary.getLookupId();
         ModelSummaryMetrics modelSummaryMetrics = new ModelSummaryMetrics();
+        modelSummaryMetrics.setName(lookupId.split("\\|")[0]);
         modelSummaryMetrics.setTenantId(modelSummary.getTenantId());
-        modelSummaryMetrics.setName(modelSummary.getName());
-        modelSummaryMetrics.setTenant(modelSummary.getTenant());
         modelSummaryMetrics.setRocScore(modelSummary.getRocScore());
         modelSummaryMetrics.setTop20PercentLift(modelSummary.getTop20PercentLift());
         modelSummaryMetrics.setDataCloudVersion(modelSummary.getDataCloudVersion());

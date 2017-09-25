@@ -1,22 +1,16 @@
 package com.latticeengines.domain.exposed.pls;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,20 +19,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.security.HasTenant;
-import com.latticeengines.domain.exposed.security.HasTenantId;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(name = "MODELQUALITY_SUMMARY_METRICS", uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }),
-        @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
+        @UniqueConstraint(columnNames = { "TENANT_NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class ModelSummaryMetrics implements HasId<String>, HasPid, HasTenant, HasName, HasTenantId {
+public class ModelSummaryMetrics implements HasId<String>, HasPid, HasName {
     private String id;
-    private Tenant tenant;
+    private String tenantName;
     private Long pid;
-    private String name;
     private Long tenantId;
     private Double rocScore;
     private Double top20PercentLift;
@@ -50,7 +40,7 @@ public class ModelSummaryMetrics implements HasId<String>, HasPid, HasTenant, Ha
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
-    @Column(name = "PID", unique = true, nullable = false)
+    @Column(name = "PID")
     @Override
     public Long getPid() {
         return pid;
@@ -64,7 +54,7 @@ public class ModelSummaryMetrics implements HasId<String>, HasPid, HasTenant, Ha
 
     @Override
     @JsonProperty("Id")
-    @Column(name = "ID", unique = true, nullable = false)
+    @Column(name = "ID")
     @Index(name = "MODELQUALITY_SUMMARY_NAME_IDX")
     public String getId() {
         return id;
@@ -77,27 +67,25 @@ public class ModelSummaryMetrics implements HasId<String>, HasPid, HasTenant, Ha
     }
 
     @Override
-    @JsonProperty("Name")
-    @Column(name = "NAME", nullable = false)
+    @JsonProperty("TenantName")
+    @Column(name = "TENANT_NAME", nullable = false)
     @Index(name = "MODELQUALITY_SUMMARY_NAME_IDX")
     public String getName() {
-        return name;
+        return tenantName;
     }
 
     @Override
-    @JsonProperty("Name")
-    public void setName(String name) {
-        this.name = name;
+    @JsonProperty("TenantName")
+    public void setName(String tenantName) {
+        this.tenantName = tenantName;
     }
 
-    @Override
     @JsonIgnore
-    @Column(name = "TENANT_ID", nullable = false)
+    @Column(name = "TENANT_ID")
     public Long getTenantId() {
         return tenantId;
     }
 
-    @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
     }
@@ -134,22 +122,6 @@ public class ModelSummaryMetrics implements HasId<String>, HasPid, HasTenant, Ha
     @JsonProperty("DataCloudVersion")
     public void setDataCloudVersion(String dataCloudVersion) {
         this.dataCloudVersion = dataCloudVersion;
-    }
-
-    @Override
-    @JsonProperty("Tenant")
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    @Override
-    @JsonProperty("Tenant")
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-        setTenantId(tenant.getPid());
     }
 
     @JsonProperty("LastUpdateTime")
