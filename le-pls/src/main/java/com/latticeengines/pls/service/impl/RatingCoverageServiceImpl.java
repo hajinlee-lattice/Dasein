@@ -519,7 +519,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private void logInErrorMap(final Map<String, String> errorMap, final String key, final String msg) {
         try {
-            logInErrorMap(errorMap, key, msg);
+            errorMap.put(key, msg);
         } catch (Exception ex) {
             log.info("Ignoring unexpected error while putting msg in error map for key: " + key, ex);
         }
