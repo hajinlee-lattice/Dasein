@@ -37,7 +37,7 @@ public class ConsolidateContactData extends ConsolidateDataBase<ConsolidateConta
             mergeStep = 0;
             upsertMasterStep = 1;
             diffStep = 2;
-            TransformationStepConfig merge = mergeInputs();
+            TransformationStepConfig merge = mergeInputs(false);
             TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig sort = sortDiff(diffStep);

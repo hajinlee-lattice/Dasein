@@ -76,7 +76,7 @@ public class ConsolidateAccountData extends ConsolidateDataBase<ConsolidateAccou
             bucketStep = 6;
             sortStep = 7;
 
-            TransformationStepConfig merge = mergeInputs();
+            TransformationStepConfig merge = mergeInputs(false);
             TransformationStepConfig mergeNew = mergeNew();
             TransformationStepConfig match = match();
             TransformationStepConfig upsertMaster = mergeMaster();

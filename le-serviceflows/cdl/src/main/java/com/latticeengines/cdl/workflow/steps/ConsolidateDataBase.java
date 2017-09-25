@@ -178,7 +178,7 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         return transformationProxy.getWorkflowConf(request, configuration.getPodId());
     }
 
-    protected TransformationStepConfig mergeInputs() {
+    protected TransformationStepConfig mergeInputs(boolean useTargetTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<String> baseSources = inputTableNames;
         step.setBaseSources(baseSources);
@@ -190,6 +190,12 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         step.setBaseTables(baseTables);
         step.setTransformer("consolidateDataTransformer");
         step.setConfiguration(getConsolidateDataConfig(true));
+        if (useTargetTable) {
+            TargetTable targetTable = new TargetTable();
+            targetTable.setCustomerSpace(customerSpace);
+            targetTable.setNamePrefix(getMergeTableName());
+            step.setTargetTable(targetTable);
+        }
         return step;
     }
 
@@ -277,6 +283,10 @@ public abstract class ConsolidateDataBase<T extends ConsolidateDataBaseConfigura
         setupConfig(config);
         config.setDedupeSource(isDedupeSource);
         return appendEngineConf(config, lightEngineConfig());
+    }
+
+    protected String getMergeTableName() {
+        return batchStore.name() + "_Merged";
     }
 
     protected abstract void setupConfig(ConsolidateDataTransformerConfig config);

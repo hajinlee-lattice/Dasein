@@ -68,7 +68,7 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
 
             inputMergeStep = 0;
             partitionAndAggregateStep = 1;
-            TransformationStepConfig inputMerge = mergeInputs();
+            TransformationStepConfig inputMerge = mergeInputs(true);
             TransformationStepConfig partitionAggr = partitionAndAggregate();
 
             List<TransformationStepConfig> steps = new ArrayList<>();
@@ -142,8 +142,10 @@ public class ConsolidateTransactionData extends ConsolidateDataBase<ConsolidateT
             Table deltaTable = setupDeltaTable(aggregateTable);
             putObjectInContext(DELTA_TABLE_KEY, deltaTable);
         }
-
         super.onPostTransformationCompleted();
+        metadataProxy.deleteTable(customerSpace.toString(),
+                TableUtils.getFullTableName(getMergeTableName(), pipelineVersion));
+
     }
 
     private Table setupMasterTable(Table aggregateTable) {
