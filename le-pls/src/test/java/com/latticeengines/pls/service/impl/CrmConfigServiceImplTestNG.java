@@ -7,8 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -17,6 +15,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
@@ -125,17 +125,17 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecate
     }
 
     boolean checkStatus(String status) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(status);
-        Long statusCode = (Long) jsonObject.get("Status");
-        if (statusCode != null && statusCode == 3L) {
+        ObjectMapper jsonParser = new ObjectMapper();
+        JsonNode jsonObject = jsonParser.readTree(status);
+        JsonNode statusCode = jsonObject.get("Status");
+        if (statusCode != null && statusCode.asLong() == 3L) {
             return true;
         }
-        Boolean isSuccessful = (Boolean) jsonObject.get("Success");
-        if (isSuccessful != null && isSuccessful) {
+        JsonNode isSuccessful = jsonObject.get("Success");
+        if (isSuccessful != null && isSuccessful.asBoolean()) {
             return true;
         }
-        String errorMsg = (String) jsonObject.get("ErrorMessage");
+        String errorMsg = jsonObject.get("ErrorMessage").asText();
         throw new RuntimeException(errorMsg);
     }
 }

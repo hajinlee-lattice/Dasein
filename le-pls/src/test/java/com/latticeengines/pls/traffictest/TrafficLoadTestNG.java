@@ -20,12 +20,10 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.commons.net.ntp.TimeStamp;
 import org.apache.hadoop.conf.Configuration;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -38,6 +36,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -163,20 +163,20 @@ public class TrafficLoadTestNG extends PlsDeploymentTestNGBaseDeprecated {
         String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
         ModelSummary summary = modelSummaryParser.parse("", contents);
         KeyValue keyValue = summary.getDetails();
-        JSONParser jsonParser = new JSONParser();
-        JSONObject modelSummary = (JSONObject) jsonParser.parse(keyValue.getPayload());
-        JSONObject modelDetails = (JSONObject) jsonParser.parse(modelSummary.get("ModelDetails").toString());
+        ObjectMapper jsonParser = new ObjectMapper();
+        ObjectNode modelSummary = (ObjectNode) jsonParser.readTree(keyValue.getPayload());
+        ObjectNode modelDetails = (ObjectNode) jsonParser.readTree(modelSummary.get("ModelDetails").toString());
         modelDetails.put("Name", tenant.getName());
-        modelSummary.put("ModelDetails", modelDetails);
+        modelSummary.set("ModelDetails", modelDetails);
         HdfsUtils.rmdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
-        HdfsUtils.writeToFile(yarnConfiguration, dir + "/enhancements/modelsummary.json", modelSummary.toJSONString());
-        HdfsUtils.writeToFile(yarnConfiguration, dir + "/test_model.csv", modelSummary.toJSONString());
-        HdfsUtils.writeToFile(yarnConfiguration, dir + "/test_readoutsample.csv", modelSummary.toJSONString());
-        HdfsUtils.writeToFile(yarnConfiguration, dir + "/test_scored.txt", modelSummary.toJSONString());
-        HdfsUtils.writeToFile(yarnConfiguration, dir + "/test_explorer.csv", modelSummary.toJSONString());
-        HdfsUtils.writeToFile(yarnConfiguration, dir + "/rf_model.txt", modelSummary.toJSONString());
+        HdfsUtils.writeToFile(yarnConfiguration, dir + "/enhancements/modelsummary.json", jsonParser.writeValueAsString(modelSummary));
+        HdfsUtils.writeToFile(yarnConfiguration, dir + "/test_model.csv", jsonParser.writeValueAsString(modelSummary));
+        HdfsUtils.writeToFile(yarnConfiguration, dir + "/test_readoutsample.csv", jsonParser.writeValueAsString(modelSummary));
+        HdfsUtils.writeToFile(yarnConfiguration, dir + "/test_scored.txt", jsonParser.writeValueAsString(modelSummary));
+        HdfsUtils.writeToFile(yarnConfiguration, dir + "/test_explorer.csv", jsonParser.writeValueAsString(modelSummary));
+        HdfsUtils.writeToFile(yarnConfiguration, dir + "/rf_model.txt", jsonParser.writeValueAsString(modelSummary));
     }
 
     private void createUsers() throws Exception {

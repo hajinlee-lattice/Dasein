@@ -5,19 +5,20 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -391,12 +392,12 @@ public class ModelCommandCallable implements Callable<Long> {
         // Parse diagnostics file
         String warnings = "";
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
+        ObjectMapper jsonParser = new ObjectMapper();
+        JsonNode jsonObject = jsonParser.readTree(content);
 
         // Check positive event rate between arbitrary range
         double[] positiveEventRateThresh = { 1, 50 }; // 1% to 50%
-        double positiveEventRate = (double) ((JSONObject) jsonObject.get("Summary")).get("PositiveEventRate");
+        double positiveEventRate = jsonObject.get("Summary").get("PositiveEventRate").asDouble();
         positiveEventRate *= 100; // Convert to percentage
 
         if (positiveEventRate < positiveEventRateThresh[0] || positiveEventRate > positiveEventRateThresh[1]) {
@@ -405,23 +406,22 @@ public class ModelCommandCallable implements Callable<Long> {
         }
 
         // check if there's skipped rows
-        long numOfSkippedRows = (long) ((JSONObject) jsonObject.get("Summary")).get("NumberOfSkippedRows");
+        long numOfSkippedRows = jsonObject.get("Summary").get("NumberOfSkippedRows").asLong();
         if (numOfSkippedRows > 0) {
             warnings += "The number of skipped rows=" + numOfSkippedRows + "\n";
         }
 
         // check if there's high UC columns
-        String highUCColumns = (String) ((JSONObject) jsonObject.get("Summary")).get("HighUCColumns");
+        String highUCColumns = jsonObject.get("Summary").get("HighUCColumns").asText();
         if (highUCColumns != null) {
             warnings += "Columns with high Uncertainty Coefficient=" + highUCColumns + "\n";
         }
 
         // Check any invalid column bucketing metadata
-        JSONObject metadataDiagnostics = (JSONObject) jsonObject.get("MetadataDiagnostics");
-        List<String> columns = new ArrayList<String>();
-        for (Object key : metadataDiagnostics.keySet()) {
-            columns.add((String) key);
-        }
+        JsonNode metadataDiagnostics = jsonObject.get("MetadataDiagnostics");
+        List<String> columns = new ArrayList<>();
+        Iterator<String> fieldNames =  metadataDiagnostics.fieldNames();
+        fieldNames.forEachRemaining(columns::add);
         if (!columns.isEmpty()) {
             warnings += "Detected invalid bucketing metadata for columns: " + columns.toString() + "\n";
         }

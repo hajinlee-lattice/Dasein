@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
@@ -166,27 +166,27 @@ public class ModelAlertServiceImpl implements ModelAlertService {
     }
 
     private ModelSummaryInfo getInfoFromModelSummary(String tenantId, String modelId) throws Exception {
-        JSONParser parser = new JSONParser();
+        ObjectMapper parser = new ObjectMapper();
         String modelSummaryContents = getFileContents(tenantId, modelId, MODEL_SUMMARY_JSON_FILE_NAME);
 
-        JSONObject modelSummaryObject = (JSONObject) parser.parse(modelSummaryContents);
-        JSONObject modelDetails = (JSONObject) modelSummaryObject.get(MODEL_SUMMARY_MODEL_DETAILS);
-        Long totalLeads = (Long) modelDetails.get(MODEL_DETAILS_TOTAL_LEADS);
-        Long totalConversions = (Long) modelDetails.get(MODEL_DETAILS_TOTAL_CONVERSIONS);
-        Double rocScore = (Double) modelDetails.get(MODEL_DETAILS_ROC_SCORE);
+        JsonNode modelSummaryObject = parser.readTree(modelSummaryContents);
+        JsonNode modelDetails = modelSummaryObject.get(MODEL_SUMMARY_MODEL_DETAILS);
+        Long totalLeads = modelDetails.get(MODEL_DETAILS_TOTAL_LEADS).asLong();
+        Long totalConversions = modelDetails.get(MODEL_DETAILS_TOTAL_CONVERSIONS).asLong();
+        Double rocScore = modelDetails.get(MODEL_DETAILS_ROC_SCORE).asDouble();
 
         ModelSummaryInfo result = new ModelSummaryInfo(totalLeads, totalConversions, rocScore);
         return result;
     }
 
     private List<String> getExcessiveDiscreteValues(String tenantId, String modelId) throws Exception {
-        JSONParser parser = new JSONParser();
+        ObjectMapper parser = new ObjectMapper();
         List<String> excessiveDiscreteValuesAttributes = new ArrayList<String>();
         String dataDiagnosticsContents = getFileContents(tenantId, modelId, DATA_DIAGNOSTICS_JSON_FILE_NAME);
 
-        JSONObject dataDiagnosticsObject = (JSONObject) parser.parse(dataDiagnosticsContents);
-        JSONObject summaryObject = (JSONObject) dataDiagnosticsObject.get(DATA_DIAGNOSTICS_SUMMARY);
-        JSONArray gt200DiscreteValueArray = (JSONArray) summaryObject.get(DATA_DIAGNOSTICS_GT200_DISCRETE_VALUE);
+        JsonNode dataDiagnosticsObject = parser.readTree(dataDiagnosticsContents);
+        JsonNode summaryObject = dataDiagnosticsObject.get(DATA_DIAGNOSTICS_SUMMARY);
+        ArrayNode gt200DiscreteValueArray = (ArrayNode) summaryObject.get(DATA_DIAGNOSTICS_GT200_DISCRETE_VALUE);
 
         for (Object columnNameObject : gt200DiscreteValueArray) {
             excessiveDiscreteValuesAttributes.add(columnNameObject.toString());
@@ -244,19 +244,19 @@ public class ModelAlertServiceImpl implements ModelAlertService {
         ModelAlerts.MissingMetaDataWarnings missingMetaDataWarnings = new ModelAlerts.MissingMetaDataWarnings();
 
         try {
-            JSONParser parser = new JSONParser();
+            ObjectMapper parser = new ObjectMapper();
             String metadataDiagnosticsContents = getFileContents(tenantId, modelId, METADATA_DIAGNOSTICS_JSON_FILE_NAME);
 
-            JSONObject metadataDiagnosticsObject = (JSONObject) parser.parse(metadataDiagnosticsContents);
-            JSONArray approvedUsageErrors = (JSONArray) metadataDiagnosticsObject
+            JsonNode metadataDiagnosticsObject = parser.readTree(metadataDiagnosticsContents);
+            ArrayNode approvedUsageErrors = (ArrayNode) metadataDiagnosticsObject
                     .get(METADATA_DIAGNOSTICS_APPROVED_USAGE_ANNOTATION_ERRORS);
-            JSONArray tagsErrors = (JSONArray) metadataDiagnosticsObject
+            ArrayNode tagsErrors = (ArrayNode) metadataDiagnosticsObject
                     .get(METADATA_DIAGNOSTICS_TAGS_ANNOTATION_ERRORS);
-            JSONArray categoryErrors = (JSONArray) metadataDiagnosticsObject
+            ArrayNode categoryErrors = (ArrayNode) metadataDiagnosticsObject
                     .get(METADATA_DIAGNOSTICS_CATEGORY_ANNOTATION_ERRORS);
-            JSONArray displayErrors = (JSONArray) metadataDiagnosticsObject
+            ArrayNode displayErrors = (ArrayNode) metadataDiagnosticsObject
                     .get(METADATA_DIAGNOSTICS_DISPLAY_NAME_ANNOTATION_ERRORS);
-            JSONArray statTypeErrors = (JSONArray) metadataDiagnosticsObject
+            ArrayNode statTypeErrors = (ArrayNode) metadataDiagnosticsObject
                     .get(METADATA_DIAGNOSTICS_STAT_TYPE_ANNOTATION_ERRORS);
 
             List<String> invalidApprovedUsageAttributes = fillListFromJsonArray(approvedUsageErrors);
@@ -282,15 +282,13 @@ public class ModelAlertServiceImpl implements ModelAlertService {
         return missingMetaDataWarnings;
     }
 
-    private List<String> fillListFromJsonArray(JSONArray array) {
+    private List<String> fillListFromJsonArray(ArrayNode array) {
         List<String> returnList = new ArrayList<String>();
         if (array == null) {
             return returnList;
         }
         for (int i = 0; i < array.size(); i++) {
-            JSONObject obj = (JSONObject) array.get(i);
-            String key = (String) obj.get(METADATA_DIAGNOSTICS_KEY);
-            returnList.add(key);
+            returnList.add(array.get(i).get(METADATA_DIAGNOSTICS_KEY).asText());
         }
         return returnList;
     }

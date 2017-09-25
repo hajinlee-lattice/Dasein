@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
@@ -108,25 +108,25 @@ public class CrmUtils {
     }
     
     public static boolean checkVerificationStatus(String jsonResponse) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = ( JSONObject ) jsonParser.parse(jsonResponse);
-        JSONArray jsonArray = ( JSONArray ) jsonObject.get("Value");
-        JSONObject result = ( JSONObject ) jsonArray.get(0);
-        return "Effective".equals(result.get("Key")) && "true".equals(result.get("Value"));
+        ObjectMapper jsonParser = new ObjectMapper();
+        JsonNode jsonObject = jsonParser.readTree(jsonResponse);
+        ArrayNode jsonArray = ( ArrayNode ) jsonObject.get("Value");
+        JsonNode result = jsonArray.get(0);
+        return "Effective".equals(result.get("Key").asText()) && "true".equals(result.get("Value").asText());
     }
 
     public static boolean checkUpdateDataProviderStatus(String status) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = ( JSONObject ) jsonParser.parse(status);
-        Long statusCode = ( Long ) jsonObject.get("Status");
-        if (statusCode != null && statusCode == 3L) {
+        ObjectMapper jsonParser = new ObjectMapper();
+        JsonNode jsonObject = jsonParser.readTree(status);
+        JsonNode statusCode = jsonObject.get("Status");
+        if (statusCode != null && statusCode.asLong() == 3L) {
             return true;
         }
-        Boolean isSuccessful = ( Boolean ) jsonObject.get("Success");
-        if (isSuccessful != null && isSuccessful) {
+        JsonNode isSuccessful = jsonObject.get("Success");
+        if (isSuccessful != null && isSuccessful.asBoolean()) {
             return true;
         }
-        String errorMsg = ( String ) jsonObject.get("ErrorMessage");
+        String errorMsg = jsonObject.get("ErrorMessage").asText();
         throw new RuntimeException(errorMsg);
     }
 

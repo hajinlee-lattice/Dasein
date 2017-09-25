@@ -6,14 +6,14 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
@@ -177,10 +177,10 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         try {
             RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
             String result = restTemplate.postForObject(url, parameters, String.class);
-            JSONParser jsonParser = new JSONParser();
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(result);
+            ObjectMapper jsonParser = new ObjectMapper();
+            JsonNode jsonObject = jsonParser.readTree(result);
 
-            String id = (String) jsonObject.get("id");
+            String id = jsonObject.get("id").asText();
 
             String[] tokens = id.split("/");
             return tokens[tokens.length - 2];

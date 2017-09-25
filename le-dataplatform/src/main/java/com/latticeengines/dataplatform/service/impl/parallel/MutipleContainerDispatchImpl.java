@@ -4,11 +4,11 @@ import javax.annotation.Resource;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.service.DispatchService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
@@ -55,9 +55,9 @@ public class MutipleContainerDispatchImpl implements DispatchService {
     public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath, boolean isParallelEnabled)
             throws Exception {
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
-        long sampleSize = (long) ((JSONObject) jsonObject.get("Summary")).get("SampleSize");
+        ObjectMapper jsonParser = new ObjectMapper();
+        JsonNode jsonObject = jsonParser.readTree(content);
+        long sampleSize = jsonObject.get("Summary").get("SampleSize").asLong();
         return sampleSize;
     }
 

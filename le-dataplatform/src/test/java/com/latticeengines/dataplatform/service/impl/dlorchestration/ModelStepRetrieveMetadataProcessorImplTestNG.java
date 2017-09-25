@@ -11,9 +11,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +19,9 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -127,9 +127,9 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         String metadata = modelStepRetrieveMetadataProcessor.executeStepWithResult(command, commandParameters);
 
         // Assert metadata is in json format
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(metadata);
-        long status = (long) jsonObject.get("Status");
+        ObjectMapper jsonParser = new ObjectMapper();
+        JsonNode jsonObject = jsonParser.readTree(metadata);
+        long status = jsonObject.get("Status").asLong();
 
         assertEquals(status, 3);
     }
@@ -157,17 +157,17 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
         // Assert metadataValidationResult is in json format
         String metadataDiagnosticsContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(metadataDiagnosticsContent);
-        JSONArray approvedUsageError = (JSONArray) jsonObject.get("ApprovedUsageAnnotationErrors");
+        ObjectMapper jsonParser = new ObjectMapper();
+        JsonNode jsonObject = jsonParser.readTree(metadataDiagnosticsContent);
+        ArrayNode approvedUsageError = (ArrayNode) jsonObject.get("ApprovedUsageAnnotationErrors");
         assertEquals(approvedUsageError.size(), 2);
-        JSONArray tagsError = (JSONArray) jsonObject.get("TagsAnnotationErrors");
+        ArrayNode tagsError = (ArrayNode) jsonObject.get("TagsAnnotationErrors");
         assertEquals(tagsError.size(), 3);
-        JSONArray categoryError = (JSONArray) jsonObject.get("CategoryAnnotationErrors");
+        ArrayNode categoryError = (ArrayNode) jsonObject.get("CategoryAnnotationErrors");
         assertEquals(categoryError.size(), 2);
-        JSONArray displayNameError = (JSONArray) jsonObject.get("DisplayNameAnnotationErrors");
+        ArrayNode displayNameError = (ArrayNode) jsonObject.get("DisplayNameAnnotationErrors");
         assertEquals(displayNameError.size(), 2);
-        JSONArray statTypeError = (JSONArray) jsonObject.get("StatisticalTypeAnnotationErrors");
+        ArrayNode statTypeError = (ArrayNode) jsonObject.get("StatisticalTypeAnnotationErrors");
         assertEquals(statTypeError.size(), 2);
 
         // delete the metadata-diagnostics file

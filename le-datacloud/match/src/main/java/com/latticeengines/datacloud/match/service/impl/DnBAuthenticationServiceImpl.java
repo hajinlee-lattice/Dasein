@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +102,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         }
     }
 
-    private String retrieveTokenFromResponseBody(String body) throws ParseException {
+    private String retrieveTokenFromResponseBody(String body) {
         String token = JsonPath.parse(body).read(tokenJsonPath);
         if (token == null) {
             throw new RuntimeException(String.format("Failed to parse token from response %s!", body));
@@ -138,7 +137,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         try {
             String response = obtainAuthorizationReponseBody(type);
             token = retrieveTokenFromResponseBody(response);
-        } catch (ParseException | IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
 

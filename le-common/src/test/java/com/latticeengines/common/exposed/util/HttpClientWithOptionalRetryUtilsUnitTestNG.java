@@ -2,14 +2,15 @@ package com.latticeengines.common.exposed.util;
 
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class HttpClientWithOptionalRetryUtilsUnitTestNG {
 
@@ -34,15 +35,15 @@ public class HttpClientWithOptionalRetryUtilsUnitTestNG {
         confirmGetResponse(result);
     }
 
-    private void confirmGetResponse(String result) throws ParseException {
-        JSONParser parser = new JSONParser();
-        JSONObject resultObj = (JSONObject)parser.parse(result);
-        JSONObject argsObj = (JSONObject)resultObj.get("args");
-        assertTrue(argsObj.get(TEMPERATURE).equals(_101));
+    private void confirmGetResponse(String result) throws IOException {
+        ObjectMapper parser = new ObjectMapper();
+        JsonNode resultObj = parser.readTree(result);
+        JsonNode argsObj = resultObj.get("args");
+        assertTrue(argsObj.get(TEMPERATURE).asText().equals(_101));
 
-        JSONObject headersObj = (JSONObject)resultObj.get("headers");
-        assertTrue(headersObj.get(AUTHORIZATION).equals(TOKEN_SOME_TOKEN));
-        assertTrue(headersObj.get(CONTENT_TYPE).equals(APPLICATION_JSON));
+        JsonNode headersObj = resultObj.get("headers");
+        assertTrue(headersObj.get(AUTHORIZATION).asText().equals(TOKEN_SOME_TOKEN));
+        assertTrue(headersObj.get(CONTENT_TYPE).asText().equals(APPLICATION_JSON));
     }
 
     @Test(groups = "unit")
@@ -55,14 +56,14 @@ public class HttpClientWithOptionalRetryUtilsUnitTestNG {
         confirmPostResponse(result);
     }
 
-    private void confirmPostResponse(String result) throws ParseException {
-        JSONParser parser = new JSONParser();
-        JSONObject resultObj = (JSONObject)parser.parse(result);
+    private void confirmPostResponse(String result) throws IOException {
+        ObjectMapper parser = new ObjectMapper();
+        JsonNode resultObj = parser.readTree(result);
 
-        assertTrue(resultObj.get("data").equals(SOME_TEST_PAYLOAD));
+        assertTrue(resultObj.get("data").asText().equals(SOME_TEST_PAYLOAD));
 
-        JSONObject headersObj = (JSONObject)resultObj.get("headers");
-        assertTrue(headersObj.get(AUTHORIZATION).equals(TOKEN_SOME_TOKEN));
-        assertTrue(headersObj.get(CONTENT_TYPE).equals(APPLICATION_JSON));
+        JsonNode headersObj = resultObj.get("headers");
+        assertTrue(headersObj.get(AUTHORIZATION).asText().equals(TOKEN_SOME_TOKEN));
+        assertTrue(headersObj.get(CONTENT_TYPE).asText().equals(APPLICATION_JSON));
     }
 }

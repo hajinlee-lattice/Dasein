@@ -9,13 +9,12 @@ import java.net.URL;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modeling.Metadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
@@ -28,7 +27,7 @@ public class MetadataValidationServiceTestNG extends RemoteFunctionalTestNGBase 
     private MetadataValidationServiceImpl metadataValidationService;
 
     @Test(groups = { "functional" })
-    public void testGenerateMetadataValidationResult() throws IOException, ParseException {
+    public void testGenerateMetadataValidationResult() throws IOException {
         URL metadataUrl = ClassLoader.getSystemResource("incorrect-metadata.json");
         String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
         Metadata metadataObj = JsonUtils.deserialize(metadataContents, Metadata.class);
@@ -43,7 +42,7 @@ public class MetadataValidationServiceTestNG extends RemoteFunctionalTestNGBase 
     }
 
     @Test(groups = { "functional" })
-    public void testValidateThrowsException() throws IOException, ParseException {
+    public void testValidateThrowsException() throws IOException {
         URL metadataUrl = ClassLoader.getSystemResource("incorrect-metadata.json");
         String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
         String jsonString = null;
@@ -54,22 +53,22 @@ public class MetadataValidationServiceTestNG extends RemoteFunctionalTestNGBase 
             jsonString = e.getMessage();
         }
         // Assert validationValidationResult is in json format
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(jsonString);
-        JSONArray approvedUsageError = (JSONArray) jsonObject.get("ApprovedUsageAnnotationErrors");
+        ObjectMapper jsonParser = new ObjectMapper();
+        JsonNode jsonObject = jsonParser.readTree(jsonString);
+        ArrayNode approvedUsageError = (ArrayNode) jsonObject.get("ApprovedUsageAnnotationErrors");
         assertEquals(approvedUsageError.size(), 2);
-        JSONArray tagsError = (JSONArray) jsonObject.get("TagsAnnotationErrors");
+        ArrayNode tagsError = (ArrayNode) jsonObject.get("TagsAnnotationErrors");
         assertEquals(tagsError.size(), 3);
-        JSONArray categoryError = (JSONArray) jsonObject.get("CategoryAnnotationErrors");
+        ArrayNode categoryError = (ArrayNode) jsonObject.get("CategoryAnnotationErrors");
         assertEquals(categoryError.size(), 2);
-        JSONArray displayNameError = (JSONArray) jsonObject.get("DisplayNameAnnotationErrors");
+        ArrayNode displayNameError = (ArrayNode) jsonObject.get("DisplayNameAnnotationErrors");
         assertEquals(displayNameError.size(), 2);
-        JSONArray statTypeError = (JSONArray) jsonObject.get("StatisticalTypeAnnotationErrors");
+        ArrayNode statTypeError = (ArrayNode) jsonObject.get("StatisticalTypeAnnotationErrors");
         assertEquals(statTypeError.size(), 2);
     }
 
     @Test(groups = { "functional" })
-    public void testValidateDoNotThrowsException() throws IOException, ParseException {
+    public void testValidateDoNotThrowsException() throws IOException {
         URL metadataUrl = ClassLoader.getSystemResource("correct-metadata.json");
         String metadataContents = FileUtils.readFileToString(new File(metadataUrl.getPath()));
         try {
