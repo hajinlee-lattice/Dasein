@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.pls.SegmentIdAndModelRulesPair;
+import com.latticeengines.domain.exposed.pls.SegmentIdAndSingleRulePair;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -86,6 +87,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             return processRatingEngineModelIds(request);
         } else if (request.getSegmentIdModelRules() != null) {
             return getDummyCoverage ? processSegmentIdModelRulesDummy(request) : processSegmentIdModelRules(request);
+        } else if (request.getSegmentIdAndSingleRules() != null) {
+            return processSegmentIdSingleRulesDummy(request);
         }
 
         return null;
@@ -558,6 +561,28 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             }
             coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
             segmentIdAndModelRulesPairCoverageMap.put(segmentIdAndModelRulesPair.getSegmentId(), coverageInfo);
+        }
+        return result;
+    }
+
+    private RatingsCountResponse processSegmentIdSingleRulesDummy(RatingsCountRequest request) {
+        RatingsCountResponse result = new RatingsCountResponse();
+        HashMap<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap = new HashMap<>();
+        result.setSegmentIdModelRulesCoverageMap(segmentIdAndSingleRulesCoverageMap);
+
+        Random rand = new Random(System.currentTimeMillis());
+
+        for (SegmentIdAndSingleRulePair segmentIdAndSingleRulePair : request.getSegmentIdAndSingleRules()) {
+            CoverageInfo coverageInfo = new CoverageInfo();
+            Long accountCount = 5000L;
+            accountCount += rand.nextInt(1000);
+            Long contactCount = 7000L;
+            contactCount += rand.nextInt(500);
+
+            coverageInfo.setAccountCount(accountCount);
+            coverageInfo.setContactCount(contactCount);
+
+            segmentIdAndSingleRulesCoverageMap.put(segmentIdAndSingleRulePair.getResponseKeyId(), coverageInfo);
         }
         return result;
     }
