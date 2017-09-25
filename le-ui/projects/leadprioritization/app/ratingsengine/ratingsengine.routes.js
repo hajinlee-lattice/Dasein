@@ -120,7 +120,7 @@ angular
                 },
                 WizardProgressItems: function(RatingsEngineStore) {
                     return [
-                        { label: 'Segment', state: 'segment', nextFn: RatingsEngineStore.nextSaveGeneric },
+                        { label: 'Segment', state: 'segment', nextFn: RatingsEngineStore.nextSaveRatingEngine },
                         { label: 'Attributes', state: 'segment.attributes' },
                         { label: 'Rules', state: 'segment.attributes.rules' }
                     ];

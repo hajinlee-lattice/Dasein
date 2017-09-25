@@ -13,6 +13,7 @@ angular.module('lp.ratingsengine')
         this.rating = null;
         this.ratings = null;
         this.type = null;
+        this.savedSegment = "";
     }
 
     this.init();
@@ -50,29 +51,26 @@ angular.module('lp.ratingsengine')
         // });
     }
 
-    this.setSegment = function(segment) {
 
-        console.log(segment);
-        this.savedSegment = segment;
+    this.setSegment = function(segmentId) {
+        this.savedSegment = segmentId;
     }
 
-    this.saveSegment = function(segment, ratingEngineId) {
-        if (segment) {
-            this.getRatingEnging(ratingEngineId).then(function(ratingEngine){
-                PlaybookWizardStore.savePlay({
-                    displayName: play.displayName,
-                    name: play.name,
-                    segment: segment.name
-                }).then(function(response){
-                    PlaybookWizardStore.setSegment(segment);
-                });
-            });
-        }
-    }
-
-    this.getSavedSegment = function() {
+    this.getSegment = function() {
         return this.savedSegment;
     }
+
+    this.nextSaveRatingEngine = function(nextState) {
+        var changed = false,
+            opts = RatingsEngineStore.settings,
+            segment = RatingsEngineStore.getSegment();
+
+        RatingsEngineStore.saveRating().then(function(rating) {
+            $state.go(nextState, {rating_id: rating.id});
+        });
+    }
+
+
 
     this.setRating = function(rating) {
         this.currentRating = rating;
@@ -105,7 +103,7 @@ angular.module('lp.ratingsengine')
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
         opts.type = opts.type || 'RULE_BASED',
         opts.displayName = 'testing making new engine';
-        opts.segment = {"pid":1838,"name":"segment1504299116731","display_name":"Yunlong_test_segment1","updated":1504299200000,"created":1503964326000,"is_master_segment":false};
+        opts.segment = {'name': RatingsEngineStore.getSegment() };
         RatingsEngineService.saveRating(opts).then(function(data){
             deferred.resolve(data);
             RatingsEngineStore.setRating(data);
@@ -125,6 +123,15 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
+    this.getSegmentsCounts = function(segmentIds){
+        var deferred = $q.defer();
+        
+        RatingsEngineService.getSegmentsCounts(segmentIds).then(function(response){
+            deferred.resolve(response);
+        });
+
+        return deferred.promise;
+    };
 
     this.getRatingsChartData = function(arrayofIds){
         var deferred = $q.defer();
@@ -136,20 +143,6 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     };
 
-    // this.getRatingsCounts = function(Ratings, noSalesForceId) {
-    //     var deferred = $q.defer(),
-    //         ratings_ids = [],
-    //         noSalesForceId = noSalesForceId || false;
-    //     if(Ratings && typeof Ratings === 'object') {
-    //         Ratings.forEach(function(value, key) {
-    //             ratings_ids.push(value.id);
-    //         });
-    //         RatingsEngineService.getRatingsCounts(ratings_ids, noSalesForceId).then(function(data) {
-    //             deferred.resolve(data);
-    //         });
-    //     }
-    //     return deferred.promise;
-    // }
 
     this.setType = function(type) {
         this.type = type;
@@ -192,22 +185,21 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
-    // this.getRatingsCounts = function(ratings, noSalesForceId) {
-    //     var deferred = $q.defer();
+    this.getSegmentsCounts = function(segmentIds) {
+        var deferred = $q.defer();
 
-    //     $http({
-    //         method: 'POST',
-    //         url: '/pls/ratingengines/coverage',
-    //         data: {
-    //             ratingEngineIds: ratings,
-    //             restrictNotNullSalesforceId: noSalesForceId
-    //         }
-    //     }).then(function(response) {
-    //         deferred.resolve(response.data);
-    //     });
+        $http({
+            method: 'POST',
+            url: '/pls/ratingengines/coverage',
+            data: {
+                segmentIds: segmentIds
+            }
+        }).then(function(response) {
+            deferred.resolve(response.data);
+        });
 
-    //     return deferred.promise;
-    // }
+        return deferred.promise;
+    }
 
     this.getRatingsChartData = function(arrayofIds) {
         var deferred = $q.defer();
