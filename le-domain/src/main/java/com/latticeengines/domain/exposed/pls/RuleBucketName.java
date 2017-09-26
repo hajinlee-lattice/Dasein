@@ -16,7 +16,7 @@ public enum RuleBucketName {
 
     private String name;
 
-    private RuleBucketName(String name) {
+    RuleBucketName(String name) {
         this.name = name;
     }
 

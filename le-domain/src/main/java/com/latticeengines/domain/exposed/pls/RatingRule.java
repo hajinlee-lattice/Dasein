@@ -20,6 +20,12 @@ public class RatingRule {
     @JsonProperty("defaultBucketName")
     private String defaultBucketName = DEFAULT_BUCKET_NAME;
 
+    public static RatingRule constructDefaultRule() {
+        RatingRule ratingRule = new RatingRule();
+        ratingRule.setBucketToRuleMap(generateDefaultBuckets());
+        return ratingRule;
+    }
+
     public RatingRule() {
     }
 
@@ -40,7 +46,7 @@ public class RatingRule {
     }
 
     @VisibleForTesting
-    TreeMap<String, Map<String, Restriction>> generateDefaultBuckets() {
+    static TreeMap<String, Map<String, Restriction>> generateDefaultBuckets() {
         TreeMap<String, Map<String, Restriction>> map = new TreeMap<>();
         map.put(RuleBucketName.A.getName(), generateDefaultAccountAndContactBuckets());
         map.put(RuleBucketName.A_MINUS.getName(), generateDefaultAccountAndContactBuckets());
@@ -51,7 +57,7 @@ public class RatingRule {
         return map;
     }
 
-    private Map<String, Restriction> generateDefaultAccountAndContactBuckets() {
+    private static Map<String, Restriction> generateDefaultAccountAndContactBuckets() {
         Map<String, Restriction> map = new HashMap<>();
         map.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, null);
         map.put(FrontEndQueryConstants.CONTACT_RESTRICTION, null);

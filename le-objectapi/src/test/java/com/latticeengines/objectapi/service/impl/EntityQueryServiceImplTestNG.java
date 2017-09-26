@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -218,7 +217,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     private RuleBasedModel ruleBasedModel() {
         RuleBasedModel model = new RuleBasedModel();
         model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));
-        RatingRule rule = new RatingRule();
+        RatingRule rule = RatingRule.constructDefaultRule();
 
         Map<String, Restriction> ruleA = new HashMap<>();
         ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
