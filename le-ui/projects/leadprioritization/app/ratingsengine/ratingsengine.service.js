@@ -104,6 +104,16 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
+    this.getRatingDashboard = function(id) {
+        var deferred = $q.defer();
+
+        RatingsEngineService.getRatingDashboard(id).then(function(data) {
+            deferred.resolve(data);
+        });
+
+        return deferred.promise;
+    }
+
     this.getCurrentRating = function() {
         return this.currentRating;
     }
@@ -333,4 +343,16 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
+    this.getRatingDashboard = function(id) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/ratingengines/' + id + '/dashboard'
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+
+        return deferred.promise;
+    }
 });

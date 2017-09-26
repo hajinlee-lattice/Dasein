@@ -96,6 +96,17 @@ angular
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Rating Engine'
             },
+            resolve: {
+                Rating: function($q, $stateParams, RatingsEngineStore) {
+                    var deferred = $q.defer();
+
+                    RatingsEngineStore.getRatingDashboard($stateParams.rating_id).then(function(data) {
+                        deferred.resolve(data);
+                    });
+
+                    return deferred.promise;
+                }   
+            },
             views: {
                 "summary@": {
                     template: ''

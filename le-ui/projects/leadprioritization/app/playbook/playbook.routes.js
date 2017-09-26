@@ -517,7 +517,11 @@ angular
                         engineIdObject = [{id: engineId}];
 
                     PlaybookWizardStore.getRatingsCounts(engineIdObject, true).then(function(data){
-                        deferred.resolve(data.ratingEngineIdCoverageMap[engineId].accountCount);
+                        var accountCount = null;
+                        if(data && data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] && data.ratingEngineIdCoverageMap[engineId].accountCount) {
+                            accoutCount = data.ratingEngineIdCoverageMap[engineId].accountCount;
+                        }
+                        deferred.resolve(accountCount);
                     });
 
                     return deferred.promise;
