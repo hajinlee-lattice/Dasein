@@ -6,7 +6,6 @@ import java.util.TreeMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.Restriction;
 
 public class RatingRuleUnitTestNG {
@@ -16,14 +15,13 @@ public class RatingRuleUnitTestNG {
     @Test(groups = "unit")
     public void testSortedBucketToRuleMap() {
         Assert.assertEquals(ratingRule.getDefaultBucketName(), RuleBucketName.C.getName());
-        assertOrderOfMap(ratingRule.getBucketToRuleMap());
+        Assert.assertNull(ratingRule.getBucketToRuleMap());
+        assertOrderOfMap(ratingRule.generateDefaultBuckets());
         System.out.println("ratingRule is " + ratingRule);
-        assertOrderOfRatingRuleString(ratingRule.toString());
-        RatingRule deserialized = JsonUtils.deserialize(ratingRule.toString(), RatingRule.class);
-        assertOrderOfMap(deserialized.getBucketToRuleMap());
-
+        System.out.println("ratingRule.generateDefaultBuckets() is " + ratingRule.generateDefaultBuckets());
     }
 
+    @SuppressWarnings("unused")
     private void assertOrderOfRatingRuleString(String ratingRule) {
         int Aindex = ratingRule.indexOf("\"" + RuleBucketName.A.getName() + "\"");
         int AminusIndex = ratingRule.indexOf("\"" + RuleBucketName.A_MINUS.getName() + "\"");

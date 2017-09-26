@@ -1,11 +1,11 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
@@ -15,7 +15,7 @@ public class RatingRule {
     public static final String DEFAULT_BUCKET_NAME = RuleBucketName.C.getName();
 
     @JsonProperty("bucketToRuleMap")
-    private TreeMap<String, Map<String, Restriction>> bucketToRuleMap = generateDefaultBuckets();
+    private TreeMap<String, Map<String, Restriction>> bucketToRuleMap;
 
     @JsonProperty("defaultBucketName")
     private String defaultBucketName = DEFAULT_BUCKET_NAME;
@@ -39,7 +39,8 @@ public class RatingRule {
         return this.defaultBucketName;
     }
 
-    private TreeMap<String, Map<String, Restriction>> generateDefaultBuckets() {
+    @VisibleForTesting
+    TreeMap<String, Map<String, Restriction>> generateDefaultBuckets() {
         TreeMap<String, Map<String, Restriction>> map = new TreeMap<>();
         map.put(RuleBucketName.A.getName(), generateDefaultAccountAndContactBuckets());
         map.put(RuleBucketName.A_MINUS.getName(), generateDefaultAccountAndContactBuckets());
@@ -52,8 +53,8 @@ public class RatingRule {
 
     private Map<String, Restriction> generateDefaultAccountAndContactBuckets() {
         Map<String, Restriction> map = new HashMap<>();
-        map.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, Restriction.builder().and(Collections.emptyList()).build());
-        map.put(FrontEndQueryConstants.CONTACT_RESTRICTION, Restriction.builder().and(Collections.emptyList()).build());
+        map.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION, null);
+        map.put(FrontEndQueryConstants.CONTACT_RESTRICTION, null);
         return map;
     }
 
