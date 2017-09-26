@@ -38,7 +38,14 @@ angular
                     if (vm.tree.bucketRestriction) {
                         var bucket = vm.tree.bucketRestriction;
                         
-                        vm.item = vm.enrichments[ vm.enrichmentsMap[ bucket.attr.split('.')[1] ] ]
+                        vm.item = angular.copy(
+                            vm.enrichments[
+                                vm.enrichmentsMap[
+                                    bucket.attr.split('.')[1]
+                                ]
+                            ]
+                        );
+
                         vm.root.pushItem(vm.item, vm.tree.bucketRestriction);
                         vm.type = vm.item.cube.Bkts.Type;
                         vm.label = vm.item.topbkt.Lbl;
@@ -47,7 +54,7 @@ angular
                         vm.setOperation(vm.item, vm.type, vm.label, vm.range);
 
                         if (typeof vm.tree.bucketRestriction.bkt.Id != "number") {
-                            vm.tree.bucketRestriction.bkt.Id = vm.tree.labelGlyph;
+                            //vm.tree.bucketRestriction.bkt.Id = vm.tree.labelGlyph;
                             vm.unused = true;
                         }
                     }
@@ -75,7 +82,8 @@ angular
             }
 
             vm.checkSelected = function(bucket) {
-                if (bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]) {
+                console.log(bucket);
+                if (bucket.Rng && bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]) {
                     //console.log('selected', (bucket.Rng[0] == vm.range[0] && bucket.Rng[1] == vm.range[1]), bucket.Rng[0], vm.range[0], bucket.Rng[1], vm.range[1], bucket, vm.range);
                     vm.presetOperation = bucket.Lbl;
                 }
@@ -167,8 +175,19 @@ angular
             }
             
             vm.editBucket = function() {
+                console.log('editBucket', vm.editing, vm.type, vm);
                 if (!vm.editing && (vm.type == 'Boolean' || vm.type == 'Numerical')) {
-                    this.root.saveState(true);
+                    if (vm.unused) {
+                        vm.unused = false;
+                        vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
+                        vm.tree.bucketRestriction.bkt = angular.copy(vm.item.cube.Bkts.List[0]);
+                        vm.label = vm.item.topbkt.Lbl;
+                        vm.range = vm.item.topbkt.Rng;
+
+                        vm.setOperation(vm.item, vm.type, vm.label, vm.range);
+                    }
+
+                    vm.root.saveState(true);
                     vm.editing = true;
                 }
             }
@@ -265,6 +284,12 @@ angular
                         }
                     }
                 });
+            }
+
+            vm.buckRestrictionSortBy = function() {
+                return function(object) {
+                    return object.bucketRestriction && object.bucketRestriction.bkt.Id;
+                }
             }
 
             vm.init();

@@ -90,6 +90,10 @@ div.advanced-query-builder {
             margin-bottom: 2em;
         }
 
+        .query-section-item-unused {
+            display: none;
+        }
+
         .query-section-item {
             position: absolute;
             top: 2em;
@@ -277,6 +281,25 @@ div.advanced-query-builder {
             padding: 2.5em 0 1.2em 1.5em;
             margin-bottom: 0em;
             
+
+            &.item-unused {
+                border-color: #bbb;
+                
+                .item-operator-and,
+                .item-operator-or {
+                    color: #bbb;
+                }
+                
+                .query-section-item-unused {
+                    display: block;
+                }
+
+                .item-bucket-data,
+                .item-edit-bucket-data {
+                    display: none;
+                }
+            }
+
             &.query-section-item-end:first-child div.query-section-item-end {
                 top: 0.75em;
             }
@@ -421,7 +444,7 @@ div.wizard-content div.advanced-query-builder {
             background: white;
         }
 
-        .query-section-item-content {
+        .item-unused .query-section-item-content {
             border-right-color:  white;
         }
     }

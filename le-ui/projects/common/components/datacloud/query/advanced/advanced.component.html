@@ -6,38 +6,39 @@
             </h2>
             
             <div class="query-rules-header-infotext">
-                A record will always get the highest rating it is eligibnle for.
+                A record will always get the highest rating it is eligable for.
             </div>
 
             <div class="query-rules-header-defaultbucket">
                 If a record doesn't match any rules, it should be given this rating:
                 
-                <select>
-                    <option ng-repeat="bucket in vm.buckets" ng-value="bucket.label">{{ bucket.label }}</option>
+                <select ng-model="vm.rating_rule.defaultBucketName" 
+                        ng-options="bkt.bucket as bkt.bucket for bkt in vm.buckets">
                 </select>
             </div>
         </div>
         
         <ul class="query-rules-buckets-container" ng-if="vm.mode == 'rules'">
             <li     ng-repeat="bucket in vm.buckets" 
-                    ng-class="{ 'active': bucket.active }"
+                    ng-class="{ 'active': bucket.bucket == vm.bucket }"
+                    ng-click="vm.clickBucketTile(bucket)"
                     class="query-rules-buckets-bucket">
                 <div class="bucket-box">
-                    <div class="bucket-label"><h2>{{ bucket.label }}</h2></div>
+                    <div class="bucket-label"><h2>{{ bucket.bucket }}</h2></div>
                     <div class="bucket-resource">{{ bucket.resource }}</div>
                     <div class="bucket-resource-count">
                         <span class="count-number">{{ bucket.count }}</span>
-                        <span class="count-percentage">({{ bucket.percentage }}%)</span>
+                        <span class="count-percentage">({{ (bucket.count / vm.coverage_map.accountCount) * 100 | number:1 }}%)</span>
                     </div>
                 </div>
 
-                <div  class="bucket-rulecount">0 Rules</div>
+                <div  class="bucket-rulecount">{{ vm.getRuleCount(bucket) }} Rules</div>
             </li>
         </ul>
         
         <ul class="row controls">
             <li class="" ng-if="vm.mode == 'rules'">
-                <h2>Rules (<span class="query-rules-count">0</span>)</h2>
+                <h2>Rules (<span class="query-rules-count">{{ vm.getRuleCount() }}</span>)</h2>
                 Query expression of the rules you've created:
             </li>
             <li class="buttons pull-right" ng-if="vm.mode == 'segment'">

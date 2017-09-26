@@ -6,9 +6,9 @@ angular.module('lp.ratingsengine')
         this.settings = {};
 
         this.validation = {
-            segment: true,
+            segment: false,
             attributes: false,
-            rules: true
+            rules: false
         }
 
         this.segment_form = {
@@ -19,6 +19,7 @@ angular.module('lp.ratingsengine')
         this.rating = null;
         this.ratings = null;
         this.type = null;
+        this.coverage = {};
         this.savedSegment = "";
     }
 
@@ -149,12 +150,60 @@ angular.module('lp.ratingsengine')
     this.getRatingsChartData = function(arrayofIds){
         var deferred = $q.defer();
         
-        RatingsEngineService.getRatingsChartData(arrayofIds).then(function(response){
+        RatingsEngineService.getRatingsChartData({
+                ratingEngineIds: arrayofIds
+        }).then(function(response){
+            RatingsEngineStore.setCoverage(response);
             deferred.resolve(response);
         });
 
         return deferred.promise;
     };
+
+    this.getCoverageMap = function(CurrentRatingsEngine){
+        console.log('getCoverageMap', CurrentRatingsEngine);
+        var deferred = $q.defer();
+        var CoverageMap = {
+            "restrictNotNullSalesforceId":false,
+            "segmentIdModelRules": [{
+                "segmentId": "segment1504822371239",
+                "ratingRule": {
+                    "bucketToRuleMap": CurrentRatingsEngine.rule.ratingRule.bucketToRuleMap,
+                    "defaultBucketName": CurrentRatingsEngine.rule.ratingRule.defaultBucketName
+                }
+            }]
+        };
+
+        RatingsEngineService.getRatingsChartData(CoverageMap).then(function(response){
+            RatingsEngineStore.setCoverage(response);
+            deferred.resolve(response);
+        });
+
+        return deferred.promise;
+    };
+
+    this.getCoverage = function() {
+        return this.coverage;
+    }
+
+    this.setCoverage = function(coverage) {
+        this.coverage = coverage;
+    }
+
+    // this.getRatingsCounts = function(Ratings, noSalesForceId) {
+    //     var deferred = $q.defer(),
+    //         ratings_ids = [],
+    //         noSalesForceId = noSalesForceId || false;
+    //     if(Ratings && typeof Ratings === 'object') {
+    //         Ratings.forEach(function(value, key) {
+    //             ratings_ids.push(value.id);
+    //         });
+    //         RatingsEngineService.getRatingsCounts(ratings_ids, noSalesForceId).then(function(data) {
+    //             deferred.resolve(data);
+    //         });
+    //     }
+    //     return deferred.promise;
+    // }
 
     this.setType = function(type) {
         this.type = type;
@@ -213,15 +262,13 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
-    this.getRatingsChartData = function(arrayofIds) {
+    this.getRatingsChartData = function(CoverageRequest) {
         var deferred = $q.defer();
 
         $http({
             method: 'POST',
             url: '/pls/ratingengines/coverage',
-            data: {
-                ratingEngineIds: arrayofIds
-            }
+            data: CoverageRequest
         }).then(function(response) {
             deferred.resolve(response.data);
         });

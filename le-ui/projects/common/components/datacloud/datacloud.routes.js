@@ -399,7 +399,10 @@ angular
                 }],
                 CurrentRatingsEngine: [function() {
                     return null;
-                }]
+                }],
+                CoverageMap: [function() {
+                    return null;
+                }],
             },
             views: {
                 "main@": {

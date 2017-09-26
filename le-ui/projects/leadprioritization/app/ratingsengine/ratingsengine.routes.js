@@ -246,9 +246,18 @@ angular
                 CurrentRatingsEngine: function($q, $stateParams, DataCloudStore) {
                     var deferred = $q.defer();
 
-                    DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(data) {
-                        var model = (data && data[0] ? data[0] : {});
+                    DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function(result) {
+                        var model = (result && result[0] ? result[0] : {});
                         deferred.resolve(model);
+                    }); 
+
+                    return deferred.promise;
+                },
+                CoverageMap: function($q, $stateParams, RatingsEngineStore, CurrentRatingsEngine) {
+                    var deferred = $q.defer();
+
+                    RatingsEngineStore.getCoverageMap(CurrentRatingsEngine).then(function(result) {
+                        deferred.resolve(result);
                     }); 
 
                     return deferred.promise;

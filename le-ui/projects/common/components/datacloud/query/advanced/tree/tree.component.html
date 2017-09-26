@@ -58,7 +58,7 @@
 <div    class="query-section-item noselect-children category-{{ vm.item.Category.replace(' ','_') | lowercase }}" 
         ng-class="{ 
             'dragging': vm.root.draggedItem == vm,
-            'dropped': vm.root.droppedItem == vm 
+            'dropped': vm.root.droppedItem == vm
         }"
         ng-if="vm.tree.bucketRestriction" 
         ng-init="data = vm.enrichments['LatticeAccount.'+vm.tree.bucketRestriction.attr]"
@@ -74,13 +74,15 @@
 
     <div    class="query-section-item-content" 
             ng-click="vm.editBucket()"
-            ng-class="{ 'cursor-pointer': vm.type != 'Enum' }">
+            ng-class="{ 
+                'cursor-pointer': vm.type != 'Enum'
+            }">
         <span class="query-section-item-category">{{vm.item.Category}}{{vm.item.Subcategory != 'Other' ? ' - ' + vm.item.Subcategory : ''}}</span>
         
         <span class="query-section-item-displayname">
             <span class="query-section-item-name"><strong>{{vm.item.DisplayName}}</strong></span>
             
-            <span ng-if="vm.editing && !vm.unused">
+            <span class="item-edit-bucket-data" ng-if="vm.editing && !vm.unused">
 
                 <span ng-if="vm.type == 'Boolean'" class="query-section-item-operation">
                     <select ng-model="vm.item.topbkt.Lbl" ng-change="vm.updateBucketCount()">
@@ -142,7 +144,7 @@
                 <button class="button blue-button" ng-click="vm.setBucket($event)">SET</button>
             </span>
 
-            <span ng-if="!vm.editing && !vm.unused">
+            <span class="item-bucket-data" ng-if="!vm.editing && !vm.unused">
                 <span class="query-section-item-operation">
                     <span class="query-section-item-operation">{{vm.getOperationLabel()}}</span>
 
@@ -178,14 +180,17 @@
         <i class="fa fa-close" ng-click="vm.clickDelete($parent)"></i>
     </div>
 
-    <div ng-if="vm.unused === true" class="query-section-item-unused">
+    <div class="query-section-item-unused">
         UNUSED
     </div>
 </div>
 
 <ul ng-if="vm.tree.logicalRestriction && !vm.tree.collapsed">
-    <li     ng-repeat="item in vm.tree.logicalRestriction.restrictions"
-            ng-class="{'query-section-item-box-subtree':item.logicalRestriction}" 
+    <li     ng-repeat="item in vm.tree.logicalRestriction.restrictions | orderBy: vm.buckRestrictionSortBy()"
+            ng-class="{
+                'query-section-item-box-subtree':item.logicalRestriction,
+                'item-unused': item.bucketRestriction && !item.bucketRestriction.bkt.Id
+            }" 
             class="query-section-item-box">
         <query-tree-directive 
                 class="{{ vm.tree.logicalRestriction ? 'query-section-type-' + vm.tree.logicalRestriction.operator.toLowerCase() : '' }}" 
