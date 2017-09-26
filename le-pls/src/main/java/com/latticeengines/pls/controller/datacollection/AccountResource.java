@@ -1,9 +1,10 @@
-package com.latticeengines.app.exposed.controller;
+package com.latticeengines.pls.controller.datacollection;
 
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,6 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "accounts", description = "REST resource for serving data about accounts")
 @RestController
 @RequestMapping("/accounts")
+@PreAuthorize("hasRole('View_PLS_CDL_Data')")
 public class AccountResource extends BaseFrontEndEntityResource {
 
     @Inject

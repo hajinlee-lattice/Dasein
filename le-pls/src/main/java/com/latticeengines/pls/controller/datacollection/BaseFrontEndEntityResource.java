@@ -1,4 +1,4 @@
-package com.latticeengines.app.exposed.controller;
+package com.latticeengines.pls.controller.datacollection;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
