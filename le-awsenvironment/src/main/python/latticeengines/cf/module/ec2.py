@@ -233,7 +233,12 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
     }
 
     if efs is None:
-        del md["AWS::CloudFormation::Init"]["install"]["packages"]
+        md["AWS::CloudFormation::Init"]["install"]["packages"] = {
+            "yum" : {
+                "aws-cli": [],
+                "jq": []
+            }
+        }
         del md["AWS::CloudFormation::Init"]["install"]["files"]["/tmp/mount_efs.sh"]
         del md["AWS::CloudFormation::Init"]["install"]["commands"]["30_mount_efs"]
 
