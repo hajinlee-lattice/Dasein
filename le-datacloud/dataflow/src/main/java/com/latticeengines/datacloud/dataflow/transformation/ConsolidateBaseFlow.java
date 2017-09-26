@@ -42,7 +42,7 @@ public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends C
     }
 
     protected void createTimestampColumns(ConsolidateDataTransformerConfig config, List<Node> sources) {
-        long currentTime = System.currentTimeMillis() / 1000;
+        long currentTime = System.currentTimeMillis();
         for (int i = 0; i < sources.size(); i++) {
             Node source = sources.get(i);
             if (!source.getFieldNames().contains(CREATE_DATE)) {

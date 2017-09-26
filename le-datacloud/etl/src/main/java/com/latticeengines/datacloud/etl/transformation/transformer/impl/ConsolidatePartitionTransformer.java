@@ -191,7 +191,7 @@ public class ConsolidatePartitionTransformer extends
             GenericRecord record = iter.next();
             String value = record.get(config.getTimeField()).toString();
             Long time = Long.valueOf(value);
-            String date = HdfsPathBuilder.dateOnlyFormat.format(new Date(time * 1000));
+            String date = HdfsPathBuilder.dateOnlyFormat.format(new Date(time));
             populateDateMaps(workflowDir, config, tableSource, dateFileMap, dateTempFileMap, newDates, date);
             if (!dateRecordMap.containsKey(date)) {
                 dateRecordMap.put(date, new ArrayList<>());

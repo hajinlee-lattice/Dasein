@@ -327,7 +327,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Assert.assertEquals(keyboardRecord.get("TotalQuantity").toString(), "1");
     }
 
-    // @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void createData() {
         uploadTable1();
         uploadTable2();
@@ -336,9 +336,9 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     private void uploadTable1() {
         Object[][] data = {
-                { "1", "1", null, "PurchaseHistory", "1" /* " Disk" */, 10D, 1L, "Order1", 1502755200L, "Ext1" }, //
-                { "3", "2", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1502755200L, "Ext1" }, //
-                { "4", "2", null, "PurchaseHistory", "2" /* Monitor */, 10D, 1L, "Order1", 1502755200L, "Ext1" }, //
+                { "1", "1", null, "PurchaseHistory", "1" /* " Disk" */, 10D, 1L, "Order1", 1502755200000L, "Ext1" }, //
+                { "3", "2", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1502755200000L, "Ext1" }, //
+                { "4", "2", null, "PurchaseHistory", "2" /* Monitor */, 10D, 1L, "Order1", 1502755200000L, "Ext1" }, //
         };
 
         uploadDataToHdfs(data, fieldNames, clz,
@@ -346,18 +346,18 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     }
 
     private void uploadTable2() {
-        Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1502755200L, "Ext2" }, //
-                { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001576L, "Ext2" }, //
+        Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1502755200000L, "Ext2" }, //
+                { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001576000L, "Ext2" }, //
         };
         uploadDataToHdfs(data, fieldNames, clz,
                 "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName2 + ".avro", tableName2);
     }
 
     private void uploadTable3() {
-        Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1503001576L, "Ext3" }, //
-                { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001577L, "Ext3" }, //
-                { "6", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001578L, "Ext3" }, //
-                { "7", "3", null, "PurchaseHistory", "3" /* Keyboard */, 10D, 1L, "Order1", 1503001578L, "Ext3" }, //
+        Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1503001576000L, "Ext3" }, //
+                { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001577000L, "Ext3" }, //
+                { "6", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001578000L, "Ext3" }, //
+                { "7", "3", null, "PurchaseHistory", "3" /* Keyboard */, 10D, 1L, "Order1", 1503001578000L, "Ext3" }, //
         };
         uploadDataToHdfs(data, fieldNames, clz,
                 "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName3 + ".avro", tableName3);
