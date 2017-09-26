@@ -110,7 +110,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         String queryStr = "SELECT new map " //
                 + "( " //
                 + "  pid AS " + PlaymakerConstants.ID //
-                // + " recommendationId AS " + PlaymakerConstants.ID //
+                + ", recommendationId AS " + PlaymakerConstants.ID + PlaymakerConstants.V2 //
                 + ", accountId AS " + PlaymakerConstants.AccountID //
                 + ", leAccountExternalID AS " + PlaymakerConstants.LEAccountExternalID //
                 + ", playId AS " + PlaymakerConstants.PlayID //
