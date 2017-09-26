@@ -51,8 +51,14 @@
                             <label for="{{segment.name}}">{{segment.display_name}}</label></li>
                         <!--  <li class="accounts">{{ vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number }}</li>
                         <li class="contacts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li> -->
-                        <li class="accounts">{{segment.num_accounts|number}}</li>
-                        <li class="contacts">{{segment.num_contacts|number}}</li>
+                        <li class="accounts">
+                            <span ng-if="!vm.loadingSupplementaryData">{{segment.numAccounts|number}}</span>
+                            <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
+                        </li>
+                        <li class="contacts">
+                            <span ng-if="!vm.loadingSupplementaryData">{{segment.numContacts|number}}</span>
+                            <i class="fa fa-spinner fa-spin" ng-if="vm.loadingSupplementaryData"></i>
+                        </li>
                     </ul>
                 </li>
             </ul>

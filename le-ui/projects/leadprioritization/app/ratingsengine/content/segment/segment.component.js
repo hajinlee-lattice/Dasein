@@ -2,8 +2,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
 .controller('RatingsEngineSegment', function(
     $scope, $state, $stateParams, ResourceUtility, RatingsEngineStore, DataCloudStore, Segments, QueryStore
 ) {
-    var vm = this,
-    	segmentIds = [];
+    var vm = this;
 
     angular.extend(vm, {
         stored: RatingsEngineStore.segment_form,
@@ -13,7 +12,8 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         stateParams: $stateParams,
         currentPage: 1,
         pageSize: 15,
-        block_user: true
+        block_user: true,
+        loadingSupplementaryData: true
     });
 
     $scope.$watch('vm.search', function(newValue, oldValue) {
@@ -22,14 +22,19 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         }
     });
 
+    $scope.$watch('vm.currentPage', function(newValue, oldValue) {
+        if(vm.currentPage != oldValue) {
+        	vm.filteredSegments = vm.segments.slice((15 * (vm.currentPage - 1)), (15 * vm.currentPage));
+        	vm.loadingSupplementaryData = true;
+        	vm.getCounts(vm.filteredSegments);
+        	console.log(vm.currentPage, vm.filteredSegments);
+        }
+    });
+
     vm.init = function() {
 
     	vm.filteredSegments = vm.segments.slice(0, 15);
-    	
-    	angular.forEach(vm.filteredSegments, function(segment) {
-            var segmentId = segment.name;
-            segmentIds.push(segmentId);
-        });
+    	vm.getCounts(vm.filteredSegments);
 
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
@@ -41,10 +46,24 @@ angular.module('lp.ratingsengine.wizard.segment', [])
             vm.block_user = false;
         }
 
-        RatingsEngineStore.getSegmentsCounts(segmentIds).then(function(response){
-            //console.log(response);
-        });
+    }
 
+    vm.getCounts = function(filteredSegments) {
+
+    	segmentIds = [];
+
+    	angular.forEach(filteredSegments, function(segment) {
+            var segmentId = segment.name;
+            segmentIds.push(segmentId);
+        });
+        console.log(segmentIds);
+        RatingsEngineStore.getSegmentsCounts(segmentIds).then(function(response){
+            angular.forEach(filteredSegments, function(segment) {
+            	segment.numAccounts = response.segmentIdCoverageMap[segment.name].accountCount;
+            	segment.numContacts = response.segmentIdCoverageMap[segment.name].contactCount;
+            });
+            vm.loadingSupplementaryData = false;
+        });
     }
 
     vm.setSegment = function(segment) {
