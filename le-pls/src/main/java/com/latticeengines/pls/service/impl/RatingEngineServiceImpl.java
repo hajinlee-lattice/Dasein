@@ -11,12 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -26,11 +24,10 @@ import com.latticeengines.pls.entitymanager.RatingEngineEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.pls.service.RatingModelService;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("ratingEngineService")
-public class RatingEngineServiceImpl implements RatingEngineService {
+public class RatingEngineServiceImpl extends RatingEngineTemplate implements RatingEngineService {
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
 
@@ -39,9 +36,6 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     @Autowired
     private MetadataSegmentService metadataSegmentService;
-
-    @Autowired
-    private DataFeedProxy dataFeedProxy;
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
@@ -68,32 +62,10 @@ public class RatingEngineServiceImpl implements RatingEngineService {
         return result;
     }
 
-    @VisibleForTesting
-    RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId) {
-        if (ratingEngine == null) {
-            return null;
-        }
-        RatingEngineSummary ratingEngineSummary = new RatingEngineSummary();
-        ratingEngineSummary.setId(ratingEngine.getId());
-        ratingEngineSummary.setDisplayName(ratingEngine.getDisplayName());
-        ratingEngineSummary.setNote(ratingEngine.getNote());
-        ratingEngineSummary.setType(ratingEngine.getType());
-        ratingEngineSummary.setStatus(ratingEngine.getStatus());
-        ratingEngineSummary.setSegmentDisplayName(
-                ratingEngine.getSegment() != null ? ratingEngine.getSegment().getDisplayName() : null);
-        ratingEngineSummary.setCreatedBy(ratingEngine.getCreatedBy());
-        ratingEngineSummary.setCreated(ratingEngine.getCreated());
-        ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
-
-        Date lastRefreshedDate = findLastRefreshedDate(tenantId);
-        ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);
-        return ratingEngineSummary;
-    }
-
     @Override
-    public RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate) {
+    public RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate) {
         Tenant tenant = MultiTenantContext.getTenant();
-        RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
+        RatingEngine ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId);
         if (populateRefreshedDate) {
             updateLastRefreshedDate(tenant.getId(), ratingEngine);
         }
@@ -162,12 +134,6 @@ public class RatingEngineServiceImpl implements RatingEngineService {
             Date lastRefreshedDate = findLastRefreshedDate(tenantId);
             ratingEngine.setLastRefreshedDate(lastRefreshedDate);
         }
-    }
-
-    private Date findLastRefreshedDate(String tenantId) {
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(tenantId);
-        Date lastRefreshedDate = dataFeed.getLastPublished();
-        return lastRefreshedDate;
     }
 
     private RatingEngine validateRatingEngine(String ratingEngineId) {

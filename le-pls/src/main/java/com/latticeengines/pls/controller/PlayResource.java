@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayLaunchService;
@@ -32,6 +33,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "play", description = "REST resource for play")
 @RestController
@@ -61,6 +63,20 @@ public class PlayResource {
         // listing API takes lot of time to load
         shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
         return playService.getAllFullPlays(shouldLoadCoverage, ratingEngineId);
+    }
+
+    @RequestMapping(value = "/launches/dashboard", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Play launch dashboard for a tenant")
+    public PlayLaunchDashboard getPlayLaunchDashboard(HttpServletRequest request, //
+            @ApiParam(value = "List of Play Ids for which to load dashboard info", required = false) @RequestParam(value = "playIds", required = false) List<String> playIds, //
+            @ApiParam(value = "List of launch states to consider", required = false) @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates, //
+            @ApiParam(value = "Start date in Unix timestamp", required = true) @RequestParam(value = "plays", required = true) long start, //
+            @ApiParam(value = "Play launch offset from start time", required = true) @RequestParam(value = "offset", required = true) long offset, //
+            @ApiParam(value = "Maximum number of play launches to consider", required = true) @RequestParam(value = "max", required = true) long max) {
+        // adding signature
+        // TODO - add impl
+        return new PlayLaunchDashboard();
     }
 
     @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")

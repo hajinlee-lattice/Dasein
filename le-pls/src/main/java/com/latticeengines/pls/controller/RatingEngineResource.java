@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingCoverageService;
+import com.latticeengines.pls.service.RatingEngineDashboardService;
 import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -46,6 +48,9 @@ public class RatingEngineResource {
 
     @Autowired
     private RatingEngineService ratingEngineService;
+
+    @Autowired
+    private RatingEngineDashboardService ratingEngineDashboardService;
 
     @Autowired
     private RatingCoverageService ratingCoverageService;
@@ -98,6 +103,14 @@ public class RatingEngineResource {
         restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
         return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
                 descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/dashboard", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get dashboard info for Rating Engine given its id")
+    public RatingEngineDashboard getRatingsDashboard( //
+            @PathVariable String ratingEngineId) {
+        return ratingEngineDashboardService.getRatingsDashboard(ratingEngineId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

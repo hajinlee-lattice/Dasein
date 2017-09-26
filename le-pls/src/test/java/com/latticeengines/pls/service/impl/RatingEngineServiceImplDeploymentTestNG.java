@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -24,9 +26,11 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.RuleBucketName;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataSegmentService;
+import com.latticeengines.pls.service.RatingEngineDashboardService;
 import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -45,9 +49,14 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
     @Autowired
     private RatingEngineService ratingEngineService;
 
+    @Autowired
+    private RatingEngineDashboardService ratingEngineDashboardService;
+
     private RatingEngine ratingEngine;
 
     private MetadataSegment segment;
+
+    private String ratingEngineId;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws KeyManagementException, NoSuchAlgorithmException, IOException {
@@ -56,7 +65,8 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         segment = new MetadataSegment();
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction());
+        Restriction accountRestriction = Restriction.builder().and(new ArrayList<Restriction>()).build();
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
         segment.setContactFrontEndRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
@@ -75,7 +85,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         RatingEngine createdRatingEngine = ratingEngineService.createOrUpdate(ratingEngine, mainTestTenant.getId());
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getId());
-        String id = createdRatingEngine.getId();
+        ratingEngineId = createdRatingEngine.getId();
         Assert.assertNotNull(createdRatingEngine.getCreated());
         Date createdDate = createdRatingEngine.getCreated();
         Assert.assertNotNull(createdRatingEngine.getUpdated());
@@ -91,15 +101,16 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         List<RatingEngine> ratingEngineList = ratingEngineService.getAllRatingEngines();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 1);
-        Assert.assertEquals(id, ratingEngineList.get(0).getId());
+        Assert.assertEquals(ratingEngineId, ratingEngineList.get(0).getId());
 
         // test get a list of ratingEngine summaries
         List<RatingEngineSummary> summaries = ratingEngineService.getAllRatingEngineSummaries();
         log.info("ratingEngineSummaries is " + summaries);
         Assert.assertNotNull(summaries);
         Assert.assertEquals(summaries.size(), 1);
-        Assert.assertEquals(id, summaries.get(0).getId());
+        Assert.assertEquals(ratingEngineId, summaries.get(0).getId());
         Assert.assertEquals(summaries.get(0).getSegmentDisplayName(), SEGMENT_NAME);
+        Assert.assertEquals(summaries.get(0).getSegmentName(), ratingEngine.getSegment().getName());
 
         // test get list of ratingEngine summaries filtered by type and status
         summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(null, null);
@@ -130,14 +141,14 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(summaries.size(), 0);
 
         // test basic find
-        createdRatingEngine = ratingEngineService.getRatingEngineById(id, false);
+        createdRatingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
         Assert.assertNotNull(createdRatingEngine);
-        Assert.assertEquals(id, createdRatingEngine.getId());
+        Assert.assertEquals(ratingEngineId, createdRatingEngine.getId());
         MetadataSegment segment = createdRatingEngine.getSegment();
         Assert.assertNotNull(segment);
         Assert.assertEquals(segment.getDisplayName(), SEGMENT_NAME);
         String createdRatingEngineStr = createdRatingEngine.toString();
-        createdRatingEngine = ratingEngineService.getRatingEngineById(id, true);
+        createdRatingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, true);
         Assert.assertNotNull(createdRatingEngine);
         log.info("String is " + createdRatingEngineStr);
 
@@ -165,7 +176,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         ratingEngineList = ratingEngineService.getAllRatingEngines();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 1);
-        Assert.assertEquals(id, ratingEngineList.get(0).getId());
+        Assert.assertEquals(ratingEngineId, ratingEngineList.get(0).getId());
 
         summaries = ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.RULE_BASED.name(),
                 RatingEngineStatus.ACTIVE.name());
@@ -181,7 +192,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(summaries.size(), 0);
 
         // test basic find rating models
-        ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(id);
+        ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(ratingEngineId);
         Assert.assertNotNull(ratingModels);
         Assert.assertEquals(ratingModels.size(), 1);
         it = ratingModels.iterator();
@@ -194,7 +205,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         String ratingModelId = rm.getId();
         Assert.assertNotNull(ratingModelId);
         // test get specific rating model
-        rm = ratingEngineService.getRatingModel(id, ratingModelId);
+        rm = ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
         Assert.assertNotNull(rm);
 
         // test update rating model
@@ -202,22 +213,45 @@ public class RatingEngineServiceImplDeploymentTestNG extends PlsDeploymentTestNG
         RatingRule ratingRule = new RatingRule();
         ratingRule.setDefaultBucketName(RuleBucketName.D.getName());
         roleBasedModel.setRatingRule(ratingRule);
-        RatingModel retrievedRoleBasedModel = ratingEngineService.updateRatingModel(id, ratingModelId, roleBasedModel);
+        RatingModel retrievedRoleBasedModel = ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId,
+                roleBasedModel);
         Assert.assertTrue(retrievedRoleBasedModel instanceof RuleBasedModel);
         Assert.assertEquals(((RuleBasedModel) retrievedRoleBasedModel).getRatingRule().getDefaultBucketName(),
                 RuleBucketName.D.getName());
+    }
 
-        createdRatingEngine = ratingEngineService.getRatingEngineById(id, false);
-        createdRatingEngineStr = createdRatingEngine.toString();
+    @Test(groups = "deployment", dependsOnMethods = { "testBasicOperations" })
+    public void testDashboardService() {
+
+        RatingEngineDashboard ratingEngineDashboard = ratingEngineDashboardService.getRatingsDashboard(ratingEngineId);
+
+        Assert.assertNotNull(ratingEngineDashboard);
+        Assert.assertNotNull(ratingEngineDashboard.getSegment());
+        Assert.assertNotNull(ratingEngineDashboard.getSummary());
+        Assert.assertNotNull(ratingEngineDashboard.getPlays());
+        // following test can not be enabled for tenants which does not have CDL
+        // data ingested
+        // Assert.assertNotNull(ratingEngineDashboard.getCoverageInfo());
+        // Assert.assertTrue(ratingEngineDashboard.getCoverageInfo().getAccountCount()
+        // > 0);
+        // Assert.assertTrue(ratingEngineDashboard.getCoverageInfo().getContactCount()
+        // > 0);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testDashboardService" })
+    public void testDeleteOperations() {
+
+        RatingEngine createdRatingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
+        String createdRatingEngineStr = createdRatingEngine.toString();
         log.info("After updating the model, the getting full of Rating Engine is " + createdRatingEngineStr);
 
         // test delete
         ratingEngineService.deleteById(createdRatingEngine.getId());
-        ratingEngineList = ratingEngineService.getAllRatingEngines();
+        List<RatingEngine> ratingEngineList = ratingEngineService.getAllRatingEngines();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 0);
 
-        createdRatingEngine = ratingEngineService.getRatingEngineById(id, false);
+        createdRatingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false);
         Assert.assertNull(createdRatingEngine);
     }
 

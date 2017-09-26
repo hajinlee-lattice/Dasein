@@ -30,6 +30,9 @@ public class RatingEngineSummary {
     @JsonProperty("segmentDisplayName")
     private String segmentDisplayName;
 
+    @JsonProperty("segmentName")
+    private String segmentName;
+
     @JsonProperty("created")
     private Date created;
 
@@ -104,6 +107,14 @@ public class RatingEngineSummary {
 
     public String getSegmentDisplayName() {
         return this.segmentDisplayName;
+    }
+
+    public String getSegmentName() {
+        return segmentName;
+    }
+
+    public void setSegmentName(String segmentName) {
+        this.segmentName = segmentName;
     }
 
     public void setCreatedBy(String user) {
