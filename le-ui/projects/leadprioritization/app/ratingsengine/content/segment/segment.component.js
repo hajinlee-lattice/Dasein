@@ -27,7 +27,6 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         	vm.filteredSegments = vm.segments.slice((15 * (vm.currentPage - 1)), (15 * vm.currentPage));
         	vm.loadingSupplementaryData = true;
         	vm.getCounts(vm.filteredSegments);
-        	console.log(vm.currentPage, vm.filteredSegments);
         }
     });
 
