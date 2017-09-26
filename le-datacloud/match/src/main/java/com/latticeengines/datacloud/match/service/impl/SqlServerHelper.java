@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -55,11 +57,13 @@ public class SqlServerHelper implements DbHelper {
     private static final Integer MAX_RETRIES = 2;
 
     private static final Integer QUEUE_SIZE = 20000;
-    private static final Integer TIMEOUT_MINUTE = 10;
+    private static final Integer TIMEOUT_MINUTE_REALTIME = 1;
+    private static final Integer TIMEOUT_MINUTE_BULK = 10;
 
     private final BlockingQueue<MatchContext> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
     private final ConcurrentMap<String, MatchContext> map = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, Long> fetcherActivity = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Pair<Boolean, Long>> fetcherActivity = new ConcurrentHashMap<>();   // Pair<isWorking, timestamp>
+    private final Set<String> timeoutUids = new ConcurrentSkipListSet<>();
     private ExecutorService executor;
 
     @Autowired
@@ -136,10 +140,23 @@ public class SqlServerHelper implements DbHelper {
         return matchContext;
     }
 
+    private void checkStuckFetcher(String rootUid) {
+        synchronized (fetcherActivity) {
+            for (Map.Entry<String, Pair<Boolean, Long>> entry : fetcherActivity.entrySet()) {
+                if (entry.getValue().getLeft() == Boolean.TRUE && System.currentTimeMillis()
+                        - entry.getValue().getRight() > TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE_REALTIME)) {
+                    throw new RuntimeException(
+                            "Dropping request due to some stuck fetchers. RootOperationUID=" + rootUid);
+                }
+            }
+        }
+    }
+
     @Override
     public MatchContext fetch(MatchContext matchContext) {
         if (enableFetchers) {
             init();
+            checkStuckFetcher(matchContext.getOutput().getRootOperationUID());
             queue.add(matchContext);
             return waitForResult(matchContext.getOutput().getRootOperationUID());
         } else {
@@ -577,8 +594,8 @@ public class SqlServerHelper implements DbHelper {
     private void scanQueue() {
         int numNewFetchers = 0;
         synchronized (fetcherActivity) {
-            for (Map.Entry<String, Long> entry : fetcherActivity.entrySet()) {
-                if (System.currentTimeMillis() - entry.getValue() > TimeUnit.HOURS.toMillis(1)) {
+            for (Map.Entry<String, Pair<Boolean, Long>> entry : fetcherActivity.entrySet()) {
+                if (System.currentTimeMillis() - entry.getValue().getRight() > TimeUnit.HOURS.toMillis(1)) {
                     log.warn("Fetcher " + entry.getKey() + " has no activity for 1 hour. Spawn a new one");
                     fetcherActivity.remove(entry.getKey());
                 }
@@ -587,6 +604,16 @@ public class SqlServerHelper implements DbHelper {
         }
         for (int i = 0; i < numNewFetchers; i++) {
             executor.submit(new Fetcher());
+        }
+        synchronized (timeoutUids) {
+            Iterator<String> iter = timeoutUids.iterator();
+            while (iter.hasNext()) {
+                String rootUid = iter.next();
+                if (map.containsKey(rootUid)) {
+                    map.remove(rootUid);
+                    iter.remove();
+                }
+            }
         }
     }
 
@@ -603,7 +630,8 @@ public class SqlServerHelper implements DbHelper {
                 log.debug("Found fetch result for RootOperationUID=" + rootUid);
                 return map.remove(rootUid);
             }
-        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE));
+        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE_REALTIME));
+        timeoutUids.add(rootUid);
         throw new RuntimeException("Fetching timeout. RootOperationUID=" + rootUid);
     }
 
@@ -616,7 +644,7 @@ public class SqlServerHelper implements DbHelper {
             log.info("Launched a fetcher " + name);
             while (true) {
                 try {
-                    fetcherActivity.put(name, System.currentTimeMillis());
+                    fetcherActivity.put(name, Pair.of(Boolean.TRUE, System.currentTimeMillis()));
                     while (!queue.isEmpty()) {
                         List<MatchContext> matchContextList = new ArrayList<>();
                         int thisGroupSize = Math.min(groupSize, Math.max(queue.size() / 4, 4));
@@ -625,6 +653,10 @@ public class SqlServerHelper implements DbHelper {
                             try {
                                 MatchContext matchContext = queue.poll(50, TimeUnit.MILLISECONDS);
                                 if (matchContext != null) {
+                                    if (timeoutUids.contains(matchContext.getOutput().getRootOperationUID())) {
+                                        timeoutUids.remove(matchContext.getOutput().getRootOperationUID());
+                                        continue;
+                                    }
                                     String version = matchContext.getInput().getDataCloudVersion();
                                     if (StringUtils.isEmpty(version)) {
                                         version = MatchInput.DEFAULT_DATACLOUD_VERSION;
@@ -657,7 +689,7 @@ public class SqlServerHelper implements DbHelper {
                         } else {
                             fetchMultipleContexts(matchContextList);
                         }
-                        fetcherActivity.put(name, System.currentTimeMillis());
+                        fetcherActivity.put(name, Pair.of(Boolean.FALSE, System.currentTimeMillis()));
                     }
                 } catch (Exception e) {
                     log.warn("Error from fetcher.");
@@ -735,7 +767,12 @@ public class SqlServerHelper implements DbHelper {
                 }
 
             }
-        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE));
+        } while (System.currentTimeMillis() - startTime < TimeUnit.MINUTES.toMillis(TIMEOUT_MINUTE_BULK));
+        for (String rootUid : rootUids) {
+            if (!intermediateResults.containsKey(rootUid)) {
+                timeoutUids.add(rootUid);
+            }
+        }
         throw new RuntimeException("Fetching timeout. RootOperationUID=" + rootUids);
     }
 
