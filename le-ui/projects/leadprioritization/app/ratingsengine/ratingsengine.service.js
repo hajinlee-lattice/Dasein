@@ -1,14 +1,20 @@
 angular.module('lp.ratingsengine')
-.service('RatingsEngineStore', function($q, $state, $stateParams, RatingsEngineService, BrowserStorageUtility){
+.service('RatingsEngineStore', function($q, $state, $stateParams, RatingsEngineService, DataCloudStore, BrowserStorageUtility){
     var RatingsEngineStore = this;
 
     this.init = function() {
         this.settings = {};
+
         this.validation = {
             segment: true,
             attributes: false,
             rules: true
         }
+
+        this.segment_form = {
+            segment_selection: ''
+        }
+
         this.currentRating = {};
         this.rating = null;
         this.ratings = null;
@@ -52,25 +58,31 @@ angular.module('lp.ratingsengine')
     }
 
 
-    this.setSegment = function(segmentId) {
-        this.savedSegment = segmentId;
+    this.setSegment = function(segment) {
+        this.savedSegment = segment;
     }
 
     this.getSegment = function() {
         return this.savedSegment;
     }
 
+    var getRatingsEngineRule = function(RatingsEngineModels) {
+        var data = RatingsEngineModels[0],
+            rule = (data && data.rule ? data.rule : {}),
+            rule = rule || {};
+        return rule;
+    }
+
     this.nextSaveRatingEngine = function(nextState) {
         var changed = false,
             opts = RatingsEngineStore.settings,
+            currentRating = RatingsEngineStore.getCurrentRating(),
             segment = RatingsEngineStore.getSegment();
 
-        RatingsEngineStore.saveRating().then(function(rating) {
+        RatingsEngineStore.saveRating(currentRating).then(function(rating) {
             $state.go(nextState, {rating_id: rating.id});
         });
     }
-
-
 
     this.setRating = function(rating) {
         this.currentRating = rating;
@@ -98,12 +110,13 @@ angular.module('lp.ratingsengine')
     this.saveRating = function(opts) {
         var deferred = $q.defer(),
             opts = opts || {},
-            ClientSession = BrowserStorageUtility.getClientSession();
+            ClientSession = BrowserStorageUtility.getClientSession(),
+            segment = RatingsEngineStore.getSegment();
 
         opts.createdBy = opts.createdBy || ClientSession.EmailAddress;
         opts.type = opts.type || 'RULE_BASED',
         opts.displayName = 'testing making new engine';
-        opts.segment = {'name': RatingsEngineStore.getSegment() };
+        opts.segment = {'name': segment.name };
         RatingsEngineService.saveRating(opts).then(function(data){
             deferred.resolve(data);
             RatingsEngineStore.setRating(data);
@@ -142,7 +155,6 @@ angular.module('lp.ratingsengine')
 
         return deferred.promise;
     };
-
 
     this.setType = function(type) {
         this.type = type;
@@ -266,13 +278,12 @@ angular.module('lp.ratingsengine')
 
         $http({
             method: 'GET',
-            url: '/pls/ratingsengines/' + id
+            url: '/pls/ratingengines/' + id
         }).then(function(response){
             deferred.resolve(response.data);
         });
 
         return deferred.promise;
     }
-
 
 });

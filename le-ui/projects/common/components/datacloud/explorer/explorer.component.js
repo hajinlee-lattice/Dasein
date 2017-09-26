@@ -1699,7 +1699,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.selectRatingsEngineAttribute = function(enrichment) {
         var rule = getRatingsEngineRule(RatingsEngineModels);
-        DataCloudStore.selectRatingsEngineAttribute($stateParams.rating_id, rule.id, enrichment).then(function(response) {
+        DataCloudStore.selectRatingsEngineAttributes($stateParams.rating_id, rule.id, [enrichment.ColumnId]).then(function(response) {
             enrichment.IsRatingsEngineAttribute = !enrichment.IsRatingsEngineAttribute;
             var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
             DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);

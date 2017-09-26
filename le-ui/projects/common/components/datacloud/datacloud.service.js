@@ -312,6 +312,10 @@ angular.module('common.datacloud')
         this.ratingsEngineAttributes = attributes;
     }
 
+    this.getCurrentRatingsEngineAttributes = function() {
+        return this.ratingsEngineAttributes;
+    }
+
     this.getRatingsEngineAttributes = function(ratingsEngineId, ratingModelId) {
         var deferred = $q.defer();
         DataCloudService.getRatingsEngineAttributes(ratingsEngineId, ratingModelId).then(function(response) {
@@ -321,7 +325,7 @@ angular.module('common.datacloud')
         return deferred.promise;
     }
 
-    this.setSelectedRatingsEngineAttributes = function(attribute_id) {
+    this.setSelectedRatingsEngineAttribute = function(attribute_id) {
         var index = this.ratingsEngineAttributes.indexOf(attribute_id);
         if(index >= 0) {
             this.ratingsEngineAttributes.splice(index, 1);
@@ -330,10 +334,18 @@ angular.module('common.datacloud')
         }
     }
 
-    this.selectRatingsEngineAttribute = function(rating_id, rating_model_id, attribute) {
+    this.setSelectedRatingsEngineAttributes = function(attributes) {
+        if(attributes)  {
+            attributes.forEach(function(value) {
+                DataCloudStore.setSelectedRatingsEngineAttribute(value);
+            });
+        }
+    }
+
+    this.selectRatingsEngineAttributes = function(rating_id, rating_model_id, attributes) {
         var deferred = $q.defer();
-        this.setSelectedRatingsEngineAttributes(attribute.ColumnId);
-        DataCloudService.selectRatingsEngineAttribute(rating_id, rating_model_id, this.ratingsEngineAttributes).then(function(response) {
+        this.setSelectedRatingsEngineAttributes(attributes);
+        DataCloudService.selectRatingsEngineAttributes(rating_id, rating_model_id, this.ratingsEngineAttributes).then(function(response) {
             DataCloudStore.setRatingsEngineAttributes(response);
             deferred.resolve(response);
         });
@@ -625,7 +637,7 @@ angular.module('common.datacloud')
         return (ratingsEngine && ratingsEngine.rule && ratingsEngine.rule.selectedAttributes ? ratingsEngine.rule.selectedAttributes : []);
     }
 
-    this.selectRatingsEngineAttribute = function(ratingsEngineId, ratingModelId, attributes) {
+    this.selectRatingsEngineAttributes = function(ratingsEngineId, ratingModelId, attributes) {
         var deferred = $q.defer(),
             save = {
                 rule: {

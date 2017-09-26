@@ -1,8 +1,4 @@
-<!-- <section class="ratings-engine segment container">
-    
-</section> -->
-
-<div class="playbook-segment playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
+<div class="ratingengine-segment playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
     <div class="inner-container">
         <form name="segment_form">
             <div class="header">
@@ -40,7 +36,10 @@
                         <li class="contacts">Contacts</li>
                     </ul>
                 </li>
-                <li ng-repeat="segment in (filteredList = (vm.segments | filter: {'display_name': vm.search})) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" class="item segment">
+                <li 
+                    ng-repeat="segment in (filteredList = (vm.segments | filter: {'display_name': vm.search})) | startFrom: (vm.currentPage - 1) * vm.pageSize | limitTo: vm.pageSize" 
+                    ng-disabled="vm.block_user"
+                    class="item segment">
                     <ul>
                         <li class="name">
                             <input  type="radio" 
@@ -48,7 +47,7 @@
                                     name="segment.name" 
                                     ng-value="segment.name"
                                     ng-model="vm.stored.segment_selection" 
-                                    ng-click="vm.setSegment(segment.name)" />
+                                    ng-click="vm.setSegment(segment)" />
                             <label for="{{segment.name}}">{{segment.display_name}}</label></li>
                         <!--  <li class="accounts">{{ vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number }}</li>
                         <li class="contacts">{{vm.SegmentsUtility.PropertyBag('NumAccounts', segment)|number}}</li> -->

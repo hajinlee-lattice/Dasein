@@ -1,2 +1,23 @@
-section.ratingsengine.segment.container {
+section.ratingsengine {
+    .ratingengine-segment {
+        .content-body {
+            .list {
+                .item {
+                    ul {
+                        & > li {
+                            &.accounts,
+                            &.contacts {
+                                @include flex-item(0 1 auto);
+                                text-align: right;
+                            }
+                        }
+                    }
+                    &[disabled] {
+                        pointer-events: none;
+                        opacity: .5;
+                    }
+                }
+            }
+        }
+    }
 }

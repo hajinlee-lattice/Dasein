@@ -40,6 +40,17 @@ angular
                 pageIcon: 'ico-playbook',
                 pageTitle: 'Rating Engine'
             },
+            resolve: {
+                RatingList: function($q, RatingsEngineStore) {
+                    var deferred = $q.defer();
+
+                    RatingsEngineStore.getRatings().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }   
+            },
             views: {
                 "main@": {
                     controller: 'RatingsEngineListController',
