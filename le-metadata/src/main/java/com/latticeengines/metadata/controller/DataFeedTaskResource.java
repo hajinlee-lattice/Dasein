@@ -34,13 +34,11 @@ public class DataFeedTaskResource {
         dataFeedTaskService.createDataFeedTask(customerSpace, dataFeedTask);
     }
 
-    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}/{tableName}", method = RequestMethod.POST, headers =
-            "Accept=application/json")
+    @RequestMapping(value = "/{source}/{dataFeedType}/{entity}/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create data feed task")
     public void createOrUpdateDataFeedTask(@PathVariable String customerSpace, @PathVariable String source,
-                                           @PathVariable String dataFeedType, @PathVariable String entity,
-                                           @PathVariable String tableName) {
+            @PathVariable String dataFeedType, @PathVariable String entity, @PathVariable String tableName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataFeedTaskService.createOrUpdateDataFeedTask(customerSpace, source, dataFeedType, entity, tableName);
     }
@@ -73,7 +71,8 @@ public class DataFeedTaskResource {
     @RequestMapping(value = "/{entity}/list", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
-    public List<DataFeedTask> getDataFeedTaskWithSameEntity(@PathVariable String customerSpace, @PathVariable String entity) {
+    public List<DataFeedTask> getDataFeedTaskWithSameEntity(@PathVariable String customerSpace,
+            @PathVariable String entity) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace, entity);
     }
