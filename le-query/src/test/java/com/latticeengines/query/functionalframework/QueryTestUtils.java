@@ -18,8 +18,8 @@ public class QueryTestUtils {
                     InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("attrrepo.json.gz");
                     GZIPInputStream gis = new GZIPInputStream(is);
                     attrRepo = JsonUtils.deserialize(gis, AttributeRepository.class);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to read attrrepo.json.gz");
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to read attrrepo.json.gz", e);
                 }
             }
         }

@@ -81,6 +81,18 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count, 1916);
     }
 
+    @Test(groups = "functional")
+    public void testTransactionSelect() {
+        Restriction restriction = Restriction.builder() //
+                .let(BusinessEntity.Transaction, ATTR_ACCOUNT_ID).eq(1802) //
+                .build();
+        Query query = Query.builder() //
+                .select(BusinessEntity.Transaction, ATTR_ACCOUNT_ID) //
+                .where(restriction).build();
+        List<Map<String, Object>> results = queryEvaluatorService.getData(attrRepo, query).getData();
+        Assert.assertEquals(results.size(), 1);
+    }
+
     @Test(groups = "functional", enabled = false)
     public void testSelect() {
         Restriction restriction = Restriction.builder() //
