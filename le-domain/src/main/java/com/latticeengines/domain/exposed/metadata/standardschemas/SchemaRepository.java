@@ -1045,7 +1045,7 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet(new String[] { "TIMESTAMP", "TIME STAMP", "LASTMODIFIEDDATE",
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LASTMODIFIEDDATE",
                         "LAST MODIFIED DATE", "LASTMODIFIED" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
@@ -1074,7 +1074,8 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
                 .allowedDisplayNames(
-                        Sets.newHashSet(new String[] { "TIMESTAMP", "TRANSACTION_TIME", "TRANSACTION TIME" })) //
+                        Sets.newHashSet(new String[] { "TIMESTAMP", "TIME STAMP", "TRANSACTION_TIME",
+                                "TRANSACTION TIME" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionTime) //
                 .logicalType(LogicalDataType.Timestamp) //
