@@ -1,8 +1,10 @@
 package com.latticeengines.playmaker.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -17,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
@@ -111,7 +112,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
                 if (accExtRec.containsKey(PlaymakerConstants.LaunchDate)) {
                     accExtRec.put(PlaymakerConstants.ExpirationDate,
-                            (long) accExtRec.get(PlaymakerConstants.LaunchDate) + 8000000L);
+                            (long) accExtRec.get(PlaymakerConstants.LaunchDate) + TimeUnit.DAYS.toSeconds(6 * 31));
                 }
 
                 Object bucketEnumObj = accExtRec.get(PlaymakerConstants.PriorityID);
@@ -124,6 +125,13 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
                 }
 
                 accExtRec.put(PlaymakerConstants.SfdcContactID, "");
+                List<Map<String, String>> contactList = PlaymakerUtils
+                        .getExpandedContacts((String) accExtRec.get(PlaymakerConstants.Contacts));
+
+                accExtRec.put(PlaymakerConstants.Contacts, //
+                        contactList.isEmpty() //
+                                ? new ArrayList<>() //
+                                : contactList);
 
                 accExtRec.put(PlaymakerConstants.RowNum, rowNum++);
 
