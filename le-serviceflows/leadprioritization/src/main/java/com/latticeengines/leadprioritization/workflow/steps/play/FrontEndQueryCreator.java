@@ -69,7 +69,7 @@ public class FrontEndQueryCreator {
         accountFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
         contactFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
 
-        setSortField(BusinessEntity.Account, InterfaceName.LEAccountIDLong.name(), false, accountFrontEndQuery);
+        setSortField(BusinessEntity.Account, InterfaceName.LastModifiedDate.name(), false, accountFrontEndQuery);
         setSortField(BusinessEntity.Contact, InterfaceName.ContactId.name(), false, contactFrontEndQuery);
     }
 
@@ -163,7 +163,6 @@ public class FrontEndQueryCreator {
         accountLookupFields = new HashMap<>();
         accountLookupFields.put(BusinessEntity.Account,
                 Arrays.asList(InterfaceName.AccountId.name(), //
-                        InterfaceName.LEAccountIDLong.name(), //
                         InterfaceName.SalesforceAccountID.name(), //
                         InterfaceName.CompanyName.name(), //
                         InterfaceName.LDC_Name.name()));

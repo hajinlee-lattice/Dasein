@@ -94,10 +94,10 @@ public class RecommendationCreator {
         String playLaunchId = playLaunchContext.getPlayLaunchId();
         Tenant tenant = playLaunchContext.getTenant();
 
-        Object accountIdObj = checkAndGet(account, InterfaceName.AccountId.name());
-        Object accountIdLongObj = checkAndGet(account, InterfaceName.LEAccountIDLong.name());
-        String accountId = accountIdObj == null ? null : accountIdObj.toString();
-        String accountIdLong = accountIdLongObj == null ? accountId : accountIdLongObj.toString();
+        Object accountId = checkAndGet(account, InterfaceName.AccountId.name());
+        if (accountId == null) {
+            throw new RuntimeException("Account Id can not be null");
+        }
 
         Recommendation recommendation = new Recommendation();
         recommendation.setDescription(playLaunch.getPlay().getDescription());
@@ -110,8 +110,8 @@ public class RecommendationCreator {
         }
         recommendation.setLaunchDate(launchTime);
 
-        recommendation.setAccountId(accountIdLong);
-        recommendation.setLeAccountExternalID(accountIdLong);
+        recommendation.setAccountId(accountId.toString());
+        recommendation.setLeAccountExternalID(accountId.toString());
         recommendation.setSfdcAccountID(checkAndGet(account, InterfaceName.SalesforceAccountID.name()));
         Double value = 0D;
         recommendation.setMonetaryValue(value);

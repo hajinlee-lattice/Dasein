@@ -36,7 +36,7 @@ public class TestPlayCreationHelper {
     private TenantEntityMgr tenantEntityMgr;
 
     // this test tenant has account data loaded in CDL
-    private String tenantIdentifier = "hliu_09_07_fisher.hliu_09_07_fisher.Production";
+    private String tenantIdentifier = "CDLTest_Lynn_0920.CDLTest_Lynn_0920.Production";
 
     private Tenant tenant;
 
