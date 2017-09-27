@@ -48,18 +48,21 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         // get rating engine summary
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, true);
         RatingEngineSummary ratingEngineSummary = constructRatingEngineSummary(ratingEngine, tenant.getId());
+        log.info(String.format("Step 1 - Loading rating engine summary completed for : %s", ratingEngineId));
 
         // get coverage info
         RatingsCountRequest coverageRequest = new RatingsCountRequest();
         coverageRequest.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
         RatingsCountResponse ratingsCountResponse = ratingCoverageService.getCoverageInfo(coverageRequest);
         CoverageInfo coverageInfo = ratingsCountResponse.getRatingEngineIdCoverageMap().get(ratingEngine.getId());
+        log.info(String.format("Step 2 - Loading ratings coverage completed for : %s", ratingEngineId));
 
         // get segment info
         MetadataSegment segment = ratingEngine.getSegment();
 
         // get related plays
         List<Play> plays = playService.getAllFullPlays(false, ratingEngineId);
+        log.info(String.format("Step 3 - Loading related plays completed for : %s", ratingEngineId));
 
         dashboard.setSummary(ratingEngineSummary);
         dashboard.setCoverageInfo(coverageInfo);

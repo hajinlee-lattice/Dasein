@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,7 @@ import com.latticeengines.domain.exposed.pls.RuleBucketName;
 import com.latticeengines.domain.exposed.pls.SegmentIdAndModelRulesPair;
 import com.latticeengines.domain.exposed.pls.SegmentIdAndSingleRulePair;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -88,7 +92,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         } else if (request.getSegmentIdModelRules() != null) {
             return getDummyCoverage ? processSegmentIdModelRulesDummy(request) : processSegmentIdModelRules(request);
         } else if (request.getSegmentIdAndSingleRules() != null) {
-            return processSegmentIdSingleRulesDummy(request);
+            return getDummyCoverage ? processSegmentIdSingleRulesDummy(request) : processSegmentIdSingleRules(request);
         }
 
         return null;
@@ -191,6 +195,74 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         return result;
     }
 
+    private RatingsCountResponse processSegmentIdSingleRules(RatingsCountRequest request) {
+        Tenant tenent = MultiTenantContext.getTenant();
+
+        RatingsCountResponse result = new RatingsCountResponse();
+        Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap = new ConcurrentHashMap<>();
+        result.setSegmentIdAndSingleRulesCoverageMap(segmentIdAndSingleRulesCoverageMap);
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        result.setErrorMap(errorMap);
+
+        Map<String, MetadataSegment> segmentMap = loadSegments(request.getSegmentIdAndSingleRules(), errorMap);
+
+        if (request.getSegmentIdAndSingleRules().size() < thresholdForParallelProcessing) {
+            // it is more efficient to use sequential stream (will use current
+            // thread) if collection size is small. It also ensures that small
+            // requests are not blocked if threadpool is used by bigger requests
+            Stream<SegmentIdAndSingleRulePair> stream = //
+                    request.getSegmentIdAndSingleRules().stream();
+
+            segmentIdAndSingleRulesStreamProcessing( //
+                    request, tenent, segmentMap, //
+                    segmentIdAndSingleRulesCoverageMap, //
+                    errorMap, stream);
+        } else {
+            tpForParallelStream.submit(//
+                    () -> //
+                    {
+                        Stream<SegmentIdAndSingleRulePair> parallelStream = //
+                                request.getSegmentIdAndSingleRules().stream() //
+                                        .parallel();
+
+                        segmentIdAndSingleRulesStreamProcessing( //
+                                request, tenent, segmentMap, //
+                                segmentIdAndSingleRulesCoverageMap, //
+                                errorMap, parallelStream);
+                    }) //
+                    .join();
+        }
+
+        return result;
+    }
+
+    private Map<String, MetadataSegment> loadSegments(List<SegmentIdAndSingleRulePair> segmentIdAndSingleRules,
+            Map<String, String> errorMap) {
+
+        Map<String, MetadataSegment> segmentMap = new ConcurrentHashMap<>();
+
+        if (CollectionUtils.isNotEmpty(segmentIdAndSingleRules)) {
+            Set<String> uniqueSegmentIds = //
+                    segmentIdAndSingleRules.stream() //
+                            .map(SegmentIdAndSingleRulePair::getSegmentId) //
+                            .collect(Collectors.toSet());
+
+            uniqueSegmentIds.stream() //
+                    .forEach(segmentId -> {
+                        try {
+                            MetadataSegment segment = //
+                                    metadataSegmentService.getSegmentByName( //
+                                            segmentId, false);
+                            segmentMap.put(segmentId, segment);
+                        } catch (Exception ex) {
+                            logInErrorMap(errorMap, segmentId, "Could not load segment");
+                        }
+                    });
+
+        }
+        return segmentMap;
+    }
+
     // this method can accept parallel or sequential stream
     private void ratingEngineStreamProcessing(RatingsCountRequest request, Tenant tenent,
             Map<String, CoverageInfo> ratingEngineIdCoverageMap, Map<String, String> errorMap, Stream<String> stream) {
@@ -222,6 +294,18 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                 segmentIdModelRulesPair, request.isRestrictNotNullSalesforceId()));
     }
 
+    // this method can accept parallel or sequential stream
+    private void segmentIdAndSingleRulesStreamProcessing(RatingsCountRequest request, Tenant tenent,
+            Map<String, MetadataSegment> segmentMap, Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap,
+            Map<String, String> errorMap, Stream<SegmentIdAndSingleRulePair> stream) {
+
+        stream //
+                .forEach( //
+                        segmentIdSingleRulesPair -> //
+                        processSingleSegmentIdSingleRulesPair(tenent, segmentMap, segmentIdAndSingleRulesCoverageMap, errorMap, //
+                                segmentIdSingleRulesPair, request.isRestrictNotNullSalesforceId()));
+    }
+
     private void processSingleSegmentId(Tenant tenent, Map<String, CoverageInfo> segmentIdCoverageMap,
             Map<String, String> errorMap, String segmentId, boolean isRestrictNotNullSalesforceId) {
         try {
@@ -236,22 +320,41 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             FrontEndQuery contactFrontEndQuery = //
                     createEntityFronEndQuery(BusinessEntity.Contact, //
                             isRestrictNotNullSalesforceId, segment);
-            log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
 
-            Long accountCount = entityProxy.getCount( //
-                    tenent.getId(), //
-                    accountFrontEndQuery);
-            Long contactCount = getContactCount(tenent, contactFrontEndQuery);
-
-            CoverageInfo coverageInfo = new CoverageInfo();
-
-            coverageInfo.setAccountCount(accountCount);
-            coverageInfo.setContactCount(contactCount);
-
-            segmentIdCoverageMap.put(segmentId, coverageInfo);
+            loadBasicCoverage(tenent, segmentIdCoverageMap, segmentId, accountFrontEndQuery, contactFrontEndQuery);
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for segment id: " + segmentId, ex);
             logInErrorMap(errorMap, segmentId, ex.getMessage());
+        }
+    }
+
+    private void processSingleSegmentIdSingleRulesPair(Tenant tenent, Map<String, MetadataSegment> segmentMap,
+            Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap, Map<String, String> errorMap,
+            SegmentIdAndSingleRulePair segmentIdSingleRulePair, boolean isRestrictNotNullSalesforceId) {
+        try {
+            MultiTenantContext.setTenant(tenent);
+
+            MetadataSegment segment = //
+                    segmentMap.get(segmentIdSingleRulePair.getSegmentId());
+
+            if (segment == null) {
+                // we have already logged in message for segment being null
+                return;
+            }
+
+            FrontEndQuery accountFrontEndQuery = //
+                    createEntityFronEndQueryForSegmentAndRule(BusinessEntity.Account, //
+                            isRestrictNotNullSalesforceId, segment, segmentIdSingleRulePair);
+            FrontEndQuery contactFrontEndQuery = //
+                    createEntityFronEndQueryForSegmentAndRule(BusinessEntity.Contact, //
+                            isRestrictNotNullSalesforceId, segment, segmentIdSingleRulePair);
+
+            loadBasicCoverage(tenent, segmentIdAndSingleRulesCoverageMap, segmentIdSingleRulePair.getResponseKeyId(),
+                    accountFrontEndQuery, contactFrontEndQuery);
+        } catch (Exception ex) {
+            log.info("Ignoring exception in getting coverage info for segmentIdSingleRulePair: "
+                    + segmentIdSingleRulePair, ex);
+            logInErrorMap(errorMap, segmentIdSingleRulePair.getResponseKeyId(), ex.getMessage());
         }
     }
 
@@ -387,6 +490,22 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
     }
 
+    void loadBasicCoverage(Tenant tenent, Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap, String key,
+            FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery) {
+        log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
+        Long accountCount = entityProxy.getCount( //
+                tenent.getId(), //
+                accountFrontEndQuery);
+        Long contactCount = getContactCount(tenent, contactFrontEndQuery);
+
+        CoverageInfo coverageInfo = new CoverageInfo();
+
+        coverageInfo.setAccountCount(accountCount);
+        coverageInfo.setContactCount(contactCount);
+
+        segmentIdAndSingleRulesCoverageMap.put(key, coverageInfo);
+    }
+
     private Long getContactCount(Tenant tenent, FrontEndQuery contactFrontEndQuery) {
         Long contactCount = 0L;
         try {
@@ -413,6 +532,54 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         entityFrontEndQuery.setContactRestriction(contactRestriction);
         entityFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
         return entityFrontEndQuery;
+    }
+
+    private FrontEndQuery createEntityFronEndQueryForSegmentAndRule(BusinessEntity entityType,
+            boolean isRestrictNotNullSalesforceId, MetadataSegment segment,
+            SegmentIdAndSingleRulePair segmentIdSingleRulePair) {
+        FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
+
+        entityFrontEndQuery.setMainEntity(entityType);
+
+        FrontEndRestriction accountRestriction = prepareFronEndRestriction(prepareRestrctionList(
+                segment.getAccountRestriction(), segmentIdSingleRulePair.getAccountRestriction()));
+        FrontEndRestriction contactRestriction = prepareFronEndRestriction(prepareRestrctionList(
+                segment.getContactRestriction(), segmentIdSingleRulePair.getContacttRestriction()));
+
+        entityFrontEndQuery.setAccountRestriction(accountRestriction);
+        entityFrontEndQuery.setContactRestriction(contactRestriction);
+        entityFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+
+        return entityFrontEndQuery;
+    }
+
+    private List<Restriction> prepareRestrctionList(Restriction segmenEntitytRestriction,
+            Restriction ruleEntityRestriction) {
+        List<Restriction> restrictionList = new ArrayList<>();
+
+        if (segmenEntitytRestriction != null) {
+            restrictionList.add(segmenEntitytRestriction);
+        }
+
+        if (ruleEntityRestriction != null) {
+            restrictionList.add(ruleEntityRestriction);
+        }
+
+        return restrictionList;
+    }
+
+    private FrontEndRestriction prepareFronEndRestriction(List<Restriction> restrictions) {
+        Restriction finalRestriction = null;
+
+        if (restrictions.size() == 0) {
+            finalRestriction = null;
+        } else if (restrictions.size() == 1) {
+            finalRestriction = restrictions.get(0);
+        } else {
+            finalRestriction = Restriction.builder().and(restrictions).build();
+        }
+
+        return new FrontEndRestriction(finalRestriction);
     }
 
     private RatingsCountResponse processRatingIdsDummy(RatingsCountRequest request) {
